@@ -1,2 +1,2 @@
 # OMCompiler.jl
-A transalation of the OpenModelicaCompilers frontend into Julia. Stay tuned people
+A translation of the OpenModelicaCompilers frontend into Julia. Stay tuned people
