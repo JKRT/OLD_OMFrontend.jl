@@ -45,7 +45,7 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        import MetaModelica.ArrayUtil
+        import ArrayUtil
         import BaseHashTable
         import Util
 

@@ -105,7 +105,7 @@
 
         import ExpressionSimplify
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         import Util
 

@@ -56,7 +56,7 @@
 
         import ComponentReference
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         Key = DAE.ComponentRef 
 

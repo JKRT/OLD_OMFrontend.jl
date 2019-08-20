@@ -1,4 +1,4 @@
-  module Connect
+  module Connect 
 
 
     using MetaModelica
@@ -6,13 +6,13 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Face
-    @UniontypeDecl ConnectorType
-    @UniontypeDecl ConnectorElement
-    @UniontypeDecl SetTrieNode
-    @UniontypeDecl OuterConnect
-    @UniontypeDecl Sets
-    @UniontypeDecl Set
+    @UniontypeDecl Face 
+    @UniontypeDecl ConnectorType 
+    @UniontypeDecl ConnectorElement 
+    @UniontypeDecl SetTrieNode 
+    @UniontypeDecl OuterConnect 
+    @UniontypeDecl Sets 
+    @UniontypeDecl Set 
 
          #= /*
          * This file is part of OpenModelica.
@@ -51,7 +51,8 @@
 
         import Absyn
 
-         NEW_SET::ModelicaInteger = -1
+         const NEW_SET = -1 #= The index used for new sets which have not
+           yet been assigned a set index. =#::ModelicaInteger
 
           #= This type indicates whether a connector is an inside or an outside connector.
             Note: this is not the same as inner and outer references.
@@ -85,7 +86,7 @@
 
               @Record STREAM begin
 
-                       associatedFlow::Option
+                       associatedFlow::Option{DAE.ComponentRef}
               end
 
               @Record NO_TYPE begin
@@ -109,17 +110,17 @@
 
                        name::String
                        cref::DAE.ComponentRef
-                       nodes::IList
+                       nodes::List{SetTrieNode}
                        connectCount::ModelicaInteger
               end
 
               @Record SET_TRIE_LEAF begin
 
                        name::String
-                       insideElement #= The inside element. =#::Option
-                       outsideElement #= The outside element. =#::Option
+                       insideElement #= The inside element. =#::Option{ConnectorElement}
+                       outsideElement #= The outside element. =#::Option{ConnectorElement}
                        flowAssociation #= The name of the associated flow
-                             variable, if the leaf represents a stream variable. =#::Option
+                             variable, if the leaf represents a stream variable. =#::Option{DAE.ComponentRef}
                        connectCount #= How many times this connector has been connected. =#::ModelicaInteger
               end
          end
@@ -147,8 +148,8 @@
 
                        sets::SetTrie
                        setCount #= How many sets the trie contains. =#::ModelicaInteger
-                       connections::IList
-                       outerConnects #= Connect statements to propagate upwards. =#::IList
+                       connections::List{SetConnection}
+                       outerConnects #= Connect statements to propagate upwards. =#::List{OuterConnect}
               end
          end
 
@@ -157,7 +158,7 @@
               @Record SET begin
 
                        ty::ConnectorType
-                       elements::IList
+                       elements::List{ConnectorElement}
               end
 
               @Record SET_POINTER begin
@@ -166,7 +167,7 @@
               end
          end
 
-         emptySet = SETS(SET_TRIE_NODE("", DAE.WILD(), list(), 0), 0, list(), list())::Sets
+         const emptySet = SETS(SET_TRIE_NODE("", DAE.WILD(), nil, 0), 0, nil, nil)::Sets
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

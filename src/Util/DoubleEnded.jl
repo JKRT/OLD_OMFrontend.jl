@@ -43,14 +43,14 @@
          *
          */ =#
 
-        import Mutable
+        import MutableType
 
          @Uniontype MutableList begin
               @Record LIST begin
 
-                       length::Mutable{ModelicaInteger}
-                       front::Mutable{List{T}}
-                       back::Mutable{List{T}}
+                       length::MutableType{ModelicaInteger}
+                       front::MutableType{List{T}}
+                       back::MutableType{List{T}}
               end
          end
 

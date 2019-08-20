@@ -1,4 +1,4 @@
-  module StringUtil 
+  module StringUtil
 
 
     using MetaModelica
@@ -50,7 +50,7 @@
            the character if found. If not found returns NO_POS. The start and end
            position determines the section of the string to search in, and if not
            specified they are set to the start and end of the string. =#
-        function findChar(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 1, inEndPos::ModelicaInteger = 0) ::ModelicaInteger 
+        function findChar(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 1, inEndPos::ModelicaInteger = 0) ::ModelicaInteger
               local outIndex::ModelicaInteger = NO_POS
 
               local len::ModelicaInteger = stringLength(inString)
@@ -76,7 +76,7 @@
            index of the character if found. If not found returns NO_POS. The start and
            end position determines the section of the string to search in, and if not
            specified they are set to the start and end of the string. =#
-        function rfindChar(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 0, inEndPos::ModelicaInteger = 1) ::ModelicaInteger 
+        function rfindChar(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 0, inEndPos::ModelicaInteger = 1) ::ModelicaInteger
               local outIndex::ModelicaInteger = NO_POS
 
               local len::ModelicaInteger = stringLength(inString)
@@ -103,7 +103,7 @@
            NO_POS. The start and end position determines the section of the string to
            search in, and if not specified they are set to the start and end of the
            string. =#
-        function findCharNot(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 1, inEndPos::ModelicaInteger = 0) ::ModelicaInteger 
+        function findCharNot(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 1, inEndPos::ModelicaInteger = 0) ::ModelicaInteger
               local outIndex::ModelicaInteger = NO_POS
 
               local len::ModelicaInteger = stringLength(inString)
@@ -130,7 +130,7 @@
            returns NO_POS. The start and end position determines the section of the
            string to search in, and if not specified they are set to the start and end
            of the string. =#
-        function rfindCharNot(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 0, inEndPos::ModelicaInteger = 1) ::ModelicaInteger 
+        function rfindCharNot(inString::String, inChar::ModelicaInteger, inStartPos::ModelicaInteger = 0, inEndPos::ModelicaInteger = 1) ::ModelicaInteger
               local outIndex::ModelicaInteger = NO_POS
 
               local len::ModelicaInteger = stringLength(inString)
@@ -154,7 +154,7 @@
 
          #= Returns true if the given character represented by it's ASCII decimal number
            is an alphabetic character. =#
-        function isAlpha(inChar::ModelicaInteger) ::Bool 
+        function isAlpha(inChar::ModelicaInteger) ::Bool
               local outIsAlpha::Bool = inChar >= 65 && inChar <= 90 || inChar >= 97 && inChar <= 122
           outIsAlpha
         end
@@ -179,7 +179,7 @@
 
            This function operates on ASCII strings, and does not handle UTF-8 strings
            correctly. =#
-        function wordWrap(inString::String, inWrapLength::ModelicaInteger, inDelimiter::String = "", inRaggedness::ModelicaReal = 0.3) ::List{String} 
+        function wordWrap(inString::String, inWrapLength::ModelicaInteger, inDelimiter::String = "", inRaggedness::ModelicaReal = 0.3) ::List{String}
               local outStrings::List{String} = nil
 
               local start_pos::ModelicaInteger = 1
@@ -288,7 +288,7 @@
         end
 
          #= Repeat str n times =#
-        function repeat(str::String, n::ModelicaInteger) ::String 
+        function repeat(str::String, n::ModelicaInteger) ::String
               local res::String = ""
 
               local len::ModelicaInteger = stringLength(str)
@@ -302,12 +302,12 @@
         end
 
          #= Adds quotation marks to the beginning and end of a string. =#
-        function quote(inString::String) ::String 
+        function quoteString(inString::String) ::String
               local outString::String = stringAppendList(list("\\", inString, "\\"))
           outString
         end
 
-        function equalIgnoreSpace(s1::String, s2::String) ::Bool 
+        function equalIgnoreSpace(s1::String, s2::String) ::Bool
               local b::Bool
 
               local j::ModelicaInteger = 1
@@ -337,7 +337,7 @@
           b
         end
 
-        function bytesToReadableUnit(bytes::ModelicaReal, significantDigits::ModelicaInteger = 4, maxSizeInUnit::ModelicaReal = 500 #= If it is 1000, we print up to 1000GB before changing to X TB =#) ::String 
+        function bytesToReadableUnit(bytes::ModelicaReal, significantDigits::ModelicaInteger = 4, maxSizeInUnit::ModelicaReal = 500 #= If it is 1000, we print up to 1000GB before changing to X TB =#) ::String
               local str::String
 
               local TB::ModelicaReal = 1024 ^ 4
@@ -359,7 +359,7 @@
           str
         end
 
-        function stringHashDjb2Work(str::String, hash::ModelicaInteger = 5381) ::ModelicaInteger 
+        function stringHashDjb2Work(str::String, hash::ModelicaInteger = 5381) ::ModelicaInteger
               local ohash::ModelicaInteger = hash
 
               for i in 1:stringLength(str)
@@ -368,7 +368,7 @@
           ohash
         end
 
-        function stringAppend9(str1::String, str2::String, str3::String, str4::String = "", str5::String = "", str6::String = "", str7::String = "", str8::String = "", str9::String = "") ::String 
+        function stringAppend9(str1::String, str2::String, str3::String, str4::String = "", str5::String = "", str6::String = "", str7::String = "", str8::String = "", str9::String = "") ::String
               local str::String
 
               local sb::System.StringAllocator = System.StringAllocator(stringLength(str1) + stringLength(str2) + stringLength(str3) + stringLength(str4) + stringLength(str5) + stringLength(str6) + stringLength(str7) + stringLength(str8) + stringLength(str9))
@@ -396,7 +396,7 @@
           str
         end
 
-        function endsWithNewline(str::String) ::Bool 
+        function endsWithNewline(str::String) ::Bool
               local b::Bool
 
               b = CHAR_NEWLINE == MetaModelica.Dangerous.stringGetNoBoundsChecking(str, stringLength(str))

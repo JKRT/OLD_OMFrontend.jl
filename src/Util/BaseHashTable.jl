@@ -52,9 +52,9 @@
          #=  keyEqual - A comparison function between two keys, returns true if equal.
          =#
 
-        import MetaModelica.ArrayUtil
+        import ArrayUtil
         import Error
-        import MetaModelica.ListUtil
+        import ListUtil
          #=  Generic hashtable code below
          =#
          #=  adrpo: use a prime here (pick your poison):

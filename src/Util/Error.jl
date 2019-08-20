@@ -1,4 +1,4 @@
-  module Error 
+  module Error
 
 
     using MetaModelica
@@ -6,10 +6,10 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Severity 
-    @UniontypeDecl MessageType 
-    @UniontypeDecl Message 
-    @UniontypeDecl TotalMessage 
+    @UniontypeDecl Severity
+    @UniontypeDecl MessageType
+    @UniontypeDecl Message
+    @UniontypeDecl TotalMessage
 
     prefixToStr = Function
 
@@ -47,9 +47,7 @@
          */ =#
 
         import Util
-
         import Flags
-
         import Config
         import Global
         import System
@@ -1173,8 +1171,8 @@
         import ErrorExt
          const dummyInfo = SOURCEINFO("", false, 0, 0, 0, 0, 0.0)::SourceInfo
 
-        function clearCurrentComponent()  
-              function dummy(str::String, i::ModelicaInteger) ::String 
+        function clearCurrentComponent()
+              function dummy(str::String, i::ModelicaInteger) ::String
 
                 str
               end
@@ -1199,7 +1197,7 @@
                       setGlobalRoot(Global.currentInstVar, SOME((arrayCreate(1, cpre), arrayCreate(1, component), arrayCreate(1, info), arrayCreate(1, func))))
                     ()
                   end
-                  
+
                   SOME((apre, astr, ainfo, afunc))  => begin
                       arrayUpdate(apre, 1, cpre)
                       arrayUpdate(astr, 1, component)
@@ -1237,7 +1235,7 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   SOME((apre, astr, ainfo, afunc))  => begin
                       str = arrayGet(astr, 1)
                       if str != ""
@@ -1262,7 +1260,7 @@
           function: addMessage
           Adds a message given ID and tokens. The rest of the info
           is looked up in the message table. =#
-        function addMessage(inErrorMsg::Message, inMessageTokens::MessageTokens)  
+        function addMessage(inErrorMsg::Message, inMessageTokens::MessageTokens)
               local msg_type::MessageType
               local severity::Severity
               local str::String
@@ -1288,10 +1286,10 @@
                =#
         end
 
-         #= 
+         #=
           Adds a message given ID, tokens and source file info.
           The rest of the info is looked up in the message table. =#
-        function addSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)  
+        function addSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)
               _ = begin
                   local msg_type::MessageType
                   local severity::Severity
@@ -1315,7 +1313,7 @@
               end
         end
 
-        function addStrictMessage(errorMsg::Message, tokens::MessageTokens, info::SourceInfo)  
+        function addStrictMessage(errorMsg::Message, tokens::MessageTokens, info::SourceInfo)
               local msg::Message = errorMsg
 
               if Flags.getConfigBool(Flags.STRICT)
@@ -1327,7 +1325,7 @@
         end
 
          #= Same as addSourceMessage, but fails after adding the error. =#
-        function addSourceMessageAndFail(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)  
+        function addSourceMessageAndFail(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)
               addSourceMessage(inErrorMsg, inMessageTokens, inInfo)
               fail()
         end
@@ -1335,7 +1333,7 @@
          #= Adds an error message given the message, token and a list of file info. The
            the last file info in the list is used for the message itself, the rest of the
            file infos are used to print a trace of where the error came from. =#
-        function addMultiSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::List{<:SourceInfo})  
+        function addMultiSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::List{<:SourceInfo})
               _ = begin
                   local info::SourceInfo
                   local rest_info::List{SourceInfo}
@@ -1346,7 +1344,7 @@
                       addSourceMessage(inErrorMsg, inMessageTokens, info)
                     ()
                   end
-                  
+
                   (_, _, info <| rest_info)  => begin
                       if ! listMember(info, rest_info)
                         addSourceMessage(ERROR_FROM_HERE, nil, info)
@@ -1354,7 +1352,7 @@
                       addMultiSourceMessage(inErrorMsg, inMessageTokens, rest_info)
                     ()
                   end
-                  
+
                   (_, _,  nil())  => begin
                       addMessage(inErrorMsg, inMessageTokens)
                     ()
@@ -1369,7 +1367,7 @@
           Adds a message or a source message depending on the OPTIONAL source file info.
           If the source file info is not present a normal message is added.
           If the source file info is present a source message is added =#
-        function addMessageOrSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfoOpt::Option{<:SourceInfo})  
+        function addMessageOrSourceMessage(inErrorMsg::Message, inMessageTokens::MessageTokens, inInfoOpt::Option{<:SourceInfo})
               _ = begin
                   local info::SourceInfo
                    #=  we DON'T have an info, add message
@@ -1379,7 +1377,7 @@
                       addMessage(inErrorMsg, inMessageTokens)
                     ()
                   end
-                  
+
                   (_, _, SOME(info))  => begin
                       addSourceMessage(inErrorMsg, inMessageTokens, info)
                     ()
@@ -1390,7 +1388,7 @@
                =#
         end
 
-        function addTotalMessage(message::TotalMessage)  
+        function addTotalMessage(message::TotalMessage)
               local msg::Message
               local info::SourceInfo
 
@@ -1398,7 +1396,7 @@
               addSourceMessage(msg, nil, info)
         end
 
-        function addTotalMessages(messages::List{<:TotalMessage})  
+        function addTotalMessages(messages::List{<:TotalMessage})
               for msg in messages
                 addTotalMessage(msg)
               end
@@ -1407,17 +1405,17 @@
          #= Relations for pretty printing.
           function: printMessagesStr
           Prints messages to a string. =#
-        function printMessagesStr(warningsAsErrors::Bool = false) ::String 
+        function printMessagesStr(warningsAsErrors::Bool = false) ::String
               local res::String
 
               res = ErrorExt.printMessagesStr(warningsAsErrors)
           res
         end
 
-         #= 
+         #=
           Prints errors only to a string.
          =#
-        function printErrorsNoWarning() ::String 
+        function printErrorsNoWarning() ::String
               local res::String
 
               res = ErrorExt.printErrorsNoWarning()
@@ -1425,7 +1423,7 @@
         end
 
          #= Returns all messages as a list of strings, one for each message. =#
-        function printMessagesStrLst() ::List{String} 
+        function printMessagesStrLst() ::List{String}
               local outStringLst::List{String}
 
               outStringLst = begin
@@ -1440,7 +1438,7 @@
 
          #=  Returns all messages as a list of strings, one for each message.
            Filters out messages of certain type. =#
-        function printMessagesStrLstType(inMessageType::MessageType) ::List{String} 
+        function printMessagesStrLstType(inMessageType::MessageType) ::List{String}
               local outStringLst::List{String}
 
               outStringLst = begin
@@ -1455,7 +1453,7 @@
 
          #= Returns all messages as a list of strings, one for each message.
           Filters out messages of certain severity =#
-        function printMessagesStrLstSeverity(inSeverity::Severity) ::List{String} 
+        function printMessagesStrLstSeverity(inSeverity::Severity) ::List{String}
               local outStringLst::List{String}
 
               outStringLst = begin
@@ -1469,12 +1467,12 @@
         end
 
          #= clears the message buffer =#
-        function clearMessages()  
+        function clearMessages()
               ErrorExt.clearMessages()
         end
 
          #= Returns the number of messages in the message queue =#
-        function getNumMessages() ::ModelicaInteger 
+        function getNumMessages() ::ModelicaInteger
               local num::ModelicaInteger
 
               num = ErrorExt.getNumMessages()
@@ -1482,51 +1480,51 @@
         end
 
          #= Returns the number of messages with severity 'Error' in the message queue  =#
-        function getNumErrorMessages() ::ModelicaInteger 
+        function getNumErrorMessages() ::ModelicaInteger
               local num::ModelicaInteger
 
               num = ErrorExt.getNumErrorMessages()
           num
         end
 
-         #= 
+         #=
           Relations for interactive comm. These returns the messages as an array
           of strings, suitable for sending to clients like model editor, MDT, etc.
 
           Return all messages in a matrix format, vector of strings for each
           message, written out as a string. =#
-        function getMessages() ::List{TotalMessage} 
+        function getMessages() ::List{TotalMessage}
               local res::List{TotalMessage}
 
               res = ErrorExt.getMessages()
           res
         end
 
-         #= 
+         #=
           Return all messages in a matrix format, vector of strings for each
           message, written out as a string.
           Filtered by a specific MessageType. =#
-        function getMessagesStrType(inMessageType::MessageType) ::String 
+        function getMessagesStrType(inMessageType::MessageType) ::String
               local outString::String
 
               outString = "not impl yet."
           outString
         end
 
-         #= 
+         #=
           Return all messages in a matrix format, vector of strings for each
           message, written out as a string.
           Filtered by a specific MessageType. =#
-        function getMessagesStrSeverity(inSeverity::Severity) ::String 
+        function getMessagesStrSeverity(inSeverity::Severity) ::String
               local outString::String
 
               outString = "not impl yet."
           outString
         end
 
-         #= 
+         #=
           Converts a MessageType to a string. =#
-        function messageTypeStr(inMessageType::MessageType) ::String 
+        function messageTypeStr(inMessageType::MessageType) ::String
               local outString::String
 
               outString = begin
@@ -1534,23 +1532,23 @@
                   SYNTAX(__)  => begin
                     "SYNTAX"
                   end
-                  
+
                   GRAMMAR(__)  => begin
                     "GRAMMAR"
                   end
-                  
+
                   TRANSLATION(__)  => begin
                     "TRANSLATION"
                   end
-                  
+
                   SYMBOLIC(__)  => begin
                     "SYMBOLIC"
                   end
-                  
+
                   SIMULATION(__)  => begin
                     "SIMULATION"
                   end
-                  
+
                   SCRIPTING(__)  => begin
                     "SCRIPTING"
                   end
@@ -1559,9 +1557,9 @@
           outString
         end
 
-         #= 
+         #=
           Converts a Severity to a string. =#
-        function severityStr(inSeverity::Severity) ::String 
+        function severityStr(inSeverity::Severity) ::String
               local outString::String
 
               outString = begin
@@ -1569,15 +1567,15 @@
                   INTERNAL(__)  => begin
                     "Internal error"
                   end
-                  
+
                   ERROR(__)  => begin
                     "Error"
                   end
-                  
+
                   WARNING(__)  => begin
                     "Warning"
                   end
-                  
+
                   NOTIFICATION(__)  => begin
                     "Notification"
                   end
@@ -1586,10 +1584,10 @@
           outString
         end
 
-         #= 
+         #=
           Converts an SourceInfo into a string ready to be used in error messages.
           Format is [filename:line start:column start-line end:column end] =#
-        function infoStr(info::SourceInfo) ::String 
+        function infoStr(info::SourceInfo) ::String
               local str::String
 
               str = begin
@@ -1609,16 +1607,16 @@
           str
         end
 
-         #= 
+         #=
           Used to make compiler-internal assertions. These messages are not meant
           to be shown to a user, but rather to show internal error messages. =#
-        function assertion(b::Bool, message::String, info::SourceInfo)  
+        function assertion(b::Bool, message::String, info::SourceInfo)
               _ = begin
                 @match (b, message, info) begin
                   (true, _, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         addSourceMessage(INTERNAL_ERROR, list(message), info)
                       fail()
@@ -1627,17 +1625,17 @@
               end
         end
 
-         #= 
+         #=
           Used to make assertions. These messages are meant to be shown to a user when
           the condition is true. If the Error-level of the message is Error, this function
           fails. =#
-        function assertionOrAddSourceMessage(inCond::Bool, inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)  
+        function assertionOrAddSourceMessage(inCond::Bool, inErrorMsg::Message, inMessageTokens::MessageTokens, inInfo::SourceInfo)
               _ = begin
                 @match (inCond, inErrorMsg, inMessageTokens, inInfo) begin
                   (true, _, _, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         addSourceMessage(inErrorMsg, inMessageTokens, inInfo)
                         failOnErrorMsg(inErrorMsg)
@@ -1647,13 +1645,13 @@
               end
         end
 
-        function failOnErrorMsg(inMessage::Message)  
+        function failOnErrorMsg(inMessage::Message)
               _ = begin
                 @match inMessage begin
                   MESSAGE(severity = ERROR(__))  => begin
                     fail()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1661,27 +1659,27 @@
               end
         end
 
-         #= 
+         #=
           Used to make a compiler warning =#
-        function addCompilerError(message::String)  
+        function addCompilerError(message::String)
               addMessage(COMPILER_ERROR, list(message))
         end
 
-         #= 
+         #=
           Used to make a compiler warning =#
-        function addCompilerWarning(message::String)  
+        function addCompilerWarning(message::String)
               addMessage(COMPILER_WARNING, list(message))
         end
 
-         #= 
+         #=
           Used to make a compiler notification =#
-        function addCompilerNotification(message::String)  
+        function addCompilerNotification(message::String)
               addMessage(COMPILER_NOTIFICATION, list(message))
         end
 
-         #= 
+         #=
           Used to make an internal error =#
-        function addInternalError(message::String, info::SourceInfo)  
+        function addInternalError(message::String, info::SourceInfo)
               local filename::String
 
               if Config.getRunningTestsuite()
@@ -1693,7 +1691,7 @@
         end
 
          #= Prints out a message and terminates the execution. =#
-        function terminateError(message::String, info::SourceInfo)  
+        function terminateError(message::String, info::SourceInfo)
               ErrorExt.addSourceMessage(0, MessageType.TRANSLATION(), Severity.INTERNAL(), info.lineNumberStart, info.columnNumberStart, info.lineNumberEnd, info.columnNumberEnd, info.isReadOnly, info.fileName, "%s", list(message))
               print(ErrorExt.printMessagesStr())
               System.exit(-1)

@@ -51,7 +51,7 @@
          *
          */ =#
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         import GraphMLDumpTpl
 

@@ -62,7 +62,7 @@
          */ =#
         import Print
 
-        import MetaModelica.ListUtil
+        import ListUtil
         import System
 
 

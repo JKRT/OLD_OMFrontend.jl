@@ -54,7 +54,7 @@
         T = ModelicaInteger 
          #=  Should be Any.
          =#
-        import MetaModelica.ListUtil
+        import ListUtil
 
         import MetaModelica.Dangerous
 

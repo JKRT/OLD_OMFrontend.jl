@@ -1,4 +1,4 @@
-  module Tpl
+  module Tpl 
 
 
     using MetaModelica
@@ -6,11 +6,11 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Text
-    @UniontypeDecl BlockTypeFileText
-    @UniontypeDecl StringToken
-    @UniontypeDecl BlockType
-    @UniontypeDecl IterOptions
+    @UniontypeDecl Text 
+    @UniontypeDecl BlockTypeFileText 
+    @UniontypeDecl StringToken 
+    @UniontypeDecl BlockType 
+    @UniontypeDecl IterOptions 
 
     Tpl_Fun = Function
 
@@ -46,7 +46,7 @@
         import Error
         import File
         import Flags
-        import MetaModelica.ListUtil
+        import ListUtil
         import Print
         import StackOverflow
         import StringUtil
@@ -56,7 +56,7 @@
          #=  where tabs will be converted where 1 tab = 4 spaces ??
          =#
 
-        Tokens = List{StringToken}
+        Tokens = List 
 
          @Uniontype Text begin
               @Record MEM_TEXT begin
@@ -64,7 +64,7 @@
                        tokens::Tokens
                        #= reversed list of tokens
                        =#
-                       blocksStack::List
+                       blocksStack::List{Tuple{Tokens, BlockType}}
               end
 
               @Record FILE_TEXT begin
@@ -77,7 +77,7 @@
               end
          end
 
-         emptyTxt = MEM_TEXT(list(), list())
+         const emptyTxt = MEM_TEXT(nil, nil)::Text
 
          @Uniontype BlockTypeFileText begin
               @Record BT_FILE_TEXT begin
@@ -165,19 +165,19 @@
               end
          end
 
-        ArgType1 = Any
-        ArgType2 = Any
-        ArgType3 = Any
-        ArgType4 = Any
+        ArgType1 = Any 
+        ArgType2 = Any 
+        ArgType3 = Any 
+        ArgType4 = Any 
          #= by default, we will parse new lines in every non-token string
          =#
 
-        function writeStr(inText::Text, inStr::String)::Text
+        function writeStr(inText::Text, inStr::String) ::Text 
               local outText::Text
 
               outText = begin
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local str::String
                   local txt::Text
                   local nchars::ModelicaInteger
@@ -189,16 +189,16 @@
                   (txt, "")  => begin
                     txt
                   end
-
+                  
                   (MEM_TEXT(tokens = toks, blocksStack = blstack), str) where ((-1) == System.stringFind(str, "\\n"))  => begin
-                    MEM_TEXT(ST_STRING(str) <| toks, blstack)
+                    MEM_TEXT(_cons(ST_STRING(str), toks), blstack)
                   end
-
-                  (FILE_TEXT(), str) where ((-1) == System.stringFind(str, "\\n"))  => begin
+                  
+                  (FILE_TEXT(__), str) where ((-1) == System.stringFind(str, "\\n"))  => begin
                       stringFile(inText, str, line = false)
                     inText
                   end
-
+                  
                   _  => begin
                       writeChars(inText, System.strtokIncludingDelimiters(inStr, "\\n"))
                   end
@@ -209,32 +209,32 @@
           outText
         end
 
-        function writeTok(inText::Text, inToken::StringToken)::Text
+        function writeTok(inText::Text, inToken::StringToken) ::Text 
               local outText::Text
 
               outText = begin
                   local txt::Text
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local tok::StringToken
                    #= to ensure invariant being able to check emptiness only through the tokens (list) emtiness
                    =#
                    #= should not happen, tokens must have at least one element
                    =#
                 @match (inText, inToken) begin
-                  (txt, ST_BLOCK(tokens =  nil))  => begin
+                  (txt, ST_BLOCK(tokens =  nil()))  => begin
                     txt
                   end
-
+                  
                   (txt, ST_STRING(value = ""))  => begin
                     txt
                   end
-
+                  
                   (MEM_TEXT(tokens = toks, blocksStack = blstack), tok)  => begin
-                    MEM_TEXT(tok <| toks, blstack)
+                    MEM_TEXT(_cons(tok, toks), blstack)
                   end
-
-                  (FILE_TEXT(), tok)  => begin
+                  
+                  (FILE_TEXT(__), tok)  => begin
                        #= same as above - compiler should not generate this value in any case
                        =#
                       tokFileText(inText, tok)
@@ -245,32 +245,32 @@
           outText
         end
 
-        function writeText(inText::Text, inTextToWrite::Text)::Text
+        function writeText(inText::Text, inTextToWrite::Text) ::Text 
               local outText::Text
 
               outText = begin
                   local toks::Tokens
                   local txttoks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local txt::Text
                    #= to ensure invariant being able to check emptiness only through the tokens (list) emtiness
                    =#
                 @match (inText, inTextToWrite) begin
-                  (txt, MEM_TEXT(tokens =  nil))  => begin
+                  (txt, MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-
-                  (MEM_TEXT(tokens = toks, blocksStack = blstack), MEM_TEXT(tokens = txttoks, blocksStack =  nil))  => begin
-                    MEM_TEXT(ST_BLOCK(txttoks, BT_TEXT()) <| toks, blstack)
+                  
+                  (MEM_TEXT(tokens = toks, blocksStack = blstack), MEM_TEXT(tokens = txttoks, blocksStack =  nil()))  => begin
+                    MEM_TEXT(_cons(ST_BLOCK(txttoks, BT_TEXT()), toks), blstack)
                   end
-
-                  (FILE_TEXT(), MEM_TEXT(tokens = txttoks, blocksStack =  nil))  => begin
+                  
+                  (FILE_TEXT(__), MEM_TEXT(tokens = txttoks, blocksStack =  nil()))  => begin
                       for tok in listReverse(txttoks)
                         writeTok(inText, tok)
                       end
                     inText
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.writeText failed - incomplete text was passed to be written\\n")
@@ -285,31 +285,31 @@
           outText
         end
 
-        function writeChars(inText::Text, inChars::List{<:String})::Text
+        function writeChars(inText::Text, inChars::List{<:String}) ::Text 
               local outText::Text
 
               outText = begin
                   local txt::Text
                   local c::String
-                  local chars::List{<:String}
-                  local lschars::List{<:String}
+                  local chars::List{String}
+                  local lschars::List{String}
                   local isline::Bool
                 @match (inText, inChars) begin
-                  (txt,  nil)  => begin
+                  (txt,  nil())  => begin
                     txt
                   end
-
+                  
                   (txt, "\n" <| chars)  => begin
                       txt = newLine(txt)
                     writeChars(txt, chars)
                   end
-
+                  
                   (txt, c <| chars)  => begin
                       (lschars, chars, isline) = takeLineOrString(chars)
-                      txt = writeLineOrStr(txt, stringAppendList(c <| lschars), isline)
+                      txt = writeLineOrStr(txt, stringAppendList(_cons(c, lschars)), isline)
                     writeChars(txt, chars)
                   end
-
+                  
                   (_, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.writeChars failed.\\n")
@@ -328,12 +328,12 @@
           outText
         end
 
-        function writeLineOrStr(inText::Text, inStr::String, inIsLine::Bool)::Text
+        function writeLineOrStr(inText::Text, inStr::String, inIsLine::Bool) ::Text 
               local outText::Text
 
               outText = begin
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local str::String
                   local txt::Text
                    #= empty string means nothing
@@ -346,16 +346,16 @@
                   (txt, "", _)  => begin
                     txt
                   end
-
+                  
                   (MEM_TEXT(tokens = toks, blocksStack = blstack), str, false)  => begin
-                    MEM_TEXT(ST_STRING(str) <| toks, blstack)
+                    MEM_TEXT(_cons(ST_STRING(str), toks), blstack)
                   end
-
+                  
                   (MEM_TEXT(tokens = toks, blocksStack = blstack), str, true)  => begin
-                    MEM_TEXT(ST_LINE(str) <| toks, blstack)
+                    MEM_TEXT(_cons(ST_LINE(str), toks), blstack)
                   end
-
-                  (FILE_TEXT(), str, _)  => begin
+                  
+                  (FILE_TEXT(__), str, _)  => begin
                       stringFile(inText, str, line = inIsLine)
                     inText
                   end
@@ -364,62 +364,62 @@
           outText
         end
 
-        function takeLineOrString(inChars::List{<:String})::Tuple{List{<:String}, List{<:String}, Bool}
+        function takeLineOrString(inChars::List{<:String}) ::Tuple{List{String}, List{String}, Bool} 
               local outIsLine::Bool
-              local outRestChars::List{<:String}
-              local outTillNewLineChars::List{<:String}
+              local outRestChars::List{String}
+              local outTillNewLineChars::List{String}
 
               (outTillNewLineChars, outRestChars, outIsLine) = begin
                   local char::String
-                  local tnlchars::List{<:String}
-                  local restchars::List{<:String}
-                  local chars::List{<:String}
+                  local tnlchars::List{String}
+                  local restchars::List{String}
+                  local chars::List{String}
                   local isline::Bool
                 @match inChars begin
-                   nil  => begin
-                    (list(), list(), false)
+                   nil()  => begin
+                    (nil, nil, false)
                   end
-
+                  
                   "\n" <| chars  => begin
                     (list("\\n"), chars, true)
                   end
-
+                  
                   char <| chars  => begin
                       (tnlchars, restchars, isline) = takeLineOrString(chars)
-                    (char <| tnlchars, restchars, isline)
+                    (_cons(char, tnlchars), restchars, isline)
                   end
                 end
               end
           (outTillNewLineChars, outRestChars, outIsLine)
         end
 
-        function softNewLine(inText::Text)::Text
+        function softNewLine(inText::Text) ::Text 
               local outText::Text
 
               outText = begin
                   local txt::Text
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local tok::StringToken
                    #= empty - nothing
                    =#
                 @match inText begin
-                  txt && MEM_TEXT(tokens =  nil)  => begin
+                  txt && MEM_TEXT(tokens =  nil())  => begin
                     txt
                   end
-
+                  
                   txt && MEM_TEXT(tokens = toks)  => begin
                        #= at start of line - nothing
                        =#
                       if ! isAtStartOfLine(txt)
-                        txt.tokens = ST_NEW_LINE() <| toks
+                        txt.tokens = _cons(ST_NEW_LINE(), toks)
                       end
                        #= otherwise put normal new-line
                        =#
                     txt
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                        #= at start of line - nothing
                        =#
                       if ! isAtStartOfLine(inText)
@@ -429,7 +429,7 @@
                        =#
                     inText
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.softNL failed. \\n")
@@ -442,7 +442,7 @@
           outText
         end
 
-        function isAtStartOfLine(text::Text)::Bool
+        function isAtStartOfLine(text::Text) ::Bool 
               local b::Bool
 
               b = begin
@@ -451,8 +451,8 @@
                   MEM_TEXT(tokens = tok <| _)  => begin
                     isAtStartOfLineTok(tok)
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                     arrayGet(text.isstart, 1)
                   end
                 end
@@ -460,7 +460,7 @@
           b
         end
 
-        function isAtStartOfLineTok(inTok::StringToken)::Bool
+        function isAtStartOfLineTok(inTok::StringToken) ::Bool 
               local b::Bool
 
               b = begin
@@ -468,22 +468,22 @@
                    #= a new-line at the end
                    =#
                 @match inTok begin
-                  ST_NEW_LINE()  => begin
+                  ST_NEW_LINE(__)  => begin
                     true
                   end
-
-                  ST_LINE()  => begin
+                  
+                  ST_LINE(__)  => begin
                     true
                   end
-
+                  
                   ST_STRING_LIST(lastHasNewLine = true)  => begin
                     true
                   end
-
+                  
                   ST_BLOCK(tokens = tok <| _)  => begin
                     isAtStartOfLineTok(tok)
                   end
-
+                  
                   _  => begin
                       false
                   end
@@ -500,18 +500,18 @@
           b
         end
 
-        function newLine(inText::Text)::Text
+        function newLine(inText::Text) ::Text 
               local outText::Text
 
               outText = begin
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                 @match inText begin
                   MEM_TEXT(tokens = toks, blocksStack = blstack)  => begin
-                    MEM_TEXT(ST_NEW_LINE() <| toks, blstack)
+                    MEM_TEXT(_cons(ST_NEW_LINE(), toks), blstack)
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                       newlineFile(inText)
                     inText
                   end
@@ -520,12 +520,12 @@
           outText
         end
 
-        function pushBlock(txt::Text, inBlockType::BlockType)::Text
+        function pushBlock(txt::Text, inBlockType::BlockType) ::Text 
 
 
               txt = begin
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local blType::BlockType
                   local nchars::ModelicaInteger
                   local aind::ModelicaInteger
@@ -533,14 +533,14 @@
                   local isstart::Bool
                 @match txt begin
                   MEM_TEXT(tokens = toks, blocksStack = blstack)  => begin
-                    MEM_TEXT(list(), (toks, inBlockType) <| blstack)
+                    MEM_TEXT(nil, _cons((toks, inBlockType), blstack))
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                       nchars = arrayGet(txt.nchars, 1)
                       aind = arrayGet(txt.aind, 1)
                       isstart = arrayGet(txt.isstart, 1)
-                      arrayUpdate(txt.blocksStack, 1, BT_FILE_TEXT(inBlockType, nchars, aind, isstart, arrayCreate(1, textFileTell(txt)), arrayCreate(1, NONE())) <| arrayGet(txt.blocksStack, 1))
+                      arrayUpdate(txt.blocksStack, 1, _cons(BT_FILE_TEXT(inBlockType, nchars, aind, isstart, arrayCreate(1, textFileTell(txt)), arrayCreate(1, NONE())), arrayGet(txt.blocksStack, 1)))
                       _ = begin
                         @match inBlockType begin
                           BT_INDENT(width = w)  => begin
@@ -548,7 +548,7 @@
                               arrayUpdate(txt.aind, 1, aind + w)
                             ()
                           end
-
+                          
                           BT_ABS_INDENT(width = w)  => begin
                               if isstart
                                 arrayUpdate(txt.nchars, 1, 0)
@@ -556,17 +556,17 @@
                               arrayUpdate(txt.aind, 1, w)
                             ()
                           end
-
+                          
                           BT_REL_INDENT(offset = w)  => begin
                               arrayUpdate(txt.aind, 1, aind + w)
                             ()
                           end
-
+                          
                           BT_ANCHOR(offset = w)  => begin
                               arrayUpdate(txt.aind, 1, nchars + w)
                             ()
                           end
-
+                          
                           _  => begin
                               ()
                           end
@@ -574,7 +574,7 @@
                       end
                     txt
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.pushBlock failed \\n")
@@ -587,52 +587,52 @@
           txt
         end
 
-        function popBlock(txt::Text)::Text
+        function popBlock(txt::Text) ::Text 
 
 
               txt = begin
                   local toks::Tokens
                   local stacktoks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local blType::BlockType
-                  local rest::List{<:BlockTypeFileText}
+                  local rest::List{BlockTypeFileText}
                   local blk::BlockTypeFileText
                   local oldisstart::Bool
                    #= when nothing was put, just pop tokens from the stack and no block output
                    =#
                 @match txt begin
-                  MEM_TEXT(tokens =  nil, blocksStack = (stacktoks, _) <| blstack)  => begin
+                  MEM_TEXT(tokens =  nil(), blocksStack = (stacktoks, _) <| blstack)  => begin
                     MEM_TEXT(stacktoks, blstack)
                   end
-
+                  
                   MEM_TEXT(tokens = toks, blocksStack = (stacktoks, blType) <| blstack)  => begin
-                    MEM_TEXT(ST_BLOCK(toks, blType) <| stacktoks, blstack)
+                    MEM_TEXT(_cons(ST_BLOCK(toks, blType), stacktoks), blstack)
                   end
-
-                  FILE_TEXT()  => begin
-                      @match blk <| rest = arrayGet(txt.blocksStack, 1)
+                  
+                  FILE_TEXT(__)  => begin
+                      @match _cons(blk, rest) = arrayGet(txt.blocksStack, 1)
                       arrayUpdate(txt.blocksStack, 1, rest)
                       _ = begin
                         @match blk.bt begin
-                          BT_INDENT()  => begin
+                          BT_INDENT(__)  => begin
                               if arrayGet(txt.isstart, 1)
                                 arrayUpdate(txt.nchars, 1, blk.nchars)
                               end
                               arrayUpdate(txt.aind, 1, blk.aind)
                             ()
                           end
-
+                          
                           _ where (begin
                             @match blk.bt begin
-                              BT_ABS_INDENT()  => begin
+                              BT_ABS_INDENT(__)  => begin
                                 true
                               end
-
-                              BT_REL_INDENT()  => begin
+                              
+                              BT_REL_INDENT(__)  => begin
                                 true
                               end
-
-                              BT_ANCHOR()  => begin
+                              
+                              BT_ANCHOR(__)  => begin
                                 true
                               end
                             end
@@ -662,7 +662,7 @@
                               arrayUpdate(txt.aind, 1, blk.aind)
                             ()
                           end
-
+                          
                           _  => begin
                               ()
                           end
@@ -670,7 +670,7 @@
                       end
                     txt
                   end
-
+                  
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.popBlock failed - probably pushBlock and popBlock are not well balanced !\\n")
@@ -685,20 +685,20 @@
           txt
         end
 
-        function pushIter(txt::Text, inIterOptions::IterOptions)::Text
+        function pushIter(txt::Text, inIterOptions::IterOptions) ::Text 
 
 
               txt = begin
                   local toks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local iopts::IterOptions
                   local i0::ModelicaInteger
                 @match (txt, inIterOptions) begin
                   (MEM_TEXT(tokens = toks, blocksStack = blstack), iopts && ITER_OPTIONS(startIndex0 = i0))  => begin
-                    MEM_TEXT(list(), (list(), BT_ITER(iopts, arrayCreate(1, i0))) <| (toks, BT_TEXT()) <| blstack)
+                    MEM_TEXT(nil, _cons((nil, BT_ITER(iopts, arrayCreate(1, i0))), _cons((toks, BT_TEXT()), blstack)))
                   end
-
-                  (FILE_TEXT(), iopts && ITER_OPTIONS(startIndex0 = i0))  => begin
+                  
+                  (FILE_TEXT(__), iopts && ITER_OPTIONS(startIndex0 = i0))  => begin
                        #= let the existing tokens on stack in the text block and start iterating
                        =#
                       _ = begin
@@ -706,7 +706,7 @@
                           ITER_OPTIONS(alignNum = 0, wrapWidth = 0)  => begin
                             ()
                           end
-
+                          
                           _  => begin
                                 Error.addInternalError("Tpl.mo FILE_TEXT does not support aligning or wrapping elements", sourceInfo())
                               fail()
@@ -716,7 +716,7 @@
                       pushBlock(txt, BT_ITER(inIterOptions, arrayCreate(1, i0)))
                     txt
                   end
-
+                  
                   (_, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.pushIter failed \\n")
@@ -729,30 +729,30 @@
           txt
         end
 
-        function popIter(txt::Text)::Text
+        function popIter(txt::Text) ::Text 
 
 
               txt = begin
                   local stacktoks::Tokens
                   local itertoks::Tokens
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local blType::BlockType
                    #= nothing was iterated, pop only the stacked tokens
                    =#
                 @match txt begin
-                  MEM_TEXT(tokens =  nil, blocksStack = ( nil, _) <| (stacktoks, _) <| blstack)  => begin
+                  MEM_TEXT(tokens =  nil(), blocksStack = ( nil(), _) <| (stacktoks, _) <| blstack)  => begin
                     MEM_TEXT(stacktoks, blstack)
                   end
-
-                  MEM_TEXT(tokens =  nil, blocksStack = (itertoks, blType) <| (stacktoks, _) <| blstack)  => begin
-                    MEM_TEXT(ST_BLOCK(itertoks, blType) <| stacktoks, blstack)
+                  
+                  MEM_TEXT(tokens =  nil(), blocksStack = (itertoks, blType) <| (stacktoks, _) <| blstack)  => begin
+                    MEM_TEXT(_cons(ST_BLOCK(itertoks, blType), stacktoks), blstack)
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                       arrayUpdate(txt.blocksStack, 1, listRest(arrayGet(txt.blocksStack, 1)))
                     txt
                   end
-
+                  
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.popIter failed - probably pushIter and popIter are not well balanced or something was written between the last nextIter and popIter ?\\n")
@@ -767,7 +767,7 @@
           txt
         end
 
-        function nextIter(txt::Text)::Text
+        function nextIter(txt::Text) ::Text 
 
 
               txt = begin
@@ -775,39 +775,39 @@
                   local itertoks::Tokens
                   local tok::StringToken
                   local emptok::StringToken
-                  local blstack::List{<:Tuple{<:Tokens, BlockType}}
+                  local blstack::List{Tuple{Tokens, BlockType}}
                   local iopts::IterOptions
-                  local i0::Array{<:ModelicaInteger}
-                  local tell::Array{<:ModelicaInteger}
+                  local i0::Array{ModelicaInteger}
+                  local tell::Array{ModelicaInteger}
                   local bt::BlockType
                   local tellpos::ModelicaInteger
                   local curIndex::ModelicaInteger
                   local txt2::Text
                   local haveToken::Bool
-                  local septok::Array{<:Option{<:StringToken}}
+                  local septok::Array{Option{StringToken}}
                    #= empty iteration segment and 'empty' option is NONE(), so do nothing
                    =#
                 @match txt begin
-                  txt && MEM_TEXT(tokens =  nil, blocksStack = (_, BT_ITER(options = ITER_OPTIONS(empty = NONE()))) <| _)  => begin
+                  txt && MEM_TEXT(tokens =  nil(), blocksStack = (_, BT_ITER(options = ITER_OPTIONS(empty = NONE()))) <| _)  => begin
                     txt
                   end
-
-                  MEM_TEXT(tokens =  nil, blocksStack = (itertoks, bt && BT_ITER(options = ITER_OPTIONS(empty = SOME(emptok)), index0 = i0)) <| blstack)  => begin
+                  
+                  MEM_TEXT(tokens =  nil(), blocksStack = (itertoks, bt && BT_ITER(options = ITER_OPTIONS(empty = SOME(emptok)), index0 = i0)) <| blstack)  => begin
                       arrayUpdate(i0, 1, arrayGet(i0, 1) + 1)
-                    MEM_TEXT(list(), (emptok <| itertoks, bt) <| blstack)
+                    MEM_TEXT(nil, _cons((_cons(emptok, itertoks), bt), blstack))
                   end
-
-                  MEM_TEXT(tokens = tok <|  nil, blocksStack = (itertoks, bt && BT_ITER(index0 = i0)) <| blstack)  => begin
+                  
+                  MEM_TEXT(tokens = tok <|  nil(), blocksStack = (itertoks, bt && BT_ITER(index0 = i0)) <| blstack)  => begin
                       arrayUpdate(i0, 1, arrayGet(i0, 1) + 1)
-                    MEM_TEXT(list(), (tok <| itertoks, bt) <| blstack)
+                    MEM_TEXT(nil, _cons((_cons(tok, itertoks), bt), blstack))
                   end
-
+                  
                   MEM_TEXT(tokens = toks, blocksStack = (itertoks, bt && BT_ITER(index0 = i0)) <| blstack)  => begin
                       arrayUpdate(i0, 1, arrayGet(i0, 1) + 1)
-                    MEM_TEXT(list(), (ST_BLOCK(toks, BT_TEXT()) <| itertoks, bt) <| blstack)
+                    MEM_TEXT(nil, _cons((_cons(ST_BLOCK(toks, BT_TEXT()), itertoks), bt), blstack))
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                        #= empty iteration segment, but 'empty' option is specified, so put the value
                        =#
                        #= one token, put it as it is
@@ -836,7 +836,7 @@
                                         haveToken = false
                                       txt
                                     end
-
+                                    
                                     SOME(emptok)  => begin
                                         arrayUpdate(i0, 1, arrayGet(i0, 1) + 1)
                                         haveToken = true
@@ -858,7 +858,7 @@
                       end
                     txt2
                   end
-
+                  
                   _  => begin
                         Error.addInternalError("-!!!Tpl.nextIter failed - nextIter was called in a non-iteration context?", sourceInfo())
                       fail()
@@ -870,17 +870,17 @@
           txt
         end
 
-        function getIteri_i0(inText::Text)::ModelicaInteger
+        function getIteri_i0(inText::Text) ::ModelicaInteger 
               local outI0::ModelicaInteger
 
               outI0 = begin
-                  local i0::Array{<:ModelicaInteger}
+                  local i0::Array{ModelicaInteger}
                 @match inText begin
                   MEM_TEXT(blocksStack = (_, BT_ITER(index0 = i0)) <| _)  => begin
                     arrayGet(i0, 1)
                   end
-
-                  FILE_TEXT()  => begin
+                  
+                  FILE_TEXT(__)  => begin
                     begin
                       @match listGet(arrayGet(inText.blocksStack, 1), 1) begin
                         BT_FILE_TEXT(bt = BT_ITER(index0 = i0))  => begin
@@ -889,7 +889,7 @@
                       end
                     end
                   end
-
+                  
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.getIter_i0 failed - getIter_i0 was called in a non-iteration context ? \\n")
@@ -904,7 +904,7 @@
 
          #= function: textString:
         This function renders a (memory-)text to string. =#
-        function textString(inText::Text)::String
+        function textString(inText::Text) ::String 
               local outString::String
 
               outString = begin
@@ -919,7 +919,7 @@
                       Print.restoreBuf(handle)
                     str
                   end
-
+                  
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.textString failed.\\n")
@@ -934,21 +934,21 @@
 
          #= function: textStringBuf:
         This function renders a (memory-)text to (Print.)string buffer. =#
-        function textStringBuf(inText::Text)
+        function textStringBuf(inText::Text)  
               _ = begin
                   local toks::Tokens
                 @match inText begin
-                  MEM_TEXT(tokens = toks, blocksStack =  nil)  => begin
+                  MEM_TEXT(tokens = toks, blocksStack =  nil())  => begin
                       (_, _) = tokensString(listReverse(toks), 0, true, 0)
                     ()
                   end
-
+                  
                   MEM_TEXT(blocksStack = _ <| _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.textString failed - a non-comlete text was given.\\n")
                     fail()
                   end
-
+                  
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-!!!Tpl.textString failed.\\n")
@@ -960,7 +960,7 @@
                =#
         end
 
-        function tokensString(inTokens::Tokens, actualPositionOnLine::ModelicaInteger, atStartOfLine::Bool, afterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function tokensString(inTokens::Tokens, actualPositionOnLine::ModelicaInteger, atStartOfLine::Bool, afterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
 
 
 
@@ -971,14 +971,18 @@
           (actualPositionOnLine, atStartOfLine, afterNewLineIndent)
         end
 
-        function tokensFile(file::File.FILE, inTokens::Tokens, actualPositionOnLine::ModelicaInteger, atStartOfLine::Bool, afterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
-          for tok in inTokens
+        function tokensFile(file::File.File, inTokens::Tokens, actualPositionOnLine::ModelicaInteger, atStartOfLine::Bool, afterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
+
+
+
+
+              for tok in inTokens
                 (actualPositionOnLine, atStartOfLine, afterNewLineIndent) = tokFile(file, tok, actualPositionOnLine, atStartOfLine, afterNewLineIndent)
               end
           (actualPositionOnLine, atStartOfLine, afterNewLineIndent)
         end
 
-        function tokString(inStringToken::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function tokString(inStringToken::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
@@ -987,17 +991,17 @@
                   local toks::Tokens
                   local bt::BlockType
                   local str::String
-                  local strLst::List{<:String}
+                  local strLst::List{String}
                   local nchars::ModelicaInteger
                   local aind::ModelicaInteger
                   local blen::ModelicaInteger
                   local isstart::Bool
                 @match (inStringToken, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  (ST_NEW_LINE(), _, _, aind)  => begin
+                  (ST_NEW_LINE(__), _, _, aind)  => begin
                       Print.printBufNewLine()
                     (aind, true, aind)
                   end
-
+                  
                   (ST_STRING(value = str), nchars, true, aind)  => begin
                       blen = Print.getBufLength()
                       Print.printBufSpace(nchars)
@@ -1005,35 +1009,35 @@
                       blen = Print.getBufLength() - blen
                     (blen, false, aind)
                   end
-
+                  
                   (ST_STRING(value = str), nchars, false, aind)  => begin
                       blen = Print.getBufLength()
                       Print.printBuf(str)
                       blen = Print.getBufLength() - blen
                     (nchars + blen, false, aind)
                   end
-
+                  
                   (ST_LINE(line = str), nchars, true, aind)  => begin
                       Print.printBufSpace(nchars)
                       Print.printBuf(str)
                     (aind, true, aind)
                   end
-
+                  
                   (ST_LINE(line = str), _, false, aind)  => begin
                       Print.printBuf(str)
                     (aind, true, aind)
                   end
-
+                  
                   (ST_STRING_LIST(strList = strLst), nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = stringListString(strLst, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (ST_BLOCK(tokens = toks, blockType = bt), nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = blockString(bt, listReverse(toks), nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.tokString failed.\\n")
@@ -1050,8 +1054,8 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function tokFileText(inText::Text, inStringToken::StringToken, doHandleTok::Bool = true)
-              local file::File.FILE = File.File(getTextOpaqueFile(inText))
+        function tokFileText(inText::Text, inStringToken::StringToken, doHandleTok::Bool = true)  
+              local file::File.File = File.File(getTextOpaqueFile(inText))
               local nchars::ModelicaInteger
               local aind::ModelicaInteger
               local isstart::Bool
@@ -1061,7 +1065,7 @@
               end
               _ = begin
                 @match inText begin
-                  FILE_TEXT()  => begin
+                  FILE_TEXT(__)  => begin
                       nchars = arrayGet(inText.nchars, 1)
                       aind = arrayGet(inText.aind, 1)
                       isstart = arrayGet(inText.isstart, 1)
@@ -1075,45 +1079,49 @@
               end
         end
 
-        function tokFile(file::File.FILE, inStringToken::StringToken, nchars::ModelicaInteger, isstart::Bool, aind::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function tokFile(file::File.File, inStringToken::StringToken, nchars::ModelicaInteger, isstart::Bool, aind::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
+
+
+
+
               (nchars, isstart, aind) = begin
                   local toks::Tokens
                   local bt::BlockType
                   local str::String
-                  local strLst::List{<:String}
+                  local strLst::List{String}
                 @match (inStringToken, nchars, isstart, aind) begin
-                  (ST_NEW_LINE(), _, _, aind)  => begin
+                  (ST_NEW_LINE(__), _, _, aind)  => begin
                       File.write(file, "\\n")
                     (aind, true, aind)
                   end
-
+                  
                   (ST_STRING(value = str), nchars, true, aind)  => begin
                       File.writeSpace(file, nchars)
                       File.write(file, str)
                     (nchars + stringLength(str), false, aind)
                   end
-
+                  
                   (ST_STRING(value = str), nchars, false, aind)  => begin
                       File.write(file, str)
                     (nchars + stringLength(str), false, aind)
                   end
-
+                  
                   (ST_LINE(line = str), nchars, true, aind)  => begin
                       File.writeSpace(file, nchars)
                       File.write(file, str)
                     (aind, true, aind)
                   end
-
+                  
                   (ST_LINE(line = str), _, false, aind)  => begin
                       File.write(file, str)
                     (aind, true, aind)
                   end
-
+                  
                   (ST_STRING_LIST(strList = strLst), nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = stringListFile(file, strLst, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (ST_BLOCK(tokens = toks, blockType = bt), nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = blockFile(file, bt, listReverse(toks), nchars, isstart, aind)
                     (nchars, isstart, aind)
@@ -1123,29 +1131,29 @@
           (nchars, isstart, aind)
         end
 
-        function stringListString(inStringList::List{<:String}, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function stringListString(inStringList::List{<:String}, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
               (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent) = begin
                   local str::String
-                  local strLst::List{<:String}
+                  local strLst::List{String}
                   local nchars::ModelicaInteger
                   local aind::ModelicaInteger
                   local blen::ModelicaInteger
                   local isstart::Bool
                   local hasNL::Bool
                 @match (inStringList, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  ( nil, _, isstart, aind)  => begin
+                  ( nil(), _, isstart, aind)  => begin
                     (aind, isstart, aind)
                   end
-
+                  
                   ("" <| strLst, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = stringListString(strLst, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (str <| strLst, nchars, true, aind)  => begin
                       blen = Print.getBufLength()
                       Print.printBufSpace(nchars)
@@ -1160,7 +1168,7 @@
                       (nchars, isstart, aind) = stringListString(strLst, nchars, hasNL, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (str <| strLst, nchars, false, aind)  => begin
                       blen = Print.getBufLength()
                       Print.printBuf(str)
@@ -1174,7 +1182,7 @@
                       (nchars, isstart, aind) = stringListString(strLst, nchars, hasNL, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.stringListString failed.\\n")
@@ -1195,21 +1203,25 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function stringListFile(file::File.FILE, inStringList::List{<:String}, nchars::ModelicaInteger, isstart::Bool, aind::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function stringListFile(file::File.File, inStringList::List{<:String}, nchars::ModelicaInteger, isstart::Bool, aind::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
+
+
+
+
               (nchars, isstart, aind) = begin
                   local str::String
-                  local strLst::List{<:String}
+                  local strLst::List{String}
                   local hasNL::Bool
                 @match (inStringList, nchars, isstart, aind) begin
-                  ( nil, _, isstart, aind)  => begin
+                  ( nil(), _, isstart, aind)  => begin
                     (aind, isstart, aind)
                   end
-
+                  
                   ("" <| strLst, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = stringListFile(file, strLst, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (str <| strLst, nchars, true, aind)  => begin
                       File.writeSpace(file, nchars)
                       File.write(file, str)
@@ -1222,7 +1234,7 @@
                       (nchars, isstart, aind) = stringListFile(file, strLst, nchars, hasNL, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (str <| strLst, nchars, false, aind)  => begin
                       File.write(file, str)
                       hasNL = StringUtil.endsWithNewline(str)
@@ -1234,7 +1246,7 @@
                       (nchars, isstart, aind) = stringListFile(file, strLst, nchars, hasNL, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.stringListFile failed.\\n")
@@ -1253,7 +1265,7 @@
           (nchars, isstart, aind)
         end
 
-        function blockString(inBlockType::BlockType, inTokens::Tokens, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function blockString(inBlockType::BlockType, inTokens::Tokens, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
@@ -1274,11 +1286,11 @@
                   local blen::ModelicaInteger
                   local isstart::Bool
                 @match (inBlockType, inTokens, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  (BT_TEXT(), toks, nchars, isstart, aind)  => begin
+                  (BT_TEXT(__), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokensString(toks, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_INDENT(width = w), toks, nchars, true, aind)  => begin
                       (tsnchars, isstart) = tokensString(toks, w + nchars, true, w + aind)
                       nchars = if isstart
@@ -1288,7 +1300,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_INDENT(width = w), toks, nchars, false, aind)  => begin
                       Print.printBufSpace(w)
                       (tsnchars, isstart) = tokensString(toks, w + nchars, false, w + aind)
@@ -1299,7 +1311,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ABS_INDENT(width = w), toks, nchars, true, aind)  => begin
                       blen = Print.getBufLength()
                       (tsnchars, isstart) = tokensString(toks, 0, true, w)
@@ -1315,7 +1327,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ABS_INDENT(width = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensString(toks, nchars, false, w)
                       nchars = if isstart
@@ -1325,7 +1337,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_REL_INDENT(offset = w), toks, nchars, true, aind)  => begin
                       blen = Print.getBufLength()
                       (tsnchars, isstart) = tokensString(toks, nchars, true, aind + w)
@@ -1341,7 +1353,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_REL_INDENT(offset = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensString(toks, nchars, false, aind + w)
                       nchars = if isstart
@@ -1351,7 +1363,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ANCHOR(offset = w), toks, nchars, true, aind)  => begin
                       blen = Print.getBufLength()
                       (tsnchars, isstart) = tokensString(toks, nchars, true, nchars + w)
@@ -1367,7 +1379,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ANCHOR(offset = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensString(toks, nchars, false, nchars + w)
                       nchars = if isstart
@@ -1377,33 +1389,33 @@
                           end
                     (nchars, isstart, aind)
                   end
-
-                  (BT_ITER(),  nil, nchars, isstart, aind)  => begin
+                  
+                  (BT_ITER(__),  nil(), nchars, isstart, aind)  => begin
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = NONE(), alignNum = 0, wrapWidth = 0)), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokensString(toks, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = SOME(septok), alignNum = 0, wrapWidth = 0)), tok <| toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokString(tok, nchars, isstart, aind)
                       (nchars, isstart) = iterSeparatorString(toks, septok, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = SOME(septok), alignNum = anum, alignOfset = aoffset, alignSeparator = asep, wrapWidth = wwidth, wrapSeparator = wsep)), tok <| toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokString(tok, nchars, isstart, aind)
                       (nchars, isstart) = iterSeparatorAlignWrapString(toks, septok, 1 + aoffset, anum, asep, wwidth, wsep, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = NONE(), alignNum = anum, alignOfset = aoffset, alignSeparator = asep, wrapWidth = wwidth, wrapSeparator = wsep)), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart) = iterAlignWrapString(toks, aoffset, anum, asep, wwidth, wsep, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.tokString failed.\\n")
@@ -1448,7 +1460,7 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function iterSeparatorString(inTokens::Tokens, inSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterSeparatorString(inTokens::Tokens, inSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1460,10 +1472,10 @@
                   local aind::ModelicaInteger
                   local isstart::Bool
                 @match (inTokens, inSeparator, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  ( nil, _, pos, isstart, _)  => begin
+                  ( nil(), _, pos, isstart, _)  => begin
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, septok, pos, isstart, aind)  => begin
                       (pos, isstart, aind) = tokString(septok, pos, isstart, aind)
                       (pos, isstart, aind) = tokString(tok, pos, isstart, aind)
@@ -1475,7 +1487,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function iterSeparatorAlignWrapString(inTokens::Tokens, inSeparator::StringToken, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterSeparatorAlignWrapString(inTokens::Tokens, inSeparator::StringToken, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1492,7 +1504,7 @@
               local aind::ModelicaInteger = inAfterNewLineIndent
 
               while boolNot(listEmpty(toks))
-                @match tok <| toks = toks
+                @match _cons(tok, toks) = toks
                 if idx > 0 && intMod(idx, anum) == 0
                   (pos, isstart, aind) = tokString(asep, pos, isstart, aind)
                 else
@@ -1506,7 +1518,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function iterAlignWrapString(inTokens::Tokens, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterAlignWrapString(inTokens::Tokens, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1522,10 +1534,10 @@
                   local wwidth::ModelicaInteger
                   local isstart::Bool
                 @match (inTokens, inActualIndex, inAlignNum, inAlignSeparator, inWrapWidth, inWrapSeparator, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  ( nil, _, _, _, _, _, pos, isstart, _)  => begin
+                  ( nil(), _, _, _, _, _, pos, isstart, _)  => begin
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind) where (idx > 0 && intMod(idx, anum) == 0)  => begin
                       (pos, isstart, aind) = tokString(asep, pos, isstart, aind)
                       (pos, isstart, aind) = tryWrapString(wwidth, wsep, pos, isstart, aind)
@@ -1533,20 +1545,20 @@
                       (pos, isstart) = iterAlignWrapString(toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind) where (wwidth > 0 && pos >= wwidth)  => begin
                       (pos, isstart, aind) = tokString(wsep, pos, isstart, aind)
                       (pos, isstart, aind) = tokString(tok, pos, isstart, aind)
                       (pos, isstart) = iterAlignWrapString(toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind)  => begin
                       (pos, isstart, aind) = tokString(tok, pos, isstart, aind)
                       (pos, isstart) = iterAlignWrapString(toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.iterAlignWrapString failed.\\n")
@@ -1573,7 +1585,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function tryWrapString(inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function tryWrapString(inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
@@ -1590,7 +1602,7 @@
                   (wwidth, wsep, pos, isstart, aind) where (wwidth > 0 && pos >= wwidth)  => begin
                     tokString(wsep, pos, isstart, aind)
                   end
-
+                  
                   _  => begin
                       (inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent)
                   end
@@ -1601,7 +1613,7 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function blockFile(file::File.FILE, inBlockType::BlockType, inTokens::Tokens, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function blockFile(file::File.File, inBlockType::BlockType, inTokens::Tokens, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
@@ -1622,11 +1634,11 @@
                   local blen::ModelicaInteger
                   local isstart::Bool
                 @match (inBlockType, inTokens, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  (BT_TEXT(), toks, nchars, isstart, aind)  => begin
+                  (BT_TEXT(__), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokensFile(file, toks, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_INDENT(width = w), toks, nchars, true, aind)  => begin
                       (tsnchars, isstart) = tokensFile(file, toks, w + nchars, true, w + aind)
                       nchars = if isstart
@@ -1636,7 +1648,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_INDENT(width = w), toks, nchars, false, aind)  => begin
                       File.writeSpace(file, w)
                       (tsnchars, isstart) = tokensFile(file, toks, w + nchars, false, w + aind)
@@ -1647,7 +1659,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ABS_INDENT(width = w), toks, nchars, true, aind)  => begin
                       blen = File.tell(file)
                       (tsnchars, isstart) = tokensFile(file, toks, 0, true, w)
@@ -1663,7 +1675,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ABS_INDENT(width = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensFile(file, toks, nchars, false, w)
                       nchars = if isstart
@@ -1673,7 +1685,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_REL_INDENT(offset = w), toks, nchars, true, aind)  => begin
                       blen = File.tell(file)
                       (tsnchars, isstart) = tokensFile(file, toks, nchars, true, aind + w)
@@ -1689,7 +1701,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_REL_INDENT(offset = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensFile(file, toks, nchars, false, aind + w)
                       nchars = if isstart
@@ -1699,7 +1711,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ANCHOR(offset = w), toks, nchars, true, aind)  => begin
                       blen = File.tell(file)
                       (tsnchars, isstart) = tokensFile(file, toks, nchars, true, nchars + w)
@@ -1715,7 +1727,7 @@
                           end
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ANCHOR(offset = w), toks, nchars, false, aind)  => begin
                       (tsnchars, isstart) = tokensFile(file, toks, nchars, false, nchars + w)
                       nchars = if isstart
@@ -1725,33 +1737,33 @@
                           end
                     (nchars, isstart, aind)
                   end
-
-                  (BT_ITER(),  nil, nchars, isstart, aind)  => begin
+                  
+                  (BT_ITER(__),  nil(), nchars, isstart, aind)  => begin
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = NONE(), alignNum = 0, wrapWidth = 0)), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokensFile(file, toks, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = SOME(septok), alignNum = 0, wrapWidth = 0)), tok <| toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokFile(file, tok, nchars, isstart, aind)
                       (nchars, isstart) = iterSeparatorFile(file, toks, septok, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = SOME(septok), alignNum = anum, alignOfset = aoffset, alignSeparator = asep, wrapWidth = wwidth, wrapSeparator = wsep)), tok <| toks, nchars, isstart, aind)  => begin
                       (nchars, isstart, aind) = tokFile(file, tok, nchars, isstart, aind)
                       (nchars, isstart) = iterSeparatorAlignWrapFile(file, toks, septok, 1 + aoffset, anum, asep, wwidth, wsep, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   (BT_ITER(options = ITER_OPTIONS(separator = NONE(), alignNum = anum, alignOfset = aoffset, alignSeparator = asep, wrapWidth = wwidth, wrapSeparator = wsep)), toks, nchars, isstart, aind)  => begin
                       (nchars, isstart) = iterAlignWrapFile(file, toks, aoffset, anum, asep, wwidth, wsep, nchars, isstart, aind)
                     (nchars, isstart, aind)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.tokString failed.\\n")
@@ -1796,7 +1808,7 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function iterSeparatorFile(file::File.FILE, inTokens::Tokens, inSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterSeparatorFile(file::File.File, inTokens::Tokens, inSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1808,10 +1820,10 @@
                   local aind::ModelicaInteger
                   local isstart::Bool
                 @match (inTokens, inSeparator, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  ( nil, _, pos, isstart, _)  => begin
+                  ( nil(), _, pos, isstart, _)  => begin
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, septok, pos, isstart, aind)  => begin
                       (pos, isstart, aind) = tokFile(file, septok, pos, isstart, aind)
                       (pos, isstart, aind) = tokFile(file, tok, pos, isstart, aind)
@@ -1823,7 +1835,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function iterSeparatorAlignWrapFile(file::File.FILE, inTokens::Tokens, inSeparator::StringToken, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterSeparatorAlignWrapFile(file::File.File, inTokens::Tokens, inSeparator::StringToken, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1840,7 +1852,7 @@
               local aind::ModelicaInteger = inAfterNewLineIndent
 
               while boolNot(listEmpty(toks))
-                @match tok <| toks = toks
+                @match _cons(tok, toks) = toks
                 if idx > 0 && intMod(idx, anum) == 0
                   (pos, isstart, aind) = tokFile(file, asep, pos, isstart, aind)
                 else
@@ -1854,7 +1866,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function iterAlignWrapFile(file::File.FILE, inTokens::Tokens, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool}
+        function iterAlignWrapFile(file::File.File, inTokens::Tokens, inActualIndex::ModelicaInteger, inAlignNum::ModelicaInteger, inAlignSeparator::StringToken, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool} 
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
 
@@ -1870,10 +1882,10 @@
                   local wwidth::ModelicaInteger
                   local isstart::Bool
                 @match (inTokens, inActualIndex, inAlignNum, inAlignSeparator, inWrapWidth, inWrapSeparator, inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent) begin
-                  ( nil, _, _, _, _, _, pos, isstart, _)  => begin
+                  ( nil(), _, _, _, _, _, pos, isstart, _)  => begin
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind) where (idx > 0 && intMod(idx, anum) == 0)  => begin
                       (pos, isstart, aind) = tokFile(file, asep, pos, isstart, aind)
                       (pos, isstart, aind) = tryWrapFile(file, wwidth, wsep, pos, isstart, aind)
@@ -1881,20 +1893,20 @@
                       (pos, isstart) = iterAlignWrapFile(file, toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind) where (wwidth > 0 && pos >= wwidth)  => begin
                       (pos, isstart, aind) = tokFile(file, wsep, pos, isstart, aind)
                       (pos, isstart, aind) = tokFile(file, tok, pos, isstart, aind)
                       (pos, isstart) = iterAlignWrapFile(file, toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   (tok <| toks, idx, anum, asep, wwidth, wsep, pos, isstart, aind)  => begin
                       (pos, isstart, aind) = tokFile(file, tok, pos, isstart, aind)
                       (pos, isstart) = iterAlignWrapFile(file, toks, idx + 1, anum, asep, wwidth, wsep, pos, isstart, aind)
                     (pos, isstart)
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.iterAlignWrapString failed.\\n")
@@ -1921,7 +1933,7 @@
           (outActualPositionOnLine, outAtStartOfLine)
         end
 
-        function tryWrapFile(file::File.FILE, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger)::Tuple{ModelicaInteger, Bool, ModelicaInteger}
+        function tryWrapFile(file::File.File, inWrapWidth::ModelicaInteger, inWrapSeparator::StringToken, inActualPositionOnLine::ModelicaInteger, inAtStartOfLine::Bool, inAfterNewLineIndent::ModelicaInteger) ::Tuple{ModelicaInteger, Bool, ModelicaInteger} 
               local outAfterNewLineIndent::ModelicaInteger
               local outAtStartOfLine::Bool
               local outActualPositionOnLine::ModelicaInteger
@@ -1938,7 +1950,7 @@
                   (wwidth, wsep, pos, isstart, aind) where (wwidth > 0 && pos >= wwidth)  => begin
                     tokFile(file, wsep, pos, isstart, aind)
                   end
-
+                  
                   _  => begin
                       (inActualPositionOnLine, inAtStartOfLine, inAfterNewLineIndent)
                   end
@@ -1949,28 +1961,28 @@
           (outActualPositionOnLine, outAtStartOfLine, outAfterNewLineIndent)
         end
 
-        function strTokText(inStringToken::StringToken)::Text
+        function strTokText(inStringToken::StringToken) ::Text 
               local outText::Text
 
-              outText = MEM_TEXT(list(inStringToken), list())
+              outText = MEM_TEXT(list(inStringToken), nil)
           outText
         end
 
-        function textStrTok(inText::Text)::StringToken
+        function textStrTok(inText::Text) ::StringToken 
               local outStringToken::StringToken
 
               outStringToken = begin
                   local toks::Tokens
                   local txttoks::Tokens
                 @match inText begin
-                  MEM_TEXT(tokens =  nil)  => begin
+                  MEM_TEXT(tokens =  nil())  => begin
                     ST_STRING("")
                   end
-
-                  MEM_TEXT(tokens = txttoks, blocksStack =  nil)  => begin
+                  
+                  MEM_TEXT(tokens = txttoks, blocksStack =  nil())  => begin
                     ST_BLOCK(txttoks, BT_TEXT())
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.textStrTok failed - incomplete text was passed to be converted.\\n")
@@ -1985,27 +1997,27 @@
           outStringToken
         end
 
-        function stringText(inString::String)::Text
+        function stringText(inString::String) ::Text 
               local outText::Text
 
-              outText = MEM_TEXT(list(ST_STRING(inString)), list())
+              outText = MEM_TEXT(list(ST_STRING(inString)), nil)
           outText
         end
 
-        function strTokString(inStringToken::StringToken)::String
+        function strTokString(inStringToken::StringToken) ::String 
               local outString::String
 
-              outString = textString(MEM_TEXT(list(inStringToken), list()))
+              outString = textString(MEM_TEXT(list(inStringToken), nil))
           outString
         end
 
-        function failIfTrue(istrue::Bool)
+        function failIfTrue(istrue::Bool)  
               if istrue
                 fail()
               end
         end
 
-        function tplCallHandleErrors(inFun::Tpl_Fun, txt::Text = emptyTxt)::Text
+        function tplCallHandleErrors(inFun::Tpl_Fun, txt::Text = emptyTxt) ::Text 
 
 
               local nErr::ModelicaInteger
@@ -2029,14 +2041,14 @@
           txt
         end
 
-        function tplCallWithFailErrorNoArg(inFun::Tpl_Fun, txt::Text = emptyTxt)::Text
+        function tplCallWithFailErrorNoArg(inFun::Tpl_Fun, txt::Text = emptyTxt) ::Text 
 
 
               txt = tplCallHandleErrors(inFun, txt)
           txt
         end
 
-        function tplCallWithFailError(inFun::Tpl_Fun, inArg::ArgType1, txt::Text = emptyTxt)::Text
+        function tplCallWithFailError(inFun::Tpl_Fun, inArg::ArgType1, txt::Text = emptyTxt) ::Text 
 
 
               local arg::ArgType1
@@ -2045,7 +2057,7 @@
           txt
         end
 
-        function tplCallWithFailError2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, txt::Text = emptyTxt)::Text
+        function tplCallWithFailError2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, txt::Text = emptyTxt) ::Text 
 
 
               local argA::ArgType1
@@ -2055,14 +2067,14 @@
           txt
         end
 
-        function tplCallWithFailError3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3, txt::Text = emptyTxt)::Text
+        function tplCallWithFailError3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3, txt::Text = emptyTxt) ::Text 
 
 
               txt = tplCallHandleErrors((inArgA, inArgB, inArgC) -> inFun(inArgA = inArgA, inArgB = inArgB, inArgC = inArgC), txt)
           txt
         end
 
-        function tplString(inFun::Tpl_Fun, inArg::ArgType1)::String
+        function tplString(inFun::Tpl_Fun, inArg::ArgType1) ::String 
               local outString::String
 
               local txt::Text
@@ -2075,7 +2087,7 @@
           outString
         end
 
-        function tplString2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2)::String
+        function tplString2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2) ::String 
               local outString::String
 
               local txt::Text
@@ -2088,7 +2100,7 @@
           outString
         end
 
-        function tplString3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3)::String
+        function tplString3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3) ::String 
               local outString::String
 
               local txt::Text
@@ -2101,7 +2113,7 @@
           outString
         end
 
-        function tplPrint(inFun::Tpl_Fun, inArg::ArgType1)
+        function tplPrint(inFun::Tpl_Fun, inArg::ArgType1)  
               local txt::Text
               local nErr::ModelicaInteger
 
@@ -2111,7 +2123,7 @@
               textStringBuf(txt)
         end
 
-        function tplPrint2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2)
+        function tplPrint2(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2)  
               local txt::Text
               local nErr::ModelicaInteger
 
@@ -2121,7 +2133,7 @@
               textStringBuf(txt)
         end
 
-        function tplPrint3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3)
+        function tplPrint3(inFun::Tpl_Fun, inArgA::ArgType1, inArgB::ArgType2, inArgC::ArgType3)  
               local txt::Text
               local nErr::ModelicaInteger
 
@@ -2131,7 +2143,7 @@
               textStringBuf(txt)
         end
 
-        function tplNoret3(inFun::Tpl_Fun, inArg::ArgType1, inArg2::ArgType2, inArg3::ArgType3)
+        function tplNoret3(inFun::Tpl_Fun, inArg::ArgType1, inArg2::ArgType2, inArg3::ArgType3)  
               local nErr::ModelicaInteger
 
               nErr = Error.getNumErrorMessages()
@@ -2139,7 +2151,7 @@
               failIfTrue(Error.getNumErrorMessages() > nErr)
         end
 
-        function tplNoret2(inFun::Tpl_Fun, inArg::ArgType1, inArg2::ArgType2)
+        function tplNoret2(inFun::Tpl_Fun, inArg::ArgType1, inArg2::ArgType2)  
               local nErr::ModelicaInteger
 
               nErr = Error.getNumErrorMessages()
@@ -2147,7 +2159,7 @@
               failIfTrue(Error.getNumErrorMessages() > nErr)
         end
 
-        function tplNoret(inFun::Tpl_Fun, inArg::ArgType1)
+        function tplNoret(inFun::Tpl_Fun, inArg::ArgType1)  
               local nErr::ModelicaInteger
 
               nErr = Error.getNumErrorMessages()
@@ -2157,7 +2169,7 @@
 
          #= function: textFile:
         This function renders a (memory-)text to a file. =#
-        function textFile(inText::Text, inFileName::String)
+        function textFile(inText::Text, inFileName::String)  
               _ = begin
                   local txt::Text
                   local file::String
@@ -2179,7 +2191,7 @@
                       end
                     ()
                   end
-
+                  
                   _  => begin
                         if Flags.isSet(Flags.FAILTRACE)
                           Debug.trace("-!!!Tpl.textFile failed - a system error ?\\n")
@@ -2191,7 +2203,7 @@
         end
 
          #= This function renders a (memory-)text to a file. If we generate modelicaLine directives, translate them to C preprocessor. =#
-        function textFileConvertLines(inText::Text, inFileName::String)
+        function textFileConvertLines(inText::Text, inFileName::String)  
               _ = begin
                   local txt::Text
                   local file::String
@@ -2218,7 +2230,7 @@
                       end
                     ()
                   end
-
+                  
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-!!!Tpl.textFile failed - a system error ?\\n")
@@ -2231,7 +2243,7 @@
         end
 
          #= Magic sourceInfo() function implementation =#
-        function sourceInfo(inFileName::String, inLineNum::ModelicaInteger, inColumnNum::ModelicaInteger)::SourceInfo
+        function sourceInfo(inFileName::String, inLineNum::ModelicaInteger, inColumnNum::ModelicaInteger) ::SourceInfo 
               local outSourceInfo::SourceInfo
 
               outSourceInfo = SOURCEINFO(inFileName, false, inLineNum, inColumnNum, inLineNum, inColumnNum, 0.0)
@@ -2244,7 +2256,7 @@
          =#
 
          #= Wraps call to Error.addSourceMessage() funtion with Error.TEMPLATE_ERROR and one MessageToken. =#
-        function addSourceTemplateError(inErrMsg::String, inInfo::SourceInfo)
+        function addSourceTemplateError(inErrMsg::String, inInfo::SourceInfo)  
               Error.addSourceMessage(Error.TEMPLATE_ERROR, list(inErrMsg), inInfo)
         end
 
@@ -2252,57 +2264,56 @@
          =#
 
          #= Wraps call to Error.addMessage() funtion with Error.TEMPLATE_ERROR and one MessageToken. =#
-        T = Any
-        function addTemplateErrorFunc(func::T)
+        function addTemplateErrorFunc(func::T)  where {T}
               Error.addMessage(Error.TEMPLATE_ERROR_FUNC, list(System.dladdr(func)))
         end
 
          #= Wraps call to Error.addMessage() funtion with Error.TEMPLATE_ERROR and one MessageToken. =#
-        function addTemplateError(msg::String)
+        function addTemplateError(msg::String)  
               Error.addMessage(Error.TEMPLATE_ERROR, list(msg))
         end
 
          #= Magic sourceInfo() function implementation =#
-        function redirectToFile(text::Text, fileName::String)::Text
+        function redirectToFile(text::Text, fileName::String) ::Text 
 
 
-              local file::File.FILE = File.FILE()
+              local file::File.File = File.File()
 
               if Config.getRunningTestsuite()
                 System.appendFile(Config.getRunningTestsuiteFile(), fileName + "\\n")
               end
               File.open(file, fileName, File.Mode.Write)
-              text = writeText(FILE_TEXT(File.getReference(file), arrayCreate(1, 0), arrayCreate(1, 0), arrayCreate(1, true), arrayCreate(1, list())), text)
+              text = writeText(FILE_TEXT(File.getReference(file), arrayCreate(1, 0), arrayCreate(1, 0), arrayCreate(1, true), arrayCreate(1, nil)), text)
           text
         end
 
          #= Magic sourceInfo() function implementation =#
-        function closeFile(text::Text)::Text
+        function closeFile(text::Text) ::Text 
 
 
-              local file::File.FILE = File.FILE(getTextOpaqueFile(text))
+              local file::File.File = File.File(getTextOpaqueFile(text))
 
               File.releaseReference(file)
               text = emptyTxt
           text
         end
 
-        function booleanString(b::Bool)::String
+        function booleanString(b::Bool) ::String 
               local s::String
 
               s = String(b)
           s
         end
 
-        function getTextOpaqueFile(text::Text)::Option{<:ModelicaInteger}
-              local opaqueFile::Option{<:ModelicaInteger}
+        function getTextOpaqueFile(text::Text) ::Option{ModelicaInteger} 
+              local opaqueFile::Option{ModelicaInteger}
 
               opaqueFile = begin
                 @match text begin
-                  FILE_TEXT()  => begin
+                  FILE_TEXT(__)  => begin
                     text.opaqueFile
                   end
-
+                  
                   _  => begin
                         Error.addInternalError("tokFile got non-file text input", sourceInfo())
                       fail()
@@ -2313,15 +2324,15 @@
         end
 
          #= Like ST_STRING or ST_LINE =#
-        function stringFile(inText::Text, str::String, line::Bool, recurseSeparator::Bool = true)
-              local file::File.FILE = File.FILE(getTextOpaqueFile(inText))
+        function stringFile(inText::Text, str::String, line::Bool, recurseSeparator::Bool = true)  
+              local file::File.File = File.File(getTextOpaqueFile(inText))
               local nchars::ModelicaInteger
               local iopts::IterOptions
               local septok::StringToken
 
               _ = begin
                 @match inText begin
-                  FILE_TEXT()  => begin
+                  FILE_TEXT(__)  => begin
                       handleTok(inText)
                       nchars = arrayGet(inText.nchars, 1)
                       if ! line
@@ -2350,13 +2361,13 @@
         end
 
          #= Like ST_NEWLINE =#
-        function newlineFile(inText::Text)
-              local file::File.FILE = File.FILE(getTextOpaqueFile(inText))
+        function newlineFile(inText::Text)  
+              local file::File.File = File.File(getTextOpaqueFile(inText))
               local nchars::ModelicaInteger
 
               _ = begin
                 @match inText begin
-                  FILE_TEXT()  => begin
+                  FILE_TEXT(__)  => begin
                       File.write(file, "\\n")
                       arrayUpdate(inText.nchars, 1, arrayGet(inText.aind, 1))
                       arrayUpdate(inText.isstart, 1, true)
@@ -2366,26 +2377,26 @@
               end
         end
 
-        function textFileTell(inText::Text)::ModelicaInteger
+        function textFileTell(inText::Text) ::ModelicaInteger 
               local tell::ModelicaInteger
 
-              local file::File.FILE = File.FILE(getTextOpaqueFile(inText))
+              local file::File.File = File.File(getTextOpaqueFile(inText))
 
               tell = File.tell(file)
           tell
         end
 
          #= Handle a new token, for example separators =#
-        function handleTok(txt::Text)
+        function handleTok(txt::Text)  
               local septok::StringToken
-              local aseptok::Array{<:Option{<:StringToken}}
+              local aseptok::Array{Option{StringToken}}
 
               _ = begin
                 @match txt begin
-                  FILE_TEXT()  => begin
+                  FILE_TEXT(__)  => begin
                       _ = begin
                         @match arrayGet(txt.blocksStack, 1) begin
-                          BT_FILE_TEXT(bt = BT_ITER(), septok = aseptok) <| _  => begin
+                          BT_FILE_TEXT(bt = BT_ITER(__), septok = aseptok) <| _  => begin
                               _ = begin
                                 @match arrayGet(aseptok, 1) begin
                                   SOME(septok)  => begin
@@ -2393,7 +2404,7 @@
                                       tokFileText(txt, septok, doHandleTok = false)
                                     ()
                                   end
-
+                                  
                                   _  => begin
                                       ()
                                   end
@@ -2401,7 +2412,7 @@
                               end
                             ()
                           end
-
+                          
                           _  => begin
                               ()
                           end
@@ -2413,17 +2424,192 @@
               end
         end
 
-        function debugSusan()::Bool
+        function debugSusan() ::Bool 
               local b::Bool
 
               b = Flags.isSet(Flags.SUSAN_MATCHCONTINUE_DEBUG)
           b
         end
 
-        function fakeStackOverflow()
+        function fakeStackOverflow()  
               Error.addInternalError("Stack overflow:\\n" + StackOverflow.generateReadableMessage(), sourceInfo())
               StackOverflow.triggerStackOverflow()
         end
+
+    #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+    @exportAll()
+  end
+  
+  module Connect 
+
+
+    using MetaModelica
+    #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+    using ExportAll
+    #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+
+    @UniontypeDecl Face 
+    @UniontypeDecl ConnectorType 
+    @UniontypeDecl ConnectorElement 
+    @UniontypeDecl SetTrieNode 
+    @UniontypeDecl OuterConnect 
+    @UniontypeDecl Sets 
+    @UniontypeDecl Set 
+
+         #= /*
+         * This file is part of OpenModelica.
+         *
+         * Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
+         * c/o Linköpings universitet, Department of Computer and Information Science,
+         * SE-58183 Linköping, Sweden.
+         *
+         * All rights reserved.
+         *
+         * THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
+         * THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+         * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
+         * RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+         * ACCORDING TO RECIPIENTS CHOICE.
+         *
+         * The OpenModelica software and the Open Source Modelica
+         * Consortium (OSMC) Public License (OSMC-PL) are obtained
+         * from OSMC, either from the above address,
+         * from the URLs: http:www.ida.liu.se/projects/OpenModelica or
+         * http:www.openmodelica.org, and in the OpenModelica distribution.
+         * GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+         *
+         * This program is distributed WITHOUT ANY WARRANTY; without
+         * even the implied warranty of  MERCHANTABILITY or FITNESS
+         * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
+         * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
+         *
+         * See the full OSMC Public License conditions for more details.
+         *
+         */ =#
+
+        import DAE
+
+        import Prefix
+
+        import Absyn
+
+         const NEW_SET = -1 #= The index used for new sets which have not
+           yet been assigned a set index. =#::ModelicaInteger
+
+          #= This type indicates whether a connector is an inside or an outside connector.
+            Note: this is not the same as inner and outer references.
+            A connector is inside if it connects from the outside into a component and it
+            is outside if it connects out from the component.  This is important when
+            generating equations for flow variables, where outside connectors are
+            multiplied with -1 (since flow is always into a component). =#
+         @Uniontype Face begin
+              @Record INSIDE begin
+
+              end
+
+              @Record OUTSIDE begin
+
+              end
+
+              @Record NO_FACE begin
+
+              end
+         end
+
+          #= The type of a connector element. =#
+         @Uniontype ConnectorType begin
+              @Record EQU begin
+
+              end
+
+              @Record FLOW begin
+
+              end
+
+              @Record STREAM begin
+
+                       associatedFlow::Option{DAE.ComponentRef}
+              end
+
+              @Record NO_TYPE begin
+
+              end
+         end
+
+         @Uniontype ConnectorElement begin
+              @Record CONNECTOR_ELEMENT begin
+
+                       name::DAE.ComponentRef
+                       face::Face
+                       ty::ConnectorType
+                       source::DAE.ElementSource
+                       set #= Which set this element belongs to. =#::ModelicaInteger
+              end
+         end
+
+         @Uniontype SetTrieNode begin
+              @Record SET_TRIE_NODE begin
+
+                       name::String
+                       cref::DAE.ComponentRef
+                       nodes::List{SetTrieNode}
+                       connectCount::ModelicaInteger
+              end
+
+              @Record SET_TRIE_LEAF begin
+
+                       name::String
+                       insideElement #= The inside element. =#::Option{ConnectorElement}
+                       outsideElement #= The outside element. =#::Option{ConnectorElement}
+                       flowAssociation #= The name of the associated flow
+                             variable, if the leaf represents a stream variable. =#::Option{DAE.ComponentRef}
+                       connectCount #= How many times this connector has been connected. =#::ModelicaInteger
+              end
+         end
+
+        SetTrie = SetTrieNode  #= A trie, a.k.a. prefix tree, that maps crefs to sets. =#
+
+        SetConnection = Tuple  #= A connection between two sets. =#
+
+         @Uniontype OuterConnect begin
+              @Record OUTERCONNECT begin
+
+                       scope #= the scope where this connect was created =#::Prefix.Prefix
+                       cr1 #= the lhs component reference =#::DAE.ComponentRef
+                       io1 #= inner/outer attribute for cr1 component =#::Absyn.InnerOuter
+                       f1 #= the face of the lhs component =#::Face
+                       cr2 #= the rhs component reference =#::DAE.ComponentRef
+                       io2 #= inner/outer attribute for cr2 component =#::Absyn.InnerOuter
+                       f2 #= the face of the rhs component =#::Face
+                       source #= the element origin =#::DAE.ElementSource
+              end
+         end
+
+         @Uniontype Sets begin
+              @Record SETS begin
+
+                       sets::SetTrie
+                       setCount #= How many sets the trie contains. =#::ModelicaInteger
+                       connections::List{SetConnection}
+                       outerConnects #= Connect statements to propagate upwards. =#::List{OuterConnect}
+              end
+         end
+
+          #= A set of connection elements. =#
+         @Uniontype Set begin
+              @Record SET begin
+
+                       ty::ConnectorType
+                       elements::List{ConnectorElement}
+              end
+
+              @Record SET_POINTER begin
+
+                       index::ModelicaInteger
+              end
+         end
+
+         const emptySet = SETS(SET_TRIE_NODE("", DAE.WILD(), nil, 0), 0, nil, nil)::Sets
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

@@ -90,7 +90,7 @@
 
         import IOStreamExt
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         function create(streamName::String, streamType::IOStreamType) ::IOStream 
               local outStream::IOStream

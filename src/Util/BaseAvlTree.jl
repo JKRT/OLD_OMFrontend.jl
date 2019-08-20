@@ -1,4 +1,4 @@
-  #=TODO: Originally partial =# module BaseAvlTree 
+module BaseAvlTree
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Tree 
+    @UniontypeDecl Tree
     valueStr = Function
     ConflictFunc = Function
 
@@ -53,8 +53,8 @@
          *
          */ =#
         import BaseAvlSet
-        extends BaseAvlSet
-        Value = ModelicaInteger 
+        using BaseAvlSet
+        const Value = ModelicaInteger
          #=  TODO: We should have an Any type
          =#
 
@@ -82,7 +82,7 @@
 
 
 
-        function printNodeStr(inNode::Tree) ::String 
+        function printNodeStr(inNode::Tree) ::String
               local outString::String
 
               outString = begin
@@ -90,7 +90,7 @@
                   NODE(__)  => begin
                     "(" + keyStr(inNode.key) + ", " + valueStr(inNode.value) + ")"
                   end
-                  
+
                   LEAF(__)  => begin
                     "(" + keyStr(inNode.key) + ", " + valueStr(inNode.value) + ")"
                   end
@@ -100,32 +100,29 @@
         end
 
 
-
-           #= Default conflict resolving function for add. =#
-          @ExtendedFunction addConflictDefault addConflictFail()
-
          #= Conflict resolving function for add which fails on conflict. =#
-        function addConflictFail(newValue::Value, oldValue::Value, key::Key) ::Value 
-              local value::Value
-
-              fail()
-          value
+        function addConflictFail(newValue::Value, oldValue::Value, key::Key) ::Value
+          fail()
         end
 
+
+        #= Default conflict resolving function for add. =#
+        addConflictDefault = addConflictFail
+
          #= Conflict resolving function for add which replaces the old value with the new. =#
-        function addConflictReplace(newValue::Value, oldValue::Value, key::Key) ::Value 
+        function addConflictReplace(newValue::Value, oldValue::Value, key::Key) ::Value
               local value::Value = newValue
           value
         end
 
          #= Conflict resolving function for add which keeps the old value. =#
-        function addConflictKeep(newValue::Value, oldValue::Value, key::Key) ::Value 
+        function addConflictKeep(newValue::Value, oldValue::Value, key::Key) ::Value
               local value::Value = oldValue
           value
         end
 
          #= Inserts a new node in the tree. =#
-        function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree 
+        function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
               local tree::Tree = inTree
 
               tree = begin
@@ -139,7 +136,7 @@
                   EMPTY(__)  => begin
                     LEAF(inKey, inValue)
                   end
-                  
+
                   NODE(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
@@ -164,7 +161,7 @@
                           balance(tree)
                         end
                   end
-                  
+
                   LEAF(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
@@ -196,7 +193,7 @@
         end
 
          #= Adds a list of key-value pairs to the tree. =#
-        function addList(tree::Tree, inValues::List{<:Tuple{<:Key, Value}}, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree 
+        function addList(tree::Tree, inValues::List{<:Tuple{<:Key, Value}}, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
 
 
               local key::Key
@@ -210,14 +207,14 @@
         end
 
          #= Alias for add that replaces the node in case of conflict. =#
-        function update(tree::Tree, key::Key, value::Value) ::Tree 
+        function update(tree::Tree, key::Key, value::Value) ::Tree
               local outTree::Tree = add(tree, key, value, addConflictReplace)
           outTree
         end
 
          #= Fetches a value from the tree given a key, or fails if no value is associated
            with the key. =#
-        function get(tree::Tree, key::Key) ::Value 
+        function get(tree::Tree, key::Key) ::Value
               local value::Value
 
               local k::Key
@@ -227,7 +224,7 @@
                   NODE(__)  => begin
                     tree.key
                   end
-                  
+
                   LEAF(__)  => begin
                     tree.key
                   end
@@ -238,16 +235,16 @@
                   (0, LEAF(__))  => begin
                     tree.value
                   end
-                  
+
                   (0, NODE(__))  => begin
                     tree.value
                   end
-                  
+
                   (1, NODE(__))  => begin
                     get(tree.right, key)
                   end
-                  
-                  (#= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#, NODE(__))  => begin
+
+                  (-1, NODE(__))  => begin
                     get(tree.left, key)
                   end
                 end
@@ -257,7 +254,7 @@
 
          #= Fetches a value from the tree given a key, or returns NONE if no value is
            associated with the key. =#
-        function getOpt(tree::Tree, key::Key) ::Option{Value} 
+        function getOpt(tree::Tree, key::Key) ::Option{Value}
               local value::Option{Value}
 
               local k::Key
@@ -267,11 +264,11 @@
                   NODE(__)  => begin
                     tree.key
                   end
-                  
+
                   LEAF(__)  => begin
                     tree.key
                   end
-                  
+
                   _  => begin
                       key
                   end
@@ -282,19 +279,19 @@
                   (0, LEAF(__))  => begin
                     SOME(tree.value)
                   end
-                  
+
                   (0, NODE(__))  => begin
                     SOME(tree.value)
                   end
-                  
+
                   (1, NODE(__))  => begin
                     getOpt(tree.right, key)
                   end
-                  
-                  (#= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#, NODE(__))  => begin
+
+                  (-1, NODE(__))  => begin
                     getOpt(tree.left, key)
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -304,7 +301,7 @@
         end
 
          #= Creates a new tree from a list of key-value pairs. =#
-        function fromList(inValues::List{<:Tuple{<:Key, Value}}, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree 
+        function fromList(inValues::List{<:Tuple{<:Key, Value}}, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
               local tree::Tree = EMPTY()
 
               local key::Key
@@ -318,7 +315,7 @@
         end
 
          #= Converts the tree to a flat list of key-value tuples. =#
-        function toList(inTree::Tree, lst::List{<:Tuple{<:Key, Value}} = nil) ::List{Tuple{Key, Value}} 
+        function toList(inTree::Tree, lst::List{<:Tuple{<:Key, Value}} = nil) ::List{Tuple{Key, Value}}
 
 
               lst = begin
@@ -331,11 +328,11 @@
                       lst = toList(inTree.left, lst)
                     lst
                   end
-                  
+
                   LEAF(key = key, value = value)  => begin
                     _cons((key, value), lst)
                   end
-                  
+
                   _  => begin
                       lst
                   end
@@ -345,7 +342,7 @@
         end
 
          #= Constructs a list of all the values in the tree. =#
-        function listValues(tree::Tree, lst::List{<:Value} = nil) ::List{Value} 
+        function listValues(tree::Tree, lst::List{<:Value} = nil) ::List{Value}
 
 
               lst = begin
@@ -357,11 +354,11 @@
                       lst = listValues(tree.left, lst)
                     lst
                   end
-                  
+
                   LEAF(value = value)  => begin
                     _cons(value, lst)
                   end
-                  
+
                   _  => begin
                       lst
                   end
@@ -371,7 +368,7 @@
         end
 
          #= Joins two trees by adding the second one to the first. =#
-        function join(tree::Tree, treeToJoin::Tree, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree 
+        function join(tree::Tree, treeToJoin::Tree, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
 
 
               tree = begin
@@ -379,14 +376,14 @@
                   EMPTY(__)  => begin
                     tree
                   end
-                  
+
                   NODE(__)  => begin
                       tree = add(tree, treeToJoin.key, treeToJoin.value, conflictFunc)
                       tree = join(tree, treeToJoin.left, conflictFunc)
                       tree = join(tree, treeToJoin.right, conflictFunc)
                     tree
                   end
-                  
+
                   LEAF(__)  => begin
                     add(tree, treeToJoin.key, treeToJoin.value, conflictFunc)
                   end
@@ -397,7 +394,7 @@
 
          #= Traverses the tree in depth-first pre-order and applies the given function to
            each node, but without constructing a new tree like with map. =#
-        function forEach(tree::Tree, func::EachFunc)  
+        function forEach(tree::Tree, func::EachFunc)
               _ = begin
                 @match tree begin
                   NODE(__)  => begin
@@ -406,12 +403,12 @@
                       forEach(tree.right, func)
                     ()
                   end
-                  
+
                   LEAF(__)  => begin
                       func(tree.key, tree.value)
                     ()
                   end
-                  
+
                   EMPTY(__)  => begin
                     ()
                   end
@@ -419,13 +416,13 @@
               end
         end
 
-        function intersection()  
+        function intersection()
               fail()
         end
 
          #= Traverses the tree in depth-first pre-order and applies the given function to
            each node, constructing a new tree with the resulting nodes. =#
-        function map(inTree::Tree, inFunc::MapFunc) ::Tree 
+        function map(inTree::Tree, inFunc::MapFunc) ::Tree
               local outTree::Tree = inTree
 
               outTree = begin
@@ -450,7 +447,7 @@
                       end
                     outTree
                   end
-                  
+
                   LEAF(key = key, value = value)  => begin
                       new_value = inFunc(key, value)
                       if ! referenceEq(value, new_value)
@@ -458,7 +455,7 @@
                       end
                     outTree
                   end
-                  
+
                   _  => begin
                       inTree
                   end
@@ -482,12 +479,12 @@
                       outResult = fold(inTree.right, inFunc, outResult)
                     outResult
                   end
-                  
+
                   LEAF(key = key, value = value)  => begin
                       outResult = inFunc(key, value, outResult)
                     outResult
                   end
-                  
+
                   _  => begin
                       outResult
                   end
@@ -509,12 +506,12 @@
                       (foldArg1, foldArg2) = fold_2(tree.right, foldFunc, foldArg1, foldArg2)
                     ()
                   end
-                  
+
                   LEAF(__)  => begin
                       (foldArg1, foldArg2) = foldFunc(tree.key, tree.value, foldArg1, foldArg2)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -539,12 +536,12 @@
                       end
                     value
                   end
-                  
+
                   LEAF(__)  => begin
                       (value, c) = foldFunc(tree.key, tree.value, value)
                     value
                   end
-                  
+
                   _  => begin
                       value
                   end
@@ -582,7 +579,7 @@
                       end
                     outTree
                   end
-                  
+
                   LEAF(key = key, value = value)  => begin
                       (new_value, outResult) = inFunc(key, value, outResult)
                       if ! referenceEq(value, new_value)
@@ -590,7 +587,7 @@
                       end
                     outTree
                   end
-                  
+
                   _  => begin
                       inTree
                   end
@@ -599,7 +596,7 @@
           (outTree, outResult)
         end
 
-        function setTreeLeftRight(orig::Tree, left::Tree = EMPTY(), right::Tree = EMPTY()) ::Tree 
+        function setTreeLeftRight(orig::Tree, left::Tree = EMPTY(), right::Tree = EMPTY()) ::Tree
               local res::Tree
 
               res = begin
@@ -607,11 +604,11 @@
                   (NODE(__), EMPTY(__), EMPTY(__))  => begin
                     LEAF(orig.key, orig.value)
                   end
-                  
+
                   (LEAF(__), EMPTY(__), EMPTY(__))  => begin
                     orig
                   end
-                  
+
                   (NODE(__), _, _)  => begin
                     if referenceEqOrEmpty(orig.left, left) && referenceEqOrEmpty(orig.right, right)
                           orig
@@ -619,7 +616,7 @@
                           NODE(orig.key, orig.value, max(height(left), height(right)) + 1, left, right)
                         end
                   end
-                  
+
                   (LEAF(__), _, _)  => begin
                     NODE(orig.key, orig.value, max(height(left), height(right)) + 1, left, right)
                   end

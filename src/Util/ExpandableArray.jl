@@ -44,7 +44,7 @@
                  data #= This is an array of one array<Option<T>>, to make data mutable =#::Array{Array{Option{T}}}
         end
 
-        import MetaModelica.ArrayUtil
+        import ArrayUtil
         import MetaModelica.Dangerous
         import Util
 

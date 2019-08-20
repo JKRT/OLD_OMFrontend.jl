@@ -37,7 +37,7 @@
          */ =#
         import Values
 
-        import MetaModelica.ListUtil
+        import ListUtil
         import ValuesUtil
 
         function val(filename::String, varname::String, timeStamp::ModelicaReal) ::ModelicaReal 

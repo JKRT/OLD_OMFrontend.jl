@@ -1,4 +1,4 @@
-  module HashTableCrILst 
+  module Prefix 
 
 
     using MetaModelica
@@ -6,10 +6,9 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    FuncHashCref = Function
-    FuncCrefEqual = Function
-    FuncCrefStr = Function
-    FuncExpStr = Function
+    @UniontypeDecl Prefix 
+    @UniontypeDecl ComponentPrefix 
+    @UniontypeDecl ClassPrefix 
 
          #= /*
          * This file is part of OpenModelica.
@@ -41,65 +40,55 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-         #= /* Below is the instance specific code. For each hashtable the user must define:
 
-        Key       - The key used to uniquely define elements in a hashtable
-        Value     - The data to associate with each key
-        hashFunc   - A function that maps a key to a positive integer.
-        keyEqual   - A comparison function between two keys, returns true if equal.
-        */ =#
-         #= /* HashTable instance specific code */ =#
+        import SCode
 
-        import BaseHashTable
+        import ClassInf
 
         import DAE
 
-        import ComponentReference
+          #= A Prefix has a component prefix and a class prefix.
+         The component prefix consist of a name an a list of constant valued subscripts.
+         The class prefix contains the variability of the class, i.e unspecified, parameter or constant. =#
+         @Uniontype Prefix begin
+              @Record NOPRE begin
 
-        import ListUtil
+              end
 
-        Key = DAE.ComponentRef 
+              @Record PREFIX begin
 
-        Value = List 
+                       compPre #= component prefixes are stored in inverse order c.b.a =#::ComponentPrefix
+                       classPre #= the class prefix, i.e. variability, var, discrete, param, const =#::ClassPrefix
+              end
+         end
 
-        HashTableCrefFunctionsType = Tuple 
+        ComponentPrefixOpt = Option  #= a type alias for an optional component prefix =#
 
-        HashTable = Tuple 
+          #= Prefix for component name, e.g. a.b[2].c.
+          NOTE: Component prefixes are stored in inverse order c.b[2].a! =#
+         @Uniontype ComponentPrefix begin
+              @Record PRE begin
 
+                       prefix #= prefix name =#::String
+                       dimensions #= dimensions =#::List{DAE.Dimension}
+                       subscripts #= subscripts =#::List{DAE.Subscript}
+                       next #= next prefix =#::ComponentPrefix
+                       ci_state #= to be able to at least partially fill in type information properly for DAE.VAR =#::ClassInf.State
+                       info::SourceInfo
+              end
 
+              @Record NOCOMPPRE begin
 
+              end
+         end
 
+          #= Prefix for classes is its variability =#
+         @Uniontype ClassPrefix begin
+              @Record CLASSPRE begin
 
-
-
-
-
-         #= 
-          Returns an empty HashTable.
-          Using the default bucketsize..
-         =#
-        function emptyHashTable() ::HashTable 
-              local hashTable::HashTable
-
-              hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
-          hashTable
-        end
-
-         #= Returns an empty HashTable.
-         Using the bucketsize size. =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
-              local hashTable::HashTable
-
-              hashTable = BaseHashTable.emptyHashTableWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr, printIntListStr))
-          hashTable
-        end
-
-        function printIntListStr(ilst::List{<:ModelicaInteger}) ::String 
-              local res::String
-
-              res = "{" + stringDelimitList(ListUtil.map(ilst, intString), ",") + "}"
-          res
-        end
+                       variability #= VAR, DISCRETE, PARAM, or CONST =#::SCode.Variability
+              end
+         end
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

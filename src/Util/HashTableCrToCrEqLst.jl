@@ -60,7 +60,7 @@
 
         import BackendDump
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         Key = DAE.ComponentRef 
 

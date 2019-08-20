@@ -56,7 +56,7 @@
 
         import Global
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         import Print
 

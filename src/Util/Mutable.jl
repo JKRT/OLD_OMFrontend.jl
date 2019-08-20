@@ -1,10 +1,8 @@
-  module Debug 
+    #= Creating mutable (shared) objects
 
-
-    using MetaModelica
-    #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-    using ExportAll
-
+   This uniontype contains routines for creating and updating objects,
+   similar to array<> structures. =#
+   @Uniontype Mutable begin
          #= /*
          * This file is part of OpenModelica.
          *
@@ -36,19 +34,21 @@
          *
          */ =#
 
-        import Print
+        function create(data::T) ::MutableType{T} 
+              local mutable::MutableType{T}
 
-         #= used for debug printing. =#
-        function trace(s::String)  
-              Print.printErrorBuf(s)
+            #= TODO: Defined in the runtime =#
+          mutable
         end
 
-         #= printing with newline. =#
-        function traceln(str::String)  
-              Print.printErrorBuf(str)
-              Print.printErrorBuf("\\n")
+        function update(mutable::MutableType{<:T}, data::T)  
+            #= TODO: Defined in the runtime =#
         end
 
-    #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-    @exportAll()
-  end
+        function access(mutable::MutableType{<:T}) ::T 
+              local data::T
+
+            #= TODO: Defined in the runtime =#
+          data
+        end
+   end

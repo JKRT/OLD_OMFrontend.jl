@@ -44,7 +44,7 @@
          *
          */ =#
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
          @Uniontype Info begin
               @Record INFO begin

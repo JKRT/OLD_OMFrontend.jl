@@ -49,7 +49,7 @@
          #=  keyEqual - A comparison function between two keys, returns true if equal.
          =#
 
-        import MetaModelica.ArrayUtil
+        import ArrayUtil
          #=  Generic hashset code below
          =#
          #=  adrpo: use a prime here (pick your poison):

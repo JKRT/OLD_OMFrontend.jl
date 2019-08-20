@@ -8,14 +8,15 @@ ccall((:pcre2_jit_stack_assign_8, Base.PCRE.PCRE_LIB), Cvoid,
       (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), Base.PCRE.MATCH_CONTEXT[], C_NULL, Base.PCRE.JIT_STACK[])
 
 #=TODO make it call the parserscript from OpenModelica home=#
-push!(LOAD_PATH, "../Util/")
-push!(LOAD_PATH, "../Frontend/")
+push!(LOAD_PATH, "src/Util/.")
+push!(LOAD_PATH, "src/Frontend/.")
+push!(LOAD_PATH, ".")
 println(LOAD_PATH)
 # include("./Absyn.jl")
 # include("./AbsynUtil.jl")
 # include("./List.jl")
 #include("./SCode.jl")
-include("../Util/AbsynToSCode.jl")
+include("../Frontend/AbsynToSCode.jl")
 #include("./SCodeUtil.jl")
 using Absyn
 using MetaModelica

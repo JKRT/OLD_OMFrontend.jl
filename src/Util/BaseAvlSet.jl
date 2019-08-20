@@ -1,4 +1,4 @@
-  #=TODO: Originally partial =# module BaseAvlSet 
+  #=TODO: Originally partial =# module BaseAvlSet
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Tree 
+    @UniontypeDecl Tree
     keyStr = Function
     keyCompare = Function
 
@@ -40,7 +40,7 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        Key = ModelicaInteger 
+        const Key = ModelicaInteger
 
           #= The binary tree data structure. =#
          @Uniontype Tree begin
@@ -62,13 +62,9 @@
               end
          end
 
-        ValueNode = Key 
+        const ValueNode = Key
 
-
-
-
-
-        function printNodeStr(inNode::Tree) ::String 
+        function printNodeStr(inNode::Tree) ::String
               local outString::String
 
               outString = begin
@@ -76,7 +72,7 @@
                   NODE(__)  => begin
                     keyStr(inNode.key)
                   end
-                  
+
                   LEAF(__)  => begin
                     keyStr(inNode.key)
                   end
@@ -86,13 +82,13 @@
         end
 
          #= Return an empty tree =#
-        function new() ::Tree 
+        function new() ::Tree
               local outTree::Tree = EMPTY()
           outTree
         end
 
          #= Inserts a new node in the tree. =#
-        function add(inTree::Tree, inKey::Key) ::Tree 
+        function add(inTree::Tree, inKey::Key) ::Tree
               local tree::Tree = inTree
 
               tree = begin
@@ -105,7 +101,7 @@
                   EMPTY(__)  => begin
                     LEAF(inKey)
                   end
-                  
+
                   NODE(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
@@ -123,7 +119,7 @@
                           balance(tree)
                         end
                   end
-                  
+
                   LEAF(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
@@ -147,7 +143,7 @@
         end
 
          #= Adds a list of key-value pairs to the tree. =#
-        function addList(tree::Tree, inValues::List{<:Key}) ::Tree 
+        function addList(tree::Tree, inValues::List{<:Key}) ::Tree
 
 
               for key in inValues
@@ -157,7 +153,7 @@
         end
 
          #= Gets a value from the tree given a key. =#
-        function hasKey(inTree::Tree, inKey::Key) ::Bool 
+        function hasKey(inTree::Tree, inKey::Key) ::Bool
               local comp::Bool = false
 
               local key::Key
@@ -169,13 +165,13 @@
                   NODE(__)  => begin
                     inTree.key
                   end
-                  
+
                   LEAF(__)  => begin
                     inTree.key
                   end
-                  
+
                   EMPTY(__)  => begin
-                      return 
+                      return
                     fail()
                   end
                 end
@@ -186,15 +182,15 @@
                   (0, _)  => begin
                     true
                   end
-                  
+
                   (1, NODE(right = tree))  => begin
                     hasKey(tree, inKey)
                   end
-                  
-                  (#= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#, NODE(left = tree))  => begin
+
+                  (-1, NODE(left = tree))  => begin
                     hasKey(tree, inKey)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -203,7 +199,7 @@
           comp
         end
 
-        function isEmpty(tree::Tree) ::Bool 
+        function isEmpty(tree::Tree) ::Bool
               local isEmpty::Bool
 
               isEmpty = begin
@@ -211,7 +207,7 @@
                   EMPTY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -221,7 +217,7 @@
         end
 
          #= Converts the tree to a flat list of keys (in order). =#
-        function listKeys(inTree::Tree, lst::List{<:Key} = nil) ::List{Key} 
+        function listKeys(inTree::Tree, lst::List{<:Key} = nil) ::List{Key}
 
 
               lst = begin
@@ -229,14 +225,14 @@
                   LEAF(__)  => begin
                     _cons(inTree.key, lst)
                   end
-                  
+
                   NODE(__)  => begin
                       lst = listKeys(inTree.right, lst)
                       lst = _cons(inTree.key, lst)
                       lst = listKeys(inTree.left, lst)
                     lst
                   end
-                  
+
                   _  => begin
                       lst
                   end
@@ -246,7 +242,7 @@
         end
 
          #= Converts the tree to a flat list of keys (in order). =#
-        function listKeysReverse(inTree::Tree, lst::List{<:Key} = nil) ::List{Key} 
+        function listKeysReverse(inTree::Tree, lst::List{<:Key} = nil) ::List{Key}
 
 
               lst = begin
@@ -254,14 +250,14 @@
                   LEAF(__)  => begin
                     _cons(inTree.key, lst)
                   end
-                  
+
                   NODE(__)  => begin
                       lst = listKeysReverse(inTree.left, lst)
                       lst = _cons(inTree.key, lst)
                       lst = listKeysReverse(inTree.right, lst)
                     lst
                   end
-                  
+
                   _  => begin
                       lst
                   end
@@ -271,7 +267,7 @@
         end
 
          #= Joins two trees by adding the second one to the first. =#
-        function join(tree::Tree, treeToJoin::Tree) ::Tree 
+        function join(tree::Tree, treeToJoin::Tree) ::Tree
 
 
               tree = begin
@@ -279,14 +275,14 @@
                   EMPTY(__)  => begin
                     tree
                   end
-                  
+
                   NODE(__)  => begin
                       tree = add(tree, treeToJoin.key)
                       tree = join(tree, treeToJoin.left)
                       tree = join(tree, treeToJoin.right)
                     tree
                   end
-                  
+
                   LEAF(__)  => begin
                     add(tree, treeToJoin.key)
                   end
@@ -297,7 +293,7 @@
 
          #= Prints the tree to a string using UTF-8 box-drawing characters to construct a
            graphical view of the tree. =#
-        function printTreeStr(inTree::Tree) ::String 
+        function printTreeStr(inTree::Tree) ::String
               local outString::String
 
               local left::Tree
@@ -308,11 +304,11 @@
                   EMPTY(__)  => begin
                     "EMPTY()"
                   end
-                  
+
                   LEAF(__)  => begin
                     printNodeStr(inTree)
                   end
-                  
+
                   NODE(left = left, right = right)  => begin
                     printTreeStr2(left, true, "") + printNodeStr(inTree) + "\\n" + printTreeStr2(right, false, "")
                   end
@@ -321,7 +317,7 @@
           outString
         end
 
-        function setTreeLeftRight(orig::Tree, left::Tree = EMPTY(), right::Tree = EMPTY()) ::Tree 
+        function setTreeLeftRight(orig::Tree, left::Tree = EMPTY(), right::Tree = EMPTY()) ::Tree
               local res::Tree
 
               res = begin
@@ -329,11 +325,11 @@
                   (NODE(__), EMPTY(__), EMPTY(__))  => begin
                     LEAF(orig.key)
                   end
-                  
+
                   (LEAF(__), EMPTY(__), EMPTY(__))  => begin
                     orig
                   end
-                  
+
                   (NODE(__), _, _)  => begin
                     if referenceEqOrEmpty(orig.left, left) && referenceEqOrEmpty(orig.right, right)
                           orig
@@ -341,7 +337,7 @@
                           NODE(orig.key, max(height(left), height(right)) + 1, left, right)
                         end
                   end
-                  
+
                   (LEAF(__), _, _)  => begin
                     NODE(orig.key, max(height(left), height(right)) + 1, left, right)
                   end
@@ -352,7 +348,7 @@
 
          #= Takes two sets and returns the intersection as well as the remainder
           of both sets after removing the duplicates in both sets. =#
-        function intersection(tree1::Tree, tree2::Tree) ::Tree 
+        function intersection(tree1::Tree, tree2::Tree) ::Tree
               local intersect::Tree = Tree.EMPTY()
               local rest1::Tree = Tree.EMPTY()
               local rest2::Tree = Tree.EMPTY()
@@ -417,7 +413,7 @@
           intersect, rest1, rest2
         end
 
-        function referenceEqOrEmpty(t1::Tree, t2::Tree) ::Bool 
+        function referenceEqOrEmpty(t1::Tree, t2::Tree) ::Bool
               local b::Bool
 
               b = begin
@@ -425,7 +421,7 @@
                   (EMPTY(__), EMPTY(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       referenceEq(t1, t2)
                   end
@@ -435,7 +431,7 @@
         end
 
          #= Balances a Tree =#
-        function balance(inTree::Tree) ::Tree 
+        function balance(inTree::Tree) ::Tree
               local outTree::Tree = inTree
 
               outTree = begin
@@ -448,7 +444,7 @@
                   LEAF(__)  => begin
                     inTree
                   end
-                  
+
                   NODE(__)  => begin
                       lh = height(outTree.left)
                       rh = height(outTree.right)
@@ -478,7 +474,7 @@
           outTree
         end
 
-        function height(inNode::Tree) ::ModelicaInteger 
+        function height(inNode::Tree) ::ModelicaInteger
               local outHeight::ModelicaInteger
 
               outHeight = begin
@@ -486,11 +482,11 @@
                   NODE(__)  => begin
                     inNode.height
                   end
-                  
+
                   LEAF(__)  => begin
                     1
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -499,7 +495,7 @@
           outHeight
         end
 
-        function calculateBalance(inNode::Tree) ::ModelicaInteger 
+        function calculateBalance(inNode::Tree) ::ModelicaInteger
               local outBalance::ModelicaInteger
 
               outBalance = begin
@@ -507,11 +503,11 @@
                   NODE(__)  => begin
                     height(inNode.left) - height(inNode.right)
                   end
-                  
+
                   LEAF(__)  => begin
                     0
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -521,7 +517,7 @@
         end
 
          #= Performs an AVL left rotation on the given tree. =#
-        function rotateLeft(inNode::Tree) ::Tree 
+        function rotateLeft(inNode::Tree) ::Tree
               local outNode::Tree = inNode
 
               outNode = begin
@@ -532,12 +528,12 @@
                       node = setTreeLeftRight(outNode, left = outNode.left, right = child.left)
                     setTreeLeftRight(child, left = node, right = child.right)
                   end
-                  
+
                   NODE(right = child && LEAF(__))  => begin
                       node = setTreeLeftRight(outNode, left = outNode.left, right = EMPTY())
                     setTreeLeftRight(child, left = node, right = EMPTY())
                   end
-                  
+
                   _  => begin
                       inNode
                   end
@@ -547,7 +543,7 @@
         end
 
          #= Performs an AVL right rotation on the given tree. =#
-        function rotateRight(inNode::Tree) ::Tree 
+        function rotateRight(inNode::Tree) ::Tree
               local outNode::Tree = inNode
 
               outNode = begin
@@ -558,12 +554,12 @@
                       node = setTreeLeftRight(outNode, left = child.right, right = outNode.right)
                     setTreeLeftRight(child, right = node, left = child.left)
                   end
-                  
+
                   NODE(left = child && LEAF(__))  => begin
                       node = setTreeLeftRight(outNode, left = EMPTY(), right = outNode.right)
                     setTreeLeftRight(child, right = node, left = EMPTY())
                   end
-                  
+
                   _  => begin
                       inNode
                   end
@@ -573,7 +569,7 @@
         end
 
          #= Helper function to printTreeStr. =#
-        function printTreeStr2(inTree::Tree, isLeft::Bool, inIndent::String) ::String 
+        function printTreeStr2(inTree::Tree, isLeft::Bool, inIndent::String) ::String
               local outString::String
 
               local val_node::Option{ValueNode}
@@ -599,7 +595,7 @@
                           "     "
                         end))
                   end
-                  
+
                   _  => begin
                       ""
                   end

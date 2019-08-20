@@ -52,7 +52,7 @@
 
         import BaseHashSet
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         import InstStateMachineUtil
 

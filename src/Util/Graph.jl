@@ -94,7 +94,7 @@
 
         import Error
 
-        import MetaModelica.ListUtil
+        import ListUtil
 
         NodeType = Any 
 
