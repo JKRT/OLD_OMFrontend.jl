@@ -7,7 +7,9 @@ Base.PCRE.JIT_STACK[] = ccall((:pcre2_jit_stack_create_8, Base.PCRE.PCRE_LIB), P
 ccall((:pcre2_jit_stack_assign_8, Base.PCRE.PCRE_LIB), Cvoid,
       (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), Base.PCRE.MATCH_CONTEXT[], C_NULL, Base.PCRE.JIT_STACK[])
 
-push!(LOAD_PATH, ".")
+#=TODO make it call the parserscript from OpenModelica home=#
+push!(LOAD_PATH, "../Util/")
+push!(LOAD_PATH, "../Frontend/")
 println(LOAD_PATH)
 # include("./Absyn.jl")
 #include("./AbsynUtil.jl")
