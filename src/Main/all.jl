@@ -12,10 +12,10 @@ push!(LOAD_PATH, "../Util/")
 push!(LOAD_PATH, "../Frontend/")
 println(LOAD_PATH)
 # include("./Absyn.jl")
-#include("./AbsynUtil.jl")
+# include("./AbsynUtil.jl")
 # include("./List.jl")
 #include("./SCode.jl")
-include("./AbsynToSCode.jl")
+include("../Util/AbsynToSCode.jl")
 #include("./SCodeUtil.jl")
 using Absyn
 using MetaModelica
