@@ -1,4 +1,4 @@
-  module SCodeDump 
+  module SCodeDump
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl SCodeDumpOptions 
+    @UniontypeDecl SCodeDumpOptions
 
          #= /*
          * This file is part of OpenModelica.
@@ -53,6 +53,8 @@
 
         import Tpl
 
+        import DAE
+
          @Uniontype SCodeDumpOptions begin
               @Record OPTIONS begin
 
@@ -70,28 +72,28 @@
 
          const defaultOptions = OPTIONS(false, false, false, false, true, true, false, false, false)::SCodeDumpOptions
 
-        function programStr(inProgram::SCode.Program, options::SCodeDumpOptions = defaultOptions) ::String 
+        function programStr(inProgram::SCode.Program, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpProgram, inProgram, options)
           outString
         end
 
-        function classDefStr(cd::SCode.ClassDef, options::SCodeDumpOptions = defaultOptions) ::String 
+        function classDefStr(cd::SCode.ClassDef, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpClassDef, cd, options)
           outString
         end
 
-        function statementStr(stmt::SCode.Statement, options::SCodeDumpOptions = defaultOptions) ::String 
+        function statementStr(stmt::SCode.Statement, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpStatement, stmt, options)
           outString
         end
 
-        function equationStr(inEEquation::SCode.EEquation, options::SCodeDumpOptions = defaultOptions) ::String 
+        function equationStr(inEEquation::SCode.EEquation, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpEEquation, inEEquation, options)
@@ -99,7 +101,7 @@
         end
 
          #= Prints SCode.Mod to a string. =#
-        function printModStr(inMod::SCode.Mod, options::SCodeDumpOptions = defaultOptions) ::String 
+        function printModStr(inMod::SCode.Mod, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpModifier, inMod, options)
@@ -107,7 +109,7 @@
         end
 
          #= Prints SCode.Comment to a string. =#
-        function printCommentAndAnnotationStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String 
+        function printCommentAndAnnotationStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString2(SCodeDumpTpl.dumpComment, inComment, options)
@@ -115,7 +117,7 @@
         end
 
          #= Prints SCode.Comment.comment to a string. =#
-        function printCommentStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String 
+        function printCommentStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = begin
@@ -124,7 +126,7 @@
                   SCode.COMMENT(comment = comment)  => begin
                     Tpl.tplString2(SCodeDumpTpl.dumpCommentStr, comment, options)
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -134,7 +136,7 @@
         end
 
          #= Prints SCode.Comment.annotation to a string. =#
-        function printAnnotationStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String 
+        function printAnnotationStr(inComment::SCode.Comment, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = begin
@@ -143,7 +145,7 @@
                   (SCode.COMMENT(annotation_ = annotation_), _)  => begin
                     Tpl.tplString2(SCodeDumpTpl.dumpAnnotationOpt, annotation_, options)
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -153,7 +155,7 @@
         end
 
          #= Prints SCode.Restriction to a string. =#
-        function restrString(inRestriction::SCode.Restriction) ::String 
+        function restrString(inRestriction::SCode.Restriction) ::String
               local outString::String
 
               outString = begin
@@ -161,111 +163,111 @@
                   SCode.R_CLASS(__)  => begin
                     "class"
                   end
-                  
+
                   SCode.R_OPTIMIZATION(__)  => begin
                     "optimization"
                   end
-                  
+
                   SCode.R_MODEL(__)  => begin
                     "model"
                   end
-                  
+
                   SCode.R_RECORD(false)  => begin
                     "record"
                   end
-                  
+
                   SCode.R_RECORD(true)  => begin
                     "operator record"
                   end
-                  
+
                   SCode.R_BLOCK(__)  => begin
                     "block"
                   end
-                  
+
                   SCode.R_CONNECTOR(false)  => begin
                     "connector"
                   end
-                  
+
                   SCode.R_CONNECTOR(true)  => begin
                     "expandable connector"
                   end
-                  
+
                   SCode.R_OPERATOR(__)  => begin
                     "operator"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(false))  => begin
                     "pure function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(true))  => begin
                     "impure function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__))  => begin
                     "operator function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(false))  => begin
                     "pure external function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(true))  => begin
                     "impure external function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_RECORD_CONSTRUCTOR(__))  => begin
                     "record constructor"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__))  => begin
                     "parallel function"
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_KERNEL_FUNCTION(__))  => begin
                     "kernel function"
                   end
-                  
+
                   SCode.R_TYPE(__)  => begin
                     "type"
                   end
-                  
+
                   SCode.R_PACKAGE(__)  => begin
                     "package"
                   end
-                  
+
                   SCode.R_ENUMERATION(__)  => begin
                     "enumeration"
                   end
-                  
+
                   SCode.R_METARECORD(__)  => begin
                     "metarecord " + AbsynUtil.pathString(inRestriction.name)
                   end
-                  
+
                   SCode.R_UNIONTYPE(__)  => begin
                     "uniontype"
                   end
-                  
+
                   SCode.R_PREDEFINED_INTEGER(__)  => begin
                     "Integer"
                   end
-                  
+
                   SCode.R_PREDEFINED_REAL(__)  => begin
                     "Real"
                   end
-                  
+
                   SCode.R_PREDEFINED_STRING(__)  => begin
                     "String"
                   end
-                  
+
                   SCode.R_PREDEFINED_BOOLEAN(__)  => begin
                     "Boolean"
                   end
-                  
+
                   SCode.R_PREDEFINED_CLOCK(__)  => begin
                     "Clock"
                   end
-                  
+
                   SCode.R_PREDEFINED_ENUMERATION(__)  => begin
                     "enumeration"
                   end
@@ -279,7 +281,7 @@
         end
 
          #= Translates a SCode.Restriction to a String. =#
-        function restrictionStringPP(inRestriction::SCode.Restriction) ::String 
+        function restrictionStringPP(inRestriction::SCode.Restriction) ::String
               local outString::String
 
               outString = Tpl.tplString(SCodeDumpTpl.dumpRestriction, inRestriction)
@@ -289,7 +291,7 @@
          const noEachStr = ""::String
 
          #= Print SCode.Element to a string. =#
-        function unparseElementStr(inElement::SCode.Element, options::SCodeDumpOptions = defaultOptions) ::String 
+        function unparseElementStr(inElement::SCode.Element, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
 
               outString = Tpl.tplString3(SCodeDumpTpl.dumpElement, inElement, noEachStr, options)
@@ -297,7 +299,7 @@
         end
 
          #= Print SCode.Element to a string. =#
-        function shortElementStr(inElement::SCode.Element) ::String 
+        function shortElementStr(inElement::SCode.Element) ::String
               local outString::String
 
               outString = begin
@@ -319,35 +321,35 @@
                       res = stringAppendList(list("extends ", str, ";"))
                     res
                   end
-                  
+
                   SCode.COMPONENT(__)  => begin
                       res = unparseElementStr(inElement, defaultOptions)
                     res
                   end
-                  
+
                   SCode.CLASS(prefixes = SCode.PREFIXES(__), classDef = SCode.DERIVED(__))  => begin
                       res = unparseElementStr(inElement, defaultOptions)
                     res
                   end
-                  
+
                   SCode.CLASS(name = n, partialPrefix = pp, prefixes = SCode.PREFIXES(innerOuter = io, redeclarePrefix = rdp, replaceablePrefix = rpp), classDef = SCode.CLASS_EXTENDS(__))  => begin
                       ioStr = Dump.unparseInnerouterStr(io) + redeclareStr(rdp) + replaceablePrefixStr(rpp) + partialStr(pp)
                       res = stringAppendList(list(ioStr, "class extends ", n, ";"))
                     res
                   end
-                  
+
                   SCode.CLASS(name = n, partialPrefix = pp, prefixes = SCode.PREFIXES(innerOuter = io, redeclarePrefix = rdp, replaceablePrefix = rpp), classDef = SCode.ENUMERATION(__))  => begin
                       ioStr = Dump.unparseInnerouterStr(io) + redeclareStr(rdp) + replaceablePrefixStr(rpp) + partialStr(pp)
                       res = stringAppendList(list(ioStr, "class ", n, " enumeration;"))
                     res
                   end
-                  
+
                   SCode.CLASS(name = n, partialPrefix = pp, prefixes = SCode.PREFIXES(innerOuter = io, redeclarePrefix = rdp, replaceablePrefix = rpp))  => begin
                       ioStr = Dump.unparseInnerouterStr(io) + redeclareStr(rdp) + replaceablePrefixStr(rpp) + partialStr(pp)
                       res = stringAppendList(list(ioStr, "class ", n, ";"))
                     res
                   end
-                  
+
                   SCode.IMPORT(imp = imp)  => begin
                       str = "import " + AbsynUtil.printImportString(imp) + ";"
                     str
@@ -357,7 +359,7 @@
           outString
         end
 
-        function printEnumStr(en::SCode.Enum) ::String 
+        function printEnumStr(en::SCode.Enum) ::String
               local str::String
 
               str = begin
@@ -372,7 +374,7 @@
         end
 
          #= Print Variability to a string. =#
-        function variabilityString(inVariability::SCode.Variability) ::String 
+        function variabilityString(inVariability::SCode.Variability) ::String
               local outString::String
 
               outString = begin
@@ -380,15 +382,15 @@
                   SCode.VAR(__)  => begin
                     "VAR"
                   end
-                  
+
                   SCode.DISCRETE(__)  => begin
                     "DISCRETE"
                   end
-                  
+
                   SCode.PARAM(__)  => begin
                     "PARAM"
                   end
-                  
+
                   SCode.CONST(__)  => begin
                     "CONST"
                   end
@@ -398,7 +400,7 @@
         end
 
          #= Print parallelism to a string. =#
-        function parallelismString(inParallelism::SCode.Parallelism) ::String 
+        function parallelismString(inParallelism::SCode.Parallelism) ::String
               local outString::String
 
               outString = begin
@@ -406,11 +408,11 @@
                   SCode.PARGLOBAL(__)  => begin
                     "PARGLOBAL"
                   end
-                  
+
                   SCode.PARLOCAL(__)  => begin
                     "PARLOCAL"
                   end
-                  
+
                   SCode.NON_PARALLEL(__)  => begin
                     "NON_PARALLEL"
                   end
@@ -420,7 +422,7 @@
         end
 
          #= Print a inner outer info to a string. =#
-        function innerouterString(innerOuter::Absyn.InnerOuter) ::String 
+        function innerouterString(innerOuter::Absyn.InnerOuter) ::String
               local outString::String
 
               outString = begin
@@ -428,15 +430,15 @@
                   Absyn.INNER_OUTER(__)  => begin
                     "INNER/OUTER"
                   end
-                  
+
                   Absyn.INNER(__)  => begin
                     "INNER"
                   end
-                  
+
                   Absyn.OUTER(__)  => begin
                     "OUTER"
                   end
-                  
+
                   Absyn.NOT_INNER_OUTER(__)  => begin
                     ""
                   end
@@ -446,7 +448,7 @@
         end
 
          #= Print Variability to a string. =#
-        function unparseVariability(inVariability::SCode.Variability) ::String 
+        function unparseVariability(inVariability::SCode.Variability) ::String
               local outString::String
 
               outString = begin
@@ -454,15 +456,15 @@
                   SCode.VAR(__)  => begin
                     ""
                   end
-                  
+
                   SCode.DISCRETE(__)  => begin
                     "discrete"
                   end
-                  
+
                   SCode.PARAM(__)  => begin
                     "parameter"
                   end
-                  
+
                   SCode.CONST(__)  => begin
                     "constant"
                   end
@@ -472,7 +474,7 @@
         end
 
          #= Takes a SCode.Equation rather then SCode.EEquation as equationStr does. =#
-        function equationStr2(eqns::SCode.Equation, options::SCodeDumpOptions) ::String 
+        function equationStr2(eqns::SCode.Equation, options::SCodeDumpOptions) ::String
               local s::String
 
               s = begin
@@ -487,7 +489,7 @@
         end
 
          #= prints SCode.Initial to a string =#
-        function printInitialStr(initial_::SCode.Initial) ::String 
+        function printInitialStr(initial_::SCode.Initial) ::String
               local str::String
 
               str = begin
@@ -495,7 +497,7 @@
                   SCode.INITIAL(__)  => begin
                     "initial"
                   end
-                  
+
                   SCode.NON_INITIAL(__)  => begin
                     "non initial"
                   end
@@ -504,7 +506,7 @@
           str
         end
 
-        function connectorTypeStr(inConnectorType::SCode.ConnectorType) ::String 
+        function connectorTypeStr(inConnectorType::SCode.ConnectorType) ::String
               local str::String
 
               str = begin
@@ -512,11 +514,11 @@
                   SCode.POTENTIAL(__)  => begin
                     ""
                   end
-                  
+
                   SCode.FLOW(__)  => begin
                     "flow"
                   end
-                  
+
                   SCode.STREAM(__)  => begin
                     "stream"
                   end
@@ -525,7 +527,7 @@
           str
         end
 
-        function encapsulatedStr(inEncapsulated::SCode.Encapsulated) ::String 
+        function encapsulatedStr(inEncapsulated::SCode.Encapsulated) ::String
               local str::String
 
               str = begin
@@ -533,7 +535,7 @@
                   SCode.ENCAPSULATED(__)  => begin
                     "encapsulated "
                   end
-                  
+
                   SCode.NOT_ENCAPSULATED(__)  => begin
                     ""
                   end
@@ -542,7 +544,7 @@
           str
         end
 
-        function partialStr(inPartial::SCode.Partial) ::String 
+        function partialStr(inPartial::SCode.Partial) ::String
               local str::String
 
               str = begin
@@ -550,7 +552,7 @@
                   SCode.PARTIAL(__)  => begin
                     "partial "
                   end
-                  
+
                   SCode.NOT_PARTIAL(__)  => begin
                     ""
                   end
@@ -559,7 +561,7 @@
           str
         end
 
-        function visibilityStr(inVisibility::SCode.Visibility) ::String 
+        function visibilityStr(inVisibility::SCode.Visibility) ::String
               local str::String
 
               str = begin
@@ -567,7 +569,7 @@
                   SCode.PUBLIC(__)  => begin
                     "public "
                   end
-                  
+
                   SCode.PROTECTED(__)  => begin
                     "protected "
                   end
@@ -576,7 +578,7 @@
           str
         end
 
-        function finalStr(inFinal::SCode.Final) ::String 
+        function finalStr(inFinal::SCode.Final) ::String
               local str::String
 
               str = begin
@@ -584,7 +586,7 @@
                   SCode.FINAL(__)  => begin
                     "final "
                   end
-                  
+
                   SCode.NOT_FINAL(__)  => begin
                     ""
                   end
@@ -593,7 +595,7 @@
           str
         end
 
-        function eachStr(inEach::SCode.Each) ::String 
+        function eachStr(inEach::SCode.Each) ::String
               local str::String
 
               str = begin
@@ -601,7 +603,7 @@
                   SCode.EACH(__)  => begin
                     "each "
                   end
-                  
+
                   SCode.NOT_EACH(__)  => begin
                     ""
                   end
@@ -610,7 +612,7 @@
           str
         end
 
-        function redeclareStr(inRedeclare::SCode.Redeclare) ::String 
+        function redeclareStr(inRedeclare::SCode.Redeclare) ::String
               local str::String
 
               str = begin
@@ -618,7 +620,7 @@
                   SCode.REDECLARE(__)  => begin
                     "redeclare "
                   end
-                  
+
                   SCode.NOT_REDECLARE(__)  => begin
                     ""
                   end
@@ -627,7 +629,7 @@
           str
         end
 
-        function replaceableStr(inReplaceable::SCode.Replaceable) ::Tuple{String, String} 
+        function replaceableStr(inReplaceable::SCode.Replaceable) ::Tuple{String, String}
               local strConstraint::String
               local strReplaceable::String
 
@@ -642,11 +644,11 @@
                       mod_str = printModStr(mod, defaultOptions)
                     ("replaceable ", path_str + "(" + mod_str + ")")
                   end
-                  
+
                   SCode.REPLACEABLE(NONE())  => begin
                     ("replaceable ", "")
                   end
-                  
+
                   SCode.NOT_REPLACEABLE(__)  => begin
                     ("", "")
                   end
@@ -655,7 +657,7 @@
           (strReplaceable, strConstraint)
         end
 
-        function replaceablePrefixStr(inReplaceable::SCode.Replaceable) ::String 
+        function replaceablePrefixStr(inReplaceable::SCode.Replaceable) ::String
               local strReplaceable::String
 
               strReplaceable = begin
@@ -663,7 +665,7 @@
                   SCode.REPLACEABLE(_)  => begin
                     "replaceable "
                   end
-                  
+
                   SCode.NOT_REPLACEABLE(__)  => begin
                     ""
                   end
@@ -672,7 +674,7 @@
           strReplaceable
         end
 
-        function replaceableConstrainClassStr(inReplaceable::SCode.Replaceable) ::String 
+        function replaceableConstrainClassStr(inReplaceable::SCode.Replaceable) ::String
               local strReplaceable::String
 
               (_, strReplaceable) = replaceableStr(inReplaceable)
@@ -680,7 +682,7 @@
         end
 
          #= Returns prefixes as string =#
-        function prefixesStr(prefixes::SCode.Prefixes) ::String 
+        function prefixesStr(prefixes::SCode.Prefixes) ::String
               local str::String
 
               str = begin
@@ -700,14 +702,14 @@
           str
         end
 
-        function filterElements(elements::List{<:SCode.Element}, options::SCodeDumpOptions) ::List{SCode.Element} 
+        function filterElements(elements::List{<:SCode.Element}, options::SCodeDumpOptions) ::List{SCode.Element}
               local outElements::List{SCode.Element}
 
               outElements = ListUtil.select1(elements, filterElement, options)
           outElements
         end
 
-        function filterElement(element::SCode.Element, options::SCodeDumpOptions) ::Bool 
+        function filterElement(element::SCode.Element, options::SCodeDumpOptions) ::Bool
               local b::Bool
 
               b = begin
@@ -715,19 +717,19 @@
                   (SCode.IMPORT(visibility = SCode.PROTECTED(__)), OPTIONS(stripProtectedImports = true))  => begin
                     false
                   end
-                  
+
                   (SCode.CLASS(prefixes = SCode.PREFIXES(visibility = SCode.PROTECTED(__))), OPTIONS(stripProtectedClasses = true))  => begin
                     false
                   end
-                  
+
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(visibility = SCode.PROTECTED(__))), OPTIONS(stripProtectedComponents = true))  => begin
                     false
                   end
-                  
+
                   (SCode.CLASS(restriction = SCode.R_METARECORD(moved = true)), OPTIONS(stripMetaRecords = true))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -735,181 +737,6 @@
               end
           b
         end
-
-    #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-    @exportAll()
-  end
-  
-  module Connect 
-
-
-    using MetaModelica
-    #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-    using ExportAll
-    #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
-    @UniontypeDecl Face 
-    @UniontypeDecl ConnectorType 
-    @UniontypeDecl ConnectorElement 
-    @UniontypeDecl SetTrieNode 
-    @UniontypeDecl OuterConnect 
-    @UniontypeDecl Sets 
-    @UniontypeDecl Set 
-
-         #= /*
-         * This file is part of OpenModelica.
-         *
-         * Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
-         * c/o Linköpings universitet, Department of Computer and Information Science,
-         * SE-58183 Linköping, Sweden.
-         *
-         * All rights reserved.
-         *
-         * THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
-         * THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
-         * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
-         * RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
-         * ACCORDING TO RECIPIENTS CHOICE.
-         *
-         * The OpenModelica software and the Open Source Modelica
-         * Consortium (OSMC) Public License (OSMC-PL) are obtained
-         * from OSMC, either from the above address,
-         * from the URLs: http:www.ida.liu.se/projects/OpenModelica or
-         * http:www.openmodelica.org, and in the OpenModelica distribution.
-         * GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
-         *
-         * This program is distributed WITHOUT ANY WARRANTY; without
-         * even the implied warranty of  MERCHANTABILITY or FITNESS
-         * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
-         * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
-         *
-         * See the full OSMC Public License conditions for more details.
-         *
-         */ =#
-
-        import DAE
-
-        import Prefix
-
-        import Absyn
-
-         const NEW_SET = -1 #= The index used for new sets which have not
-           yet been assigned a set index. =#::ModelicaInteger
-
-          #= This type indicates whether a connector is an inside or an outside connector.
-            Note: this is not the same as inner and outer references.
-            A connector is inside if it connects from the outside into a component and it
-            is outside if it connects out from the component.  This is important when
-            generating equations for flow variables, where outside connectors are
-            multiplied with -1 (since flow is always into a component). =#
-         @Uniontype Face begin
-              @Record INSIDE begin
-
-              end
-
-              @Record OUTSIDE begin
-
-              end
-
-              @Record NO_FACE begin
-
-              end
-         end
-
-          #= The type of a connector element. =#
-         @Uniontype ConnectorType begin
-              @Record EQU begin
-
-              end
-
-              @Record FLOW begin
-
-              end
-
-              @Record STREAM begin
-
-                       associatedFlow::Option{DAE.ComponentRef}
-              end
-
-              @Record NO_TYPE begin
-
-              end
-         end
-
-         @Uniontype ConnectorElement begin
-              @Record CONNECTOR_ELEMENT begin
-
-                       name::DAE.ComponentRef
-                       face::Face
-                       ty::ConnectorType
-                       source::DAE.ElementSource
-                       set #= Which set this element belongs to. =#::ModelicaInteger
-              end
-         end
-
-         @Uniontype SetTrieNode begin
-              @Record SET_TRIE_NODE begin
-
-                       name::String
-                       cref::DAE.ComponentRef
-                       nodes::List{SetTrieNode}
-                       connectCount::ModelicaInteger
-              end
-
-              @Record SET_TRIE_LEAF begin
-
-                       name::String
-                       insideElement #= The inside element. =#::Option{ConnectorElement}
-                       outsideElement #= The outside element. =#::Option{ConnectorElement}
-                       flowAssociation #= The name of the associated flow
-                             variable, if the leaf represents a stream variable. =#::Option{DAE.ComponentRef}
-                       connectCount #= How many times this connector has been connected. =#::ModelicaInteger
-              end
-         end
-
-        SetTrie = SetTrieNode  #= A trie, a.k.a. prefix tree, that maps crefs to sets. =#
-
-        SetConnection = Tuple  #= A connection between two sets. =#
-
-         @Uniontype OuterConnect begin
-              @Record OUTERCONNECT begin
-
-                       scope #= the scope where this connect was created =#::Prefix.Prefix
-                       cr1 #= the lhs component reference =#::DAE.ComponentRef
-                       io1 #= inner/outer attribute for cr1 component =#::Absyn.InnerOuter
-                       f1 #= the face of the lhs component =#::Face
-                       cr2 #= the rhs component reference =#::DAE.ComponentRef
-                       io2 #= inner/outer attribute for cr2 component =#::Absyn.InnerOuter
-                       f2 #= the face of the rhs component =#::Face
-                       source #= the element origin =#::DAE.ElementSource
-              end
-         end
-
-         @Uniontype Sets begin
-              @Record SETS begin
-
-                       sets::SetTrie
-                       setCount #= How many sets the trie contains. =#::ModelicaInteger
-                       connections::List{SetConnection}
-                       outerConnects #= Connect statements to propagate upwards. =#::List{OuterConnect}
-              end
-         end
-
-          #= A set of connection elements. =#
-         @Uniontype Set begin
-              @Record SET begin
-
-                       ty::ConnectorType
-                       elements::List{ConnectorElement}
-              end
-
-              @Record SET_POINTER begin
-
-                       index::ModelicaInteger
-              end
-         end
-
-         const emptySet = SETS(SET_TRIE_NODE("", DAE.WILD(), nil, 0), 0, nil, nil)::Sets
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

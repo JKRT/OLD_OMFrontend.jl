@@ -1,4 +1,4 @@
-  module Prefix 
+  module Prefix
 
 
     using MetaModelica
@@ -6,9 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Prefix 
-    @UniontypeDecl ComponentPrefix 
-    @UniontypeDecl ClassPrefix 
+    @UniontypeDecl ComponentPrefix
+    @UniontypeDecl ClassPrefix
 
          #= /*
          * This file is part of OpenModelica.
@@ -50,7 +49,7 @@
           #= A Prefix has a component prefix and a class prefix.
          The component prefix consist of a name an a list of constant valued subscripts.
          The class prefix contains the variability of the class, i.e unspecified, parameter or constant. =#
-         @Uniontype Prefix begin
+         @Uniontype PrefixType begin
               @Record NOPRE begin
 
               end
