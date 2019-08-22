@@ -1,4 +1,4 @@
-  module ComponentReference 
+  module ComponentReference
 
 
     using MetaModelica
@@ -82,7 +82,7 @@
 
          const dummyCref = DAE.CREF_IDENT("dummy", DAE.T_UNKNOWN_DEFAULT, nil)::DAE.ComponentRef
 
-         #= 
+         #=
           author: PA
 
           Calculates a hash value for DAE.ComponentRef, by hashing each individual part separately and summing the values, and then apply
@@ -90,7 +90,7 @@
           Also hashes subscripts in a clever way avoiding [1,2] and [2,1] to hash to the same value. This is done by investigating array type
           to find dimension of array.
          =#
-        function hashComponentRefMod(cr::DAE.ComponentRef, mod::ModelicaInteger) ::ModelicaInteger 
+        function hashComponentRefMod(cr::DAE.ComponentRef, mod::ModelicaInteger) ::ModelicaInteger
               local res::ModelicaInteger
 
               local h::ModelicaInteger
@@ -103,7 +103,7 @@
         end
 
          #= new hashing that properly deals with subscripts so [1,2] and [2,1] hash to different values =#
-        function hashComponentRef(cr::DAE.ComponentRef) ::ModelicaInteger 
+        function hashComponentRef(cr::DAE.ComponentRef) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -115,15 +115,15 @@
                   DAE.CREF_IDENT(id, tp, subs)  => begin
                     stringHashDjb2(id) + hashSubscripts(tp, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(id, tp, subs, cr1)  => begin
                     stringHashDjb2(id) + hashSubscripts(tp, subs) + hashComponentRef(cr1)
                   end
-                  
+
                   DAE.CREF_ITER(id, _, tp, subs)  => begin
                     stringHashDjb2(id) + hashSubscripts(tp, subs)
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -137,7 +137,7 @@
         end
 
          #= help function, hashing subscripts making sure [1,2] and [2,1] doesn't match to the same number =#
-        function hashSubscripts(tp::DAE.Type, subs::List{<:DAE.Subscript}) ::ModelicaInteger 
+        function hashSubscripts(tp::DAE.Type, subs::List{<:DAE.Subscript}) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -145,7 +145,7 @@
                   (_,  nil())  => begin
                     0
                   end
-                  
+
                   _  => begin
                       hashSubscripts2(ListUtil.fill(1, listLength(subs)), subs, 1)
                   end
@@ -160,7 +160,7 @@
         end
 
          #= help function =#
-        function hashSubscripts2(dims::List{<:ModelicaInteger}, subs::List{<:DAE.Subscript}, factor::ModelicaInteger) ::ModelicaInteger 
+        function hashSubscripts2(dims::List{<:ModelicaInteger}, subs::List{<:DAE.Subscript}, factor::ModelicaInteger) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -172,7 +172,7 @@
                   ( nil(),  nil(), _)  => begin
                     0
                   end
-                  
+
                   (_ <| rest_dims, s <| rest_subs, _)  => begin
                     hashSubscript(s) * factor + hashSubscripts2(rest_dims, rest_subs, factor * 1000)
                   end
@@ -185,7 +185,7 @@
         end
 
          #= help function =#
-        function hashSubscript(sub::DAE.Subscript) ::ModelicaInteger 
+        function hashSubscript(sub::DAE.Subscript) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -195,19 +195,19 @@
                   DAE.WHOLEDIM(__)  => begin
                     0
                   end
-                  
+
                   DAE.INDEX(DAE.ICONST(i))  => begin
                     i
                   end
-                  
+
                   DAE.SLICE(exp)  => begin
                     Expression.hashExp(exp)
                   end
-                  
+
                   DAE.INDEX(exp)  => begin
                     Expression.hashExp(exp)
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp)  => begin
                     Expression.hashExp(exp)
                   end
@@ -218,7 +218,7 @@
 
          #= @author: adrpo
           creates an array, with one element for each record in ComponentRef! =#
-        function createEmptyCrefMemory() ::Array{List{DAE.ComponentRef}} 
+        function createEmptyCrefMemory() ::Array{List{DAE.ComponentRef}}
               local crefMemory::Array{List{DAE.ComponentRef}}
 
               crefMemory = arrayCreate(3, nil)
@@ -231,7 +231,7 @@
 
          #= @author: adrpo
           This function creates a dummy component reference =#
-        function makeDummyCref() ::DAE.ComponentRef 
+        function makeDummyCref() ::DAE.ComponentRef
               local outCrefIdent::DAE.ComponentRef
 
               outCrefIdent = dummyCref
@@ -240,14 +240,14 @@
 
          #= @author: adrpo
           This function creates a DAE.CREF_IDENT(ident, identType, subscriptLst) =#
-        function makeCrefIdent(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}) ::DAE.ComponentRef 
+        function makeCrefIdent(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}) ::DAE.ComponentRef
               local outCrefIdent::DAE.ComponentRef
 
               outCrefIdent = DAE.CREF_IDENT(ident, identType, subscriptLst)
           outCrefIdent
         end
 
-        function makeUntypedCrefIdent(ident::DAE.Ident) ::DAE.ComponentRef 
+        function makeUntypedCrefIdent(ident::DAE.Ident) ::DAE.ComponentRef
               local outCrefIdent::DAE.ComponentRef
 
               outCrefIdent = DAE.CREF_IDENT(ident, DAE.T_UNKNOWN_DEFAULT, nil)
@@ -256,7 +256,7 @@
 
          #= @author: adrpo
           This function creates a DAE.CREF_QUAL(ident, identType, subscriptLst, componentRef) =#
-        function makeCrefQual(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}, componentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function makeCrefQual(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}, componentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outCrefQual::DAE.ComponentRef
 
               local subCref::DAE.ComponentRef
@@ -276,7 +276,7 @@
          #= This function converts a ComponentRef to a Path, if possible.
           If the component reference contains subscripts, it will silently
           fail. =#
-        function crefToPath(inComponentRef::DAE.ComponentRef) ::Absyn.Path 
+        function crefToPath(inComponentRef::DAE.ComponentRef) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -287,7 +287,7 @@
                   DAE.CREF_IDENT(ident = i, subscriptLst =  nil())  => begin
                     Absyn.IDENT(i)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = i, subscriptLst =  nil(), componentRef = c)  => begin
                       p = crefToPath(c)
                     Absyn.QUALIFIED(i, p)
@@ -297,7 +297,7 @@
           outPath
         end
 
-        function crefToPathIgnoreSubs(inComponentRef::DAE.ComponentRef) ::Absyn.Path 
+        function crefToPathIgnoreSubs(inComponentRef::DAE.ComponentRef) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -308,7 +308,7 @@
                   DAE.CREF_IDENT(ident = i)  => begin
                     Absyn.IDENT(i)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = i, componentRef = c)  => begin
                       p = crefToPathIgnoreSubs(c)
                     Absyn.QUALIFIED(i, p)
@@ -319,7 +319,7 @@
         end
 
          #= This function converts a Absyn.Path to a ComponentRef. =#
-        function pathToCref(inPath::Absyn.Path) ::DAE.ComponentRef 
+        function pathToCref(inPath::Absyn.Path) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -330,11 +330,11 @@
                   Absyn.IDENT(name = i)  => begin
                     makeCrefIdent(i, DAE.T_UNKNOWN_DEFAULT, nil)
                   end
-                  
+
                   Absyn.FULLYQUALIFIED(p)  => begin
                     pathToCref(p)
                   end
-                  
+
                   Absyn.QUALIFIED(name = i, path = p)  => begin
                       c = pathToCref(p)
                     makeCrefQual(i, DAE.T_UNKNOWN_DEFAULT, nil, c)
@@ -346,7 +346,7 @@
 
          #=   author: Frenkel TUD
           generates a cref from DAE.Var =#
-        function creffromVar(inVar::DAE.Var) ::DAE.ComponentRef 
+        function creffromVar(inVar::DAE.Var) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -362,7 +362,7 @@
         end
 
          #= Transform an ComponentRef into Absyn.ComponentRef. =#
-        function unelabCref(inComponentRef::DAE.ComponentRef) ::Absyn.ComponentRef 
+        function unelabCref(inComponentRef::DAE.ComponentRef) ::Absyn.ComponentRef
               local outComponentRef::Absyn.ComponentRef
 
               outComponentRef = begin
@@ -378,18 +378,18 @@
                       subs_1 = unelabSubscripts(subs)
                     Absyn.CREF_IDENT(id, subs_1)
                   end
-                  
+
                   DAE.CREF_IDENT(ident = id, subscriptLst = subs)  => begin
                       subs_1 = unelabSubscripts(subs)
                     Absyn.CREF_IDENT(id, subs_1)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id, subscriptLst = subs, componentRef = cr)  => begin
                       cr_1 = unelabCref(cr)
                       subs_1 = unelabSubscripts(subs)
                     Absyn.CREF_QUAL(id, subs_1, cr_1)
                   end
-                  
+
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       print("ComponentReference.unelabCref failed on: " + printComponentRefStr(inComponentRef) + "\\n")
@@ -405,7 +405,7 @@
         end
 
          #= Helper function to unelabCref, handles subscripts. =#
-        function unelabSubscripts(inSubscriptLst::List{<:DAE.Subscript}) ::List{Absyn.Subscript} 
+        function unelabSubscripts(inSubscriptLst::List{<:DAE.Subscript}) ::List{Absyn.Subscript}
               local outAbsynSubscriptLst::List{Absyn.Subscript}
 
               outAbsynSubscriptLst = begin
@@ -419,24 +419,24 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.WHOLEDIM(__) <| xs  => begin
                       xs_1 = unelabSubscripts(xs)
                     _cons(Absyn.NOSUB(), xs_1)
                   end
-                  
+
                   DAE.SLICE(exp = e) <| xs  => begin
                       xs_1 = unelabSubscripts(xs)
                       e_1 = Expression.unelabExp(e)
                     _cons(Absyn.SUBSCRIPT(e_1), xs_1)
                   end
-                  
+
                   DAE.INDEX(exp = e) <| xs  => begin
                       xs_1 = unelabSubscripts(xs)
                       e_1 = Expression.unelabExp(e)
                     _cons(Absyn.SUBSCRIPT(e_1), xs_1)
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp = e) <| xs  => begin
                       xs_1 = unelabSubscripts(xs)
                       e_1 = Expression.unelabExp(e)
@@ -454,7 +454,7 @@
         end
 
          #= Translates an Absyn cref to an untyped DAE cref. =#
-        function toExpCref(absynCref::Absyn.ComponentRef) ::DAE.ComponentRef 
+        function toExpCref(absynCref::Absyn.ComponentRef) ::DAE.ComponentRef
               local daeCref::DAE.ComponentRef
 
               daeCref = begin
@@ -462,19 +462,19 @@
                   Absyn.CREF_IDENT(__)  => begin
                     makeCrefIdent(absynCref.name, DAE.T_UNKNOWN_DEFAULT, toExpCrefSubs(absynCref.subscripts))
                   end
-                  
+
                   Absyn.CREF_QUAL(__)  => begin
                     makeCrefQual(absynCref.name, DAE.T_UNKNOWN_DEFAULT, toExpCrefSubs(absynCref.subscripts), toExpCref(absynCref.componentRef))
                   end
-                  
+
                   Absyn.CREF_FULLYQUALIFIED(__)  => begin
                     toExpCref(absynCref.componentRef)
                   end
-                  
+
                   Absyn.WILD(__)  => begin
                     DAE.WILD()
                   end
-                  
+
                   Absyn.ALLWILD(__)  => begin
                     DAE.WILD()
                   end
@@ -484,7 +484,7 @@
         end
 
          #= Translates a list of Absyn subscripts to a list of untyped DAE subscripts. =#
-        function toExpCrefSubs(absynSubs::List{<:Absyn.Subscript}) ::List{DAE.Subscript} 
+        function toExpCrefSubs(absynSubs::List{<:Absyn.Subscript}) ::List{DAE.Subscript}
               local daeSubs::List{DAE.Subscript}
 
               local i::ModelicaInteger
@@ -494,7 +494,7 @@
                   Absyn.SUBSCRIPT(__)  => begin
                     DAE.INDEX(Expression.fromAbsynExp(sub.subscript))
                   end
-                  
+
                   Absyn.NOSUB(__)  => begin
                     DAE.WHOLEDIM()
                   end
@@ -504,7 +504,7 @@
         end
 
          #= This function simply converts a ComponentRef to a String. =#
-        function crefStr(inComponentRef::DAE.ComponentRef) ::String 
+        function crefStr(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
 
               outString = stringDelimitList(toStringList(inComponentRef), if Flags.getConfigBool(Flags.MODELICA_OUTPUT)
@@ -516,7 +516,7 @@
         end
 
          #= Same as crefStr, but uses _ instead of .  =#
-        function crefModelicaStr(inComponentRef::DAE.ComponentRef) ::String 
+        function crefModelicaStr(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
 
               outString = stringDelimitList(toStringList(inComponentRef), "_")
@@ -525,7 +525,7 @@
 
          #= @autor: adrpo
           Print a cref or none =#
-        function printComponentRefOptStr(inComponentRefOpt::Option{<:DAE.ComponentRef}) ::String 
+        function printComponentRefOptStr(inComponentRefOpt::Option{<:DAE.ComponentRef}) ::String
               local outString::String
 
               outString = begin
@@ -537,7 +537,7 @@
                   NONE()  => begin
                     "NONE()"
                   end
-                  
+
                   SOME(cref)  => begin
                       str = printComponentRefStr(cref)
                       str = "SOME(" + str + ")"
@@ -559,7 +559,7 @@
               Once these are tested and ok, the printExp above can
               be replaced by a call to these _str functions and
               printing the result. =#
-        function printComponentRefStr(inComponentRef::DAE.ComponentRef) ::String 
+        function printComponentRefStr(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
 
               outString = begin
@@ -577,21 +577,21 @@
                   DAE.CREF_IDENT(ident = s, subscriptLst =  nil())  => begin
                     s
                   end
-                  
+
                   DAE.CREF_IDENT(ident = s, subscriptLst = subs)  => begin
                       str = printComponentRef2Str(s, subs)
                     str
                   end
-                  
+
                   DAE.CREF_ITER(ident = s, index = ix, subscriptLst =  nil())  => begin
                     s + "/* iter index " + intString(ix) + " */"
                   end
-                  
+
                   DAE.CREF_ITER(ident = s, index = ix, subscriptLst = subs)  => begin
                       str = printComponentRef2Str(s, subs)
                     str + "/* iter index " + intString(ix) + " */"
                   end
-                  
+
                   DAE.CREF_QUAL(ident = s, subscriptLst = subs, componentRef = cr)  => begin
                       b = Config.modelicaOutput()
                       str = printComponentRef2Str(s, subs)
@@ -604,7 +604,7 @@
                       str = stringAppendList(list(str, strseb, strrest))
                     str
                   end
-                  
+
                   DAE.WILD(__)  => begin
                     "_"
                   end
@@ -626,7 +626,7 @@
         end
 
          #= Like printComponentRefStr but also fixes the special dollar-sign variables =#
-        function printComponentRefStrFixDollarDer(inComponentRef::DAE.ComponentRef) ::String 
+        function printComponentRefStrFixDollarDer(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
 
               outString = begin
@@ -635,7 +635,7 @@
                   DAE.CREF_QUAL(ident = "$DER", subscriptLst =  nil(), componentRef = cr)  => begin
                     "der(" + printComponentRefStr(cr) + ")"
                   end
-                  
+
                   _  => begin
                       printComponentRefStr(inComponentRef)
                   end
@@ -645,7 +645,7 @@
         end
 
          #= Helper function to printComponentRefStr. =#
-        function printComponentRef2Str(inIdent::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript}) ::String 
+        function printComponentRef2Str(inIdent::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript}) ::String
               local outString::String
 
               outString = begin
@@ -661,7 +661,7 @@
                   (s,  nil())  => begin
                     s
                   end
-                  
+
                   (s, l)  => begin
                       b = Config.modelicaOutput()
                       str = ExpressionDump.printListStr(l, ExpressionDump.printSubscriptStr, ",")
@@ -686,7 +686,7 @@
         This function is equal to debugPrintComponentRefTypeStr with the extra feature that it
         prints the base type of each ComponentRef.
         NOTE Only used for debugging. =#
-        function debugPrintComponentRefTypeStr(inComponentRef::DAE.ComponentRef) ::String 
+        function debugPrintComponentRefTypeStr(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
 
               outString = begin
@@ -702,7 +702,7 @@
                   DAE.WILD(__)  => begin
                     "_"
                   end
-                  
+
                   DAE.CREF_IDENT(ident = s, identType = ty, subscriptLst = subs)  => begin
                       str_1 = ExpressionDump.printListStr(subs, ExpressionDump.debugPrintSubscriptStr, ", ")
                       str = s + (if stringLength(str_1) > 0
@@ -714,7 +714,7 @@
                       str = stringAppendList(list(str, " [", str2, "]"))
                     str
                   end
-                  
+
                   DAE.CREF_QUAL(ident = s, identType = ty, subscriptLst = subs, componentRef = cr)  => begin
                       if Config.modelicaOutput()
                         str = printComponentRef2Str(s, subs)
@@ -745,7 +745,7 @@
 
          #= author: Frenkel TUD
           Returns true if the ComponentRefs has the same name (the last identifier). =#
-        function crefLastIdentEqual(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefLastIdentEqual(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local equal::Bool
 
               local id1::DAE.Ident
@@ -759,7 +759,7 @@
 
          #= author: Frenkel TUD
           Returns true if the ComponentRefs have the same first Cref. =#
-        function crefFirstCrefEqual(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefFirstCrefEqual(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local equal::Bool
 
               local pcr1::DAE.ComponentRef
@@ -773,7 +773,7 @@
 
          #= author: Frenkel TUD
           Returns true if the ComponentRefs have the same first Cref. =#
-        function crefFirstCrefLastCrefEqual(cr1::DAE.ComponentRef #= First Cref =#, cr2::DAE.ComponentRef #= Last Cref =#) ::Bool 
+        function crefFirstCrefLastCrefEqual(cr1::DAE.ComponentRef #= First Cref =#, cr2::DAE.ComponentRef #= Last Cref =#) ::Bool
               local equal::Bool
 
               local pcr1::DAE.ComponentRef
@@ -786,7 +786,7 @@
         end
 
          #= Returns true if the first identifier in both crefs are the same, otherwise false. =#
-        function crefFirstIdentEqual(inCref1::DAE.ComponentRef, inCref2::DAE.ComponentRef) ::Bool 
+        function crefFirstIdentEqual(inCref1::DAE.ComponentRef, inCref2::DAE.ComponentRef) ::Bool
               local outEqual::Bool
 
               local id1::DAE.Ident
@@ -800,7 +800,7 @@
 
 
 
-        module CompareWithGenericSubscript 
+        module CompareWithGenericSubscript
 
 
           using MetaModelica
@@ -809,7 +809,7 @@
 
                const compareSubscript = CompareWithSubsType.WithGenericSubscript::CompareWithSubsType
 
-              function compare(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger 
+              function compare(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
                     local res::ModelicaInteger
 
                     res = begin
@@ -817,49 +817,49 @@
                         (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                             res = stringCompare(cr1.ident, cr2.ident)
                             if compareSubscript == CompareWithSubsType.WithoutSubscripts || res != 0
-                              return 
+                              return
                             end
                           compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                         end
-                        
+
                         (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                             res = stringCompare(cr1.ident, cr2.ident)
                             if res != 0
-                              return 
+                              return
                             end
                             if compareSubscript != CompareWithSubsType.WithoutSubscripts
                               res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                               if res != 0
-                                return 
+                                return
                               end
                             end
                           compare(cr1.componentRef, cr2.componentRef)
                         end
-                        
+
                         (DAE.CREF_QUAL(__), DAE.CREF_IDENT(__))  => begin
                             res = stringCompare(cr1.ident, cr2.ident)
                             if res != 0
-                              return 
+                              return
                             end
                             if compareSubscript != CompareWithSubsType.WithoutSubscripts
                               res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                             end
                             if res != 0
-                              return 
+                              return
                             end
                           1
                         end
-                        
+
                         (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                             res = stringCompare(cr1.ident, cr2.ident)
                             if res != 0
-                              return 
+                              return
                             end
                             if compareSubscript != CompareWithSubsType.WithoutSubscripts
                               res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                             end
                             if res != 0
-                              return 
+                              return
                             end
                           -1
                         end
@@ -868,7 +868,7 @@
                 res
               end
 
-              function compareSubs(ss1::List{<:DAE.Subscript}, ss2::List{<:DAE.Subscript}) ::ModelicaInteger 
+              function compareSubs(ss1::List{<:DAE.Subscript}, ss2::List{<:DAE.Subscript}) ::ModelicaInteger
                     local res::ModelicaInteger = 0
 
                     local ss::List{DAE.Subscript} = ss2
@@ -913,63 +913,62 @@
           @exportAll()
         end
 
-        module CompareWithGenericSubscriptNotAlphabetic 
+        module CompareWithGenericSubscriptNotAlphabetic
 
 
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-              extends CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithGenericSubscriptNotAlphabetic)
+
+          @ExtendedFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithGenericSubscriptNotAlphabetic)
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
         end
 
-        module CompareWithoutSubscripts 
+        module CompareWithoutSubscripts
 
 
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-              extends CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithoutSubscripts)
+          @ExtendeFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithoutSubscripts)
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
         end
 
-        module CompareWithIntSubscript 
+        module CompareWithIntSubscript
 
 
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-              extends CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithIntSubscript)
+          @ExtendedFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithIntSubscript)
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
         end
 
          #= A sorting function (greatherThan) for crefs =#
-        function crefSortFunc(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefSortFunc(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local greaterThan::Bool
-
               greaterThan = CompareWithGenericSubscript.compare(cr1, cr2) > 0
           greaterThan
         end
 
          #= A sorting function for crefs =#
-        function crefCompareGeneric(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger 
+        function crefCompareGeneric(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
               local comp::ModelicaInteger
-
               comp = CompareWithGenericSubscript.compare(cr1, cr2)
           comp
         end
 
          #= A sorting function for crefs =#
-        function crefCompareIntSubscript(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger 
+        function crefCompareIntSubscript(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
               local comp::ModelicaInteger
 
               comp = CompareWithIntSubscript.compare(cr1, cr2)
@@ -977,7 +976,7 @@
         end
 
          #= A sorting function for crefs =#
-        function crefCompareGenericNotAlphabetic(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger 
+        function crefCompareGenericNotAlphabetic(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
               local comp::ModelicaInteger
 
               comp = CompareWithGenericSubscriptNotAlphabetic.compare(cr1, cr2)
@@ -989,7 +988,7 @@
           they are at the end of the whole component reference.
           e.g. r[1].i is greater than r[2].a.
           returns true if the first cref is greater than the second =#
-        function crefLexicalGreaterSubsAtEnd(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefLexicalGreaterSubsAtEnd(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local isGreater::Bool
 
               isGreater = crefLexicalCompareSubsAtEnd(cr1, cr2) > 0
@@ -1001,7 +1000,7 @@
           they are at the end of the whole component reference.
           e.g. r[1].i is greater than r[2].a.
           returns value is same as C strcmp. 0 if equal, 1 if first is greater, -1 otherwise =#
-        function crefLexicalCompareSubsAtEnd(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger 
+        function crefLexicalCompareSubsAtEnd(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
               local res::ModelicaInteger
 
               local subs1::List{ModelicaInteger}
@@ -1022,7 +1021,7 @@
           compares subs. However only if the crefs with out subs are equal.
           (i.e. identsCompared is 0)
           otherwise just returns =#
-        function crefLexicalCompareSubsAtEnd2(inSubs1::List{<:ModelicaInteger}, inSubs2::List{<:ModelicaInteger}) ::ModelicaInteger 
+        function crefLexicalCompareSubsAtEnd2(inSubs1::List{<:ModelicaInteger}, inSubs2::List{<:ModelicaInteger}) ::ModelicaInteger
               local res::ModelicaInteger = 0
 
               local rest::List{ModelicaInteger} = inSubs2
@@ -1046,7 +1045,7 @@
          #= author: PA
           Returns true if second arg is a sub component ref of first arg.
           For instance, b.c. is a sub_component of a.b.c. =#
-        function crefContainedIn(containerCref::DAE.ComponentRef #= the cref that might contain =#, containedCref::DAE.ComponentRef #= cref that might be contained =#) ::Bool 
+        function crefContainedIn(containerCref::DAE.ComponentRef #= the cref that might contain =#, containedCref::DAE.ComponentRef #= cref that might be contained =#) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1060,18 +1059,18 @@
                   (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                     false
                   end
-                  
+
                   (full, partOf)  => begin
                       @match true = crefEqualNoStringCompare(full, partOf)
                     true
                   end
-                  
+
                   (full && DAE.CREF_QUAL(componentRef = cr2), partOf)  => begin
                       @match false = crefEqualNoStringCompare(full, partOf)
                       res = crefContainedIn(cr2, partOf)
                     res
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1091,7 +1090,7 @@
           For example, a.b is a prefix of a.b.c.
           adrpo 2010-10-07,
             added also that a.b.c is a prefix of a.b.c[1].*! =#
-        function crefPrefixOf(prefixCref::DAE.ComponentRef, fullCref::DAE.ComponentRef) ::Bool 
+        function crefPrefixOf(prefixCref::DAE.ComponentRef, fullCref::DAE.ComponentRef) ::Bool
               local outPrefixOf::Bool
 
               outPrefixOf = begin
@@ -1099,23 +1098,23 @@
                   (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                     prefixCref.ident == fullCref.ident && Expression.subscriptEqual(prefixCref.subscriptLst, fullCref.subscriptLst) && crefPrefixOf(prefixCref.componentRef, fullCref.componentRef)
                   end
-                  
+
                   (DAE.CREF_IDENT(subscriptLst =  nil()), DAE.CREF_QUAL(__))  => begin
                     prefixCref.ident == fullCref.ident
                   end
-                  
+
                   (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                     prefixCref.ident == fullCref.ident && Expression.subscriptEqual(prefixCref.subscriptLst, fullCref.subscriptLst)
                   end
-                  
+
                   (DAE.CREF_IDENT(subscriptLst =  nil()), DAE.CREF_IDENT(__))  => begin
                     stringEq(prefixCref.ident, fullCref.ident)
                   end
-                  
+
                   (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                     prefixCref.ident == fullCref.ident && Expression.subscriptEqual(prefixCref.subscriptLst, fullCref.subscriptLst)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1142,7 +1141,7 @@
           Returns true if prefixCref is a prefix of fullCref
           For example, a.b is a prefix of a.b.c.
           This function ignores the subscripts =#
-        function crefPrefixOfIgnoreSubscripts(prefixCref::DAE.ComponentRef, fullCref::DAE.ComponentRef) ::Bool 
+        function crefPrefixOfIgnoreSubscripts(prefixCref::DAE.ComponentRef, fullCref::DAE.ComponentRef) ::Bool
               local outPrefixOf::Bool
 
               outPrefixOf = begin
@@ -1150,15 +1149,15 @@
                   (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                     prefixCref.ident == fullCref.ident && crefPrefixOfIgnoreSubscripts(prefixCref.componentRef, fullCref.componentRef)
                   end
-                  
+
                   (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                     prefixCref.ident == fullCref.ident
                   end
-                  
+
                   (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                     prefixCref.ident == fullCref.ident
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1174,7 +1173,7 @@
         end
 
          #= negation of crefPrefixOf =#
-        function crefNotPrefixOf(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefNotPrefixOf(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1182,7 +1181,7 @@
                   (DAE.CREF_QUAL(__), DAE.CREF_IDENT(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       ! crefPrefixOf(cr1, cr2)
                   end
@@ -1195,7 +1194,7 @@
 
          #= Returns true if two component references are equal.
           No string comparison of unparsed crefs is performed! =#
-        function crefEqual(inComponentRef1::DAE.ComponentRef, inComponentRef2::DAE.ComponentRef) ::Bool 
+        function crefEqual(inComponentRef1::DAE.ComponentRef, inComponentRef2::DAE.ComponentRef) ::Bool
               local outBoolean::Bool
 
               outBoolean = crefEqualNoStringCompare(inComponentRef1, inComponentRef2)
@@ -1203,7 +1202,7 @@
         end
 
          #= returns true if the cref is in the list of crefs =#
-        function crefInLst(cref::DAE.ComponentRef, lst::List{<:DAE.ComponentRef}) ::Bool 
+        function crefInLst(cref::DAE.ComponentRef, lst::List{<:DAE.ComponentRef}) ::Bool
               local b::Bool
 
               b = ListUtil.isMemberOnTrue(cref, lst, crefEqual)
@@ -1211,7 +1210,7 @@
         end
 
          #= returns true if the cref is not in the list of crefs =#
-        function crefNotInLst(cref::DAE.ComponentRef, lst::List{<:DAE.ComponentRef}) ::Bool 
+        function crefNotInLst(cref::DAE.ComponentRef, lst::List{<:DAE.ComponentRef}) ::Bool
               local b::Bool
 
               b = ! ListUtil.isMemberOnTrue(cref, lst, crefEqual)
@@ -1220,7 +1219,7 @@
 
          #= Returns true if two component references are equal,
           comparing strings if no other solution is found =#
-        function crefEqualVerySlowStringCompareDoNotUse(inComponentRef1::DAE.ComponentRef, inComponentRef2::DAE.ComponentRef) ::Bool 
+        function crefEqualVerySlowStringCompareDoNotUse(inComponentRef1::DAE.ComponentRef, inComponentRef2::DAE.ComponentRef) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1239,39 +1238,39 @@
                       @match true = referenceEq(inComponentRef1, inComponentRef2)
                     true
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = n1, subscriptLst =  nil()), DAE.CREF_IDENT(ident = n2, subscriptLst =  nil()))  => begin
                       @match true = stringEq(n1, n2)
                     true
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = n1, subscriptLst = idx1 && _ <| _), DAE.CREF_IDENT(ident = n2, subscriptLst = idx2 && _ <| _))  => begin
                       @match true = stringEq(n1, n2)
                       @match true = Expression.subscriptEqual(idx1, idx2)
                     true
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = n1, subscriptLst =  nil()), DAE.CREF_IDENT(ident = n2, subscriptLst = idx2 && _ <| _))  => begin
                       @match 0 = System.stringFind(n1, n2)
                       s1 = n2 + "[" + ExpressionDump.printListStr(idx2, ExpressionDump.printSubscriptStr, ",") + "]"
                       @match true = stringEq(s1, n1)
                     true
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = n1, subscriptLst = idx2 && _ <| _), DAE.CREF_IDENT(ident = n2, subscriptLst =  nil()))  => begin
                       @match 0 = System.stringFind(n2, n1)
                       s1 = n1 + "[" + ExpressionDump.printListStr(idx2, ExpressionDump.printSubscriptStr, ",") + "]"
                       @match true = stringEq(s1, n2)
                     true
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = n1, subscriptLst = idx1, componentRef = cr1), DAE.CREF_QUAL(ident = n2, subscriptLst = idx2, componentRef = cr2))  => begin
                       @match true = stringEq(n1, n2)
                       @match true = crefEqualVerySlowStringCompareDoNotUse(cr1, cr2)
                       @match true = Expression.subscriptEqual(idx1, idx2)
                     true
                   end
-                  
+
                   (cr1 && DAE.CREF_QUAL(ident = n1), cr2 && DAE.CREF_IDENT(ident = n2))  => begin
                       @match 0 = System.stringFind(n2, n1)
                       s1 = printComponentRefStr(cr1)
@@ -1279,7 +1278,7 @@
                       @match true = stringEq(s1, s2)
                     true
                   end
-                  
+
                   (cr1 && DAE.CREF_IDENT(ident = n1), cr2 && DAE.CREF_QUAL(ident = n2))  => begin
                       @match 0 = System.stringFind(n1, n2)
                       s1 = printComponentRefStr(cr1)
@@ -1287,7 +1286,7 @@
                       @match true = stringEq(s1, s2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1360,7 +1359,7 @@
           IMPORTANT! do not use this function if you have
           stringified components, meaning this function will
           return false for: cref1: QUAL(x, IDENT(x)) != cref2: IDENT(x.y) =#
-        function crefEqualNoStringCompare(inCref1::DAE.ComponentRef, inCref2::DAE.ComponentRef) ::Bool 
+        function crefEqualNoStringCompare(inCref1::DAE.ComponentRef, inCref2::DAE.ComponentRef) ::Bool
               local outEqual::Bool
 
               if referenceEq(inCref1, inCref2)
@@ -1372,11 +1371,11 @@
                   (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                     inCref1.ident == inCref2.ident && Expression.subscriptEqual(inCref1.subscriptLst, inCref2.subscriptLst)
                   end
-                  
+
                   (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                     inCref1.ident == inCref2.ident && crefEqualNoStringCompare(inCref1.componentRef, inCref2.componentRef) && Expression.subscriptEqual(inCref1.subscriptLst, inCref2.subscriptLst)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1388,7 +1387,7 @@
          #= author: PA
           Checks if two crefs are equal and if
           so returns the cref, otherwise fail. =#
-        function crefEqualReturn(cr::DAE.ComponentRef, cr2::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefEqualReturn(cr::DAE.ComponentRef, cr2::DAE.ComponentRef) ::DAE.ComponentRef
               local ocr::DAE.ComponentRef
 
               @match true = crefEqualNoStringCompare(cr, cr2)
@@ -1397,7 +1396,7 @@
         end
 
          #= Checks if two crefs are equal, without considering their last subscripts. =#
-        function crefEqualWithoutLastSubs(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefEqualWithoutLastSubs(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local res::Bool
 
               res = crefEqualNoStringCompare(crefStripLastSubs(cr1), crefStripLastSubs(cr2))
@@ -1405,14 +1404,14 @@
         end
 
          #= Checks if two crefs are equal, without considering their subscripts. =#
-        function crefEqualWithoutSubs(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function crefEqualWithoutSubs(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local res::Bool
 
               res = crefEqualWithoutSubs2(referenceEq(cr1, cr2), cr1, cr2)
           res
         end
 
-        function crefEqualWithoutSubs2(refEq::Bool, icr1::DAE.ComponentRef, icr2::DAE.ComponentRef) ::Bool 
+        function crefEqualWithoutSubs2(refEq::Bool, icr1::DAE.ComponentRef, icr2::DAE.ComponentRef) ::Bool
               local res::Bool
 
               res = begin
@@ -1425,11 +1424,11 @@
                   (true, _, _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.CREF_IDENT(ident = n1), DAE.CREF_IDENT(ident = n2))  => begin
                     stringEq(n1, n2)
                   end
-                  
+
                   (_, DAE.CREF_QUAL(ident = n1, componentRef = cr1), DAE.CREF_QUAL(ident = n2, componentRef = cr2))  => begin
                       r = stringEq(n1, n2)
                       r = if r
@@ -1439,7 +1438,7 @@
                           end
                     r
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1450,7 +1449,7 @@
 
          #= returns true if ComponentRef is an ident,
          i.e a => true , a.b => false =#
-        function crefIsIdent(cr::DAE.ComponentRef) ::Bool 
+        function crefIsIdent(cr::DAE.ComponentRef) ::Bool
               local res::Bool
 
               res = begin
@@ -1458,7 +1457,7 @@
                   DAE.CREF_IDENT(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1469,7 +1468,7 @@
 
          #= returns true if ComponentRef is not an ident,
          i.e a => false , a.b => true =#
-        function crefIsNotIdent(cr::DAE.ComponentRef) ::Bool 
+        function crefIsNotIdent(cr::DAE.ComponentRef) ::Bool
               local res::Bool
 
               res = begin
@@ -1477,7 +1476,7 @@
                   DAE.CREF_IDENT(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -1486,10 +1485,10 @@
           res
         end
 
-         #= 
+         #=
         function isRecord
           returns true if the type of the last ident is a record =#
-        function isRecord(cr::DAE.ComponentRef) ::Bool 
+        function isRecord(cr::DAE.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -1498,11 +1497,11 @@
                   DAE.CREF_IDENT(identType = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)))  => begin
                     true
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = comp)  => begin
                     isRecord(comp)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1514,7 +1513,7 @@
         end
 
          #= returns true if cref is elemnt of an array =#
-        function isArrayElement(cr::DAE.ComponentRef) ::Bool 
+        function isArrayElement(cr::DAE.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -1523,15 +1522,15 @@
                   DAE.CREF_IDENT(identType = DAE.T_ARRAY(__))  => begin
                     true
                   end
-                  
+
                   DAE.CREF_QUAL(identType = DAE.T_ARRAY(__))  => begin
                     true
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = comp)  => begin
                     isArrayElement(comp)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1540,7 +1539,7 @@
           b
         end
 
-        function isPreCref(cr::DAE.ComponentRef) ::Bool 
+        function isPreCref(cr::DAE.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -1548,7 +1547,7 @@
                   DAE.CREF_QUAL(ident = DAE.preNamePrefix)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1557,7 +1556,7 @@
           b
         end
 
-        function isPreviousCref(cr::DAE.ComponentRef) ::Bool 
+        function isPreviousCref(cr::DAE.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -1565,7 +1564,7 @@
                   DAE.CREF_QUAL(ident = DAE.previousNamePrefix)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1574,7 +1573,7 @@
           b
         end
 
-        function isStartCref(cr::DAE.ComponentRef) ::Bool 
+        function isStartCref(cr::DAE.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -1582,7 +1581,7 @@
                   DAE.CREF_QUAL(ident = DAE.startNamePrefix)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1591,7 +1590,7 @@
           b
         end
 
-        function popPreCref(inCR::DAE.ComponentRef) ::DAE.ComponentRef 
+        function popPreCref(inCR::DAE.ComponentRef) ::DAE.ComponentRef
               local outCR::DAE.ComponentRef
 
               outCR = begin
@@ -1600,7 +1599,7 @@
                   DAE.CREF_QUAL(ident = "$PRE", componentRef = cr)  => begin
                     cr
                   end
-                  
+
                   _  => begin
                       inCR
                   end
@@ -1609,7 +1608,7 @@
           outCR
         end
 
-        function popCref(inCR::DAE.ComponentRef) ::DAE.ComponentRef 
+        function popCref(inCR::DAE.ComponentRef) ::DAE.ComponentRef
               local outCR::DAE.ComponentRef
 
               outCR = begin
@@ -1618,7 +1617,7 @@
                   DAE.CREF_QUAL(componentRef = cr)  => begin
                     cr
                   end
-                  
+
                   _  => begin
                       inCR
                   end
@@ -1631,7 +1630,7 @@
           are arrays and references the first element of the array.
           like for instance a.b{1,1} and a{1} returns true but
           a.b{1,2} or a{2} returns false. =#
-        function crefIsFirstArrayElt(inComponentRef::DAE.ComponentRef) ::Bool 
+        function crefIsFirstArrayElt(inComponentRef::DAE.ComponentRef) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1647,7 +1646,7 @@
                       end
                     ListUtil.mapAllValueBool(subs, Expression.subscriptIsFirst, true)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1660,7 +1659,7 @@
 
          #= Function: crefHaveSubs
           Checks whether Componentref has any subscripts, recursive  =#
-        function crefHaveSubs(icr::DAE.ComponentRef) ::Bool 
+        function crefHaveSubs(icr::DAE.ComponentRef) ::Bool
               local ob::Bool
 
               ob = begin
@@ -1672,11 +1671,11 @@
                   DAE.CREF_QUAL(subscriptLst = _ <| _)  => begin
                     true
                   end
-                  
+
                   DAE.CREF_IDENT(subscriptLst = _ <| _)  => begin
                     true
                   end
-                  
+
                   DAE.CREF_IDENT(ident = str, subscriptLst =  nil())  => begin
                       idx = System.stringFind(str, "[")
                       if ! idx > 0
@@ -1684,12 +1683,12 @@
                       end
                     true
                   end
-                  
+
                   DAE.CREF_QUAL(subscriptLst =  nil(), componentRef = cr)  => begin
                       b = crefHaveSubs(cr)
                     b
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1711,7 +1710,7 @@
           x[:,1] has not scalar subscripts
           x[{1,2},1] has not scalar subscripts
          =#
-        function crefHasScalarSubscripts(cr::DAE.ComponentRef) ::Bool 
+        function crefHasScalarSubscripts(cr::DAE.ComponentRef) ::Bool
               local hasScalarSubs::Bool
 
               hasScalarSubs = begin
@@ -1724,7 +1723,7 @@
                       @match nil = crefLastSubs(cr)
                     true
                   end
-                  
+
                   _  => begin
                       @match (@match _cons(_, _) = subs) = crefLastSubs(cr)
                       @match true = Expression.subscriptConstants(subs)
@@ -1733,7 +1732,7 @@
                       @match true = listLength(dims) <= listLength(subs)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1753,7 +1752,7 @@
         end
 
          #=  =#
-        function crefIsScalarWithAllConstSubs(inCref::DAE.ComponentRef) ::Bool 
+        function crefIsScalarWithAllConstSubs(inCref::DAE.ComponentRef) ::Bool
               local isScalar::Bool
 
               isScalar = begin
@@ -1768,7 +1767,7 @@
                       @match nil = crefSubs(inCref)
                     true
                   end
-                  
+
                   _  => begin
                       @match (@match _cons(_, _) = subs) = crefSubs(inCref)
                       dims = crefDims(inCref)
@@ -1776,7 +1775,7 @@
                       @match true = Expression.subscriptConstants(subs)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1794,7 +1793,7 @@
         end
 
          #=  =#
-        function crefIsScalarWithVariableSubs(inCref::DAE.ComponentRef) ::Bool 
+        function crefIsScalarWithVariableSubs(inCref::DAE.ComponentRef) ::Bool
               local isScalar::Bool
 
               isScalar = begin
@@ -1812,7 +1811,7 @@
                       @match false = Expression.subscriptConstants(subs)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1831,7 +1830,7 @@
 
          #=  A function to check if a cref contains a [:] wholedim element in the subscriptlist.
          =#
-        function containWholeDim(inRef::DAE.ComponentRef) ::Bool 
+        function containWholeDim(inRef::DAE.ComponentRef) ::Bool
               local wholedim::Bool
 
               wholedim = begin
@@ -1844,12 +1843,12 @@
                       wholedim = containWholeDim2(ssl, ty)
                     wholedim
                   end
-                  
+
                   DAE.CREF_QUAL(_, _, _, cr)  => begin
                       wholedim = containWholeDim(cr)
                     wholedim
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1858,7 +1857,7 @@
           wholedim
         end
 
-        function traverseCref(cref::DAE.ComponentRef, func::FuncType, argIn::Type_a) ::Type_a 
+        function traverseCref(cref::DAE.ComponentRef, func::FuncType, argIn::Type_a) ::Type_a
               local argOut::Type_a
 
               argOut = begin
@@ -1869,12 +1868,12 @@
                       arg = func(cref, argIn)
                     arg
                   end
-                  
+
                   (DAE.CREF_QUAL(_, _, _, cr), _, _)  => begin
                       arg = func(cref, argIn)
                     traverseCref(cr, func, arg)
                   end
-                  
+
                   _  => begin
                         print("traverseCref failed!")
                       fail()
@@ -1885,7 +1884,7 @@
         end
 
          #= traverse function to check if one of the crefs is a record =#
-        function crefIsRec(cref::DAE.ComponentRef, isRecIn::Bool) ::Bool 
+        function crefIsRec(cref::DAE.ComponentRef, isRecIn::Bool) ::Bool
               local isRec::Bool
 
                #=  is this case the last ident needs a consideration
@@ -1894,9 +1893,9 @@
           isRec
         end
 
-         #= 
+         #=
           A function to check if a cref contains a [:] wholedim element in the subscriptlist. =#
-        function containWholeDim2(inRef::List{<:DAE.Subscript}, inType::DAE.Type) ::Bool 
+        function containWholeDim2(inRef::List{<:DAE.Subscript}, inType::DAE.Type) ::Bool
               local wholedim::Bool
 
               wholedim = begin
@@ -1911,22 +1910,22 @@
                   ( nil(), _)  => begin
                     false
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| _, DAE.T_ARRAY(__))  => begin
                     true
                   end
-                  
+
                   (DAE.SLICE(es1) <| _, DAE.T_ARRAY(dims = ad))  => begin
                       @match true = containWholeDim3(es1, ad)
                     true
                   end
-                  
+
                   (_ <| ssl, DAE.T_ARRAY(tty, ad))  => begin
                       ad = ListUtil.stripFirst(ad)
                       b = containWholeDim2(ssl, DAE.T_ARRAY(tty, ad))
                     b
                   end
-                  
+
                   (_ <| ssl, _)  => begin
                       wholedim = containWholeDim2(ssl, inType)
                     wholedim
@@ -1937,7 +1936,7 @@
         end
 
          #= Verify that a slice adresses all dimensions =#
-        function containWholeDim3(inExp::DAE.Exp, ad::DAE.Dimensions) ::Bool 
+        function containWholeDim3(inExp::DAE.Exp, ad::DAE.Dimensions) ::Bool
               local ob::Bool
 
               ob = begin
@@ -1952,7 +1951,7 @@
                       @match true = intEq(x1, x2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1973,7 +1972,7 @@
              (a->array, b->array) given a[2].b   return a[2].b[1]
           i.e essentially filling the missing subs with 1.
          =#
-        function crefArrayGetFirstCref(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefArrayGetFirstCref(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -1992,7 +1991,7 @@
                       subs = listAppend(subs, newsubs)
                     DAE.CREF_IDENT(i, ty, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(i, ty, subs, cr)  => begin
                       dims = Types.getDimensions(ty)
                       diff = listLength(dims) - listLength(subs)
@@ -2007,7 +2006,7 @@
         end
 
          #= Returns the last identifier of a cref as an Absyn.IDENT. =#
-        function crefLastPath(inComponentRef::DAE.ComponentRef) ::Absyn.Path 
+        function crefLastPath(inComponentRef::DAE.ComponentRef) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -2017,7 +2016,7 @@
                   DAE.CREF_IDENT(ident = i, subscriptLst =  nil())  => begin
                     Absyn.IDENT(i)
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = c, subscriptLst =  nil())  => begin
                     crefLastPath(c)
                   end
@@ -2027,7 +2026,7 @@
         end
 
          #= Returns the first identifier of a component reference. =#
-        function crefFirstIdent(inComponentRef::DAE.ComponentRef) ::DAE.Ident 
+        function crefFirstIdent(inComponentRef::DAE.ComponentRef) ::DAE.Ident
               local outIdent::DAE.Ident
 
               outIdent = begin
@@ -2036,7 +2035,7 @@
                   DAE.CREF_IDENT(ident = id)  => begin
                     id
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id)  => begin
                     id
                   end
@@ -2047,7 +2046,7 @@
 
          #= author: PA
           Returns the last identfifier of a ComponentRef. =#
-        function crefLastIdent(inComponentRef::DAE.ComponentRef) ::DAE.Ident 
+        function crefLastIdent(inComponentRef::DAE.ComponentRef) ::DAE.Ident
               local outIdent::DAE.Ident
 
               outIdent = begin
@@ -2058,7 +2057,7 @@
                   DAE.CREF_IDENT(ident = id)  => begin
                     id
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr)  => begin
                       res = crefLastIdent(cr)
                     res
@@ -2068,9 +2067,9 @@
           outIdent
         end
 
-         #= 
+         #=
           Return the last ComponentRef =#
-        function crefLastCref(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefLastCref(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2081,7 +2080,7 @@
                   DAE.CREF_IDENT(__)  => begin
                     inComponentRef
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr)  => begin
                       res = crefLastCref(cr)
                     res
@@ -2091,7 +2090,7 @@
           outComponentRef
         end
 
-        function crefRest(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefRest(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               @match DAE.CREF_QUAL(componentRef = outCref) = inCref
@@ -2099,7 +2098,7 @@
         end
 
          #= Helper function to crefTypeFull. =#
-        function crefTypeFull2(inCref::DAE.ComponentRef, accumDims::List{<:DAE.Dimension} = nil) ::Tuple{DAE.Type, List{DAE.Dimension}} 
+        function crefTypeFull2(inCref::DAE.ComponentRef, accumDims::List{<:DAE.Dimension} = nil) ::Tuple{DAE.Type, List{DAE.Dimension}}
               local outDims::List{DAE.Dimension}
               local outType::DAE.Type
 
@@ -2118,14 +2117,14 @@
                       end
                     (ty, dims)
                   end
-                  
+
                   DAE.CREF_QUAL(identType = ty, subscriptLst = subs, componentRef = cr)  => begin
                       (ty, dims) = Types.flattenArrayType(ty)
                       dims = ListUtil.stripN(dims, listLength(subs))
                       (basety, dims) = crefTypeFull2(cr, ListUtil.append_reverse(dims, accumDims))
                     (basety, dims)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("ComponentReference.crefTypeFull2 failed on cref: ")
@@ -2155,7 +2154,7 @@
                               a[1].b[1] --> Real[2]
 
             =#
-        function crefTypeFull(inCref::DAE.ComponentRef) ::DAE.Type 
+        function crefTypeFull(inCref::DAE.ComponentRef) ::DAE.Type
               local outType::DAE.Type
 
               local ty::DAE.Type
@@ -2173,7 +2172,7 @@
          #=  ***deprecated. Use crefTypeFull unless you really specifically want the type of the first cref.
           Function for extracting the type of the first identifier of a cref.
            =#
-        function crefType(inCref::DAE.ComponentRef) ::DAE.Type 
+        function crefType(inCref::DAE.ComponentRef) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2182,11 +2181,11 @@
                   DAE.CREF_IDENT(identType = ty)  => begin
                     ty
                   end
-                  
+
                   DAE.CREF_QUAL(identType = ty)  => begin
                     ty
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("ComponentReference.crefType failed on cref: ")
@@ -2208,7 +2207,7 @@
           NOTE THAT THIS WILL BE AN ARRAY TYPE IF THE LAST CREF IS AN ARRAY TYPE
           If you want to get the component reference type considering subscripts use:
           crefTypeConsiderSubs =#
-        function crefLastType(inRef::DAE.ComponentRef) ::DAE.Type 
+        function crefLastType(inRef::DAE.ComponentRef) ::DAE.Type
               local res::DAE.Type
 
               res = begin
@@ -2218,7 +2217,7 @@
                   DAE.CREF_IDENT(_, t2, _)  => begin
                     t2
                   end
-                  
+
                   DAE.CREF_QUAL(_, _, _, cr)  => begin
                     crefLastType(cr)
                   end
@@ -2227,10 +2226,10 @@
           res
         end
 
-         #= 
+         #=
         function: crefDims
           Return the all dimension (contained in the types) of a ComponentRef =#
-        function crefDims(inComponentRef::DAE.ComponentRef) ::List{DAE.Dimension} 
+        function crefDims(inComponentRef::DAE.ComponentRef) ::List{DAE.Dimension}
               local outDimensionLst::List{DAE.Dimension}
 
               outDimensionLst = begin
@@ -2242,7 +2241,7 @@
                   DAE.CREF_IDENT(identType = idType)  => begin
                     Types.getDimensions(idType)
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, identType = idType)  => begin
                       dims = Types.getDimensions(idType)
                       res = crefDims(cr)
@@ -2254,10 +2253,10 @@
           outDimensionLst
         end
 
-         #= 
+         #=
         function: crefSubs
           Return all subscripts of a ComponentRef =#
-        function crefSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript} 
+        function crefSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript}
               local outSubscriptLst::List{DAE.Subscript}
 
               outSubscriptLst = begin
@@ -2269,7 +2268,7 @@
                   DAE.CREF_IDENT(subscriptLst = subs)  => begin
                     subs
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, subscriptLst = subs)  => begin
                       res = crefSubs(cr)
                       res = listAppend(subs, res)
@@ -2280,7 +2279,7 @@
           outSubscriptLst
         end
 
-        function crefFirstSubs(inCref::DAE.ComponentRef) ::List{DAE.Subscript} 
+        function crefFirstSubs(inCref::DAE.ComponentRef) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = begin
@@ -2288,11 +2287,11 @@
                   DAE.CREF_IDENT(__)  => begin
                     inCref.subscriptLst
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                     inCref.subscriptLst
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2302,7 +2301,7 @@
         end
 
          #= Return the last subscripts of a ComponentRef =#
-        function crefLastSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript} 
+        function crefLastSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript}
               local outSubscriptLst::List{DAE.Subscript}
 
               outSubscriptLst = begin
@@ -2313,7 +2312,7 @@
                   DAE.CREF_IDENT(subscriptLst = subs)  => begin
                     subs
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr)  => begin
                     crefLastSubs(cr)
                   end
@@ -2323,7 +2322,7 @@
         end
 
          #= Returns the first part of a component reference, i.e the identifier =#
-        function crefFirstCref(inCr::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefFirstCref(inCr::DAE.ComponentRef) ::DAE.ComponentRef
               local outCr::DAE.ComponentRef
 
               outCr = begin
@@ -2335,7 +2334,7 @@
                   DAE.CREF_QUAL(id, t2, subs, _)  => begin
                     makeCrefIdent(id, t2, subs)
                   end
-                  
+
                   DAE.CREF_IDENT(_, _, _)  => begin
                     inCr
                   end
@@ -2355,7 +2354,7 @@
         one dimension is lifted.
         See also, crefType.
          =#
-        function crefTypeConsiderSubs(cr::DAE.ComponentRef) ::DAE.Type 
+        function crefTypeConsiderSubs(cr::DAE.ComponentRef) ::DAE.Type
               local res::DAE.Type
 
               res = Expression.unliftArrayTypeWithSubs(crefLastSubs(cr), crefLastType(cr))
@@ -2365,7 +2364,7 @@
          #= Function: crefType
         Function for extracting the name and type out of the first cref of a componentReference.
          =#
-        function crefNameType(inRef::DAE.ComponentRef) ::Tuple{DAE.Ident, DAE.Type} 
+        function crefNameType(inRef::DAE.ComponentRef) ::Tuple{DAE.Ident, DAE.Type}
               local res::DAE.Type
               local id::DAE.Ident
 
@@ -2377,11 +2376,11 @@
                   DAE.CREF_IDENT(name, t2, _)  => begin
                     (name, t2)
                   end
-                  
+
                   DAE.CREF_QUAL(name, t2, _, _)  => begin
                     (name, t2)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-ComponentReference.crefType failed on Cref:")
@@ -2394,7 +2393,7 @@
           (id, res)
         end
 
-        function getArrayCref(name::DAE.ComponentRef) ::Option{DAE.ComponentRef} 
+        function getArrayCref(name::DAE.ComponentRef) ::Option{DAE.ComponentRef}
               local arrayCref::Option{DAE.ComponentRef}
 
               arrayCref = begin
@@ -2409,7 +2408,7 @@
                       end
                     SOME(arrayCrefInner)
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -2418,7 +2417,7 @@
           arrayCref
         end
 
-        function getArraySubs(name::DAE.ComponentRef) ::List{DAE.Subscript} 
+        function getArraySubs(name::DAE.ComponentRef) ::List{DAE.Subscript}
               local arraySubs::List{DAE.Subscript}
 
               arraySubs = begin
@@ -2428,7 +2427,7 @@
                       arrayCrefSubs = crefSubs(name)
                     arrayCrefSubs
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2455,7 +2454,7 @@
 
         alternative names: crefAddSuffix, crefAddIdent
          =#
-        function crefPrependIdent(icr::DAE.ComponentRef, ident::String, subs::List{<:DAE.Subscript}, tp::DAE.Type) ::DAE.ComponentRef 
+        function crefPrependIdent(icr::DAE.ComponentRef, ident::String, subs::List{<:DAE.Subscript}, tp::DAE.Type) ::DAE.ComponentRef
               local newCr::DAE.ComponentRef
 
               newCr = begin
@@ -2467,7 +2466,7 @@
                   (DAE.CREF_IDENT(id1, tp1, subs1), _, _, _)  => begin
                     makeCrefQual(id1, tp1, subs1, makeCrefIdent(ident, tp, subs))
                   end
-                  
+
                   (DAE.CREF_QUAL(id1, tp1, subs1, cr), _, _, _)  => begin
                       cr = crefPrependIdent(cr, ident, subs, tp)
                     makeCrefQual(id1, tp1, subs1, cr)
@@ -2479,7 +2478,7 @@
 
          #= public function crefPrefixDer
           Appends $DER to a cref, so a => $DER.a =#
-        function crefPrefixDer(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixDer(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(DAE.derivativeNamePrefix, DAE.T_REAL_DEFAULT, nil, inCref)
@@ -2488,7 +2487,7 @@
 
          #= public function crefPrefixPre
           Appends $PRE to a cref, so a => $PRE.a =#
-        function crefPrefixPre(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixPre(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(DAE.preNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
@@ -2497,7 +2496,7 @@
 
          #= public function crefPrefixPrevious
           Appends $CLKPRE to a cref, so a => $CLKPRE.a =#
-        function crefPrefixPrevious(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixPrevious(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(DAE.previousNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
@@ -2506,14 +2505,14 @@
 
          #= public function crefPrefixAux
           Appends $AUX to a cref, so a => $AUX.a =#
-        function crefPrefixAux(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixAux(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(DAE.auxNamePrefix, DAE.T_REAL_DEFAULT, nil, inCref)
           outCref
         end
 
-        function crefRemovePrePrefix(cref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefRemovePrePrefix(cref::DAE.ComponentRef) ::DAE.ComponentRef
 
 
               cref = begin
@@ -2521,7 +2520,7 @@
                   DAE.CREF_QUAL(ident = DAE.preNamePrefix)  => begin
                     cref.componentRef
                   end
-                  
+
                   _  => begin
                       cref
                   end
@@ -2532,7 +2531,7 @@
 
          #= public function crefPrefixStart
           Appends $START to a cref, so a => $START.a =#
-        function crefPrefixStart(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixStart(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(DAE.startNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
@@ -2541,7 +2540,7 @@
 
          #= Prefixes a cref with a string identifier, e.g.:
             crefPrefixString(a, b.c) => a.b.c =#
-        function crefPrefixString(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixString(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = makeCrefQual(inString, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
@@ -2550,7 +2549,7 @@
 
          #= Prefixes a cref with a list of strings, e.g.:
             crefPrefixStringList({a, b, c}, d.e.f) => a.b.c.d.e.f =#
-        function crefPrefixStringList(inStrings::List{<:String}, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefPrefixStringList(inStrings::List{<:String}, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -2563,7 +2562,7 @@
                       cref = crefPrefixString(str, cref)
                     cref
                   end
-                  
+
                   _  => begin
                       inCref
                   end
@@ -2572,7 +2571,7 @@
           outCref
         end
 
-        function prefixWithPath(inCref::DAE.ComponentRef, inPath::Absyn.Path) ::DAE.ComponentRef 
+        function prefixWithPath(inCref::DAE.ComponentRef, inPath::Absyn.Path) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -2583,12 +2582,12 @@
                   (_, Absyn.IDENT(name = name))  => begin
                     DAE.CREF_QUAL(name, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
                   end
-                  
+
                   (_, Absyn.QUALIFIED(name = name, path = rest_path))  => begin
                       cref = prefixWithPath(inCref, rest_path)
                     DAE.CREF_QUAL(name, DAE.T_UNKNOWN_DEFAULT, nil, cref)
                   end
-                  
+
                   (_, Absyn.FULLYQUALIFIED(path = rest_path))  => begin
                     prefixWithPath(inCref, rest_path)
                   end
@@ -2600,7 +2599,7 @@
          #= Prepend a string to a component reference.
           For qualified named, this means prepending a
           string to the first identifier. =#
-        function prependStringCref(inString::String, inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function prependStringCref(inString::String, inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2615,7 +2614,7 @@
                       i_1 = stringAppend(p, i)
                     makeCrefQual(i_1, t2, s, c)
                   end
-                  
+
                   (p, DAE.CREF_IDENT(ident = i, identType = t2, subscriptLst = s))  => begin
                       i_1 = stringAppend(p, i)
                     makeCrefIdent(i_1, t2, s)
@@ -2625,7 +2624,7 @@
           outComponentRef
         end
 
-        function appendStringCref(str::String, cr::DAE.ComponentRef) ::DAE.ComponentRef 
+        function appendStringCref(str::String, cr::DAE.ComponentRef) ::DAE.ComponentRef
               local ocr::DAE.ComponentRef
 
               ocr = joinCrefs(cr, DAE.CREF_IDENT(str, DAE.T_UNKNOWN_DEFAULT, nil))
@@ -2633,7 +2632,7 @@
         end
 
          #= Appends a string to the first identifier of a cref. =#
-        function appendStringFirstIdent(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function appendStringFirstIdent(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -2647,12 +2646,12 @@
                       id = stringAppend(id, inString)
                     DAE.CREF_QUAL(id, ty, subs, cr)
                   end
-                  
+
                   (_, DAE.CREF_IDENT(id, ty, subs))  => begin
                       id = stringAppend(id, inString)
                     DAE.CREF_IDENT(id, ty, subs)
                   end
-                  
+
                   (_, DAE.CREF_ITER(id, idx, ty, subs))  => begin
                       id = stringAppend(id, inString)
                     DAE.CREF_ITER(id, idx, ty, subs)
@@ -2663,7 +2662,7 @@
         end
 
          #= Appends a string to the last identifier of a cref. =#
-        function appendStringLastIdent(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function appendStringLastIdent(inString::String, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -2677,12 +2676,12 @@
                       cr = appendStringLastIdent(inString, cr)
                     DAE.CREF_QUAL(id, ty, subs, cr)
                   end
-                  
+
                   (_, DAE.CREF_IDENT(id, ty, subs))  => begin
                       id = stringAppend(id, inString)
                     DAE.CREF_IDENT(id, ty, subs)
                   end
-                  
+
                   (_, DAE.CREF_ITER(id, idx, ty, subs))  => begin
                       id = stringAppend(id, inString)
                     DAE.CREF_ITER(id, idx, ty, subs)
@@ -2695,7 +2694,7 @@
          #= Joins two component references by concatenating them.
           alternative names: crefAppend
            =#
-        function joinCrefs(inComponentRef1::DAE.ComponentRef #=  first part of the new componentref =#, inComponentRef2::DAE.ComponentRef #=  last part of the new componentref =#) ::DAE.ComponentRef 
+        function joinCrefs(inComponentRef1::DAE.ComponentRef #=  first part of the new componentref =#, inComponentRef2::DAE.ComponentRef #=  last part of the new componentref =#) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2709,7 +2708,7 @@
                   (DAE.CREF_IDENT(ident = id, identType = t2, subscriptLst = sub), cr2)  => begin
                     makeCrefQual(id, t2, sub, cr2)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, identType = t2, subscriptLst = sub, componentRef = cr), cr2)  => begin
                       cr_1 = joinCrefs(cr, cr2)
                     makeCrefQual(id, t2, sub, cr_1)
@@ -2720,7 +2719,7 @@
         end
 
          #= like joinCrefs but with last part as first argument. =#
-        function joinCrefsR(inComponentRef2::DAE.ComponentRef #=  last part of the new componentref =#, inComponentRef1::DAE.ComponentRef #=  first part of the new componentref =#) ::DAE.ComponentRef 
+        function joinCrefsR(inComponentRef2::DAE.ComponentRef #=  last part of the new componentref =#, inComponentRef1::DAE.ComponentRef #=  first part of the new componentref =#) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2734,7 +2733,7 @@
                   (cr2, DAE.CREF_IDENT(ident = id, identType = t2, subscriptLst = sub))  => begin
                     makeCrefQual(id, t2, sub, cr2)
                   end
-                  
+
                   (cr2, DAE.CREF_QUAL(ident = id, identType = t2, subscriptLst = sub, componentRef = cr))  => begin
                       cr_1 = joinCrefs(cr, cr2)
                     makeCrefQual(id, t2, sub, cr_1)
@@ -2745,7 +2744,7 @@
         end
 
          #= Like joinCrefs but first argument is an expression =#
-        function joinCrefsExp(exp::DAE.Exp, cref::DAE.ComponentRef) ::Tuple{DAE.Exp, DAE.ComponentRef} 
+        function joinCrefsExp(exp::DAE.Exp, cref::DAE.ComponentRef) ::Tuple{DAE.Exp, DAE.ComponentRef}
 
 
 
@@ -2757,7 +2756,7 @@
                       cr = joinCrefs(cref, cr)
                     DAE.CREF(cr, tp)
                   end
-                  
+
                   _  => begin
                       exp
                   end
@@ -2769,7 +2768,7 @@
          #= The subscriptCref function adds a subscript to the ComponentRef
           For instance a.b with subscript 10 becomes a.b[10] and c.d[1,2]
           with subscript 3,4 becomes c.d[1,2,3,4] =#
-        function subscriptCref(inComponentRef::DAE.ComponentRef, inSubscriptLst::List{<:DAE.Subscript}) ::DAE.ComponentRef 
+        function subscriptCref(inComponentRef::DAE.ComponentRef, inSubscriptLst::List{<:DAE.Subscript}) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2785,7 +2784,7 @@
                       newsub_1 = listAppend(sub, newsub)
                     makeCrefIdent(id, t2, newsub_1)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, subscriptLst = sub, componentRef = cref, identType = t2), newsub)  => begin
                       cref_1 = subscriptCref(cref, newsub)
                     makeCrefQual(id, t2, sub, cref_1)
@@ -2799,7 +2798,7 @@
           type of the components reference so that the type of the reference is correct
           with regards to the subscript. If the reference is not of array type this
           function will fail. =#
-        function subscriptCrefWithInt(inComponentRef::DAE.ComponentRef, inSubscript::ModelicaInteger) ::DAE.ComponentRef 
+        function subscriptCrefWithInt(inComponentRef::DAE.ComponentRef, inSubscript::ModelicaInteger) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2815,7 +2814,7 @@
                       ty = Expression.unliftArray(ty)
                     makeCrefIdent(id, ty, subs)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, subscriptLst = subs, componentRef = rest_cref, identType = ty), _)  => begin
                       rest_cref = subscriptCrefWithInt(rest_cref, inSubscript)
                     makeCrefQual(id, ty, subs, rest_cref)
@@ -2826,7 +2825,7 @@
         end
 
          #= sets the subs of the last componenentref ident =#
-        function crefSetLastSubs(inComponentRef::DAE.ComponentRef, inSubs::List{<:DAE.Subscript}) ::DAE.ComponentRef 
+        function crefSetLastSubs(inComponentRef::DAE.ComponentRef, inSubs::List{<:DAE.Subscript}) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2838,7 +2837,7 @@
                   (DAE.CREF_IDENT(ident = id, identType = tp), _)  => begin
                     makeCrefIdent(id, tp, inSubs)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, identType = tp, subscriptLst = subs, componentRef = cr), _)  => begin
                       cr = crefSetLastSubs(cr, inSubs)
                     makeCrefQual(id, tp, subs, cr)
@@ -2851,7 +2850,7 @@
          #= Apply subs to the first componenentref ident that is of array type.
            TODO: must not apply subs whose list length exceeds array dimensions.
            author: rfranke =#
-        function crefApplySubs(inComponentRef::DAE.ComponentRef, inSubs::List{<:DAE.Subscript}) ::DAE.ComponentRef 
+        function crefApplySubs(inComponentRef::DAE.ComponentRef, inSubs::List{<:DAE.Subscript}) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2863,16 +2862,16 @@
                   DAE.CREF_IDENT(ident = id, identType = tp && DAE.T_ARRAY(__), subscriptLst = subs)  => begin
                     makeCrefIdent(id, tp, listAppend(subs, inSubs))
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id, identType = tp && DAE.T_ARRAY(__), subscriptLst = subs, componentRef = cr)  => begin
                     makeCrefQual(id, tp, listAppend(subs, inSubs), cr)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id, identType = tp, subscriptLst = subs, componentRef = cr)  => begin
                       cr = crefApplySubs(cr, inSubs)
                     makeCrefQual(id, tp, subs, cr)
                   end
-                  
+
                   _  => begin
                         Error.addInternalError("function ComponentReference.crefApplySubs to non array\\n", sourceInfo())
                       fail()
@@ -2882,9 +2881,9 @@
           outComponentRef
         end
 
-         #= 
+         #=
         sets the type of a cref. =#
-        function crefSetType(inRef::DAE.ComponentRef, newType::DAE.Type) ::DAE.ComponentRef 
+        function crefSetType(inRef::DAE.ComponentRef, newType::DAE.Type) ::DAE.ComponentRef
               local outRef::DAE.ComponentRef
 
               outRef = begin
@@ -2896,7 +2895,7 @@
                   (DAE.CREF_IDENT(id, _, subs), _)  => begin
                     makeCrefIdent(id, newType, subs)
                   end
-                  
+
                   (DAE.CREF_QUAL(id, _, subs, child), _)  => begin
                     makeCrefQual(id, newType, subs, child)
                   end
@@ -2905,9 +2904,9 @@
           outRef
         end
 
-         #= 
+         #=
         sets the 'last' type of a cref. =#
-        function crefSetLastType(inRef::DAE.ComponentRef, newType::DAE.Type) ::DAE.ComponentRef 
+        function crefSetLastType(inRef::DAE.ComponentRef, newType::DAE.Type) ::DAE.ComponentRef
               local outRef::DAE.ComponentRef
 
               outRef = begin
@@ -2920,12 +2919,12 @@
                   DAE.CREF_IDENT(id, _, subs)  => begin
                     makeCrefIdent(id, newType, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(id, ty, subs, child)  => begin
                       child = crefSetLastType(child, newType)
                     makeCrefQual(id, ty, subs, child)
                   end
-                  
+
                   DAE.CREF_ITER(id, idx, _, subs)  => begin
                     DAE.CREF_ITER(id, idx, newType, subs)
                   end
@@ -2934,10 +2933,10 @@
           outRef
         end
 
-         #= 
+         #=
         Go trough ComponentRef searching for a slice eighter in
         qual's or finaly ident. if none find, add dimension to DAE.CREF_IDENT(,ss:INPUTARG,) =#
-        function replaceCrefSliceSub(inCr::DAE.ComponentRef, newSub::List{<:DAE.Subscript}) ::DAE.ComponentRef 
+        function replaceCrefSliceSub(inCr::DAE.ComponentRef, newSub::List{<:DAE.Subscript}) ::DAE.ComponentRef
               local outCr::DAE.ComponentRef
 
               outCr = begin
@@ -2971,13 +2970,13 @@
                       subs = replaceSliceSub(subs, newSub)
                     makeCrefIdent(name, identType, subs)
                   end
-                  
+
                   (DAE.CREF_IDENT(identType = t2, subscriptLst = subs), _)  => begin
                       @match true = listLength(Expression.arrayTypeDimensions(t2)) >= listLength(subs) + 1
                       child = subscriptCref(inCr, newSub)
                     child
                   end
-                  
+
                   (DAE.CREF_IDENT(identType = t2, subscriptLst = subs), _)  => begin
                       @match false = listLength(Expression.arrayTypeDimensions(t2)) >= listLength(subs) + listLength(newSub)
                       child = subscriptCref(inCr, newSub)
@@ -2986,22 +2985,22 @@
                       end
                     child
                   end
-                  
+
                   (DAE.CREF_QUAL(name, identType, subs, child), _)  => begin
                       subs = replaceSliceSub(subs, newSub)
                     makeCrefQual(name, identType, subs, child)
                   end
-                  
+
                   (DAE.CREF_QUAL(name, identType, subs, child), _)  => begin
                       @match true = listLength(Expression.arrayTypeDimensions(identType)) >= listLength(subs) + 1
                     makeCrefQual(name, identType, listAppend(subs, newSub), child)
                   end
-                  
+
                   (DAE.CREF_QUAL(name, identType, subs, child), _)  => begin
                       child = replaceCrefSliceSub(child, newSub)
                     makeCrefQual(name, identType, subs, child)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Expression.replaceCref_SliceSub failed\\n")
@@ -3018,9 +3017,9 @@
           outCr
         end
 
-         #= 
+         #=
         A function for replacing any occurance of DAE.SLICE or DAE.WHOLEDIM with new sub. =#
-        function replaceSliceSub(inSubs::List{<:DAE.Subscript}, inSub::List{<:DAE.Subscript}) ::List{DAE.Subscript} 
+        function replaceSliceSub(inSubs::List{<:DAE.Subscript}, inSub::List{<:DAE.Subscript}) ::List{DAE.Subscript}
               local osubs::List{DAE.Subscript}
 
               osubs = begin
@@ -3031,12 +3030,12 @@
                       subs = listAppend(inSub, subs)
                     subs
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| subs, _)  => begin
                       subs = listAppend(inSub, subs)
                     subs
                   end
-                  
+
                   (sub <| subs, _)  => begin
                       subs = replaceSliceSub(subs, inSub)
                     _cons(sub, subs)
@@ -3054,13 +3053,13 @@
           osubs
         end
 
-         #= 
+         #=
         Author BZ
         Strips the SLICE-subscripts fromt the -last- subscript list. All other subscripts are not changed.
         For example
         x[1].y[{1,2},3,{1,3,7}] => x[1].y[3]
         Alternative names: stripLastSliceSubs =#
-        function stripCrefIdentSliceSubs(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function stripCrefIdentSliceSubs(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3073,7 +3072,7 @@
                       subs = removeSliceSubs(subs)
                     makeCrefIdent(id, ty, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, identType = ty, subscriptLst = subs, ident = id)  => begin
                       outCref = stripCrefIdentSliceSubs(cr)
                     makeCrefQual(id, ty, subs, outCref)
@@ -3084,7 +3083,7 @@
         end
 
          #= strips the cref at the array-cref. remove subscripts, outputs appended crefs =#
-        function stripArrayCref(crefIn::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, ModelicaInteger, Option{DAE.ComponentRef}} 
+        function stripArrayCref(crefIn::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, ModelicaInteger, Option{DAE.ComponentRef}}
               local crefTail::Option{DAE.ComponentRef}
               local idxOut::ModelicaInteger
               local crefHead::DAE.ComponentRef
@@ -3100,11 +3099,11 @@
                   DAE.CREF_IDENT(ident = id, subscriptLst = DAE.INDEX(DAE.ICONST(idx)) <|  nil(), identType = ty)  => begin
                     (makeCrefIdent(id, ty, nil), idx, NONE())
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, identType = ty, subscriptLst = DAE.INDEX(DAE.ICONST(idx)) <|  nil(), ident = id)  => begin
                     (makeCrefIdent(id, ty, nil), idx, SOME(cr))
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, identType = ty, ident = id)  => begin
                       outCref = stripCrefIdentSliceSubs(cr)
                     (makeCrefQual(id, ty, nil, outCref), -1, NONE())
@@ -3120,9 +3119,9 @@
           (crefHead, idxOut, crefTail)
         end
 
-         #= 
+         #=
         helper function for stripCrefIdentSliceSubs =#
-        function removeSliceSubs(subs::List{<:DAE.Subscript}) ::List{DAE.Subscript} 
+        function removeSliceSubs(subs::List{<:DAE.Subscript}) ::List{DAE.Subscript}
               local osubs::List{DAE.Subscript} = nil
 
               for s in subs
@@ -3131,7 +3130,7 @@
                     DAE.SLICE(__)  => begin
                       osubs
                     end
-                    
+
                     _  => begin
                         _cons(s, osubs)
                     end
@@ -3142,9 +3141,9 @@
           osubs
         end
 
-         #= 
+         #=
         Removes all subscript of a componentref =#
-        function crefStripSubs(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripSubs(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3155,7 +3154,7 @@
                   DAE.CREF_IDENT(ident = id, identType = ty)  => begin
                     makeCrefIdent(id, ty, nil)
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = cr, identType = ty, ident = id)  => begin
                       outCref = crefStripSubs(cr)
                     makeCrefQual(id, ty, nil, outCref)
@@ -3166,7 +3165,7 @@
         end
 
          #= Strips a prefix/cref from a component reference =#
-        function crefStripPrefix(cref::DAE.ComponentRef, prefix::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripPrefix(cref::DAE.ComponentRef, prefix::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3182,7 +3181,7 @@
                       @match true = Expression.subscriptEqual(subs1, subs2)
                     cr1
                   end
-                  
+
                   (DAE.CREF_QUAL(id1, _, subs1, cr1), DAE.CREF_QUAL(id2, _, subs2, cr2))  => begin
                       @match true = stringEq(id1, id2)
                       @match true = Expression.subscriptEqual(subs1, subs2)
@@ -3194,7 +3193,7 @@
         end
 
          #= Strips the last part of a component reference, i.e ident and subs =#
-        function crefStripLastIdent(inCr::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripLastIdent(inCr::DAE.ComponentRef) ::DAE.ComponentRef
               local outCr::DAE.ComponentRef
 
               outCr = begin
@@ -3207,7 +3206,7 @@
                   DAE.CREF_QUAL(id, t2, subs, DAE.CREF_IDENT(_, _, _))  => begin
                     makeCrefIdent(id, t2, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(id, t2, subs, cr)  => begin
                       cr1 = crefStripLastIdent(cr)
                     makeCrefQual(id, t2, subs, cr1)
@@ -3218,7 +3217,7 @@
         end
 
          #= Strips the last subscripts of a ComponentRef =#
-        function crefStripLastSubs(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripLastSubs(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -3232,7 +3231,7 @@
                   DAE.CREF_IDENT(ident = id, identType = t2)  => begin
                     makeCrefIdent(id, t2, nil)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id, identType = t2, subscriptLst = s, componentRef = cr)  => begin
                       cr_1 = crefStripLastSubs(cr)
                     makeCrefQual(id, t2, s, cr_1)
@@ -3245,7 +3244,7 @@
          #= Recursively looks up subscripts and strips the given iter sub.
            This gives an array variable that is defined in a for loop (no NF_SCALARIZE).
            author: rfranke =#
-        function crefStripIterSub(inComponentRef::DAE.ComponentRef, iter::DAE.Ident) ::DAE.ComponentRef 
+        function crefStripIterSub(inComponentRef::DAE.ComponentRef, iter::DAE.Ident) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               local ident::DAE.Ident
@@ -3263,7 +3262,7 @@
                           subs
                         end)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = ident, identType = ty, componentRef = cref, subscriptLst = subs && DAE.INDEX(exp = DAE.CREF(componentRef = DAE.CREF_IDENT(ident = index))) <|  nil())  => begin
                       if index == iter
                         subs = nil
@@ -3272,11 +3271,11 @@
                       end
                     makeCrefQual(ident, ty, subs, cref)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = ident, identType = ty, componentRef = cref, subscriptLst = subs)  => begin
                     makeCrefQual(ident, ty, subs, crefStripIterSub(cref, iter))
                   end
-                  
+
                   _  => begin
                       inComponentRef
                   end
@@ -3287,7 +3286,7 @@
 
          #= Strips the first part of a component reference,
         i.e the identifier and eventual subscripts =#
-        function crefStripFirstIdent(inCr::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripFirstIdent(inCr::DAE.ComponentRef) ::DAE.ComponentRef
               local outCr::DAE.ComponentRef
 
               outCr = begin
@@ -3304,7 +3303,7 @@
          #= author: PA
           Same as crefStripLastSubs but works on
           a stringified component ref instead. =#
-        function crefStripLastSubsStringified(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefStripLastSubsStringified(inComponentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -3321,7 +3320,7 @@
                       id_1 = stringDelimitList(lst_1, "[")
                     makeCrefIdent(id_1, t2, nil)
                   end
-                  
+
                   cr  => begin
                     cr
                   end
@@ -3338,7 +3337,7 @@
 
           NOTE: This function should not be used in OMC, since the OMC backend no longer
             uses stringified components. It is still used by MathCore though. =#
-        function stringifyComponentRef(cr::DAE.ComponentRef) ::DAE.ComponentRef 
+        function stringifyComponentRef(cr::DAE.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               local subs::List{DAE.Subscript}
@@ -3359,7 +3358,7 @@
          #= /***************************************************/ =#
 
          #= Print a ComponentRef. =#
-        function printComponentRef(inComponentRef::DAE.ComponentRef)  
+        function printComponentRef(inComponentRef::DAE.ComponentRef)
               _ = begin
                   local s::DAE.Ident
                   local subs::List{DAE.Subscript}
@@ -3371,12 +3370,12 @@
                       Print.printBuf("_")
                     ()
                   end
-                  
+
                   DAE.CREF_IDENT(ident = s, subscriptLst = subs)  => begin
                       printComponentRef2(s, subs)
                     ()
                   end
-                  
+
                   DAE.CREF_QUAL(ident = s, subscriptLst = subs, componentRef = cr)  => begin
                       if Config.modelicaOutput()
                         printComponentRef2(s, subs)
@@ -3394,7 +3393,7 @@
         end
 
          #= Helper function to printComponentRef =#
-        function printComponentRef2(inString::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript})  
+        function printComponentRef2(inString::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript})
               _ = begin
                   local s::DAE.Ident
                   local l::List{DAE.Subscript}
@@ -3403,7 +3402,7 @@
                       Print.printBuf(s)
                     ()
                   end
-                  
+
                   (s, l)  => begin
                       if Config.modelicaOutput()
                         Print.printBuf(s)
@@ -3422,21 +3421,21 @@
               end
         end
 
-        function printComponentRefListStr(crs::List{<:DAE.ComponentRef}) ::String 
+        function printComponentRefListStr(crs::List{<:DAE.ComponentRef}) ::String
               local res::String
 
               res = "{" + stringDelimitList(ListUtil.map(crs, printComponentRefStr), ",") + "}"
           res
         end
 
-        function printComponentRefList(crs::List{<:DAE.ComponentRef})  
+        function printComponentRefList(crs::List{<:DAE.ComponentRef})
               local buffer::String
 
               buffer = "{" + stringDelimitList(ListUtil.map(crs, printComponentRefStr), ", ") + "}\\n"
               print(buffer)
         end
 
-        function replaceWholeDimSubscript(icr::DAE.ComponentRef, index::ModelicaInteger) ::DAE.ComponentRef 
+        function replaceWholeDimSubscript(icr::DAE.ComponentRef, index::ModelicaInteger) ::DAE.ComponentRef
               local ocr::DAE.ComponentRef
 
               ocr = begin
@@ -3449,12 +3448,12 @@
                       ss = replaceWholeDimSubscript2(ss, index)
                     DAE.CREF_QUAL(id, et, ss, cr)
                   end
-                  
+
                   (DAE.CREF_QUAL(id, et, ss, cr), _)  => begin
                       cr = replaceWholeDimSubscript(cr, index)
                     DAE.CREF_QUAL(id, et, ss, cr)
                   end
-                  
+
                   (DAE.CREF_IDENT(id, et, ss), _)  => begin
                       ss = replaceWholeDimSubscript2(ss, index)
                     DAE.CREF_IDENT(id, et, ss)
@@ -3464,7 +3463,7 @@
           ocr
         end
 
-        function replaceWholeDimSubscript2(isubs::List{<:DAE.Subscript}, index::ModelicaInteger) ::List{DAE.Subscript} 
+        function replaceWholeDimSubscript2(isubs::List{<:DAE.Subscript}, index::ModelicaInteger) ::List{DAE.Subscript}
               local osubs::List{DAE.Subscript}
 
               osubs = begin
@@ -3475,7 +3474,7 @@
                       sub = DAE.INDEX(DAE.ICONST(index))
                     _cons(sub, subs)
                   end
-                  
+
                   (sub <| subs, _)  => begin
                       subs = replaceWholeDimSubscript2(subs, index)
                     _cons(sub, subs)
@@ -3488,7 +3487,7 @@
         end
 
          #= Splits a cref at the end, e.g. a.b.c.d => {a.b.c, d}. =#
-        function splitCrefLast(inCref::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef} 
+        function splitCrefLast(inCref::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
               local outLastCref::DAE.ComponentRef
               local outPrefixCref::DAE.ComponentRef
 
@@ -3502,7 +3501,7 @@
                   DAE.CREF_QUAL(id, ty, subs, last && DAE.CREF_IDENT(__))  => begin
                     (DAE.CREF_IDENT(id, ty, subs), last)
                   end
-                  
+
                   DAE.CREF_QUAL(id, ty, subs, last)  => begin
                       (prefix, last) = splitCrefLast(last)
                     (DAE.CREF_QUAL(id, ty, subs, prefix), last)
@@ -3513,7 +3512,7 @@
         end
 
          #= Gets the first a cref at the n-th cref, e.g. (a.b.c.d,2) => a.b. =#
-        function firstNCrefs(inCref::DAE.ComponentRef, nIn::ModelicaInteger) ::DAE.ComponentRef 
+        function firstNCrefs(inCref::DAE.ComponentRef, nIn::ModelicaInteger) ::DAE.ComponentRef
               local outFirstCrefs::DAE.ComponentRef
 
               outFirstCrefs = begin
@@ -3526,20 +3525,20 @@
                   (_, 0)  => begin
                     inCref
                   end
-                  
+
                   (DAE.CREF_QUAL(id, ty, subs, _), 1)  => begin
                     DAE.CREF_IDENT(id, ty, subs)
                   end
-                  
+
                   (DAE.CREF_IDENT(_, _, _), _)  => begin
                     inCref
                   end
-                  
+
                   (DAE.CREF_QUAL(id, ty, subs, last), _)  => begin
                       prefix = firstNCrefs(last, nIn - 1)
                     DAE.CREF_QUAL(id, ty, subs, prefix)
                   end
-                  
+
                   _  => begin
                       inCref
                   end
@@ -3548,7 +3547,7 @@
           outFirstCrefs
         end
 
-        function splitCrefFirst(inCref::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef} 
+        function splitCrefFirst(inCref::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
               local outCrefRest::DAE.ComponentRef
               local outCrefFirst::DAE.ComponentRef
 
@@ -3562,7 +3561,7 @@
         end
 
          #= Converts a component reference to a list of strings. =#
-        function toStringList(inCref::DAE.ComponentRef) ::List{String} 
+        function toStringList(inCref::DAE.ComponentRef) ::List{String}
               local outStringList::List{String}
 
               outStringList = Dangerous.listReverseInPlace(toStringList_tail(inCref, nil))
@@ -3570,7 +3569,7 @@
         end
 
          #= Tail-recursive implementation of toStringList. =#
-        function toStringList_tail(inCref::DAE.ComponentRef, inAccumStrings::List{<:String}) ::List{String} 
+        function toStringList_tail(inCref::DAE.ComponentRef, inAccumStrings::List{<:String}) ::List{String}
               local outStringList::List{String}
 
               outStringList = begin
@@ -3580,11 +3579,11 @@
                   (DAE.CREF_QUAL(ident = id, componentRef = cref), _)  => begin
                     toStringList_tail(cref, _cons(id, inAccumStrings))
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = id), _)  => begin
                     _cons(id, inAccumStrings)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -3593,7 +3592,7 @@
           outStringList
         end
 
-        function crefDepth(inCref::DAE.ComponentRef) ::ModelicaInteger 
+        function crefDepth(inCref::DAE.ComponentRef) ::ModelicaInteger
               local depth::ModelicaInteger
 
               depth = begin
@@ -3602,11 +3601,11 @@
                   DAE.WILD(__)  => begin
                     0
                   end
-                  
+
                   DAE.CREF_IDENT(__)  => begin
                     1
                   end
-                  
+
                   DAE.CREF_QUAL(componentRef = n)  => begin
                     crefDepth1(n, 1)
                   end
@@ -3615,7 +3614,7 @@
           depth
         end
 
-        function crefDepth1(inCref::DAE.ComponentRef, iDepth::ModelicaInteger) ::ModelicaInteger 
+        function crefDepth1(inCref::DAE.ComponentRef, iDepth::ModelicaInteger) ::ModelicaInteger
               local depth::ModelicaInteger
 
               depth = begin
@@ -3624,11 +3623,11 @@
                   (DAE.WILD(__), _)  => begin
                     iDepth
                   end
-                  
+
                   (DAE.CREF_IDENT(__), _)  => begin
                     1 + iDepth
                   end
-                  
+
                   (DAE.CREF_QUAL(componentRef = n), _)  => begin
                     crefDepth1(n, 1 + iDepth)
                   end
@@ -3643,7 +3642,7 @@
 
            This function expects the subscripts of the cref to be constant evaluated,
            otherwise it will fail. =#
-        function expandCref(inCref::DAE.ComponentRef, expandRecord::Bool) ::List{DAE.ComponentRef} 
+        function expandCref(inCref::DAE.ComponentRef, expandRecord::Bool) ::List{DAE.ComponentRef}
               local outCref::List{DAE.ComponentRef}
 
               outCref = begin
@@ -3651,7 +3650,7 @@
                   (_, _)  => begin
                     expandCref_impl(inCref, expandRecord)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- ComponentReference.expandCref failed on " + printComponentRefStr(inCref))
@@ -3662,7 +3661,7 @@
           outCref
         end
 
-        function expandCref_impl(inCref::DAE.ComponentRef, expandRecord::Bool) ::List{DAE.ComponentRef} 
+        function expandCref_impl(inCref::DAE.ComponentRef, expandRecord::Bool) ::List{DAE.ComponentRef}
               local outCref::List{DAE.ComponentRef}
 
               outCref = begin
@@ -3685,7 +3684,7 @@
                       crefs = ListUtil.map1r(crefs, joinCrefs, inCref)
                     ListUtil.map1Flat(crefs, expandCref_impl, true)
                   end
-                  
+
                   (DAE.CREF_IDENT(id, ty && DAE.T_ARRAY(__),  nil()), true)  => begin
                       @match ((@match DAE.T_COMPLEX(varLst = varLst, complexClassType = ClassInf.RECORD()) = basety), dims) = Types.flattenArrayType(ty)
                       correctTy = DAE.T_ARRAY(basety, dims)
@@ -3693,14 +3692,14 @@
                       crefs = expandCref2(id, correctTy, subs, dims)
                     expandCrefLst(crefs, varLst, nil)
                   end
-                  
+
                   (DAE.CREF_IDENT(id, ty && DAE.T_ARRAY(__),  nil()), _)  => begin
                       (basety, dims) = Types.flattenArrayType(ty)
                       correctTy = DAE.T_ARRAY(basety, dims)
                       subs = ListUtil.fill(DAE.WHOLEDIM(), listLength(dims))
                     expandCref2(id, correctTy, subs, dims)
                   end
-                  
+
                   (DAE.CREF_IDENT(id, ty && DAE.T_ARRAY(__), subs), true)  => begin
                       @match ((@match DAE.T_COMPLEX(varLst = varLst, complexClassType = ClassInf.RECORD()) = basety), dims) = Types.flattenArrayType(ty)
                       correctTy = DAE.T_ARRAY(basety, dims)
@@ -3712,7 +3711,7 @@
                       crefs = expandCref2(id, correctTy, subs, dims)
                     expandCrefLst(crefs, varLst, nil)
                   end
-                  
+
                   (DAE.CREF_IDENT(id, ty && DAE.T_ARRAY(__), subs), _)  => begin
                       (basety, dims) = Types.flattenArrayType(ty)
                       correctTy = DAE.T_ARRAY(basety, dims)
@@ -3723,7 +3722,7 @@
                       end
                     expandCref2(id, correctTy, subs, dims)
                   end
-                  
+
                   (DAE.CREF_QUAL(id, ty && DAE.T_ARRAY(__), subs, cref), _)  => begin
                       crefs = expandCref_impl(cref, expandRecord)
                       (basety, dims) = Types.flattenArrayType(ty)
@@ -3734,13 +3733,13 @@
                       crefs = expandCrefQual(crefs2, crefs)
                     crefs
                   end
-                  
+
                   (DAE.CREF_QUAL(id, ty, subs, cref), _)  => begin
                       crefs = expandCref_impl(cref, expandRecord)
                       crefs = ListUtil.map3r(crefs, makeCrefQual, id, ty, subs)
                     crefs
                   end
-                  
+
                   _  => begin
                       list(inCref)
                   end
@@ -3771,7 +3770,7 @@
           outCref
         end
 
-        function expandCrefLst(inCrefs::List{<:DAE.ComponentRef}, varLst::List{<:DAE.Var}, inCrefsAcc::List{<:List{<:DAE.ComponentRef}}) ::List{DAE.ComponentRef} 
+        function expandCrefLst(inCrefs::List{<:DAE.ComponentRef}, varLst::List{<:DAE.Var}, inCrefsAcc::List{<:List{<:DAE.ComponentRef}}) ::List{DAE.ComponentRef}
               local outCref::List{DAE.ComponentRef}
 
               outCref = begin
@@ -3782,7 +3781,7 @@
                   ( nil(), _, _)  => begin
                     ListUtil.flatten(inCrefsAcc)
                   end
-                  
+
                   (cr <| rest, _, _)  => begin
                       crefs = ListUtil.map(varLst, creffromVar)
                       crefs = ListUtil.map1r(crefs, joinCrefs, cr)
@@ -3798,7 +3797,7 @@
          #= Helper function to expandCref_impl. Constructs all combinations of the head
            and rest cref lists. E.g.:
             expandCrefQual({x, y}, {a, b}) => {x.a, x.b, y.a, y.b}  =#
-        function expandCrefQual(inHeadCrefs::List{<:DAE.ComponentRef}, inRestCrefs::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef} 
+        function expandCrefQual(inHeadCrefs::List{<:DAE.ComponentRef}, inRestCrefs::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef} = nil
 
               local crefs::List{DAE.ComponentRef}
@@ -3810,7 +3809,7 @@
           outCrefs
         end
 
-        function expandCref2(inId::DAE.Ident, inType::DAE.Type, inSubscripts::List{<:DAE.Subscript}, inDimensions::List{<:DAE.Dimension}) ::List{DAE.ComponentRef} 
+        function expandCref2(inId::DAE.Ident, inType::DAE.Type, inSubscripts::List{<:DAE.Subscript}, inDimensions::List{<:DAE.Dimension}) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef} = nil
 
               local subslst::List{List{DAE.Subscript}}
@@ -3826,7 +3825,7 @@
           outCrefs
         end
 
-        function replaceSubsWithString(inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function replaceSubsWithString(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3842,28 +3841,28 @@
                       cr1 = replaceSubsWithString(cr)
                     DAE.CREF_QUAL(ident, identType, nil, cr1)
                   end
-                  
+
                   DAE.CREF_QUAL(ident = ident, identType = identType, subscriptLst = subscriptLst, componentRef = cr)  => begin
                       identType = Expression.unliftArrayTypeWithSubs(subscriptLst, identType)
                       cr1 = replaceSubsWithString(cr)
                       cr = makeCrefsFromSubScriptLst(subscriptLst, DAE.CREF_IDENT(ident, identType, nil))
                     joinCrefs(cr, cr1)
                   end
-                  
+
                   DAE.CREF_IDENT(subscriptLst =  nil())  => begin
                     inCref
                   end
-                  
+
                   DAE.CREF_IDENT(ident = ident, identType = identType, subscriptLst = subscriptLst)  => begin
                       identType = Expression.unliftArrayTypeWithSubs(subscriptLst, identType)
                       cr = makeCrefsFromSubScriptLst(subscriptLst, DAE.CREF_IDENT(ident, identType, nil))
                     cr
                   end
-                  
+
                   DAE.CREF_ITER(__)  => begin
                     inCref
                   end
-                  
+
                   DAE.WILD(__)  => begin
                     inCref
                   end
@@ -3872,7 +3871,7 @@
           outCref
         end
 
-        function makeCrefsFromSubScriptLst(inSubscriptLst::List{<:DAE.Subscript}, inPreCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function makeCrefsFromSubScriptLst(inSubscriptLst::List{<:DAE.Subscript}, inPreCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef = inPreCref
 
               for subScript in inSubscriptLst
@@ -3885,7 +3884,7 @@
                         cr = makeCrefsFromSubScriptExp(e)
                       joinCrefs(outCref, cr)
                     end
-                    
+
                     _  => begin
                           str = ExpressionDump.printSubscriptStr(subScript)
                           Error.addInternalError("function ComponentReference.makeCrefsFromSubScriptLst for:" + str + "\\n", sourceInfo())
@@ -3899,7 +3898,7 @@
           outCref
         end
 
-        function makeCrefsFromSubScriptExp(inExp::DAE.Exp) ::DAE.ComponentRef 
+        function makeCrefsFromSubScriptExp(inExp::DAE.Exp) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3915,11 +3914,11 @@
                       str = ExpressionDump.printExpStr(inExp)
                     DAE.CREF_IDENT(str, DAE.T_UNKNOWN_DEFAULT, nil)
                   end
-                  
+
                   DAE.CREF(__)  => begin
                     Expression.expCref(inExp)
                   end
-                  
+
                   DAE.BINARY(operator = op, exp1 = e1, exp2 = e2)  => begin
                       str = ExpressionDump.binopSymbol(op)
                       cr1 = makeCrefsFromSubScriptExp(e1)
@@ -3928,12 +3927,12 @@
                       outCref = joinCrefs(outCref, cr2)
                     outCref
                   end
-                  
+
                   DAE.ENUM_LITERAL(name = enum_lit)  => begin
                       str = System.stringReplace(AbsynUtil.pathString(enum_lit), ".", "P")
                     DAE.CREF_IDENT(str, DAE.T_UNKNOWN_DEFAULT, nil)
                   end
-                  
+
                   _  => begin
                         str = ExpressionDump.dumpExpStr(inExp, 0)
                         Error.addInternalError("function ComponentReference.makeCrefsFromSubScriptExp for:" + str + "\\n", sourceInfo())
@@ -3945,7 +3944,7 @@
         end
 
          #= Replaces the last part of a cref with a new cref. =#
-        function replaceLast(inCref::DAE.ComponentRef, inNewLast::DAE.ComponentRef) ::DAE.ComponentRef 
+        function replaceLast(inCref::DAE.ComponentRef, inNewLast::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -3958,7 +3957,7 @@
                       cref = replaceLast(cref, inNewLast)
                     DAE.CREF_QUAL(ident, ty, subs, cref)
                   end
-                  
+
                   (DAE.CREF_IDENT(__), _)  => begin
                     inNewLast
                   end
@@ -3968,7 +3967,7 @@
         end
 
          #= deprecated. use expandArray =#
-        function expandArrayCref(inCr::DAE.ComponentRef, inDims::List{<:DAE.Dimension}) ::List{DAE.ComponentRef} 
+        function expandArrayCref(inCr::DAE.ComponentRef, inDims::List{<:DAE.Dimension}) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef}
 
               local lasttype::DAE.Type
@@ -3981,7 +3980,7 @@
           outCrefs
         end
 
-        function expandArrayCref1(inCr::DAE.ComponentRef, inSubscripts::List{<:List{<:DAE.Subscript}}, inAccumSubs::List{<:DAE.Subscript}, inAccumCrefs::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef} 
+        function expandArrayCref1(inCr::DAE.ComponentRef, inSubscripts::List{<:List{<:DAE.Subscript}}, inAccumSubs::List{<:DAE.Subscript}, inAccumCrefs::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef}
 
               outCrefs = begin
@@ -3996,11 +3995,11 @@
                       crefs = expandArrayCref1(inCr, rest_subs, _cons(sub, inAccumSubs), crefs)
                     crefs
                   end
-                  
+
                   (_, _ <| _, _, _)  => begin
                     inAccumCrefs
                   end
-                  
+
                   _  => begin
                         cref = crefSetLastSubs(inCr, inAccumSubs)
                       _cons(cref, inAccumCrefs)
@@ -4011,14 +4010,14 @@
         end
 
          #= Explodes a cref into a list of CREF_IDENTs. =#
-        function explode(inCref::DAE.ComponentRef) ::List{DAE.ComponentRef} 
+        function explode(inCref::DAE.ComponentRef) ::List{DAE.ComponentRef}
               local outParts::List{DAE.ComponentRef}
 
               outParts = Dangerous.listReverse(explode_tail(inCref, nil))
           outParts
         end
 
-        function explode_tail(inCref::DAE.ComponentRef, inParts::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef} 
+        function explode_tail(inCref::DAE.ComponentRef, inParts::List{<:DAE.ComponentRef}) ::List{DAE.ComponentRef}
               local outParts::List{DAE.ComponentRef}
 
               outParts = begin
@@ -4029,7 +4028,7 @@
                       first_cr = crefFirstCref(inCref)
                     explode_tail(rest_cr, _cons(first_cr, inParts))
                   end
-                  
+
                   _  => begin
                       _cons(inCref, inParts)
                   end
@@ -4039,7 +4038,7 @@
         end
 
          #= Constructs a cref from a list of CREF_IDENTs. =#
-        function implode(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef 
+        function implode(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               local first::DAE.ComponentRef
@@ -4050,7 +4049,7 @@
         end
 
          #= Constructs a cref from a reversed list of CREF_IDENTs. =#
-        function implode_reverse(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef 
+        function implode_reverse(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               local first::DAE.ComponentRef
@@ -4061,7 +4060,7 @@
           outCref
         end
 
-        function implode_tail(inParts::List{<:DAE.ComponentRef}, inAccumCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function implode_tail(inParts::List{<:DAE.ComponentRef}, inAccumCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -4075,7 +4074,7 @@
                       cr = DAE.CREF_QUAL(id, ty, subs, inAccumCref)
                     implode_tail(rest, cr)
                   end
-                  
+
                   ( nil(), _)  => begin
                     inAccumCref
                   end
@@ -4084,14 +4083,14 @@
           outCref
         end
 
-        function identifierCount(inCref::DAE.ComponentRef) ::ModelicaInteger 
+        function identifierCount(inCref::DAE.ComponentRef) ::ModelicaInteger
               local outIdCount::ModelicaInteger
 
               outIdCount = identifierCount_tail(inCref, 0)
           outIdCount
         end
 
-        function identifierCount_tail(inCref::DAE.ComponentRef, inAccumCount::ModelicaInteger) ::ModelicaInteger 
+        function identifierCount_tail(inCref::DAE.ComponentRef, inAccumCount::ModelicaInteger) ::ModelicaInteger
               local outIdCount::ModelicaInteger
 
               outIdCount = begin
@@ -4100,7 +4099,7 @@
                   (DAE.CREF_QUAL(componentRef = cr), _)  => begin
                     identifierCount_tail(cr, inAccumCount + 1)
                   end
-                  
+
                   _  => begin
                       inAccumCount + 1
                   end
@@ -4111,11 +4110,11 @@
 
          #= Checks that the subscripts in a cref are valid given the dimensions of the
            cref's type. Prints an error if they are not. =#
-        function checkCrefSubscriptsBounds(inCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkCrefSubscriptsBounds(inCref::DAE.ComponentRef, inInfo::SourceInfo)
               checkCrefSubscriptsBounds2(inCref, inCref, inInfo)
         end
 
-        function checkCrefSubscriptsBounds2(inCref::DAE.ComponentRef, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkCrefSubscriptsBounds2(inCref::DAE.ComponentRef, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local ty::DAE.Type
                   local subs::List{DAE.Subscript}
@@ -4127,12 +4126,12 @@
                       checkCrefSubscriptsBounds2(rest_cr, inWholeCref, inInfo)
                     ()
                   end
-                  
+
                   (DAE.CREF_IDENT(identType = ty, subscriptLst = subs), _, _)  => begin
                       checkCrefSubscriptsBounds3(ty, subs, inWholeCref, inInfo)
                     ()
                   end
-                  
+
                   (DAE.CREF_ITER(identType = ty, subscriptLst = subs), _, _)  => begin
                       checkCrefSubscriptsBounds3(ty, subs, inWholeCref, inInfo)
                     ()
@@ -4141,7 +4140,7 @@
               end
         end
 
-        function checkCrefSubscriptsBounds3(inCrefType::DAE.Type, inSubscripts::List{<:DAE.Subscript}, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkCrefSubscriptsBounds3(inCrefType::DAE.Type, inSubscripts::List{<:DAE.Subscript}, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)
               local dims::List{DAE.Dimension}
               local subs::List{DAE.Subscript}
 
@@ -4157,7 +4156,7 @@
               checkCrefSubscriptsBounds4(subs, dims, 1, inWholeCref, inInfo)
         end
 
-        function checkCrefSubscriptsBounds4(inSubscripts::List{<:DAE.Subscript}, inDimensions::List{<:DAE.Dimension}, inIndex::ModelicaInteger, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkCrefSubscriptsBounds4(inSubscripts::List{<:DAE.Subscript}, inDimensions::List{<:DAE.Dimension}, inIndex::ModelicaInteger, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local sub::DAE.Subscript
                   local rest_subs::List{DAE.Subscript}
@@ -4169,11 +4168,11 @@
                       checkCrefSubscriptsBounds4(rest_subs, rest_dims, inIndex + 1, inWholeCref, inInfo)
                     ()
                   end
-                  
+
                   ( nil(), _, _, _, _)  => begin
                     ()
                   end
-                  
+
                   (_,  nil(), _, _, _)  => begin
                     ()
                   end
@@ -4187,7 +4186,7 @@
                =#
         end
 
-        function checkCrefSubscriptBounds(inSubscript::DAE.Subscript, inDimension::DAE.Dimension, inIndex::ModelicaInteger, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo) ::Bool 
+        function checkCrefSubscriptBounds(inSubscript::DAE.Subscript, inDimension::DAE.Dimension, inIndex::ModelicaInteger, inWholeCref::DAE.ComponentRef, inInfo::SourceInfo) ::Bool
               local outIsValid::Bool
 
               outIsValid = begin
@@ -4209,13 +4208,13 @@
                       printSubscriptBoundsError(exp, inDimension, inIndex, inWholeCref, inInfo)
                     false
                   end
-                  
+
                   (DAE.SLICE(exp = DAE.ARRAY(array = expl)), DAE.DIM_INTEGER(integer = dim), _, _, _)  => begin
                       exp = ListUtil.getMemberOnTrue(dim, expl, subscriptExpOutOfBounds)
                       printSubscriptBoundsError(exp, inDimension, inIndex, inWholeCref, inInfo)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -4224,7 +4223,7 @@
           outIsValid
         end
 
-        function subscriptExpOutOfBounds(inDimSize::ModelicaInteger, inSubscriptExp::DAE.Exp) ::Bool 
+        function subscriptExpOutOfBounds(inDimSize::ModelicaInteger, inSubscriptExp::DAE.Exp) ::Bool
               local outOutOfBounds::Bool
 
               outOutOfBounds = begin
@@ -4233,7 +4232,7 @@
                   (_, DAE.ICONST(integer = i))  => begin
                     i < 1 || i > inDimSize
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4242,7 +4241,7 @@
           outOutOfBounds
         end
 
-        function printSubscriptBoundsError(inSubscriptExp::DAE.Exp, inDimension::DAE.Dimension, inIndex::ModelicaInteger, inCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function printSubscriptBoundsError(inSubscriptExp::DAE.Exp, inDimension::DAE.Dimension, inIndex::ModelicaInteger, inCref::DAE.ComponentRef, inInfo::SourceInfo)
               local sub_str::String
               local dim_str::String
               local idx_str::String
@@ -4255,7 +4254,7 @@
               Error.addSourceMessage(Error.ARRAY_INDEX_OUT_OF_BOUNDS, list(sub_str, idx_str, dim_str, cref_str), inInfo)
         end
 
-        function crefAppendedSubs(cref::DAE.ComponentRef) ::String 
+        function crefAppendedSubs(cref::DAE.ComponentRef) ::String
               local s::String
 
               local s1::String
@@ -4267,7 +4266,7 @@
           s
         end
 
-        function writeCref(file::File.File, cref::DAE.ComponentRef, escape::File.Escape = File.Escape.None)  
+        function writeCref(file::File.File, cref::DAE.ComponentRef, escape::File.Escape = File.Escape.None)
               local c::DAE.ComponentRef = cref
 
               while true
@@ -4276,26 +4275,26 @@
                     DAE.CREF_IDENT(__)  => begin
                         File.writeEscape(file, c.ident, escape)
                         writeSubscripts(file, c.subscriptLst, escape)
-                        return 
+                        return
                       fail()
                     end
-                    
+
                     DAE.CREF_QUAL(ident = "$DER")  => begin
                         File.write(file, "der(")
                         writeCref(file, c.componentRef, escape)
                         File.write(file, ")")
-                        return 
+                        return
                       fail()
                     end
-                    
+
                     DAE.CREF_QUAL(ident = "$CLKPRE")  => begin
                         File.write(file, "previous(")
                         writeCref(file, c.componentRef, escape)
                         File.write(file, ")")
-                        return 
+                        return
                       fail()
                     end
-                    
+
                     DAE.CREF_QUAL(__)  => begin
                         File.writeEscape(file, c.ident, escape)
                         writeSubscripts(file, c.subscriptLst, escape)
@@ -4307,13 +4306,13 @@
               end
         end
 
-        function writeSubscripts(file::File.File, subs::List{<:DAE.Subscript}, escape::File.Escape = File.Escape.None)  
+        function writeSubscripts(file::File.File, subs::List{<:DAE.Subscript}, escape::File.Escape = File.Escape.None)
               local first::Bool = true
               local i::ModelicaInteger
               local exp::DAE.Exp
 
               if listEmpty(subs)
-                return 
+                return
               end
               File.write(file, "[")
               for s in subs
@@ -4328,32 +4327,32 @@
                         File.write(file, ":")
                       ()
                     end
-                    
+
                     DAE.SLICE(DAE.ICONST(i))  => begin
                         File.writeInt(file, i)
                       ()
                     end
-                    
+
                     DAE.INDEX(DAE.ICONST(i))  => begin
                         File.writeInt(file, i)
                       ()
                     end
-                    
+
                     DAE.WHOLE_NONEXP(DAE.ICONST(i))  => begin
                         File.writeInt(file, i)
                       ()
                     end
-                    
+
                     DAE.SLICE(exp)  => begin
                         File.write(file, ExpressionDump.printExpStr(exp))
                       ()
                     end
-                    
+
                     DAE.INDEX(exp)  => begin
                         File.write(file, ExpressionDump.printExpStr(exp))
                       ()
                     end
-                    
+
                     DAE.WHOLE_NONEXP(exp)  => begin
                         File.write(file, ExpressionDump.printExpStr(exp))
                       ()
@@ -4364,7 +4363,7 @@
               File.write(file, "]")
         end
 
-        function getConsumedMemory(inCref::DAE.ComponentRef) ::Tuple{ModelicaReal, ModelicaReal, ModelicaReal} 
+        function getConsumedMemory(inCref::DAE.ComponentRef) ::Tuple{ModelicaReal, ModelicaReal, ModelicaReal}
               local szSubs::ModelicaReal = 0
               local szTypes::ModelicaReal = 0
               local szIdents::ModelicaReal = 0
@@ -4381,20 +4380,20 @@
                         szSubs = szSubs + System.getSizeOfData(cr.subscriptLst)
                       (false, cr)
                     end
-                    
+
                     DAE.CREF_ITER(__)  => begin
                         szIdents = szIdents + System.getSizeOfData(cr.ident)
                         szTypes = szTypes + System.getSizeOfData(cr.identType)
                       (false, cr)
                     end
-                    
+
                     DAE.CREF_QUAL(__)  => begin
                         szIdents = szIdents + System.getSizeOfData(cr.ident)
                         szTypes = szTypes + System.getSizeOfData(cr.identType)
                         szSubs = szSubs + System.getSizeOfData(cr.subscriptLst)
                       (true, cr.componentRef)
                     end
-                    
+
                     _  => begin
                         (false, cr)
                     end
@@ -4404,7 +4403,7 @@
           (szIdents, szTypes, szSubs)
         end
 
-        function createDifferentiatedCrefName(inCref::DAE.ComponentRef, inX::DAE.ComponentRef, inMatrixName::String) ::DAE.ComponentRef 
+        function createDifferentiatedCrefName(inCref::DAE.ComponentRef, inX::DAE.ComponentRef, inMatrixName::String) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               local subs::List{DAE.Subscript}
