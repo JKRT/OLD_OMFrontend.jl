@@ -1,1 +1,1 @@
-These things can probably be removed alltogehter at some point
+These things can probably be removed altogether at some point
