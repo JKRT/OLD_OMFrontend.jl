@@ -1,4 +1,4 @@
-  module Expression 
+  module Expression
 
 
     using MetaModelica
@@ -128,12 +128,12 @@
 
         import DAEDump
 
-        ComponentRef = DAE.ComponentRef 
-        Exp = DAE.Exp 
-        Operator = DAE.Operator 
-        Type = DAE.Type 
-        Subscript = DAE.Subscript 
-        Var = DAE.Var 
+        ComponentRef = DAE.ComponentRef
+        Exp = DAE.Exp
+        Operator = DAE.Operator
+        Type = DAE.Type
+        Subscript = DAE.Subscript
+        Var = DAE.Var
          #=  protected imports
          =#
 
@@ -187,7 +187,7 @@
          #= /***************************************************/ =#
 
          #= Converts an integer into an index subscript. =#
-        function intSubscript(inInteger::ModelicaInteger) ::DAE.Subscript 
+        function intSubscript(inInteger::ModelicaInteger) ::DAE.Subscript
               local outSubscript::DAE.Subscript
 
               outSubscript = DAE.INDEX(DAE.ICONST(inInteger))
@@ -195,7 +195,7 @@
         end
 
          #= Converts a list of integers into index subscripts. =#
-        function intSubscripts(inIntegers::List{<:ModelicaInteger}) ::List{DAE.Subscript} 
+        function intSubscripts(inIntegers::List{<:ModelicaInteger}) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = ListUtil.map(inIntegers, intSubscript)
@@ -203,20 +203,20 @@
         end
 
          #= Tries to convert a subscript to an integer index. =#
-        function subscriptInt(inSubscript::DAE.Subscript) ::ModelicaInteger 
+        function subscriptInt(inSubscript::DAE.Subscript) ::ModelicaInteger
               local outInteger::ModelicaInteger = expArrayIndex(subscriptIndexExp(inSubscript))
           outInteger
         end
 
          #= Tries to convert a list of subscripts to integer indices. =#
-        function subscriptsInt(inSubscripts::List{<:DAE.Subscript}) ::List{ModelicaInteger} 
+        function subscriptsInt(inSubscripts::List{<:DAE.Subscript}) ::List{ModelicaInteger}
               local outIntegers::List{ModelicaInteger}
 
               outIntegers = ListUtil.map(inSubscripts, subscriptInt)
           outIntegers
         end
 
-        function dimensionIsZero(inDimension::DAE.Dimension) ::Bool 
+        function dimensionIsZero(inDimension::DAE.Dimension) ::Bool
               local outIsZero::Bool
 
               outIsZero = 0 == dimensionSize(inDimension)
@@ -226,7 +226,7 @@
          #= Transform an DAE.Exp into Absyn.Expression.
           Note: This function currently only works for
           constants and component references. =#
-        function unelabExp(inExp::DAE.Exp) ::Absyn.Exp 
+        function unelabExp(inExp::DAE.Exp) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -261,155 +261,155 @@
                   DAE.ICONST(integer = i)  => begin
                     Absyn.INTEGER(i)
                   end
-                  
+
                   DAE.RCONST(real = r)  => begin
                       s = realString(r)
                     Absyn.REAL(s)
                   end
-                  
+
                   DAE.SCONST(string = s)  => begin
                     Absyn.STRING(s)
                   end
-                  
+
                   DAE.BCONST(bool = b)  => begin
                     Absyn.BOOL(b)
                   end
-                  
+
                   DAE.ENUM_LITERAL(name = path)  => begin
                       cr_1 = AbsynUtil.pathToCref(path)
                     Absyn.CREF(cr_1)
                   end
-                  
+
                   DAE.CREF(componentRef = cr)  => begin
                       cr_1 = ComponentReference.unelabCref(cr)
                     Absyn.CREF(cr_1)
                   end
-                  
+
                   DAE.BINARY(e1, op, e2)  => begin
                       aop = unelabOperator(op)
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                     Absyn.BINARY(ae1, aop, ae2)
                   end
-                  
+
                   DAE.UNARY(op, e1)  => begin
                       aop = unelabOperator(op)
                       ae1 = unelabExp(e1)
                     Absyn.UNARY(aop, ae1)
                   end
-                  
+
                   DAE.LBINARY(e1, op, e2)  => begin
                       aop = unelabOperator(op)
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                     Absyn.LBINARY(ae1, aop, ae2)
                   end
-                  
+
                   DAE.LUNARY(op, e1)  => begin
                       aop = unelabOperator(op)
                       ae1 = unelabExp(e1)
                     Absyn.LUNARY(aop, ae1)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1, operator = op, exp2 = e2)  => begin
                       aop = unelabOperator(op)
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                     Absyn.RELATION(ae1, aop, ae2)
                   end
-                  
+
                   DAE.IFEXP(e1, e2, e3)  => begin
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                       ae3 = unelabExp(e3)
                     Absyn.IFEXP(ae1, ae2, ae3, nil)
                   end
-                  
+
                   DAE.CALL(path, expl, _)  => begin
                       aexpl = ListUtil.map(expl, unelabExp)
                       acref = AbsynUtil.pathToCref(path)
                     Absyn.CALL(acref, Absyn.FUNCTIONARGS(aexpl, nil))
                   end
-                  
+
                   DAE.RECORD(path = path, exps = expl)  => begin
                       aexpl = ListUtil.map(expl, unelabExp)
                       acref = AbsynUtil.pathToCref(path)
                     Absyn.CALL(acref, Absyn.FUNCTIONARGS(aexpl, nil))
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(path, expl, _, _)  => begin
                       aexpl = ListUtil.map(expl, unelabExp)
                       acref = AbsynUtil.pathToCref(path)
                     Absyn.PARTEVALFUNCTION(acref, Absyn.FUNCTIONARGS(aexpl, nil))
                   end
-                  
+
                   DAE.ARRAY(array =  nil(), ty = ty)  => begin
                       (ty, dims) = Types.flattenArrayType(ty)
                       ae1 = unleabZeroExpFromType(ty)
                       expl_1 = ListUtil.map(dims, unelabDimensionToFillExp)
                     Absyn.CALL(Absyn.CREF_IDENT("fill", nil), Absyn.FUNCTIONARGS(_cons(ae1, expl_1), nil))
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                       expl_1 = ListUtil.map(expl, unelabExp)
                     Absyn.ARRAY(expl_1)
                   end
-                  
+
                   DAE.MATRIX(matrix = mexpl2)  => begin
                       amexpl = ListUtil.mapList(mexpl2, unelabExp)
                     Absyn.MATRIX(amexpl)
                   end
-                  
+
                   DAE.RANGE(_, e1, SOME(e2), e3)  => begin
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                       ae3 = unelabExp(e3)
                     Absyn.RANGE(ae1, SOME(ae2), ae3)
                   end
-                  
+
                   DAE.RANGE(_, e1, NONE(), e3)  => begin
                       ae1 = unelabExp(e1)
                       ae3 = unelabExp(e3)
                     Absyn.RANGE(ae1, NONE(), ae3)
                   end
-                  
+
                   DAE.TUPLE(expl)  => begin
                       expl_1 = ListUtil.map(expl, unelabExp)
                     Absyn.TUPLE(expl_1)
                   end
-                  
+
                   DAE.CAST(_, e1)  => begin
                       ae1 = unelabExp(e1)
                     ae1
                   end
-                  
+
                   DAE.ASUB(_, _)  => begin
                       print("Internal Error, can not unelab ASUB\\n")
                     fail()
                   end
-                  
+
                   DAE.TSUB(e1, _, _)  => begin
                       ae1 = unelabExp(e1)
                     ae1
                   end
-                  
+
                   DAE.SIZE(e1, SOME(e2))  => begin
                       ae1 = unelabExp(e1)
                       ae2 = unelabExp(e2)
                     Absyn.CALL(Absyn.CREF_IDENT("size", nil), Absyn.FUNCTIONARGS(list(ae1, ae2), nil))
                   end
-                  
+
                   DAE.CODE(code, _)  => begin
                     Absyn.CODE(code)
                   end
-                  
+
                   DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(iterType = iterType, path = path), expr = e1, iterators = riters)  => begin
                       acref = AbsynUtil.pathToCref(path)
                       ae1 = unelabExp(e1)
                       aiters = ListUtil.map(riters, unelabReductionIterator)
                     Absyn.CALL(acref, Absyn.FOR_ITER_FARG(ae1, iterType, aiters))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         print("Expression.unelabExp failed on: " + ExpressionDump.printExpStr(inExp) + "\\n")
@@ -433,7 +433,7 @@
         end
 
          #= Transform an DAE.Dimension into Absyn.Subscript, if possible =#
-        function unelabDimension(inDim::DAE.Dimension) ::Absyn.Subscript 
+        function unelabDimension(inDim::DAE.Dimension) ::Absyn.Subscript
               local outDim::Absyn.Subscript
 
               outDim = begin
@@ -446,21 +446,21 @@
                   DAE.DIM_INTEGER(i)  => begin
                     Absyn.SUBSCRIPT(Absyn.INTEGER(i))
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     Absyn.SUBSCRIPT(Absyn.CREF(Absyn.CREF_IDENT("Boolean", nil)))
                   end
-                  
+
                   DAE.DIM_ENUM(enumTypeName = p)  => begin
                       c = AbsynUtil.pathToCref(p)
                     Absyn.SUBSCRIPT(Absyn.CREF(c))
                   end
-                  
+
                   DAE.DIM_EXP(e)  => begin
                       ae = unelabExp(e)
                     Absyn.SUBSCRIPT(ae)
                   end
-                  
+
                   DAE.DIM_UNKNOWN(__)  => begin
                     Absyn.NOSUB()
                   end
@@ -469,7 +469,7 @@
           outDim
         end
 
-        function unleabZeroExpFromType(ty::DAE.Type) ::Absyn.Exp 
+        function unleabZeroExpFromType(ty::DAE.Type) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -477,19 +477,19 @@
                   DAE.T_BOOL(__)  => begin
                     Absyn.BOOL(false)
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     Absyn.STRING("")
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     Absyn.INTEGER(0)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     Absyn.REAL("0.0")
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     Absyn.REAL("0.0")
                   end
@@ -500,7 +500,7 @@
         end
 
          #= Transform an DAE.Dimension into Absyn.Exp, if possible =#
-        function unelabDimensionToFillExp(inDim::DAE.Dimension) ::Absyn.Exp 
+        function unelabDimensionToFillExp(inDim::DAE.Dimension) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -510,11 +510,11 @@
                   DAE.DIM_INTEGER(i)  => begin
                     Absyn.INTEGER(i)
                   end
-                  
+
                   DAE.DIM_EXP(e)  => begin
                     unelabExp(e)
                   end
-                  
+
                   _  => begin
                       Absyn.INTEGER(1)
                   end
@@ -524,7 +524,7 @@
           outExp
         end
 
-        function unelabReductionIterator(riter::DAE.ReductionIterator) ::Absyn.ForIterator 
+        function unelabReductionIterator(riter::DAE.ReductionIterator) ::Absyn.ForIterator
               local aiter::Absyn.ForIterator
 
               aiter = begin
@@ -545,7 +545,7 @@
         end
 
          #= help function to unelabExpression. =#
-        function unelabOperator(op::DAE.Operator) ::Absyn.Operator 
+        function unelabOperator(op::DAE.Operator) ::Absyn.Operator
               local aop::Absyn.Operator
 
               aop = begin
@@ -553,123 +553,123 @@
                   DAE.ADD(_)  => begin
                     Absyn.ADD()
                   end
-                  
+
                   DAE.SUB(_)  => begin
                     Absyn.SUB()
                   end
-                  
+
                   DAE.MUL(_)  => begin
                     Absyn.MUL()
                   end
-                  
+
                   DAE.DIV(_)  => begin
                     Absyn.DIV()
                   end
-                  
+
                   DAE.POW(_)  => begin
                     Absyn.POW()
                   end
-                  
+
                   DAE.UMINUS(_)  => begin
                     Absyn.UMINUS()
                   end
-                  
+
                   DAE.UMINUS_ARR(_)  => begin
                     Absyn.UMINUS()
                   end
-                  
+
                   DAE.ADD_ARR(_)  => begin
                     Absyn.ADD()
                   end
-                  
+
                   DAE.SUB_ARR(_)  => begin
                     Absyn.SUB()
                   end
-                  
+
                   DAE.MUL_ARR(_)  => begin
                     Absyn.MUL()
                   end
-                  
+
                   DAE.DIV_ARR(_)  => begin
                     Absyn.DIV()
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(_)  => begin
                     Absyn.MUL()
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(_)  => begin
                     Absyn.ADD()
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(_)  => begin
                     Absyn.SUB()
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(_)  => begin
                     Absyn.MUL()
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(_)  => begin
                     Absyn.MUL()
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(_)  => begin
                     Absyn.DIV()
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(_)  => begin
                     Absyn.DIV()
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(_)  => begin
                     Absyn.POW()
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(_)  => begin
                     Absyn.POW()
                   end
-                  
+
                   DAE.POW_ARR(_)  => begin
                     Absyn.POW()
                   end
-                  
+
                   DAE.POW_ARR2(_)  => begin
                     Absyn.POW()
                   end
-                  
+
                   DAE.AND(_)  => begin
                     Absyn.AND()
                   end
-                  
+
                   DAE.OR(_)  => begin
                     Absyn.OR()
                   end
-                  
+
                   DAE.NOT(_)  => begin
                     Absyn.NOT()
                   end
-                  
+
                   DAE.LESS(_)  => begin
                     Absyn.LESS()
                   end
-                  
+
                   DAE.LESSEQ(_)  => begin
                     Absyn.LESSEQ()
                   end
-                  
+
                   DAE.GREATER(_)  => begin
                     Absyn.GREATER()
                   end
-                  
+
                   DAE.GREATEREQ(_)  => begin
                     Absyn.GREATEREQ()
                   end
-                  
+
                   DAE.EQUAL(_)  => begin
                     Absyn.EQUAL()
                   end
-                  
+
                   DAE.NEQUAL(_)  => begin
                     Absyn.NEQUAL()
                   end
@@ -685,16 +685,16 @@
 
           NOTE: This function should not be used in OMC, since the OMC backend no longer
                 uses stringified components. It is still used by MathCore though. =#
-        function stringifyCrefs(inExp::DAE.Exp) ::DAE.Exp 
+        function stringifyCrefs(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = traverseExpDummy(inExp, traversingstringifyCrefFinder)
           outExp
         end
 
-         #= 
+         #=
         helper for stringifyCrefs =#
-        function traversingstringifyCrefFinder(inExp::DAE.Exp) ::DAE.Exp 
+        function traversingstringifyCrefFinder(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -707,16 +707,16 @@
                   DAE.CREF(ty = DAE.T_FUNCTION_REFERENCE_VAR(__))  => begin
                     inExp
                   end
-                  
+
                   DAE.CREF(ty = DAE.T_FUNCTION_REFERENCE_FUNC(__))  => begin
                     inExp
                   end
-                  
+
                   DAE.CREF(cr, ty)  => begin
                       crs = ComponentReference.stringifyComponentRef(cr)
                     makeCrefExp(crs, ty)
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -725,7 +725,7 @@
           outExp
         end
 
-        function CodeVarToCref(inExp::DAE.Exp) ::DAE.Exp 
+        function CodeVarToCref(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -738,7 +738,7 @@
                       e = crefExp(e_cref)
                     e
                   end
-                  
+
                   DAE.CODE(Absyn.C_EXPRESSION(Absyn.CALL(Absyn.CREF_IDENT("der",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(cref) <|  nil(),  nil()))), _)  => begin
                       (_, e_cref) = Static.elabUntypedCref(FCore.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
                       e = crefExp(e_cref)
@@ -751,7 +751,7 @@
 
          #= converts to ICONST if possible. If it does
          not fit, a RCONST is returned instead. =#
-        function realToIntIfPossible(inVal::ModelicaReal) ::DAE.Exp 
+        function realToIntIfPossible(inVal::ModelicaReal) ::DAE.Exp
               local outVal::DAE.Exp
 
               try
@@ -762,10 +762,10 @@
           outVal
         end
 
-         #= 
+         #=
           function liftArrayR
           Converts a type into an array type with dimension n as first dim =#
-        function liftArrayR(tp::DAE.Type, n::DAE.Dimension) ::DAE.Type 
+        function liftArrayR(tp::DAE.Type, n::DAE.Dimension) ::DAE.Type
               local outTp::DAE.Type
 
               outTp = begin
@@ -776,7 +776,7 @@
                       dims = _cons(n, dims)
                     DAE.T_ARRAY(elt_tp, dims)
                   end
-                  
+
                   _  => begin
                       DAE.T_ARRAY(tp, list(n))
                   end
@@ -788,7 +788,7 @@
          #= Converts (extracts) a dimension to an expression.
           This function will fail if dimension is unknown or an expression (in case the dimension is from a different scope).
           If you want to(kind of) handle unknown dims use dimensionSizeExpHandleUnkown. =#
-        function dimensionSizeConstantExp(dim::DAE.Dimension) ::DAE.Exp 
+        function dimensionSizeConstantExp(dim::DAE.Dimension) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = begin
@@ -797,11 +797,11 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     DAE.ICONST(i)
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     DAE.ICONST(i)
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     DAE.ICONST(2)
                   end
@@ -813,7 +813,7 @@
          #= Converts (extracts) a dimension to an expression.
           This function will fail if dimension is unknown. i.e. DIM_UNKNOWN.
           If you want to(kind of) handle unknown dims use dimensionSizeExpHandleUnkown. =#
-        function dimensionSizeExp(dim::DAE.Dimension) ::DAE.Exp 
+        function dimensionSizeExp(dim::DAE.Dimension) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = begin
@@ -823,15 +823,15 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     DAE.ICONST(i)
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     DAE.ICONST(i)
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     DAE.ICONST(2)
                   end
-                  
+
                   DAE.DIM_EXP(exp = e)  => begin
                     e
                   end
@@ -846,7 +846,7 @@
           are okay if the variable is a function input (it's just holds the slot
           and will not be generated). Otherwise it's an error
           since it shouldn't have reached there. =#
-        function dimensionSizeExpHandleUnkown(dim::DAE.Dimension) ::DAE.Exp 
+        function dimensionSizeExpHandleUnkown(dim::DAE.Dimension) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = begin
@@ -854,7 +854,7 @@
                   DAE.DIM_UNKNOWN(__)  => begin
                     DAE.ICONST(-1)
                   end
-                  
+
                   _  => begin
                       dimensionSizeExp(dim)
                   end
@@ -864,7 +864,7 @@
         end
 
          #= Converts an integer to an array dimension. =#
-        function intDimension(value::ModelicaInteger) ::DAE.Dimension 
+        function intDimension(value::ModelicaInteger) ::DAE.Dimension
               local dim::DAE.Dimension
 
               dim = DAE.DIM_INTEGER(value)
@@ -872,7 +872,7 @@
         end
 
          #= Converts an array dimension to a subscript. =#
-        function dimensionSubscript(dim::DAE.Dimension) ::DAE.Subscript 
+        function dimensionSubscript(dim::DAE.Dimension) ::DAE.Subscript
               local sub::DAE.Subscript
 
               sub = begin
@@ -881,15 +881,15 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     DAE.INDEX(DAE.ICONST(i))
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     DAE.INDEX(DAE.ICONST(i))
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     DAE.INDEX(DAE.ICONST(2))
                   end
-                  
+
                   DAE.DIM_UNKNOWN(__)  => begin
                     DAE.WHOLEDIM()
                   end
@@ -904,7 +904,7 @@
 
          #= author: PA
           Negates an expression. =#
-        function negate(inExp::DAE.Exp) ::DAE.Exp 
+        function negate(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -925,42 +925,42 @@
                   DAE.UNARY(DAE.UMINUS(_), e)  => begin
                     e
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS_ARR(_), e)  => begin
                     e
                   end
-                  
+
                   DAE.LUNARY(DAE.NOT(_), e)  => begin
                     e
                   end
-                  
+
                   DAE.BINARY(e1, op, e2) where (isMulOrDiv(op))  => begin
                     DAE.BINARY(negate(e1), op, e2)
                   end
-                  
+
                   DAE.BINARY(e1, op, e2) where (isSub(op))  => begin
                     DAE.BINARY(e2, op, e1)
                   end
-                  
+
                   e where (isZero(e))  => begin
                     e
                   end
-                  
+
                   DAE.ICONST(i)  => begin
                       i_1 = 0 - i
                     DAE.ICONST(i_1)
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                       r_1 = 0.0 - r
                     DAE.RCONST(r_1)
                   end
-                  
+
                   DAE.BCONST(b)  => begin
                       b_1 = ! b
                     DAE.BCONST(b_1)
                   end
-                  
+
                   e  => begin
                       t = typeof(e)
                       outExp = begin
@@ -968,7 +968,7 @@
                           DAE.T_BOOL(__)  => begin
                             DAE.LUNARY(DAE.NOT(t), e)
                           end
-                          
+
                           _  => begin
                                 b = DAEUtil.expTypeArray(t)
                                 op = if b
@@ -997,7 +997,7 @@
           outExp
         end
 
-        function negateReal(inReal::DAE.Exp) ::DAE.Exp 
+        function negateReal(inReal::DAE.Exp) ::DAE.Exp
               local outNegatedReal::DAE.Exp
 
               outNegatedReal = DAE.UNARY(DAE.UMINUS(DAE.T_REAL_DEFAULT), inReal)
@@ -1007,7 +1007,7 @@
          #= expands products
         For example
         a *(b+c) => a*b + a*c =#
-        function expand(e::DAE.Exp) ::DAE.Exp 
+        function expand(e::DAE.Exp) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = begin
@@ -1022,7 +1022,7 @@
                       @match DAE.BINARY(e21, op, e22) = expand(e2)
                     DAE.BINARY(DAE.BINARY(e1, DAE.MUL(tp), e21), op, DAE.BINARY(e1, DAE.MUL(tp), e22))
                   end
-                  
+
                   _  => begin
                       e
                   end
@@ -1033,7 +1033,7 @@
 
          #= author: Frenkel TUD 2012-11
           exp -> der(exp) =#
-        function expDer(inExp::DAE.Exp) ::DAE.Exp 
+        function expDer(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = DAE.CALL(Absyn.IDENT("der"), list(inExp), DAE.callAttrBuiltinReal)
@@ -1042,7 +1042,7 @@
 
          #= author: PA
           Makes the expression absolute. i.e. non-negative. =#
-        function expAbs(inExp::DAE.Exp) ::DAE.Exp 
+        function expAbs(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1063,23 +1063,23 @@
                       i2 = intAbs(i)
                     DAE.ICONST(i2)
                   end
-                  
+
                   DAE.RCONST(real = r)  => begin
                       r2 = realAbs(r)
                     DAE.RCONST(r2)
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS(__), exp = e)  => begin
                       e_1 = expAbs(e)
                     e_1
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       e1_1 = expAbs(e1)
                       e2_1 = expAbs(e2)
                     DAE.BINARY(e1_1, op, e2_1)
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -1089,16 +1089,16 @@
         end
 
          #= Function that strips all noEvent() calls in an expression =#
-        function stripNoEvent(e::DAE.Exp) ::DAE.Exp 
+        function stripNoEvent(e::DAE.Exp) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = traverseExpDummy(e, stripNoEventExp)
           outE
         end
 
-         #= 
+         #=
         traversal function for stripNoEvent =#
-        function stripNoEventExp(e::DAE.Exp) ::DAE.Exp 
+        function stripNoEventExp(e::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1106,7 +1106,7 @@
                   DAE.CALL(path = Absyn.IDENT("noEvent"), expLst = outExp <|  nil())  => begin
                     outExp
                   end
-                  
+
                   _  => begin
                       e
                   end
@@ -1116,16 +1116,16 @@
         end
 
          #= Function that adds a noEvent() call to all relations in an expression =#
-        function addNoEventToRelations(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToRelations(e::DAE.Exp) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = traverseExpDummy(e, addNoEventToRelationExp)
           outE
         end
 
-         #= 
+         #=
         traversal function for addNoEventToRelations =#
-        function addNoEventToRelationExp(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToRelationExp(e::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1133,7 +1133,7 @@
                   DAE.RELATION(__)  => begin
                     makeNoEvent(e)
                   end
-                  
+
                   _  => begin
                       e
                   end
@@ -1143,16 +1143,16 @@
         end
 
          #= Function that adds a noEvent() call to all relations in an expression =#
-        function addNoEventToRelationsAndConds(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToRelationsAndConds(e::DAE.Exp) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = traverseExpDummy(e, addNoEventToRelationandCondExp)
           outE
         end
 
-         #= 
+         #=
         traversal function for addNoEventToRelationsAndConds =#
-        function addNoEventToRelationandCondExp(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToRelationandCondExp(e::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1163,11 +1163,11 @@
                   DAE.RELATION(__)  => begin
                     makeNoEvent(e)
                   end
-                  
+
                   DAE.IFEXP(e1, e2, e3)  => begin
                     DAE.IFEXP(makeNoEvent(e1), e2, e3)
                   end
-                  
+
                   _  => begin
                       e
                   end
@@ -1177,16 +1177,16 @@
         end
 
          #=  Function that adds a noEvent() call to all event triggering functions in an expression =#
-        function addNoEventToEventTriggeringFunctions(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToEventTriggeringFunctions(e::DAE.Exp) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = traverseExpDummy(e, addNoEventToEventTriggeringFunctionsExp)
           outE
         end
 
-         #= 
+         #=
         traversal function for addNoEventToEventTriggeringFunctions =#
-        function addNoEventToEventTriggeringFunctionsExp(e::DAE.Exp) ::DAE.Exp 
+        function addNoEventToEventTriggeringFunctionsExp(e::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1194,7 +1194,7 @@
                   DAE.CALL(__) where (isEventTriggeringFunctionExp(e))  => begin
                     makeNoEvent(e)
                   end
-                  
+
                   _  => begin
                       e
                   end
@@ -1204,7 +1204,7 @@
         end
 
          #= Strips the last subscripts of a Exp =#
-        function expStripLastSubs(inExp::DAE.Exp) ::DAE.Exp 
+        function expStripLastSubs(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1223,7 +1223,7 @@
                       e = makeCrefExp(cr_1, ty)
                     e
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                       e_1 = expStripLastSubs(e)
                       ty = typeof(e_1)
@@ -1241,7 +1241,7 @@
         end
 
          #= Strips the last identifier of a cref Exp =#
-        function expStripLastIdent(inExp::DAE.Exp) ::DAE.Exp 
+        function expStripLastIdent(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1260,7 +1260,7 @@
                       e = makeCrefExp(cr_1, ty)
                     e
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                       e_1 = expStripLastIdent(e)
                       ty = typeof(e_1)
@@ -1279,7 +1279,7 @@
 
          #= Prepends a subscript to a CREF expression
          For instance a.b[1,2] with subscript 'i' becomes a.b[i,1,2]. =#
-        function prependSubscriptExp(exp::DAE.Exp, subscr::DAE.Subscript) ::DAE.Exp 
+        function prependSubscriptExp(exp::DAE.Exp, subscr::DAE.Subscript) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1302,14 +1302,14 @@
           outExp
         end
 
-         #= 
+         #=
         author: PA
         Takes an arbitrary expression and applies subscripts to it. This is done by creating asub
         expressions given the original expression and then simplify them.
         Note: The subscripts must be INDEX
 
         alternative names: subsriptExp (but already taken), subscriptToAsub =#
-        function applyExpSubscripts(exp::DAE.Exp, inSubs::List{<:DAE.Subscript}) ::DAE.Exp 
+        function applyExpSubscripts(exp::DAE.Exp, inSubs::List{<:DAE.Subscript}) ::DAE.Exp
 
 
               local s::DAE.Exp
@@ -1318,7 +1318,7 @@
           exp
         end
 
-         #= 
+         #=
         author: PA
         Takes an arbitrary expression and applies subscripts to it. This is done by creating asub
         expressions given the original expression and then simplify them.
@@ -1329,7 +1329,7 @@
         This version of the function also returns a boolean stating if simplify
         improved anything (can be used as a heuristic if you want to apply
         the subscript when scalarizing) =#
-        function applyExpSubscriptsFoldCheckSimplify(exp::DAE.Exp, inSubs::List{<:DAE.Subscript}, checkSimplify::Bool = false) ::Tuple{DAE.Exp, Bool} 
+        function applyExpSubscriptsFoldCheckSimplify(exp::DAE.Exp, inSubs::List{<:DAE.Subscript}, checkSimplify::Bool = false) ::Tuple{DAE.Exp, Bool}
 
 
 
@@ -1367,7 +1367,7 @@
                subscriptExp on (a) with sub [2,1] gives a[2,1]
 
          =#
-        function subscriptExp(inExp::DAE.Exp, inSubs::List{<:DAE.Subscript}) ::DAE.Exp 
+        function subscriptExp(inExp::DAE.Exp, inSubs::List{<:DAE.Subscript}) ::DAE.Exp
               local outArg::DAE.Exp
 
               outArg = begin
@@ -1385,30 +1385,30 @@
                   (_,  nil())  => begin
                     inExp
                   end
-                  
+
                   (DAE.CREF(cref, ty), _)  => begin
                       cref = ComponentReference.subscriptCref(cref, inSubs)
                     DAE.CREF(cref, ty)
                   end
-                  
+
                   (DAE.ARRAY(_, _, explst), sub <| restsubs)  => begin
                       exp = listGet(explst, subscriptInt(sub))
                     subscriptExp(exp, restsubs)
                   end
-                  
+
                   (DAE.BINARY(exp1, op, exp2), _)  => begin
                       exp1 = subscriptExp(exp1, inSubs)
                       exp2 = subscriptExp(exp2, inSubs)
                     DAE.BINARY(exp1, op, exp2)
                   end
-                  
+
                   (DAE.CAST(ty, exp1), _)  => begin
                       exp1 = subscriptExp(exp1, inSubs)
                       ty = Types.arrayElementType(ty)
                       exp1 = DAE.CAST(ty, exp1)
                     exp1
                   end
-                  
+
                   _  => begin
                         str = "Expression.subscriptExp failed on " + ExpressionDump.printExpStr(inExp) + "\\n"
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -1422,7 +1422,7 @@
          #= Converts an array type into its element type
           See also Types.unliftArray.
           . =#
-        function unliftArray(inType::DAE.Type) ::DAE.Type 
+        function unliftArray(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1434,19 +1434,19 @@
                   DAE.T_ARRAY(ty = tp, dims = _ <|  nil())  => begin
                     tp
                   end
-                  
+
                   DAE.T_ARRAY(ty = tp, dims = _ <| ds)  => begin
                     DAE.T_ARRAY(tp, ds)
                   end
-                  
+
                   DAE.T_METATYPE(ty = tp)  => begin
                     Types.simplifyType(unliftArray(tp))
                   end
-                  
+
                   DAE.T_METAARRAY(ty = tp)  => begin
                     tp
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -1455,14 +1455,14 @@
           outType
         end
 
-        function unliftArrayIgnoreFirst(a::A, inType::DAE.Type) ::DAE.Type 
+        function unliftArrayIgnoreFirst(a::A, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = unliftArray(inType)
           outType
         end
 
-        function unliftExp(inExp::DAE.Exp) ::DAE.Exp 
+        function unliftExp(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1479,17 +1479,17 @@
                       expCref = makeCrefExp(cr, ty)
                     expCref
                   end
-                  
+
                   DAE.ARRAY(ty = ty, scalar = s, array = a)  => begin
                       ty = unliftArray(ty)
                     DAE.ARRAY(ty, s, a)
                   end
-                  
+
                   DAE.MATRIX(ty = ty, integer = i, matrix = mat)  => begin
                       ty = unliftArray(ty)
                     DAE.MATRIX(ty, i, mat)
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -1498,14 +1498,14 @@
           outExp
         end
 
-        function liftExp(inExp::DAE.Exp, inDimension::DAE.Dimension) ::DAE.Exp 
+        function liftExp(inExp::DAE.Exp, inDimension::DAE.Dimension) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = DAE.ARRAY(Types.liftArray(typeof(inExp), inDimension), false, ListUtil.fill(inExp, dimensionSize(inDimension)))
           outExp
         end
 
-        function liftExpList(inExp::DAE.Exp, inDimensions::List{<:DAE.Dimension}) ::DAE.Exp 
+        function liftExpList(inExp::DAE.Exp, inDimensions::List{<:DAE.Dimension}) ::DAE.Exp
               local outExp::DAE.Exp = inExp
 
               for dim in listReverse(inDimensions)
@@ -1514,11 +1514,11 @@
           outExp
         end
 
-         #= 
+         #=
         This function adds an array dimension to a type on the right side, i.e.
         liftArrayRigth(Real[2,3],SOME(4)) => Real[2,3,4].
         This function has the same functionality as Types.liftArrayType but for DAE.Type.' =#
-        function liftArrayRight(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type 
+        function liftArrayRight(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1531,7 +1531,7 @@
                       ty_1 = liftArrayRight(ty, dim)
                     DAE.T_ARRAY(ty_1, dims)
                   end
-                  
+
                   _  => begin
                       DAE.T_ARRAY(inType, list(inDimension))
                   end
@@ -1540,11 +1540,11 @@
           outType
         end
 
-         #= 
+         #=
         author: PA
         This function adds an array dimension to a type on the left side, i.e.
         liftArrayRigth(Real[2,3],SOME(4)) => Real[4,2,3] =#
-        function liftArrayLeft(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type 
+        function liftArrayLeft(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1555,7 +1555,7 @@
                   (DAE.T_ARRAY(ty, dims), dim)  => begin
                     DAE.T_ARRAY(ty, _cons(dim, dims))
                   end
-                  
+
                   _  => begin
                       DAE.T_ARRAY(inType, list(inDimension))
                   end
@@ -1564,7 +1564,7 @@
           outType
         end
 
-        function liftArrayLeftList(inType::DAE.Type, inDimensions::List{<:DAE.Dimension}) ::DAE.Type 
+        function liftArrayLeftList(inType::DAE.Type, inDimensions::List{<:DAE.Dimension}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1574,12 +1574,12 @@
                   (_,  nil())  => begin
                     inType
                   end
-                  
+
                   (DAE.T_ARRAY(ty, dims), _)  => begin
                       dims = listAppend(inDimensions, dims)
                     DAE.T_ARRAY(ty, dims)
                   end
-                  
+
                   _  => begin
                       DAE.T_ARRAY(inType, inDimensions)
                   end
@@ -1589,7 +1589,7 @@
         end
 
          #= Sets the type of an operator. =#
-        function setOpType(inOp::DAE.Operator, inType::DAE.Type) ::DAE.Operator 
+        function setOpType(inOp::DAE.Operator, inType::DAE.Type) ::DAE.Operator
               local outOp::DAE.Operator
 
               outOp = begin
@@ -1597,131 +1597,131 @@
                   (DAE.ADD(__), _)  => begin
                     DAE.ADD(inType)
                   end
-                  
+
                   (DAE.SUB(__), _)  => begin
                     DAE.SUB(inType)
                   end
-                  
+
                   (DAE.MUL(__), _)  => begin
                     DAE.MUL(inType)
                   end
-                  
+
                   (DAE.DIV(__), _)  => begin
                     DAE.DIV(inType)
                   end
-                  
+
                   (DAE.POW(__), _)  => begin
                     DAE.POW(inType)
                   end
-                  
+
                   (DAE.UMINUS(__), _)  => begin
                     DAE.UMINUS(inType)
                   end
-                  
+
                   (DAE.UMINUS_ARR(__), _)  => begin
                     DAE.UMINUS_ARR(inType)
                   end
-                  
+
                   (DAE.ADD_ARR(__), _)  => begin
                     DAE.ADD_ARR(inType)
                   end
-                  
+
                   (DAE.SUB_ARR(__), _)  => begin
                     DAE.SUB_ARR(inType)
                   end
-                  
+
                   (DAE.MUL_ARR(__), _)  => begin
                     DAE.MUL_ARR(inType)
                   end
-                  
+
                   (DAE.DIV_ARR(__), _)  => begin
                     DAE.DIV_ARR(inType)
                   end
-                  
+
                   (DAE.MUL_ARRAY_SCALAR(__), _)  => begin
                     DAE.MUL_ARRAY_SCALAR(inType)
                   end
-                  
+
                   (DAE.ADD_ARRAY_SCALAR(__), _)  => begin
                     DAE.ADD_ARRAY_SCALAR(inType)
                   end
-                  
+
                   (DAE.SUB_SCALAR_ARRAY(__), _)  => begin
                     DAE.SUB_SCALAR_ARRAY(inType)
                   end
-                  
+
                   (DAE.MUL_SCALAR_PRODUCT(__), _)  => begin
                     DAE.MUL_SCALAR_PRODUCT(inType)
                   end
-                  
+
                   (DAE.MUL_MATRIX_PRODUCT(__), _)  => begin
                     DAE.MUL_MATRIX_PRODUCT(inType)
                   end
-                  
+
                   (DAE.DIV_ARRAY_SCALAR(__), _)  => begin
                     DAE.DIV_ARRAY_SCALAR(inType)
                   end
-                  
+
                   (DAE.DIV_SCALAR_ARRAY(__), _)  => begin
                     DAE.DIV_SCALAR_ARRAY(inType)
                   end
-                  
+
                   (DAE.POW_ARRAY_SCALAR(__), _)  => begin
                     DAE.POW_ARRAY_SCALAR(inType)
                   end
-                  
+
                   (DAE.POW_SCALAR_ARRAY(__), _)  => begin
                     DAE.POW_SCALAR_ARRAY(inType)
                   end
-                  
+
                   (DAE.POW_ARR(__), _)  => begin
                     DAE.POW_ARR(inType)
                   end
-                  
+
                   (DAE.POW_ARR2(__), _)  => begin
                     DAE.POW_ARR2(inType)
                   end
-                  
+
                   (DAE.AND(__), _)  => begin
                     DAE.AND(inType)
                   end
-                  
+
                   (DAE.OR(__), _)  => begin
                     DAE.OR(inType)
                   end
-                  
+
                   (DAE.NOT(__), _)  => begin
                     DAE.NOT(inType)
                   end
-                  
+
                   (DAE.LESS(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.LESSEQ(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.GREATER(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.GREATEREQ(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.EQUAL(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.NEQUAL(__), _)  => begin
                     inOp
                   end
-                  
+
                   (DAE.USERDEFINED(__), _)  => begin
                     inOp
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Expression.setOpType failed on unknown operator")
@@ -1735,7 +1735,7 @@
          #= Unlifts the type of an operator by removing one dimension from the operator
            type. The operator is changed to the scalar version if the type becomes a
            scalar type. =#
-        function unliftOperator(inOperator::DAE.Operator) ::DAE.Operator 
+        function unliftOperator(inOperator::DAE.Operator) ::DAE.Operator
               local outOperator::DAE.Operator
 
               local ty::Type
@@ -1749,7 +1749,7 @@
          #= Unlifts the type of an operator by removing X dimensions from the operator
            type. The operator is changed to the scalar version if the type becomes a
            scalar type. =#
-        function unliftOperatorX(inOperator::DAE.Operator, inX::ModelicaInteger) ::DAE.Operator 
+        function unliftOperatorX(inOperator::DAE.Operator, inX::ModelicaInteger) ::DAE.Operator
               local outOperator::DAE.Operator
 
               local ty::Type
@@ -1762,7 +1762,7 @@
 
          #= Helper function to unliftOperator. Sets the type of the given operator, and
            changes the operator to the scalar version if the type is scalar. =#
-        function unliftOperator2(inOperator::DAE.Operator, inType::DAE.Type) ::DAE.Operator 
+        function unliftOperator2(inOperator::DAE.Operator, inType::DAE.Type) ::DAE.Operator
               local outOperator::DAE.Operator
 
               outOperator = begin
@@ -1770,7 +1770,7 @@
                   (_, DAE.T_ARRAY(__))  => begin
                     setOpType(inOperator, inType)
                   end
-                  
+
                   _  => begin
                       makeScalarOpFromArrayOp(inOperator, inType)
                   end
@@ -1781,7 +1781,7 @@
 
          #= Helper function to makeScalarOpFromArrayOp. Returns the scalar version of a
            given array operator. =#
-        function makeScalarOpFromArrayOp(inOperator::DAE.Operator, inType::DAE.Type) ::DAE.Operator 
+        function makeScalarOpFromArrayOp(inOperator::DAE.Operator, inType::DAE.Type) ::DAE.Operator
               local outOperator::DAE.Operator
 
               outOperator = begin
@@ -1789,51 +1789,51 @@
                   (DAE.MUL_ARRAY_SCALAR(__), _)  => begin
                     DAE.MUL(inType)
                   end
-                  
+
                   (DAE.ADD_ARRAY_SCALAR(__), _)  => begin
                     DAE.ADD(inType)
                   end
-                  
+
                   (DAE.SUB_SCALAR_ARRAY(__), _)  => begin
                     DAE.SUB(inType)
                   end
-                  
+
                   (DAE.DIV_ARRAY_SCALAR(__), _)  => begin
                     DAE.DIV(inType)
                   end
-                  
+
                   (DAE.DIV_SCALAR_ARRAY(__), _)  => begin
                     DAE.DIV(inType)
                   end
-                  
+
                   (DAE.POW_ARRAY_SCALAR(__), _)  => begin
                     DAE.POW(inType)
                   end
-                  
+
                   (DAE.POW_SCALAR_ARRAY(__), _)  => begin
                     DAE.POW(inType)
                   end
-                  
+
                   (DAE.UMINUS_ARR(__), _)  => begin
                     DAE.UMINUS(inType)
                   end
-                  
+
                   (DAE.ADD_ARR(__), _)  => begin
                     DAE.ADD(inType)
                   end
-                  
+
                   (DAE.SUB_ARR(__), _)  => begin
                     DAE.SUB(inType)
                   end
-                  
+
                   (DAE.MUL_ARR(__), _)  => begin
                     DAE.MUL(inType)
                   end
-                  
+
                   (DAE.DIV_ARR(__), _)  => begin
                     DAE.DIV(inType)
                   end
-                  
+
                   _  => begin
                       inOperator
                   end
@@ -1843,7 +1843,7 @@
         end
 
          #= Returns true if the operator takes a scalar and an array as arguments. =#
-        function isScalarArrayOp(inOperator::DAE.Operator) ::Bool 
+        function isScalarArrayOp(inOperator::DAE.Operator) ::Bool
               local outIsScalarArrayOp::Bool
 
               outIsScalarArrayOp = begin
@@ -1851,15 +1851,15 @@
                   DAE.SUB_SCALAR_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1869,7 +1869,7 @@
         end
 
          #= Returns true if the operator takes an array and a scalar as arguments. =#
-        function isArrayScalarOp(inOperator::DAE.Operator) ::Bool 
+        function isArrayScalarOp(inOperator::DAE.Operator) ::Bool
               local outIsArrayScalarOp::Bool
 
               outIsArrayScalarOp = begin
@@ -1877,19 +1877,19 @@
                   DAE.MUL_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1902,7 +1902,7 @@
           But there are a few special cases.  When the last existing
           subscript is a slice, it is replaced by the slice indexed by
           the new subscript. =#
-        function subscriptsAppend(inSubscriptLst::List{<:DAE.Subscript}, inSubscript::DAE.Exp) ::List{DAE.Subscript} 
+        function subscriptsAppend(inSubscriptLst::List{<:DAE.Subscript}, inSubscript::DAE.Exp) ::List{DAE.Subscript}
               local outSubscriptLst::List{DAE.Subscript}
 
               outSubscriptLst = begin
@@ -1915,20 +1915,20 @@
                   ( nil(), _)  => begin
                     list(DAE.INDEX(inSubscript))
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| ss, _)  => begin
                     _cons(DAE.INDEX(inSubscript), ss)
                   end
-                  
+
                   (DAE.SLICE(exp = e) <|  nil(), _)  => begin
                       (e_1, _) = ExpressionSimplify.simplify1(makeASUB(e, list(inSubscript)))
                     list(DAE.INDEX(e_1))
                   end
-                  
+
                   (s && DAE.INDEX(__) <|  nil(), _)  => begin
                     list(s, DAE.INDEX(inSubscript))
                   end
-                  
+
                   (s <| ss, _)  => begin
                       ss_1 = subscriptsAppend(ss, inSubscript)
                     _cons(s, ss_1)
@@ -1939,7 +1939,7 @@
         end
 
          #= Replaces the first slice subscript in the given list with the given subscript. =#
-        function subscriptsReplaceSlice(inSubscripts::List{<:DAE.Subscript}, inSubscript::DAE.Subscript) ::List{DAE.Subscript} 
+        function subscriptsReplaceSlice(inSubscripts::List{<:DAE.Subscript}, inSubscript::DAE.Subscript) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = begin
@@ -1949,11 +1949,11 @@
                   (DAE.WHOLEDIM(__) <| rest_subs, _)  => begin
                     _cons(inSubscript, rest_subs)
                   end
-                  
+
                   (DAE.SLICE(__) <| rest_subs, _)  => begin
                     _cons(inSubscript, rest_subs)
                   end
-                  
+
                   (sub <| rest_subs, _)  => begin
                       rest_subs = subscriptsReplaceSlice(rest_subs, inSubscript)
                     _cons(sub, rest_subs)
@@ -1963,9 +1963,9 @@
           outSubscripts
         end
 
-         #= 
+         #=
         helper function for renameVarsToUnderlineVar2 unlifts array type as much as we have subscripts =#
-        function unliftArrayTypeWithSubs(subs::List{<:DAE.Subscript}, ity::DAE.Type) ::DAE.Type 
+        function unliftArrayTypeWithSubs(subs::List{<:DAE.Subscript}, ity::DAE.Type) ::DAE.Type
               local oty::DAE.Type
 
               oty = begin
@@ -1975,7 +1975,7 @@
                   ( nil(), ty)  => begin
                     ty
                   end
-                  
+
                   (_ <| rest, ty)  => begin
                       ty = unliftArray(ty)
                       ty = unliftArrayTypeWithSubs(rest, ty)
@@ -1988,7 +1988,7 @@
 
          #= Function: unliftArrayX
         Unlifts a type with X dimensions... =#
-        function unliftArrayX(inType::DAE.Type, x::ModelicaInteger) ::DAE.Type 
+        function unliftArrayX(inType::DAE.Type, x::ModelicaInteger) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1997,7 +1997,7 @@
                   (_, 0)  => begin
                     inType
                   end
-                  
+
                   _  => begin
                         ty = unliftArray(inType)
                       unliftArrayX(ty, x - 1)
@@ -2008,7 +2008,7 @@
         end
 
          #= Appends a new element to a DAE.ARRAY. =#
-        function arrayAppend(head::DAE.Exp, rest::DAE.Exp) ::DAE.Exp 
+        function arrayAppend(head::DAE.Exp, rest::DAE.Exp) ::DAE.Exp
               local array::DAE.Exp
 
               array = begin
@@ -2023,7 +2023,7 @@
                       dims = _cons(DAE.DIM_INTEGER(dim), dims)
                     DAE.ARRAY(DAE.T_ARRAY(ty, dims), scalar, _cons(head, expl))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Expression.arrayAppend failed.")
@@ -2035,7 +2035,7 @@
         end
 
          #= Updates the first dimension of an array type. =#
-        function arrayDimensionSetFirst(inArrayType::DAE.Type, dimension::DAE.Dimension) ::DAE.Type 
+        function arrayDimensionSetFirst(inArrayType::DAE.Type, dimension::DAE.Dimension) ::DAE.Type
               local outArrayType::DAE.Type
 
               outArrayType = begin
@@ -2055,7 +2055,7 @@
          #= /***************************************************/ =#
 
          #= Returns the value of a constant Real expression. =#
-        function toReal(inExp::DAE.Exp) ::ModelicaReal 
+        function toReal(inExp::DAE.Exp) ::ModelicaReal
               local outReal::ModelicaReal
 
               outReal = begin
@@ -2063,15 +2063,15 @@
                   DAE.RCONST(__)  => begin
                     inExp.real
                   end
-                  
+
                   DAE.ICONST(__)  => begin
                     intReal(inExp.integer)
                   end
-                  
+
                   DAE.CAST(__)  => begin
                     toReal(inExp.exp)
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     intReal(inExp.index)
                   end
@@ -2081,7 +2081,7 @@
         end
 
          #= Returns the value of a constant Boolean expression. =#
-        function toBool(inExp::DAE.Exp) ::Bool 
+        function toBool(inExp::DAE.Exp) ::Bool
               local outBool::Bool
 
               @match DAE.BCONST(outBool) = inExp
@@ -2089,7 +2089,7 @@
         end
 
          #= returns the int value if expression is constant Real that can be represented by an Integer =#
-        function realExpIntLit(exp::DAE.Exp) ::Option{ModelicaInteger} 
+        function realExpIntLit(exp::DAE.Exp) ::Option{ModelicaInteger}
               local oi::Option{ModelicaInteger}
 
               oi = begin
@@ -2106,7 +2106,7 @@
                           end
                     op
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -2116,7 +2116,7 @@
         end
 
          #= returns the int value if expression is constant Integer =#
-        function expInt(exp::DAE.Exp) ::ModelicaInteger 
+        function expInt(exp::DAE.Exp) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -2124,11 +2124,11 @@
                   DAE.ICONST(__)  => begin
                     exp.integer
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     exp.index
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     if exp.bool
                           1
@@ -2142,7 +2142,7 @@
         end
 
          #= Returns a real interval expression for any clock kind; 0.0 if unknown. =#
-        function getClockInterval(inClk::DAE.ClockKind) ::DAE.Exp 
+        function getClockInterval(inClk::DAE.ClockKind) ::DAE.Exp
               local outIntvl::DAE.Exp
 
               local e::DAE.Exp
@@ -2154,15 +2154,15 @@
                   DAE.REAL_CLOCK(e)  => begin
                     e
                   end
-                  
+
                   DAE.INTEGER_CLOCK(e, e2)  => begin
                     DAE.BINARY(DAE.CAST(DAE.T_REAL_DEFAULT, e), DAE.DIV(DAE.T_REAL_DEFAULT), DAE.CAST(DAE.T_REAL_DEFAULT, e2))
                   end
-                  
+
                   DAE.BOOLEAN_CLOCK(e, e2)  => begin
                     e2
                   end
-                  
+
                   _  => begin
                       DAE.RCONST(0.0)
                   end
@@ -2174,7 +2174,7 @@
         end
 
          #= Returns the array index that an expression represents as an integer. =#
-        function expArrayIndex(inExp::DAE.Exp) ::ModelicaInteger 
+        function expArrayIndex(inExp::DAE.Exp) ::ModelicaInteger
               local outIndex::ModelicaInteger
 
               outIndex = begin
@@ -2182,11 +2182,11 @@
                   DAE.ICONST(__)  => begin
                     inExp.integer
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     inExp.index
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     if inExp.bool
                           2
@@ -2199,7 +2199,7 @@
           outIndex
         end
 
-        function sconstEnumNameString(exp::DAE.Exp) ::String 
+        function sconstEnumNameString(exp::DAE.Exp) ::String
               local str::String
 
               str = begin
@@ -2209,7 +2209,7 @@
                   DAE.SCONST(s)  => begin
                     s
                   end
-                  
+
                   DAE.ENUM_LITERAL(name)  => begin
                     AbsynUtil.pathString(name)
                   end
@@ -2219,7 +2219,7 @@
         end
 
          #= Returns the name of a Var =#
-        function varName(v::DAE.Var) ::String 
+        function varName(v::DAE.Var) ::String
               local name::String
 
               name = begin
@@ -2233,7 +2233,7 @@
         end
 
          #= Returns the type of a Var =#
-        function varType(v::DAE.Var) ::DAE.Type 
+        function varType(v::DAE.Var) ::DAE.Type
               local tp::DAE.Type
 
               tp = begin
@@ -2247,7 +2247,7 @@
         end
 
          #= Returns the componentref if DAE.Exp is a CREF or DER(CREF) =#
-        function expOrDerCref(inExp::DAE.Exp) ::Tuple{DAE.ComponentRef, Bool} 
+        function expOrDerCref(inExp::DAE.Exp) ::Tuple{DAE.ComponentRef, Bool}
               local isDer::Bool
               local outComponentRef::DAE.ComponentRef
 
@@ -2257,7 +2257,7 @@
                   DAE.CREF(componentRef = cr)  => begin
                     (cr, false)
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "der"), expLst = DAE.CREF(cr, _) <|  nil())  => begin
                     (cr, true)
                   end
@@ -2267,7 +2267,7 @@
         end
 
          #= Returns the componentref if DAE.Exp is a CREF, =#
-        function expCref(inExp::DAE.Exp) ::DAE.ComponentRef 
+        function expCref(inExp::DAE.Exp) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2282,7 +2282,7 @@
         end
 
          #= Returns the componentref if DAE.Exp is a CREF or -CREF =#
-        function expCrefNegCref(inExp::DAE.Exp) ::DAE.ComponentRef 
+        function expCrefNegCref(inExp::DAE.Exp) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2291,11 +2291,11 @@
                   DAE.CREF(componentRef = cr)  => begin
                     cr
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS(_), DAE.CREF(componentRef = cr))  => begin
                     cr
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS_ARR(_), DAE.CREF(componentRef = cr))  => begin
                     cr
                   end
@@ -2305,7 +2305,7 @@
         end
 
          #= Returns the componentref if the expression in inTuple is a CREF. =#
-        function expCrefTuple(inTuple::Tuple{<:DAE.Exp, Bool}) ::DAE.ComponentRef 
+        function expCrefTuple(inTuple::Tuple{<:DAE.Exp, Bool}) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -2322,7 +2322,7 @@
          #= Returns the componentref if DAE.Exp is a CREF, or the factors of CREF if expression is an if expression.
           This is used in e.g. the tearing algorithm to detect potential division by zero in
           expressions like 1/(if b then 1.0 else x) which could lead to division by zero if b is false and x is 0;  =#
-        function expCrefInclIfExpFactors(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function expCrefInclIfExpFactors(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local outComponentRefs::List{DAE.ComponentRef}
 
               outComponentRefs = begin
@@ -2336,7 +2336,7 @@
                   DAE.CREF(componentRef = cr)  => begin
                     list(cr)
                   end
-                  
+
                   DAE.IFEXP(_, tb, fb)  => begin
                       f = ListUtil.select(listAppend(factors(tb), factors(fb)), isCref)
                       crefs = ListUtil.map(f, expCref)
@@ -2348,7 +2348,7 @@
         end
 
          #= returns the list of expressions in the array =#
-        function getArrayContents(e::DAE.Exp) ::List{DAE.Exp} 
+        function getArrayContents(e::DAE.Exp) ::List{DAE.Exp}
               local es::List{DAE.Exp}
 
               @match DAE.ARRAY(array = es) = e
@@ -2356,7 +2356,7 @@
         end
 
          #= Returns the contents of an array or matrix as a list of expressions. =#
-        function getArrayOrMatrixContents(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function getArrayOrMatrixContents(inExp::DAE.Exp) ::List{DAE.Exp}
               local outContents::List{DAE.Exp}
 
               outContents = begin
@@ -2370,7 +2370,7 @@
                   DAE.ARRAY(array = expl)  => begin
                     expl
                   end
-                  
+
                   DAE.MATRIX(ty = DAE.T_ARRAY(el_ty, _ <| dims), matrix = mat)  => begin
                       ty = DAE.T_ARRAY(el_ty, dims)
                       sc = Types.basicType(el_ty)
@@ -2382,7 +2382,7 @@
         end
 
          #= makes all asubs for the complete dimension of the exp. =#
-        function makeASUBsForDimension(eIn::DAE.Exp) ::List{DAE.Exp} 
+        function makeASUBsForDimension(eIn::DAE.Exp) ::List{DAE.Exp}
               local eLstOut::List{DAE.Exp} = nil
 
               local size::ModelicaInteger
@@ -2402,7 +2402,7 @@
 
          #= returns the list of expressions from a complex structure like array,record,call,tuple...
         author:Waurich TUD 2014-04 =#
-        function getComplexContents(e::DAE.Exp) ::List{DAE.Exp} 
+        function getComplexContents(e::DAE.Exp) ::List{DAE.Exp}
               local es::List{DAE.Exp}
 
               es = begin
@@ -2430,7 +2430,7 @@
                           end
                     expLst
                   end
-                  
+
                   DAE.BINARY(exp1 = exp1, operator = DAE.ADD_ARR(__), exp2 = exp2)  => begin
                       if isArray(exp1)
                         expLst1 = getComplexContents(exp1)
@@ -2446,41 +2446,41 @@
                       expLst = ListUtil.threadMap(expLst1, expLst2, (DAE.ADD(ty)) -> makeBinaryExp(inOp = DAE.ADD(ty)))
                     expLst
                   end
-                  
+
                   DAE.CALL(expLst = expLst)  => begin
                       expLstLst = ListUtil.map(expLst, getComplexContentsInCall)
                       expLst = ListUtil.flatten(expLstLst)
                     expLst
                   end
-                  
+
                   DAE.RECORD(exps = expLst)  => begin
                     expLst
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                       expLst = arrayElements(e)
                     expLst
                   end
-                  
+
                   DAE.MATRIX(matrix = expLstLst)  => begin
                       expLst = ListUtil.flatten(expLstLst)
                     expLst
                   end
-                  
+
                   DAE.TUPLE(PR = expLst)  => begin
                     expLst
                   end
-                  
+
                   DAE.CAST(exp = exp)  => begin
                       expLst = getComplexContents(exp)
                     expLst
                   end
-                  
+
                   DAE.ASUB(exp = exp)  => begin
                       expLst = getComplexContents(exp)
                     expLst
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2494,7 +2494,7 @@
         end
 
          #= gets the scalars for the complex expressions inside a function call =#
-        function getComplexContentsInCall(expIn::DAE.Exp) ::List{DAE.Exp} 
+        function getComplexContentsInCall(expIn::DAE.Exp) ::List{DAE.Exp}
               local expsOut::List{DAE.Exp}
 
               local expLst::List{DAE.Exp}
@@ -2509,7 +2509,7 @@
         end
 
          #= returns the list of expressions in the array =#
-        function getArrayOrRangeContents(e::DAE.Exp) ::List{DAE.Exp} 
+        function getArrayOrRangeContents(e::DAE.Exp) ::List{DAE.Exp}
               local es::List{DAE.Exp}
 
               es = begin
@@ -2527,35 +2527,35 @@
                   DAE.ARRAY(array = es)  => begin
                     es
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix, ty = ty)  => begin
                       ty = Types.unliftArray(ty)
                       es = ListUtil.map2(matrix, makeArray, ty, ! Types.arrayType(ty))
                     es
                   end
-                  
+
                   DAE.CREF(ty = DAE.T_ARRAY(dims = DAE.DIM_INTEGER(istop) <| _))  => begin
                       es = ListUtil.map(ExpressionSimplify.simplifyRange(1, 1, istop), makeIntegerExp)
                       es = ListUtil.map1r(es, makeASUBSingleSub, e)
                     es
                   end
-                  
+
                   DAE.RANGE(DAE.T_BOOL(__), DAE.BCONST(bstart), NONE(), DAE.BCONST(bstop))  => begin
                     ListUtil.map(ExpressionSimplify.simplifyRangeBool(bstart, bstop), makeBoolExp)
                   end
-                  
+
                   DAE.RANGE(DAE.T_INTEGER(__), DAE.ICONST(istart), NONE(), DAE.ICONST(istop))  => begin
                     ListUtil.map(ExpressionSimplify.simplifyRange(istart, 1, istop), makeIntegerExp)
                   end
-                  
+
                   DAE.RANGE(DAE.T_INTEGER(__), DAE.ICONST(istart), SOME(DAE.ICONST(istep)), DAE.ICONST(istop))  => begin
                     ListUtil.map(ExpressionSimplify.simplifyRange(istart, istep, istop), makeIntegerExp)
                   end
-                  
+
                   DAE.RANGE(DAE.T_REAL(__), DAE.RCONST(rstart), NONE(), DAE.RCONST(rstop))  => begin
                     ListUtil.map(ExpressionSimplify.simplifyRangeReal(rstart, 1.0, rstop), makeRealExp)
                   end
-                  
+
                   DAE.RANGE(DAE.T_REAL(__), DAE.RCONST(rstart), SOME(DAE.RCONST(rstep)), DAE.RCONST(rstop))  => begin
                     ListUtil.map(ExpressionSimplify.simplifyRangeReal(rstart, rstep, rstop), makeRealExp)
                   end
@@ -2565,7 +2565,7 @@
         end
 
          #= returns the list of expressions in the array =#
-        function get2dArrayOrMatrixContent(e::DAE.Exp) ::List{List{DAE.Exp}} 
+        function get2dArrayOrMatrixContent(e::DAE.Exp) ::List{List{DAE.Exp}}
               local outExps::List{List{DAE.Exp}}
 
               outExps = begin
@@ -2575,7 +2575,7 @@
                   DAE.ARRAY(array = es)  => begin
                     ListUtil.map(es, getArrayContents)
                   end
-                  
+
                   DAE.MATRIX(matrix = ess)  => begin
                     ess
                   end
@@ -2589,7 +2589,7 @@
 
          #= takes a type, and if it is boxed, unbox it
           otherwise return the given type =#
-        function unboxExpType(inType::DAE.Type) ::DAE.Type 
+        function unboxExpType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2598,7 +2598,7 @@
                   DAE.T_METABOXED(ty = ty)  => begin
                     ty
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -2608,7 +2608,7 @@
         end
 
          #= takes an expression and unboxes it if it is boxed =#
-        function unboxExp(ie::DAE.Exp) ::DAE.Exp 
+        function unboxExp(ie::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2617,7 +2617,7 @@
                   DAE.BOX(e)  => begin
                     unboxExp(e)
                   end
-                  
+
                   _  => begin
                       ie
                   end
@@ -2627,7 +2627,7 @@
         end
 
          #= takes an expression and boxes it =#
-        function boxExp(e::DAE.Exp) ::DAE.Exp 
+        function boxExp(e::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2635,7 +2635,7 @@
                   DAE.BOX(_)  => begin
                     e
                   end
-                  
+
                   _  => begin
                       DAE.BOX(e)
                   end
@@ -2646,7 +2646,7 @@
 
          #= Returns the expression in a subscript index.
           If the subscript is not an index the function fails. =#
-        function subscriptIndexExp(inSubscript::DAE.Subscript) ::DAE.Exp 
+        function subscriptIndexExp(inSubscript::DAE.Subscript) ::DAE.Exp
               local outExp::DAE.Exp
 
               @match DAE.INDEX(exp = outExp) = inSubscript
@@ -2654,7 +2654,7 @@
         end
 
          #= Returns the subscript expression, or fails on DAE.WHOLEDIM. =#
-        function getSubscriptExp(inSubscript::DAE.Subscript) ::DAE.Exp 
+        function getSubscriptExp(inSubscript::DAE.Subscript) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2663,11 +2663,11 @@
                   DAE.SLICE(exp = e)  => begin
                     e
                   end
-                  
+
                   DAE.INDEX(exp = e)  => begin
                     e
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp = e)  => begin
                     e
                   end
@@ -2678,7 +2678,7 @@
 
          #= Returns the expression in a subscript representing non-expanded array.
           If the subscript is not WHOLE_NONEXP the function fails. =#
-        function subscriptNonExpandedExp(inSubscript::DAE.Subscript) ::DAE.Exp 
+        function subscriptNonExpandedExp(inSubscript::DAE.Subscript) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2694,7 +2694,7 @@
 
          #= Returns true if the given subscript is the first index for a dimension, i.e.
            1, false or the first enumeration literal in an enumeration. =#
-        function subscriptIsFirst(inSubscript::DAE.Subscript) ::Bool 
+        function subscriptIsFirst(inSubscript::DAE.Subscript) ::Bool
               local outIsFirst::Bool
 
               outIsFirst = begin
@@ -2702,11 +2702,11 @@
                   DAE.INDEX(exp = DAE.ICONST(1))  => begin
                     true
                   end
-                  
+
                   DAE.INDEX(exp = DAE.BCONST(false))  => begin
                     true
                   end
-                  
+
                   DAE.INDEX(exp = DAE.ENUM_LITERAL(index = 1))  => begin
                     true
                   end
@@ -2717,7 +2717,7 @@
 
          #= author: PA
           Returns the nth expression of an array expression. =#
-        function nthArrayExp(inExp::DAE.Exp, inInteger::ModelicaInteger) ::DAE.Exp 
+        function nthArrayExp(inExp::DAE.Exp, inInteger::ModelicaInteger) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2736,12 +2736,12 @@
                       e_2 = nthArrayExp(e2, inInteger)
                     DAE.BINARY(e_1, op, e_2)
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                       e1 = listGet(expl, inInteger)
                     e1
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -2751,7 +2751,7 @@
         end
 
          #= Return the last subscripts of a Exp =#
-        function expLastSubs(inExp::DAE.Exp) ::List{DAE.Subscript} 
+        function expLastSubs(inExp::DAE.Exp) ::List{DAE.Subscript}
               local outSubscriptLst::List{DAE.Subscript}
 
               outSubscriptLst = begin
@@ -2763,7 +2763,7 @@
                       subs = ComponentReference.crefLastSubs(cr)
                     subs
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                       subs = expLastSubs(e)
                     subs
@@ -2774,7 +2774,7 @@
         end
 
          #= Tries to return the dimensions from an expression, typically an array. =#
-        function expDimensions(inExp::DAE.Exp) ::DAE.Dimensions 
+        function expDimensions(inExp::DAE.Exp) ::DAE.Dimensions
               local outDims::DAE.Dimensions
 
               outDims = begin
@@ -2784,19 +2784,19 @@
                   DAE.ARRAY(ty = tp)  => begin
                     arrayDimension(tp)
                   end
-                  
+
                   DAE.MATRIX(ty = tp)  => begin
                     arrayDimension(tp)
                   end
-                  
+
                   DAE.LUNARY(exp = e)  => begin
                     expDimensions(e)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e)  => begin
                     expDimensions(e)
                   end
-                  
+
                   DAE.CALL(attr = DAE.CALL_ATTR(ty = tp))  => begin
                     arrayDimension(tp)
                   end
@@ -2805,11 +2805,11 @@
           outDims
         end
 
-         #= 
+         #=
         Author BZ
         Get dimension of array.
          =#
-        function arrayDimension(tp::DAE.Type) ::DAE.Dimensions 
+        function arrayDimension(tp::DAE.Type) ::DAE.Dimensions
               local dims::DAE.Dimensions
 
               dims = begin
@@ -2817,7 +2817,7 @@
                   DAE.T_ARRAY(dims = dims)  => begin
                     dims
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2827,7 +2827,7 @@
         end
 
          #= Return the array dimensions of a type. =#
-        function arrayTypeDimensions(tp::DAE.Type) ::DAE.Dimensions 
+        function arrayTypeDimensions(tp::DAE.Type) ::DAE.Dimensions
               local dims::DAE.Dimensions
 
               dims = begin
@@ -2841,7 +2841,7 @@
         end
 
          #= Converts a list of subscript to a list of dimensions. =#
-        function subscriptDimensions(inSubscripts::List{<:DAE.Subscript}) ::DAE.Dimensions 
+        function subscriptDimensions(inSubscripts::List{<:DAE.Subscript}) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               outDimensions = ListUtil.map(inSubscripts, subscriptDimension)
@@ -2850,7 +2850,7 @@
 
          #= Converts a subscript to a dimension by interpreting the subscript as a
            dimension. =#
-        function subscriptDimension(inSubscript::DAE.Subscript) ::DAE.Dimension 
+        function subscriptDimension(inSubscript::DAE.Subscript) ::DAE.Dimension
               local outDimension::DAE.Dimension
 
               outDimension = begin
@@ -2861,23 +2861,23 @@
                   DAE.INDEX(exp = DAE.ICONST(x))  => begin
                     DAE.DIM_INTEGER(x)
                   end
-                  
+
                   DAE.INDEX(exp = e)  => begin
                     DAE.DIM_EXP(e)
                   end
-                  
+
                   DAE.WHOLEDIM(__)  => begin
                     DAE.DIM_UNKNOWN()
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp = DAE.ICONST(x)) where (! Config.splitArrays())  => begin
                     DAE.DIM_INTEGER(x)
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp = e) where (! Config.splitArrays())  => begin
                     DAE.DIM_EXP(e)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         sub_str = ExpressionDump.subscriptString(inSubscript)
@@ -2892,7 +2892,7 @@
         end
 
          #=  Returns the element type of an array expression. =#
-        function arrayEltType(inType::DAE.Type) ::DAE.Type 
+        function arrayEltType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2901,7 +2901,7 @@
                   DAE.T_ARRAY(ty = t)  => begin
                     arrayEltType(t)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -2911,7 +2911,7 @@
         end
 
          #= Returns the size of an ET_ARRAY or ET_COMPLEX =#
-        function sizeOf(inType::DAE.Type) ::ModelicaInteger 
+        function sizeOf(inType::DAE.Type) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -2929,30 +2929,30 @@
                       nr = nr * sizeOf(inType.ty)
                     nr
                   end
-                  
+
                   DAE.T_COMPLEX(varLst = varLst)  => begin
                       lstInt = ListUtil.mapMap(varLst, varType, sizeOf)
                       nr = ListUtil.reduce(lstInt, intAdd)
                     nr
                   end
-                  
+
                   DAE.T_TUPLE(types = typs)  => begin
                       nr = ListUtil.applyAndFold(typs, intAdd, sizeOf, 0)
                     nr
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     sizeOf(ty)
                   end
-                  
+
                   DAE.T_METATYPE(ty = ty)  => begin
                     sizeOf(ty)
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     0
                   end
-                  
+
                   _  => begin
                       1
                   end
@@ -2973,7 +2973,7 @@
         end
 
          #= Extracts an integer from an array dimension =#
-        function dimensionSize(dim::DAE.Dimension) ::ModelicaInteger 
+        function dimensionSize(dim::DAE.Dimension) ::ModelicaInteger
               local value::ModelicaInteger
 
               value = begin
@@ -2982,19 +2982,19 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIM_EXP(exp = DAE.ICONST(integer = i))  => begin
                     i
                   end
-                  
+
                   DAE.DIM_EXP(exp = DAE.ENUM_LITERAL(index = i))  => begin
                     i
                   end
@@ -3003,7 +3003,7 @@
           value
         end
 
-        function addDimensions(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension 
+        function addDimensions(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension
               local dim::DAE.Dimension
 
               dim = begin
@@ -3015,7 +3015,7 @@
                       i = dimensionSize(dim1) + dimensionSize(dim2)
                     DAE.DIM_INTEGER(i)
                   end
-                  
+
                   _  => begin
                       DAE.DIM_UNKNOWN()
                   end
@@ -3026,7 +3026,7 @@
 
          #= Extracts an integer from an array dimension. Also handles DIM_EXP and
           DIM_UNKNOWN if checkModel is used. =#
-        function dimensionSizeAll(dim::DAE.Dimension) ::ModelicaInteger 
+        function dimensionSizeAll(dim::DAE.Dimension) ::ModelicaInteger
               local value::ModelicaInteger
 
               value = begin
@@ -3036,24 +3036,24 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIM_EXP(exp = e)  => begin
                     expInt(e)
                   end
-                  
+
                   DAE.DIM_EXP(__)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                     0
                   end
-                  
+
                   DAE.DIM_UNKNOWN(__)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                     0
@@ -3064,7 +3064,7 @@
         end
 
          #= Extracts a list of integers from a list of array dimensions =#
-        function dimensionsSizes(inDims::DAE.Dimensions) ::List{ModelicaInteger} 
+        function dimensionsSizes(inDims::DAE.Dimensions) ::List{ModelicaInteger}
               local outValues::List{ModelicaInteger}
 
               outValues = ListUtil.map(inDims, dimensionSizeAll)
@@ -3072,7 +3072,7 @@
         end
 
          #= Retrieves the Type of the Expression =#
-        function typeof(inExp::DAE.Exp) ::DAE.Type 
+        function typeof(inExp::DAE.Exp) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3102,110 +3102,110 @@
                   DAE.ICONST(__)  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   DAE.CLKCONST(__)  => begin
                     DAE.T_CLOCK_DEFAULT
                   end
-                  
+
                   DAE.ENUM_LITERAL(name = p, index = i)  => begin
                     DAE.T_ENUMERATION(SOME(i), p, nil, nil, nil)
                   end
-                  
+
                   DAE.CREF(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.BINARY(operator = op)  => begin
                     typeofOp(op)
                   end
-                  
+
                   DAE.UNARY(operator = op)  => begin
                     typeofOp(op)
                   end
-                  
+
                   DAE.LBINARY(operator = op)  => begin
                     typeofOp(op)
                   end
-                  
+
                   DAE.LUNARY(operator = op)  => begin
                     typeofOp(op)
                   end
-                  
+
                   DAE.RELATION(operator = op)  => begin
                     typeofRelation(typeofOp(op))
                   end
-                  
+
                   DAE.IFEXP(expThen = e2)  => begin
                     typeof(e2)
                   end
-                  
+
                   DAE.CALL(attr = DAE.CALL_ATTR(ty = tp))  => begin
                     tp
                   end
-                  
+
                   DAE.RECORD(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.ARRAY(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.MATRIX(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.RANGE(start = DAE.ICONST(i1), step = NONE(), stop = DAE.ICONST(i2), ty = tp && DAE.T_INTEGER(__))  => begin
                       i = intMax(0, i2 - i1 + 1)
                     DAE.T_ARRAY(tp, list(DAE.DIM_INTEGER(i)))
                   end
-                  
+
                   DAE.RANGE(start = DAE.ICONST(1), step = NONE(), stop = e, ty = tp && DAE.T_INTEGER(__))  => begin
                     DAE.T_ARRAY(tp, list(DAE.DIM_EXP(e)))
                   end
-                  
+
                   DAE.RANGE(ty = tp)  => begin
                     DAE.T_ARRAY(tp, list(DAE.DIM_UNKNOWN()))
                   end
-                  
+
                   DAE.CAST(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.ASUB(exp = e, sub = explist)  => begin
                       i = sum(1 for e in explist if isScalar(e))
                       tp = unliftArrayX(typeof(e), i)
                     tp
                   end
-                  
+
                   DAE.TSUB(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.RSUB(__)  => begin
                     inExp.ty
                   end
-                  
+
                   DAE.CODE(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.REDUCTION(iterators = DAE.REDUCTIONITER(exp = iterExp, guardExp = NONE()) <|  nil(), expr = operExp, reductionInfo = DAE.REDUCTIONINFO(exprType = DAE.T_ARRAY(dims = dim <| _), path = Absyn.IDENT("array")))  => begin
                       @match false = dimensionKnown(dim)
                       iterTp = typeof(iterExp)
@@ -3214,65 +3214,65 @@
                       tp = Types.liftTypeWithDims(operTp, iterdims)
                     tp
                   end
-                  
+
                   DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(exprType = ty))  => begin
                     Types.simplifyType(ty)
                   end
-                  
+
                   DAE.SIZE(_, NONE())  => begin
                     DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN()))
                   end
-                  
+
                   DAE.SIZE(_, SOME(_))  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   DAE.LIST(__)  => begin
                     DAE.T_METATYPE(DAE.T_METALIST_DEFAULT)
                   end
-                  
+
                   DAE.CONS(__)  => begin
                     DAE.T_METATYPE(DAE.T_METALIST_DEFAULT)
                   end
-                  
+
                   DAE.META_TUPLE(exps)  => begin
                       tys = ListUtil.map(exps, typeof)
                     DAE.T_METATYPE(DAE.T_METATUPLE(tys))
                   end
-                  
+
                   DAE.TUPLE(exps)  => begin
                       tys = ListUtil.map(exps, typeof)
                     DAE.T_TUPLE(tys, NONE())
                   end
-                  
+
                   DAE.META_OPTION(__)  => begin
                     DAE.T_METATYPE(DAE.T_NONE_DEFAULT)
                   end
-                  
+
                   DAE.METARECORDCALL(path = p, index = i, typeVars = typeVars)  => begin
                     DAE.T_METATYPE(DAE.T_METARECORD(p, AbsynUtil.stripLast(p), typeVars, i, nil, false))
                   end
-                  
+
                   DAE.BOX(e)  => begin
                     DAE.T_METATYPE(DAE.T_METABOXED(typeof(e)))
                   end
-                  
+
                   DAE.MATCHEXPRESSION(et = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.UNBOX(ty = tp)  => begin
                     tp
                   end
-                  
+
                   DAE.SHARED_LITERAL(exp = e)  => begin
                     typeof(e)
                   end
-                  
+
                   DAE.EMPTY(ty = tp)  => begin
                     tp
                   end
-                  
+
                   e  => begin
                       msg = "- Expression.typeof failed for " + ExpressionDump.printExpStr(e)
                       Error.addMessage(Error.INTERNAL_ERROR, list(msg))
@@ -3291,7 +3291,7 @@
         end
 
          #= Boolean or array of boolean =#
-        function typeofRelation(inType::DAE.Type) ::DAE.Type 
+        function typeofRelation(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3303,7 +3303,7 @@
                       _ = typeofRelation(ty)
                     DAE.T_ARRAY(ty, dims)
                   end
-                  
+
                   _  => begin
                       DAE.T_BOOL_DEFAULT
                   end
@@ -3313,7 +3313,7 @@
         end
 
          #= Helper function to typeof =#
-        function typeofOp(inOperator::DAE.Operator) ::DAE.Type 
+        function typeofOp(inOperator::DAE.Operator) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3322,127 +3322,127 @@
                   DAE.ADD(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.SUB(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.MUL(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.DIV(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.POW(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.UMINUS(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.UMINUS_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.ADD_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.SUB_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.MUL_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.DIV_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.POW_ARR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.POW_ARR2(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.AND(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.OR(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.NOT(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.LESS(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.LESSEQ(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.GREATER(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.GREATEREQ(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.EQUAL(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.NEQUAL(ty = t)  => begin
                     t
                   end
-                  
+
                   DAE.USERDEFINED(__)  => begin
                     DAE.T_UNKNOWN_DEFAULT
                   end
@@ -3452,7 +3452,7 @@
         end
 
          #= Retrieve all function sub expressions in an expression. =#
-        function getRelations(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function getRelations(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
               outExpLst = begin
@@ -3474,26 +3474,26 @@
                   e && DAE.RELATION(__)  => begin
                     list(e)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1, exp2 = e2)  => begin
                       rellst1 = getRelations(e1)
                       rellst2 = getRelations(e2)
                       rellst = listAppend(rellst1, rellst2)
                     rellst
                   end
-                  
+
                   DAE.LUNARY(exp = e)  => begin
                       rellst = getRelations(e)
                     rellst
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, exp2 = e2)  => begin
                       rellst1 = getRelations(e1)
                       rellst2 = getRelations(e2)
                       rellst = listAppend(rellst1, rellst2)
                     rellst
                   end
-                  
+
                   DAE.IFEXP(expCond = cond, expThen = tb, expElse = fb)  => begin
                       rellst1 = getRelations(cond)
                       rellst2 = getRelations(tb)
@@ -3502,24 +3502,24 @@
                       rellst = listAppend(rellst3, rellst4)
                     rellst
                   end
-                  
+
                   DAE.ARRAY(array = e <|  nil())  => begin
                       rellst = getRelations(e)
                     rellst
                   end
-                  
+
                   DAE.ARRAY(ty = t, scalar = sc, array = e <| xs)  => begin
                       rellst1 = getRelations(DAE.ARRAY(t, sc, xs))
                       rellst2 = getRelations(e)
                       rellst = listAppend(rellst1, rellst2)
                     rellst
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                       rellst = getRelations(e)
                     rellst
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -3530,14 +3530,14 @@
 
          #= author: lochel
           This function extracts all crefs from the input expression, except 'time'. =#
-        function getAllCrefs(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function getAllCrefs(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef}
 
               (_, outCrefs) = traverseExpBottomUp(inExp, getAllCrefs2, nil)
           outCrefs
         end
 
-        function getAllCrefs2(inExp::DAE.Exp, inCrefList::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}} 
+        function getAllCrefs2(inExp::DAE.Exp, inCrefList::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}}
               local outCrefList::List{DAE.ComponentRef} = inCrefList
               local outExp::DAE.Exp = inExp
 
@@ -3554,14 +3554,14 @@
 
          #= author: ptaeuber
           This function extracts all crefs from the input expression (except 'time') and expands arrays and records. =#
-        function getAllCrefsExpanded(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function getAllCrefsExpanded(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local outCrefs::List{DAE.ComponentRef}
 
               (_, outCrefs) = traverseExpBottomUp(inExp, getAllCrefsExpanded2, nil)
           outCrefs
         end
 
-        function getAllCrefsExpanded2(inExp::DAE.Exp, inCrefList::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}} 
+        function getAllCrefsExpanded2(inExp::DAE.Exp, inCrefList::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}}
               local outCrefList::List{DAE.ComponentRef} = inCrefList
               local outExp::DAE.Exp = inExp
 
@@ -3583,7 +3583,7 @@
          #= similar to terms, but also performs expansion of
          multiplications to reveal more terms, like for instance:
          allTerms((a+b)*(b+c)) => {a*b,a*c,b*b,b*c} =#
-        function allTerms(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function allTerms(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
               outExpLst = begin
@@ -3603,7 +3603,7 @@
                       res = listAppend(f1, f2)
                     res
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.SUB(__), exp2 = e2)  => begin
                       f1 = allTerms(e1)
                       f2 = allTerms(e2)
@@ -3611,14 +3611,14 @@
                       res = listAppend(f1, f2_1)
                     res
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARR(__), exp2 = e2)  => begin
                       f1 = allTerms(e1)
                       f2 = allTerms(e2)
                       res = listAppend(f1, f2)
                     res
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.SUB_ARR(__), exp2 = e2)  => begin
                       f1 = allTerms(e1)
                       f2 = allTerms(e2)
@@ -3626,101 +3626,101 @@
                       res = listAppend(f1, f2_1)
                     res
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e2)
                       f1 = ListUtil.map1(f1, makeProduct, e1)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL_ARR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e2)
                       f1 = ListUtil.map1(f1, makeProduct, e1)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL_ARRAY_SCALAR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e2)
                       f1 = ListUtil.map1(f1, makeProduct, e1)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, makeProduct, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL_ARR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, makeProduct, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL_ARRAY_SCALAR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, makeProduct, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, expDiv, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV_ARR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, expDiv, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV_ARRAY_SCALAR(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, expDiv, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV_SCALAR_ARRAY(_), e2)  => begin
                       @match (@match _cons(_, _cons(_, _)) = f1) = allTerms(e1)
                       f1 = ListUtil.map1(f1, expDiv, e2)
                       f1 = ListUtil.flatten(ListUtil.map(f1, allTerms))
                     f1
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS(__), exp = e1)  => begin
                       f1 = allTerms(e1)
                       f1 = ListUtil.map(f1, negate)
                     f1
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e1)  => begin
                       f1 = allTerms(e1)
                       f1 = ListUtil.map(f1, negate)
                     f1
                   end
-                  
+
                   DAE.LUNARY(operator = DAE.NOT(__), exp = e1)  => begin
                       f1 = allTerms(e1)
                       f1 = ListUtil.map(f1, negate)
                     f1
                   end
-                  
+
                   DAE.ASUB(exp = e1, sub = f2)  => begin
                       f1 = allTerms(e1)
                       f1 = ListUtil.map1(f1, makeASUB, f2)
                     f1
                   end
-                  
+
                   _  => begin
                       list(inExp)
                   end
@@ -3769,7 +3769,7 @@
          #= simliar to terms, but also perform expansion of
          multiplications to reveal more terms, like for instance:
          allTerms((a(x)+b(x))*(c+d)) => {a(x)*(c+d),b(x)*(c+d)} =#
-        function allTermsForCref(inExp::DAE.Exp, cr::DAE.ComponentRef #= x =#, inFunc::MapFunc) ::Tuple{List{DAE.Exp}, List{DAE.Exp}} 
+        function allTermsForCref(inExp::DAE.Exp, cr::DAE.ComponentRef #= x =#, inFunc::MapFunc) ::Tuple{List{DAE.Exp}, List{DAE.Exp}}
               local outExpLstWithoutX::List{DAE.Exp}
               local outExpLstWithX::List{DAE.Exp}
 
@@ -3792,7 +3792,7 @@
                       resx = listAppend(fx1, fx2)
                     (resx, res)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.SUB(__), exp2 = e2)  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       (fx2, f2) = allTermsForCref(e2, cr, inFunc)
@@ -3802,7 +3802,7 @@
                       resx = listAppend(fx1, fx2)
                     (resx, res)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARR(__), exp2 = e2)  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       (fx2, f2) = allTermsForCref(e2, cr, inFunc)
@@ -3810,7 +3810,7 @@
                       resx = listAppend(fx1, fx2)
                     (resx, res)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.SUB_ARR(__), exp2 = e2)  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       (fx2, f2) = allTermsForCref(e2, cr, inFunc)
@@ -3820,7 +3820,7 @@
                       resx = listAppend(fx1, fx2)
                     (resx, res)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(_), e2) where (inFunc(e2, cr))  => begin
                       (fx1, f1) = allTermsForCref(e2, cr, inFunc)
                       (fx1, f2) = ListUtil.split1OnTrue(fx1, inFunc, cr)
@@ -3838,7 +3838,7 @@
                       end
                     (fx1, f1)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(_), e2) where (inFunc(e1, cr))  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       (fx1, f2) = ListUtil.split1OnTrue(fx1, inFunc, cr)
@@ -3856,7 +3856,7 @@
                       end
                     (fx1, f1)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV(_), e2) where (inFunc(e1, cr))  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       (fx1, f2) = ListUtil.split1OnTrue(fx1, inFunc, cr)
@@ -3874,14 +3874,14 @@
                       end
                     (fx1, f1)
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS(__), exp = e1)  => begin
                       (fx1, f1) = allTermsForCref(e1, cr, inFunc)
                       f1 = ListUtil.map(f1, negate)
                       fx1 = ListUtil.map(fx1, negate)
                     (fx1, f1)
                   end
-                  
+
                   _  => begin
                         if inFunc(inExp, cr)
                           res = nil
@@ -3898,7 +3898,7 @@
         end
 
          #= Returns the terms of the expression if any as a list of expressions =#
-        function termsExpandUnary(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function termsExpandUnary(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
               outExpLst = begin
@@ -3907,7 +3907,7 @@
                   DAE.UNARY(operator = DAE.UMINUS(__), exp = e)  => begin
                     ListUtil.map(terms(e), negate)
                   end
-                  
+
                   _  => begin
                       terms(inExp)
                   end
@@ -3917,7 +3917,7 @@
         end
 
          #= Returns the terms of the expression if any as a list of expressions =#
-        function terms(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function terms(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
               outExpLst = terms2(inExp, nil, false)
@@ -3925,7 +3925,7 @@
         end
 
          #= Returns the terms of the expression if any as a list of expressions =#
-        function terms2(inExp::DAE.Exp, inAcc::List{<:DAE.Exp}, neg::Bool) ::List{DAE.Exp} 
+        function terms2(inExp::DAE.Exp, inAcc::List{<:DAE.Exp}, neg::Bool) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
               outExpLst = begin
@@ -3939,18 +3939,18 @@
                       acc = terms2(e1, acc, neg)
                     acc
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB(__), exp2 = e2), acc, _)  => begin
                       acc = terms2(e2, acc, ! neg)
                       acc = terms2(e1, acc, neg)
                     acc
                   end
-                  
+
                   (e, acc, true)  => begin
                       e = negate(e)
                     _cons(e, acc)
                   end
-                  
+
                   (e, acc, _)  => begin
                     _cons(e, acc)
                   end
@@ -3962,7 +3962,7 @@
          #= author: PA
           Returns the quotient of an expression.
           For instance e = p/q returns (p,q) for numerator p and denominator q. =#
-        function quotient(inExp::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp} 
+        function quotient(inExp::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp}
               local denom::DAE.Exp
               local num::DAE.Exp
 
@@ -3976,13 +3976,13 @@
                   DAE.BINARY(exp1 = e1, operator = DAE.DIV(__), exp2 = e2)  => begin
                     (e1, e2)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2)  => begin
                       (p, q) = quotient(e1)
                       tp = typeof(p)
                     (DAE.BINARY(e2, DAE.MUL(tp), p), q)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2)  => begin
                       (p, q) = quotient(e2)
                       tp = typeof(p)
@@ -3995,7 +3995,7 @@
         end
 
          #= Returns the factors of the expression if any as a list of expressions =#
-        function factors(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function factors(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
                #=  TODO: Remove this listReverse as it is pointless.
@@ -4007,7 +4007,7 @@
         end
 
          #= Returns the factors of the expression if any as a list of expressions =#
-        function factorsWork(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp} 
+        function factorsWork(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp}
 
 
               acc = begin
@@ -4020,21 +4020,21 @@
                       acc = factorsWork(e2, acc, doInverseFactors)
                     acc
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.DIV(ty = DAE.T_REAL(__)), exp2 = e2)  => begin
                       acc = factorsWork(e1, acc, doInverseFactors)
                       acc = factorsWork(e2, acc, ! doInverseFactors)
                     acc
                   end
-                  
+
                   DAE.ICONST(integer = 1)  => begin
                     acc
                   end
-                  
+
                   DAE.RCONST(real = 1.0)  => begin
                     acc
                   end
-                  
+
                   _  => begin
                       _cons(if doInverseFactors
                             inverseFactors(inExp)
@@ -4051,7 +4051,7 @@
 
          #= each expression in the list inversed.
           For example: inverseFactors {a, 3+b} => {1/a, 1/3+b} =#
-        function inverseFactors(inExp::DAE.Exp) ::DAE.Exp 
+        function inverseFactors(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4068,12 +4068,12 @@
                       tp2 = typeof(e2)
                     DAE.BINARY(e1, DAE.POW(tp), DAE.UNARY(DAE.UMINUS(tp2), e2))
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = op && DAE.DIV(__), exp2 = e2)  => begin
                       @match false = isZero(e1)
                     DAE.BINARY(e2, op, e1)
                   end
-                  
+
                   e  => begin
                       @match false = isZero(e)
                       tp = typeof(e)
@@ -4082,7 +4082,7 @@
                           DAE.T_REAL(__)  => begin
                             DAE.BINARY(DAE.RCONST(1.0), DAE.DIV(DAE.T_REAL_DEFAULT), e)
                           end
-                          
+
                           DAE.T_INTEGER(__)  => begin
                             DAE.BINARY(DAE.ICONST(1), DAE.DIV(DAE.T_INTEGER_DEFAULT), e)
                           end
@@ -4097,12 +4097,12 @@
           outExp
         end
 
-         #= 
+         #=
          Returns the factors of the expression if any as a list of expressions.
          e.g.
          -(x*(x*y)^n) -> {-1,x,x^n,x^n}
          =#
-        function expandFactors(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function expandFactors(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
                #=  TODO: Remove this listReverse as it is pointless.
@@ -4116,7 +4116,7 @@
         end
 
          #= Returns the factors of the expression if any as a list of expressions =#
-        function expandFactorsWork(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp} 
+        function expandFactorsWork(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp}
 
 
               acc = begin
@@ -4140,7 +4140,7 @@
                       acc = listAppend(pow_acc2, acc)
                     acc
                   end
-                  
+
                   DAE.BINARY(DAE.BINARY(e1, DAE.DIV(__), e2), DAE.POW(__), e3)  => begin
                       pow_acc = expandFactorsWork(e1, nil, doInverseFactors)
                       pow_acc = expPowLst(pow_acc, e3)
@@ -4150,7 +4150,7 @@
                       acc = listAppend(pow_acc2, acc)
                     acc
                   end
-                  
+
                   DAE.BINARY(DAE.BINARY(e1, DAE.POW(__), e2), DAE.POW(__), e3)  => begin
                       e = expMul(e2, e3)
                       pow_acc = expandFactorsWork(e1, nil, doInverseFactors)
@@ -4158,7 +4158,7 @@
                       acc = listAppend(pow_acc, acc)
                     acc
                   end
-                  
+
                   DAE.BINARY(e1, op && DAE.DIV(tp), e2) where (isZero(e2))  => begin
                        #=  (x/y)^n = x^n*y^(-n)
                        =#
@@ -4184,21 +4184,21 @@
                       acc = expandFactorsWork(e1, acc, doInverseFactors)
                     _cons(e, acc)
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS(tp), e1)  => begin
                       e = makeConstOne(tp)
                       acc = expandFactorsWork(e1, acc, doInverseFactors)
                       e = negate(e)
                     _cons(e, acc)
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS_ARR(tp), e1)  => begin
                       e = makeConstOne(tp)
                       acc = expandFactorsWork(e1, acc, doInverseFactors)
                       e = negate(e)
                     _cons(e, acc)
                   end
-                  
+
                   _  => begin
                         acc = expandFactorsWork3(inExp, acc, doInverseFactors)
                       expandFactorsWork2(acc, doInverseFactors)
@@ -4210,7 +4210,7 @@
           acc
         end
 
-        function expandFactorsWork3(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp} 
+        function expandFactorsWork3(inExp::DAE.Exp, acc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp}
 
 
               local e1::DAE.Exp
@@ -4223,25 +4223,25 @@
                   _  => begin
                     factorsWork(inExp, acc, doInverseFactors)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(__), e2)  => begin
                       acc = expandFactorsWork(e1, acc, doInverseFactors)
                       acc = expandFactorsWork(e2, acc, doInverseFactors)
                     acc
                   end
-                  
+
                   DAE.BINARY(DAE.BINARY(e, op && DAE.DIV(__), e1), DAE.DIV(__), e2)  => begin
                       e = DAE.BINARY(e, op, expMul(e1, e2))
                       acc = expandFactorsWork(e, acc, doInverseFactors)
                     acc
                   end
-                  
+
                   DAE.BINARY(DAE.BINARY(e, DAE.MUL(__), e1), op && DAE.DIV(__), e2)  => begin
                       acc = expandFactorsWork(e, acc, doInverseFactors)
                       acc = expandFactorsWork(DAE.BINARY(e1, op, e2), acc, doInverseFactors)
                     acc
                   end
-                  
+
                   _  => begin
                     _cons(inExp, acc)
                   end
@@ -4254,7 +4254,7 @@
           acc
         end
 
-        function expandFactorsWork2(inAcc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp} 
+        function expandFactorsWork2(inAcc::List{<:DAE.Exp}, doInverseFactors::Bool #= Decides if a factor e should be 1/e instead =#) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp} = nil
 
               local tmpExpLst::List{DAE.Exp}
@@ -4265,23 +4265,23 @@
                     DAE.BINARY(DAE.BINARY(_, DAE.DIV(__), _), DAE.POW(__), _)  => begin
                       expandFactorsWork(elem, nil, doInverseFactors)
                     end
-                    
+
                     DAE.BINARY(DAE.BINARY(_, DAE.MUL(__), _), DAE.POW(__), _)  => begin
                       expandFactorsWork(elem, nil, doInverseFactors)
                     end
-                    
+
                     DAE.BINARY(DAE.BINARY(_, DAE.POW(__), _), DAE.POW(__), _)  => begin
                       expandFactorsWork(elem, nil, doInverseFactors)
                     end
-                    
+
                     DAE.UNARY(DAE.UMINUS(__), _)  => begin
                       expandFactorsWork(elem, nil, doInverseFactors)
                     end
-                    
+
                     DAE.UNARY(DAE.UMINUS_ARR(__), _)  => begin
                       expandFactorsWork(elem, nil, doInverseFactors)
                     end
-                    
+
                     _  => begin
                         list(elem)
                     end
@@ -4294,7 +4294,7 @@
 
          #= Retrieves all terms of an expression containing a variable,
           given as second argument (in the form of an Exp) =#
-        function getTermsContainingX(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp} 
+        function getTermsContainingX(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp}
               local outExp2::DAE.Exp
               local outExp1::DAE.Exp
 
@@ -4320,7 +4320,7 @@
                       nonxt = DAE.BINARY(nonxt1, DAE.ADD(ty), nonxt2)
                     (xt, nonxt)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB(ty = ty), exp2 = e2), cr && DAE.CREF(__))  => begin
                       (xt1, nonxt1) = getTermsContainingX(e1, cr)
                       (xt2, nonxt2) = getTermsContainingX(e2, cr)
@@ -4328,14 +4328,14 @@
                       nonxt = DAE.BINARY(nonxt1, DAE.SUB(ty), nonxt2)
                     (xt, nonxt)
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS(ty = ty), exp = e), cr && DAE.CREF(__))  => begin
                       (xt1, nonxt1) = getTermsContainingX(e, cr)
                       xt = DAE.UNARY(DAE.UMINUS(ty), xt1)
                       nonxt = DAE.UNARY(DAE.UMINUS(ty), nonxt1)
                     (xt, nonxt)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARR(ty = ty), exp2 = e2), cr && DAE.CREF(__))  => begin
                       (xt1, nonxt1) = getTermsContainingX(e1, cr)
                       (xt2, nonxt2) = getTermsContainingX(e2, cr)
@@ -4343,7 +4343,7 @@
                       nonxt = DAE.BINARY(nonxt1, DAE.ADD_ARR(ty), nonxt2)
                     (xt, nonxt)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB_ARR(ty = ty), exp2 = e2), cr && DAE.CREF(__))  => begin
                       (xt1, nonxt1) = getTermsContainingX(e1, cr)
                       (xt2, nonxt2) = getTermsContainingX(e2, cr)
@@ -4351,14 +4351,14 @@
                       nonxt = DAE.BINARY(nonxt1, DAE.SUB_ARR(ty), nonxt2)
                     (xt, nonxt)
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS_ARR(ty = ty), exp = e), cr && DAE.CREF(__))  => begin
                       (xt1, nonxt1) = getTermsContainingX(e, cr)
                       xt = DAE.UNARY(DAE.UMINUS_ARR(ty), xt1)
                       nonxt = DAE.UNARY(DAE.UMINUS_ARR(ty), nonxt1)
                     (xt, nonxt)
                   end
-                  
+
                   (e, cr && DAE.CREF(ty = ty))  => begin
                       res = expContains(e, cr)
                       (zero, _) = makeZeroExpression(arrayDimension(ty))
@@ -4374,7 +4374,7 @@
                           end
                     (xt, nonxt)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -4390,7 +4390,7 @@
 
          #= returns all non-array expressions of an array expression as a long list
         E.g. {[1,2;3,4],[4,5;6,7]} => {1,2,3,4,4,5,6,7} =#
-        function flattenArrayExpToList(e::DAE.Exp) ::List{DAE.Exp} 
+        function flattenArrayExpToList(e::DAE.Exp) ::List{DAE.Exp}
               local expLst::List{DAE.Exp}
 
               expLst = begin
@@ -4402,23 +4402,23 @@
                       expLst = ListUtil.map(expl, negate)
                     expLst
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                       expLst = ListUtil.flatten(ListUtil.map(expl, flattenArrayExpToList))
                     expLst
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = DAE.MATRIX(matrix = mexpl))  => begin
                       expl = ListUtil.flatten(ListUtil.map(ListUtil.flatten(mexpl), flattenArrayExpToList))
                       expLst = ListUtil.map(expl, negate)
                     expLst
                   end
-                  
+
                   DAE.MATRIX(matrix = mexpl)  => begin
                       expLst = ListUtil.flatten(ListUtil.map(ListUtil.flatten(mexpl), flattenArrayExpToList))
                     expLst
                   end
-                  
+
                   _  => begin
                       list(e)
                   end
@@ -4432,7 +4432,7 @@
          #= /***************************************************/ =#
 
          #=  adds a noEvent call around an expression =#
-        function makeNoEvent(e1::DAE.Exp) ::DAE.Exp 
+        function makeNoEvent(e1::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = Expression.makePureBuiltinCall("noEvent", list(e1), DAE.T_BOOL_DEFAULT)
@@ -4440,7 +4440,7 @@
         end
 
          #=  =#
-        function makeAbs(e1::DAE.Exp) ::DAE.Exp 
+        function makeAbs(e1::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = Expression.makePureBuiltinCall("abs", list(e1), DAE.T_REAL_DEFAULT)
@@ -4448,7 +4448,7 @@
         end
 
          #=  =#
-        function makeSign(e1::DAE.Exp) ::DAE.Exp 
+        function makeSign(e1::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = Expression.makePureBuiltinCall("sign", list(e1), DAE.T_REAL_DEFAULT)
@@ -4457,7 +4457,7 @@
 
          #= creates a nested if expression given a list of conditions and
         guarded expressions and a default value (the else branch) =#
-        function makeNestedIf(inConds::List{<:DAE.Exp} #= conditions =#, inTbExps::List{<:DAE.Exp} #=  guarded expressions, for each condition =#, fExp::DAE.Exp #= default value, else branch =#) ::DAE.Exp 
+        function makeNestedIf(inConds::List{<:DAE.Exp} #= conditions =#, inTbExps::List{<:DAE.Exp} #=  guarded expressions, for each condition =#, fExp::DAE.Exp #= default value, else branch =#) ::DAE.Exp
               local ifExp::DAE.Exp
 
               ifExp = begin
@@ -4469,7 +4469,7 @@
                   (c <|  nil(), tbExp <|  nil(), _)  => begin
                     DAE.IFEXP(c, tbExp, fExp)
                   end
-                  
+
                   (c <| conds, tbExp <| tbExps, _)  => begin
                       ifExp = makeNestedIf(conds, tbExps, fExp)
                     DAE.IFEXP(c, tbExp, ifExp)
@@ -4480,7 +4480,7 @@
         end
 
          #= Makes an expression of a component reference, given also a type =#
-        function makeCrefExp(inCref::DAE.ComponentRef, inExpType::DAE.Type) ::DAE.Exp 
+        function makeCrefExp(inCref::DAE.ComponentRef, inExpType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4506,7 +4506,7 @@
           creates a DAE.Exp from a cref by exrtacting the type from the types of the cref (if qualified) and
           considering the dimensions and subscripts that exist in the cref.
          =#
-        function crefToExp(cr::DAE.ComponentRef) ::DAE.Exp 
+        function crefToExp(cr::DAE.ComponentRef) ::DAE.Exp
               local cref::DAE.Exp
 
               cref = DAE.CREF(cr, ComponentReference.crefTypeFull(cr))
@@ -4518,7 +4518,7 @@
 
         Author: BZ, 2008-08
         generate an DAE.CREF(ComponentRef, Type) from a ComponenRef, make array type correct from subs =#
-        function crefExp(cr::DAE.ComponentRef) ::DAE.Exp 
+        function crefExp(cr::DAE.ComponentRef) ::DAE.Exp
               local cref::DAE.Exp
 
               cref = begin
@@ -4535,7 +4535,7 @@
                               ty2 = unliftArrayTypeWithSubs(subs, ty1)
                             DAE.CREF(cr, ty2)
                           end
-                          
+
                           _  => begin
                               DAE.CREF(cr, ty1)
                           end
@@ -4552,7 +4552,7 @@
           Creates an ASUB given an expression and a list of expression indexes.
           If flag -d=checkASUB is ON we give a warning that the given exp is
           not a component reference. =#
-        function makeASUB(inExp::DAE.Exp, inSubs::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeASUB(inExp::DAE.Exp, inSubs::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4568,7 +4568,7 @@
                       exp = DAE.ASUB(exp, subs)
                     exp
                   end
-                  
+
                   (_, _)  => begin
                       if Flags.isSet(Flags.CHECK_ASUB)
                         _ = begin
@@ -4577,7 +4577,7 @@
                                 Debug.traceln("Warning: makeASUB: given expression: " + ExpressionDump.printExpStr(inExp) + " contains a component reference!\\n" + " Subscripts exps: [" + stringDelimitList(ListUtil.map(inSubs, ExpressionDump.printExpStr), ",") + "]\\n" + "DAE.ASUB should not be used for component references, instead the subscripts should be added directly to the component reference!")
                               ()
                             end
-                            
+
                             _  => begin
                                 ()
                             end
@@ -4592,14 +4592,14 @@
           outExp
         end
 
-        function makeASUBSingleSub(exp::DAE.Exp, sub::DAE.Exp) ::DAE.Exp 
+        function makeASUBSingleSub(exp::DAE.Exp, sub::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = makeASUB(exp, list(sub))
           outExp
         end
 
-        function makeTuple(inExps::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeTuple(inExps::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = if listLength(inExps) > 1
@@ -4610,9 +4610,9 @@
           outExp
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2010-05 =#
-        function generateCrefsExpFromExpVar(inVar::DAE.Var, inCrefPrefix::DAE.ComponentRef) ::DAE.Exp 
+        function generateCrefsExpFromExpVar(inVar::DAE.Var, inCrefPrefix::DAE.ComponentRef) ::DAE.Exp
               local outCrefExp::DAE.Exp
 
               outCrefExp = begin
@@ -4631,9 +4631,9 @@
           outCrefExp
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2010-05 =#
-        function generateCrefsFromExpVar(inVar::DAE.Var, inCrefPrefix::DAE.ComponentRef) ::DAE.ComponentRef 
+        function generateCrefsFromExpVar(inVar::DAE.Var, inCrefPrefix::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -4651,7 +4651,7 @@
           outCref
         end
 
-        function generateCrefsExpFromExp(inExp::DAE.Exp, inCrefPrefix::DAE.ComponentRef) ::DAE.Exp 
+        function generateCrefsExpFromExp(inExp::DAE.Exp, inCrefPrefix::DAE.ComponentRef) ::DAE.Exp
               local outCrefExp::DAE.Exp
 
               outCrefExp = begin
@@ -4668,29 +4668,29 @@
                   DAE.CREF(componentRef = DAE.WILD(__))  => begin
                     inExp
                   end
-                  
+
                   DAE.ARRAY(ty = ty, scalar = b, array = explst)  => begin
                       explst = ListUtil.map1(explst, generateCrefsExpFromExp, inCrefPrefix)
                     DAE.ARRAY(ty, b, explst)
                   end
-                  
+
                   DAE.CALL(path = p1, expLst = explst, attr = attr && DAE.CALL_ATTR(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(p2))))  => begin
                       @match true = AbsynUtil.pathEqual(p1, p2) #= is record constructor =#
                       explst = ListUtil.map1(explst, generateCrefsExpFromExp, inCrefPrefix)
                     DAE.CALL(p1, explst, attr)
                   end
-                  
+
                   DAE.CREF(componentRef = cr, ty = ty)  => begin
                       name = ComponentReference.crefModelicaStr(cr)
                       cr = ComponentReference.crefPrependIdent(inCrefPrefix, name, nil, ty)
                       e = makeCrefExp(cr, ty)
                     e
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                     negate(generateCrefsExpFromExp(e, inCrefPrefix))
                   end
-                  
+
                   _  => begin
                         print("Expression.generateCrefsExpFromExp: fail for" + ExpressionDump.printExpStr(inExp) + "\\n")
                       fail()
@@ -4701,7 +4701,7 @@
           outCrefExp
         end
 
-        function generateCrefsExpLstFromExp(inExp::DAE.Exp, inCrefPrefix::Option{<:DAE.ComponentRef}) ::List{DAE.Exp} 
+        function generateCrefsExpLstFromExp(inExp::DAE.Exp, inCrefPrefix::Option{<:DAE.ComponentRef}) ::List{DAE.Exp}
               local outCrefExpList::List{DAE.Exp}
 
               outCrefExpList = begin
@@ -4719,37 +4719,37 @@
                       explst = ListUtil.flatten(ListUtil.map1(explst, generateCrefsExpLstFromExp, inCrefPrefix))
                     explst
                   end
-                  
+
                   (DAE.ARRAY(array = explst), _)  => begin
                       explst = ListUtil.flatten(ListUtil.map1(explst, generateCrefsExpLstFromExp, inCrefPrefix))
                     explst
                   end
-                  
+
                   (DAE.CALL(path = p1, expLst = explst, attr = DAE.CALL_ATTR(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(p2)))), _) where (AbsynUtil.pathEqual(p1, p2))  #= is record constructor =# => begin
                     ListUtil.flatten(ListUtil.map1(explst, generateCrefsExpLstFromExp, inCrefPrefix))
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("der"), expLst = DAE.CREF(componentRef = incref) <|  nil()), _)  => begin
                       cr = ComponentReference.crefPrefixDer(incref)
                       e = Expression.crefExp(cr)
                     generateCrefsExpLstFromExp(e, inCrefPrefix)
                   end
-                  
+
                   (DAE.CREF(componentRef = cr, ty = ty), SOME(incref))  => begin
                       name = ComponentReference.crefModelicaStr(cr)
                       cr = ComponentReference.crefPrependIdent(incref, name, nil, ty)
                       e = makeCrefExp(cr, ty)
                     list(e)
                   end
-                  
+
                   (DAE.CREF(__), NONE())  => begin
                     list(inExp)
                   end
-                  
+
                   (DAE.UNARY(exp = e), _)  => begin
                     generateCrefsExpLstFromExp(e, inCrefPrefix)
                   end
-                  
+
                   _  => begin
                         print("Expression.generateCrefsExpLstFromExp: fail for " + ExpressionDump.printExpStr(inExp) + "\\n")
                       fail()
@@ -4760,14 +4760,14 @@
           outCrefExpList
         end
 
-        function makeArray(inElements::List{<:DAE.Exp}, inType::DAE.Type, inScalar::Bool) ::DAE.Exp 
+        function makeArray(inElements::List{<:DAE.Exp}, inType::DAE.Type, inScalar::Bool) ::DAE.Exp
               local outArray::DAE.Exp
 
               outArray = DAE.ARRAY(inType, inScalar, inElements)
           outArray
         end
 
-        function makeArrayFromList(inElements::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeArrayFromList(inElements::List{<:DAE.Exp}) ::DAE.Exp
               local outArray::DAE.Exp
 
               local ty::DAE.Type
@@ -4778,7 +4778,7 @@
         end
 
          #= Constructs an array of the given scalar type. =#
-        function makeScalarArray(inExpLst::List{<:DAE.Exp}, et::DAE.Type) ::DAE.Exp 
+        function makeScalarArray(inExpLst::List{<:DAE.Exp}, et::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               local i::ModelicaInteger
@@ -4789,7 +4789,7 @@
         end
 
          #= Construct an array node of an DAE.Exp list of type REAL. =#
-        function makeRealArray(expl::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeRealArray(expl::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = makeScalarArray(expl, DAE.T_REAL_DEFAULT)
@@ -4797,7 +4797,7 @@
         end
 
          #= Construct an add node of the two expressions of type REAL. =#
-        function makeRealAdd(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp 
+        function makeRealAdd(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = DAE.BINARY(inExp1, DAE.ADD(DAE.T_REAL_DEFAULT), inExp2)
@@ -4806,7 +4806,7 @@
 
          #= author: PA
           Adds two scalar expressions. =#
-        function expAdd(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expAdd(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4826,70 +4826,70 @@
                       @match true = isZero(e1)
                     e2
                   end
-                  
+
                   (_, _)  => begin
                       @match true = isZero(e2)
                     e1
                   end
-                  
+
                   (DAE.RCONST(r1), DAE.RCONST(r2))  => begin
                       r1 = realAdd(r1, r2)
                     DAE.RCONST(r1)
                   end
-                  
+
                   (DAE.ICONST(i1), DAE.ICONST(i2))  => begin
                       i1 = intAdd(i1, i2)
                     DAE.ICONST(i1)
                   end
-                  
+
                   (_, DAE.UNARY(operator = DAE.UMINUS(__), exp = e))  => begin
                     expSub(e1, e)
                   end
-                  
+
                   (_, DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e))  => begin
                     expSub(e1, e)
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.MUL(__), y))  => begin
                     expSub(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.MUL_ARR(__), y))  => begin
                     expSub(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.DIV(__), y))  => begin
                     expSub(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.DIV_ARR(__), y))  => begin
                     expSub(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS(__), exp = e), _)  => begin
                     expSub(e2, e)
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e), _)  => begin
                     expSub(e2, e)
                   end
-                  
+
                   (DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.MUL(__), y), _)  => begin
                     expSub(e2, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.MUL_ARR(__), y), _)  => begin
                     expSub(e2, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.DIV(__), y), _)  => begin
                     expSub(e2, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.DIV_ARR(__), y), _)  => begin
                     expSub(e2, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, _)  => begin
                       tp = typeof(e1)
                       @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
@@ -4901,7 +4901,7 @@
                           end
                     DAE.BINARY(e1, op, e2)
                   end
-                  
+
                   _  => begin
                         tp = typeof(e1)
                         @match true = Types.isEnumeration(tp)
@@ -4924,7 +4924,7 @@
 
          #= author: PA
           Subtracts two scalar expressions. =#
-        function expSub(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expSub(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4943,56 +4943,56 @@
                       @match true = isZero(e1)
                     negate(e2)
                   end
-                  
+
                   (_, _)  => begin
                       @match true = isZero(e2)
                     e1
                   end
-                  
+
                   (DAE.RCONST(r1), DAE.RCONST(r2))  => begin
                       r1 = realSub(r1, r2)
                     DAE.RCONST(r1)
                   end
-                  
+
                   (DAE.ICONST(i1), DAE.ICONST(i2))  => begin
                       i1 = intSub(i1, i2)
                     DAE.ICONST(i1)
                   end
-                  
+
                   (_, DAE.UNARY(operator = DAE.UMINUS(__), exp = e))  => begin
                     expAdd(e1, e)
                   end
-                  
+
                   (_, DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e))  => begin
                     expAdd(e1, e)
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.MUL(__), y))  => begin
                     expAdd(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.MUL_ARR(__), y))  => begin
                     expAdd(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS(__), x), op && DAE.DIV(__), y))  => begin
                     expAdd(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (_, DAE.BINARY(DAE.UNARY(DAE.UMINUS_ARR(__), x), op && DAE.DIV_ARR(__), y))  => begin
                     expAdd(e1, DAE.BINARY(x, op, y))
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS(__), exp = e), _)  => begin
                       e = expAdd(e, e2)
                     negate(e)
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e), _)  => begin
                       e = expAdd(e, e2)
                     negate(e)
                   end
-                  
+
                   (_, _)  => begin
                       tp = typeof(e1)
                       if Types.isIntegerOrRealOrSubTypeOfEither(tp)
@@ -5019,7 +5019,7 @@
 
          #= Takes two expressions and create
          the difference between them =#
-        function makeDiff(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function makeDiff(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = if isZero(e2)
@@ -5034,7 +5034,7 @@
 
          #= Takes two expressions and create
          the difference between them --> a-(b+c) = a-b-c =#
-        function makeDifference(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function makeDifference(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = makeDiff(e1, e2)
@@ -5042,7 +5042,7 @@
         end
 
          #= Makes a binary logical expression of all elements in the list. =#
-        function makeLBinary(inExpLst::List{<:DAE.Exp}, op::DAE.Operator) ::DAE.Exp 
+        function makeLBinary(inExpLst::List{<:DAE.Exp}, op::DAE.Operator) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5055,25 +5055,25 @@
                   ( nil(), DAE.AND(_))  => begin
                     DAE.BCONST(true)
                   end
-                  
+
                   ( nil(), DAE.OR(_))  => begin
                     DAE.BCONST(false)
                   end
-                  
+
                   (e1 <|  nil(), _)  => begin
                     e1
                   end
-                  
+
                   (e1 <| e2 <|  nil(), _)  => begin
                     DAE.LBINARY(e1, op, e2)
                   end
-                  
+
                   (e1 <| rest, _)  => begin
                       res = makeLBinary(rest, op)
                       res = DAE.LBINARY(e1, op, res)
                     res
                   end
-                  
+
                   _  => begin
                         str = "Expression.makeLBinary failed for operator " + ExpressionDump.lbinopSymbol(op)
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -5091,7 +5091,7 @@
         makeSum1 => (a + b) + c
         makeSum => a + (b + c)
          =#
-        function makeSum1(inExpLst::List{<:DAE.Exp}, simplify::Bool = false) ::DAE.Exp 
+        function makeSum1(inExpLst::List{<:DAE.Exp}, simplify::Bool = false) ::DAE.Exp
               local outExp::DAE.Exp
 
               local e1::DAE.Exp
@@ -5102,19 +5102,19 @@
                    nil()  => begin
                     DAE.RCONST(0.0)
                   end
-                  
+
                   e1 <|  nil()  => begin
                     e1
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                     expAdd(e1, e2)
                   end
-                  
+
                   _  => begin
                     makeSumWork(inExpLst, simplify)
                   end
-                  
+
                   _  => begin
                         if Flags.isSet(Flags.FAILTRACE)
                           Debug.trace("-Expression.makeSum1 failed, DAE.Exp lst:")
@@ -5129,7 +5129,7 @@
 
          #= Takes a list of expressions an makes a sum
           expression adding all elements in the list. =#
-        function makeSumWork(inExpLst::List{<:DAE.Exp}, simplify::Bool = false) ::DAE.Exp 
+        function makeSumWork(inExpLst::List{<:DAE.Exp}, simplify::Bool = false) ::DAE.Exp
               local outExp::DAE.Exp
 
               local tp::Type
@@ -5161,7 +5161,7 @@
 
          #= Takes a list of expressions an makes a sum
           expression adding all elements in the list. =#
-        function makeSum(inExpLst::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeSum(inExpLst::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5180,21 +5180,21 @@
                    nil()  => begin
                     DAE.RCONST(0.0)
                   end
-                  
+
                   e1 <|  nil()  => begin
                     e1
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                       @match true = isZero(e1)
                     e2
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                       @match true = isZero(e2)
                     e1
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                       tp = typeof(e1) #= Take type info from e1, ok since type checking already performed. =#
                       b = DAEUtil.expTypeArray(tp)
@@ -5205,7 +5205,7 @@
                           end
                     DAE.BINARY(e1, op, e2)
                   end
-                  
+
                   e1 <| rest  => begin
                       b1 = isZero(e1)
                       e2 = makeSum(rest)
@@ -5224,7 +5224,7 @@
                           end
                     res
                   end
-                  
+
                   lst  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-Expression.makeSum failed, DAE.Exp lst:")
@@ -5252,7 +5252,7 @@
 
          #= author: PA
           Multiplies two scalar expressions. =#
-        function expMul(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expMul(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5271,38 +5271,38 @@
                       @match true = isZero(e1)
                     e1
                   end
-                  
+
                   (_, _)  => begin
                       @match true = isZero(e2)
                     e2
                   end
-                  
+
                   (DAE.RCONST(real = 1.0), _)  => begin
                     e2
                   end
-                  
+
                   (_, DAE.RCONST(real = 1.0))  => begin
                     e1
                   end
-                  
+
                   (DAE.ICONST(1), _)  => begin
                     e2
                   end
-                  
+
                   (_, DAE.ICONST(1))  => begin
                     e1
                   end
-                  
+
                   (DAE.RCONST(r1), DAE.RCONST(r2))  => begin
                       r1 = realMul(r1, r2)
                     DAE.RCONST(r1)
                   end
-                  
+
                   (DAE.ICONST(i1), DAE.ICONST(i2))  => begin
                       i1 = intMul(i1, i2)
                     DAE.ICONST(i1)
                   end
-                  
+
                   _  => begin
                         tp = typeof(e1)
                         @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
@@ -5330,7 +5330,7 @@
         end
 
          #= author: vitalij =#
-        function expPow(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expPow(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5349,37 +5349,37 @@
                   (_, _) where (isOne(e2))  => begin
                     e1
                   end
-                  
+
                   (_, _) where (isZero(e2))  => begin
                     makeConstOne(typeof(e1))
                   end
-                  
+
                   (_, _) where (isConstOne(e1))  => begin
                     e1
                   end
-                  
+
                   (_, _) where (isZero(e1) && expIsPositive(e2))  => begin
                     makeConstZero(typeof(e1))
                   end
-                  
+
                   (DAE.UNARY(DAE.UMINUS(__), e), _) where (isEven(e2))  => begin
                     expPow(e, e2)
                   end
-                  
+
                   (DAE.BINARY(e3, DAE.DIV(__), e4), DAE.UNARY(DAE.UMINUS(__), e5))  => begin
                       e = makeDiv(e4, e3)
                       e = expPow(e, e5)
                     e
                   end
-                  
+
                   (DAE.BINARY(e3, DAE.DIV(__), e4), _) where (isNegativeOrZero(e2))  => begin
                     expPow(makeDiv(e4, e3), negate(e2))
                   end
-                  
+
                   (_, _) where (isHalf(e2))  => begin
                     Expression.makePureBuiltinCall("sqrt", list(e1), DAE.T_REAL_DEFAULT)
                   end
-                  
+
                   _  => begin
                         tp = typeof(e1)
                         b = DAEUtil.expTypeArray(tp)
@@ -5409,17 +5409,17 @@
           outExp
         end
 
-         #= 
+         #=
         {a,b}^n -> {a^n, b^n}
         author: vitalij =#
-        function expPowLst(expLst::List{<:DAE.Exp}, n::DAE.Exp) ::List{DAE.Exp} 
+        function expPowLst(expLst::List{<:DAE.Exp}, n::DAE.Exp) ::List{DAE.Exp}
               local outExp::List{DAE.Exp} = ListUtil.map1(expLst, expPow, n)
           outExp
         end
 
          #= author: Frenkel TUD 2011-04
           returns max(e1,e2). =#
-        function expMaxScalar(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expMaxScalar(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local tp::Type
@@ -5429,7 +5429,7 @@
           outExp
         end
 
-        function expOptMaxScalar(e1::Option{<:DAE.Exp}, e2::Option{<:DAE.Exp}) ::Option{DAE.Exp} 
+        function expOptMaxScalar(e1::Option{<:DAE.Exp}, e2::Option{<:DAE.Exp}) ::Option{DAE.Exp}
               local outExp::Option{DAE.Exp}
 
               outExp = begin
@@ -5439,11 +5439,11 @@
                   (_, NONE())  => begin
                     e1
                   end
-                  
+
                   (NONE(), _)  => begin
                     e2
                   end
-                  
+
                   (SOME(e11), SOME(e22))  => begin
                     SOME(expMaxScalar(e11, e22))
                   end
@@ -5454,7 +5454,7 @@
 
          #= author: Frenkel TUD 2011-04
           returns min(e1,e2). =#
-        function expMinScalar(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expMinScalar(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local tp::Type
@@ -5465,7 +5465,7 @@
           outExp
         end
 
-        function expOptMinScalar(e1::Option{<:DAE.Exp}, e2::Option{<:DAE.Exp}) ::Option{DAE.Exp} 
+        function expOptMinScalar(e1::Option{<:DAE.Exp}, e2::Option{<:DAE.Exp}) ::Option{DAE.Exp}
               local outExp::Option{DAE.Exp}
 
               outExp = begin
@@ -5475,11 +5475,11 @@
                   (_, NONE())  => begin
                     e1
                   end
-                  
+
                   (NONE(), _)  => begin
                     e2
                   end
-                  
+
                   (SOME(e11), SOME(e22))  => begin
                     SOME(expMinScalar(e11, e22))
                   end
@@ -5490,7 +5490,7 @@
 
          #= takes and expression e1 and a list of expressisions {v1,v2,...,vn} and returns
         {e1*v1,e1*v2,...,e1*vn} =#
-        function makeProductVector(e1::DAE.Exp, v::List{<:DAE.Exp}) ::List{DAE.Exp} 
+        function makeProductVector(e1::DAE.Exp, v::List{<:DAE.Exp}) ::List{DAE.Exp}
               local res::List{DAE.Exp}
 
               res = ListUtil.map1(v, makeProduct, e1)
@@ -5498,7 +5498,7 @@
         end
 
          #= calculate a scalr product <v,w> =#
-        function makeScalarProduct(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::DAE.Exp 
+        function makeScalarProduct(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::DAE.Exp
               local s::DAE.Exp = DAE.RCONST(0.0)
 
               local size1::ModelicaInteger = arrayLength(v)
@@ -5513,14 +5513,14 @@
           s
         end
 
-        function lenVec(v::Array{<:DAE.Exp}) ::DAE.Exp 
+        function lenVec(v::Array{<:DAE.Exp}) ::DAE.Exp
               local len::DAE.Exp = makeScalarProduct(v, v)
 
               len = Expression.makePureBuiltinCall("sqrt", list(len), DAE.T_REAL_DEFAULT)
           len
         end
 
-        function addVec(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::Array{DAE.Exp} 
+        function addVec(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::Array{DAE.Exp}
               local y::Array{DAE.Exp}
 
               local size1::ModelicaInteger = arrayLength(v)
@@ -5537,7 +5537,7 @@
           y
         end
 
-        function subVec(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::Array{DAE.Exp} 
+        function subVec(v::Array{<:DAE.Exp}, w::Array{<:DAE.Exp}) ::Array{DAE.Exp}
               local y::Array{DAE.Exp}
 
               local size1::ModelicaInteger = arrayLength(v)
@@ -5555,7 +5555,7 @@
         end
 
          #= Makes a product of two expressions =#
-        function makeProduct(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function makeProduct(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local product::DAE.Exp
 
               product = makeProductLst(list(e1, e2))
@@ -5564,7 +5564,7 @@
 
          #= Takes a list of expressions an makes a product
           expression multiplying all elements in the list. =#
-        function makeProductLst(inExpLst::List{<:DAE.Exp}) ::DAE.Exp 
+        function makeProductLst(inExpLst::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5586,42 +5586,42 @@
                    nil()  => begin
                     DAE.RCONST(1.0)
                   end
-                  
+
                   e1 <|  nil()  => begin
                     e1
                   end
-                  
+
                   e <| es  => begin
                       @match true = isConstOne(e)
                       res = makeProductLst(es)
                     res
                   end
-                  
+
                   DAE.BINARY(operator = DAE.DIV(__), exp2 = e) <| _  => begin
                       @match true = isZero(e)
                     fail()
                   end
-                  
+
                   _ <| DAE.BINARY(operator = DAE.DIV(__), exp2 = e) <|  nil()  => begin
                       @match true = isZero(e)
                     fail()
                   end
-                  
+
                   e <| _  => begin
                       @match true = isZero(e)
                     e
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.DIV(ty = tp), exp2 = e) <| e2 <|  nil()  => begin
                       @match true = isConstOne(e1)
                     DAE.BINARY(e2, DAE.DIV(tp), e)
                   end
-                  
+
                   e2 <| DAE.BINARY(exp1 = e1, operator = DAE.DIV(ty = tp), exp2 = e) <|  nil()  => begin
                       @match true = isConstOne(e1)
                     DAE.BINARY(e2, DAE.DIV(tp), e)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = DAE.DIV(ty = tp), exp2 = e) <| es  => begin
                       @match true = isConstOne(e1)
                       p1 = makeProductLst(es)
@@ -5634,12 +5634,12 @@
                           end
                     res
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                       @match true = isConstOne(e2)
                     e1
                   end
-                  
+
                   e1 <| e2 <|  nil()  => begin
                       b1 = isZero(e1)
                       b2 = isZero(e2)
@@ -5654,7 +5654,7 @@
                           end
                     res
                   end
-                  
+
                   e1 <| rest  => begin
                       e2 = makeProductLst(rest)
                       tp = typeof(e1)
@@ -5670,7 +5670,7 @@
                           end
                     res
                   end
-                  
+
                   lst  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("-Expression.makeProductLst failed, DAE.Exp lst:")
@@ -5693,7 +5693,7 @@
          #= Checks if a type is OTHER and in that case returns REAL instead.
          This is used to make proper transformations in case OTHER is
          retrieved from subexpression where it should instead be REAL or INT =#
-        function checkIfOther(inTp::DAE.Type) ::DAE.Type 
+        function checkIfOther(inTp::DAE.Type) ::DAE.Type
               local outTp::DAE.Type
 
               outTp = begin
@@ -5701,7 +5701,7 @@
                   DAE.T_UNKNOWN(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   _  => begin
                       inTp
                   end
@@ -5710,11 +5710,11 @@
           outTp
         end
 
-         #= 
+         #=
         function expDiv
           author: PA
           Divides two scalar expressions. =#
-        function expDiv(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function expDiv(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local tp::Type
@@ -5734,7 +5734,7 @@
         end
 
          #= Takes two expressions and create a division =#
-        function makeDiv(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp 
+        function makeDiv(e1::DAE.Exp, e2::DAE.Exp) ::DAE.Exp
               local res::DAE.Exp
 
               res = begin
@@ -5742,11 +5742,11 @@
                   (_, _) where (isZero(e1) && ! isZero(e2))  => begin
                     e1
                   end
-                  
+
                   (_, _) where (isOne(e2))  => begin
                     e1
                   end
-                  
+
                   _  => begin
                       expDiv(e1, e2)
                   end
@@ -5757,7 +5757,7 @@
 
          #= takes and expression e1 and a list of expressisions {v1,v2,...,vn} and returns
         {v1/e1,v2/e1,...,vn/e1} =#
-        function makeDivVector(v::List{<:DAE.Exp}, e1::DAE.Exp) ::List{DAE.Exp} 
+        function makeDivVector(v::List{<:DAE.Exp}, e1::DAE.Exp) ::List{DAE.Exp}
               local res::List{DAE.Exp}
 
               res = ListUtil.map1(v, makeDiv, e1)
@@ -5765,7 +5765,7 @@
         end
 
          #= creates an ASUB given an expression and an index =#
-        function makeAsubAddIndex(e::DAE.Exp, indx::ModelicaInteger) ::DAE.Exp 
+        function makeAsubAddIndex(e::DAE.Exp, indx::ModelicaInteger) ::DAE.Exp
               local outExp::DAE.Exp = e
 
               outExp = begin
@@ -5774,7 +5774,7 @@
                       outExp.sub = listAppend(outExp.sub, list(DAE.ICONST(indx)))
                     outExp
                   end
-                  
+
                   _  => begin
                       makeASUB(e, list(DAE.ICONST(indx)))
                   end
@@ -5784,7 +5784,7 @@
         end
 
          #= Creates an integer constant expression given the integer input. =#
-        function makeIntegerExp(i::ModelicaInteger) ::DAE.Exp 
+        function makeIntegerExp(i::ModelicaInteger) ::DAE.Exp
               local e::DAE.Exp
 
               e = DAE.ICONST(i)
@@ -5792,7 +5792,7 @@
         end
 
          #= Creates an integer constant expression given the integer input. =#
-        function makeRealExp(r::ModelicaReal) ::DAE.Exp 
+        function makeRealExp(r::ModelicaReal) ::DAE.Exp
               local e::DAE.Exp
 
               e = DAE.RCONST(r)
@@ -5800,7 +5800,7 @@
         end
 
          #= Creates an integer constant expression given the integer input. =#
-        function makeBoolExp(b::Bool) ::DAE.Exp 
+        function makeBoolExp(b::Bool) ::DAE.Exp
               local e::DAE.Exp
 
               e = DAE.BCONST(b)
@@ -5809,7 +5809,7 @@
 
          #= author: PA
           Create the constant value one, given a type that is INT or REAL =#
-        function makeConstOne(inType::DAE.Type) ::DAE.Exp 
+        function makeConstOne(inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5817,11 +5817,11 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.ICONST(1)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     DAE.RCONST(1.0)
                   end
-                  
+
                   _  => begin
                       DAE.RCONST(1.0)
                   end
@@ -5831,28 +5831,25 @@
         end
 
          #= Generates a zero constant =#
-        function makeConstZero(inType::DAE.Type) ::DAE.Exp 
-              local const::DAE.Exp
-
-              const = begin
+        function makeConstZero(inType::DAE.Type) ::DAE.Exp
+              local constExpr::DAE.Exp
+              constExpr = begin
                 @match inType begin
                   DAE.T_REAL(__)  => begin
                     DAE.RCONST(0.0)
                   end
-                  
                   DAE.T_INTEGER(__)  => begin
                     DAE.ICONST(0)
                   end
-                  
                   _  => begin
                       DAE.RCONST(0.0)
                   end
                 end
               end
-          const
+          constExpr
         end
 
-        function makeConstNumber(ty::DAE.Type, n::ModelicaInteger) ::DAE.Exp 
+        function makeConstNumber(ty::DAE.Type, n::ModelicaInteger) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = begin
@@ -5860,7 +5857,7 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.ICONST(n)
                   end
-                  
+
                   _  => begin
                       DAE.RCONST(n)
                   end
@@ -5870,16 +5867,14 @@
         end
 
          #= Generates a zero constant, using type from inExp =#
-        function makeConstZeroE(iExp::DAE.Exp) ::DAE.Exp 
-              local const::DAE.Exp
-
+        function makeConstZeroE(iExp::DAE.Exp) ::DAE.Exp
+              local constExpr::DAE.Exp
               local tp::DAE.Type = typeof(iExp)
-
-              const = makeConstZero(tp)
-          const
+              constExpr = makeConstZero(tp)
+          constExpr
         end
 
-        function makeListOfZeros(inDimension::ModelicaInteger) ::List{DAE.Exp} 
+        function makeListOfZeros(inDimension::ModelicaInteger) ::List{DAE.Exp}
               local outList::List{DAE.Exp} = nil
 
               if inDimension > 0
@@ -5890,7 +5885,7 @@
           outList
         end
 
-        function makeRealArrayOfZeros(inDimension::ModelicaInteger) ::DAE.Exp 
+        function makeRealArrayOfZeros(inDimension::ModelicaInteger) ::DAE.Exp
               local outExp::DAE.Exp
 
               local l::List{DAE.Exp}
@@ -5900,7 +5895,7 @@
           outExp
         end
 
-        function createZeroExpression(inType::DAE.Type) ::DAE.Exp 
+        function createZeroExpression(inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -5919,18 +5914,18 @@
                   _ where (isIntegerOrReal(inType))  => begin
                     makeConstZero(inType)
                   end
-                  
+
                   DAE.T_TUPLE(types = typeLst)  => begin
                       expLst = ListUtil.map(typeLst, createZeroExpression)
                       e = DAE.TUPLE(expLst)
                     e
                   end
-                  
+
                   DAE.T_ARRAY(dims = dims)  => begin
                       (e, _) = makeZeroExpression(dims)
                     e
                   end
-                  
+
                   DAE.T_COMPLEX(varLst = varLst, complexClassType = ClassInf.RECORD(path))  => begin
                       cr = DAE.CREF_IDENT("TMP", inType, nil)
                       typeLst = list(v.ty for v in varLst)
@@ -5940,7 +5935,7 @@
                       e = DAE.RECORD(path, expLst, varNames, inType)
                     e
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -5954,7 +5949,7 @@
         end
 
          #=  creates a Real or array<Real> zero expression with given dimensions, also returns its type =#
-        function makeZeroExpression(inDims::DAE.Dimensions) ::Tuple{DAE.Exp, DAE.Type} 
+        function makeZeroExpression(inDims::DAE.Dimensions) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -5970,7 +5965,7 @@
                    nil()  => begin
                     (DAE.RCONST(0.0), DAE.T_REAL_DEFAULT)
                   end
-                  
+
                   d <| dims  => begin
                       i = dimensionSize(d)
                       (e, ty) = makeZeroExpression(dims)
@@ -5984,7 +5979,7 @@
         end
 
          #=  creates a Real or array<Real> one expression with given dimensions, also returns its type =#
-        function makeOneExpression(inDims::DAE.Dimensions) ::Tuple{DAE.Exp, DAE.Type} 
+        function makeOneExpression(inDims::DAE.Dimensions) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -6000,7 +5995,7 @@
                    nil()  => begin
                     (DAE.RCONST(1.0), DAE.T_REAL_DEFAULT)
                   end
-                  
+
                   d <| dims  => begin
                       i = dimensionSize(d)
                       (e, ty) = makeOneExpression(dims)
@@ -6018,7 +6013,7 @@
           dimensions. e.g.
            listToArray({1,2,3,4,5,6}, {3,2}) -> {{1,2}, {3,4}, {5,6}}
          =#
-        function listToArray(inList::List{<:DAE.Exp}, dims::DAE.Dimensions) ::DAE.Exp 
+        function listToArray(inList::List{<:DAE.Exp}, dims::DAE.Dimensions) ::DAE.Exp
               local oExp::DAE.Exp
 
               oExp = begin
@@ -6029,12 +6024,12 @@
                       Error.addMessage(Error.INTERNAL_ERROR, list("Expression.listToArray called with empty dimension list."))
                     fail()
                   end
-                  
+
                   ( nil(), _)  => begin
                       Error.addMessage(Error.INTERNAL_ERROR, list("Expression.listToArray called with empty list."))
                     fail()
                   end
-                  
+
                   (exp <| _, _)  => begin
                       ty = typeof(exp)
                       oExp = listToArray2(inList, dims, ty)
@@ -6049,7 +6044,7 @@
           oExp
         end
 
-        function listToArray2(inList::List{<:DAE.Exp}, iDims::DAE.Dimensions, inType::DAE.Type) ::DAE.Exp 
+        function listToArray2(inList::List{<:DAE.Exp}, iDims::DAE.Dimensions, inType::DAE.Type) ::DAE.Exp
               local oExp::DAE.Exp
 
               oExp = begin
@@ -6064,14 +6059,14 @@
                       @match true = i == listLength(inList)
                     makeArrayFromList(inList)
                   end
-                  
+
                   (_, d <|  nil(), _)  => begin
                       i = dimensionSize(d)
                       @match true = i > listLength(inList)
                       Error.addMessage(Error.INTERNAL_ERROR, list("Expression.listToArray2: Not enough elements left in list to fit dimension."))
                     fail()
                   end
-                  
+
                   (_, _ <| _, _)  => begin
                       (d, dims) = ListUtil.splitLast(iDims)
                       explst = listToArray3(inList, d, inType)
@@ -6083,7 +6078,7 @@
           oExp
         end
 
-        function listToArray3(inList::List{<:DAE.Exp}, iDim::DAE.Dimension, inType::DAE.Type) ::List{DAE.Exp} 
+        function listToArray3(inList::List{<:DAE.Exp}, iDim::DAE.Dimension, inType::DAE.Type) ::List{DAE.Exp}
               local oExps::List{DAE.Exp}
 
               oExps = begin
@@ -6097,7 +6092,7 @@
                   ( nil(), _, _)  => begin
                     nil
                   end
-                  
+
                   (_, d, _)  => begin
                       i = dimensionSize(d)
                       if i > listLength(inList)
@@ -6115,7 +6110,7 @@
           oExps
         end
 
-        function arrayFill(dims::DAE.Dimensions, inExp::DAE.Exp) ::DAE.Exp 
+        function arrayFill(dims::DAE.Dimensions, inExp::DAE.Exp) ::DAE.Exp
               local oExp::DAE.Exp
 
               oExp = begin
@@ -6123,7 +6118,7 @@
                   ( nil(), _)  => begin
                     inExp
                   end
-                  
+
                   _  => begin
                         oExp = arrayFill2(dims, inExp)
                       oExp
@@ -6133,7 +6128,7 @@
           oExp
         end
 
-        function arrayFill2(iDims::DAE.Dimensions, inExp::DAE.Exp) ::DAE.Exp 
+        function arrayFill2(iDims::DAE.Dimensions, inExp::DAE.Exp) ::DAE.Exp
               local oExp::DAE.Exp
 
               oExp = begin
@@ -6150,7 +6145,7 @@
                       expl = ListUtil.fill(inExp, i)
                     DAE.ARRAY(DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(i))), true, expl)
                   end
-                  
+
                   (d <| dims, _)  => begin
                       arrexp = arrayFill2(list(d), inExp)
                       arrexp = arrayFill2(dims, arrexp)
@@ -6162,7 +6157,7 @@
         end
 
          #= Creates a Subscript INDEX from an Expression. =#
-        function makeIndexSubscript(exp::DAE.Exp) ::DAE.Subscript 
+        function makeIndexSubscript(exp::DAE.Exp) ::DAE.Subscript
               local subscript::DAE.Subscript
 
               subscript = DAE.INDEX(exp)
@@ -6170,7 +6165,7 @@
         end
 
          #= Creates a Var given a name and Type =#
-        function makeVar(name::String, tp::DAE.Type) ::DAE.Var 
+        function makeVar(name::String, tp::DAE.Type) ::DAE.Var
               local v::DAE.Var
 
               v = DAE.TYPES_VAR(name, DAE.dummyAttrVar, tp, DAE.UNBOUND(), NONE())
@@ -6178,7 +6173,7 @@
         end
 
          #= Multiplies two dimensions. =#
-        function dimensionsMult(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension 
+        function dimensionsMult(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension
               local res::DAE.Dimension
 
               res = intDimension(dimensionSize(dim1) * dimensionSize(dim2))
@@ -6186,7 +6181,7 @@
         end
 
          #= Adds two dimensions. =#
-        function dimensionsAdd(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension 
+        function dimensionsAdd(dim1::DAE.Dimension, dim2::DAE.Dimension) ::DAE.Dimension
               local res::DAE.Dimension
 
               try
@@ -6198,7 +6193,7 @@
         end
 
          #= Concatenates two array types, so that the resulting type is correct. =#
-        function concatArrayType(arrayType1::DAE.Type, arrayType2::DAE.Type) ::DAE.Type 
+        function concatArrayType(arrayType1::DAE.Type, arrayType2::DAE.Type) ::DAE.Type
               local concatType::DAE.Type
 
               concatType = begin
@@ -6218,7 +6213,7 @@
         end
 
          #= Help function to e.g. detectImplicitDiscreteAlgsStatemensFor =#
-        function replaceExpTpl(inExp::DAE.Exp, tpl::Tuple{<:DAE.Exp, DAE.Exp}) ::Tuple{DAE.Exp, Tuple{DAE.Exp, DAE.Exp}} 
+        function replaceExpTpl(inExp::DAE.Exp, tpl::Tuple{<:DAE.Exp, DAE.Exp}) ::Tuple{DAE.Exp, Tuple{DAE.Exp, DAE.Exp}}
               local outTpl::Tuple{DAE.Exp, DAE.Exp}
               local outExp::DAE.Exp
 
@@ -6238,7 +6233,7 @@
         end
 
          #= Helper function to replaceExpList. =#
-        function replaceExp(inExp::DAE.Exp, inSourceExp::DAE.Exp, inTargetExp::DAE.Exp) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function replaceExp(inExp::DAE.Exp, inSourceExp::DAE.Exp, inTargetExp::DAE.Exp) ::Tuple{DAE.Exp, ModelicaInteger}
               local out::Tuple{DAE.Exp, ModelicaInteger}
 
               local exp::DAE.Exp
@@ -6249,7 +6244,7 @@
           out
         end
 
-        function replaceExpWork(inExp::DAE.Exp, inTpl::Tuple{<:DAE.Exp, DAE.Exp, ModelicaInteger}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.Exp, DAE.Exp, ModelicaInteger}} 
+        function replaceExpWork(inExp::DAE.Exp, inTpl::Tuple{<:DAE.Exp, DAE.Exp, ModelicaInteger}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.Exp, DAE.Exp, ModelicaInteger}}
               local otpl::Tuple{DAE.Exp, DAE.Exp, ModelicaInteger}
               local cont::Bool
               local outExp::DAE.Exp
@@ -6266,7 +6261,7 @@
                   (_, (source, target, c)) where (expEqual(inExp, source))  => begin
                     (target, false, (source, target, c + 1))
                   end
-                  
+
                   _  => begin
                       (inExp, true, inTpl)
                   end
@@ -6275,7 +6270,7 @@
           (outExp, cont, otpl)
         end
 
-        function expressionCollector(exp::DAE.Exp, acc::List{<:DAE.Exp}) ::Tuple{DAE.Exp, List{DAE.Exp}} 
+        function expressionCollector(exp::DAE.Exp, acc::List{<:DAE.Exp}) ::Tuple{DAE.Exp, List{DAE.Exp}}
               local outExps::List{DAE.Exp}
               local outExp::DAE.Exp
 
@@ -6284,7 +6279,7 @@
           (outExp, outExps)
         end
 
-        function replaceCrefBottomUp(inExp::DAE.Exp, inSourceExp::DAE.ComponentRef, inTargetExp::DAE.Exp) ::DAE.Exp 
+        function replaceCrefBottomUp(inExp::DAE.Exp, inSourceExp::DAE.ComponentRef, inTargetExp::DAE.Exp) ::DAE.Exp
               local exp::DAE.Exp
 
               (exp, _) = traverseExpBottomUp(inExp, replaceCref, (inSourceExp, inTargetExp))
@@ -6292,7 +6287,7 @@
         end
 
          #= Replace a componentref with a expression =#
-        function replaceCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, DAE.Exp}) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, DAE.Exp}} 
+        function replaceCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, DAE.Exp}) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, DAE.Exp}}
               local otpl::Tuple{DAE.ComponentRef, DAE.Exp}
               local outExp::DAE.Exp
 
@@ -6304,7 +6299,7 @@
                   (DAE.CREF(componentRef = cr), (cr1, target)) where (ComponentReference.crefEqualNoStringCompare(cr, cr1))  => begin
                     (target, inTpl)
                   end
-                  
+
                   _  => begin
                       (inExp, inTpl)
                   end
@@ -6320,7 +6315,7 @@
           and only if they are explicitly enabled with the initial() operator; and
           only in one of the two forms when initial() then or when {…,initial(),…}
           then. [...] =#
-        function containsInitialCall(condition::DAE.Exp) ::Bool 
+        function containsInitialCall(condition::DAE.Exp) ::Bool
               local res::Bool
 
               res = begin
@@ -6329,11 +6324,11 @@
                   DAE.CALL(path = Absyn.IDENT(name = "initial"))  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(array = array)  => begin
                     ListUtil.mapBoolOr(array, containsInitialCall)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6404,27 +6399,27 @@
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.ICONST(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CLKCONST(clk)  => begin
                       (clk1, ext_arg) = traverseExpClk(clk, inFunc, inExtArg)
                       e = if referenceEq(clk1, clk)
@@ -6435,12 +6430,12 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CREF(cr, tp)  => begin
                       (cr_1, ext_arg) = traverseExpCref(cr, inFunc, inExtArg)
                       e = if referenceEq(cr, cr_1)
@@ -6451,7 +6446,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.UNARY(operator = op, exp = e1)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6462,7 +6457,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6474,7 +6469,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.LUNARY(operator = op, exp = e1)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6485,7 +6480,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6497,7 +6492,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1, operator = op, exp2 = e2, index = index_, optionExpisASUB = isExpisASUB)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6509,7 +6504,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6522,7 +6517,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CALL(path = fn, expLst = expl, attr = attr)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6533,7 +6528,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.RECORD(path = fn, exps = expl, comp = fieldNames, ty = tp)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6544,7 +6539,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(fn, expl, tp, t)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6555,7 +6550,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.ARRAY(ty = tp, scalar = scalar, array = expl)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6566,7 +6561,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.MATRIX(ty = tp, integer = dim, matrix = lstexpl)  => begin
                       (lstexpl_1, ext_arg) = traverseExpMatrix(lstexpl, inFunc, inExtArg)
                       e = if referenceEq(lstexpl, lstexpl_1)
@@ -6577,7 +6572,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.RANGE(ty = tp, start = e1, step = NONE(), stop = e2)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6589,7 +6584,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.RANGE(ty = tp, start = e1, step = SOME(e2), stop = e3)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6602,7 +6597,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.TUPLE(PR = expl)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6613,7 +6608,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CAST(ty = tp, exp = e1)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6624,7 +6619,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.ASUB(exp = e1, sub = expl)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, ext_arg)
@@ -6636,7 +6631,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.TSUB(e1, i, tp)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6647,7 +6642,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   e1 && DAE.RSUB(__)  => begin
                        #=  unary
                        =#
@@ -6668,7 +6663,7 @@
                       (e1, ext_arg) = inFunc(e1, ext_arg)
                     (e1, ext_arg)
                   end
-                  
+
                   DAE.SIZE(exp = e1, sz = NONE())  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6679,7 +6674,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.SIZE(exp = e1, sz = SOME(e2))  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6691,7 +6686,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.REDUCTION(reductionInfo = reductionInfo, expr = e1, iterators = riters)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (riters_1, ext_arg) = traverseReductionIterators(riters, inFunc, ext_arg)
@@ -6703,7 +6698,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CONS(e1, e2)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       (e2_1, ext_arg) = traverseExpBottomUp(e2, inFunc, ext_arg)
@@ -6715,7 +6710,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.LIST(expl)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6726,7 +6721,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.META_TUPLE(expl)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6737,12 +6732,12 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.META_OPTION(NONE())  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.META_OPTION(SOME(e1))  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6753,7 +6748,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.BOX(e1)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6764,7 +6759,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.UNBOX(e1, tp)  => begin
                       (e1_1, ext_arg) = traverseExpBottomUp(e1, inFunc, inExtArg)
                       e = if referenceEq(e1, e1_1)
@@ -6775,7 +6770,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.METARECORDCALL(fn, expl, fieldNames, i, typeVars)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       e = if referenceEq(expl, expl_1)
@@ -6786,7 +6781,7 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
                       (cases_1, ext_arg) = Patternm.traverseCases(cases, inFunc, ext_arg)
@@ -6798,21 +6793,21 @@
                       (e, ext_arg) = inFunc(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.SHARED_LITERAL(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.PATTERN(__)  => begin
                       (e, ext_arg) = inFunc(inExp, inExtArg)
                     (e, ext_arg)
                   end
-                  
+
                   DAE.CODE(__)  => begin
                     (inExp, inExtArg)
                   end
-                  
+
                   _  => begin
                         str = ExpressionDump.printExpStr(inExp)
                         str = "Expression.traverseExpBottomUp or one of the user-defined functions using it is not implemented correctly: " + str
@@ -6833,7 +6828,7 @@
         end
 
          #= Like traverseExpBottomUp but passes a default 0 argument =#
-        function traverseExpDummy(inExp::DAE.Exp, func::FuncExpType) ::DAE.Exp 
+        function traverseExpDummy(inExp::DAE.Exp, func::FuncExpType) ::DAE.Exp
               local outExp::DAE.Exp
 
               (outExp, _) = traverseExpBottomUp(inExp, traverseExpDummyHelper, func)
@@ -6841,7 +6836,7 @@
         end
 
          #= Like traverseExpBottomUp but does not use an extra argument =#
-        function traverseExpDummyHelper(inExp::DAE.Exp, func::FuncExpType) ::Tuple{DAE.Exp, FuncExpType} 
+        function traverseExpDummyHelper(inExp::DAE.Exp, func::FuncExpType) ::Tuple{DAE.Exp, FuncExpType}
               local outFunc::FuncExpType
               local outExp::DAE.Exp
 
@@ -6852,7 +6847,7 @@
 
          #= This function is used as input to a traverse function that does not traverse all subexpressions.
         The extra argument is a tuple of the actul function to call on each subexpression and the extra argument. =#
-        function traverseSubexpressionsHelper(inExp::DAE.Exp, itpl::Tuple{<:FuncExpType, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncExpType, Type_a}} 
+        function traverseSubexpressionsHelper(inExp::DAE.Exp, itpl::Tuple{<:FuncExpType, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncExpType, Type_a}}
               local otpl::Tuple{FuncExpType, Type_a}
               local outExp::DAE.Exp
 
@@ -6872,7 +6867,7 @@
 
          #= This function is used as input to a traverse function that does not traverse all subexpressions.
         The extra argument is a tuple of the actul function to call on each subexpression and the extra argument. =#
-        function traverseSubexpressions(e::DAE.Exp, arg::Type_a, func::FuncExpType) ::Tuple{DAE.Exp, Type_a} 
+        function traverseSubexpressions(e::DAE.Exp, arg::Type_a, func::FuncExpType) ::Tuple{DAE.Exp, Type_a}
 
 
 
@@ -6883,7 +6878,7 @@
          #= This function is used as input to a traverse function that does not traverse all subexpressions.
         The extra argument is a tuple of the actul function to call on each subexpression and the extra argument.
          =#
-        function traverseSubexpressionsDummyHelper(inExp::DAE.Exp, inFunc::FuncExpType) ::Tuple{DAE.Exp, FuncExpType} 
+        function traverseSubexpressionsDummyHelper(inExp::DAE.Exp, inFunc::FuncExpType) ::Tuple{DAE.Exp, FuncExpType}
               local outFunc::FuncExpType
               local outExp::DAE.Exp
 
@@ -6893,7 +6888,7 @@
 
          #= This function is used as input to a traverse function that does not traverse all subexpressions.
         The extra argument is a tuple of the actual function to call on each subexpression and the extra argument. =#
-        function traverseSubexpressionsTopDownHelper(inExp::DAE.Exp, itpl::Tuple{<:FuncExpType2, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncExpType2, Type_a}} 
+        function traverseSubexpressionsTopDownHelper(inExp::DAE.Exp, itpl::Tuple{<:FuncExpType2, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncExpType2, Type_a}}
               local otpl::Tuple{FuncExpType2, Type_a}
               local outExp::DAE.Exp
 
@@ -6913,7 +6908,7 @@
 
          #= author: PA
            Helper function to traverseExpBottomUp, traverses matrix expressions. =#
-        function traverseExpMatrix(inMatrix::List{<:List{<:DAE.Exp}}, func::FuncExpType, inTypeA::Type_a) ::Tuple{List{List{DAE.Exp}}, Type_a} 
+        function traverseExpMatrix(inMatrix::List{<:List{<:DAE.Exp}}, func::FuncExpType, inTypeA::Type_a) ::Tuple{List{List{DAE.Exp}}, Type_a}
               local outTypeA::Type_a = inTypeA
               local outMatrix::List{List{DAE.Exp}} = nil
 
@@ -6985,7 +6980,7 @@
           The function can potentially change the expression. In such cases,
           the changes are made top-down, i.e. a subexpression is traversed
           and changed after the complete expression is traversed. =#
-        function traverseExpTopDown(inExp::DAE.Exp, func::FuncExpType, ext_arg::Type_a) ::Tuple{DAE.Exp, Type_a} 
+        function traverseExpTopDown(inExp::DAE.Exp, func::FuncExpType, ext_arg::Type_a) ::Tuple{DAE.Exp, Type_a}
               local outArg::Type_a
               local outExp::DAE.Exp
 
@@ -6996,7 +6991,7 @@
           (outExp, outArg)
         end
 
-        function traverseExpClk(inClk::DAE.ClockKind, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ClockKind, Type_a} 
+        function traverseExpClk(inClk::DAE.ClockKind, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ClockKind, Type_a}
               local outArg::Type_a
               local outClk::DAE.ClockKind
 
@@ -7023,7 +7018,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.REAL_CLOCK(e)  => begin
                       (e1, arg) = traverseExpBottomUp(e, func, inArg)
                       clk = if referenceEq(e1, e)
@@ -7033,7 +7028,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.BOOLEAN_CLOCK(e1, e2)  => begin
                       (ea, arg) = traverseExpBottomUp(e1, func, inArg)
                       (eb, arg) = traverseExpBottomUp(e2, func, inArg)
@@ -7044,7 +7039,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.SOLVER_CLOCK(e1, e2)  => begin
                       (ea, arg) = traverseExpBottomUp(e1, func, inArg)
                       (eb, arg) = traverseExpBottomUp(e2, func, inArg)
@@ -7055,7 +7050,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   _  => begin
                       (inClk, inArg)
                   end
@@ -7064,7 +7059,7 @@
           (outClk, outArg)
         end
 
-        function traverseExpTopDownClockHelper(inClk::DAE.ClockKind, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ClockKind, Type_a} 
+        function traverseExpTopDownClockHelper(inClk::DAE.ClockKind, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ClockKind, Type_a}
               local outArg::Type_a
               local outClk::DAE.ClockKind
 
@@ -7091,7 +7086,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.REAL_CLOCK(e)  => begin
                       (e1, arg) = traverseExpTopDown(e, func, inArg)
                       clk = if referenceEq(e1, e)
@@ -7101,7 +7096,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.BOOLEAN_CLOCK(e1, e2)  => begin
                       (ea, arg) = traverseExpTopDown(e1, func, inArg)
                       (eb, arg) = traverseExpTopDown(e2, func, inArg)
@@ -7112,7 +7107,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   DAE.SOLVER_CLOCK(e1, e2)  => begin
                       (ea, arg) = traverseExpTopDown(e1, func, inArg)
                       (eb, arg) = traverseExpTopDown(e2, func, inArg)
@@ -7123,7 +7118,7 @@
                           end
                     (clk, arg)
                   end
-                  
+
                   _  => begin
                       (inClk, inArg)
                   end
@@ -7133,7 +7128,7 @@
         end
 
          #= Helper for traverseExpTopDown. =#
-        function traverseExpTopDown1(cont::Bool, inExp::DAE.Exp, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.Exp, Type_a} 
+        function traverseExpTopDown1(cont::Bool, inExp::DAE.Exp, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.Exp, Type_a}
               local outArg::Type_a
               local outExp::DAE.Exp
 
@@ -7186,23 +7181,23 @@
                   (false, _, _, _)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   (_, DAE.ICONST(_), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.RCONST(_), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.SCONST(_), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.BCONST(_), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.CLKCONST(clk), _, ext_arg)  => begin
                       (clk1, ext_arg) = traverseExpTopDownClockHelper(clk, func, ext_arg)
                       e = if referenceEq(clk1, clk)
@@ -7212,11 +7207,11 @@
                           end
                     (e, ext_arg)
                   end
-                  
+
                   (_, DAE.ENUM_LITERAL(__), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.CREF(cr, tp), rel, ext_arg)  => begin
                       (cr_1, ext_arg_1) = traverseExpTopDownCrefHelper(cr, rel, ext_arg)
                     (if referenceEq(cr, cr_1)
@@ -7225,7 +7220,7 @@
                           DAE.CREF(cr_1, tp)
                         end, ext_arg_1)
                   end
-                  
+
                   (_, DAE.UNARY(operator = op, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (if referenceEq(e1, e1_1)
@@ -7234,7 +7229,7 @@
                           DAE.UNARY(op, e1_1)
                         end, ext_arg_1)
                   end
-                  
+
                   (_, DAE.BINARY(exp1 = e1, operator = op, exp2 = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7244,7 +7239,7 @@
                           DAE.BINARY(e1_1, op, e2_1)
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.LUNARY(operator = op, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (if referenceEq(e1, e1_1)
@@ -7253,7 +7248,7 @@
                           DAE.LUNARY(op, e1_1)
                         end, ext_arg_1)
                   end
-                  
+
                   (_, DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7263,7 +7258,7 @@
                           DAE.LBINARY(e1_1, op, e2_1)
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.RELATION(exp1 = e1, operator = op, exp2 = e2, index = index_, optionExpisASUB = isExpisASUB), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7273,7 +7268,7 @@
                           DAE.RELATION(e1_1, op, e2_1, index_, isExpisASUB)
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7284,32 +7279,32 @@
                           DAE.IFEXP(e1_1, e2_1, e3_1)
                         end, ext_arg_3)
                   end
-                  
+
                   (_, DAE.CALL(path = fn, expLst = expl, attr = attr), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.CALL(fn, expl_1, attr), ext_arg_1)
                   end
-                  
+
                   (_, DAE.RECORD(path = fn, exps = expl, comp = fieldNames, ty = tp), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.RECORD(fn, expl_1, fieldNames, tp), ext_arg_1)
                   end
-                  
+
                   (_, DAE.PARTEVALFUNCTION(fn, expl, tp, t), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.PARTEVALFUNCTION(fn, expl_1, tp, t), ext_arg_1)
                   end
-                  
+
                   (_, DAE.ARRAY(ty = tp, scalar = scalar, array = expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.ARRAY(tp, scalar, expl_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.MATRIX(ty = tp, integer = dim, matrix = lstexpl), rel, ext_arg)  => begin
                       (lstexpl_1, ext_arg_1) = traverseExpMatrixTopDown(lstexpl, rel, ext_arg)
                     (DAE.MATRIX(tp, dim, lstexpl_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.RANGE(ty = tp, start = e1, step = NONE(), stop = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7319,7 +7314,7 @@
                           DAE.RANGE(tp, e1_1, NONE(), e2_1)
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.RANGE(ty = tp, start = e1, step = SOME(e2), stop = e3), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7330,28 +7325,28 @@
                           DAE.RANGE(tp, e1_1, SOME(e2_1), e3_1)
                         end, ext_arg_3)
                   end
-                  
+
                   (_, DAE.TUPLE(PR = expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.TUPLE(expl_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.CAST(ty = tp, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (DAE.CAST(tp, e1_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.ASUB(exp = e1, sub = expl_1), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (expl_1, ext_arg_2) = traverseExpListTopDown(expl_1, rel, ext_arg_1)
                     (makeASUB(e1_1, expl_1), ext_arg_2)
                   end
-                  
+
                   (_, DAE.TSUB(e1, i, tp), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (DAE.TSUB(e1_1, i, tp), ext_arg_1)
                   end
-                  
+
                   (_, e1 && DAE.RSUB(__), rel, ext_arg)  => begin
                        #=  unary
                        =#
@@ -7373,12 +7368,12 @@
                       end
                     (e1, ext_arg_1)
                   end
-                  
+
                   (_, DAE.SIZE(exp = e1, sz = NONE()), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (DAE.SIZE(e1_1, NONE()), ext_arg_1)
                   end
-                  
+
                   (_, DAE.SIZE(exp = e1, sz = SOME(e2)), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7388,21 +7383,21 @@
                           DAE.SIZE(e1_1, SOME(e2_1))
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.CODE(__), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.REDUCTION(reductionInfo = reductionInfo, expr = e1, iterators = riters), rel, ext_arg)  => begin
                       (e1, ext_arg) = traverseExpTopDown(e1, rel, ext_arg)
                       (riters, ext_arg) = traverseReductionIteratorsTopDown(riters, rel, ext_arg)
                     (DAE.REDUCTION(reductionInfo, e1, riters), ext_arg)
                   end
-                  
+
                   (_, DAE.EMPTY(__), _, _)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   (_, DAE.CONS(e1, e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                       (e2_1, ext_arg_2) = traverseExpTopDown(e2, rel, ext_arg_1)
@@ -7412,51 +7407,51 @@
                           DAE.CONS(e1_1, e2_1)
                         end, ext_arg_2)
                   end
-                  
+
                   (_, DAE.LIST(expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.LIST(expl_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.META_TUPLE(expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.META_TUPLE(expl_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.META_OPTION(oe1), rel, ext_arg)  => begin
                       (oe1, ext_arg) = traverseExpOptTopDown(oe1, rel, ext_arg)
                     (DAE.META_OPTION(oe1), ext_arg)
                   end
-                  
+
                   (_, DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), rel, ext_arg)  => begin
                       (expl, ext_arg) = traverseExpListTopDown(expl, rel, ext_arg)
                       (cases, ext_arg) = Patternm.traverseCasesTopDown(cases, rel, ext_arg)
                     (DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), ext_arg)
                   end
-                  
+
                   (_, DAE.METARECORDCALL(fn, expl, fieldNames, i, typeVars), rel, ext_arg)  => begin
                       (expl_1, ext_arg_1) = traverseExpListTopDown(expl, rel, ext_arg)
                     (DAE.METARECORDCALL(fn, expl_1, fieldNames, i, typeVars), ext_arg_1)
                   end
-                  
+
                   (_, DAE.UNBOX(e1, tp), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (DAE.UNBOX(e1_1, tp), ext_arg_1)
                   end
-                  
+
                   (_, DAE.BOX(e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1, rel, ext_arg)
                     (DAE.BOX(e1_1), ext_arg_1)
                   end
-                  
+
                   (_, DAE.PATTERN(__), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   (_, DAE.SHARED_LITERAL(__), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   _  => begin
                         str = ExpressionDump.printExpStr(inExp)
                         str = getInstanceName() + " or " + System.dladdr(func) + "not implemented correctly: " + str
@@ -7472,7 +7467,7 @@
 
          #= author: PA
            Helper function to traverseExpTopDown, traverses matrix expressions. =#
-        function traverseExpMatrixTopDown(inMatrix::List{<:List{<:DAE.Exp}}, func::FuncExpType, inTypeA::Type_a) ::Tuple{List{List{DAE.Exp}}, Type_a} 
+        function traverseExpMatrixTopDown(inMatrix::List{<:List{<:DAE.Exp}}, func::FuncExpType, inTypeA::Type_a) ::Tuple{List{List{DAE.Exp}}, Type_a}
               local outTypeA::Type_a = inTypeA
               local outMatrix::List{List{DAE.Exp}} = nil
 
@@ -7498,7 +7493,7 @@
 
          #=  author PA:
          Calls traverseExpListTopDown for each element of list. =#
-        function traverseExpListTopDown(inExpl::List{<:DAE.Exp}, rel::FuncExpType, inExt_arg::Type_a) ::Tuple{List{DAE.Exp}, Type_a} 
+        function traverseExpListTopDown(inExpl::List{<:DAE.Exp}, rel::FuncExpType, inExt_arg::Type_a) ::Tuple{List{DAE.Exp}, Type_a}
               local outA::Type_a = inExt_arg
               local outExpl::List{DAE.Exp} = nil
 
@@ -7523,7 +7518,7 @@
         end
 
          #= Calls traverseExpBottomUp for SOME(exp) and does nothing for NONE =#
-        function traverseExpOpt(inExp::Option{<:DAE.Exp}, func::FuncExpType, inTypeA::Type_a) ::Tuple{Option{DAE.Exp}, Type_a} 
+        function traverseExpOpt(inExp::Option{<:DAE.Exp}, func::FuncExpType, inTypeA::Type_a) ::Tuple{Option{DAE.Exp}, Type_a}
               local outTypeA::Type_a
               local outExp::Option{DAE.Exp}
 
@@ -7536,7 +7531,7 @@
                   (NONE(), _, a)  => begin
                     (inExp, a)
                   end
-                  
+
                   (oe && SOME(e), _, a)  => begin
                       (e1, a) = traverseExpBottomUp(e, func, a)
                       oe = if referenceEq(e, e1)
@@ -7553,7 +7548,7 @@
         end
 
          #= Calls traverseExpTopDown for SOME(exp) and does nothing for NONE =#
-        function traverseExpOptTopDown(inExp::Option{<:DAE.Exp}, func::FuncExpType, inTypeA::Type_a) ::Tuple{Option{DAE.Exp}, Type_a} 
+        function traverseExpOptTopDown(inExp::Option{<:DAE.Exp}, func::FuncExpType, inTypeA::Type_a) ::Tuple{Option{DAE.Exp}, Type_a}
               local outA::Type_a
               local outExp::Option{DAE.Exp}
 
@@ -7565,7 +7560,7 @@
                   (NONE(), _, a)  => begin
                     (NONE(), a)
                   end
-                  
+
                   (SOME(e), _, a)  => begin
                       (e1, a) = traverseExpTopDown(e, func, a)
                     (if referenceEq(e, e1)
@@ -7603,7 +7598,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   DAE.CREF_IDENT(id, ty, subs)  => begin
                       (new_ty, arg) = traverseExpTypeDims(ty, inFunc, inArg)
                       cr = if referenceEq(new_ty, ty)
@@ -7613,7 +7608,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   DAE.CREF_ITER(id, idx, ty, subs)  => begin
                       (new_ty, arg) = traverseExpTypeDims(ty, inFunc, inArg)
                       cr = if referenceEq(new_ty, ty)
@@ -7623,7 +7618,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   _  => begin
                       (inCref, inArg)
                   end
@@ -7656,7 +7651,7 @@
                           end
                     (ty, arg)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(state, vars, ty, ec)  => begin
                       (new_ty, arg) = traverseExpTypeDims(ty, inFunc, inArg)
                       ty = if referenceEq(new_ty, ty)
@@ -7666,7 +7661,7 @@
                           end
                     (ty, arg)
                   end
-                  
+
                   _  => begin
                       (inType, inArg)
                   end
@@ -7697,7 +7692,7 @@
                             dim
                           end
                     end
-                    
+
                     _  => begin
                         dim
                     end
@@ -7713,9 +7708,9 @@
           (outDims, outArg, outChanged)
         end
 
-         #= 
+         #=
         Author: BZ 2008-06, Extracts all ComponentRef from an Expression. =#
-        function extractCrefsFromExp(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function extractCrefsFromExp(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local ocrefs::List{DAE.ComponentRef}
 
               (_, ocrefs) = traverseExpBottomUp(inExp, traversingComponentRefFinder, nil)
@@ -7723,7 +7718,7 @@
         end
 
          #= Extracts all unique ComponentRef from an Expression. =#
-        function extractUniqueCrefsFromExp(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function extractUniqueCrefsFromExp(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local ocrefs::List{DAE.ComponentRef}
 
                #=  ocrefs := List.unique(List.flatten(List.map1(extractCrefsFromExp(inExp), ComponentReference.expandCref, true)));
@@ -7736,7 +7731,7 @@
           This function will not treat der(), pre() and start() as calls
           but as unique ids. i.e. x is different from der(x) and given der(x) x will not
           be extreacted as a unique id. Instead you get $DER.x. Same oes for pre and start. =#
-        function extractCrefsFromExpDerPreStart(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function extractCrefsFromExpDerPreStart(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local ocrefs::List{DAE.ComponentRef}
 
               (_, ocrefs) = traverseExpDerPreStart(inExp, traversingComponentRefFinder, nil)
@@ -7747,7 +7742,7 @@
           This function will not treat der(), pre() and start() as calls
           but as unique ids. i.e. x is different from der(x) and given der(x) x will not
           be extreacted as a unique id. Instead you get $DER.x. Same oes for pre and start.. =#
-        function extractUniqueCrefsFromExpDerPreStart(inExp::DAE.Exp) ::List{DAE.ComponentRef} 
+        function extractUniqueCrefsFromExpDerPreStart(inExp::DAE.Exp) ::List{DAE.ComponentRef}
               local ocrefs::List{DAE.ComponentRef}
 
                #=  ocrefs := List.unique(List.flatten(List.map1(extractCrefsFromExp(inExp), ComponentReference.expandCref, true)));
@@ -7757,7 +7752,7 @@
         end
 
          #= authot mahge: Extracts all unique ComponentRef from Statments. =#
-        function extractUniqueCrefsFromStatmentS(inStmts::List{<:DAE.Statement}) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
+        function extractUniqueCrefsFromStatmentS(inStmts::List{<:DAE.Statement}) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}
               local ocrefs::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}
 
               local lhscreflstlst::List{List{DAE.ComponentRef}}
@@ -7773,7 +7768,7 @@
         end
 
          #= Extracts all ComponentRef from a Statment. =#
-        function extractCrefsStatment(inStmt::DAE.Statement) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
+        function extractCrefsStatment(inStmt::DAE.Statement) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}
               local orcrefs::List{DAE.ComponentRef}
               local olcrefs::List{DAE.ComponentRef}
 
@@ -7788,44 +7783,44 @@
                       orcrefs = extractCrefsFromExpDerPreStart(exp2)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_TUPLE_ASSIGN(expExpLst = expLst, exp = exp2)  => begin
                       olcrefs = ListUtil.flatten(ListUtil.map(expLst, extractCrefsFromExpDerPreStart))
                       orcrefs = extractCrefsFromExpDerPreStart(exp2)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_ASSIGN_ARR(lhs = exp1, exp = exp2)  => begin
                       olcrefs = extractCrefsFromExpDerPreStart(exp1)
                       orcrefs = extractCrefsFromExpDerPreStart(exp2)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_IF(statementLst = stmtLst)  => begin
                       (olcrefs, orcrefs) = extractUniqueCrefsFromStatmentS(stmtLst)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_FOR(statementLst = stmtLst)  => begin
                       (olcrefs, orcrefs) = extractUniqueCrefsFromStatmentS(stmtLst)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_WHILE(statementLst = stmtLst)  => begin
                       (olcrefs, orcrefs) = extractUniqueCrefsFromStatmentS(stmtLst)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_WHEN(statementLst = stmtLst)  => begin
                       (olcrefs, orcrefs) = extractUniqueCrefsFromStatmentS(stmtLst)
                     (olcrefs, orcrefs)
                   end
-                  
+
                   DAE.STMT_ASSERT(cond = exp1)  => begin
                       orcrefs = extractCrefsFromExpDerPreStart(exp1)
                     (nil, orcrefs)
                   end
-                  
+
                   _  => begin
                       (nil, nil)
                   end
@@ -7836,7 +7831,7 @@
 
          #= Extracts all lhs crefs from Statements.
           author: ptaeuber =#
-        function getLhsCrefsFromStatements(inStmts::List{<:DAE.Statement}) ::List{DAE.ComponentRef} 
+        function getLhsCrefsFromStatements(inStmts::List{<:DAE.Statement}) ::List{DAE.ComponentRef}
               local lhsCrefs::List{DAE.ComponentRef}
 
               local lhsCrefsLst::List{List{DAE.ComponentRef}}
@@ -7848,7 +7843,7 @@
 
          #= Extracts all lhs crefs from a statement.
           author: ptaeuber =#
-        function getLhsCrefsFromStatement(inStmt::DAE.Statement) ::List{DAE.ComponentRef} 
+        function getLhsCrefsFromStatement(inStmt::DAE.Statement) ::List{DAE.ComponentRef}
               local lhsCrefs::List{DAE.ComponentRef}
 
               lhsCrefs = begin
@@ -7861,37 +7856,37 @@
                       lhsCrefs = extractCrefsFromExpDerPreStart(exp1)
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_TUPLE_ASSIGN(expExpLst = expLst)  => begin
                       lhsCrefs = ListUtil.flatten(ListUtil.map(expLst, extractCrefsFromExpDerPreStart))
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_ASSIGN_ARR(lhs = exp1)  => begin
                       lhsCrefs = extractCrefsFromExpDerPreStart(exp1)
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_IF(statementLst = stmtLst)  => begin
                       lhsCrefs = getLhsCrefsFromStatements(stmtLst)
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_FOR(statementLst = stmtLst)  => begin
                       lhsCrefs = getLhsCrefsFromStatements(stmtLst)
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_WHILE(statementLst = stmtLst)  => begin
                       lhsCrefs = getLhsCrefsFromStatements(stmtLst)
                     lhsCrefs
                   end
-                  
+
                   DAE.STMT_WHEN(statementLst = stmtLst)  => begin
                       lhsCrefs = getLhsCrefsFromStatements(stmtLst)
                     lhsCrefs
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -7900,16 +7895,16 @@
           lhsCrefs
         end
 
-         #= 
+         #=
          returns true if the expression contains any initial() call =#
-        function expHasInitial(exp::DAE.Exp) ::Bool 
+        function expHasInitial(exp::DAE.Exp) ::Bool
               local found::Bool
 
               (_, found) = traverseExpTopDown(exp, traversingexpHasInitial, false)
           found
         end
 
-        function traversingexpHasInitial(exp::DAE.Exp, found::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function traversingexpHasInitial(exp::DAE.Exp, found::Bool) ::Tuple{DAE.Exp, Bool, Bool}
 
               local cont::Bool
 
@@ -7923,7 +7918,7 @@
                   DAE.CALL(path = Absyn.IDENT("initial"))  => begin
                     (false, true)
                   end
-                  
+
                   _  => begin
                       (true, found)
                   end
@@ -7932,10 +7927,10 @@
           (exp, cont, found)
         end
 
-         #= 
+         #=
         @author: adrpo 2011-04-29
          returns true if the expression contains crefs =#
-        function expHasCrefs(inExp::DAE.Exp) ::Bool 
+        function expHasCrefs(inExp::DAE.Exp) ::Bool
               local hasCrefs::Bool
 
               hasCrefs = begin
@@ -7951,7 +7946,7 @@
         end
 
          #= Returns a true if the exp is a componentRef =#
-        function traversingComponentRefPresent(inExp::DAE.Exp, found::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function traversingComponentRefPresent(inExp::DAE.Exp, found::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outFound::Bool
               local cont::Bool
               local outExp::DAE.Exp
@@ -7961,11 +7956,11 @@
                   (_, true)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CREF(__), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   _  => begin
                       (inExp, true, false)
                   end
@@ -7974,11 +7969,11 @@
           (outExp, cont, outFound)
         end
 
-         #= 
+         #=
         Author: BZ 2008-06
         Exp traverser that Union the current ComponentRef with list if it is already there.
         Returns a list containing, unique, all componentRef in an Expression. =#
-        function traversingComponentRefFinder(inExp::DAE.Exp, inCrefs::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}} 
+        function traversingComponentRefFinder(inExp::DAE.Exp, inCrefs::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, List{DAE.ComponentRef}}
               local crefs::List{DAE.ComponentRef}
               local outExp::DAE.Exp
 
@@ -7989,7 +7984,7 @@
                       crefs = ListUtil.unionEltOnTrue(cr, crefs, ComponentReference.crefEqual)
                     (inExp, crefs)
                   end
-                  
+
                   _  => begin
                       (inExp, inCrefs)
                   end
@@ -7998,11 +7993,11 @@
           (outExp, crefs)
         end
 
-         #= 
+         #=
         Author: BZ 2008-06
         Exp traverser that Union the current ComponentRef with list if it is already there.
         Returns a list containing, unique, all componentRef in an Expression. =#
-        function traversingComponentRefFinderNoPreDer(inExp::DAE.Exp, inCrefs::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Bool, List{DAE.ComponentRef}} 
+        function traversingComponentRefFinderNoPreDer(inExp::DAE.Exp, inCrefs::List{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Bool, List{DAE.ComponentRef}}
               local crefs::List{DAE.ComponentRef}
               local cont::Bool
               local e::DAE.Exp
@@ -8014,19 +8009,19 @@
                       crefs = ListUtil.unionEltOnTrue(cr, crefs, ComponentReference.crefEqual)
                     (inExp, false, crefs)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "der")), _)  => begin
                     (inExp, false, inCrefs)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "pre")), _)  => begin
                     (inExp, false, inCrefs)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "previous")), _)  => begin
                     (inExp, false, inCrefs)
                   end
-                  
+
                   _  => begin
                       (inExp, true, inCrefs)
                   end
@@ -8035,12 +8030,12 @@
           (e, cont, crefs)
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2012-06
         Exp traverser that Union the current ComponentRef with list if it is already there.
         Returns a list containing, unique, all componentRef in an Expression and a second list
         containing all componentRef from a der function. =#
-        function traversingDerAndComponentRefFinder(inExp::Tuple{<:DAE.Exp, Tuple{<:List{<:DAE.ComponentRef}, List{<:DAE.ComponentRef}}}) ::Tuple{DAE.Exp, Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}} 
+        function traversingDerAndComponentRefFinder(inExp::Tuple{<:DAE.Exp, Tuple{<:List{<:DAE.ComponentRef}, List{<:DAE.ComponentRef}}}) ::Tuple{DAE.Exp, Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}}
               local outExp::Tuple{DAE.Exp, Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}}
 
               outExp = begin
@@ -8054,12 +8049,12 @@
                       crefs = ListUtil.unionEltOnTrue(cr, crefs, ComponentReference.crefEqual)
                     (e, (crefs, dcrefs))
                   end
-                  
+
                   (e && DAE.CALL(path = Absyn.IDENT(name = "der"), expLst = DAE.CREF(cr, _) <|  nil()), (crefs, dcrefs))  => begin
                       dcrefs = ListUtil.unionEltOnTrue(cr, dcrefs, ComponentReference.crefEqual)
                     (e, (crefs, dcrefs))
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -8074,17 +8069,17 @@
 
          #= author: Frenkel TUD 2011-04
           returns true if the expression contains the cref =#
-        function expHasCref(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool 
+        function expHasCref(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, traversingexpHasCref, (inCr, false))
           hasCref
         end
 
-         #= 
+         #=
         @author: Frenkel TUD 2011-04
         Returns a true if the exp the componentRef =#
-        function traversingexpHasCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingexpHasCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outTpl::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8102,7 +8097,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, b))  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8112,7 +8107,7 @@
         end
 
          #= Returns a true if the exp contains a cref that starts with the given name =#
-        function expHasCrefName(inExp::DAE.Exp, name::String) ::Bool 
+        function expHasCrefName(inExp::DAE.Exp, name::String) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, traversingexpHasName, (name, false))
@@ -8120,7 +8115,7 @@
         end
 
          #= Returns a true if any exp contains a cref that starts with the given name =#
-        function anyExpHasCrefName(inExps::List{<:DAE.Exp}, name::String) ::Bool 
+        function anyExpHasCrefName(inExps::List{<:DAE.Exp}, name::String) ::Bool
               local hasCref::Bool
 
               hasCref = ListUtil.applyAndFold1(inExps, boolOr, expHasCrefName, name, false)
@@ -8128,7 +8123,7 @@
         end
 
          #= Returns a true if the exp contains a cref that starts with the given name =#
-        function traversingexpHasName(inExp::DAE.Exp, inTpl::Tuple{<:String, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{String, Bool}} 
+        function traversingexpHasName(inExp::DAE.Exp, inTpl::Tuple{<:String, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{String, Bool}}
               local outTpl::Tuple{String, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8146,7 +8141,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, b))  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8155,20 +8150,20 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
         @author: Frenkel TUD 2012-06
          returns true if the expression contains the cref in function der =#
-        function expHasDerCref(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool 
+        function expHasDerCref(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, traversingexpHasDerCref, (inCr, false))
           hasCref
         end
 
-         #= 
+         #=
         @author: Frenkel TUD 2012-06
         Returns a true if the exp contains the componentRef in der =#
-        function traversingexpHasDerCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingexpHasDerCref(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outTpl::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8186,7 +8181,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("der"), expLst = DAE.CREF(componentRef = cr1) <|  nil()), (cr, false))  => begin
                       b = ComponentReference.crefPrefixOf(cr, cr1)
                     (inExp, ! b, if b
@@ -8195,7 +8190,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, b))  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8204,18 +8199,18 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
          returns true if the expression contains the  function der =#
-        function expHasDer(inExp::DAE.Exp) ::Bool 
+        function expHasDer(inExp::DAE.Exp) ::Bool
               local hasCref::Bool
 
               (_, hasCref) = traverseExpTopDown(inExp, traversingexpHasDer, false)
           hasCref
         end
 
-         #= 
+         #=
         Returns a true if the exp contains in der =#
-        function traversingexpHasDer(inExp::DAE.Exp, inTpl::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function traversingexpHasDer(inExp::DAE.Exp, inTpl::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outTpl::Bool
               local cont::Bool
               local outExp::DAE.Exp
@@ -8227,11 +8222,11 @@
                   (DAE.CALL(path = Absyn.IDENT("der")), false)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CREF(componentRef = cr), false) where (intEq(System.strncmp(ComponentReference.crefFirstIdent(cr), "DERAlias", 9), 0))  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (_, b)  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8244,18 +8239,18 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
          Returns true if the expression contains the operator pre =#
-        function expHasPre(inExp::DAE.Exp) ::Bool 
+        function expHasPre(inExp::DAE.Exp) ::Bool
               local hasPre::Bool
 
               (_, hasPre) = traverseExpTopDown(inExp, traversingexpHasPre, false)
           hasPre
         end
 
-         #= 
+         #=
         Returns true if the exp is pre(..) =#
-        function traversingexpHasPre(inExp::DAE.Exp, inHasIt::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function traversingexpHasPre(inExp::DAE.Exp, inHasIt::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outHasIt::Bool
               local cont::Bool
               local outExp::DAE.Exp
@@ -8267,7 +8262,7 @@
                   (DAE.CALL(path = Absyn.IDENT("pre")), false)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (_, b)  => begin
                     (inExp, ! b, inHasIt)
                   end
@@ -8276,18 +8271,18 @@
           (outExp, cont, outHasIt)
         end
 
-         #= 
+         #=
         Returns true if the expression contains the operator previous =#
-        function expHasPrevious(inExp::DAE.Exp) ::Bool 
+        function expHasPrevious(inExp::DAE.Exp) ::Bool
               local hasPre::Bool
 
               (_, hasPre) = traverseExpTopDown(inExp, traversingexpHasPrevious, false)
           hasPre
         end
 
-         #= 
+         #=
         Returns true if the exp is pre(..) =#
-        function traversingexpHasPrevious(inExp::DAE.Exp, inHasIt::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function traversingexpHasPrevious(inExp::DAE.Exp, inHasIt::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outHasIt::Bool
               local cont::Bool
               local outExp::DAE.Exp
@@ -8299,7 +8294,7 @@
                   (DAE.CALL(path = Absyn.IDENT("previous")), false)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (_, b)  => begin
                     (inExp, ! b, inHasIt)
                   end
@@ -8308,20 +8303,20 @@
           (outExp, cont, outHasIt)
         end
 
-         #= 
+         #=
         @author: Frenkel TUD 2011-04
          returns true if the expression contains the cref, but not in pre,change,edge =#
-        function expHasCrefNoPreorDer(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool 
+        function expHasCrefNoPreorDer(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, traversingexpHasCrefNoPreorDer, (inCr, false))
           hasCref
         end
 
-         #= 
+         #=
         @author: Frenkel TUD 2011-04
         Returns a true if the exp the componentRef =#
-        function traversingexpHasCrefNoPreorDer(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingexpHasCrefNoPreorDer(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outTpl::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8334,11 +8329,11 @@
                   (DAE.CALL(path = Absyn.IDENT(name = "pre")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "previous")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CREF(componentRef = cr1), (cr, false))  => begin
                       b = ComponentReference.crefEqualNoStringCompare(cr, cr1)
                     (inExp, ! b, if b
@@ -8347,7 +8342,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, b))  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8362,9 +8357,9 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
          returns true if the expression contains one cref from the list, but not in pre(),change(),edge(),start(), delay() =#
-        function expHasCrefsNoPreOrStart(inExp::DAE.Exp, inCr::List{<:DAE.ComponentRef}) ::Bool 
+        function expHasCrefsNoPreOrStart(inExp::DAE.Exp, inCr::List{<:DAE.ComponentRef}) ::Bool
               local hasCref::Bool = false
 
               for cr in inCr
@@ -8376,18 +8371,18 @@
           hasCref
         end
 
-         #= 
+         #=
          returns true if the expression contains the cref, but not in pre(),change(),edge(),start(), delay() =#
-        function expHasCrefNoPreOrStart(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool 
+        function expHasCrefNoPreOrStart(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, traversingexpHasCrefNoPreOrStart, (inCr, false))
           hasCref
         end
 
-         #= 
+         #=
         return true if the exp the componentRef =#
-        function traversingexpHasCrefNoPreOrStart(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingexpHasCrefNoPreOrStart(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outTpl::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8400,27 +8395,27 @@
                   (DAE.CALL(path = Absyn.IDENT(name = "pre")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "previous")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "change")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "delay")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "edge")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "$_round")), _)  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   (DAE.CREF(componentRef = cr1), (cr, false))  => begin
                       b = ComponentReference.crefEqualNoStringCompare(cr, cr1)
                     (inExp, ! b, if b
@@ -8429,7 +8424,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, b))  => begin
                     (inExp, ! b, inTpl)
                   end
@@ -8438,18 +8433,18 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
         Returns a true if the exp contains the componentRef in if,sign,semiLinear =#
-        function expHasCrefInIf(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool 
+        function expHasCrefInIf(inExp::DAE.Exp, inCr::DAE.ComponentRef) ::Bool
               local hasCref::Bool
 
               (_, (_, hasCref)) = traverseExpTopDown(inExp, expHasCrefInIfWork, (inCr, false))
           hasCref
         end
 
-         #= 
+         #=
         Returns a true if the exp contains the componentRef in if,sign,semiLinear =#
-        function expHasCrefInIfWork(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function expHasCrefInIfWork(inExp::DAE.Exp, inTpl::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outTpl::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8468,11 +8463,11 @@
                           inTpl
                         end)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "smooth"), expLst = DAE.ICONST(i) <| e1 <|  nil()), (cr, false)) where (i > 1)  => begin
                     (e1, true, (cr, true))
                   end
-                  
+
                   (DAE.CALL(__), (cr, false)) where (isEventTriggeringFunctionExp(inExp))  => begin
                       b = expHasCref(inExp, cr)
                     (inExp, true, if b
@@ -8481,7 +8476,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "semiLinear"), expLst = e1 <| _ <| _ <|  nil()), (cr, false))  => begin
                       b = expHasCref(e1, cr)
                     (e1, true, if b
@@ -8490,7 +8485,7 @@
                           inTpl
                         end)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "sign"), expLst = e1 <|  nil()), (cr, false))  => begin
                       b = expHasCref(e1, cr)
                     (e1, ! b, if b
@@ -8499,11 +8494,11 @@
                           inTpl
                         end)
                   end
-                  
+
                   (_, (_, true))  => begin
                     (inExp, false, inTpl)
                   end
-                  
+
                   _  => begin
                       (inExp, true, inTpl)
                   end
@@ -8512,9 +8507,9 @@
           (outExp, cont, outTpl)
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2011-05, traverses all ComponentRef from an Expression. =#
-        function traverseCrefsFromExp(inExp::DAE.Exp, inFunc::FuncCrefTypeA, inArg::Type_a) ::Type_a 
+        function traverseCrefsFromExp(inExp::DAE.Exp, inFunc::FuncCrefTypeA, inArg::Type_a) ::Type_a
               local outArg::Type_a
 
               outArg = begin
@@ -8529,9 +8524,9 @@
           outArg
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2011-05 =#
-        function traversingCrefFinder(inExp::DAE.Exp, inTpl::Tuple{<:FuncCrefTypeA, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncCrefTypeA, Type_a}} 
+        function traversingCrefFinder(inExp::DAE.Exp, inTpl::Tuple{<:FuncCrefTypeA, Type_a}) ::Tuple{DAE.Exp, Tuple{FuncCrefTypeA, Type_a}}
               local outTpl::Tuple{FuncCrefTypeA, Type_a}
               local outExp::DAE.Exp
 
@@ -8549,7 +8544,7 @@
                           (func, arg1)
                         end)
                   end
-                  
+
                   _  => begin
                       (inExp, inTpl)
                   end
@@ -8558,19 +8553,19 @@
           (outExp, outTpl)
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2010-02, Extracts all Division DAE.Exp from an Expression. =#
-        function extractDivExpFromExp(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function extractDivExpFromExp(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExps::List{DAE.Exp}
 
               (_, outExps) = traverseExpBottomUp(inExp, traversingDivExpFinder, nil)
           outExps
         end
 
-         #= 
+         #=
         Author: Frenkel TUD 2010-02
         Returns a list containing, all division DAE.Exp in an Expression. =#
-        function traversingDivExpFinder(e::DAE.Exp, exps::List{<:DAE.Exp}) ::Tuple{DAE.Exp, List{DAE.Exp}} 
+        function traversingDivExpFinder(e::DAE.Exp, exps::List{<:DAE.Exp}) ::Tuple{DAE.Exp, List{DAE.Exp}}
               local acc::List{DAE.Exp}
               local outExp::DAE.Exp
 
@@ -8580,19 +8575,19 @@
                   (DAE.BINARY(operator = DAE.DIV(_), exp2 = e2), _)  => begin
                     (e, _cons(e2, exps))
                   end
-                  
+
                   (DAE.BINARY(operator = DAE.DIV_ARR(_), exp2 = e2), _)  => begin
                     (e, _cons(e2, exps))
                   end
-                  
+
                   (DAE.BINARY(operator = DAE.DIV_ARRAY_SCALAR(_), exp2 = e2), _)  => begin
                     (e, _cons(e2, exps))
                   end
-                  
+
                   (DAE.BINARY(operator = DAE.DIV_SCALAR_ARRAY(_), exp2 = e2), _)  => begin
                     (e, _cons(e2, exps))
                   end
-                  
+
                   _  => begin
                       (e, exps)
                   end
@@ -8648,7 +8643,7 @@
                           SOME(e1)
                         end, arg)
                   end
-                  
+
                   _  => begin
                       (inExp, inArg)
                   end
@@ -8695,188 +8690,188 @@
                   DAE.ICONST(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.CREF(componentRef = cref, ty = ty)  => begin
                       (cref, arg) = traverseExpBidirCref(cref, inEnterFunc, inExitFunc, inArg)
                     (DAE.CREF(cref, ty), arg)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                     (DAE.BINARY(e1, op, e2), arg)
                   end
-                  
+
                   DAE.UNARY(operator = op, exp = e1)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.UNARY(op, e1), arg)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                     (DAE.LBINARY(e1, op, e2), arg)
                   end
-                  
+
                   DAE.LUNARY(operator = op, exp = e1)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.LUNARY(op, e1), arg)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1, operator = op, exp2 = e2, index = index, optionExpisASUB = opt_exp_asub)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                     (DAE.RELATION(e1, op, e2, index, opt_exp_asub), arg)
                   end
-                  
+
                   DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                       (e3, arg) = traverseExpBidir(e3, inEnterFunc, inExitFunc, arg)
                     (DAE.IFEXP(e1, e2, e3), arg)
                   end
-                  
+
                   DAE.CALL(path = path, expLst = expl, attr = attr)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.CALL(path, expl, attr), arg)
                   end
-                  
+
                   DAE.RECORD(path = path, exps = expl, comp = strl, ty = ty)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.RECORD(path, expl, strl, ty), arg)
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(path, expl, ty, t)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.PARTEVALFUNCTION(path, expl, ty, t), arg)
                   end
-                  
+
                   DAE.ARRAY(ty = ty, scalar = b1, array = expl)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.ARRAY(ty, b1, expl), arg)
                   end
-                  
+
                   DAE.MATRIX(ty = ty, integer = dim, matrix = mat_expl)  => begin
                       (mat_expl, arg) = ListUtil.map2Fold(mat_expl, traverseExpListBidir, inEnterFunc, inExitFunc, inArg)
                     (DAE.MATRIX(ty, dim, mat_expl), arg)
                   end
-                  
+
                   DAE.RANGE(ty = ty, start = e1, step = oe1, stop = e2)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (oe1, arg) = traverseExpOptBidir(oe1, inEnterFunc, inExitFunc, arg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                     (DAE.RANGE(ty, e1, oe1, e2), arg)
                   end
-                  
+
                   DAE.TUPLE(PR = expl)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.TUPLE(expl), arg)
                   end
-                  
+
                   DAE.CAST(ty = ty, exp = e1)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.CAST(ty, e1), arg)
                   end
-                  
+
                   DAE.ASUB(exp = e1, sub = expl)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, arg)
                     (DAE.ASUB(e1, expl), arg)
                   end
-                  
+
                   e1 && DAE.RSUB(__)  => begin
                       (e2, arg) = traverseExpBidir(e1.exp, inEnterFunc, inExitFunc, inArg)
                       e1.exp = e2
                     (e1, arg)
                   end
-                  
+
                   DAE.TSUB(e1, i, ty)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.TSUB(e1, i, ty), arg)
                   end
-                  
+
                   DAE.SIZE(exp = e1, sz = oe1)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (oe1, arg) = traverseExpOptBidir(oe1, inEnterFunc, inExitFunc, arg)
                     (DAE.SIZE(e1, oe1), arg)
                   end
-                  
+
                   DAE.CODE(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.REDUCTION(reductionInfo = reductionInfo, expr = e1, iterators = riters)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (riters, arg) = ListUtil.map2Fold(riters, traverseReductionIteratorBidir, inEnterFunc, inExitFunc, arg)
                     (DAE.REDUCTION(reductionInfo, e1, riters), arg)
                   end
-                  
+
                   DAE.LIST(valList = expl)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.LIST(expl), arg)
                   end
-                  
+
                   DAE.CONS(car = e1, cdr = e2)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                       (e2, arg) = traverseExpBidir(e2, inEnterFunc, inExitFunc, arg)
                     (DAE.CONS(e1, e2), arg)
                   end
-                  
+
                   DAE.META_TUPLE(listExp = expl)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.TUPLE(expl), arg)
                   end
-                  
+
                   DAE.META_OPTION(exp = oe1)  => begin
                       (oe1, arg) = traverseExpOptBidir(oe1, inEnterFunc, inExitFunc, inArg)
                     (DAE.META_OPTION(oe1), arg)
                   end
-                  
+
                   DAE.METARECORDCALL(path = path, args = expl, fieldNames = strl, index = index, typeVars = typeVars)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                     (DAE.METARECORDCALL(path, expl, strl, index, typeVars), arg)
                   end
-                  
+
                   DAE.MATCHEXPRESSION(matchType = match_ty, inputs = expl, aliases = aliases, localDecls = match_decls, cases = match_cases, et = ty)  => begin
                       (expl, arg) = traverseExpListBidir(expl, inEnterFunc, inExitFunc, inArg)
                       Error.addSourceMessage(Error.COMPILER_NOTIFICATION, list(getInstanceName() + " not yet implemented for match expressions. Called using: " + System.dladdr(inEnterFunc) + " " + System.dladdr(inExitFunc)), sourceInfo())
                     (DAE.MATCHEXPRESSION(match_ty, expl, aliases, match_decls, match_cases, ty), arg)
                   end
-                  
+
                   DAE.BOX(exp = e1)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.BOX(e1), arg)
                   end
-                  
+
                   DAE.UNBOX(exp = e1, ty = ty)  => begin
                       (e1, arg) = traverseExpBidir(e1, inEnterFunc, inExitFunc, inArg)
                     (DAE.UNBOX(e1, ty), arg)
                   end
-                  
+
                   DAE.SHARED_LITERAL(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   DAE.PATTERN(__)  => begin
                     (inExp, inArg)
                   end
-                  
+
                   _  => begin
                         Error.addInternalError(getInstanceName() + " - Unknown expression " + ExpressionDump.printExpStr(inExp) + ". Called using: " + System.dladdr(inEnterFunc) + " " + System.dladdr(inExitFunc), sourceInfo())
                       fail()
@@ -8906,12 +8901,12 @@
                       (cr, arg) = traverseExpBidirCref(cr, inEnterFunc, inExitFunc, arg)
                     (DAE.CREF_QUAL(name, ty, subs, cr), arg)
                   end
-                  
+
                   DAE.CREF_IDENT(ident = name, identType = ty, subscriptLst = subs)  => begin
                       (subs, arg) = ListUtil.map2Fold(subs, traverseExpBidirSubs, inEnterFunc, inExitFunc, inArg)
                     (DAE.CREF_IDENT(name, ty, subs), arg)
                   end
-                  
+
                   _  => begin
                       (inCref, inArg)
                   end
@@ -8922,7 +8917,7 @@
 
          #= Helper function to traverseExpBottomUp. Traverses any expressions in a
           component reference (i.e. in it's subscripts). =#
-        function traverseExpCref(inCref::DAE.ComponentRef, rel::FuncType, iarg::Type_a) ::Tuple{DAE.ComponentRef, Type_a} 
+        function traverseExpCref(inCref::DAE.ComponentRef, rel::FuncType, iarg::Type_a) ::Tuple{DAE.ComponentRef, Type_a}
               local outArg::Type_a
               local outCref::DAE.ComponentRef
 
@@ -8947,7 +8942,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = name, identType = ty, subscriptLst = subs), _, arg)  => begin
                       (subs_1, arg) = traverseExpSubs(subs, rel, arg)
                       cr = if referenceEq(subs, subs_1)
@@ -8957,7 +8952,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   (DAE.CREF_ITER(ident = name, index = ix, identType = ty, subscriptLst = subs), _, arg)  => begin
                       (subs_1, arg) = traverseExpSubs(subs, rel, arg)
                       cr = if referenceEq(subs, subs_1)
@@ -8967,7 +8962,7 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   (DAE.OPTIMICA_ATTR_INST_CREF(componentRef = cr, instant = instant), _, arg)  => begin
                       (cr_1, arg) = traverseExpCref(cr, rel, arg)
                       cr = if referenceEq(cr, cr_1)
@@ -8977,11 +8972,11 @@
                           end
                     (cr, arg)
                   end
-                  
+
                   (DAE.WILD(__), _, arg)  => begin
                     (inCref, arg)
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Expression.traverseExpCref: Unknown cref"))
                       fail()
@@ -8991,7 +8986,7 @@
           (outCref, outArg)
         end
 
-        function traverseExpSubs(inSubscript::List{<:DAE.Subscript}, rel::FuncType, iarg::Type_a) ::Tuple{List{DAE.Subscript}, Type_a} 
+        function traverseExpSubs(inSubscript::List{<:DAE.Subscript}, rel::FuncType, iarg::Type_a) ::Tuple{List{DAE.Subscript}, Type_a}
               local outArg::Type_a
               local outSubscript::List{DAE.Subscript}
 
@@ -9005,7 +9000,7 @@
                   ( nil(), _, arg)  => begin
                     (inSubscript, arg)
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| rest, _, arg)  => begin
                       (res, arg) = traverseExpSubs(rest, rel, arg)
                       res = if referenceEq(rest, res)
@@ -9015,7 +9010,7 @@
                           end
                     (res, arg)
                   end
-                  
+
                   (DAE.SLICE(exp = sub_exp) <| rest, _, arg)  => begin
                       (sub_exp_1, arg) = traverseExpBottomUp(sub_exp, rel, arg)
                       (res, arg) = traverseExpSubs(rest, rel, arg)
@@ -9026,7 +9021,7 @@
                           end
                     (res, arg)
                   end
-                  
+
                   (DAE.INDEX(exp = sub_exp) <| rest, _, arg)  => begin
                       (sub_exp_1, arg) = traverseExpBottomUp(sub_exp, rel, arg)
                       (res, arg) = traverseExpSubs(rest, rel, arg)
@@ -9037,7 +9032,7 @@
                           end
                     (res, arg)
                   end
-                  
+
                   (DAE.WHOLE_NONEXP(exp = sub_exp) <| rest, _, arg)  => begin
                       (sub_exp_1, arg) = traverseExpBottomUp(sub_exp, rel, arg)
                       (res, arg) = traverseExpSubs(rest, rel, arg)
@@ -9053,7 +9048,7 @@
           (outSubscript, outArg)
         end
 
-        function traverseExpTopDownCrefHelper(inCref::DAE.ComponentRef, rel::FuncType, iarg::Argument) ::Tuple{DAE.ComponentRef, Argument} 
+        function traverseExpTopDownCrefHelper(inCref::DAE.ComponentRef, rel::FuncType, iarg::Argument) ::Tuple{DAE.ComponentRef, Argument}
               local outArg::Argument
               local outCref::DAE.ComponentRef
 
@@ -9075,7 +9070,7 @@
                           DAE.CREF_QUAL(name, ty, subs_1, cr_1)
                         end, arg)
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = name, identType = ty, subscriptLst = subs), _, arg)  => begin
                       (subs_1, arg) = traverseExpTopDownSubs(subs, rel, arg)
                     (if referenceEq(subs, subs_1)
@@ -9084,7 +9079,7 @@
                           DAE.CREF_IDENT(name, ty, subs_1)
                         end, arg)
                   end
-                  
+
                   (DAE.WILD(__), _, arg)  => begin
                     (inCref, arg)
                   end
@@ -9106,17 +9101,17 @@
                   DAE.WHOLEDIM(__)  => begin
                     (inSubscript, inArg)
                   end
-                  
+
                   DAE.SLICE(exp = sub_exp)  => begin
                       (sub_exp, arg) = traverseExpBidir(sub_exp, inEnterFunc, inExitFunc, inArg)
                     (DAE.SLICE(sub_exp), arg)
                   end
-                  
+
                   DAE.INDEX(exp = sub_exp)  => begin
                       (sub_exp, arg) = traverseExpBidir(sub_exp, inEnterFunc, inExitFunc, inArg)
                     (DAE.INDEX(sub_exp), arg)
                   end
-                  
+
                   DAE.WHOLE_NONEXP(exp = sub_exp)  => begin
                       (sub_exp, arg) = traverseExpBidir(sub_exp, inEnterFunc, inExitFunc, inArg)
                     (DAE.WHOLE_NONEXP(sub_exp), arg)
@@ -9126,7 +9121,7 @@
           (outSubscript, outArg)
         end
 
-        function traverseExpTopDownSubs(inSubscript::List{<:DAE.Subscript}, rel::FuncType, iarg::Argument) ::Tuple{List{DAE.Subscript}, Argument} 
+        function traverseExpTopDownSubs(inSubscript::List{<:DAE.Subscript}, rel::FuncType, iarg::Argument) ::Tuple{List{DAE.Subscript}, Argument}
               local arg::Argument = iarg
               local outSubscript::List{DAE.Subscript}
 
@@ -9142,7 +9137,7 @@
                     DAE.WHOLEDIM(__)  => begin
                       sub
                     end
-                    
+
                     DAE.SLICE(__)  => begin
                         (exp, arg) = traverseExpTopDown(sub.exp, rel, arg)
                       if referenceEq(sub.exp, exp)
@@ -9151,7 +9146,7 @@
                             DAE.SLICE(exp)
                           end
                     end
-                    
+
                     DAE.INDEX(__)  => begin
                         (exp, arg) = traverseExpTopDown(sub.exp, rel, arg)
                       if referenceEq(sub.exp, exp)
@@ -9160,7 +9155,7 @@
                             DAE.INDEX(exp)
                           end
                     end
-                    
+
                     DAE.WHOLE_NONEXP(__)  => begin
                         (exp, arg) = traverseExpTopDown(sub.exp, rel, arg)
                       if referenceEq(sub.exp, exp)
@@ -9207,7 +9202,7 @@
          #= /***************************************************/ =#
 
          #= returns true if operator is division or multiplication =#
-        function operatorDivOrMul(op::DAE.Operator) ::Bool 
+        function operatorDivOrMul(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -9215,11 +9210,11 @@
                   DAE.MUL(_)  => begin
                     true
                   end
-                  
+
                   DAE.DIV(_)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9229,7 +9224,7 @@
         end
 
          #= Returns true if expression is a range expression. =#
-        function isRange(inExp::DAE.Exp) ::Bool 
+        function isRange(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9237,7 +9232,7 @@
                   DAE.RANGE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9246,7 +9241,7 @@
           outBoolean
         end
 
-        function isReduction(inExp::DAE.Exp) ::Bool 
+        function isReduction(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9254,7 +9249,7 @@
                   DAE.REDUCTION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9265,7 +9260,7 @@
 
          #= Returns true if an expression is constant
           and has the value one, otherwise false =#
-        function isOne(inExp::DAE.Exp) ::Bool 
+        function isOne(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9278,16 +9273,16 @@
                   DAE.ICONST(integer = ival)  => begin
                     intEq(ival, 1)
                   end
-                  
+
                   DAE.RCONST(real = rval)  => begin
                     realEq(rval, 1.0)
                   end
-                  
+
                   DAE.CAST(exp = e)  => begin
                       res = isOne(e) #= Casting to one is still one =#
                     res
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9298,7 +9293,7 @@
 
          #= Returns true if an expression is constant
           and has the value zero, otherwise false =#
-        function isZero(inExp::DAE.Exp) ::Bool 
+        function isZero(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9312,31 +9307,31 @@
                   DAE.ICONST(integer = ival)  => begin
                     intEq(ival, 0)
                   end
-                  
+
                   DAE.RCONST(real = rval)  => begin
                     realEq(rval, 0.0)
                   end
-                  
+
                   DAE.CAST(exp = e)  => begin
                     isZero(e)
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS(_), e)  => begin
                     isZero(e)
                   end
-                  
+
                   DAE.ARRAY(array = ae)  => begin
                     ListUtil.mapAllValueBool(ae, isZero, true)
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix)  => begin
                     ListUtil.mapListAllValueBool(matrix, isZero, true)
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS_ARR(_), e)  => begin
                     isZero(e)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9347,7 +9342,7 @@
 
          #= Returns true if an expression is constant
           and zero or near to zero, otherwise false =#
-        function isZeroOrAlmostZero(inExp::DAE.Exp, nominal::DAE.Exp = DAE.RCONST(1.0)) ::Bool 
+        function isZeroOrAlmostZero(inExp::DAE.Exp, nominal::DAE.Exp = DAE.RCONST(1.0)) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9363,39 +9358,39 @@
                   (DAE.ICONST(integer = ival), _)  => begin
                     intEq(ival, 0)
                   end
-                  
+
                   (DAE.RCONST(real = rval), DAE.RCONST(real = rNom))  => begin
                     realLt(abs(rval), 1e-6 * abs(rNom))
                   end
-                  
+
                   (DAE.RCONST(real = rval), _)  => begin
                     realLt(abs(rval), 1e-6)
                   end
-                  
+
                   (DAE.CAST(exp = e), _)  => begin
                     isZeroOrAlmostZero(e, nominal)
                   end
-                  
+
                   (DAE.UNARY(DAE.UMINUS(_), e), _)  => begin
                     isZeroOrAlmostZero(e, nominal)
                   end
-                  
+
                   (DAE.ARRAY(array = ae), _)  => begin
                     ListUtil.map1AllValueBool(ae, isZeroOrAlmostZero, true, nominal)
                   end
-                  
+
                   (DAE.MATRIX(matrix = matrix), _)  => begin
                     ListUtil.map1ListAllValueBool(matrix, isZeroOrAlmostZero, true, nominal)
                   end
-                  
+
                   (DAE.UNARY(DAE.UMINUS_ARR(_), e), _)  => begin
                     isZeroOrAlmostZero(e, nominal)
                   end
-                  
+
                   (DAE.IFEXP(_, e, e1), _)  => begin
                     isZeroOrAlmostZero(e, nominal) || isZeroOrAlmostZero(e1, nominal)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9405,7 +9400,7 @@
         end
 
          #= Returns true if an expression is known to be >= 0 =#
-        function isPositiveOrZero(inExp::DAE.Exp) ::Bool 
+        function isPositiveOrZero(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9422,44 +9417,44 @@
                   DAE.CALL(path = Absyn.IDENT("abs"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("exp"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("cosh"))  => begin
                     true
                   end
-                  
+
                   DAE.ICONST(i)  => begin
                     i >= 0
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                     realGe(r, 0.0)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.ADD(__), e2)  => begin
                     isPositiveOrZero(e1) && isPositiveOrZero(e2)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.SUB(__), e2)  => begin
                     isPositiveOrZero(e1) && isNegativeOrZero(e2)
                   end
-                  
+
                   DAE.BINARY(e1, DAE.MUL(__), e2)  => begin
                       b1 = isPositiveOrZero(e1) && isPositiveOrZero(e2)
                       b2 = isNegativeOrZero(e1) && isNegativeOrZero(e2)
                       b3 = expEqual(e1, e2)
                     b1 || b2 || b3
                   end
-                  
+
                   DAE.BINARY(e1, DAE.DIV(__), e2)  => begin
                       b1 = isPositiveOrZero(e1) && isPositiveOrZero(e2)
                       b2 = isNegativeOrZero(e1) && isNegativeOrZero(e2)
                     b1 || b2
                   end
-                  
+
                   DAE.BINARY(e1, DAE.POW(__), DAE.RCONST(r))  => begin
                       i = realInt(r)
                       b1 = realEq(r, intReal(i))
@@ -9468,15 +9463,15 @@
                       b = b2 || b3
                     b1 && b
                   end
-                  
+
                   DAE.BINARY(_, DAE.POW(__), e2)  => begin
                     isEven(e2)
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS(__), e1)  => begin
                     isNegativeOrZero(e1)
                   end
-                  
+
                   _  => begin
                       isZero(inExp)
                   end
@@ -9498,7 +9493,7 @@
         end
 
          #= Returns true if an expression is known to be <= 0 =#
-        function isNegativeOrZero(inExp::DAE.Exp) ::Bool 
+        function isNegativeOrZero(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9511,19 +9506,19 @@
                   DAE.ICONST(i)  => begin
                     i <= 0
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                     r <= 0.0
                   end
-                  
+
                   DAE.UNARY(DAE.UMINUS(__), e1)  => begin
                     isPositiveOrZero(e1)
                   end
-                  
+
                   DAE.BINARY(_, DAE.POW(__), e2) where (isOdd(e2))  => begin
                     isNegativeOrZero(e2)
                   end
-                  
+
                   _  => begin
                       isZero(inExp)
                   end
@@ -9536,7 +9531,7 @@
         end
 
          #= Returns true if an expression is 0.5 =#
-        function isHalf(inExp::DAE.Exp) ::Bool 
+        function isHalf(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9545,7 +9540,7 @@
                   DAE.RCONST(real = rval)  => begin
                     realEq(rval, 0.5)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9554,7 +9549,7 @@
           outBoolean
         end
 
-        function isAtomic(inExp::DAE.Exp) ::Bool 
+        function isAtomic(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9562,19 +9557,19 @@
                   DAE.CREF(__)  => begin
                     true
                   end
-                  
+
                   DAE.CALL(__)  => begin
                     true
                   end
-                  
+
                   DAE.ICONST(__)  => begin
                     inExp.integer >= 0
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     inExp.real > 0.0
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9585,7 +9580,7 @@
 
          #= author: lochel
           Returns true if an expression contains an impure function call. =#
-        function isImpure(inExp::DAE.Exp) ::Bool 
+        function isImpure(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = isConstWork(inExp)
@@ -9594,7 +9589,7 @@
         end
 
          #= author: lochel =#
-        function isImpureWork(inExp::DAE.Exp, isImpure::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function isImpureWork(inExp::DAE.Exp, isImpure::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outImpure::Bool
               local cont::Bool
               local outExp::DAE.Exp
@@ -9604,55 +9599,55 @@
                   (_, true)  => begin
                     (inExp, true, true)
                   end
-                  
+
                   (DAE.CALL(attr = DAE.CALL_ATTR(isImpure = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "alarm"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "compareFilesAndMove"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "delay"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "initial"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "print"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "readFile"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "sample"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "system"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "system_parallel"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "terminal"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "writeFile"), attr = DAE.CALL_ATTR(builtin = true)), _)  => begin
                     (inExp, false, true)
                   end
-                  
+
                   _  => begin
                       (inExp, true, false)
                   end
@@ -9664,14 +9659,14 @@
         end
 
          #=  Returns true if an expression contains a record type. =#
-        function containsRecordType(inExp::DAE.Exp) ::Bool 
+        function containsRecordType(inExp::DAE.Exp) ::Bool
               local isRec::Bool
 
               (_, isRec) = traverseExpTopDown(inExp, containsRecordTypeWork, false)
           isRec
         end
 
-        function containsRecordTypeWork(inExp::DAE.Exp, inRec::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function containsRecordTypeWork(inExp::DAE.Exp, inRec::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outRec::Bool = inRec
               local cont::Bool = false
               local outExp::DAE.Exp = inExp
@@ -9686,7 +9681,7 @@
                     DAE.RECORD(__)  => begin
                       (inExp, false, true)
                     end
-                    
+
                     DAE.CALL(expLst = expLst, attr = DAE.CALL_ATTR(ty = ty))  => begin
                         subRec = isRecordType(ty)
                         if ! subRec
@@ -9699,7 +9694,7 @@
                         end
                       (inExp, ! subRec, subRec)
                     end
-                    
+
                     _  => begin
                         (inExp, true, false)
                     end
@@ -9710,7 +9705,7 @@
         end
 
          #= Returns true if an expression is constant =#
-        function isConst(inExp::DAE.Exp) ::Bool 
+        function isConst(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = isConstWork(inExp)
@@ -9718,7 +9713,7 @@
         end
 
          #= Returns true if an expression is really a constant scalar value. no calls, casts, or something =#
-        function isEvaluatedConst(inExp::DAE.Exp) ::Bool 
+        function isEvaluatedConst(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = isEvaluatedConstWork(inExp, true)
@@ -9726,7 +9721,7 @@
         end
 
          #= Returns true if an expression is really constant =#
-        function isEvaluatedConstWork(inExp::DAE.Exp, inRes::Bool) ::Bool 
+        function isEvaluatedConstWork(inExp::DAE.Exp, inRes::Bool) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9735,27 +9730,27 @@
                   (_, false)  => begin
                     false
                   end
-                  
+
                   (DAE.ICONST(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.RCONST(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.BCONST(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.SCONST(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.ENUM_LITERAL(__), _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9765,7 +9760,7 @@
         end
 
          #= Returns true if an expression is constant =#
-        function isConstWork(inExp::DAE.Exp) ::Bool 
+        function isConstWork(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9782,31 +9777,31 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                     isConstWork(e)
                   end
-                  
+
                   DAE.CAST(exp = e)  => begin
                     isConstWork(e)
                   end
-                  
+
                   DAE.BINARY(e1, _, e2)  => begin
                       res = isConstWork(e2)
                     if res
@@ -9815,7 +9810,7 @@
                           false
                         end
                   end
-                  
+
                   DAE.IFEXP(e, e1, e2)  => begin
                       res = isConstWork(e2)
                       if res
@@ -9827,7 +9822,7 @@
                           false
                         end
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1, exp2 = e2)  => begin
                       res = isConstWork(e2)
                     if res
@@ -9836,11 +9831,11 @@
                           false
                         end
                   end
-                  
+
                   DAE.LUNARY(exp = e)  => begin
                     isConstWork(e)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1, exp2 = e2)  => begin
                       res = isConstWork(e2)
                     if res
@@ -9849,15 +9844,15 @@
                           false
                         end
                   end
-                  
+
                   DAE.ARRAY(array = ae)  => begin
                     isConstWorkList(ae)
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix)  => begin
                     isConstWorkListList(matrix)
                   end
-                  
+
                   DAE.RANGE(start = e1, step = NONE(), stop = e2)  => begin
                       res = isConstWork(e2)
                     if res
@@ -9866,7 +9861,7 @@
                           false
                         end
                   end
-                  
+
                   DAE.RANGE(start = e, step = SOME(e1), stop = e2)  => begin
                       res = isConstWork(e2)
                       if res
@@ -9878,15 +9873,15 @@
                           false
                         end
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(expList = ae)  => begin
                     isConstWorkList(ae)
                   end
-                  
+
                   DAE.TUPLE(PR = ae)  => begin
                     isConstWorkList(ae)
                   end
-                  
+
                   DAE.ASUB(exp = e, sub = ae)  => begin
                       res = isConstWork(e)
                     if res
@@ -9895,15 +9890,15 @@
                           false
                         end
                   end
-                  
+
                   DAE.TSUB(exp = e)  => begin
                     isConstWork(e)
                   end
-                  
+
                   DAE.SIZE(exp = e, sz = NONE())  => begin
                     isConstWork(e)
                   end
-                  
+
                   DAE.SIZE(exp = e1, sz = SOME(e2))  => begin
                       res = isConstWork(e2)
                     if res
@@ -9912,11 +9907,11 @@
                           false
                         end
                   end
-                  
+
                   DAE.CALL(expLst = ae, attr = DAE.CALL_ATTR(builtin = false, isImpure = false))  => begin
                     isConstWorkList(ae)
                   end
-                  
+
                   DAE.CALL(path = path, expLst = ae, attr = DAE.CALL_ATTR(builtin = true))  => begin
                     if listMember(AbsynUtil.pathFirstIdent(path), list("initial", "terminal", "sample"))
                           false
@@ -9924,11 +9919,11 @@
                           isConstWorkList(ae)
                         end
                   end
-                  
+
                   DAE.RECORD(exps = ae)  => begin
                     isConstWorkList(ae)
                   end
-                  
+
                   DAE.REDUCTION(expr = e1, iterators = DAE.REDUCTIONITER(exp = e2) <|  nil())  => begin
                       res = isConstWork(e2)
                     if res
@@ -9937,11 +9932,11 @@
                           false
                         end
                   end
-                  
+
                   DAE.BOX(exp = e)  => begin
                     isConstWork(e)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9953,7 +9948,7 @@
         end
 
          #= Returns true if an expression is a constant value =#
-        function isConstValueWork(inExp::DAE.Exp) ::Bool 
+        function isConstValueWork(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -9967,39 +9962,39 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(array = ae)  => begin
                     isConstValueWorkList(ae)
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix)  => begin
                     isConstValueWorkListList(matrix)
                   end
-                  
+
                   DAE.RECORD(__)  => begin
                     true
                   end
-                  
+
                   DAE.METARECORDCALL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10009,7 +10004,7 @@
         end
 
          #= Returns true if an expression is a constant value (not a composite operation) =#
-        function isConstValue(inExp::DAE.Exp) ::Bool 
+        function isConstValue(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = isConstValueWork(inExp)
@@ -10017,7 +10012,7 @@
         end
 
          #= Returns true if a list of expressions is constant =#
-        function isConstWorkList(inExps::List{<:DAE.Exp}) ::Bool 
+        function isConstWorkList(inExps::List{<:DAE.Exp}) ::Bool
               local outBoolean::Bool
 
               local e::DAE.Exp
@@ -10033,7 +10028,7 @@
           outBoolean
         end
 
-        function isConstWorkListList(inExps::List{<:List{<:DAE.Exp}}) ::Bool 
+        function isConstWorkListList(inExps::List{<:List{<:DAE.Exp}}) ::Bool
               local outIsConst::Bool
 
               local e::List{DAE.Exp}
@@ -10050,7 +10045,7 @@
         end
 
          #= Returns true if a list of expressions is a constant value =#
-        function isConstValueWorkList(inExps::List{<:DAE.Exp}) ::Bool 
+        function isConstValueWorkList(inExps::List{<:DAE.Exp}) ::Bool
               local outBoolean::Bool
 
               local e::DAE.Exp
@@ -10066,7 +10061,7 @@
           outBoolean
         end
 
-        function isConstValueWorkListList(inExps::List{<:List{<:DAE.Exp}}) ::Bool 
+        function isConstValueWorkListList(inExps::List{<:List{<:DAE.Exp}}) ::Bool
               local outIsConst::Bool
 
               local e::List{DAE.Exp}
@@ -10084,7 +10079,7 @@
 
          #= author: PA
           Check if expression is not constant. =#
-        function isNotConst(e::DAE.Exp) ::Bool 
+        function isNotConst(e::DAE.Exp) ::Bool
               local nb::Bool
 
               local b::Bool
@@ -10095,7 +10090,7 @@
         end
 
          #= Returns true if expression is a relation =#
-        function isRelation(inExp::DAE.Exp) ::Bool 
+        function isRelation(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10103,7 +10098,7 @@
                   DAE.RELATION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10112,7 +10107,7 @@
           outBoolean
         end
 
-        function isEventTriggeringFunctionExp(inExp::DAE.Exp) ::Bool 
+        function isEventTriggeringFunctionExp(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -10120,27 +10115,27 @@
                   DAE.CALL(path = Absyn.IDENT("div"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("mod"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("rem"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("ceil"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("floor"))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("integer"))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10150,7 +10145,7 @@
         end
 
          #= returns true if operator is ADD or SUB =#
-        function isAddOrSub(op::DAE.Operator) ::Bool 
+        function isAddOrSub(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = isAdd(op) || isSub(op)
@@ -10158,7 +10153,7 @@
         end
 
          #= returns true if operator is ADD =#
-        function isAdd(op::DAE.Operator) ::Bool 
+        function isAdd(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -10166,11 +10161,11 @@
                   DAE.ADD(__)  => begin
                     true
                   end
-                  
+
                   DAE.ADD_ARR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10180,7 +10175,7 @@
         end
 
          #= returns true if operator is SUB =#
-        function isSub(op::DAE.Operator) ::Bool 
+        function isSub(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -10188,11 +10183,11 @@
                   DAE.SUB(__)  => begin
                     true
                   end
-                  
+
                   DAE.SUB_ARR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10202,7 +10197,7 @@
         end
 
          #= returns true if BINARY is a+b or a-b =#
-        function isAddOrSubBinary(iExp::DAE.Exp) ::Bool 
+        function isAddOrSubBinary(iExp::DAE.Exp) ::Bool
               local res::Bool
 
               local op::DAE.Operator
@@ -10212,7 +10207,7 @@
                   DAE.BINARY(_, op, _)  => begin
                     isAddOrSub(op)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10222,13 +10217,13 @@
         end
 
          #= returns true if operator is MUL or DIV =#
-        function isMulOrDiv(op::DAE.Operator) ::Bool 
+        function isMulOrDiv(op::DAE.Operator) ::Bool
               local res::Bool = isMul(op) || isDiv(op)
           res
         end
 
          #= returns true if operator is MUL =#
-        function isMul(op::DAE.Operator) ::Bool 
+        function isMul(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -10236,11 +10231,11 @@
                   DAE.MUL(__)  => begin
                     true
                   end
-                  
+
                   DAE.MUL_ARR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10250,7 +10245,7 @@
         end
 
          #= returns true if operator is DIV =#
-        function isDiv(op::DAE.Operator) ::Bool 
+        function isDiv(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -10258,11 +10253,11 @@
                   DAE.DIV(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIV_ARR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10272,7 +10267,7 @@
         end
 
          #= returns true if BINARY is a/b =#
-        function isDivBinary(iExp::DAE.Exp) ::Bool 
+        function isDivBinary(iExp::DAE.Exp) ::Bool
               local res::Bool
 
               local op::DAE.Operator
@@ -10282,7 +10277,7 @@
                   DAE.BINARY(_, op, _)  => begin
                     isDiv(op)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10292,7 +10287,7 @@
         end
 
          #= returns true if BINARY is a/b or a*b =#
-        function isMulorDivBinary(iExp::DAE.Exp) ::Bool 
+        function isMulorDivBinary(iExp::DAE.Exp) ::Bool
               local res::Bool
 
               local op::DAE.Operator
@@ -10302,7 +10297,7 @@
                   DAE.BINARY(_, op, _)  => begin
                     isMulOrDiv(op)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10312,7 +10307,7 @@
         end
 
          #= returns true if operator is POW =#
-        function isPow(op::DAE.Operator) ::Bool 
+        function isPow(op::DAE.Operator) ::Bool
               local res::Bool
 
               res = begin
@@ -10320,7 +10315,7 @@
                   DAE.POW(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10330,7 +10325,7 @@
         end
 
          #= return true if expression is DAE.CALL(path=Absyn.IDENT(name)) =#
-        function isFunCall(iExp::DAE.Exp, name::String) ::Bool 
+        function isFunCall(iExp::DAE.Exp, name::String) ::Bool
               local res::Bool
 
               res = begin
@@ -10339,7 +10334,7 @@
                   (DAE.CALL(path = Absyn.IDENT(name_)), _)  => begin
                     name_ == name
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10349,7 +10344,7 @@
         end
 
          #=  =#
-        function equalTypes(t1::DAE.Type, t2::DAE.Type) ::Bool 
+        function equalTypes(t1::DAE.Type, t2::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -10365,27 +10360,27 @@
                   (DAE.T_INTEGER(__), DAE.T_INTEGER(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_REAL(__), DAE.T_REAL(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_STRING(__), DAE.T_STRING(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_BOOL(__), DAE.T_BOOL(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_CLOCK(__), DAE.T_CLOCK(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_COMPLEX(varLst = vars1), DAE.T_COMPLEX(varLst = vars2))  => begin
                     equalTypesComplexVars(vars1, vars2)
                   end
-                  
+
                   (DAE.T_ARRAY(ty1, ad1), DAE.T_ARRAY(ty2, ad2))  => begin
                       li1 = ListUtil.map(ad1, dimensionSize)
                       li2 = ListUtil.map(ad2, dimensionSize)
@@ -10393,7 +10388,7 @@
                       @match true = equalTypes(ty1, ty2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10405,7 +10400,7 @@
         end
 
          #=  =#
-        function equalTypesComplexVars(inVars1::List{<:DAE.Var}, inVars2::List{<:DAE.Var}) ::Bool 
+        function equalTypesComplexVars(inVars1::List{<:DAE.Var}, inVars2::List{<:DAE.Var}) ::Bool
               local b::Bool
 
               b = begin
@@ -10419,13 +10414,13 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (DAE.TYPES_VAR(name = s1, ty = t1) <| vars1, DAE.TYPES_VAR(name = s2, ty = t2) <| vars2)  => begin
                       @match true = stringEq(s1, s2)
                       @match true = equalTypes(t1, t2)
                     equalTypesComplexVars(vars1, vars2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10441,7 +10436,7 @@
         end
 
          #= Returns true if type is one of the builtin types. =#
-        function typeBuiltin(inType::DAE.Type) ::Bool 
+        function typeBuiltin(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10449,23 +10444,23 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10477,7 +10472,7 @@
         end
 
          #=  =#
-        function isWholeDim(s::DAE.Subscript) ::Bool 
+        function isWholeDim(s::DAE.Subscript) ::Bool
               local b::Bool
 
               b = begin
@@ -10485,7 +10480,7 @@
                   DAE.WHOLEDIM(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10495,7 +10490,7 @@
         end
 
          #=  =#
-        function isInt(it::DAE.Type) ::Bool 
+        function isInt(it::DAE.Type) ::Bool
               local re::Bool
 
               re = begin
@@ -10504,11 +10499,11 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ARRAY(ty = t1)  => begin
                     isInt(t1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10518,7 +10513,7 @@
         end
 
          #=  =#
-        function isReal(it::DAE.Type) ::Bool 
+        function isReal(it::DAE.Type) ::Bool
               local re::Bool
 
               re = begin
@@ -10527,11 +10522,11 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ARRAY(ty = t1)  => begin
                     isReal(t1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10541,7 +10536,7 @@
         end
 
          #=  =#
-        function isExpReal(e::DAE.Exp) ::Bool 
+        function isExpReal(e::DAE.Exp) ::Bool
               local re::Bool
 
               re = isReal(typeof(e))
@@ -10549,7 +10544,7 @@
         end
 
          #= Return true if expression has zero-dimension =#
-        function isConstZeroLength(inExp::DAE.Exp) ::Bool 
+        function isConstZeroLength(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10557,11 +10552,11 @@
                   DAE.ARRAY(array =  nil())  => begin
                     true
                   end
-                  
+
                   DAE.MATRIX(matrix =  nil())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10571,7 +10566,7 @@
         end
 
          #= Return true if expression is false =#
-        function isConstFalse(inExp::DAE.Exp) ::Bool 
+        function isConstFalse(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10579,7 +10574,7 @@
                   DAE.BCONST(false)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10589,7 +10584,7 @@
         end
 
          #= Return true if expression is true =#
-        function isConstTrue(inExp::DAE.Exp) ::Bool 
+        function isConstTrue(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10597,7 +10592,7 @@
                   DAE.BCONST(true)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10607,7 +10602,7 @@
         end
 
          #= Return true if expression is 1 =#
-        function isConstOne(inExp::DAE.Exp) ::Bool 
+        function isConstOne(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10619,11 +10614,11 @@
                   DAE.RCONST(rval)  => begin
                     realEq(rval, 1.0)
                   end
-                  
+
                   DAE.ICONST(ival)  => begin
                     intEq(ival, 1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10637,7 +10632,7 @@
         end
 
          #= Return true if expression is -1 =#
-        function isConstMinusOne(inExp::DAE.Exp) ::Bool 
+        function isConstMinusOne(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10649,11 +10644,11 @@
                   DAE.RCONST(rval)  => begin
                     realEq(rval, -1.0)
                   end
-                  
+
                   DAE.ICONST(ival)  => begin
                     intEq(ival, -1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10666,7 +10661,7 @@
           outBoolean
         end
 
-        function isGreatereqOrLesseq(op::DAE.Operator) ::Bool 
+        function isGreatereqOrLesseq(op::DAE.Operator) ::Bool
               local b::Bool
 
               b = begin
@@ -10674,11 +10669,11 @@
                   DAE.GREATEREQ(__)  => begin
                     true
                   end
-                  
+
                   DAE.LESSEQ(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10687,7 +10682,7 @@
           b
         end
 
-        function isLesseqOrLess(op::DAE.Operator) ::Bool 
+        function isLesseqOrLess(op::DAE.Operator) ::Bool
               local b::Bool
 
               b = begin
@@ -10695,11 +10690,11 @@
                   DAE.LESS(__)  => begin
                     true
                   end
-                  
+
                   DAE.LESSEQ(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10712,7 +10707,7 @@
          functioncall that returns an array, otherwise false.
           Note: the der operator is represented as a
                 function call but still return false. =#
-        function containVectorFunctioncall(inExp::DAE.Exp) ::Bool 
+        function containVectorFunctioncall(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10732,117 +10727,117 @@
                   DAE.CALL(path = Absyn.IDENT(name = "der"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "pre"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "previous"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "inStream"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "actualStream"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(attr = DAE.CALL_ATTR(ty = DAE.T_ARRAY(__)))  => begin
                     true
                   end
-                  
+
                   DAE.CALL(__)  => begin
                     false
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(expList = elst)  => begin
                     ListUtil.mapBoolOr(elst, containVectorFunctioncall)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.BINARY(exp2 = e2) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                     containVectorFunctioncall(e)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.LBINARY(exp2 = e2) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.LUNARY(exp = e)  => begin
                     containVectorFunctioncall(e)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.RELATION(exp2 = e2) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expCond = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expThen = e2) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expElse = e3) where (containVectorFunctioncall(e3))  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(array = elst)  => begin
                     ListUtil.mapBoolOr(elst, containVectorFunctioncall)
                   end
-                  
+
                   DAE.MATRIX(matrix = explst)  => begin
                       flatexplst = ListUtil.flatten(explst)
                       res = ListUtil.mapBoolOr(flatexplst, containVectorFunctioncall)
                     res
                   end
-                  
+
                   DAE.RANGE(start = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.RANGE(stop = e2) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.RANGE(step = SOME(e)) where (containVectorFunctioncall(e))  => begin
                     true
                   end
-                  
+
                   DAE.TUPLE(PR = elst)  => begin
                     ListUtil.mapBoolOr(elst, containVectorFunctioncall)
                   end
-                  
+
                   DAE.CAST(exp = e)  => begin
                     containVectorFunctioncall(e)
                   end
-                  
+
                   DAE.SIZE(exp = e1) where (containVectorFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.SIZE(sz = SOME(e2)) where (containVectorFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10909,7 +10904,7 @@
           is a functioncall, otherwise false.
           Note: the der and pre operators are represented
                 as function calls but still returns false. =#
-        function containFunctioncall(inExp::DAE.Exp) ::Bool 
+        function containFunctioncall(inExp::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -10929,110 +10924,110 @@
                   DAE.CALL(path = Absyn.IDENT(name = "der"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "pre"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name = "previous"))  => begin
                     false
                   end
-                  
+
                   DAE.CALL(__)  => begin
                     true
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(expList = elst)  => begin
                       res = ListUtil.mapBoolOr(elst, containFunctioncall)
                     res
                   end
-                  
+
                   DAE.BINARY(exp1 = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.BINARY(exp2 = e2) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(exp = e)  => begin
                     containFunctioncall(e)
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.LBINARY(exp2 = e2) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.LUNARY(exp = e)  => begin
                     containFunctioncall(e)
                   end
-                  
+
                   DAE.RELATION(exp1 = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.RELATION(exp2 = e2) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expCond = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expThen = e2) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(expElse = e3) where (containFunctioncall(e3))  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(array = elst)  => begin
                     ListUtil.mapBoolOr(elst, containFunctioncall)
                   end
-                  
+
                   DAE.MATRIX(matrix = explst)  => begin
                       flatexplst = ListUtil.flatten(explst)
                       res = ListUtil.mapBoolOr(flatexplst, containFunctioncall)
                     res
                   end
-                  
+
                   DAE.RANGE(start = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.RANGE(stop = e2) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   DAE.RANGE(step = SOME(e)) where (containFunctioncall(e))  => begin
                     true
                   end
-                  
+
                   DAE.TUPLE(PR = elst)  => begin
                     ListUtil.mapBoolOr(elst, containVectorFunctioncall)
                   end
-                  
+
                   DAE.CAST(exp = e)  => begin
                     containFunctioncall(e)
                   end
-                  
+
                   DAE.ASUB(exp = e)  => begin
                     containFunctioncall(e)
                   end
-                  
+
                   DAE.SIZE(exp = e1) where (containFunctioncall(e1))  => begin
                     true
                   end
-                  
+
                   DAE.SIZE(sz = SOME(e2)) where (containFunctioncall(e2))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11080,7 +11075,7 @@
          #= Function: expIntOrder
         This function takes a list of Exp, assumes they are all ICONST
         and checks wheter the ICONST are in order. =#
-        function expIntOrder(expectedValue::ModelicaInteger, integers::List{<:DAE.Exp}) ::Bool 
+        function expIntOrder(expectedValue::ModelicaInteger, integers::List{<:DAE.Exp}) ::Bool
               local ob::Bool
 
               ob = begin
@@ -11092,11 +11087,11 @@
                   (_,  nil())  => begin
                     true
                   end
-                  
+
                   (x1, DAE.ICONST(x2) <| expl) where (intEq(x1, x2))  => begin
                     expIntOrder(x1 + 1, expl)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11107,7 +11102,7 @@
 
          #= returns true if expression is an array.
          =#
-        function isArray(inExp::DAE.Exp) ::Bool 
+        function isArray(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -11115,11 +11110,11 @@
                   DAE.ARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = DAE.ARRAY(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11129,7 +11124,7 @@
         end
 
          #= returns true if expression is a MM array. =#
-        function isMetaArray(inExp::DAE.Exp) ::Bool 
+        function isMetaArray(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = Types.isMetaArray(typeof(inExp))
@@ -11138,7 +11133,7 @@
 
          #= returns true if expression is an matrix.
          =#
-        function isMatrix(inExp::DAE.Exp) ::Bool 
+        function isMatrix(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -11146,11 +11141,11 @@
                   DAE.MATRIX(__)  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = DAE.MATRIX(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11161,7 +11156,7 @@
 
          #= Returns true if the expression is a vector, i.e. an array with one dimension,
            otherwise false. =#
-        function isVector(inExp::DAE.Exp) ::Bool 
+        function isVector(inExp::DAE.Exp) ::Bool
               local outIsVector::Bool
 
               outIsVector = begin
@@ -11169,11 +11164,11 @@
                   DAE.ARRAY(ty = DAE.T_ARRAY(ty = DAE.T_ARRAY(__)))  => begin
                     false
                   end
-                  
+
                   DAE.ARRAY(ty = DAE.T_ARRAY(dims = _ <|  nil()))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11187,7 +11182,7 @@
         end
 
          #= Returns true if expression is an unary. =#
-        function isUnary(inExp::DAE.Exp) ::Bool 
+        function isUnary(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -11195,7 +11190,7 @@
                   DAE.UNARY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11205,7 +11200,7 @@
         end
 
          #= Returns true if expression is an binary. =#
-        function isBinary(inExp::DAE.Exp) ::Bool 
+        function isBinary(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -11213,7 +11208,7 @@
                   DAE.BINARY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11223,7 +11218,7 @@
         end
 
          #= Returns true if expression is a negative unary. =#
-        function isNegativeUnary(inExp::DAE.Exp) ::Bool 
+        function isNegativeUnary(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
               outB = begin
@@ -11231,7 +11226,7 @@
                   DAE.UNARY(operator = DAE.UMINUS(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11242,7 +11237,7 @@
 
          #= Returns true if the given expression is a component reference,
            otherwise false. =#
-        function isCref(inExp::DAE.Exp) ::Bool 
+        function isCref(inExp::DAE.Exp) ::Bool
               local outIsCref::Bool
 
               outIsCref = begin
@@ -11250,7 +11245,7 @@
                   DAE.CREF(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11259,7 +11254,7 @@
           outIsCref
         end
 
-        function isUnaryCref(inExp::DAE.Exp) ::Bool 
+        function isUnaryCref(inExp::DAE.Exp) ::Bool
               local outIsCref::Bool
 
               outIsCref = begin
@@ -11267,7 +11262,7 @@
                   DAE.UNARY(DAE.UMINUS(__), DAE.CREF(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11278,7 +11273,7 @@
 
          #= Returns true if the given expression is a function call,
            otherwise false. =#
-        function isCall(inExp::DAE.Exp) ::Bool 
+        function isCall(inExp::DAE.Exp) ::Bool
               local outIsCall::Bool
 
               outIsCall = begin
@@ -11286,7 +11281,7 @@
                   DAE.CALL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11297,7 +11292,7 @@
 
          #= Returns true if the given expression is TSUB,
            otherwise false. =#
-        function isTSUB(inExp::DAE.Exp) ::Bool 
+        function isTSUB(inExp::DAE.Exp) ::Bool
               local outIsCall::Bool
 
               outIsCall = begin
@@ -11305,7 +11300,7 @@
                   DAE.TSUB(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11316,7 +11311,7 @@
 
          #= Returns true if the given expression is a pure function call,
            otherwise false. =#
-        function isPureCall(inExp::DAE.Exp) ::Bool 
+        function isPureCall(inExp::DAE.Exp) ::Bool
               local outIsPureCall::Bool
 
               outIsPureCall = isCall(inExp) && ! isImpure(inExp)
@@ -11325,7 +11320,7 @@
 
          #= Returns true if the given expression is a pure function call,
            otherwise false. =#
-        function isImpureCall(inExp::DAE.Exp) ::Bool 
+        function isImpureCall(inExp::DAE.Exp) ::Bool
               local outIsPureCall::Bool
 
               outIsPureCall = isCall(inExp) && isImpure(inExp)
@@ -11334,7 +11329,7 @@
 
          #= Returns true if the given expression is a record call,i.e. a function call without elements
            otherwise false. =#
-        function isRecordCall(inExp::DAE.Exp, funcsIn::DAE.FunctionTree) ::Bool 
+        function isRecordCall(inExp::DAE.Exp, funcsIn::DAE.FunctionTree) ::Bool
               local outIsCall::Bool
 
               outIsCall = begin
@@ -11345,7 +11340,7 @@
                       @match SOME(func) = DAE.AvlTreePathFunction.get(funcsIn, path)
                     listEmpty(DAEUtil.getFunctionElements(func))
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11356,7 +11351,7 @@
 
          #= Returns true if the given expression is a not component reference,
            otherwise false. =#
-        function isNotCref(inExp::DAE.Exp) ::Bool 
+        function isNotCref(inExp::DAE.Exp) ::Bool
               local outIsCref::Bool
 
               outIsCref = begin
@@ -11364,7 +11359,7 @@
                   DAE.CREF(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -11375,7 +11370,7 @@
 
          #= Checks whether a cref is an array or not.
          =#
-        function isCrefArray(inExp::DAE.Exp) ::Bool 
+        function isCrefArray(inExp::DAE.Exp) ::Bool
               local outIsArray::Bool
 
               outIsArray = begin
@@ -11383,7 +11378,7 @@
                   DAE.CREF(ty = DAE.T_ARRAY(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11393,7 +11388,7 @@
         end
 
          #= Checks whether an expression is a scalar cref or not. =#
-        function isCrefScalar(inExp::DAE.Exp) ::Bool 
+        function isCrefScalar(inExp::DAE.Exp) ::Bool
               local isScalar::Bool
 
               isScalar = begin
@@ -11405,11 +11400,11 @@
                       b = ComponentReference.crefHasScalarSubscripts(cr)
                     b
                   end
-                  
+
                   DAE.CREF(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11420,7 +11415,7 @@
 
          #= Returns true if the given expression is a tuple,
            otherwise false. =#
-        function isTuple(inExp::DAE.Exp) ::Bool 
+        function isTuple(inExp::DAE.Exp) ::Bool
               local outIsTuple::Bool
 
               outIsTuple = begin
@@ -11428,7 +11423,7 @@
                   DAE.TUPLE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11439,7 +11434,7 @@
 
          #= Returns true if the given expression is a record,
            otherwise false. =#
-        function isRecord(inExp::DAE.Exp) ::Bool 
+        function isRecord(inExp::DAE.Exp) ::Bool
               local outIsRecord::Bool
 
               outIsRecord = begin
@@ -11447,7 +11442,7 @@
                   DAE.RECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11457,7 +11452,7 @@
         end
 
          #= Returns true if the given expression is a scalar constant, otherwise false. =#
-        function isScalarConst(inExp::DAE.Exp) ::Bool 
+        function isScalarConst(inExp::DAE.Exp) ::Bool
               local outIsScalar::Bool
 
               outIsScalar = begin
@@ -11465,23 +11460,23 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11496,7 +11491,7 @@
 
         See also isPositiveOrZero.
          =#
-        function expIsPositive(e::DAE.Exp) ::Bool 
+        function expIsPositive(e::DAE.Exp) ::Bool
               local res::Bool
 
               res = isPositiveOrZero(e) && ! isZero(e)
@@ -11504,7 +11499,7 @@
         end
 
          #= returns true if const expression is even =#
-        function isEven(e::DAE.Exp) ::Bool 
+        function isEven(e::DAE.Exp) ::Bool
               local even::Bool
 
               even = begin
@@ -11515,15 +11510,15 @@
                   DAE.ICONST(i)  => begin
                     intMod(i, 2) == 0
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                     realMod(r, 2.0) == 0.0
                   end
-                  
+
                   DAE.CAST(exp = exp)  => begin
                     isEven(exp)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11533,7 +11528,7 @@
         end
 
          #= returns true if const expression is odd =#
-        function isOdd(e::DAE.Exp) ::Bool 
+        function isOdd(e::DAE.Exp) ::Bool
               local even::Bool
 
               even = begin
@@ -11544,15 +11539,15 @@
                   DAE.ICONST(i)  => begin
                     intMod(i, 2) == 1
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                     realMod(r, 2.0) == 1.0
                   end
-                  
+
                   DAE.CAST(exp = exp)  => begin
                     isOdd(exp)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11562,7 +11557,7 @@
         end
 
          #= Returns true if Type is Integer or Real =#
-        function isIntegerOrReal(tp::DAE.Type) ::Bool 
+        function isIntegerOrReal(tp::DAE.Type) ::Bool
               local res::Bool
 
               res = begin
@@ -11570,11 +11565,11 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -11584,14 +11579,14 @@
         end
 
          #= Returns true if the two expressions are equal, otherwise false. =#
-        function expEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool 
+        function expEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
               local outEqual::Bool
 
               outEqual = 0 == compare(inExp1, inExp2)
           outEqual
         end
 
-        function compareOpt(inExp1::Option{<:DAE.Exp}, inExp2::Option{<:DAE.Exp}) ::ModelicaInteger 
+        function compareOpt(inExp1::Option{<:DAE.Exp}, inExp2::Option{<:DAE.Exp}) ::ModelicaInteger
               local comp::ModelicaInteger
 
               local e1::DAE.Exp
@@ -11602,15 +11597,15 @@
                   (NONE(), NONE())  => begin
                     0
                   end
-                  
+
                   (NONE(), _)  => begin
                     -1
                   end
-                  
+
                   (_, NONE())  => begin
                     1
                   end
-                  
+
                   (SOME(e1), SOME(e2))  => begin
                     compare(e1, e2)
                   end
@@ -11619,7 +11614,7 @@
           comp
         end
 
-        function compareList(inExpl1::List{<:DAE.Exp}, inExpl2::List{<:DAE.Exp}) ::ModelicaInteger 
+        function compareList(inExpl1::List{<:DAE.Exp}, inExpl2::List{<:DAE.Exp}) ::ModelicaInteger
               local comp::ModelicaInteger
 
               local len1::ModelicaInteger
@@ -11650,7 +11645,7 @@
           comp
         end
 
-        function compareListList(inExpl1::List{<:List{<:DAE.Exp}}, inExpl2::List{<:List{<:DAE.Exp}}) ::ModelicaInteger 
+        function compareListList(inExpl1::List{<:List{<:DAE.Exp}}, inExpl2::List{<:List{<:DAE.Exp}}) ::ModelicaInteger
               local comp::ModelicaInteger
 
               local expl2::List{DAE.Exp}
@@ -11681,7 +11676,7 @@
 
          #= Returns true if the two expressions are structural equal. This means
           only the componentreference can be different =#
-        function expStructuralEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool 
+        function expStructuralEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -11723,47 +11718,47 @@
                   (DAE.ICONST(integer = i1), DAE.ICONST(integer = i2))  => begin
                     i1 == i2
                   end
-                  
+
                   (DAE.UNARY(DAE.UMINUS(_), DAE.ICONST(integer = i1)), DAE.ICONST(integer = i2))  => begin
                       i1 = -i1
                     i1 == i2
                   end
-                  
+
                   (DAE.ICONST(integer = i1), DAE.UNARY(DAE.UMINUS(_), DAE.ICONST(integer = i2)))  => begin
                       i2 = -i2
                     i1 == i2
                   end
-                  
+
                   (DAE.RCONST(real = r1), DAE.RCONST(real = r2))  => begin
                     r1 == r2
                   end
-                  
+
                   (DAE.UNARY(DAE.UMINUS(_), DAE.RCONST(real = r1)), DAE.RCONST(real = r2))  => begin
                       r1 = -r1
                     r1 == r2
                   end
-                  
+
                   (DAE.RCONST(real = r1), DAE.UNARY(DAE.UMINUS(_), DAE.RCONST(real = r2)))  => begin
                       r2 = -r2
                     r1 == r2
                   end
-                  
+
                   (DAE.SCONST(string = s1), DAE.SCONST(string = s2))  => begin
                     stringEq(s1, s2)
                   end
-                  
+
                   (DAE.BCONST(bool = b1), DAE.BCONST(bool = b2))  => begin
                     boolEq(b1, b2)
                   end
-                  
+
                   (DAE.ENUM_LITERAL(name = enum1), DAE.ENUM_LITERAL(name = enum2))  => begin
                     AbsynUtil.pathEqual(enum1, enum2)
                   end
-                  
+
                   (DAE.CREF(__), DAE.CREF(__))  => begin
                     true
                   end
-                  
+
                   (DAE.BINARY(exp1 = e11, operator = op1, exp2 = e12), DAE.BINARY(exp1 = e21, operator = op2, exp2 = e22))  => begin
                       b = operatorEqual(op1, op2)
                       b = if b
@@ -11778,7 +11773,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.LBINARY(exp1 = e11, operator = op1, exp2 = e12), DAE.LBINARY(exp1 = e21, operator = op2, exp2 = e22))  => begin
                       b = operatorEqual(op1, op2)
                       b = if b
@@ -11793,7 +11788,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.UNARY(operator = op1, exp = e1), DAE.UNARY(operator = op2, exp = e2))  => begin
                       b = operatorEqual(op1, op2)
                       b = if b
@@ -11803,7 +11798,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.LUNARY(operator = op1, exp = e1), DAE.LUNARY(operator = op2, exp = e2))  => begin
                       b = operatorEqual(op1, op2)
                       b = if b
@@ -11813,7 +11808,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.RELATION(exp1 = e11, operator = op1, exp2 = e12), DAE.RELATION(exp1 = e21, operator = op2, exp2 = e22))  => begin
                       b = operatorEqual(op1, op2)
                       b = if b
@@ -11828,7 +11823,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.IFEXP(expCond = e11, expThen = e12, expElse = e13), DAE.IFEXP(expCond = e21, expThen = e22, expElse = e23))  => begin
                       b = expStructuralEqual(e11, e21)
                       b = if b
@@ -11843,7 +11838,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.CALL(path = path1, expLst = expl1), DAE.CALL(path = path2, expLst = expl2))  => begin
                       b = AbsynUtil.pathEqual(path1, path2)
                       b = if b
@@ -11853,7 +11848,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.RECORD(path = path1, exps = expl1), DAE.RECORD(path = path2, exps = expl2))  => begin
                       b = AbsynUtil.pathEqual(path1, path2)
                       b = if b
@@ -11863,7 +11858,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.PARTEVALFUNCTION(path = path1, expList = expl1), DAE.PARTEVALFUNCTION(path = path2, expList = expl2))  => begin
                       b = AbsynUtil.pathEqual(path1, path2)
                       b = if b
@@ -11873,7 +11868,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.ARRAY(ty = tp1, array = expl1), DAE.ARRAY(ty = tp2, array = expl2))  => begin
                       b = valueEq(tp1, tp2)
                       b = if b
@@ -11883,11 +11878,11 @@
                           end
                     b
                   end
-                  
+
                   (DAE.MATRIX(matrix = explstlst1), DAE.MATRIX(matrix = explstlst2))  => begin
                     expStructuralEqualListLst(explstlst1, explstlst2)
                   end
-                  
+
                   (DAE.RANGE(start = e11, step = NONE(), stop = e13), DAE.RANGE(start = e21, step = NONE(), stop = e23))  => begin
                       b = expStructuralEqual(e11, e21)
                       b = if b
@@ -11897,7 +11892,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.RANGE(start = e11, step = SOME(e12), stop = e13), DAE.RANGE(start = e21, step = SOME(e22), stop = e23))  => begin
                       b = expStructuralEqual(e11, e21)
                       b = if b
@@ -11912,11 +11907,11 @@
                           end
                     b
                   end
-                  
+
                   (DAE.TUPLE(PR = expl1), DAE.TUPLE(PR = expl2))  => begin
                     expStructuralEqualList(expl1, expl2)
                   end
-                  
+
                   (DAE.CAST(ty = tp1, exp = e1), DAE.CAST(ty = tp2, exp = e2))  => begin
                       b = valueEq(tp1, tp2)
                       b = if b
@@ -11926,7 +11921,7 @@
                           end
                     b
                   end
-                  
+
                   (DAE.ASUB(exp = e1, sub = ae1), DAE.ASUB(sub = ae2))  => begin
                       b = expStructuralEqual(e1, e1)
                       b = if b
@@ -11936,11 +11931,11 @@
                           end
                     b
                   end
-                  
+
                   (DAE.SIZE(exp = e1, sz = NONE()), DAE.SIZE(exp = e2, sz = NONE()))  => begin
                     expStructuralEqual(e1, e2)
                   end
-                  
+
                   (DAE.SIZE(exp = e1, sz = SOME(e11)), DAE.SIZE(exp = e2, sz = SOME(e22)))  => begin
                       b = expStructuralEqual(e1, e2)
                       b = if b
@@ -11950,21 +11945,21 @@
                           end
                     b
                   end
-                  
+
                   (DAE.CODE(__), DAE.CODE(__))  => begin
                       Debug.trace("exp_equal on CODE not impl.\\n")
                     false
                   end
-                  
+
                   (DAE.REDUCTION(__), DAE.REDUCTION(__))  => begin
                       res = valueEq(inExp1, inExp2)
                     res
                   end
-                  
+
                   (DAE.LIST(valList = expl1), DAE.LIST(valList = expl2))  => begin
                     expStructuralEqualList(expl1, expl2)
                   end
-                  
+
                   (DAE.CONS(car = e11, cdr = e12), DAE.CONS(car = e21, cdr = e22))  => begin
                       b = expStructuralEqual(e11, e21)
                       b = if b
@@ -11974,19 +11969,19 @@
                           end
                     b
                   end
-                  
+
                   (DAE.META_TUPLE(listExp = expl1), DAE.META_TUPLE(listExp = expl2))  => begin
                     expStructuralEqualList(expl1, expl2)
                   end
-                  
+
                   (DAE.META_OPTION(exp = NONE()), DAE.META_OPTION(exp = NONE()))  => begin
                     true
                   end
-                  
+
                   (DAE.META_OPTION(exp = SOME(e1)), DAE.META_OPTION(exp = SOME(e2)))  => begin
                     expStructuralEqual(e1, e2)
                   end
-                  
+
                   (DAE.METARECORDCALL(path = path1, args = expl1), DAE.METARECORDCALL(path = path2, args = expl2))  => begin
                       b = AbsynUtil.pathEqual(path1, path2)
                       b = if b
@@ -11996,23 +11991,23 @@
                           end
                     b
                   end
-                  
+
                   (e1 && DAE.MATCHEXPRESSION(__), e2 && DAE.MATCHEXPRESSION(__))  => begin
                     valueEq(e1, e2)
                   end
-                  
+
                   (DAE.BOX(e1), DAE.BOX(e2))  => begin
                     expStructuralEqual(e1, e2)
                   end
-                  
+
                   (DAE.UNBOX(exp = e1), DAE.UNBOX(exp = e2))  => begin
                     expStructuralEqual(e1, e2)
                   end
-                  
+
                   (DAE.SHARED_LITERAL(index = i1), DAE.SHARED_LITERAL(index = i2))  => begin
                     intEq(i1, i2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12074,7 +12069,7 @@
         end
 
          #= Returns true if the two lists of expressions are structural equal. =#
-        function expStructuralEqualList(inExp1::List{<:DAE.Exp}, inExp2::List{<:DAE.Exp}) ::Bool 
+        function expStructuralEqualList(inExp1::List{<:DAE.Exp}, inExp2::List{<:DAE.Exp}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -12087,11 +12082,11 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (e1 <| es1, e2 <| es2) where (expStructuralEqual(e1, e2))  => begin
                     expStructuralEqualList(es1, es2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12101,7 +12096,7 @@
         end
 
          #= Returns true if the two lists of lists of expressions are structural equal. =#
-        function expStructuralEqualListLst(inExp1::List{<:List{<:DAE.Exp}}, inExp2::List{<:List{<:DAE.Exp}}) ::Bool 
+        function expStructuralEqualListLst(inExp1::List{<:List{<:DAE.Exp}}, inExp2::List{<:List{<:DAE.Exp}}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -12114,11 +12109,11 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (e1 <| es1, e2 <| es2) where (expStructuralEqualList(e1, e2))  => begin
                     expStructuralEqualListLst(es1, es2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12130,7 +12125,7 @@
          #= Returns true if first expression contains the second one as a sub expression.
         Only constants, component references or der(componentReference) can be checked
         so far. =#
-        function expContains(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool 
+        function expContains(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -12158,49 +12153,49 @@
                   (DAE.ICONST(i1), DAE.ICONST(i2))  => begin
                     i1 == i2
                   end
-                  
+
                   (DAE.ICONST(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.RCONST(r1), DAE.RCONST(r2))  => begin
                     r1 == r2
                   end
-                  
+
                   (DAE.RCONST(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.SCONST(s1), DAE.SCONST(s2))  => begin
                     s1 == s2
                   end
-                  
+
                   (DAE.SCONST(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.BCONST(b1), DAE.BCONST(b2))  => begin
                     b1 == b2
                   end
-                  
+
                   (DAE.BCONST(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.ENUM_LITERAL(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.ARRAY(array = expLst), _)  => begin
                       res = ListUtil.map1BoolOr(expLst, expContains, inExp2)
                     res
                   end
-                  
+
                   (DAE.MATRIX(matrix = expl), _)  => begin
                       res = ListUtil.map1ListBoolOr(expl, expContains, inExp2)
                     res
                   end
-                  
+
                   (DAE.CREF(componentRef = cr1), DAE.CREF(componentRef = cr2))  => begin
                       res = ComponentReference.crefEqual(cr1, cr2)
                       if ! res
@@ -12209,11 +12204,11 @@
                       end
                     res
                   end
-                  
+
                   (DAE.CREF(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, exp2 = e2), _)  => begin
                       res = expContains(e1, inExp2)
                       res = if res
@@ -12223,12 +12218,12 @@
                           end
                     res
                   end
-                  
+
                   (DAE.UNARY(exp = e), _)  => begin
                       res = expContains(e, inExp2)
                     res
                   end
-                  
+
                   (DAE.LBINARY(exp1 = e1, exp2 = e2), _)  => begin
                       res = expContains(e1, inExp2)
                       res = if res
@@ -12238,12 +12233,12 @@
                           end
                     res
                   end
-                  
+
                   (DAE.LUNARY(exp = e), _)  => begin
                       res = expContains(e, inExp2)
                     res
                   end
-                  
+
                   (DAE.RELATION(exp1 = e1, exp2 = e2), _)  => begin
                       res = expContains(e1, inExp2)
                       res = if res
@@ -12253,7 +12248,7 @@
                           end
                     res
                   end
-                  
+
                   (DAE.IFEXP(expCond = c, expThen = t, expElse = f), _)  => begin
                       res = expContains(c, inExp2)
                       res = if res
@@ -12268,43 +12263,43 @@
                           end
                     res
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "der"), expLst = DAE.CREF(cr1) <|  nil()), DAE.CALL(path = Absyn.IDENT(name = "der"), expLst = DAE.CREF(cr2) <|  nil()))  => begin
                       res = ComponentReference.crefEqual(cr1, cr2)
                     res
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "pre")), _)  => begin
                     false
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT(name = "previous")), _)  => begin
                     false
                   end
-                  
+
                   (DAE.CALL(expLst =  nil()), _)  => begin
                     false
                   end
-                  
+
                   (DAE.CALL(expLst = expLst), _)  => begin
                       res = ListUtil.map1BoolOr(expLst, expContains, inExp2)
                     res
                   end
-                  
+
                   (DAE.PARTEVALFUNCTION(expList = expLst), DAE.CREF(__))  => begin
                       res = ListUtil.map1BoolOr(expLst, expContains, inExp2)
                     res
                   end
-                  
+
                   (DAE.CAST(ty = DAE.T_REAL(__), exp = DAE.ICONST(__)), _)  => begin
                     false
                   end
-                  
+
                   (DAE.CAST(ty = DAE.T_REAL(__), exp = e), _)  => begin
                       res = expContains(e, inExp2)
                     res
                   end
-                  
+
                   (DAE.ASUB(exp = e, sub = expLst), _)  => begin
                       res = ListUtil.map1BoolOr(expLst, expContains, inExp2)
                       res = if res
@@ -12314,12 +12309,12 @@
                           end
                     res
                   end
-                  
+
                   (DAE.REDUCTION(expr = e), _)  => begin
                       res = expContains(e, inExp2)
                     res
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Expression.expContains failed\\n")
@@ -12345,7 +12340,7 @@
         end
 
          #= Author BZ 2008-06 same as expContains, but reversed. =#
-        function containsExp(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool 
+        function containsExp(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
               local outBoolean::Bool
 
               outBoolean = expContains(inExp2, inExp1)
@@ -12353,7 +12348,7 @@
         end
 
          #= Returns true if expression is a componentRef or an if expression =#
-        function isExpCrefOrIfExp(e::DAE.Exp) ::Bool 
+        function isExpCrefOrIfExp(e::DAE.Exp) ::Bool
               local res::Bool
 
               res = begin
@@ -12361,11 +12356,11 @@
                   DAE.CREF(_, _)  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(_, _, _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12375,7 +12370,7 @@
         end
 
          #= Returns true if expression is an if expression =#
-        function isExpIfExp(e::DAE.Exp) ::Bool 
+        function isExpIfExp(e::DAE.Exp) ::Bool
               local res::Bool
 
               res = begin
@@ -12383,7 +12378,7 @@
                   DAE.IFEXP(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12393,7 +12388,7 @@
         end
 
          #= Helper function to expEqual. =#
-        function operatorEqual(inOperator1::DAE.Operator, inOperator2::DAE.Operator) ::Bool 
+        function operatorEqual(inOperator1::DAE.Operator, inOperator2::DAE.Operator) ::Bool
               local outBoolean::Bool
 
               outBoolean = 0 == operatorCompare(inOperator1, inOperator2)
@@ -12401,7 +12396,7 @@
         end
 
          #= Helper function to expEqual. =#
-        function operatorCompare(inOperator1::DAE.Operator, inOperator2::DAE.Operator) ::ModelicaInteger 
+        function operatorCompare(inOperator1::DAE.Operator, inOperator2::DAE.Operator) ::ModelicaInteger
               local comp::ModelicaInteger
 
               comp = begin
@@ -12411,7 +12406,7 @@
                   (DAE.USERDEFINED(fqName = p1), DAE.USERDEFINED(fqName = p2))  => begin
                     AbsynUtil.pathCompare(p1, p2)
                   end
-                  
+
                   _  => begin
                       Util.intCompare(valueConstructor(inOperator1), valueConstructor(inOperator2))
                   end
@@ -12421,7 +12416,7 @@
         end
 
          #= Checks if one of the dimensions in a list is zero. =#
-        function arrayContainZeroDimension(inDimensions::List{<:DAE.Dimension}) ::Bool 
+        function arrayContainZeroDimension(inDimensions::List{<:DAE.Dimension}) ::Bool
               local outContainZeroDim::Bool
 
               outContainZeroDim = begin
@@ -12430,11 +12425,11 @@
                   DAE.DIM_INTEGER(0) <| _  => begin
                     true
                   end
-                  
+
                   _ <| rest_dims  => begin
                     arrayContainZeroDimension(rest_dims)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12444,7 +12439,7 @@
         end
 
          #= Checks if a list of dimensions contain a wholedim, i.e. NONE. =#
-        function arrayContainWholeDimension(inDim::DAE.Dimensions) ::Bool 
+        function arrayContainWholeDimension(inDim::DAE.Dimensions) ::Bool
               local wholedim::Bool
 
               wholedim = begin
@@ -12453,11 +12448,11 @@
                   DAE.DIM_UNKNOWN(__) <| _  => begin
                     true
                   end
-                  
+
                   _ <| rest_dims  => begin
                     arrayContainWholeDimension(rest_dims)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12467,7 +12462,7 @@
         end
 
          #= Returns true if inType is an T_ARRAY =#
-        function isArrayType(inType::DAE.Type) ::Bool 
+        function isArrayType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -12475,7 +12470,7 @@
                   DAE.T_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12485,7 +12480,7 @@
         end
 
          #= Return true if the type is a record type. =#
-        function isRecordType(inType::DAE.Type) ::Bool 
+        function isRecordType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -12493,7 +12488,7 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12503,7 +12498,7 @@
         end
 
          #= returns true if the exp is 1-dimensional =#
-        function isNotComplex(e::DAE.Exp) ::Bool 
+        function isNotComplex(e::DAE.Exp) ::Bool
               local b::Bool
 
               b = begin
@@ -12513,20 +12508,20 @@
                   DAE.CALL(__)  => begin
                     false
                   end
-                  
+
                   DAE.RECORD(__)  => begin
                     false
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                     false
                   end
-                  
+
                   DAE.CAST(exp = e2)  => begin
                       b2 = isNotComplex(e2)
                     b2
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -12536,7 +12531,7 @@
         end
 
          #= Return true if the type is Real. =#
-        function isRealType(inType::DAE.Type) ::Bool 
+        function isRealType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -12544,7 +12539,7 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12554,7 +12549,7 @@
         end
 
          #= Returns whether two dimensions are equal or not. =#
-        function dimensionsEqual(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool 
+        function dimensionsEqual(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool
               local res::Bool
 
               res = begin
@@ -12563,19 +12558,19 @@
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.DIM_UNKNOWN(__))  => begin
                     true
                   end
-                  
+
                   (DAE.DIM_EXP(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.DIM_EXP(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                         b = intEq(dimensionSize(dim1), dimensionSize(dim2))
                       b
@@ -12586,7 +12581,7 @@
         end
 
          #= Returns whether two dimensions are equal or not. =#
-        function dimsEqual(dims1::DAE.Dimensions, dims2::DAE.Dimensions) ::Bool 
+        function dimsEqual(dims1::DAE.Dimensions, dims2::DAE.Dimensions) ::Bool
               local res::Bool
 
               res = begin
@@ -12598,11 +12593,11 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (d1 <| dl1, d2 <| dl2) where (dimensionsEqual(d1, d2))  => begin
                     dimsEqual(dl1, dl2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12613,7 +12608,7 @@
 
          #= Returns whether two dimensions are equal or not.
          0 == anydim is allowed =#
-        function dimsEqualAllowZero(dims1::DAE.Dimensions, dims2::DAE.Dimensions) ::Bool 
+        function dimsEqualAllowZero(dims1::DAE.Dimensions, dims2::DAE.Dimensions) ::Bool
               local res::Bool
 
               res = begin
@@ -12625,11 +12620,11 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (d1 <| dl1, d2 <| dl2) where (dimensionsEqualAllowZero(d1, d2))  => begin
                     dimsEqualAllowZero(dl1, dl2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12640,7 +12635,7 @@
 
          #= Returns whether two dimensions are equal or not.
          0 == anyDim is allowed =#
-        function dimensionsEqualAllowZero(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool 
+        function dimensionsEqualAllowZero(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool
               local res::Bool
 
               res = begin
@@ -12651,19 +12646,19 @@
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.DIM_UNKNOWN(__))  => begin
                     true
                   end
-                  
+
                   (DAE.DIM_EXP(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.DIM_EXP(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                         d1 = dimensionSize(dim1)
                         d2 = dimensionSize(dim2)
@@ -12676,7 +12671,7 @@
         end
 
          #= Checks that two dimensions are specified and equal. =#
-        function dimensionsKnownAndEqual(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool 
+        function dimensionsKnownAndEqual(dim1::DAE.Dimension, dim2::DAE.Dimension) ::Bool
               local res::Bool
 
               res = begin
@@ -12684,11 +12679,11 @@
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     false
                   end
-                  
+
                   (_, DAE.DIM_UNKNOWN(__))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       expEqual(dimensionSizeExp(dim1), dimensionSizeExp(dim2))
                   end
@@ -12700,7 +12695,7 @@
         end
 
          #= Checks whether a dimensions is known or not. =#
-        function dimensionKnown(dim::DAE.Dimension) ::Bool 
+        function dimensionKnown(dim::DAE.Dimension) ::Bool
               local known::Bool
 
               known = begin
@@ -12708,23 +12703,23 @@
                   DAE.DIM_UNKNOWN(__)  => begin
                     false
                   end
-                  
+
                   DAE.DIM_EXP(exp = DAE.ICONST(__))  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(exp = DAE.BCONST(__))  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(exp = DAE.ENUM_LITERAL(__))  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -12734,7 +12729,7 @@
         end
 
          #= Checks whether a dimensions is known or not. =#
-        function dimensionKnownAndNonZero(dim::DAE.Dimension) ::Bool 
+        function dimensionKnownAndNonZero(dim::DAE.Dimension) ::Bool
               local known::Bool
 
               known = begin
@@ -12742,11 +12737,11 @@
                   DAE.DIM_EXP(exp = DAE.ICONST(0))  => begin
                     false
                   end
-                  
+
                   DAE.DIM_INTEGER(0)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       dimensionKnown(dim)
                   end
@@ -12757,7 +12752,7 @@
 
          #= Checks whether all dimensions are known or not.
           TODO: mahge: imprive this for speed =#
-        function dimensionsKnownAndNonZero(dims::List{<:DAE.Dimension}) ::Bool 
+        function dimensionsKnownAndNonZero(dims::List{<:DAE.Dimension}) ::Bool
               local allKnown::Bool
 
               allKnown = ListUtil.mapBoolAnd(dims, dimensionKnownAndNonZero)
@@ -12765,7 +12760,7 @@
         end
 
          #= Checks whether a dimensions is known or not. =#
-        function dimensionUnknownOrExp(dim::DAE.Dimension) ::Bool 
+        function dimensionUnknownOrExp(dim::DAE.Dimension) ::Bool
               local known::Bool
 
               known = begin
@@ -12773,11 +12768,11 @@
                   DAE.DIM_UNKNOWN(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12786,7 +12781,7 @@
           known
         end
 
-        function dimensionUnknown(inDimension::DAE.Dimension) ::Bool 
+        function dimensionUnknown(inDimension::DAE.Dimension) ::Bool
               local outUnknown::Bool
 
               outUnknown = begin
@@ -12794,7 +12789,7 @@
                   DAE.DIM_UNKNOWN(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12804,7 +12799,7 @@
         end
 
          #= Returns true if two subscript lists are equal. =#
-        function subscriptEqual(inSubscriptLst1::List{<:DAE.Subscript}, inSubscriptLst2::List{<:DAE.Subscript}) ::Bool 
+        function subscriptEqual(inSubscriptLst1::List{<:DAE.Subscript}, inSubscriptLst2::List{<:DAE.Subscript}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -12818,11 +12813,11 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| xs1, DAE.WHOLEDIM(__) <| xs2)  => begin
                     subscriptEqual(xs1, xs2)
                   end
-                  
+
                   (DAE.SLICE(exp = e1) <| xs1, DAE.SLICE(exp = e2) <| xs2)  => begin
                     if expEqual(e1, e2)
                           subscriptEqual(xs1, xs2)
@@ -12830,7 +12825,7 @@
                           false
                         end
                   end
-                  
+
                   (DAE.INDEX(exp = e1) <| xs1, DAE.INDEX(exp = e2) <| xs2)  => begin
                     if expEqual(e1, e2)
                           subscriptEqual(xs1, xs2)
@@ -12838,7 +12833,7 @@
                           false
                         end
                   end
-                  
+
                   (DAE.WHOLE_NONEXP(exp = e1) <| xs1, DAE.WHOLE_NONEXP(exp = e2) <| xs2)  => begin
                     if expEqual(e1, e2)
                           subscriptEqual(xs1, xs2)
@@ -12846,7 +12841,7 @@
                           false
                         end
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12863,9 +12858,9 @@
           outBoolean
         end
 
-         #= 
+         #=
         returns true if all subscripts are known (i.e no cref) constant values (no slice or wholedim) =#
-        function subscriptConstants(inSubs::List{<:DAE.Subscript}) ::Bool 
+        function subscriptConstants(inSubs::List{<:DAE.Subscript}) ::Bool
               local areConstant::Bool = true
 
               for sub in inSubs
@@ -12874,15 +12869,15 @@
                     DAE.INDEX(exp = DAE.ICONST(__))  => begin
                       true
                     end
-                    
+
                     DAE.INDEX(exp = DAE.ENUM_LITERAL(__))  => begin
                       true
                     end
-                    
+
                     DAE.INDEX(exp = DAE.BCONST(__))  => begin
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -12897,7 +12892,7 @@
 
          #= Checks if an expression is a valid subscript, i.e. an integer or enumeration
           literal. =#
-        function isValidSubscript(inSub::DAE.Exp) ::Bool 
+        function isValidSubscript(inSub::DAE.Exp) ::Bool
               local isValid::Bool
 
               isValid = begin
@@ -12905,15 +12900,15 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12923,7 +12918,7 @@
         end
 
          #= This function checks whether sub2 contains sub1 or not(DAE.WHOLEDIM()) =#
-        function subscriptContain(issl1::List{<:DAE.Subscript}, issl2::List{<:DAE.Subscript}) ::Bool 
+        function subscriptContain(issl1::List{<:DAE.Subscript}, issl2::List{<:DAE.Subscript}) ::Bool
               local contained::Bool
 
               contained = begin
@@ -12940,29 +12935,29 @@
                   ( nil(), _)  => begin
                     true
                   end
-                  
+
                   (_ <| ssl1, DAE.WHOLEDIM(__) <| ssl2)  => begin
                       b = subscriptContain(ssl1, ssl2)
                     b
                   end
-                  
+
                   (_ <| ssl1, DAE.WHOLE_NONEXP(_) <| ssl2)  => begin
                       b = subscriptContain(ssl1, ssl2)
                     b
                   end
-                  
+
                   (DAE.INDEX(DAE.ICONST(i)) <| ssl1, DAE.SLICE(DAE.ARRAY(_, _, expl)) <| ssl2)  => begin
                       @match true = subscriptContain2(i, expl)
                       b = subscriptContain(ssl1, ssl2)
                     b
                   end
-                  
+
                   (ss1 <| ssl1, ss2 <| ssl2)  => begin
                       @match true = subscriptEqual(list(ss1), list(ss2))
                       b = subscriptContain(ssl1, ssl2)
                     b
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -12980,9 +12975,9 @@
           contained
         end
 
-         #= 
+         #=
          =#
-        function subscriptContain2(inInt::ModelicaInteger, inExp2::List{<:DAE.Exp}) ::Bool 
+        function subscriptContain2(inInt::ModelicaInteger, inExp2::List{<:DAE.Exp}) ::Bool
               local contained::Bool
 
               contained = begin
@@ -12998,11 +12993,11 @@
                   (i, DAE.ICONST(j) <| _) where (i == j)  => begin
                     true
                   end
-                  
+
                   (i, DAE.ICONST(_) <| expl) where (subscriptContain2(i, expl))  => begin
                     true
                   end
-                  
+
                   (i, DAE.ARRAY(_, _, expl2) <| expl)  => begin
                       b = subscriptContain2(i, expl2)
                       b2 = if b
@@ -13012,7 +13007,7 @@
                           end
                     b2
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13022,7 +13017,7 @@
         end
 
          #= Returns true if the expression is free from side-effects. Use with traverseExpBottomUp. =#
-        function hasNoSideEffects(inExp::DAE.Exp, ib::Bool) ::Tuple{DAE.Exp, Bool} 
+        function hasNoSideEffects(inExp::DAE.Exp, ib::Bool) ::Tuple{DAE.Exp, Bool}
               local ob::Bool
               local outExp::DAE.Exp
 
@@ -13032,11 +13027,11 @@
                   (DAE.CALL(__), _)  => begin
                     (inExp, false)
                   end
-                  
+
                   (DAE.MATCHEXPRESSION(__), _)  => begin
                     (inExp, false)
                   end
-                  
+
                   _  => begin
                       (inExp, ib)
                   end
@@ -13046,7 +13041,7 @@
         end
 
          #= Returns true if the expression is a reference to a builtin function =#
-        function isBuiltinFunctionReference(exp::DAE.Exp) ::Bool 
+        function isBuiltinFunctionReference(exp::DAE.Exp) ::Bool
               local b::Bool
 
               b = begin
@@ -13054,7 +13049,7 @@
                   DAE.CREF(ty = DAE.T_FUNCTION_REFERENCE_FUNC(builtin = true))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13064,7 +13059,7 @@
         end
 
          #= DAE.CONS =#
-        function makeCons(car::DAE.Exp, cdr::DAE.Exp) ::DAE.Exp 
+        function makeCons(car::DAE.Exp, cdr::DAE.Exp) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = DAE.CONS(car, cdr)
@@ -13072,7 +13067,7 @@
         end
 
          #= Create a DAE.CALL with the given data for a call to a builtin function. =#
-        function makeBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type, isImpure::Bool) ::DAE.Exp 
+        function makeBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type, isImpure::Bool) ::DAE.Exp
               local call::DAE.Exp
 
               call = DAE.CALL(Absyn.IDENT(name), args, DAE.CALL_ATTR(result_type, false, true, isImpure, false, DAE.NO_INLINE(), DAE.NO_TAIL()))
@@ -13080,7 +13075,7 @@
         end
 
          #= Create a DAE.CALL with the given data for a call to a builtin function. =#
-        function makePureBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type) ::DAE.Exp 
+        function makePureBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type) ::DAE.Exp
               local call::DAE.Exp
 
               call = makeBuiltinCall(name, args, result_type, false)
@@ -13088,14 +13083,14 @@
         end
 
          #= Create a DAE.CALL with the given data for a call to a builtin function. =#
-        function makeImpureBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type) ::DAE.Exp 
+        function makeImpureBuiltinCall(name::String, args::List{<:DAE.Exp}, result_type::DAE.Type) ::DAE.Exp
               local call::DAE.Exp
 
               call = makeBuiltinCall(name, args, result_type, true)
           call
         end
 
-        function reductionIterName(iter::DAE.ReductionIterator) ::String 
+        function reductionIterName(iter::DAE.ReductionIterator) ::String
               local name::String
 
               @match DAE.REDUCTIONITER(id = name) = iter
@@ -13123,7 +13118,7 @@
           (outIter, outArg)
         end
 
-        function traverseReductionIteratorTopDown(iter::DAE.ReductionIterator, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ReductionIterator, Type_a} 
+        function traverseReductionIteratorTopDown(iter::DAE.ReductionIterator, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ReductionIterator, Type_a}
               local outArg::Type_a
               local outIter::DAE.ReductionIterator
 
@@ -13144,7 +13139,7 @@
           (outIter, outArg)
         end
 
-        function traverseReductionIteratorsTopDown(inIters::DAE.ReductionIterators, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ReductionIterators, Type_a} 
+        function traverseReductionIteratorsTopDown(inIters::DAE.ReductionIterators, func::FuncExpType, inArg::Type_a) ::Tuple{DAE.ReductionIterators, Type_a}
               local outArg::Type_a
               local outIters::DAE.ReductionIterators
 
@@ -13156,7 +13151,7 @@
                   ( nil(), _, arg)  => begin
                     (inIters, arg)
                   end
-                  
+
                   (iter <| iters, _, arg)  => begin
                       (iter, arg) = traverseReductionIteratorTopDown(iter, func, arg)
                       (iters, arg) = traverseReductionIteratorsTopDown(iters, func, arg)
@@ -13167,7 +13162,7 @@
           (outIters, outArg)
         end
 
-        function traverseReductionIterator(iter::DAE.ReductionIterator, func::FuncExpType, iarg::Type_a) ::Tuple{DAE.ReductionIterator, Type_a} 
+        function traverseReductionIterator(iter::DAE.ReductionIterator, func::FuncExpType, iarg::Type_a) ::Tuple{DAE.ReductionIterator, Type_a}
               local outArg::Type_a
               local outIter::DAE.ReductionIterator
 
@@ -13195,7 +13190,7 @@
           (outIter, outArg)
         end
 
-        function traverseReductionIterators(iters::DAE.ReductionIterators, func::FuncExpType, arg::Type_a) ::Tuple{DAE.ReductionIterators, Type_a} 
+        function traverseReductionIterators(iters::DAE.ReductionIterators, func::FuncExpType, arg::Type_a) ::Tuple{DAE.ReductionIterators, Type_a}
 
 
 
@@ -13208,7 +13203,7 @@
                    nil()  => begin
                     (iters, arg)
                   end
-                  
+
                   iter <| rest  => begin
                       (iter1, arg) = traverseReductionIterator(iter, func, arg)
                       (iters1, arg) = traverseReductionIterators(rest, func, arg)
@@ -13224,14 +13219,14 @@
           (iters, arg)
         end
 
-        function simpleCrefName(exp::DAE.Exp) ::String 
+        function simpleCrefName(exp::DAE.Exp) ::String
               local name::String
 
               @match DAE.CREF(componentRef = DAE.CREF_IDENT(ident = name, subscriptLst = nil)) = exp
           name
         end
 
-        function isTailCall(exp::DAE.Exp) ::Bool 
+        function isTailCall(exp::DAE.Exp) ::Bool
               local isTail::Bool
 
               isTail = begin
@@ -13239,7 +13234,7 @@
                   DAE.CALL(attr = DAE.CALL_ATTR(tailCall = DAE.TAIL(__)))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13248,7 +13243,7 @@
           isTail
         end
 
-        function complexityTraverse(exp::DAE.Exp, complexity::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function complexityTraverse(exp::DAE.Exp, complexity::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local outComplexity::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -13256,7 +13251,7 @@
           (outExp, outComplexity)
         end
 
-        function complexityTraverse2(exp::DAE.Exp, complexity_::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function complexityTraverse2(exp::DAE.Exp, complexity_::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local outComplexity::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -13271,7 +13266,7 @@
 
          const complexityDimLarge = 1000 #= Unknown dimensions usually aren't big, but might be =#::ModelicaInteger
 
-        function complexity(exp::DAE.Exp) ::ModelicaInteger 
+        function complexity(exp::DAE.Exp) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -13292,92 +13287,92 @@
                   DAE.ICONST(__)  => begin
                     0
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     0
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     0
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     0
                   end
-                  
+
                   DAE.SHARED_LITERAL(__)  => begin
                     0
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     0
                   end
-                  
+
                   DAE.CREF(ty = tp)  => begin
                     tpComplexity(tp)
                   end
-                  
+
                   DAE.BINARY(exp1 = e1, operator = op, exp2 = e2)  => begin
                       c1 = complexity(e1)
                       c2 = complexity(e2)
                       c3 = opComplexity(op)
                     c1 + c2 + c3
                   end
-                  
+
                   DAE.UNARY(exp = e, operator = op)  => begin
                       c1 = complexity(e)
                       c2 = opComplexity(op)
                     c1 + c2
                   end
-                  
+
                   DAE.LBINARY(exp1 = e1, exp2 = e2, operator = op)  => begin
                       c1 = complexity(e1)
                       c2 = complexity(e2)
                       c3 = opComplexity(op)
                     c1 + c2 + c3
                   end
-                  
+
                   DAE.LUNARY(exp = e, operator = op)  => begin
                       c1 = complexity(e)
                       c2 = opComplexity(op)
                     c1 + c2
                   end
-                  
+
                   DAE.RELATION(exp1 = e1, exp2 = e2, operator = op)  => begin
                       c1 = complexity(e1)
                       c2 = complexity(e2)
                       c3 = opComplexity(op)
                     c1 + c2 + c3
                   end
-                  
+
                   DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3)  => begin
                       c1 = complexity(e1)
                       c2 = complexity(e2)
                       c3 = complexity(e3)
                     c1 + intMax(c2, c3)
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT(name), expLst = exps, attr = DAE.CALL_ATTR(ty = tp, builtin = true))  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, 0)
                       c2 = complexityBuiltin(name, tp)
                     c1 + c2
                   end
-                  
+
                   DAE.CALL(expLst = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, 0)
                       c2 = listLength(exps)
                     c1 + c2 + 25
                   end
-                  
+
                   DAE.RECORD(exps = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, 1)
                     c1
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(__)  => begin
                     complexityVeryBig
                   end
-                  
+
                   DAE.ARRAY(array = exps, ty = tp)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, if isArrayType(tp)
                             0
@@ -13387,108 +13382,108 @@
                       c2 = listLength(exps)
                     c1 + c2
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix && exps <| _)  => begin
                       c1 = ListUtil.applyAndFold(ListUtil.flatten(matrix), intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps) * listLength(matrix)
                     c1 + c2
                   end
-                  
+
                   DAE.RANGE(start = e1, stop = e2, step = NONE())  => begin
                     complexityDimLarge + complexity(e1) + complexity(e2)
                   end
-                  
+
                   DAE.RANGE(start = e1, stop = e2, step = SOME(e3))  => begin
                     complexityDimLarge + complexity(e1) + complexity(e2) + complexity(e3)
                   end
-                  
+
                   DAE.TUPLE(PR = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps)
                     c1 + c2
                   end
-                  
+
                   DAE.CAST(exp = e, ty = tp)  => begin
                     tpComplexity(tp) + complexity(e)
                   end
-                  
+
                   DAE.ASUB(exp = e, sub = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps)
                       c3 = complexity(e)
                     c1 + c2 + c3
                   end
-                  
+
                   DAE.TSUB(exp = e)  => begin
                     complexity(e) + 1
                   end
-                  
+
                   DAE.SIZE(exp = e, sz = NONE())  => begin
                     complexity(e) + complexityAlloc + 10
                   end
-                  
+
                   DAE.SIZE(exp = e1, sz = SOME(e2))  => begin
                     complexity(e1) + complexity(e2) + 1
                   end
-                  
+
                   DAE.CODE(__)  => begin
                     complexityVeryBig
                   end
-                  
+
                   DAE.EMPTY(__)  => begin
                     complexityVeryBig
                   end
-                  
+
                   DAE.REDUCTION(__)  => begin
                     complexityVeryBig
                   end
-                  
+
                   DAE.LIST(valList = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps)
                     c1 + c2 + complexityAlloc
                   end
-                  
+
                   DAE.CONS(car = e1, cdr = e2)  => begin
                     complexityAlloc + complexity(e1) + complexity(e2)
                   end
-                  
+
                   DAE.META_TUPLE(listExp = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps)
                     complexityAlloc + c1 + c2
                   end
-                  
+
                   DAE.META_OPTION(exp = NONE())  => begin
                     0
                   end
-                  
+
                   DAE.META_OPTION(exp = SOME(e))  => begin
                     complexity(e) + complexityAlloc
                   end
-                  
+
                   DAE.METARECORDCALL(args = exps)  => begin
                       c1 = ListUtil.applyAndFold(exps, intAdd, complexity, complexityAlloc)
                       c2 = listLength(exps)
                     c1 + c2 + complexityAlloc
                   end
-                  
+
                   DAE.MATCHEXPRESSION(__)  => begin
                     complexityVeryBig
                   end
-                  
+
                   DAE.BOX(exp = e)  => begin
                     complexityAlloc + complexity(e)
                   end
-                  
+
                   DAE.UNBOX(exp = e)  => begin
                     1 + complexity(e)
                   end
-                  
+
                   DAE.PATTERN(__)  => begin
                     0
                   end
-                  
+
                   _  => begin
                         str = "Expression.complexityWork failed: " + ExpressionDump.printExpStr(exp)
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -13506,7 +13501,7 @@
           i
         end
 
-        function complexityBuiltin(name::String, tp::DAE.Type) ::ModelicaInteger 
+        function complexityBuiltin(name::String, tp::DAE.Type) ::ModelicaInteger
               local complexity::ModelicaInteger
 
               complexity = begin
@@ -13514,11 +13509,11 @@
                   ("identity", _)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   ("cross", _)  => begin
                     3 * 3
                   end
-                  
+
                   _  => begin
                       25
                   end
@@ -13527,7 +13522,7 @@
           complexity
         end
 
-        function tpComplexity(tp::DAE.Type) ::ModelicaInteger 
+        function tpComplexity(tp::DAE.Type) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -13537,7 +13532,7 @@
                       i = ListUtil.applyAndFold(dims, intMul, dimComplexity, 1)
                     i
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -13546,7 +13541,7 @@
           i
         end
 
-        function dimComplexity(dim::DAE.Dimension) ::ModelicaInteger 
+        function dimComplexity(dim::DAE.Dimension) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -13554,15 +13549,15 @@
                   DAE.DIM_INTEGER(integer = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_ENUM(size = i)  => begin
                     i
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     2
                   end
-                  
+
                   _  => begin
                       complexityDimLarge
                   end
@@ -13571,7 +13566,7 @@
           i
         end
 
-        function opComplexity(op::DAE.Operator) ::ModelicaInteger 
+        function opComplexity(op::DAE.Operator) ::ModelicaInteger
               local i::ModelicaInteger
 
               i = begin
@@ -13580,135 +13575,135 @@
                   DAE.ADD(ty = DAE.T_STRING(__))  => begin
                     100
                   end
-                  
+
                   DAE.ADD(__)  => begin
                     1
                   end
-                  
+
                   DAE.SUB(__)  => begin
                     1
                   end
-                  
+
                   DAE.MUL(__)  => begin
                     1
                   end
-                  
+
                   DAE.DIV(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW(__)  => begin
                     30
                   end
-                  
+
                   DAE.UMINUS(__)  => begin
                     1
                   end
-                  
+
                   DAE.UMINUS_ARR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.ADD_ARR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.SUB_ARR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.MUL_ARR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.DIV_ARR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(ty = tp)  => begin
                     complexityAlloc + 3 * tpComplexity(tp)
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(ty = tp)  => begin
                     complexityAlloc + 3 * tpComplexity(tp)
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(ty = tp)  => begin
                     complexityAlloc + tpComplexity(tp)
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(ty = tp)  => begin
                     complexityAlloc + 30 * tpComplexity(tp)
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(ty = tp)  => begin
                     complexityAlloc + 30 * tpComplexity(tp)
                   end
-                  
+
                   DAE.POW_ARR(ty = tp)  => begin
                     complexityAlloc + 30 * tpComplexity(tp)
                   end
-                  
+
                   DAE.POW_ARR2(ty = tp)  => begin
                     complexityAlloc + 30 * tpComplexity(tp)
                   end
-                  
+
                   DAE.AND(__)  => begin
                     1
                   end
-                  
+
                   DAE.OR(__)  => begin
                     1
                   end
-                  
+
                   DAE.NOT(__)  => begin
                     1
                   end
-                  
+
                   DAE.LESS(__)  => begin
                     1
                   end
-                  
+
                   DAE.LESSEQ(__)  => begin
                     1
                   end
-                  
+
                   DAE.GREATER(__)  => begin
                     1
                   end
-                  
+
                   DAE.GREATEREQ(__)  => begin
                     1
                   end
-                  
+
                   DAE.EQUAL(__)  => begin
                     1
                   end
-                  
+
                   DAE.NEQUAL(__)  => begin
                     1
                   end
-                  
+
                   DAE.USERDEFINED(__)  => begin
                     100
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Expression.opWCET failed"))
                       fail()
@@ -13722,7 +13717,7 @@
 
          #= Construct a list of enumeration literal expression given the type name of an
            enumeration an a list of literal names. =#
-        function makeEnumLiterals(inTypeName::Absyn.Path, inLiterals::List{<:String}) ::List{DAE.Exp} 
+        function makeEnumLiterals(inTypeName::Absyn.Path, inLiterals::List{<:String}) ::List{DAE.Exp}
               local outLiterals::List{DAE.Exp}
 
               local enum_lit_names::List{Absyn.Path}
@@ -13734,7 +13729,7 @@
         end
 
          #= Creates a new enumeration literal. For use with listMapAndFold. =#
-        function makeEnumLiteral(name::Absyn.Path, index::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function makeEnumLiteral(name::Absyn.Path, index::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local newIndex::ModelicaInteger
               local enumExp::DAE.Exp
 
@@ -13744,7 +13739,7 @@
         end
 
          #= Determines whether an operand in an expression needs parentheses around it. =#
-        function shouldParenthesize(inOperand::DAE.Exp, inOperator::DAE.Exp, inLhs::Bool) ::Bool 
+        function shouldParenthesize(inOperand::DAE.Exp, inOperator::DAE.Exp, inLhs::Bool) ::Bool
               local outShouldParenthesize::Bool
 
               outShouldParenthesize = begin
@@ -13753,7 +13748,7 @@
                   (DAE.UNARY(__), _, _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                         diff = Util.intCompare(priority(inOperand, inLhs), priority(inOperator, inLhs))
                       shouldParenthesize2(diff, inOperand, inLhs)
@@ -13763,7 +13758,7 @@
           outShouldParenthesize
         end
 
-        function shouldParenthesize2(inPrioDiff::ModelicaInteger, inOperand::DAE.Exp, inLhs::Bool) ::Bool 
+        function shouldParenthesize2(inPrioDiff::ModelicaInteger, inOperand::DAE.Exp, inLhs::Bool) ::Bool
               local outShouldParenthesize::Bool
 
               outShouldParenthesize = begin
@@ -13771,11 +13766,11 @@
                   (1, _, _)  => begin
                     true
                   end
-                  
+
                   (0, _, false)  => begin
                     ! isAssociativeExp(inOperand)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13785,7 +13780,7 @@
         end
 
          #= Determines whether the given expression represents an associative operation or not. =#
-        function isAssociativeExp(inExp::DAE.Exp) ::Bool 
+        function isAssociativeExp(inExp::DAE.Exp) ::Bool
               local outIsAssociative::Bool
 
               outIsAssociative = begin
@@ -13794,11 +13789,11 @@
                   DAE.BINARY(operator = op)  => begin
                     isAssociativeOp(op)
                   end
-                  
+
                   DAE.LBINARY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13808,7 +13803,7 @@
         end
 
          #= Determines whether the given operator is associative or not. =#
-        function isAssociativeOp(inOperator::DAE.Operator) ::Bool 
+        function isAssociativeOp(inOperator::DAE.Operator) ::Bool
               local outIsAssociative::Bool
 
               outIsAssociative = begin
@@ -13816,23 +13811,23 @@
                   DAE.ADD(__)  => begin
                     true
                   end
-                  
+
                   DAE.MUL(__)  => begin
                     true
                   end
-                  
+
                   DAE.ADD_ARR(__)  => begin
                     true
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -13847,7 +13842,7 @@
            operation, otherwise false. This is because we don't need to add parentheses
            to expressions such as x * y / z, but x / (y * z) needs them, so the
            priorities of some binary operations differ depending on which side they are. =#
-        function priority(inExp::DAE.Exp, inLhs::Bool) ::ModelicaInteger 
+        function priority(inExp::DAE.Exp, inLhs::Bool) ::ModelicaInteger
               local outPriority::ModelicaInteger
 
               outPriority = begin
@@ -13856,39 +13851,39 @@
                   (DAE.BINARY(operator = op), false)  => begin
                     priorityBinopRhs(op)
                   end
-                  
+
                   (DAE.BINARY(operator = op), true)  => begin
                     priorityBinopLhs(op)
                   end
-                  
+
                   (DAE.RCONST(__), _) where (inExp.real < 0.0)  => begin
                     4
                   end
-                  
+
                   (DAE.UNARY(__), _)  => begin
                     4
                   end
-                  
+
                   (DAE.LBINARY(operator = op), _)  => begin
                     priorityLBinop(op)
                   end
-                  
+
                   (DAE.LUNARY(__), _)  => begin
                     7
                   end
-                  
+
                   (DAE.RELATION(__), _)  => begin
                     6
                   end
-                  
+
                   (DAE.RANGE(__), _)  => begin
                     10
                   end
-                  
+
                   (DAE.IFEXP(__), _)  => begin
                     11
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -13902,7 +13897,7 @@
          #= Returns the priority for a binary operation on the left hand side. Add and
            sub has the same priority, and mul and div too, in contrast with
            priorityBinopRhs. =#
-        function priorityBinopLhs(inOp::DAE.Operator) ::ModelicaInteger 
+        function priorityBinopLhs(inOp::DAE.Operator) ::ModelicaInteger
               local outPriority::ModelicaInteger
 
               outPriority = begin
@@ -13910,79 +13905,79 @@
                   DAE.ADD(__)  => begin
                     5
                   end
-                  
+
                   DAE.SUB(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIV(__)  => begin
                     2
                   end
-                  
+
                   DAE.POW(__)  => begin
                     1
                   end
-                  
+
                   DAE.ADD_ARR(__)  => begin
                     5
                   end
-                  
+
                   DAE.SUB_ARR(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL_ARR(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIV_ARR(__)  => begin
                     2
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(__)  => begin
                     2
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(__)  => begin
                     5
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(__)  => begin
                     2
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(__)  => begin
                     2
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_ARR(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_ARR2(__)  => begin
                     1
                   end
@@ -13994,7 +13989,7 @@
          #= Returns the priority for a binary operation on the right hand side. Add and
            sub has different priorities, and mul and div too, in contrast with
            priorityBinopLhs. =#
-        function priorityBinopRhs(inOp::DAE.Operator) ::ModelicaInteger 
+        function priorityBinopRhs(inOp::DAE.Operator) ::ModelicaInteger
               local outPriority::ModelicaInteger
 
               outPriority = begin
@@ -14002,79 +13997,79 @@
                   DAE.ADD(__)  => begin
                     6
                   end
-                  
+
                   DAE.SUB(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL(__)  => begin
                     3
                   end
-                  
+
                   DAE.DIV(__)  => begin
                     2
                   end
-                  
+
                   DAE.POW(__)  => begin
                     1
                   end
-                  
+
                   DAE.ADD_ARR(__)  => begin
                     6
                   end
-                  
+
                   DAE.SUB_ARR(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL_ARR(__)  => begin
                     3
                   end
-                  
+
                   DAE.DIV_ARR(__)  => begin
                     2
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(__)  => begin
                     3
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(__)  => begin
                     6
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(__)  => begin
                     5
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(__)  => begin
                     3
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(__)  => begin
                     3
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(__)  => begin
                     2
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(__)  => begin
                     2
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_ARR(__)  => begin
                     1
                   end
-                  
+
                   DAE.POW_ARR2(__)  => begin
                     1
                   end
@@ -14083,7 +14078,7 @@
           outPriority
         end
 
-        function priorityLBinop(inOp::DAE.Operator) ::ModelicaInteger 
+        function priorityLBinop(inOp::DAE.Operator) ::ModelicaInteger
               local outPriority::ModelicaInteger
 
               outPriority = begin
@@ -14091,7 +14086,7 @@
                   DAE.AND(__)  => begin
                     8
                   end
-                  
+
                   DAE.OR(__)  => begin
                     9
                   end
@@ -14100,7 +14095,7 @@
           outPriority
         end
 
-        function isWild(exp::DAE.Exp) ::Bool 
+        function isWild(exp::DAE.Exp) ::Bool
               local b::Bool
 
               b = begin
@@ -14108,7 +14103,7 @@
                   DAE.CREF(componentRef = DAE.WILD(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -14117,7 +14112,7 @@
           b
         end
 
-        function isNotWild(exp::DAE.Exp) ::Bool 
+        function isNotWild(exp::DAE.Exp) ::Bool
               local b::Bool
 
               b = begin
@@ -14125,7 +14120,7 @@
                   DAE.CREF(componentRef = DAE.WILD(__))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -14135,7 +14130,7 @@
         end
 
          #= Takes a list of dimensions and select the expressions dimensions, returning a list of expressions =#
-        function dimensionsToExps(dims::List{<:DAE.Dimension}) ::List{DAE.Exp} 
+        function dimensionsToExps(dims::List{<:DAE.Dimension}) ::List{DAE.Exp}
               local exps::List{DAE.Exp} = nil
 
               for d in dims
@@ -14145,7 +14140,7 @@
                     DAE.DIM_EXP(exp)  => begin
                       _cons(exp, exps)
                     end
-                    
+
                     _  => begin
                         exps
                     end
@@ -14157,7 +14152,7 @@
         end
 
          #= Splits a record into its elements. Works for crefs, records constructor calls, and casts of the same =#
-        function splitRecord(inExp::DAE.Exp, ty::DAE.Type) ::List{DAE.Exp} 
+        function splitRecord(inExp::DAE.Exp, ty::DAE.Type) ::List{DAE.Exp}
               local outExps::List{DAE.Exp}
 
               outExps = begin
@@ -14171,20 +14166,20 @@
                   (DAE.CAST(exp = exp), _)  => begin
                     splitRecord(exp, ty)
                   end
-                  
+
                   (DAE.CREF(__), DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(__), varLst =  nil()))  => begin
                     fail()
                   end
-                  
+
                   (DAE.CREF(componentRef = cr), DAE.T_COMPLEX(varLst = vs))  => begin
                     ListUtil.map1(vs, splitRecord2, cr)
                   end
-                  
+
                   (DAE.CALL(path = p1, expLst = exps, attr = DAE.CALL_ATTR(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(p2)))), _)  => begin
                       @match true = AbsynUtil.pathEqual(p1, p2) #= is record constructor =#
                     exps
                   end
-                  
+
                   (DAE.RECORD(exps = exps), _)  => begin
                     exps
                   end
@@ -14195,7 +14190,7 @@
           outExps
         end
 
-        function splitRecord2(var::DAE.Var, cr::DAE.ComponentRef) ::DAE.Exp 
+        function splitRecord2(var::DAE.Var, cr::DAE.ComponentRef) ::DAE.Exp
               local exp::DAE.Exp
 
               local n::String
@@ -14209,7 +14204,7 @@
         end
 
          #= Splits an array into a list of elements. =#
-        function splitArray(inExp::DAE.Exp) ::Tuple{List{DAE.Exp}, Bool} 
+        function splitArray(inExp::DAE.Exp) ::Tuple{List{DAE.Exp}, Bool}
               local didSplit::Bool
               local outExp::List{DAE.Exp}
 
@@ -14224,25 +14219,25 @@
                   DAE.ARRAY(array = expl)  => begin
                     (expl, true)
                   end
-                  
+
                   DAE.MATRIX(matrix = mat)  => begin
                     (ListUtil.flatten(mat), true)
                   end
-                  
+
                   DAE.RANGE(DAE.T_INTEGER(__), DAE.ICONST(istart), step, DAE.ICONST(istop))  => begin
                     (list(DAE.ICONST(i) for i in ExpressionSimplify.simplifyRange(istart, begin
                        @match step begin
                          NONE()  => begin
                            1
                          end
-                         
+
                          SOME(DAE.ICONST(istep))  => begin
                            istep
                          end
                        end
                      end, istop)), true)
                   end
-                  
+
                   _  => begin
                       (list(inExp), false)
                   end
@@ -14251,7 +14246,7 @@
           (outExp, didSplit)
         end
 
-        function equationExpEqual(exp1::DAE.EquationExp, exp2::DAE.EquationExp) ::Bool 
+        function equationExpEqual(exp1::DAE.EquationExp, exp2::DAE.EquationExp) ::Bool
               local b::Bool
 
               b = begin
@@ -14263,15 +14258,15 @@
                   (DAE.PARTIAL_EQUATION(e1), DAE.PARTIAL_EQUATION(e2))  => begin
                     expEqual(e1, e2)
                   end
-                  
+
                   (DAE.RESIDUAL_EXP(e1), DAE.RESIDUAL_EXP(e2))  => begin
                     expEqual(e1, e2)
                   end
-                  
+
                   (DAE.EQUALITY_EXPS(e1, e2), DAE.EQUALITY_EXPS(e3, e4))  => begin
                     expEqual(e1, e3) && expEqual(e2, e4)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -14292,7 +14287,7 @@
            The reason why this function takes a type instead of using the type of the
            expression is because it's used by Static.promoteExp, which already knows the
            type. =#
-        function promoteExp(inExp::DAE.Exp, inType::DAE.Type, inDims::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Type} 
+        function promoteExp(inExp::DAE.Exp, inType::DAE.Type, inDims::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -14319,7 +14314,7 @@
                       exp = promoteExp2(inExp, is_array_ty, inDims, tys)
                     (exp, res_ty)
                   end
-                  
+
                   _  => begin
                       (inExp, inType)
                   end
@@ -14355,7 +14350,7 @@
              makePromotedTypes({[2], [3], [1]}, Real) =>
                 {Real[2,3,1], Real[3,1], Real[1]}
             =#
-        function makePromotedTypes(inDimensions::List{<:DAE.Dimension}, inElementType::DAE.Type, inAccumTypes::List{<:DAE.Type}) ::List{DAE.Type} 
+        function makePromotedTypes(inDimensions::List{<:DAE.Dimension}, inElementType::DAE.Type, inAccumTypes::List{<:DAE.Type}) ::List{DAE.Type}
               local outAccumTypes::List{DAE.Type}
 
               outAccumTypes = begin
@@ -14366,7 +14361,7 @@
                       ty = DAE.T_ARRAY(inElementType, inDimensions)
                     makePromotedTypes(rest_dims, inElementType, _cons(ty, inAccumTypes))
                   end
-                  
+
                   ( nil(), _, _)  => begin
                     listReverse(inAccumTypes)
                   end
@@ -14376,7 +14371,7 @@
         end
 
          #= Helper function to promoteExp. =#
-        function promoteExp2(inExp::DAE.Exp, inIsArray::Bool, inDims::ModelicaInteger, inTypes::List{<:DAE.Type}) ::DAE.Exp 
+        function promoteExp2(inExp::DAE.Exp, inIsArray::Bool, inDims::ModelicaInteger, inTypes::List{<:DAE.Type}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -14389,16 +14384,16 @@
                   (_, _, _,  nil())  => begin
                     inExp
                   end
-                  
+
                   (DAE.ARRAY(_, _, expl), _, _, ty <| rest_ty)  => begin
                       expl = ListUtil.map3(expl, promoteExp2, false, inDims, rest_ty)
                     DAE.ARRAY(ty, false, expl)
                   end
-                  
+
                   (_, true, _, ty <| _)  => begin
                     makePureBuiltinCall("promote", list(inExp, DAE.ICONST(inDims)), ty)
                   end
-                  
+
                   _  => begin
                       promoteExp3(inExp, inTypes)
                   end
@@ -14417,7 +14412,7 @@
 
          #= Helper function to promoteExp2. Promotes a scalar expression as many times as
            the number of types given. =#
-        function promoteExp3(inExp::DAE.Exp, inTypes::List{<:DAE.Type}) ::DAE.Exp 
+        function promoteExp3(inExp::DAE.Exp, inTypes::List{<:DAE.Type}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -14430,11 +14425,11 @@
                   (_,  nil())  => begin
                     inExp
                   end
-                  
+
                   (_, ty <|  nil())  => begin
                     makeArray(list(inExp), ty, true)
                   end
-                  
+
                   (_, ty <| rest_ty)  => begin
                       exp = promoteExp3(inExp, rest_ty)
                     makeArray(list(exp), ty, false)
@@ -14450,10 +14445,10 @@
           outExp
         end
 
-         #= 
+         #=
         author: PA
         hash expression to value in range [0,mod-1] =#
-        function hashExpMod(e::DAE.Exp, mod::ModelicaInteger) ::ModelicaInteger 
+        function hashExpMod(e::DAE.Exp, mod::ModelicaInteger) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = intMod(intAbs(hashExp(e)), mod)
@@ -14461,7 +14456,7 @@
         end
 
          #= help function to hashExpMod =#
-        function hashExp(e::DAE.Exp) ::ModelicaInteger 
+        function hashExp(e::DAE.Exp) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -14483,107 +14478,107 @@
                   DAE.ICONST(i)  => begin
                     stringHashDjb2(intString(i))
                   end
-                  
+
                   DAE.RCONST(r)  => begin
                     stringHashDjb2(realString(r))
                   end
-                  
+
                   DAE.BCONST(b)  => begin
                     stringHashDjb2(boolString(b))
                   end
-                  
+
                   DAE.SCONST(s)  => begin
                     stringHashDjb2(s)
                   end
-                  
+
                   DAE.ENUM_LITERAL(name = path)  => begin
                     stringHashDjb2(AbsynUtil.pathString(path))
                   end
-                  
+
                   DAE.CREF(componentRef = cr)  => begin
                     ComponentReference.hashComponentRef(cr)
                   end
-                  
+
                   DAE.BINARY(e1, op, e2)  => begin
                     1 + hashExp(e1) + hashOp(op) + hashExp(e2)
                   end
-                  
+
                   DAE.UNARY(op, e1)  => begin
                     2 + hashOp(op) + hashExp(e1)
                   end
-                  
+
                   DAE.LBINARY(e1, op, e2)  => begin
                     3 + hashExp(e1) + hashOp(op) + hashExp(e2)
                   end
-                  
+
                   DAE.LUNARY(op, e1)  => begin
                     4 + hashOp(op) + hashExp(e1)
                   end
-                  
+
                   DAE.RELATION(e1, op, e2, _, _)  => begin
                     5 + hashExp(e1) + hashOp(op) + hashExp(e2)
                   end
-                  
+
                   DAE.IFEXP(e1, e2, e3)  => begin
                     6 + hashExp(e1) + hashExp(e2) + hashExp(e3)
                   end
-                  
+
                   DAE.CALL(path = path, expLst = expl)  => begin
                     7 + stringHashDjb2(AbsynUtil.pathString(path)) + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.RECORD(path = path, exps = expl)  => begin
                     8 + stringHashDjb2(AbsynUtil.pathString(path)) + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(path = path, expList = expl)  => begin
                     9 + stringHashDjb2(AbsynUtil.pathString(path)) + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                     10 + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.MATRIX(matrix = mexpl)  => begin
                     11 + ListUtil.reduce(ListUtil.map(ListUtil.flatten(mexpl), hashExp), intAdd)
                   end
-                  
+
                   DAE.RANGE(_, e1, SOME(e2), e3)  => begin
                     12 + hashExp(e1) + hashExp(e2) + hashExp(e3)
                   end
-                  
+
                   DAE.RANGE(_, e1, NONE(), e3)  => begin
                     13 + hashExp(e1) + hashExp(e3)
                   end
-                  
+
                   DAE.TUPLE(expl)  => begin
                     14 + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.CAST(_, e1)  => begin
                     15 + hashExp(e1)
                   end
-                  
+
                   DAE.ASUB(e1, expl)  => begin
                     16 + hashExp(e1) + ListUtil.reduce(ListUtil.map(expl, hashExp), intAdd)
                   end
-                  
+
                   DAE.TSUB(e1, i, _)  => begin
                     17 + hashExp(e1) + stringHashDjb2(intString(i))
                   end
-                  
+
                   DAE.SIZE(e1, SOME(e2))  => begin
                     18 + hashExp(e1) + hashExp(e2)
                   end
-                  
+
                   DAE.SIZE(e1, NONE())  => begin
                     19 + hashExp(e1)
                   end
-                  
+
                   DAE.REDUCTION(info, e1, iters)  => begin
                     22 + hashReductionInfo(info) + hashExp(e1) + ListUtil.reduce(ListUtil.map(iters, hashReductionIter), intAdd)
                   end
-                  
+
                   _  => begin
                       stringHashDjb2(ExpressionDump.printExpStr(e))
                   end
@@ -14599,7 +14594,7 @@
         end
 
          #= help function to hashExp =#
-        function hashReductionInfo(info::DAE.ReductionInfo) ::ModelicaInteger 
+        function hashReductionInfo(info::DAE.ReductionInfo) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -14616,7 +14611,7 @@
         end
 
          #= help function to hashExp =#
-        function hashReductionIter(iter::DAE.ReductionIterator) ::ModelicaInteger 
+        function hashReductionIter(iter::DAE.ReductionIterator) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -14627,7 +14622,7 @@
                   DAE.REDUCTIONITER(id, e1, SOME(e2), _)  => begin
                     23 + stringHashDjb2(id) + hashExp(e1) + hashExp(e2)
                   end
-                  
+
                   DAE.REDUCTIONITER(id, e1, NONE(), _)  => begin
                     24 + stringHashDjb2(id) + hashExp(e1)
                   end
@@ -14637,7 +14632,7 @@
         end
 
          #= help function to hashExp =#
-        function hashOp(op::DAE.Operator) ::ModelicaInteger 
+        function hashOp(op::DAE.Operator) ::ModelicaInteger
               local hash::ModelicaInteger
 
               hash = begin
@@ -14646,127 +14641,127 @@
                   DAE.ADD(_)  => begin
                     25
                   end
-                  
+
                   DAE.SUB(_)  => begin
                     26
                   end
-                  
+
                   DAE.MUL(_)  => begin
                     27
                   end
-                  
+
                   DAE.DIV(_)  => begin
                     28
                   end
-                  
+
                   DAE.POW(_)  => begin
                     29
                   end
-                  
+
                   DAE.UMINUS(_)  => begin
                     30
                   end
-                  
+
                   DAE.UMINUS_ARR(_)  => begin
                     31
                   end
-                  
+
                   DAE.ADD_ARR(_)  => begin
                     32
                   end
-                  
+
                   DAE.SUB_ARR(_)  => begin
                     33
                   end
-                  
+
                   DAE.MUL_ARR(_)  => begin
                     34
                   end
-                  
+
                   DAE.DIV_ARR(_)  => begin
                     35
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(_)  => begin
                     36
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(_)  => begin
                     37
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(_)  => begin
                     38
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(_)  => begin
                     39
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(_)  => begin
                     40
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(_)  => begin
                     41
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(_)  => begin
                     42
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(_)  => begin
                     43
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(_)  => begin
                     44
                   end
-                  
+
                   DAE.POW_ARR(_)  => begin
                     45
                   end
-                  
+
                   DAE.POW_ARR2(_)  => begin
                     46
                   end
-                  
+
                   DAE.AND(_)  => begin
                     47
                   end
-                  
+
                   DAE.OR(_)  => begin
                     48
                   end
-                  
+
                   DAE.NOT(_)  => begin
                     49
                   end
-                  
+
                   DAE.LESS(_)  => begin
                     50
                   end
-                  
+
                   DAE.LESSEQ(_)  => begin
                     51
                   end
-                  
+
                   DAE.GREATER(_)  => begin
                     52
                   end
-                  
+
                   DAE.GREATEREQ(_)  => begin
                     53
                   end
-                  
+
                   DAE.EQUAL(_)  => begin
                     54
                   end
-                  
+
                   DAE.NEQUAL(_)  => begin
                     55
                   end
-                  
+
                   DAE.USERDEFINED(path)  => begin
                     56 + stringHashDjb2(AbsynUtil.pathString(path))
                   end
@@ -14775,7 +14770,7 @@
           hash
         end
 
-        function matrixToArray(inMatrix::DAE.Exp) ::DAE.Exp 
+        function matrixToArray(inMatrix::DAE.Exp) ::DAE.Exp
               local outArray::DAE.Exp
 
               outArray = begin
@@ -14789,7 +14784,7 @@
                       rows = ListUtil.map2(matrix, makeArray, row_ty, true)
                     DAE.ARRAY(ty, false, rows)
                   end
-                  
+
                   _  => begin
                       inMatrix
                   end
@@ -14798,7 +14793,7 @@
           outArray
         end
 
-        function transposeArray(inArray::DAE.Exp) ::Tuple{DAE.Exp, Bool} 
+        function transposeArray(inArray::DAE.Exp) ::Tuple{DAE.Exp, Bool}
               local outWasTransposed::Bool
               local outArray::DAE.Exp
 
@@ -14817,7 +14812,7 @@
                   DAE.ARRAY(DAE.T_ARRAY(ty, dim1 <| dim2 <| rest_dims), _,  nil())  => begin
                     (DAE.ARRAY(DAE.T_ARRAY(ty, _cons(dim2, _cons(dim1, rest_dims))), false, nil), true)
                   end
-                  
+
                   DAE.ARRAY(DAE.T_ARRAY(ty, dim1 <| dim2 <| rest_dims), _, expl)  => begin
                       row_ty = DAE.T_ARRAY(ty, _cons(dim1, rest_dims))
                       matrix = ListUtil.map(expl, getArrayOrMatrixContents)
@@ -14825,14 +14820,14 @@
                       expl = ListUtil.map2(matrix, makeArray, row_ty, true)
                     (DAE.ARRAY(DAE.T_ARRAY(ty, _cons(dim2, _cons(dim1, rest_dims))), false, expl), true)
                   end
-                  
+
                   DAE.MATRIX(matrix = matrix, ty = DAE.T_ARRAY(ty, dim1 <| dim2 <|  nil()))  => begin
                       matrix = ListUtil.transposeList(matrix)
                       ty = DAE.T_ARRAY(ty, list(dim2, dim1))
                       i = listLength(matrix)
                     (DAE.MATRIX(ty, i, matrix), true)
                   end
-                  
+
                   _  => begin
                       (inArray, false)
                   end
@@ -14842,7 +14837,7 @@
         end
 
          #= Get the cref from an expression that might be ASUB. If so, return the base CREF (this function does *not* always return a CREF with the same type as the full expression). =#
-        function getCrefFromCrefOrAsub(exp::DAE.Exp) ::DAE.ComponentRef 
+        function getCrefFromCrefOrAsub(exp::DAE.Exp) ::DAE.ComponentRef
               local cr::DAE.ComponentRef
 
               cr = begin
@@ -14850,7 +14845,7 @@
                   DAE.CREF(componentRef = cr)  => begin
                     cr
                   end
-                  
+
                   DAE.ASUB(exp = DAE.CREF(componentRef = cr))  => begin
                     cr
                   end
@@ -14860,7 +14855,7 @@
         end
 
          #= Returns the array elements of an expression. =#
-        function arrayElements(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function arrayElements(inExp::DAE.Exp) ::List{DAE.Exp}
               local outExp::List{DAE.Exp}
 
               outExp = begin
@@ -14874,19 +14869,19 @@
                       expl = ListUtil.map(crl, crefExp)
                     expl
                   end
-                  
+
                   DAE.ARRAY(array = expl, ty = DAE.T_ARRAY(__))  => begin
                     ListUtil.mapFlat(expl, arrayElements)
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                     expl
                   end
-                  
+
                   DAE.MATRIX(matrix = mat)  => begin
                     ListUtil.flatten(mat)
                   end
-                  
+
                   _  => begin
                       list(inExp)
                   end
@@ -14896,7 +14891,7 @@
         end
 
          #= Returns the contents of an array expression, i.e. a list of expressions. =#
-        function arrayContent(inExp::DAE.Exp) ::List{DAE.Exp} 
+        function arrayContent(inExp::DAE.Exp) ::List{DAE.Exp}
               local outContent::List{DAE.Exp}
 
               @match DAE.ARRAY(array = outContent) = inExp
@@ -14905,7 +14900,7 @@
 
          #= @author: adrpo
          transform Absyn.Exp into DAE.Exp, unknown types are used =#
-        function fromAbsynExp(inAExp::Absyn.Exp) ::DAE.Exp 
+        function fromAbsynExp(inAExp::Absyn.Exp) ::DAE.Exp
               local outDExp::DAE.Exp
 
               outDExp = begin
@@ -14936,26 +14931,26 @@
                   Absyn.INTEGER(i)  => begin
                     DAE.ICONST(i)
                   end
-                  
+
                   Absyn.REAL(s)  => begin
                       r = System.stringReal(s)
                     DAE.RCONST(r)
                   end
-                  
+
                   Absyn.BOOL(b)  => begin
                     DAE.BCONST(b)
                   end
-                  
+
                   Absyn.STRING(s)  => begin
                     DAE.SCONST(s)
                   end
-                  
+
                   Absyn.CREF(acr)  => begin
                       cr = ComponentReference.toExpCref(acr)
                       e = makeCrefExp(cr, DAE.T_UNKNOWN_DEFAULT)
                     e
                   end
-                  
+
                   Absyn.BINARY(ae1, aop, ae2)  => begin
                       op = fromAbsynOperator(aop, DAE.T_UNKNOWN_DEFAULT)
                       e1 = fromAbsynExp(ae1)
@@ -14963,14 +14958,14 @@
                       e = DAE.BINARY(e1, op, e2)
                     e
                   end
-                  
+
                   Absyn.UNARY(aop, ae)  => begin
                       op = fromAbsynOperator(aop, DAE.T_UNKNOWN_DEFAULT)
                       e = fromAbsynExp(ae)
                       e = DAE.UNARY(op, e)
                     e
                   end
-                  
+
                   Absyn.LBINARY(ae1, aop, ae2)  => begin
                       op = fromAbsynOperator(aop, DAE.T_UNKNOWN_DEFAULT)
                       e1 = fromAbsynExp(ae1)
@@ -14978,14 +14973,14 @@
                       e = DAE.LBINARY(e1, op, e2)
                     e
                   end
-                  
+
                   Absyn.LUNARY(aop, ae)  => begin
                       op = fromAbsynOperator(aop, DAE.T_UNKNOWN_DEFAULT)
                       e = fromAbsynExp(ae)
                       e = DAE.LUNARY(op, e)
                     e
                   end
-                  
+
                   Absyn.RELATION(ae1, aop, ae2)  => begin
                       op = fromAbsynOperator(aop, DAE.T_UNKNOWN_DEFAULT)
                       e1 = fromAbsynExp(ae1)
@@ -14993,7 +14988,7 @@
                       e = DAE.RELATION(e1, op, e2, 0, NONE())
                     e
                   end
-                  
+
                   ae && Absyn.IFEXP(__)  => begin
                       @match Absyn.IFEXP(ifExp = cond, trueBranch = ae1, elseBranch = ae2) = AbsynUtil.canonIfExp(ae)
                       e = fromAbsynExp(cond)
@@ -15002,34 +14997,34 @@
                       e = DAE.IFEXP(e, e1, e2)
                     e
                   end
-                  
+
                   Absyn.CALL(acr, fargs)  => begin
                       exps = fargsToExps(fargs)
                       p = AbsynUtil.crefToPath(acr)
                       e = DAE.CALL(p, exps, DAE.callAttrBuiltinOther)
                     e
                   end
-                  
+
                   Absyn.PARTEVALFUNCTION(acr, fargs)  => begin
                       exps = fargsToExps(fargs)
                       p = AbsynUtil.crefToPath(acr)
                       e = DAE.PARTEVALFUNCTION(p, exps, DAE.T_UNKNOWN_DEFAULT, DAE.T_UNKNOWN_DEFAULT)
                     e
                   end
-                  
+
                   Absyn.ARRAY(aexps)  => begin
                       exps = ListUtil.map(aexps, fromAbsynExp)
                       e = DAE.ARRAY(DAE.T_UNKNOWN_DEFAULT, false, exps)
                     e
                   end
-                  
+
                   Absyn.MATRIX(aexpslst)  => begin
                       expslst = ListUtil.mapList(aexpslst, fromAbsynExp)
                       i = listLength(listHead(expslst))
                       e = DAE.MATRIX(DAE.T_UNKNOWN_DEFAULT, i, expslst)
                     e
                   end
-                  
+
                   Absyn.RANGE(ae1, aoe, ae2)  => begin
                       e1 = fromAbsynExp(ae1)
                       e2 = fromAbsynExp(ae2)
@@ -15037,13 +15032,13 @@
                       e = DAE.RANGE(DAE.T_UNKNOWN_DEFAULT, e1, oe, e2)
                     e
                   end
-                  
+
                   Absyn.TUPLE(aexps)  => begin
                       exps = ListUtil.map(aexps, fromAbsynExp)
                       e = DAE.TUPLE(exps)
                     e
                   end
-                  
+
                   _  => begin
                         print("Expression.fromAbsynExp: Unhandled expression: " + Dump.printExpStr(inAExp) + "\\n")
                       fail()
@@ -15053,7 +15048,7 @@
           outDExp
         end
 
-        function fargsToExps(inFargs::Absyn.FunctionArgs) ::List{DAE.Exp} 
+        function fargsToExps(inFargs::Absyn.FunctionArgs) ::List{DAE.Exp}
               local outExps::List{DAE.Exp}
 
               outExps = begin
@@ -15065,7 +15060,7 @@
                       exps = ListUtil.map(aexps, fromAbsynExp)
                     exps
                   end
-                  
+
                   Absyn.FUNCTIONARGS(_, _)  => begin
                       print("Expression.fargsToExps: Named arguments are not handled!\\n")
                     nil
@@ -15075,7 +15070,7 @@
           outExps
         end
 
-        function fromAbsynExpOpt(aoe::Option{<:Absyn.Exp}) ::Option{DAE.Exp} 
+        function fromAbsynExpOpt(aoe::Option{<:Absyn.Exp}) ::Option{DAE.Exp}
               local oe::Option{DAE.Exp}
 
               oe = begin
@@ -15085,7 +15080,7 @@
                   NONE()  => begin
                     NONE()
                   end
-                  
+
                   SOME(ae)  => begin
                       e = fromAbsynExp(ae)
                     SOME(e)
@@ -15096,7 +15091,7 @@
         end
 
          #= @author: adrpo =#
-        function fromAbsynOperator(aop::Absyn.Operator, ty::DAE.Type) ::DAE.Operator 
+        function fromAbsynOperator(aop::Absyn.Operator, ty::DAE.Type) ::DAE.Operator
               local op::DAE.Operator
 
               op = begin
@@ -15104,63 +15099,63 @@
                   (Absyn.ADD(__), _)  => begin
                     DAE.ADD(ty)
                   end
-                  
+
                   (Absyn.SUB(__), _)  => begin
                     DAE.SUB(ty)
                   end
-                  
+
                   (Absyn.MUL(__), _)  => begin
                     DAE.MUL(ty)
                   end
-                  
+
                   (Absyn.DIV(__), _)  => begin
                     DAE.DIV(ty)
                   end
-                  
+
                   (Absyn.POW(__), _)  => begin
                     DAE.POW(ty)
                   end
-                  
+
                   (Absyn.UMINUS(__), _)  => begin
                     DAE.UMINUS(ty)
                   end
-                  
+
                   (Absyn.AND(__), _)  => begin
                     DAE.AND(ty)
                   end
-                  
+
                   (Absyn.OR(__), _)  => begin
                     DAE.OR(ty)
                   end
-                  
+
                   (Absyn.NOT(__), _)  => begin
                     DAE.NOT(ty)
                   end
-                  
+
                   (Absyn.LESS(__), _)  => begin
                     DAE.LESS(ty)
                   end
-                  
+
                   (Absyn.LESSEQ(__), _)  => begin
                     DAE.LESSEQ(ty)
                   end
-                  
+
                   (Absyn.GREATER(__), _)  => begin
                     DAE.GREATER(ty)
                   end
-                  
+
                   (Absyn.GREATEREQ(__), _)  => begin
                     DAE.GREATEREQ(ty)
                   end
-                  
+
                   (Absyn.EQUAL(__), _)  => begin
                     DAE.EQUAL(ty)
                   end
-                  
+
                   (Absyn.NEQUAL(__), _)  => begin
                     DAE.NEQUAL(ty)
                   end
-                  
+
                   _  => begin
                         print("Expression.fromAbsynOperator: Unhandled operator: " + Dump.opSymbol(aop) + "\\n")
                       fail()
@@ -15171,7 +15166,7 @@
         end
 
          #= Replaces all der(cref) with $DER.cref in an expression. =#
-        function replaceDerOpInExp(inExp::DAE.Exp) ::DAE.Exp 
+        function replaceDerOpInExp(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               (outExp, _) = traverseExpBottomUp(inExp, replaceDerOpInExpTraverser, NONE())
@@ -15180,7 +15175,7 @@
 
          #= Replaces der(cref) with $DER.cref in an expression, where the cref to replace
           is explicitly given. =#
-        function replaceDerOpInExpCond(e::DAE.Exp, cr::Option{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Option{DAE.ComponentRef}} 
+        function replaceDerOpInExpCond(e::DAE.Exp, cr::Option{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Option{DAE.ComponentRef}}
               local outCr::Option{DAE.ComponentRef}
               local outExp::DAE.Exp
 
@@ -15197,7 +15192,7 @@
           Derive.differentiateExpression. Ideally these parts should be fixed so that they can
           handle der-calls, but until that happens we just replace the der-calls with
           crefs. =#
-        function replaceDerOpInExpTraverser(e::DAE.Exp, optCr::Option{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Option{DAE.ComponentRef}} 
+        function replaceDerOpInExpTraverser(e::DAE.Exp, optCr::Option{<:DAE.ComponentRef}) ::Tuple{DAE.Exp, Option{DAE.ComponentRef}}
               local outCr::Option{DAE.ComponentRef}
               local outExp::DAE.Exp
 
@@ -15213,13 +15208,13 @@
                       cref_exp = crefExp(derCr)
                     (cref_exp, optCr)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("der"), expLst = DAE.CREF(componentRef = cr) <|  nil()), NONE())  => begin
                       cr = ComponentReference.crefPrefixDer(cr)
                       cref_exp = crefExp(cr)
                     (cref_exp, NONE())
                   end
-                  
+
                   _  => begin
                       (e, optCr)
                   end
@@ -15228,7 +15223,7 @@
           (outExp, outCr)
         end
 
-        function makeBinaryExp(inLhs::DAE.Exp, inOp::DAE.Operator, inRhs::DAE.Exp) ::DAE.Exp 
+        function makeBinaryExp(inLhs::DAE.Exp, inOp::DAE.Operator, inRhs::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = DAE.BINARY(inLhs, inOp, inRhs)
@@ -15236,7 +15231,7 @@
         end
 
          #= Extracts an integer from an exp =#
-        function checkExpDimensionSizes(dim::DAE.Exp) ::Bool 
+        function checkExpDimensionSizes(dim::DAE.Exp) ::Bool
               local value::Bool
 
               value = begin
@@ -15248,7 +15243,7 @@
                           false
                         end
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -15259,7 +15254,7 @@
 
          #= Extracts an integer from an array dimension. Also handles DIM_EXP and
           DIM_UNKNOWN if checkModel is used. =#
-        function checkDimensionSizes(dim::DAE.Dimension) ::Bool 
+        function checkDimensionSizes(dim::DAE.Dimension) ::Bool
               local value::Bool
 
               value = begin
@@ -15267,19 +15262,19 @@
                   DAE.DIM_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_ENUM(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_UNKNOWN(__)  => begin
                     false
                   end
@@ -15289,7 +15284,7 @@
         end
 
          #= Extracts a list of integers from a list of array dimensions =#
-        function dimensionsList(inDims::DAE.Dimensions) ::List{ModelicaInteger} 
+        function dimensionsList(inDims::DAE.Dimensions) ::List{ModelicaInteger}
               local outValues::List{ModelicaInteger}
 
               local dims::List{ModelicaInteger}
@@ -15301,7 +15296,7 @@
                       dims = ListUtil.map(inDims, dimensionSizeAll)
                     dims
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -15311,7 +15306,7 @@
         end
 
          #= Extracts a list of integers from a list of expressions =#
-        function expDimensionsList(inDims::List{<:DAE.Exp}) ::List{ModelicaInteger} 
+        function expDimensionsList(inDims::List{<:DAE.Exp}) ::List{ModelicaInteger}
               local outValues::List{ModelicaInteger}
 
               local dims::List{ModelicaInteger}
@@ -15323,7 +15318,7 @@
                       dims = ListUtil.map(inDims, expInt)
                     dims
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -15335,7 +15330,7 @@
          #= Checks if all expressions in the given list are crefs with the same identifiers.
             e.g.  {A[1],A[2],…,A[n]} -> true
                   {A[1],B[1]} -> false =#
-        function isCrefListWithEqualIdents(iExpressions::List{<:DAE.Exp}) ::Bool 
+        function isCrefListWithEqualIdents(iExpressions::List{<:DAE.Exp}) ::Bool
               local oCrefWithEqualIdents::Bool
 
               local tmpCrefWithEqualIdents::Bool
@@ -15353,11 +15348,11 @@
                       tmpCrefWithEqualIdents = ListUtil.map1BoolAnd(crefs, ComponentReference.crefEqualWithoutLastSubs, headCref)
                     tmpCrefWithEqualIdents
                   end
-                  
+
                    nil()  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -15389,7 +15384,7 @@
           but as unique ids. i.e. x is different from der(x) and given der(x) x will not
           be extreacted as a unique id. Instead you get $DER.x. Same oes for pre and start.
          =#
-        function traverseExpDerPreStart(inExp::DAE.Exp, func::FuncExpType, inTypeA::Type_a) ::Tuple{DAE.Exp, Type_a} 
+        function traverseExpDerPreStart(inExp::DAE.Exp, func::FuncExpType, inTypeA::Type_a) ::Tuple{DAE.Exp, Type_a}
               local outA::Type_a
               local outExp::DAE.Exp
 
@@ -15440,32 +15435,32 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (e && DAE.ICONST(_), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (e && DAE.RCONST(_), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (e && DAE.SCONST(_), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (e && DAE.BCONST(_), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (e && DAE.ENUM_LITERAL(__), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.CREF(cr, tp), rel, ext_arg)  => begin
                       (cr_1, ext_arg) = traverseExpCref(cr, rel, ext_arg)
                       e = if referenceEq(cr, cr_1)
@@ -15476,7 +15471,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.UNARY(operator = op, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15487,7 +15482,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = op, exp2 = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15499,7 +15494,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.LUNARY(operator = op, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15510,7 +15505,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15522,7 +15517,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.RELATION(exp1 = e1, operator = op, exp2 = e2, index = index_, optionExpisASUB = isExpisASUB), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15534,7 +15529,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15547,7 +15542,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.CALL(path = fn, expLst = expl, attr = attr), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15558,7 +15553,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.RECORD(path = fn, exps = expl, comp = fieldNames, ty = tp), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15569,7 +15564,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.PARTEVALFUNCTION(fn, expl, tp, t), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15580,7 +15575,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.ARRAY(ty = tp, scalar = scalar, array = expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15591,7 +15586,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.MATRIX(ty = tp, integer = dim, matrix = lstexpl), rel, ext_arg)  => begin
                       (lstexpl_1, ext_arg) = traverseExpMatrix(lstexpl, rel, ext_arg)
                       e = if referenceEq(lstexpl, lstexpl_1)
@@ -15602,7 +15597,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.RANGE(ty = tp, start = e1, step = NONE(), stop = e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15614,7 +15609,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.RANGE(ty = tp, start = e1, step = SOME(e2), stop = e3), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15627,7 +15622,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.TUPLE(PR = expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15638,7 +15633,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.CAST(ty = tp, exp = e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15649,7 +15644,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.ASUB(exp = e1, sub = expl), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
@@ -15661,7 +15656,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.TSUB(e1, i, tp), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15672,7 +15667,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.SIZE(exp = e1, sz = NONE()), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15683,7 +15678,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.SIZE(exp = e1, sz = SOME(e2)), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15695,7 +15690,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.REDUCTION(reductionInfo = reductionInfo, expr = e1, iterators = riters), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (riters_1, ext_arg) = traverseReductionIterators(riters, rel, ext_arg)
@@ -15707,7 +15702,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.CONS(e1, e2), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       (e2_1, ext_arg) = traverseExpDerPreStart(e2, rel, ext_arg)
@@ -15719,7 +15714,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.LIST(expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15730,7 +15725,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.META_TUPLE(expl), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15741,12 +15736,12 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.META_OPTION(NONE()), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(inExp, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.META_OPTION(SOME(e1)), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15757,7 +15752,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.BOX(e1), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15768,7 +15763,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.UNBOX(e1, tp), rel, ext_arg)  => begin
                       (e1_1, ext_arg) = traverseExpDerPreStart(e1, rel, ext_arg)
                       e = if referenceEq(e1, e1_1)
@@ -15779,7 +15774,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.METARECORDCALL(fn, expl, fieldNames, i, typeVars), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       e = if referenceEq(expl, expl_1)
@@ -15790,7 +15785,7 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
                       (cases_1, ext_arg) = Patternm.traverseCases(cases, rel, ext_arg)
@@ -15802,21 +15797,21 @@
                       (e, ext_arg) = rel(e, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.SHARED_LITERAL(__), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(inExp, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.PATTERN(__), rel, ext_arg)  => begin
                       (e, ext_arg) = rel(inExp, ext_arg)
                     (e, ext_arg)
                   end
-                  
+
                   (DAE.CODE(__), _, ext_arg)  => begin
                     (inExp, ext_arg)
                   end
-                  
+
                   _  => begin
                         str = ExpressionDump.printExpStr(inExp)
                         str = "Expression.traverseExpDerPreStart or one of the user-defined functions using it is not implemented correctly: " + str
@@ -15854,7 +15849,7 @@
           This function will not treat der(), pre() and start() as calls
           but as unique ids. i.e. x is different from der(x) and given der(x) x will not
           be extreacted as a unique id. Instead you get $DER.x. Same oes for pre and start.. =#
-        function traverseExpDerPreStartList(inExpl::List{<:DAE.Exp}, rel::FuncExpType, iext_arg::Type_a) ::Tuple{List{DAE.Exp}, Type_a} 
+        function traverseExpDerPreStartList(inExpl::List{<:DAE.Exp}, rel::FuncExpType, iext_arg::Type_a) ::Tuple{List{DAE.Exp}, Type_a}
               local outA::Type_a
               local outExpl::List{DAE.Exp}
 
@@ -15868,7 +15863,7 @@
                   ( nil(), _, ext_arg)  => begin
                     (inExpl, ext_arg)
                   end
-                  
+
                   (e <| expl, _, ext_arg)  => begin
                       (e1, ext_arg) = traverseExpDerPreStart(e, rel, ext_arg)
                       (expl1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
@@ -15884,7 +15879,7 @@
           (outExpl, outA)
         end
 
-        function renameExpCrefIdent(inExp::DAE.Exp, inTpl::Tuple{<:String, String}) ::Tuple{DAE.Exp, Tuple{String, String}} 
+        function renameExpCrefIdent(inExp::DAE.Exp, inTpl::Tuple{<:String, String}) ::Tuple{DAE.Exp, Tuple{String, String}}
               local outTpl::Tuple{String, String}
               local outExp::DAE.Exp
 
@@ -15904,7 +15899,7 @@
                           end
                     (exp, inTpl)
                   end
-                  
+
                   _  => begin
                       (inExp, inTpl)
                   end
@@ -15913,7 +15908,7 @@
           (outExp, outTpl)
         end
 
-        function emptyToWild(exp::DAE.Exp) ::DAE.Exp 
+        function emptyToWild(exp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty::DAE.Type
@@ -15927,14 +15922,14 @@
           outExp
         end
 
-        function makeVectorCall(exp::DAE.Exp, tp::DAE.Type) ::DAE.Exp 
+        function makeVectorCall(exp::DAE.Exp, tp::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = makePureBuiltinCall("vector", list(exp), tp)
           outExp
         end
 
-        function expandCrefs(exp::DAE.Exp, dummy::ModelicaInteger = 0 #= For traversal =#) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function expandCrefs(exp::DAE.Exp, dummy::ModelicaInteger = 0 #= For traversal =#) ::Tuple{DAE.Exp, ModelicaInteger}
 
 
 
@@ -15944,7 +15939,7 @@
                   DAE.CREF(ty = DAE.T_ARRAY(ty = ty))  => begin
                     makeArray(list(makeCrefExp(cr, ty) for cr in ComponentReference.expandCref(exp.componentRef, true)), exp.ty, ! Types.isArray(ty))
                   end
-                  
+
                   _  => begin
                       exp
                   end
@@ -15961,7 +15956,7 @@
 
            Right now this is used in generating simple residual equations from complex ones in SimCode.
           =#
-        function expandExpression(inExp::DAE.Exp, expandRecord::Bool) ::List{DAE.Exp} 
+        function expandExpression(inExp::DAE.Exp, expandRecord::Bool) ::List{DAE.Exp}
               local outExps::List{DAE.Exp}
 
               outExps = begin
@@ -15980,12 +15975,12 @@
                       outExps = ListUtil.map(crlst, crefToExp)
                     outExps
                   end
-                  
+
                   DAE.UNARY(operator = DAE.UMINUS(__))  => begin
                       expl = list(DAE.UNARY(inExp.operator, exp) for exp in expandExpression(inExp.exp, expandRecord))
                     expl
                   end
-                  
+
                   DAE.BINARY(__)  => begin
                        #=  TODO! FIXME! we should change the type in the operator,
                        =#
@@ -16011,12 +16006,12 @@
                       expl = listReverse(expl)
                     expl
                   end
-                  
+
                   DAE.ARRAY(_, _, expl)  => begin
                       expl = ListUtil.mapFlat(expl, (expandRecord) -> expandExpression(expandRecord = expandRecord))
                     expl
                   end
-                  
+
                   _  => begin
                         msg = "- Expression.expandExpression failed for " + ExpressionDump.printExpStr(inExp)
                         Error.addMessage(Error.INTERNAL_ERROR, list(msg))
@@ -16029,7 +16024,7 @@
 
          #= author: Frenkel TUD 2010-07
           alternative name: vectorizeExp =#
-        function extendArrExp(inExp::DAE.Exp, inExpanded::Bool = false #= True if something was expanded, otherwise false. =#) ::Tuple{DAE.Exp, Bool} 
+        function extendArrExp(inExp::DAE.Exp, inExpanded::Bool = false #= True if something was expanded, otherwise false. =#) ::Tuple{DAE.Exp, Bool}
               local outExpanded::Bool
               local outExp::DAE.Exp
 
@@ -16041,7 +16036,7 @@
                       (exp, b) = traverseExpBottomUp(inExp, traversingextendArrExp, false)
                     (exp, b)
                   end
-                  
+
                   _  => begin
                       (inExp, inExpanded)
                   end
@@ -16054,7 +16049,7 @@
           This function extend all array and record componentrefs to their
           elements. This is necessary for BLT and substitution of simple
           equations. =#
-        function traversingextendArrExp(inExp::DAE.Exp, inExpanded::Bool) ::Tuple{DAE.Exp, Bool} 
+        function traversingextendArrExp(inExp::DAE.Exp, inExpanded::Bool) ::Tuple{DAE.Exp, Bool}
               local outExpanded::Bool
               local outExp::DAE.Exp
 
@@ -16081,13 +16076,13 @@
                       e = DAE.MATRIX(ty, i, mat)
                     (e, true)
                   end
-                  
+
                   DAE.CREF(ty = ty && DAE.T_ARRAY(__))  => begin
                       expl = expandExpression(inExp, expandRecord = false)
                       e = DAE.ARRAY(ty, true, expl)
                     (e, true)
                   end
-                  
+
                   DAE.CREF(componentRef = cr, ty = ty && DAE.T_COMPLEX(varLst = varLst, complexClassType = ClassInf.RECORD(name)))  => begin
                       expl = ListUtil.map1(varLst, generateCrefsExpFromExpVar, cr)
                       i = listLength(expl)
@@ -16096,7 +16091,7 @@
                       (e, _) = traverseExpBottomUp(e, traversingextendArrExp, true)
                     (e, true)
                   end
-                  
+
                   _  => begin
                       (inExp, inExpanded)
                   end
@@ -16112,7 +16107,7 @@
          #= traverses the subscripts of the templSubScript and searches for wholedim. the value replaces the wholedim.
         If there are multiple values, the templSubScript will be used for each of them and multiple new subScriptLsts are created.
         author:Waurich TUD 2014-04 =#
-        function insertSubScripts(templSubScript::List{<:DAE.Subscript}, value::List{<:List{<:DAE.Subscript}}, lstIn::List{<:DAE.Subscript}) ::List{List{DAE.Subscript}} 
+        function insertSubScripts(templSubScript::List{<:DAE.Subscript}, value::List{<:List{<:DAE.Subscript}}, lstIn::List{<:DAE.Subscript}) ::List{List{DAE.Subscript}}
               local outSubScript::List{List{DAE.Subscript}}
 
               outSubScript = begin
@@ -16128,13 +16123,13 @@
                       lsts = ListUtil.map1(lsts, ListUtil.append_reverser, rest)
                     lsts
                   end
-                  
+
                   (DAE.INDEX(__) <| rest, _, _)  => begin
                       sub = listHead(templSubScript)
                       lsts = insertSubScripts(rest, value, _cons(sub, lstIn))
                     lsts
                   end
-                  
+
                   _  => begin
                       value
                   end
@@ -16145,7 +16140,7 @@
           outSubScript
         end
 
-        function makeMatrix(expl::List{<:DAE.Exp}, n::ModelicaInteger) ::List{List{DAE.Exp}} 
+        function makeMatrix(expl::List{<:DAE.Exp}, n::ModelicaInteger) ::List{List{DAE.Exp}}
               local res::List{List{DAE.Exp}}
 
               local col::List{DAE.Exp}
@@ -16173,7 +16168,7 @@
             {{1, 2, 3}, {1, 2}} which corresponds to dimensions [3, 2], and generates
             all subscript combinations, e.g. {{1, 1}, {1, 2}, {2, 1}, {2, 2}, {3, 1},
             {3, 2}}. =#
-        function rangesToSubscripts(inRangelist::List{<:List{<:DAE.Subscript}}) ::List{List{DAE.Subscript}} 
+        function rangesToSubscripts(inRangelist::List{<:List{<:DAE.Subscript}}) ::List{List{DAE.Subscript}}
               local outSubslst::List{List{DAE.Subscript}}
 
               outSubslst = ListUtil.allCombinations(inRangelist, NONE(), AbsynUtil.dummyInfo)
@@ -16182,7 +16177,7 @@
 
          #= Expands a subscript into a list of subscripts. Also takes a dimension to be
            able to evaluate : subscripts. =#
-        function expandSubscript(inSubscript::DAE.Subscript, inDimension::DAE.Dimension) ::List{DAE.Subscript} 
+        function expandSubscript(inSubscript::DAE.Subscript, inDimension::DAE.Dimension) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = begin
@@ -16193,19 +16188,19 @@
                   DAE.INDEX(exp = DAE.RANGE(__))  => begin
                     list(DAE.INDEX(e) for e in expandRange(inSubscript.exp))
                   end
-                  
+
                   DAE.INDEX(exp = DAE.ARRAY(__))  => begin
                     expandSliceExp(inSubscript.exp)
                   end
-                  
+
                   DAE.INDEX(__)  => begin
                     list(inSubscript)
                   end
-                  
+
                   DAE.WHOLEDIM(__)  => begin
                     expandDimension(inDimension)
                   end
-                  
+
                   DAE.SLICE(__)  => begin
                     expandSliceExp(inSubscript.exp)
                   end
@@ -16231,7 +16226,7 @@
         end
 
          #= Generates a list of subscripts given an array dimension. =#
-        function expandDimension(inDimension::DAE.Dimension) ::List{DAE.Subscript} 
+        function expandDimension(inDimension::DAE.Dimension) ::List{DAE.Subscript}
               local outSubscript::List{DAE.Subscript}
 
               outSubscript = begin
@@ -16245,16 +16240,16 @@
                   DAE.DIM_INTEGER(integer = dim_int)  => begin
                     dimensionSizeSubscripts(dim_int)
                   end
-                  
+
                   DAE.DIM_ENUM(enumTypeName = enum_ty, literals = enum_lits)  => begin
                       enum_expl = makeEnumLiterals(enum_ty, enum_lits)
                     ListUtil.map(enum_expl, makeIndexSubscript)
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                     _cons(DAE.INDEX(DAE.BCONST(false)), _cons(DAE.INDEX(DAE.BCONST(true)), nil))
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -16268,7 +16263,7 @@
         end
 
          #= Expands a slice subscript expression. =#
-        function expandSliceExp(inSliceExp::DAE.Exp) ::List{DAE.Subscript} 
+        function expandSliceExp(inSliceExp::DAE.Exp) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = begin
@@ -16279,7 +16274,7 @@
                   DAE.ARRAY(array = expl)  => begin
                     ListUtil.map(expl, makeIndexSubscript)
                   end
-                  
+
                   DAE.RANGE(__)  => begin
                     ListUtil.map(Expression.expandRange(inSliceExp), makeIndexSubscript)
                   end
@@ -16288,14 +16283,14 @@
           outSubscripts
         end
 
-        function dimensionSizesSubscripts(inDimSizes::List{<:ModelicaInteger}) ::List{List{DAE.Subscript}} 
+        function dimensionSizesSubscripts(inDimSizes::List{<:ModelicaInteger}) ::List{List{DAE.Subscript}}
               local outSubscripts::List{List{DAE.Subscript}}
 
               outSubscripts = ListUtil.map(inDimSizes, dimensionSizeSubscripts)
           outSubscripts
         end
 
-        function dimensionSizesSubcriptsOpt(inDimSizes::List{<:Option{<:ModelicaInteger}}) ::List{List{DAE.Subscript}} 
+        function dimensionSizesSubcriptsOpt(inDimSizes::List{<:Option{<:ModelicaInteger}}) ::List{List{DAE.Subscript}}
               local outSubscripts::List{List{DAE.Subscript}}
 
               outSubscripts = ListUtil.mapOption(inDimSizes, dimensionSizeSubscripts)
@@ -16304,7 +16299,7 @@
 
          #= Converts a dimension size in the form of an integer into a list of
            subscripts, e.g.: [3] => {1, 2, 3}. =#
-        function dimensionSizeSubscripts(inDimSize::ModelicaInteger) ::List{DAE.Subscript} 
+        function dimensionSizeSubscripts(inDimSize::ModelicaInteger) ::List{DAE.Subscript}
               local outSubscripts::List{DAE.Subscript}
 
               outSubscripts = list(DAE.INDEX(DAE.ICONST(i)) for i in 1:inDimSize)
@@ -16314,7 +16309,7 @@
          #= author: Frenkel TUD 2012-10
           do some numerical helpfull thinks like
           a = b/c - > a*c-b =#
-        function createResidualExp(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp 
+        function createResidualExp(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp
               local resExp::DAE.Exp
 
               local iExp1::DAE.Exp
@@ -16341,19 +16336,19 @@
                   (_, DAE.RCONST(real = 0.0))  => begin
                     iExp1
                   end
-                  
+
                   (_, DAE.ICONST(0))  => begin
                     iExp1
                   end
-                  
+
                   (DAE.RCONST(real = 0.0), _)  => begin
                     iExp2
                   end
-                  
+
                   (DAE.ICONST(0), _)  => begin
                     iExp2
                   end
-                  
+
                   (_, _)  => begin
                       ty = typeof(iExp1)
                       @match true = Types.isIntegerOrRealOrSubTypeOfEither(ty)
@@ -16371,28 +16366,28 @@
                       (res, _) = ExpressionSimplify.simplify(res)
                     res
                   end
-                  
+
                   (_, _)  => begin
                       ty = typeof(iExp1)
                       @match true = Types.isEnumeration(ty)
                       res = expSub(iExp1, iExp2)
                     res
                   end
-                  
+
                   (_, _)  => begin
                       ty = typeof(iExp1)
                       @match true = Types.isBooleanOrSubTypeBoolean(ty)
                       res = DAE.LUNARY(DAE.NOT(ty), DAE.RELATION(iExp1, DAE.EQUAL(ty), iExp2, -1, NONE()))
                     res
                   end
-                  
+
                   (_, _)  => begin
                       ty = typeof(iExp1)
                       @match true = Types.isStringOrSubTypeString(ty)
                       res = DAE.LUNARY(DAE.NOT(ty), DAE.RELATION(iExp1, DAE.EQUAL(ty), iExp2, -1, NONE()))
                     res
                   end
-                  
+
                   _  => begin
                         res = expSub(iExp1, iExp2)
                         (res, _) = ExpressionSimplify.simplify(res)
@@ -16409,7 +16404,7 @@
           resExp
         end
 
-         #= 
+         #=
         In: f(x) {+,-} g(x)
         Out: {N,D}
 
@@ -16418,7 +16413,7 @@
         author: Vitalij Ruge
 
          =#
-        function makeFraction(iExp::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp} 
+        function makeFraction(iExp::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp}
               local d::DAE.Exp #= denominator =#
               local n::DAE.Exp #= numerator =#
 
@@ -16439,7 +16434,7 @@
           (n #= numerator =#, d #= denominator =#)
         end
 
-        function moveDivToMul(iExpLst::List{<:DAE.Exp}, iExpLstAcc::List{<:DAE.Exp}, iExpMuls::List{<:DAE.Exp}) ::Tuple{List{DAE.Exp}, List{DAE.Exp}} 
+        function moveDivToMul(iExpLst::List{<:DAE.Exp}, iExpLstAcc::List{<:DAE.Exp}, iExpMuls::List{<:DAE.Exp}) ::Tuple{List{DAE.Exp}, List{DAE.Exp}}
               local oExpMuls::List{DAE.Exp}
               local oExpLst::List{DAE.Exp}
 
@@ -16455,7 +16450,7 @@
                   ( nil(), _, _)  => begin
                     (iExpLstAcc, iExpMuls)
                   end
-                  
+
                   (DAE.UNARY(_, DAE.BINARY(exp1 = e1, operator = DAE.DIV(__), exp2 = e2)) <| rest, _, _)  => begin
                       acc = ListUtil.map1(iExpLstAcc, Expression.expMul, e2)
                       rest = ListUtil.map1(rest, Expression.expMul, e2)
@@ -16463,7 +16458,7 @@
                       (elst, elst1) = moveDivToMul(rest, _cons(negate(e1), acc), _cons(e2, iExpMuls))
                     (elst, elst1)
                   end
-                  
+
                   (DAE.UNARY(_, DAE.BINARY(exp1 = e1, operator = DAE.DIV_ARRAY_SCALAR(__), exp2 = e2)) <| rest, _, _)  => begin
                       acc = ListUtil.map1(iExpLstAcc, Expression.expMul, e2)
                       rest = ListUtil.map1(rest, Expression.expMul, e2)
@@ -16471,7 +16466,7 @@
                       (elst, elst1) = moveDivToMul(rest, _cons(negate(e1), acc), _cons(e2, iExpMuls))
                     (elst, elst1)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV(__), exp2 = e2) <| rest, _, _)  => begin
                       acc = ListUtil.map1(iExpLstAcc, Expression.expMul, e2)
                       rest = ListUtil.map1(rest, Expression.expMul, e2)
@@ -16479,7 +16474,7 @@
                       (elst, elst1) = moveDivToMul(rest, _cons(e1, acc), _cons(e2, iExpMuls))
                     (elst, elst1)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_ARRAY_SCALAR(__), exp2 = e2) <| rest, _, _)  => begin
                       acc = ListUtil.map1(iExpLstAcc, Expression.expMul, e2)
                       rest = ListUtil.map1(rest, Expression.expMul, e2)
@@ -16487,7 +16482,7 @@
                       (elst, elst1) = moveDivToMul(rest, _cons(e1, acc), _cons(e2, iExpMuls))
                     (elst, elst1)
                   end
-                  
+
                   (e <| rest, _, _)  => begin
                       (elst, elst1) = moveDivToMul(rest, _cons(e, iExpLstAcc), iExpMuls)
                     (elst, elst1)
@@ -16504,7 +16499,7 @@
          #= author: Vitalij
           do some numerical helpfull thinks on like
           sqrt(f()) - sqrt(g(.)) = 0 -> f(.) - g(.) =#
-        function createResidualExp2(iExp1::DAE.Exp, iExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp} 
+        function createResidualExp2(iExp1::DAE.Exp, iExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp}
               local oExp2::DAE.Exp = iExp2
               local oExp1::DAE.Exp = iExp1
 
@@ -16524,14 +16519,14 @@
                         (e2, _) = ExpressionSimplify.simplify1(e2)
                       (e1, e2, true)
                     end
-                    
+
                     (_, _)  => begin
                         @match (e2, e1, true) = createResidualExp3(oExp2, oExp1)
                         (e1, _) = ExpressionSimplify.simplify1(e1)
                         (e2, _) = ExpressionSimplify.simplify1(e2)
                       (e1, e2, true)
                     end
-                    
+
                     _  => begin
                         (oExp1, oExp2, false)
                     end
@@ -16547,25 +16542,25 @@
                         (e1, e2) = makeFraction(oExp2)
                       (e1, oExp1, ! isOne(e2))
                     end
-                    
+
                     (_, _)  => begin
                         @match true = isZero(oExp2)
                         (e1, e2) = makeFraction(oExp1)
                       (e1, oExp2, ! isOne(e2))
                     end
-                    
+
                     (_, _)  => begin
                         @match true = isOne(oExp1)
                         (e1, e2) = makeFraction(oExp2)
                       (e1, e2, ! isOne(e2))
                     end
-                    
+
                     (_, _)  => begin
                         @match true = isOne(oExp2)
                         (e1, e2) = makeFraction(oExp1)
                       (e1, e2, ! isOne(e2))
                     end
-                    
+
                     _  => begin
                         (oExp1, oExp2, false)
                     end
@@ -16598,7 +16593,7 @@
          #= author: Vitalij
           helper function of createResidualExp3
           swaps args =#
-        function createResidualExp3(iExp1::DAE.Exp, iExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp, Bool} 
+        function createResidualExp3(iExp1::DAE.Exp, iExp2::DAE.Exp) ::Tuple{DAE.Exp, DAE.Exp, Bool}
               local con::Bool
               local oExp2::DAE.Exp
               local oExp1::DAE.Exp
@@ -16621,39 +16616,39 @@
                   (DAE.CALL(path = Absyn.IDENT(s1), expLst = e1 <|  nil()), DAE.CALL(path = Absyn.IDENT(s2), expLst = e2 <|  nil())) where (s1 == s2 && createResidualExp4(s1))  => begin
                     (e1, e2, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("sqrt"), expLst = e1 <|  nil()), DAE.RCONST(0.0))  => begin
                     (e1, iExp2, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("sqrt"), expLst = e1 <|  nil()), e2) where (Expression.isConst(e2))  => begin
                       e = Expression.expPow(iExp2, DAE.RCONST(2.0))
                     (e1, e, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("log"), expLst = e1 <|  nil()), e2) where (Expression.isConst(e2))  => begin
                       tp = Expression.typeof(iExp2)
                       e = Expression.makePureBuiltinCall("exp", list(iExp2), tp)
                     (e1, e, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("log10"), expLst = e1 <|  nil()), e2) where (Expression.isConst(e2))  => begin
                       e = Expression.expPow(DAE.RCONST(10.0), iExp2)
                     (e1, e, true)
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("semiLinear"), expLst = DAE.RCONST(0.0) <| e1 <| e2 <|  nil()), DAE.RCONST(0.0))  => begin
                     (e1, e2, true)
                   end
-                  
+
                   (DAE.UNARY(operator = DAE.UMINUS(__), exp = e1), e2 && DAE.RCONST(0.0))  => begin
                     (e1, e2, true)
                   end
-                  
+
                   (DAE.BINARY(DAE.CALL(path = Absyn.IDENT(s1), expLst = e1 <|  nil()), DAE.SUB(__), DAE.CALL(path = Absyn.IDENT(s2), expLst = e2 <|  nil())), DAE.RCONST(0.0)) where (s1 == s2 && createResidualExp4(s1))  => begin
                     (e1, e2, true)
                   end
-                  
+
                   _  => begin
                       (iExp1, iExp2, false)
                   end
@@ -16684,14 +16679,14 @@
           (oExp1, oExp2, con)
         end
 
-         #= 
+         #=
          author: Vitalij
          helper function of createResidualExp3
          return true if f(x) = f(y), then it can be transformed into x = y.
 
          Beware: function is not complete, yet!
          =#
-        function createResidualExp4(f::String) ::Bool 
+        function createResidualExp4(f::String) ::Bool
               local resB::Bool
 
               resB = begin
@@ -16699,27 +16694,27 @@
                   "sqrt"  => begin
                     true
                   end
-                  
+
                   "exp"  => begin
                     true
                   end
-                  
+
                   "log"  => begin
                     true
                   end
-                  
+
                   "log10"  => begin
                     true
                   end
-                  
+
                   "tanh"  => begin
                     true
                   end
-                  
+
                   "sinh"  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -16728,7 +16723,7 @@
           resB
         end
 
-        function isAsubExp(expIn::DAE.Exp) ::Bool 
+        function isAsubExp(expIn::DAE.Exp) ::Bool
               local isAsub::Bool
 
               isAsub = begin
@@ -16736,7 +16731,7 @@
                   DAE.ASUB(_, _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -16745,7 +16740,7 @@
           isAsub
         end
 
-        function typeCast(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp 
+        function typeCast(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = DAE.CAST(inType, inExp)
@@ -16753,7 +16748,7 @@
           outExp
         end
 
-        function typeCastElements(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp 
+        function typeCastElements(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty::DAE.Type
@@ -16766,7 +16761,7 @@
 
          #= Expands a range expression into its elements:
             expandRange(1:4) => {1, 2, 3, 4} =#
-        function expandRange(inRange::DAE.Exp) ::List{DAE.Exp} 
+        function expandRange(inRange::DAE.Exp) ::List{DAE.Exp}
               local outValues::List{DAE.Exp}
 
               local start_exp::DAE.Exp
@@ -16787,26 +16782,26 @@
                       @match DAE.ICONST(istep) = Util.getOptionOrDefault(ostep_exp, DAE.ICONST(1))
                     list(DAE.ICONST(i) for i in ListUtil.intRange3(start_exp.integer, istep, stop_exp.integer))
                   end
-                  
+
                   (DAE.RCONST(__), DAE.RCONST(__))  => begin
                        #=  A real range, with or without a step value.
                        =#
                       @match DAE.RCONST(rstep) = Util.getOptionOrDefault(ostep_exp, DAE.RCONST(1.0))
                     list(DAE.RCONST(r) for r in ExpressionSimplify.simplifyRangeReal(start_exp.real, rstep, stop_exp.real))
                   end
-                  
+
                   (DAE.BCONST(false), DAE.BCONST(true))  => begin
                     list(start_exp, stop_exp)
                   end
-                  
+
                   (DAE.BCONST(true), DAE.BCONST(false))  => begin
                     nil
                   end
-                  
+
                   (DAE.BCONST(__), DAE.BCONST(__))  => begin
                     list(start_exp)
                   end
-                  
+
                   (DAE.ENUM_LITERAL(__), DAE.ENUM_LITERAL(__))  => begin
                        #=  false:true => {false, true}
                        =#
@@ -16832,7 +16827,7 @@
           outValues
         end
 
-        function isScalar(inExp::DAE.Exp) ::Bool 
+        function isScalar(inExp::DAE.Exp) ::Bool
               local outIsScalar::Bool
 
               outIsScalar = begin
@@ -16840,59 +16835,59 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.CLKCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(__)  => begin
                     isScalar(inExp.exp)
                   end
-                  
+
                   DAE.LUNARY(__)  => begin
                     isScalar(inExp.exp)
                   end
-                  
+
                   DAE.RELATION(__)  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                     false
                   end
-                  
+
                   DAE.MATRIX(__)  => begin
                     false
                   end
-                  
+
                   DAE.RANGE(__)  => begin
                     false
                   end
-                  
+
                   DAE.CAST(__)  => begin
                     isScalar(inExp.exp)
                   end
-                  
+
                   DAE.SIZE(__)  => begin
                     isSome(inExp.sz)
                   end
-                  
+
                   _  => begin
                       Types.isSimpleType(typeof(inExp))
                   end
@@ -16903,14 +16898,14 @@
 
          #= Returns true if the given expression contains any function calls,
            otherwise false. =#
-        function containsAnyCall(inExp::DAE.Exp) ::Bool 
+        function containsAnyCall(inExp::DAE.Exp) ::Bool
               local outContainsCall::Bool
 
               (_, outContainsCall) = traverseExpTopDown(inExp, containsAnyCall_traverser, false)
           outContainsCall
         end
 
-        function containsAnyCall_traverser(inExp::DAE.Exp, inContainsCall::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function containsAnyCall_traverser(inExp::DAE.Exp, inContainsCall::Bool) ::Tuple{DAE.Exp, Bool, Bool}
               local outContainsCall::Bool
               local outContinue::Bool
               local outExp::DAE.Exp = inExp
@@ -16920,7 +16915,7 @@
                   DAE.CALL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       inContainsCall
                   end
@@ -16932,14 +16927,14 @@
 
          #= Returns true if the given expression contains any function calls,
            otherwise false. =#
-        function containsCallTo(inExp::DAE.Exp, path::Absyn.Path) ::Bool 
+        function containsCallTo(inExp::DAE.Exp, path::Absyn.Path) ::Bool
               local outContainsCall::Bool
 
               (_, (_, outContainsCall)) = traverseExpTopDown(inExp, containsCallTo_traverser, (path, false))
           outContainsCall
         end
 
-        function containsCallTo_traverser(inExp::DAE.Exp, inTpl::Tuple{<:Absyn.Path, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{Absyn.Path, Bool}} 
+        function containsCallTo_traverser(inExp::DAE.Exp, inTpl::Tuple{<:Absyn.Path, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{Absyn.Path, Bool}}
               local outTpl::Tuple{Absyn.Path, Bool} = inTpl
               local outContinue::Bool = false
               local outExp::DAE.Exp = inExp
@@ -16956,7 +16951,7 @@
                   DAE.CALL(__)  => begin
                     AbsynUtil.pathEqual(path, inExp.path)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -16970,7 +16965,7 @@
 
          #= Tries to figure out the size of a range expression. Either return the size or
            fails. =#
-        function rangeSize(inRange::DAE.Exp) ::ModelicaInteger 
+        function rangeSize(inRange::DAE.Exp) ::ModelicaInteger
               local outSize::ModelicaInteger
 
               outSize = begin
@@ -16981,7 +16976,7 @@
                   DAE.RANGE(start = DAE.ICONST(start), step = NONE(), stop = DAE.ICONST(stop))  => begin
                     max(stop - start, 0)
                   end
-                  
+
                   DAE.RANGE(start = DAE.ICONST(start), step = SOME(DAE.ICONST(step)), stop = DAE.ICONST(stop))  => begin
                       if step != 0
                         outSize = max(realInt(floor(realDiv(stop - start, step))) + 1, 0)
@@ -16995,7 +16990,7 @@
           outSize
         end
 
-        function compare(inExp1::DAE.Exp, inExp2::DAE.Exp) ::ModelicaInteger 
+        function compare(inExp1::DAE.Exp, inExp2::DAE.Exp) ::ModelicaInteger
               local comp::ModelicaInteger
 
                #=  Return true if the references are the same.
@@ -17038,32 +17033,32 @@
                       @match DAE.ICONST(integer = i) = inExp2
                     Util.intCompare(inExp1.integer, i)
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                       @match DAE.RCONST(real = r) = inExp2
                     Util.realCompare(inExp1.real, r)
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                       @match DAE.SCONST(string = s) = inExp2
                     stringCompare(inExp1.string, s)
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                       @match DAE.BCONST(bool = b) = inExp2
                     Util.boolCompare(inExp1.bool, b)
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                       @match DAE.ENUM_LITERAL(name = p) = inExp2
                     AbsynUtil.pathCompare(inExp1.name, p)
                   end
-                  
+
                   DAE.CREF(__)  => begin
                       @match DAE.CREF(componentRef = cr) = inExp2
                     ComponentReference.crefCompareGeneric(inExp1.componentRef, cr)
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                       @match DAE.ARRAY(ty = ty, array = expl) = inExp2
                       comp = valueCompare(inExp1.ty, ty)
@@ -17073,7 +17068,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.MATRIX(__)  => begin
                       @match DAE.MATRIX(ty = ty, matrix = mexpl) = inExp2
                       comp = valueCompare(inExp1.ty, ty)
@@ -17083,7 +17078,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.BINARY(__)  => begin
                       @match DAE.BINARY(exp1 = e1, operator = op, exp2 = e2) = inExp2
                       comp = operatorCompare(inExp1.operator, op)
@@ -17098,7 +17093,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.LBINARY(__)  => begin
                       @match DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2) = inExp2
                       comp = operatorCompare(inExp1.operator, op)
@@ -17113,7 +17108,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.UNARY(__)  => begin
                       @match DAE.UNARY(exp = e, operator = op) = inExp2
                       comp = operatorCompare(inExp1.operator, op)
@@ -17123,7 +17118,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.LUNARY(__)  => begin
                       @match DAE.LUNARY(exp = e, operator = op) = inExp2
                       comp = operatorCompare(inExp1.operator, op)
@@ -17133,7 +17128,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.RELATION(__)  => begin
                       @match DAE.RELATION(exp1 = e1, operator = op, exp2 = e2) = inExp2
                       comp = operatorCompare(inExp1.operator, op)
@@ -17148,7 +17143,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.IFEXP(__)  => begin
                       @match DAE.IFEXP(expCond = e, expThen = e1, expElse = e2) = inExp2
                       comp = compare(inExp1.expCond, e)
@@ -17163,7 +17158,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.CALL(__)  => begin
                       @match DAE.CALL(path = p, expLst = expl) = inExp2
                       comp = AbsynUtil.pathCompare(inExp1.path, p)
@@ -17173,7 +17168,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.RECORD(__)  => begin
                       @match DAE.RECORD(path = p, exps = expl) = inExp2
                       comp = AbsynUtil.pathCompare(inExp1.path, p)
@@ -17183,7 +17178,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(__)  => begin
                       @match DAE.PARTEVALFUNCTION(path = p, expList = expl) = inExp2
                       comp = AbsynUtil.pathCompare(inExp1.path, p)
@@ -17193,7 +17188,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.RANGE(__)  => begin
                       @match DAE.RANGE(start = e1, step = oe, stop = e2) = inExp2
                       comp = compare(inExp1.start, e1)
@@ -17208,12 +17203,12 @@
                           comp
                         end
                   end
-                  
+
                   DAE.TUPLE(__)  => begin
                       @match DAE.TUPLE(PR = expl) = inExp2
                     compareList(inExp1.PR, expl)
                   end
-                  
+
                   DAE.CAST(__)  => begin
                       @match DAE.CAST(ty = ty, exp = e) = inExp2
                       comp = valueCompare(inExp1.ty, ty)
@@ -17223,7 +17218,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.ASUB(__)  => begin
                       @match DAE.ASUB(exp = e, sub = expl) = inExp2
                       comp = compare(inExp1.exp, e)
@@ -17233,7 +17228,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.RSUB(__)  => begin
                       @match DAE.RSUB(exp = e, ix = i, fieldName = s, ty = ty) = inExp2
                       comp = Util.intCompare(inExp1.ix, i)
@@ -17253,7 +17248,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.TSUB(__)  => begin
                       @match DAE.TSUB(exp = e, ix = i, ty = ty) = inExp2
                       comp = Util.intCompare(inExp1.ix, i)
@@ -17268,7 +17263,7 @@
                           comp
                         end
                   end
-                  
+
                   DAE.SIZE(__)  => begin
                       @match DAE.SIZE(exp = e, sz = oe) = inExp2
                       comp = compare(inExp1.exp, e)
@@ -17278,18 +17273,18 @@
                           comp
                         end
                   end
-                  
+
                   DAE.REDUCTION(__)  => begin
                     valueCompare(inExp1, inExp2)
                   end
-                  
+
                   DAE.LIST(__)  => begin
                        #=  Reductions contain too much information to compare in a sane manner.
                        =#
                       @match DAE.LIST(valList = expl) = inExp2
                     compareList(inExp1.valList, expl)
                   end
-                  
+
                   DAE.CONS(__)  => begin
                       @match DAE.CONS(car = e1, cdr = e2) = inExp2
                       comp = compare(inExp1.car, e1)
@@ -17299,17 +17294,17 @@
                           comp
                         end
                   end
-                  
+
                   DAE.META_TUPLE(__)  => begin
                       @match DAE.META_TUPLE(listExp = expl) = inExp2
                     compareList(inExp1.listExp, expl)
                   end
-                  
+
                   DAE.META_OPTION(__)  => begin
                       @match DAE.META_OPTION(exp = oe) = inExp2
                     compareOpt(inExp1.exp, oe)
                   end
-                  
+
                   DAE.METARECORDCALL(__)  => begin
                       @match DAE.METARECORDCALL(path = p, args = expl) = inExp2
                       comp = AbsynUtil.pathCompare(inExp1.path, p)
@@ -17319,35 +17314,35 @@
                           comp
                         end
                   end
-                  
+
                   DAE.MATCHEXPRESSION(__)  => begin
                     valueCompare(inExp1, inExp2)
                   end
-                  
+
                   DAE.BOX(__)  => begin
                       @match DAE.BOX(exp = e) = inExp2
                     compare(inExp1.exp, e)
                   end
-                  
+
                   DAE.UNBOX(__)  => begin
                       @match DAE.UNBOX(exp = e) = inExp2
                     compare(inExp1.exp, e)
                   end
-                  
+
                   DAE.SHARED_LITERAL(__)  => begin
                       @match DAE.SHARED_LITERAL(index = i) = inExp2
                     Util.intCompare(inExp1.index, i)
                   end
-                  
+
                   DAE.EMPTY(__)  => begin
                       @match DAE.EMPTY(name = cr) = inExp2
                     ComponentReference.crefCompareGeneric(inExp1.name, cr)
                   end
-                  
+
                   DAE.CODE(__)  => begin
                     valueCompare(inExp1, inExp2)
                   end
-                  
+
                   _  => begin
                         Error.addInternalError("Expression.compare failed: ctor:" + String(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
                       fail()
@@ -17357,7 +17352,7 @@
           comp
         end
 
-        function compareSubscripts(sub1::DAE.Subscript, sub2::DAE.Subscript) ::ModelicaInteger 
+        function compareSubscripts(sub1::DAE.Subscript, sub2::DAE.Subscript) ::ModelicaInteger
               local res::ModelicaInteger
 
               if referenceEq(sub1, sub2)
@@ -17368,19 +17363,19 @@
                     (DAE.Subscript.WHOLEDIM(__), DAE.Subscript.WHOLEDIM(__))  => begin
                       0
                     end
-                    
+
                     (DAE.Subscript.SLICE(__), DAE.Subscript.SLICE(__))  => begin
                       compare(sub1.exp, sub2.exp)
                     end
-                    
+
                     (DAE.Subscript.INDEX(__), DAE.Subscript.INDEX(__))  => begin
                       compare(sub1.exp, sub2.exp)
                     end
-                    
+
                     (DAE.Subscript.WHOLE_NONEXP(__), DAE.Subscript.WHOLE_NONEXP(__))  => begin
                       compare(sub1.exp, sub2.exp)
                     end
-                    
+
                     _  => begin
                         Util.intCompare(valueConstructor(sub1), valueConstructor(sub2))
                     end
@@ -17391,7 +17386,7 @@
         end
 
          #= For use with traverseExp =#
-        function isInvariantExpNoTraverse(e::DAE.Exp, b::Bool) ::Tuple{DAE.Exp, Bool} 
+        function isInvariantExpNoTraverse(e::DAE.Exp, b::Bool) ::Tuple{DAE.Exp, Bool}
 
 
 
@@ -17403,71 +17398,71 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BINARY(__)  => begin
                     true
                   end
-                  
+
                   DAE.UNARY(__)  => begin
                     true
                   end
-                  
+
                   DAE.LBINARY(__)  => begin
                     true
                   end
-                  
+
                   DAE.LUNARY(__)  => begin
                     true
                   end
-                  
+
                   DAE.RELATION(__)  => begin
                     true
                   end
-                  
+
                   DAE.IFEXP(__)  => begin
                     true
                   end
-                  
+
                   DAE.CALL(path = Absyn.FULLYQUALIFIED(__))  => begin
                     true
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(path = Absyn.FULLYQUALIFIED(__))  => begin
                     true
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.MATRIX(__)  => begin
                     true
                   end
-                  
+
                   DAE.RANGE(__)  => begin
                     true
                   end
-                  
+
                   DAE.CONS(__)  => begin
                     true
                   end
-                  
+
                   DAE.LIST(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -17476,7 +17471,7 @@
           (e, b)
         end
 
-        function findCallIsInlineAfterIndexReduction(e::DAE.Exp, res::Bool) ::Tuple{DAE.Exp, Bool, Bool} 
+        function findCallIsInlineAfterIndexReduction(e::DAE.Exp, res::Bool) ::Tuple{DAE.Exp, Bool, Bool}
 
               local cont::Bool
 
@@ -17487,7 +17482,7 @@
                     DAE.CALL(attr = DAE.CALL_ATTR(inlineType = DAE.AFTER_INDEX_RED_INLINE(__)))  => begin
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -17498,7 +17493,7 @@
           (e, cont, res)
         end
 
-        function tupleHead(exp::DAE.Exp, prop::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties} 
+        function tupleHead(exp::DAE.Exp, prop::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties}
               local outProp::DAE.Properties
               local outExp::DAE.Exp
 
@@ -17508,11 +17503,11 @@
                   (DAE.Exp.TUPLE(_ <| _), DAE.Properties.PROP_TUPLE(__))  => begin
                     (listHead(exp.PR), Types.propTupleFirstProp(prop))
                   end
-                  
+
                   (_, DAE.Properties.PROP_TUPLE(type_ = DAE.T_TUPLE(types = ty <| _)))  => begin
                     (DAE.Exp.TSUB(exp, 1, ty), Types.propTupleFirstProp(prop))
                   end
-                  
+
                   _  => begin
                       (exp, prop)
                   end
@@ -17522,7 +17517,7 @@
         end
 
          #= A value that requires nothing special during code generation. String literals are special and not included. =#
-        function isSimpleLiteralValue(exp::DAE.Exp) ::Bool 
+        function isSimpleLiteralValue(exp::DAE.Exp) ::Bool
               local b::Bool
 
               b = begin
@@ -17530,19 +17525,19 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.ENUM_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -17551,7 +17546,7 @@
           b
         end
 
-        function consToListIgnoreSharedLiteral(e::DAE.Exp) ::DAE.Exp 
+        function consToListIgnoreSharedLiteral(e::DAE.Exp) ::DAE.Exp
 
 
               local exp::DAE.Exp
@@ -17561,15 +17556,15 @@
                   DAE.SHARED_LITERAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.LIST(__)  => begin
                     true
                   end
-                  
+
                   DAE.CONS(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -17583,7 +17578,7 @@
           e
         end
 
-        function consToListIgnoreSharedLiteralWork(e::DAE.Exp, acc::List{<:DAE.Exp} = nil) ::DAE.Exp 
+        function consToListIgnoreSharedLiteralWork(e::DAE.Exp, acc::List{<:DAE.Exp} = nil) ::DAE.Exp
 
 
               e = begin
@@ -17591,15 +17586,15 @@
                   (DAE.SHARED_LITERAL(__), _)  => begin
                     consToListIgnoreSharedLiteralWork(e.exp, acc)
                   end
-                  
+
                   (DAE.LIST(__),  nil())  => begin
                     e
                   end
-                  
+
                   (DAE.LIST(__), _)  => begin
                     DAE.LIST(ListUtil.append_reverse(acc, e.valList))
                   end
-                  
+
                   (DAE.CONS(__), _)  => begin
                     consToListIgnoreSharedLiteralWork(e.cdr, _cons(e.car, acc))
                   end
