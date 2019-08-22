@@ -1,4 +1,4 @@
-  module IOStream 
+  module IOStream
 
 
     using MetaModelica
@@ -6,9 +6,9 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl IOStreamType 
-    @UniontypeDecl IOStreamData 
-    @UniontypeDecl IOStream 
+    @UniontypeDecl IOStreamType
+    @UniontypeDecl IOStreamData
+    @UniontypeDecl IOStreamUniontype
 
          #= /*
          * This file is part of OpenModelica.
@@ -74,7 +74,7 @@
               end
          end
 
-         @Uniontype IOStream begin
+         @Uniontype IOStreamUniontype begin
               @Record IOSTREAM begin
 
                        name::String
@@ -86,15 +86,14 @@
          const stdInput = 0::ModelicaInteger
          const stdOutput = 1::ModelicaInteger
          const stdError = 2::ModelicaInteger
-         const emptyStreamOfTypeList = IOSTREAM("emptyStreamOfTypeList", LIST(), LIST_DATA(nil))::IOStream
+         const emptyStreamOfTypeList = IOSTREAM("emptyStreamOfTypeList", LIST(), LIST_DATA(nil))::IOStreamUniontype
 
         import IOStreamExt
 
         import ListUtil
 
-        function create(streamName::String, streamType::IOStreamType) ::IOStream 
-              local outStream::IOStream
-
+        function create(streamName::String, streamType::IOStreamType) ::IOStreamUniontype
+              local outStream::IOStreamUniontype
               outStream = begin
                   local fileName::String
                   local fileID::ModelicaInteger
@@ -104,11 +103,11 @@
                       fileID = IOStreamExt.createFile(fileName)
                     IOSTREAM(streamName, streamType, FILE_DATA(fileID))
                   end
-                  
+
                   (_, LIST(__))  => begin
                     IOSTREAM(streamName, streamType, LIST_DATA(nil))
                   end
-                  
+
                   (_, BUFFER(__))  => begin
                       bufferID = IOStreamExt.createBuffer()
                     IOSTREAM(streamName, streamType, BUFFER_DATA(bufferID))
@@ -118,16 +117,16 @@
           outStream
         end
 
-        function append(inStream::IOStream, inString::String) ::IOStream 
-              local outStream::IOStream
+        function append(inStream::IOStreamUniontype, inString::String) ::IOStreamUniontype
+              local outStream::IOStreamUniontype
 
               outStream = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                   local streamName::String
                   local streamType::IOStreamType
                 @match (inStream, inString) begin
@@ -135,11 +134,11 @@
                       IOStreamExt.appendFile(fileID, inString)
                     fStream
                   end
-                  
+
                   (IOSTREAM(streamName, streamType, LIST_DATA(listData)), _)  => begin
                     IOSTREAM(streamName, streamType, LIST_DATA(_cons(inString, listData)))
                   end
-                  
+
                   (bStream && IOSTREAM(data = BUFFER_DATA(bufferID)), _)  => begin
                       IOStreamExt.appendBuffer(bufferID, inString)
                     bStream
@@ -149,29 +148,29 @@
           outStream
         end
 
-        function appendList(inStream::IOStream, inStringList::List{<:String}) ::IOStream 
-              local outStream::IOStream
+        function appendList(inStream::IOStreamUniontype, inStringList::List{<:String}) ::IOStreamUniontype
+              local outStream::IOStreamUniontype
 
               outStream = ListUtil.foldr(inStringList, append, inStream)
           outStream
         end
 
-        function close(inStream::IOStream) ::IOStream 
-              local outStream::IOStream
+        function close(inStream::IOStreamUniontype) ::IOStreamUniontype
+              local outStream::IOStreamUniontype
 
               outStream = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                 @matchcontinue inStream begin
                   fStream && IOSTREAM(data = FILE_DATA(fileID))  => begin
                       IOStreamExt.closeFile(fileID)
                     fStream
                   end
-                  
+
                   _  => begin
                       inStream
                   end
@@ -182,24 +181,24 @@
           outStream
         end
 
-        function delete(inStream::IOStream)  
+        function delete(inStream::IOStreamUniontype)
               _ = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                 @match inStream begin
                   IOSTREAM(data = FILE_DATA(fileID))  => begin
                       IOStreamExt.deleteFile(fileID)
                     ()
                   end
-                  
+
                   IOSTREAM(data = LIST_DATA(__))  => begin
                     ()
                   end
-                  
+
                   IOSTREAM(data = BUFFER_DATA(bufferID))  => begin
                       IOStreamExt.deleteBuffer(bufferID)
                     ()
@@ -208,16 +207,16 @@
               end
         end
 
-        function clear(inStream::IOStream) ::IOStream 
-              local outStream::IOStream
+        function clear(inStream::IOStreamUniontype) ::IOStreamUniontype
+              local outStream::IOStreamUniontype
 
               outStream = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                   local name::String
                   local data::IOStreamData
                   local ty::IOStreamType
@@ -226,11 +225,11 @@
                       IOStreamExt.clearFile(fileID)
                     fStream
                   end
-                  
+
                   IOSTREAM(name, ty, _)  => begin
                     IOSTREAM(name, ty, LIST_DATA(nil))
                   end
-                  
+
                   bStream && IOSTREAM(data = BUFFER_DATA(bufferID))  => begin
                       IOStreamExt.clearBuffer(bufferID)
                     bStream
@@ -240,28 +239,28 @@
           outStream
         end
 
-        function string(inStream::IOStream) ::String 
+        function string(inStream::IOStreamUniontype) ::String
               local string::String
 
               string = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                   local str::String
                 @match inStream begin
                   IOSTREAM(data = FILE_DATA(fileID))  => begin
                       str = IOStreamExt.readFile(fileID)
                     str
                   end
-                  
+
                   IOSTREAM(data = LIST_DATA(listData))  => begin
                       str = IOStreamExt.appendReversedList(listData)
                     str
                   end
-                  
+
                   IOSTREAM(data = BUFFER_DATA(bufferID))  => begin
                       str = IOStreamExt.readBuffer(bufferID)
                     str
@@ -275,25 +274,25 @@
           This function will print a string depending on the second argument
           to the standard output (1) or standard error (2).
           Use IOStream.stdOutput, IOStream.stdError constants =#
-        function print(inStream::IOStream, whereToPrint::ModelicaInteger)  
+        function print(inStream::IOStreamUniontype, whereToPrint::ModelicaInteger)
               _ = begin
                   local listData::List{String}
                   local fileID::ModelicaInteger
                   local bufferID::ModelicaInteger
-                  local fStream::IOStream
-                  local lStream::IOStream
-                  local bStream::IOStream
+                  local fStream::IOStreamUniontype
+                  local lStream::IOStreamUniontype
+                  local bStream::IOStreamUniontype
                 @match (inStream, whereToPrint) begin
                   (IOSTREAM(data = FILE_DATA(fileID)), _)  => begin
                       IOStreamExt.printFile(fileID, whereToPrint)
                     ()
                   end
-                  
+
                   (IOSTREAM(data = BUFFER_DATA(bufferID)), _)  => begin
                       IOStreamExt.printBuffer(bufferID, whereToPrint)
                     ()
                   end
-                  
+
                   (IOSTREAM(data = LIST_DATA(listData)), _)  => begin
                       IOStreamExt.printReversedList(listData, whereToPrint)
                     ()
