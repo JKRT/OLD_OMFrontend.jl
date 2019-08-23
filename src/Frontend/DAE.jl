@@ -1,2305 +1,2249 @@
-  module DAE
-
-
-    using MetaModelica
-    #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-    using ExportAll
-    #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    const Dimensions = List  #= a list of dimensions =#
-    @UniontypeDecl VarKind
-    @UniontypeDecl ConnectorType
-    @UniontypeDecl VarDirection
-    @UniontypeDecl VarParallelism
-    @UniontypeDecl VarVisibility
-    @UniontypeDecl VarInnerOuter
-    @UniontypeDecl ElementSource
-    @UniontypeDecl SymbolicOperation
-    @UniontypeDecl EquationExp
-    @UniontypeDecl Element
-    @UniontypeDecl Function
-    @UniontypeDecl InlineType
-    @UniontypeDecl FunctionDefinition
-    @UniontypeDecl derivativeCond
-    @UniontypeDecl VariableAttributes
-    @UniontypeDecl StateSelect
-    @UniontypeDecl Uncertainty
-    @UniontypeDecl Distribution
-    @UniontypeDecl ExtArg
-    @UniontypeDecl ExternalDecl
-    @UniontypeDecl DAElist
-    @UniontypeDecl Algorithm
-    @UniontypeDecl Constraint
-    @UniontypeDecl ClassAttributes
-    @UniontypeDecl Statement
-    @UniontypeDecl Else
-    @UniontypeDecl Var
-    @UniontypeDecl Attributes
-    @UniontypeDecl BindingSource
-    @UniontypeDecl Binding
-    @UniontypeDecl Type
-    @UniontypeDecl CodeType
-    @UniontypeDecl EvaluateSingletonType
-    EvaluateSingletonTypeFunction = Function
-    @UniontypeDecl FunctionAttributes
-    @UniontypeDecl FunctionBuiltin
-    @UniontypeDecl FunctionParallelism
-    @UniontypeDecl Dimension
-    @UniontypeDecl DimensionBinding
-    @UniontypeDecl FuncArg
-    @UniontypeDecl Const
-    @UniontypeDecl TupleConst
-    @UniontypeDecl Properties
-    @UniontypeDecl EqMod
-    @UniontypeDecl SubMod
-    @UniontypeDecl Mod
-    @UniontypeDecl ClockKind
-    @UniontypeDecl Exp
-    @UniontypeDecl TailCall
-    @UniontypeDecl CallAttributes
-    @UniontypeDecl ReductionInfo
-    @UniontypeDecl ReductionIterator
-    @UniontypeDecl MatchCase
-    @UniontypeDecl MatchType
-    @UniontypeDecl Pattern
-    @UniontypeDecl Operator
-    @UniontypeDecl ComponentRef
-    @UniontypeDecl Subscript
-    @UniontypeDecl Expand
-
-         #= /*
-         * This file is part of OpenModelica.
-         *
-         * Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
-         * c/o Linköpings universitet, Department of Computer and Information Science,
-         * SE-58183 Linköping, Sweden.
-         *
-         * All rights reserved.
-         *
-         * THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
-         * THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
-         * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
-         * RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
-         * ACCORDING TO RECIPIENTS CHOICE.
-         *
-         * The OpenModelica software and the Open Source Modelica
-         * Consortium (OSMC) Public License (OSMC-PL) are obtained
-         * from OSMC, either from the above address,
-         * from the URLs: http:www.ida.liu.se/projects/OpenModelica or
-         * http:www.openmodelica.org, and in the OpenModelica distribution.
-         * GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
-         *
-         * This program is distributed WITHOUT ANY WARRANTY; without
-         * even the implied warranty of  MERCHANTABILITY or FITNESS
-         * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
-         * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
-         *
-         * See the full OSMC Public License conditions for more details.
-         *
-         */ =#
-         #=  public imports
-         =#
-        import Absyn
-        import AbsynUtil
-        import BaseAvlTree
-        import ClassInf
-        import SCode
-        import Prefix
-        import Values
-        import Connect
+module DAE
+
+
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+  #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+  const Dimensions = List  #= a list of dimensions =#
+@UniontypeDecl VarKind
+@UniontypeDecl ConnectorType
+@UniontypeDecl VarDirection
+@UniontypeDecl VarParallelism
+@UniontypeDecl VarVisibility
+@UniontypeDecl VarInnerOuter
+@UniontypeDecl ElementSource
+@UniontypeDecl SymbolicOperation
+@UniontypeDecl EquationExp
+@UniontypeDecl Element
+@UniontypeDecl Function
+@UniontypeDecl InlineType
+@UniontypeDecl FunctionDefinition
+@UniontypeDecl derivativeCond
+@UniontypeDecl VariableAttributes
+@UniontypeDecl StateSelect
+@UniontypeDecl Uncertainty
+@UniontypeDecl Distribution
+@UniontypeDecl ExtArg
+@UniontypeDecl ExternalDecl
+@UniontypeDecl DAElist
+@UniontypeDecl Algorithm
+@UniontypeDecl Constraint
+@UniontypeDecl ClassAttributes
+@UniontypeDecl Statement
+@UniontypeDecl Else
+@UniontypeDecl Var
+@UniontypeDecl Attributes
+@UniontypeDecl BindingSource
+@UniontypeDecl Binding
+@UniontypeDecl Type
+@UniontypeDecl CodeType
+@UniontypeDecl EvaluateSingletonType
+EvaluateSingletonTypeFunction = Function
+@UniontypeDecl FunctionAttributes
+@UniontypeDecl FunctionBuiltin
+@UniontypeDecl FunctionParallelism
+@UniontypeDecl Dimension
+@UniontypeDecl DimensionBinding
+@UniontypeDecl FuncArg
+@UniontypeDecl Const
+@UniontypeDecl TupleConst
+@UniontypeDecl Properties
+@UniontypeDecl EqMod
+@UniontypeDecl SubMod
+@UniontypeDecl Mod
+@UniontypeDecl ClockKind
+@UniontypeDecl Exp
+@UniontypeDecl TailCall
+@UniontypeDecl CallAttributes
+@UniontypeDecl ReductionInfo
+@UniontypeDecl ReductionIterator
+@UniontypeDecl MatchCase
+@UniontypeDecl MatchType
+@UniontypeDecl Pattern
+@UniontypeDecl Operator
+@UniontypeDecl ComponentRef
+@UniontypeDecl Subscript
+@UniontypeDecl Expand
+
+#= /*
+* This file is part of OpenModelica.
+*
+* Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
+* c/o Linköpings universitet, Department of Computer and Information Science,
+* SE-58183 Linköping, Sweden.
+*
+* All rights reserved.
+*
+* THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
+* THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+* ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
+* RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+* ACCORDING TO RECIPIENTS CHOICE.
+*
+* The OpenModelica software and the Open Source Modelica
+* Consortium (OSMC) Public License (OSMC-PL) are obtained
+* from OSMC, either from the above address,
+* from the URLs: http:www.ida.liu.se/projects/OpenModelica or
+* http:www.openmodelica.org, and in the OpenModelica distribution.
+* GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+*
+* This program is distributed WITHOUT ANY WARRANTY; without
+* even the implied warranty of  MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
+* IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
+*
+* See the full OSMC Public License conditions for more details.
+*
+*/ =#
+#=  public imports
+=#
+import Absyn
+import AbsynUtil
+import BaseAvlTree
+import ClassInf
+import SCode
+import Prefix
+import Values
+import Connect
 
-        Ident = String
+Ident = String
 
-        InstDims = List
+InstDims = List
 
-        StartValue = Option
+StartValue = Option
 
-         const UNIQUEIO = "uniqueouter"::String
+const UNIQUEIO = "uniqueouter"::String
 
-         const derivativeNamePrefix = "DER"::String
+const derivativeNamePrefix = "DER"::String
 
-         const partialDerivativeNamePrefix = "pDER"::String
+const partialDerivativeNamePrefix = "pDER"::String
 
-         const preNamePrefix = "PRE"::String
+const preNamePrefix = "PRE"::String
 
-         const previousNamePrefix = "CLKPRE"::String
+const previousNamePrefix = "CLKPRE"::String
 
-         const startNamePrefix = "START"::String
+const startNamePrefix = "START"::String
 
-         const auxNamePrefix = "AUX"::String
+const auxNamePrefix = "AUX"::String
 
-         @Uniontype VarKind begin
-              @Record VARIABLE begin
+@Uniontype VarKind begin
+  @Record VARIABLE begin
 
-              end
+  end
 
-              @Record DISCRETE begin
+  @Record DISCRETE begin
 
-              end
+  end
 
-              @Record PARAM begin
+  @Record PARAM begin
 
-              end
+  end
 
-              @Record CONST begin
+  @Record CONST begin
 
-              end
-         end
+  end
+end
 
-          #= The type of a connector element. =#
-         @Uniontype ConnectorType begin
-              @Record POTENTIAL begin
+#= The type of a connector element. =#
+@Uniontype ConnectorType begin
+  @Record POTENTIAL begin
 
-              end
+  end
 
-              @Record FLOW begin
+  @Record FLOW begin
 
-              end
+  end
 
-              @Record STREAM begin
+  @Record STREAM begin
 
-                       associatedFlow::Option{ComponentRef}
-              end
+    associatedFlow::Option{ComponentRef}
+  end
 
-              @Record NON_CONNECTOR begin
+  @Record NON_CONNECTOR begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype VarDirection begin
-              @Record INPUT begin
+@Uniontype VarDirection begin
+  @Record INPUT begin
 
-              end
+  end
 
-              @Record OUTPUT begin
+  @Record OUTPUT begin
 
-              end
+  end
 
-              @Record BIDIR begin
+  @Record BIDIR begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype VarParallelism begin
-              @Record PARGLOBAL begin
+@Uniontype VarParallelism begin
+  @Record PARGLOBAL begin
 
-              end
+  end
 
-              @Record PARLOCAL begin
+  @Record PARLOCAL begin
 
-              end
+  end
 
-              @Record NON_PARALLEL begin
+  @Record NON_PARALLEL begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype VarVisibility begin
-              @Record PUBLIC begin
+@Uniontype VarVisibility begin
+  @Record PUBLIC begin
 
-              end
+  end
 
-              @Record PROTECTED begin
+  @Record PROTECTED begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype VarInnerOuter begin
-              @Record INNER begin
+@Uniontype VarInnerOuter begin
+  @Record INNER begin
 
-              end
+  end
 
-              @Record OUTER begin
+  @Record OUTER begin
 
-              end
+  end
 
-              @Record INNER_OUTER begin
+  @Record INNER_OUTER begin
 
-              end
+  end
 
-              @Record NOT_INNER_OUTER begin
+  @Record NOT_INNER_OUTER begin
 
-              end
-         end
+  end
+end
 
-          #= gives information about the origin of the element =#
-         @Uniontype ElementSource begin
-              @Record SOURCE begin
+#= gives information about the origin of the element =#
+@Uniontype ElementSource begin
+  @Record SOURCE begin
 
-                       info #= the line and column numbers of the equations and algorithms this element came from =#::SourceInfo
-                       partOfLst #= the model(s) this element came from =#::List{Absyn.Within}
-                       instance #= the instance(s) this element is part of =#::Prefix.ComponentPrefix
-                       connectEquationOptLst #= this element came from this connect(s) =#::List{Tuple{ComponentRef, ComponentRef}}
-                       typeLst #= the classes where the type(s) of the element is defined =#::List{Absyn.Path}
-                       operations #= the symbolic operations used to end up with the final state of the element =#::List{SymbolicOperation}
-                       comment::List{SCode.Comment}
-              end
-         end
+    info #= the line and column numbers of the equations and algorithms this element came from =#::SourceInfo
+    partOfLst #= the model(s) this element came from =#::List{Absyn.Within}
+    instance #= the instance(s) this element is part of =#::Prefix.ComponentPrefix
+    connectEquationOptLst #= this element came from this connect(s) =#::List{Tuple{ComponentRef, ComponentRef}}
+    typeLst #= the classes where the type(s) of the element is defined =#::List{Absyn.Path}
+    operations #= the symbolic operations used to end up with the final state of the element =#::List{SymbolicOperation}
+    comment::List{SCode.Comment}
+  end
+end
 
-         const emptyElementSource = SOURCE(AbsynUtil.dummyInfo, nil, Prefix.NOCOMPPRE(), nil, nil, nil, nil)::ElementSource
+const emptyElementSource = SOURCE(AbsynUtil.dummyInfo, nil, Prefix.NOCOMPPRE(), nil, nil, nil, nil)::ElementSource
 
-         @Uniontype SymbolicOperation begin
-              @Record FLATTEN begin
+@Uniontype SymbolicOperation begin
+  @Record FLATTEN begin
 
-                       scode::SCode.EEquation
-                       dae::Option{Element}
-              end
+    scode::SCode.EEquation
+    dae::Option{Element}
+  end
 
-              @Record SIMPLIFY begin
+  @Record SIMPLIFY begin
 
-                       before::EquationExp
-                       after::EquationExp
-              end
+    before::EquationExp
+    after::EquationExp
+  end
 
-              @Record SUBSTITUTION begin
+  @Record SUBSTITUTION begin
 
-                       substitutions::List{Exp}
-                       source::Exp
-              end
+    substitutions::List{Exp}
+    source::Exp
+  end
 
-              @Record OP_INLINE begin
+  @Record OP_INLINE begin
 
-                       before::EquationExp
-                       after::EquationExp
-              end
+    before::EquationExp
+    after::EquationExp
+  end
 
-              @Record OP_SCALARIZE begin
+  @Record OP_SCALARIZE begin
 
-                       before::EquationExp
-                       index::ModelicaInteger
-                       after::EquationExp
-              end
+    before::EquationExp
+    index::ModelicaInteger
+    after::EquationExp
+  end
 
-              @Record OP_DIFFERENTIATE begin
+  @Record OP_DIFFERENTIATE begin
 
-                       cr::ComponentRef
-                       before::Exp
-                       after::Exp
-              end
+    cr::ComponentRef
+    before::Exp
+    after::Exp
+  end
 
-              @Record SOLVE begin
+  @Record SOLVE begin
 
-                       cr::ComponentRef
-                       exp1::Exp
-                       exp2::Exp
-                       res::Exp
-                       assertConds::List{Exp}
-              end
+    cr::ComponentRef
+    exp1::Exp
+    exp2::Exp
+    res::Exp
+    assertConds::List{Exp}
+  end
 
-              @Record SOLVED begin
+  @Record SOLVED begin
 
-                       cr::ComponentRef
-                       exp::Exp
-              end
+    cr::ComponentRef
+    exp::Exp
+  end
 
-              @Record LINEAR_SOLVED begin
+  @Record LINEAR_SOLVED begin
 
-                       vars::List{ComponentRef}
-                       jac::List{List{ModelicaReal}}
-                       rhs::List{ModelicaReal}
-                       result::List{ModelicaReal}
-              end
+    vars::List{ComponentRef}
+    jac::List{List{ModelicaReal}}
+    rhs::List{ModelicaReal}
+    result::List{ModelicaReal}
+  end
 
-              @Record NEW_DUMMY_DER begin
+  @Record NEW_DUMMY_DER begin
 
-                       chosen::ComponentRef
-                       candidates::List{ComponentRef}
-              end
+    chosen::ComponentRef
+    candidates::List{ComponentRef}
+  end
 
-              @Record OP_RESIDUAL begin
+  @Record OP_RESIDUAL begin
 
-                       e1::Exp
-                       e2::Exp
-                       e::Exp
-              end
-         end
+    e1::Exp
+    e2::Exp
+    e::Exp
+  end
+end
 
-          #= An equation on residual or equality form has 1 or 2 expressions. For use with symbolic operation tracing. =#
-         @Uniontype EquationExp begin
-              @Record PARTIAL_EQUATION begin
+#= An equation on residual or equality form has 1 or 2 expressions. For use with symbolic operation tracing. =#
+@Uniontype EquationExp begin
+  @Record PARTIAL_EQUATION begin
 
-                       exp::Exp
-              end
+    exp::Exp
+  end
 
-              @Record RESIDUAL_EXP begin
+  @Record RESIDUAL_EXP begin
 
-                       exp::Exp
-              end
+    exp::Exp
+  end
 
-              @Record EQUALITY_EXPS begin
+  @Record EQUALITY_EXPS begin
 
-                       lhs::Exp
-                       rhs::Exp
-              end
-         end
+    lhs::Exp
+    rhs::Exp
+  end
+end
 
-         @Uniontype Element begin
-              @Record VAR begin
+@Uniontype Element begin
+  @Record VAR begin
 
-                       componentRef #=  The variable name =#::ComponentRef
-                       kind #= varible kind: variable, constant, parameter, discrete etc. =#::VarKind
-                       direction #= input, output or bidir =#::VarDirection
-                       parallelism #= parglobal, parlocal, or non_parallel =#::VarParallelism
-                       protection #= if protected or public =#::VarVisibility
-                       ty #= Full type information required =#::Type
-                       binding #= Binding expression e.g. for parameters ; value of start attribute =#::Option{Exp}
-                       dims #= dimensions =#::InstDims
-                       connectorType #= The connector type: flow, stream, no prefix, or not a connector element. =#::ConnectorType
-                       source #= the origins of the component/equation/algorithm =#::ElementSource
-                       variableAttributesOption::Option{VariableAttributes}
-                       comment::Option{SCode.Comment}
-                       innerOuter #= inner/outer required to 'change' outer references =#::Absyn.InnerOuter
-              end
+    componentRef #=  The variable name =#::ComponentRef
+    kind #= varible kind: variable, constant, parameter, discrete etc. =#::VarKind
+    direction #= input, output or bidir =#::VarDirection
+    parallelism #= parglobal, parlocal, or non_parallel =#::VarParallelism
+    protection #= if protected or public =#::VarVisibility
+    ty #= Full type information required =#::Type
+    binding #= Binding expression e.g. for parameters ; value of start attribute =#::Option{Exp}
+    dims #= dimensions =#::InstDims
+    connectorType #= The connector type: flow, stream, no prefix, or not a connector element. =#::ConnectorType
+    source #= the origins of the component/equation/algorithm =#::ElementSource
+    variableAttributesOption::Option{VariableAttributes}
+    comment::Option{SCode.Comment}
+    innerOuter #= inner/outer required to 'change' outer references =#::Absyn.InnerOuter
+  end
 
-              @Record DEFINE begin
+  @Record DEFINE begin
 
-                       componentRef::ComponentRef
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    componentRef::ComponentRef
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIALDEFINE begin
+  @Record INITIALDEFINE begin
 
-                       componentRef::ComponentRef
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    componentRef::ComponentRef
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record EQUATION begin
+  @Record EQUATION begin
 
-                       exp::Exp
-                       scalar::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    exp::Exp
+    scalar::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record EQUEQUATION begin
+  @Record EQUEQUATION begin
 
-                       cr1::ComponentRef
-                       cr2::ComponentRef
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    cr1::ComponentRef
+    cr2::ComponentRef
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record ARRAY_EQUATION begin
+  @Record ARRAY_EQUATION begin
 
-                       dimension #= dimension sizes =#::Dimensions
-                       exp::Exp
-                       array::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    dimension #= dimension sizes =#::Dimensions
+    exp::Exp
+    array::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIAL_ARRAY_EQUATION begin
+  @Record INITIAL_ARRAY_EQUATION begin
 
-                       dimension #= dimension sizes =#::Dimensions
-                       exp::Exp
-                       array::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    dimension #= dimension sizes =#::Dimensions
+    exp::Exp
+    array::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record CONNECT_EQUATION begin
+  @Record CONNECT_EQUATION begin
 
-                       lhsElement::Element
-                       lhsFace::Connect.Face
-                       rhsElement::Element
-                       rhsFace::Connect.Face
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    lhsElement::Element
+    lhsFace::Connect.Face
+    rhsElement::Element
+    rhsFace::Connect.Face
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record COMPLEX_EQUATION begin
+  @Record COMPLEX_EQUATION begin
 
-                       lhs::Exp
-                       rhs::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    lhs::Exp
+    rhs::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIAL_COMPLEX_EQUATION begin
+  @Record INITIAL_COMPLEX_EQUATION begin
 
-                       lhs::Exp
-                       rhs::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    lhs::Exp
+    rhs::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record WHEN_EQUATION begin
+  @Record WHEN_EQUATION begin
 
-                       condition #= Condition =#::Exp
-                       equations #= Equations =#::List{Element}
-                       elsewhen_ #= Elsewhen should be of type WHEN_EQUATION =#::Option{Element}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    condition #= Condition =#::Exp
+    equations #= Equations =#::List{Element}
+    elsewhen_ #= Elsewhen should be of type WHEN_EQUATION =#::Option{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record FOR_EQUATION begin
+  @Record FOR_EQUATION begin
 
-                       type_ #= this is the type of the iterator =#::Type
-                       iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
-                       iter #= the iterator variable =#::Ident
-                       index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
-                       range #= range for the loop =#::Exp
-                       equations #= Equations =#::List{Element}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    type_ #= this is the type of the iterator =#::Type
+    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
+    iter #= the iterator variable =#::Ident
+    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
+    range #= range for the loop =#::Exp
+    equations #= Equations =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record IF_EQUATION begin
+  @Record IF_EQUATION begin
 
-                       condition1 #= Condition =#::List{Exp}
-                       equations2 #= Equations of true branch =#::List{List{Element}}
-                       equations3 #= Equations of false branch =#::List{Element}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    condition1 #= Condition =#::List{Exp}
+    equations2 #= Equations of true branch =#::List{List{Element}}
+    equations3 #= Equations of false branch =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIAL_IF_EQUATION begin
+  @Record INITIAL_IF_EQUATION begin
 
-                       condition1 #= Condition =#::List{Exp}
-                       equations2 #= Equations of true branch =#::List{List{Element}}
-                       equations3 #= Equations of false branch =#::List{Element}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    condition1 #= Condition =#::List{Exp}
+    equations2 #= Equations of true branch =#::List{List{Element}}
+    equations3 #= Equations of false branch =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIALEQUATION begin
+  @Record INITIALEQUATION begin
 
-                       exp1::Exp
-                       exp2::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    exp1::Exp
+    exp2::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record ALGORITHM begin
+  @Record ALGORITHM begin
 
-                       algorithm_::Algorithm
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    algorithm_::Algorithm
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIALALGORITHM begin
+  @Record INITIALALGORITHM begin
 
-                       algorithm_::Algorithm
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    algorithm_::Algorithm
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record COMP begin
+  @Record COMP begin
 
-                       ident::Ident
-                       dAElist #= a component with subelements, normally only used at top level. =#::List{Element}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-                       #=  we might not this here.
-                       =#
-                       comment::Option{SCode.Comment}
-              end
+    ident::Ident
+    dAElist #= a component with subelements, normally only used at top level. =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+    #=  we might not this here.
+    =#
+    comment::Option{SCode.Comment}
+  end
 
-              @Record EXTOBJECTCLASS begin
+  @Record EXTOBJECTCLASS begin
 
-                       path #= className of external object =#::Absyn.Path
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    path #= className of external object =#::Absyn.Path
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record ASSERT begin
+  @Record ASSERT begin
 
-                       condition::Exp
-                       message::Exp
-                       level::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    condition::Exp
+    message::Exp
+    level::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record INITIAL_ASSERT begin
+  @Record INITIAL_ASSERT begin
 
-                       condition::Exp
-                       message::Exp
-                       level::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    condition::Exp
+    message::Exp
+    level::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record TERMINATE begin
+@Record TERMINATE begin
 
-                       message::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  message::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record INITIAL_TERMINATE begin
+@Record INITIAL_TERMINATE begin
 
-                       message::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  message::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record REINIT begin
+@Record REINIT begin
 
-                       componentRef::ComponentRef
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  componentRef::ComponentRef
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record NORETCALL begin
+@Record NORETCALL begin
 
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record INITIAL_NORETCALL begin
+@Record INITIAL_NORETCALL begin
 
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record CONSTRAINT begin
+@Record CONSTRAINT begin
 
-                       constraints::Constraint
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  constraints::Constraint
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
 
-              @Record CLASS_ATTRIBUTES begin
+@Record CLASS_ATTRIBUTES begin
 
-                       classAttrs::ClassAttributes
-              end
+  classAttrs::ClassAttributes
+end
 
-              @Record FLAT_SM begin
+@Record FLAT_SM begin
 
-                       ident::Ident
-                       dAElist #= The states/modes transitions and variable
-                                             merging equations within the the flat state machine =#::List{Element}
-              end
+  ident::Ident
+  dAElist #= The states/modes transitions and variable
+  merging equations within the the flat state machine =#::List{Element}
+end
 
-              @Record SM_COMP begin
+@Record SM_COMP begin
 
-                       componentRef::ComponentRef
-                       dAElist #= a component with subelements =#::List{Element}
-              end
+  componentRef::ComponentRef
+  dAElist #= a component with subelements =#::List{Element}
+end
 
-              @Record COMMENT begin
+@Record COMMENT begin
 
-                       cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
-              end
-         end
+  cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
+end
+end
 
 
-         @Uniontype Function begin
-              @Record FUNCTION begin
+@Uniontype Function begin
+  @Record FUNCTION begin
 
-                       path::Absyn.Path
-                       functions #= contains the body and an optional function derivative mapping =#::List{FunctionDefinition}
-                       type_::Type
-                       visibility::SCode.Visibility
-                       partialPrefix #= MetaModelica extension =#::Bool
-                       isImpure #= Modelica 3.3 impure/pure, by default isImpure = false all the time only if prefix *impure* function is specified =#::Bool
-                       inlineType::InlineType
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-                       comment::Option{SCode.Comment}
-              end
+    path::Absyn.Path
+    functions #= contains the body and an optional function derivative mapping =#::List{FunctionDefinition}
+    type_::Type
+    visibility::SCode.Visibility
+    partialPrefix #= MetaModelica extension =#::Bool
+    isImpure #= Modelica 3.3 impure/pure, by default isImpure = false all the time only if prefix *impure* function is specified =#::Bool
+    inlineType::InlineType
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+    comment::Option{SCode.Comment}
+  end
 
-              @Record RECORD_CONSTRUCTOR begin
+  @Record RECORD_CONSTRUCTOR begin
 
-                       path::Absyn.Path
-                       type_::Type
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
-         end
+    path::Absyn.Path
+    type_::Type
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+end
 
-         @Uniontype InlineType begin
-              @Record NORM_INLINE begin
+@Uniontype InlineType begin
+  @Record NORM_INLINE begin
 
-              end
+  end
 
-              @Record BUILTIN_EARLY_INLINE begin
+  @Record BUILTIN_EARLY_INLINE begin
 
-              end
+  end
 
-              @Record EARLY_INLINE begin
+  @Record EARLY_INLINE begin
 
-              end
+  end
 
-              @Record DEFAULT_INLINE begin
+  @Record DEFAULT_INLINE begin
 
-              end
+  end
 
-              @Record NO_INLINE begin
+  @Record NO_INLINE begin
 
-              end
+  end
 
-              @Record AFTER_INDEX_RED_INLINE begin
+  @Record AFTER_INDEX_RED_INLINE begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype FunctionDefinition begin
-              @Record FUNCTION_DEF begin
+@Uniontype FunctionDefinition begin
+  @Record FUNCTION_DEF begin
 
-                       body::List{Element}
-              end
+    body::List{Element}
+  end
 
-              @Record FUNCTION_EXT begin
+  @Record FUNCTION_EXT begin
 
-                       body::List{Element}
-                       externalDecl::ExternalDecl
-              end
+    body::List{Element}
+    externalDecl::ExternalDecl
+  end
 
-              @Record FUNCTION_DER_MAPPER begin
+  @Record FUNCTION_DER_MAPPER begin
 
-                       derivedFunction #= Function that is derived =#::Absyn.Path
-                       derivativeFunction #= Path to derivative function =#::Absyn.Path
-                       derivativeOrder #= in case a function have multiple derivatives, include all =#::ModelicaInteger
-                       conditionRefs::List{Tuple{ModelicaInteger, derivativeCond}}
-                       defaultDerivative #= if conditions fails, use default derivative if exists =#::Option{Absyn.Path}
-                       lowerOrderDerivatives::List{Absyn.Path}
-              end
-         end
+    derivedFunction #= Function that is derived =#::Absyn.Path
+    derivativeFunction #= Path to derivative function =#::Absyn.Path
+    derivativeOrder #= in case a function have multiple derivatives, include all =#::ModelicaInteger
+    conditionRefs::List{Tuple{ModelicaInteger, derivativeCond}}
+    defaultDerivative #= if conditions fails, use default derivative if exists =#::Option{Absyn.Path}
+    lowerOrderDerivatives::List{Absyn.Path}
+  end
+end
 
-          #= Different conditions on derivatives =#
-         @Uniontype derivativeCond begin
-              @Record ZERO_DERIVATIVE begin
+#= Different conditions on derivatives =#
+@Uniontype derivativeCond begin
+  @Record ZERO_DERIVATIVE begin
 
-              end
+  end
 
-              @Record NO_DERIVATIVE begin
+  @Record NO_DERIVATIVE begin
 
-                       binding::Exp
-              end
-         end
+    binding::Exp
+  end
+end
 
-         @Uniontype VariableAttributes begin
-              @Record VAR_ATTR_REAL begin
+@Uniontype VariableAttributes begin
+  @Record VAR_ATTR_REAL begin
 
-                       quantity #= quantity =#::Option{Exp}
-                       unit #= unit =#::Option{Exp}
-                       displayUnit #= displayUnit =#::Option{Exp}
-                       min::Option{Exp}
-                       max::Option{Exp}
-                       start #= start value =#::Option{Exp}
-                       fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
-                       nominal #= nominal =#::Option{Exp}
-                       stateSelectOption::Option{StateSelect}
-                       uncertainOption::Option{Uncertainty}
-                       distributionOption::Option{Distribution}
-                       equationBound::Option{Exp}
-                       isProtected::Option{Bool}
-                       finalPrefix::Option{Bool}
-                       startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
-              end
+    quantity #= quantity =#::Option{Exp}
+    unit #= unit =#::Option{Exp}
+    displayUnit #= displayUnit =#::Option{Exp}
+    min::Option{Exp}
+    max::Option{Exp}
+    start #= start value =#::Option{Exp}
+    fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
+    nominal #= nominal =#::Option{Exp}
+    stateSelectOption::Option{StateSelect}
+    uncertainOption::Option{Uncertainty}
+    distributionOption::Option{Distribution}
+    equationBound::Option{Exp}
+    isProtected::Option{Bool}
+    finalPrefix::Option{Bool}
+    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+  end
 
-              @Record VAR_ATTR_INT begin
+  @Record VAR_ATTR_INT begin
 
-                       quantity #= quantity =#::Option{Exp}
-                       min::Option{Exp}
-                       max::Option{Exp}
-                       start #= start value =#::Option{Exp}
-                       fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
-                       uncertainOption::Option{Uncertainty}
-                       distributionOption::Option{Distribution}
-                       equationBound::Option{Exp}
-                       isProtected::Option{Bool}
-                       #=  ,eb,ip
-                       =#
-                       finalPrefix::Option{Bool}
-                       startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
-              end
+    quantity #= quantity =#::Option{Exp}
+    min::Option{Exp}
+    max::Option{Exp}
+    start #= start value =#::Option{Exp}
+    fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
+    uncertainOption::Option{Uncertainty}
+    distributionOption::Option{Distribution}
+    equationBound::Option{Exp}
+    isProtected::Option{Bool}
+    #=  ,eb,ip
+    =#
+    finalPrefix::Option{Bool}
+    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+  end
 
-              @Record VAR_ATTR_BOOL begin
+  @Record VAR_ATTR_BOOL begin
 
-                       quantity #= quantity =#::Option{Exp}
-                       start #= start value =#::Option{Exp}
-                       fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
-                       equationBound::Option{Exp}
-                       isProtected::Option{Bool}
-                       finalPrefix::Option{Bool}
-                       startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
-              end
+    quantity #= quantity =#::Option{Exp}
+    start #= start value =#::Option{Exp}
+    fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
+    equationBound::Option{Exp}
+    isProtected::Option{Bool}
+    finalPrefix::Option{Bool}
+    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+  end
 
-              @Record VAR_ATTR_CLOCK begin
+  @Record VAR_ATTR_CLOCK begin
 
-                       isProtected::Option{Bool}
-                       finalPrefix::Option{Bool}
-              end
+    isProtected::Option{Bool}
+    finalPrefix::Option{Bool}
+  end
 
-              @Record VAR_ATTR_STRING begin
+  @Record VAR_ATTR_STRING begin
 
-                       quantity #= quantity =#::Option{Exp}
-                       start #= start value =#::Option{Exp}
-                       fixed #= new in Modelica 3.4; fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
-                       equationBound::Option{Exp}
-                       isProtected::Option{Bool}
-                       finalPrefix::Option{Bool}
-                       startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
-              end
+    quantity #= quantity =#::Option{Exp}
+    start #= start value =#::Option{Exp}
+    fixed #= new in Modelica 3.4; fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
+    equationBound::Option{Exp}
+    isProtected::Option{Bool}
+    finalPrefix::Option{Bool}
+    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+  end
 
-              @Record VAR_ATTR_ENUMERATION begin
+  @Record VAR_ATTR_ENUMERATION begin
 
-                       quantity #= quantity =#::Option{Exp}
-                       min::Option{Exp}
-                       max::Option{Exp}
-                       start #= start =#::Option{Exp}
-                       fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
-                       equationBound::Option{Exp}
-                       isProtected::Option{Bool}
-                       finalPrefix::Option{Bool}
-                       startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
-              end
-         end
+    quantity #= quantity =#::Option{Exp}
+    min::Option{Exp}
+    max::Option{Exp}
+    start #= start =#::Option{Exp}
+    fixed #= fixed - true: default for parameter/constant, false - default for other variables =#::Option{Exp}
+    equationBound::Option{Exp}
+    isProtected::Option{Bool}
+    finalPrefix::Option{Bool}
+    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+  end
+end
 
-         const emptyVarAttrReal = VAR_ATTR_REAL(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
+const emptyVarAttrReal = VAR_ATTR_REAL(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
 
-         const emptyVarAttrBool = VAR_ATTR_BOOL(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
+const emptyVarAttrBool = VAR_ATTR_BOOL(NONE(), NONE(), NONE(), NONE(), NONE(), NONE(), NONE())::VariableAttributes
 
-         @Uniontype StateSelect begin
-              @Record NEVER begin
+@Uniontype StateSelect begin
+  @Record NEVER begin
 
-              end
+  end
 
-              @Record AVOID begin
+  @Record AVOID begin
 
-              end
+  end
 
-              @Record DEFAULT begin
+  @Record DEFAULT begin
 
-              end
+  end
 
-              @Record PREFER begin
+  @Record PREFER begin
 
-              end
+  end
 
-              @Record ALWAYS begin
+  @Record ALWAYS begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype Uncertainty begin
-              @Record GIVEN begin
+@Uniontype Uncertainty begin
+  @Record GIVEN begin
 
-              end
+  end
 
-              @Record SOUGHT begin
+  @Record SOUGHT begin
 
-              end
+  end
 
-              @Record REFINE begin
+  @Record REFINE begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype Distribution begin
-              @Record DISTRIBUTION begin
+@Uniontype Distribution begin
+  @Record DISTRIBUTION begin
 
-                       name::Exp
-                       params::Exp
-                       paramNames::Exp
-              end
-         end
+    name::Exp
+    params::Exp
+    paramNames::Exp
+  end
+end
 
-         @Uniontype ExtArg begin
-              @Record EXTARG begin
+@Uniontype ExtArg begin
+  @Record EXTARG begin
 
-                       componentRef::ComponentRef
-                       direction::Absyn.Direction
-                       type_::Type
-              end
+    componentRef::ComponentRef
+    direction::Absyn.Direction
+    type_::Type
+  end
 
-              @Record EXTARGEXP begin
+  @Record EXTARGEXP begin
 
-                       exp::Exp
-                       type_::Type
-              end
+    exp::Exp
+    type_::Type
+  end
 
-              @Record EXTARGSIZE begin
+  @Record EXTARGSIZE begin
 
-                       componentRef::ComponentRef
-                       type_::Type
-                       exp::Exp
-              end
+    componentRef::ComponentRef
+    type_::Type
+    exp::Exp
+  end
 
-              @Record NOEXTARG begin
+  @Record NOEXTARG begin
 
-              end
-         end
+  end
+end
 
-         @Uniontype ExternalDecl begin
-              @Record EXTERNALDECL begin
+@Uniontype ExternalDecl begin
+  @Record EXTERNALDECL begin
 
-                       name::String
-                       args::List{ExtArg}
-                       returnArg::ExtArg
-                       language::String
-                       ann::Option{SCode.Annotation}
-              end
-         end
+    name::String
+    args::List{ExtArg}
+    returnArg::ExtArg
+    language::String
+    ann::Option{SCode.Annotation}
+  end
+end
 
-          #= A DAElist is a list of Elements. Variables, equations, functions,
-           algorithms, etc. are all found in this list.
-          =#
-         @Uniontype DAElist begin
-              @Record DAE_LIST begin
-                       elementLst::List{Element}
-              end
-         end
+#= A DAElist is a list of Elements. Variables, equations, functions,
+algorithms, etc. are all found in this list.
+=#
+@Uniontype DAElist begin
+  @Record DAE_LIST begin
+    elementLst::List{Element}
+  end
+end
 
-       module AvlTreePathFunction
-          using MetaModelica
-          #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-          using ExportAll
-              using BaseAvlTree
-              Key = Absyn.Path
-              Value = Option
-             addConflictDefault = addConflictReplace
-          @exportAll()
-        end
+module AvlTreePathFunction
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+  using BaseAvlTree
+import Absyn
+Key = Absyn.Path
+Value = Option
+addConflictDefault = addConflictReplace
+@exportAll()
+end
 
 #= /* AVLTree for functions */ =#
 const FunctionTree = AvlTreePathFunction.Tree
 
-         #= /* -- Algorithm.mo -- */ =#
-
-          #= The `Algorithm\\' type corresponds to a whole algorithm section.
-           It is simple a list of algorithm statements. =#
-         @Uniontype Algorithm begin
-              @Record ALGORITHM_STMTS begin
-
-                       statementLst::List{Statement}
-              end
-         end
-
-          #= Optimica extension: The `Constraints\\' type corresponds to a whole Constraint section.
-           It is simple a list of expressions. =#
-         @Uniontype Constraint begin
-              @Record CONSTRAINT_EXPS begin
-
-                       constraintLst::List{Exp}
-              end
-
-              @Record CONSTRAINT_DT begin
-
-                       constraint::Exp
-                       localCon #= local or global constraint; local constraints depend on variables that are computed within the algebraic loop itself =#::Bool
-              end
-         end
-
-          #= currently for Optimica extension: these are the objectives of optimization class =#
-         @Uniontype ClassAttributes begin
-              @Record OPTIMIZATION_ATTRS begin
-
-                       objetiveE::Option{Exp}
-                       objectiveIntegrandE::Option{Exp}
-                       startTimeE::Option{Exp}
-                       finalTimeE::Option{Exp}
-              end
-         end
-
-         #= /* TODO: create a backend and a simcode uniontype */ =#
-
-          #= There are four kinds of statements:
-             1. assignments ('a := b;')
-             2. if statements ('if A then B; elseif C; else D;')
-             3. for loops ('for i in 1:10 loop ...; end for;')
-             4. when statements ('when E do S; end when;') =#
-         @Uniontype Statement begin
-              @Record STMT_ASSIGN begin
-
-                       type_::Type
-                       exp1::Exp
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
-
-              @Record STMT_TUPLE_ASSIGN begin
-
-                       type_::Type
-                       expExpLst::List{Exp}
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
-
-              @Record STMT_ASSIGN_ARR begin
-
-                       type_::Type
-                       lhs::Exp
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
-
-              @Record STMT_IF begin
-
-                       exp::Exp
-                       statementLst::List{Statement}
-                       else_::Else
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+#= /* -- Algorithm.mo -- */ =#
+
+#= The `Algorithm\\' type corresponds to a whole algorithm section.
+It is simple a list of algorithm statements. =#
+@Uniontype Algorithm begin
+  @Record ALGORITHM_STMTS begin
+
+    statementLst::List{Statement}
+  end
+end
+
+#= Optimica extension: The `Constraints\\' type corresponds to a whole Constraint section.
+It is simple a list of expressions. =#
+@Uniontype Constraint begin
+  @Record CONSTRAINT_EXPS begin
+
+    constraintLst::List{Exp}
+  end
+
+  @Record CONSTRAINT_DT begin
+
+    constraint::Exp
+    localCon #= local or global constraint; local constraints depend on variables that are computed within the algebraic loop itself =#::Bool
+  end
+end
+
+#= currently for Optimica extension: these are the objectives of optimization class =#
+@Uniontype ClassAttributes begin
+  @Record OPTIMIZATION_ATTRS begin
+
+    objetiveE::Option{Exp}
+    objectiveIntegrandE::Option{Exp}
+    startTimeE::Option{Exp}
+    finalTimeE::Option{Exp}
+  end
+end
+
+#= /* TODO: create a backend and a simcode uniontype */ =#
+
+#= There are four kinds of statements:
+1. assignments ('a := b;')
+2. if statements ('if A then B; elseif C; else D;')
+3. for loops ('for i in 1:10 loop ...; end for;')
+4. when statements ('when E do S; end when;') =#
+@Uniontype Statement begin
+  @Record STMT_ASSIGN begin
+
+    type_::Type
+    exp1::Exp
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record STMT_TUPLE_ASSIGN begin
+
+    type_::Type
+    expExpLst::List{Exp}
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record STMT_ASSIGN_ARR begin
+
+    type_::Type
+    lhs::Exp
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record STMT_IF begin
+
+    exp::Exp
+    statementLst::List{Statement}
+    else_::Else
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_FOR begin
-
-                       type_ #= this is the type of the iterator =#::Type
-                       iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
-                       iter #= the iterator variable =#::Ident
-                       index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
-                       range #= range for the loop =#::Exp
-                       statementLst::List{Statement}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+  @Record STMT_FOR begin
+
+    type_ #= this is the type of the iterator =#::Type
+    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
+    iter #= the iterator variable =#::Ident
+    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
+    range #= range for the loop =#::Exp
+    statementLst::List{Statement}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_PARFOR begin
+  @Record STMT_PARFOR begin
 
-                       type_ #= this is the type of the iterator =#::Type
-                       iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
-                       iter #= the iterator variable =#::Ident
-                       index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
-                       range #= range for the loop =#::Exp
-                       statementLst::List{Statement}
-                       loopPrlVars #= list of parallel variables used/referenced in the parfor loop =#::List{Tuple{ComponentRef, SourceInfo}}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    type_ #= this is the type of the iterator =#::Type
+    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
+    iter #= the iterator variable =#::Ident
+    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
+    range #= range for the loop =#::Exp
+    statementLst::List{Statement}
+    loopPrlVars #= list of parallel variables used/referenced in the parfor loop =#::List{Tuple{ComponentRef, SourceInfo}}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_WHILE begin
+  @Record STMT_WHILE begin
 
-                       exp::Exp
-                       statementLst::List{Statement}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    exp::Exp
+    statementLst::List{Statement}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_WHEN begin
+  @Record STMT_WHEN begin
 
-                       exp::Exp
-                       conditions::List{ComponentRef}
-                       #=  list of boolean variables as conditions  (this is simcode stuff)
-                       =#
-                       initialCall::Bool
-                       #=  true, if top-level branch with initial() (this is simcode stuff)
-                       =#
-                       statementLst::List{Statement}
-                       elseWhen::Option{Statement}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    exp::Exp
+    conditions::List{ComponentRef}
+    #=  list of boolean variables as conditions  (this is simcode stuff)
+    =#
+    initialCall::Bool
+    #=  true, if top-level branch with initial() (this is simcode stuff)
+    =#
+    statementLst::List{Statement}
+    elseWhen::Option{Statement}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_ASSERT begin
+  @Record STMT_ASSERT begin
 
-                       cond::Exp
-                       msg::Exp
-                       level::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    cond::Exp
+    msg::Exp
+    level::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_TERMINATE begin
+  @Record STMT_TERMINATE begin
 
-                       msg::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    msg::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_REINIT begin
+  @Record STMT_REINIT begin
 
-                       var #= Variable =#::Exp
-                       value #= Value  =#::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    var #= Variable =#::Exp
+    value #= Value  =#::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_NORETCALL begin
+  @Record STMT_NORETCALL begin
 
-                       exp::Exp
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_RETURN begin
+  @Record STMT_RETURN begin
 
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_BREAK begin
+  @Record STMT_BREAK begin
 
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_CONTINUE begin
+  @Record STMT_CONTINUE begin
 
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-              @Record STMT_ARRAY_INIT begin
+  @Record STMT_ARRAY_INIT begin
 
-                       name::String
-                       ty::Type
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
+    name::String
+    ty::Type
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
 
-               #=  MetaModelica extension. KS
-               =#
+  #=  MetaModelica extension. KS
+  =#
 
-              @Record STMT_FAILURE begin
+  @Record STMT_FAILURE begin
 
-                       body::List{Statement}
-                       source #= the origin of the component/equation/algorithm =#::ElementSource
-              end
-         end
+    body::List{Statement}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+end
 
-          #= An if statements can one or more `elseif\\' branches and an
-             optional `else\\' branch. =#
-         @Uniontype Else begin
-              @Record NOELSE begin
-
-              end
-
-              @Record ELSEIF begin
-
-                       exp::Exp
-                       statementLst::List{Statement}
-                       else_::Else
-              end
-
-              @Record ELSE begin
-
-                       statementLst::List{Statement}
-              end
-         end
-
-         #= /* -- End Algorithm.mo -- */ =#
-         #= /* -- Start Types.mo -- */ =#
-
-          #= - Variables =#
-         @Uniontype Var begin
-              @Record TYPES_VAR begin
-
-                       name #= name =#::Ident
-                       attributes #= attributes =#::Attributes
-                       ty #= type =#::Type
-                       binding #= equation modification =#::Binding
-                       constOfForIteratorRange #= the constant-ness of the range if this is a for iterator, NONE() if is NOT a for iterator =#::Option{Const}
-              end
-         end
+#= An if statements can one or more `elseif\\' branches and an
+optional `else\\' branch. =#
+@Uniontype Else begin
+  @Record NOELSE begin
 
-          #= - Attributes =#
-         @Uniontype Attributes begin
-              @Record ATTR begin
+  end
 
-                       connectorType #= flow, stream or unspecified =#::ConnectorType
-                       parallelism #= parallelism =#::SCode.Parallelism
-                       variability #= variability =#::SCode.Variability
-                       direction #= direction =#::Absyn.Direction
-                       innerOuter #= inner, outer,  inner outer or unspecified =#::Absyn.InnerOuter
-                       visibility #= public, protected =#::SCode.Visibility
-              end
-         end
+  @Record ELSEIF begin
 
-         const dummyAttrVar = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
-         const dummyAttrParam = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.PARAM(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
-         const dummyAttrConst = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.CONST(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
-         const dummyAttrInput = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.INPUT(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
+    exp::Exp
+    statementLst::List{Statement}
+    else_::Else
+  end
 
-          #= where this binding came from: either default binding or start value =#
-         @Uniontype BindingSource begin
-              @Record BINDING_FROM_DEFAULT_VALUE begin
+  @Record ELSE begin
 
-              end
+    statementLst::List{Statement}
+  end
+end
 
-              @Record BINDING_FROM_START_VALUE begin
+#= /* -- End Algorithm.mo -- */ =#
+#= /* -- Start Types.mo -- */ =#
 
-              end
-         end
+#= - Variables =#
+@Uniontype Var begin
+  @Record TYPES_VAR begin
 
-         @Uniontype Binding begin
-              @Record UNBOUND begin
+    name #= name =#::Ident
+    attributes #= attributes =#::Attributes
+    ty #= type =#::Type
+    binding #= equation modification =#::Binding
+    constOfForIteratorRange #= the constant-ness of the range if this is a for iterator, NONE() if is NOT a for iterator =#::Option{Const}
+  end
+end
 
-              end
+#= - Attributes =#
+@Uniontype Attributes begin
+  @Record ATTR begin
 
-              @Record EQBOUND begin
+    connectorType #= flow, stream or unspecified =#::ConnectorType
+    parallelism #= parallelism =#::SCode.Parallelism
+    variability #= variability =#::SCode.Variability
+    direction #= direction =#::Absyn.Direction
+    innerOuter #= inner, outer,  inner outer or unspecified =#::Absyn.InnerOuter
+    visibility #= public, protected =#::SCode.Visibility
+  end
+end
 
-                       exp::Exp
-                       evaluatedExp::Option{Values.Value}
-                       constant_::Const
-                       source::BindingSource
-              end
+const dummyAttrVar = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
+const dummyAttrParam = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.PARAM(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
+const dummyAttrConst = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.CONST(), Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
+const dummyAttrInput = ATTR(NON_CONNECTOR(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.INPUT(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC())::Attributes
 
-              @Record VALBOUND begin
+#= where this binding came from: either default binding or start value =#
+@Uniontype BindingSource begin
+  @Record BINDING_FROM_DEFAULT_VALUE begin
 
-                       valBound::Values.Value
-                       source::BindingSource
-              end
-         end
+  end
 
-        EqualityConstraint = Option  #= contains the path to the equalityConstraint function,
-           the dimension of the output and the inline type of the function =#
-         #=  default constants that can be used
-         =#
-         const T_REAL_DEFAULT = T_REAL(nil)::Type
-         const T_INTEGER_DEFAULT = T_INTEGER(nil)::Type
-         const T_STRING_DEFAULT = T_STRING(nil)::Type
-         const T_BOOL_DEFAULT = T_BOOL(nil)::Type
-         const T_CLOCK_DEFAULT = T_CLOCK(nil)::Type
-         const T_ENUMERATION_DEFAULT = T_ENUMERATION(NONE(), Absyn.IDENT(""), nil, nil, nil)::Type
-         const T_REAL_BOXED = T_METABOXED(T_REAL_DEFAULT)::Type
-         const T_INTEGER_BOXED = T_METABOXED(T_INTEGER_DEFAULT)::Type
-         const T_STRING_BOXED = T_METABOXED(T_STRING_DEFAULT)::Type
-         const T_BOOL_BOXED = T_METABOXED(T_BOOL_DEFAULT)::Type
-         const T_METABOXED_DEFAULT = T_METABOXED(T_UNKNOWN_DEFAULT)::Type
-         const T_METALIST_DEFAULT = T_METALIST(T_UNKNOWN_DEFAULT)::Type
-         const T_NONE_DEFAULT = T_METAOPTION(T_UNKNOWN_DEFAULT)::Type
-         const T_ANYTYPE_DEFAULT = T_ANYTYPE(NONE())::Type
-         const T_UNKNOWN_DEFAULT = T_UNKNOWN()::Type
-         const T_NORETCALL_DEFAULT = T_NORETCALL()::Type
-         const T_METATYPE_DEFAULT = T_METATYPE(T_UNKNOWN_DEFAULT)::Type
-         const T_COMPLEX_DEFAULT = T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()) #= default complex with unknown CiState =#::Type
-         const T_COMPLEX_DEFAULT_RECORD = T_COMPLEX(ClassInf.RECORD(Absyn.IDENT("")), nil, NONE()) #= default complex with record CiState =#::Type
-         const T_SOURCEINFO_DEFAULT_METARECORD = T_METARECORD(Absyn.QUALIFIED("SourceInfo", Absyn.IDENT("SOURCEINFO")), Absyn.IDENT("SourceInfo"), nil, 1, list(TYPES_VAR("fileName", dummyAttrVar, T_STRING_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("isReadOnly", dummyAttrVar, T_BOOL_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lineNumberStart", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("columnNumberStart", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lineNumberEnd", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("columnNumberEnd", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lastModification", dummyAttrVar, T_REAL_DEFAULT, UNBOUND(), NONE())), true)::Type
-         const T_SOURCEINFO_DEFAULT = T_METAUNIONTYPE(list(Absyn.QUALIFIED("SourceInfo", Absyn.IDENT("SOURCEINFO"))), nil, true, EVAL_SINGLETON_KNOWN_TYPE(T_SOURCEINFO_DEFAULT_METARECORD), Absyn.IDENT("SourceInfo"))::Type
-         #=  Arrays of unknown dimension, eg. Real[:]
-         =#
+  @Record BINDING_FROM_START_VALUE begin
 
-         const T_ARRAY_REAL_NODIM = T_ARRAY(T_REAL_DEFAULT, list(DIM_UNKNOWN()))::Type
+  end
+end
 
-         const T_ARRAY_INT_NODIM = T_ARRAY(T_INTEGER_DEFAULT, list(DIM_UNKNOWN()))::Type
+@Uniontype Binding begin
+  @Record UNBOUND begin
 
-         const T_ARRAY_BOOL_NODIM = T_ARRAY(T_BOOL_DEFAULT, list(DIM_UNKNOWN()))::Type
+  end
 
-         const T_ARRAY_STRING_NODIM = T_ARRAY(T_STRING_DEFAULT, list(DIM_UNKNOWN()))::Type
+  @Record EQBOUND begin
 
-          #= models the different front-end and back-end types =#
-         @Uniontype Type begin
-              @Record T_INTEGER begin
+    exp::Exp
+    evaluatedExp::Option{Values.Value}
+    constant_::Const
+    source::BindingSource
+  end
 
-                       varLst::List{Var}
-              end
+  @Record VALBOUND begin
 
-              @Record T_REAL begin
+    valBound::Values.Value
+    source::BindingSource
+  end
+end
 
-                       varLst::List{Var}
-              end
+EqualityConstraint = Option  #= contains the path to the equalityConstraint function,
+the dimension of the output and the inline type of the function =#
+#=  default constants that can be used
+=#
 
-              @Record T_STRING begin
+#= models the different front-end and back-end types =#
+@Uniontype Type begin
+  @Record T_INTEGER begin
 
-                       varLst::List{Var}
-              end
+    varLst::List{Var}
+  end
 
-              @Record T_BOOL begin
+  @Record T_REAL begin
 
-                       varLst::List{Var}
-              end
+    varLst::List{Var}
+  end
 
-              @Record T_CLOCK begin
+  @Record T_STRING begin
 
-                       varLst::List{Var}
-                       #=  BTH Since Clock type has no attributes, this is not really needed, but at the moment kept for unified treatment of fundamental types
-                       =#
-              end
+    varLst::List{Var}
+  end
 
-              @Record T_ENUMERATION begin
+  @Record T_BOOL begin
 
-                       index #= the enumeration value index, SOME for element, NONE() for type =#::Option{ModelicaInteger}
-                       path #= enumeration path =#::Absyn.Path
-                       names #= names =#::List{String}
-                       literalVarLst::List{Var}
-                       attributeLst::List{Var}
-              end
+    varLst::List{Var}
+  end
 
-              @Record T_ARRAY begin
+  @Record T_CLOCK begin
 
-                       ty #= Type =#::Type
-                       dims #= dims =#::Dimensions
-              end
+    varLst::List{Var}
+    #=  BTH Since Clock type has no attributes, this is not really needed, but at the moment kept for unified treatment of fundamental types
+    =#
+  end
 
-              @Record T_NORETCALL begin
+  @Record T_ENUMERATION begin
 
-              end
+    index #= the enumeration value index, SOME for element, NONE() for type =#::Option{ModelicaInteger}
+    path #= enumeration path =#::Absyn.Path
+    names #= names =#::List{String}
+    literalVarLst::List{Var}
+    attributeLst::List{Var}
+  end
 
-              @Record T_UNKNOWN begin
+  @Record T_ARRAY begin
 
-              end
+    ty #= Type =#::Type
+    dims #= dims =#::Dimensions
+  end
 
-              @Record T_COMPLEX begin
+  @Record T_NORETCALL begin
 
-                       complexClassType #= The type of a class =#::ClassInf.State
-                       varLst #= The variables of a complex type =#::List{Var}
-                       equalityConstraint::EqualityConstraint
-              end
+  end
 
-              @Record T_SUBTYPE_BASIC begin
+  @Record T_UNKNOWN begin
 
-                       complexClassType #= The type of a class =#::ClassInf.State
-                       varLst #= complexVarLst; The variables of a complex type! Should be empty, kept here to verify! =#::List{Var}
-                       complexType #= complexType; A complex type can be a subtype of another (primitive) type (through extends) =#::Type
-                       equalityConstraint::EqualityConstraint
-              end
+  end
 
-              @Record T_FUNCTION begin
+  @Record T_COMPLEX begin
 
-                       funcArg #= funcArg =#::List{FuncArg}
-                       funcResultType #= Only single-result =#::Type
-                       functionAttributes::FunctionAttributes
-                       path::Absyn.Path
-              end
+    complexClassType #= The type of a class =#::ClassInf.State
+    varLst #= The variables of a complex type =#::List{Var}
+    equalityConstraint::EqualityConstraint
+  end
 
-              @Record T_FUNCTION_REFERENCE_VAR begin
+  @Record T_SUBTYPE_BASIC begin
 
-                       functionType #= the type of the function =#::Type
-              end
+    complexClassType #= The type of a class =#::ClassInf.State
+    varLst #= complexVarLst; The variables of a complex type! Should be empty, kept here to verify! =#::List{Var}
+    complexType #= complexType; A complex type can be a subtype of another (primitive) type (through extends) =#::Type
+    equalityConstraint::EqualityConstraint
+  end
 
-              @Record T_FUNCTION_REFERENCE_FUNC begin
+  @Record T_FUNCTION begin
 
-                       builtin::Bool
-                       functionType #= type of the non-boxptr function =#::Type
-              end
+    funcArg #= funcArg =#::List{FuncArg}
+    funcResultType #= Only single-result =#::Type
+    functionAttributes::FunctionAttributes
+    path::Absyn.Path
+  end
 
-              @Record T_TUPLE begin
+  @Record T_FUNCTION_REFERENCE_VAR begin
 
-                       types #= For functions returning multiple values. =#::List{Type}
-                       names #= For tuples elements that have names (function outputs) =#::Option{List{String}}
-              end
+    functionType #= the type of the function =#::Type
+  end
 
-              @Record T_CODE begin
+  @Record T_FUNCTION_REFERENCE_FUNC begin
 
-                       ty::CodeType
-              end
+    builtin::Bool
+    functionType #= type of the non-boxptr function =#::Type
+  end
 
-              @Record T_ANYTYPE begin
+  @Record T_TUPLE begin
 
-                       anyClassType #= anyClassType - used for generic types. When class state present the type is assumed to be a complex type which has that restriction. =#::Option{ClassInf.State}
-              end
+    types #= For functions returning multiple values. =#::List{Type}
+    names #= For tuples elements that have names (function outputs) =#::Option{List{String}}
+  end
 
-               #=  MetaModelica extensions
-               =#
+  @Record T_CODE begin
 
-              @Record T_METALIST begin
+    ty::CodeType
+  end
 
-                       ty #= listType =#::Type
-              end
+  @Record T_ANYTYPE begin
 
-              @Record T_METATUPLE begin
+    anyClassType #= anyClassType - used for generic types. When class state present the type is assumed to be a complex type which has that restriction. =#::Option{ClassInf.State}
+  end
 
-                       types::List{Type}
-              end
+  #=  MetaModelica extensions
+  =#
 
-              @Record T_METAOPTION begin
+  @Record T_METALIST begin
 
-                       ty::Type
-              end
+    ty #= listType =#::Type
+  end
 
-              @Record T_METAUNIONTYPE begin
+  @Record T_METATUPLE begin
 
-                       #=  TODO: You can't trust these fields as it seems MetaUtil.fixUniontype is sent empty elements when running dependency analysis
-                       =#
-                       paths::List{Absyn.Path}
-                       typeVars::List{Type}
-                       knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
-                       singletonType::EvaluateSingletonType
-                       path::Absyn.Path
-              end
+    types::List{Type}
+  end
 
-              @Record T_METARECORD begin
+  @Record T_METAOPTION begin
 
-                       path #= the path to the record =#::Absyn.Path
-                       utPath #= the path to its uniontype; this is what we match the type against =#::Absyn.Path
-                       #=  If the metarecord constructor was added to the FunctionTree, this would
-                       =#
-                       #=  not be needed. They are used to create the datatype in the runtime...
-                       =#
-                       typeVars::List{Type}
-                       index::ModelicaInteger
-                       #= The index in the uniontype
-                       =#
-                       fields::List{Var}
-                       knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
-              end
+    ty::Type
+  end
 
-              @Record T_METAARRAY begin
+  @Record T_METAUNIONTYPE begin
 
-                       ty::Type
-              end
+    #=  TODO: You can't trust these fields as it seems MetaUtil.fixUniontype is sent empty elements when running dependency analysis
+    =#
+    paths::List{Absyn.Path}
+    typeVars::List{Type}
+    knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
+    singletonType::EvaluateSingletonType
+    path::Absyn.Path
+  end
 
-              @Record T_METABOXED begin
+  @Record T_METARECORD begin
 
-                       ty::Type
-              end
+    path #= the path to the record =#::Absyn.Path
+    utPath #= the path to its uniontype; this is what we match the type against =#::Absyn.Path
+    #=  If the metarecord constructor was added to the FunctionTree, this would
+    =#
+    #=  not be needed. They are used to create the datatype in the runtime...
+    =#
+    typeVars::List{Type}
+    index::ModelicaInteger
+    #= The index in the uniontype
+    =#
+    fields::List{Var}
+    knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
+  end
 
-              @Record T_METAPOLYMORPHIC begin
+  @Record T_METAARRAY begin
 
-                       name::String
-              end
+    ty::Type
+  end
 
-              @Record T_METATYPE begin
+  @Record T_METABOXED begin
 
-                       ty::Type
-              end
-         end
+    ty::Type
+  end
 
-         @Uniontype CodeType begin
-              @Record C_EXPRESSION begin
+  @Record T_METAPOLYMORPHIC begin
 
-              end
+    name::String
+  end
 
-              @Record C_EXPRESSION_OR_MODIFICATION begin
+  @Record T_METATYPE begin
 
-              end
+    ty::Type
+  end
+end
 
-              @Record C_MODIFICATION begin
+@Uniontype CodeType begin
+  @Record C_EXPRESSION begin
 
-              end
+  end
 
-              @Record C_TYPENAME begin
+  @Record C_EXPRESSION_OR_MODIFICATION begin
 
-              end
+  end
 
-              @Record C_VARIABLENAME begin
+  @Record C_MODIFICATION begin
 
-              end
+  end
 
-              @Record C_VARIABLENAMES begin
+  @Record C_TYPENAME begin
 
-              end
-         end
+  end
 
-          #= Is here because constants are not allowed to contain function pointers for some reason =#
-         @Uniontype EvaluateSingletonType begin
-              @Record EVAL_SINGLETON_TYPE_FUNCTION begin
+  @Record C_VARIABLENAME begin
 
-                       fun::EvaluateSingletonTypeFunction
-              end
+  end
 
-              @Record EVAL_SINGLETON_KNOWN_TYPE begin
+  @Record C_VARIABLENAMES begin
 
-                       ty::Type
-              end
+  end
+end
 
-              @Record NOT_SINGLETON begin
+#= Is here because constants are not allowed to contain function pointers for some reason =#
+@Uniontype EvaluateSingletonType begin
+  @Record EVAL_SINGLETON_TYPE_FUNCTION begin
 
-              end
-         end
+    fun::EvaluateSingletonTypeFunction
+  end
 
+  @Record EVAL_SINGLETON_KNOWN_TYPE begin
 
+    ty::Type
+  end
 
-         const FUNCTION_ATTRIBUTES_BUILTIN = FUNCTION_ATTRIBUTES(NO_INLINE(), true, false, false, FUNCTION_BUILTIN(NONE(), false), FP_NON_PARALLEL())::FunctionAttributes
+  @Record NOT_SINGLETON begin
 
-         const FUNCTION_ATTRIBUTES_DEFAULT = FUNCTION_ATTRIBUTES(DEFAULT_INLINE(), true, false, false, FUNCTION_NOT_BUILTIN(), FP_NON_PARALLEL())::FunctionAttributes
+  end
+end
 
-         const FUNCTION_ATTRIBUTES_IMPURE = FUNCTION_ATTRIBUTES(NO_INLINE(), false, true, false, FUNCTION_NOT_BUILTIN(), FP_NON_PARALLEL())::FunctionAttributes
+@Uniontype FunctionAttributes begin
+  @Record FUNCTION_ATTRIBUTES begin
 
-         const FUNCTION_ATTRIBUTES_BUILTIN_IMPURE = FUNCTION_ATTRIBUTES(NO_INLINE(), false, true, false, FUNCTION_BUILTIN(NONE(), false), FP_NON_PARALLEL())::FunctionAttributes
+    inline::InlineType
+    isOpenModelicaPure #= if the function has __OpenModelica_Impure =#::Bool
+    isImpure #= if the function has prefix *impure* is true, else false =#::Bool
+    isFunctionPointer #= if the function is a local variable =#::Bool
+    isBuiltin::FunctionBuiltin
+    functionParallelism::FunctionParallelism
+  end
+end
 
-         @Uniontype FunctionAttributes begin
-              @Record FUNCTION_ATTRIBUTES begin
+@Uniontype FunctionBuiltin begin
+  @Record FUNCTION_NOT_BUILTIN begin
 
-                       inline::InlineType
-                       isOpenModelicaPure #= if the function has __OpenModelica_Impure =#::Bool
-                       isImpure #= if the function has prefix *impure* is true, else false =#::Bool
-                       isFunctionPointer #= if the function is a local variable =#::Bool
-                       isBuiltin::FunctionBuiltin
-                       functionParallelism::FunctionParallelism
-              end
-         end
+  end
 
-         @Uniontype FunctionBuiltin begin
-              @Record FUNCTION_NOT_BUILTIN begin
+  @Record FUNCTION_BUILTIN begin
 
-              end
+    name::Option{String}
+    unboxArgs::Bool
+  end
 
-              @Record FUNCTION_BUILTIN begin
+  @Record FUNCTION_BUILTIN_PTR begin
 
-                       name::Option{String}
-                       unboxArgs::Bool
-              end
+  end
+end
 
-              @Record FUNCTION_BUILTIN_PTR begin
+#= This was a function restriction in SCode and Absyn
+=#
+#= Now it is part of function attributes.
+=#
 
-              end
-         end
+@Uniontype FunctionParallelism begin
+  @Record FP_NON_PARALLEL begin
 
-         #= This was a function restriction in SCode and Absyn
-         =#
-         #= Now it is part of function attributes.
-         =#
+  end
 
-         @Uniontype FunctionParallelism begin
-              @Record FP_NON_PARALLEL begin
+  @Record FP_PARALLEL_FUNCTION begin
 
-              end
+  end
 
-              @Record FP_PARALLEL_FUNCTION begin
+  @Record FP_KERNEL_FUNCTION begin
 
-              end
+  end
+end
 
-              @Record FP_KERNEL_FUNCTION begin
+const FUNCTION_ATTRIBUTES_BUILTIN = FUNCTION_ATTRIBUTES(NO_INLINE(), true, false, false, FUNCTION_BUILTIN(NONE(), false), FP_NON_PARALLEL())::FunctionAttributes
 
-              end
-         end
+const FUNCTION_ATTRIBUTES_DEFAULT = FUNCTION_ATTRIBUTES(DEFAULT_INLINE(), true, false, false, FUNCTION_NOT_BUILTIN(), FP_NON_PARALLEL())::FunctionAttributes
 
+const FUNCTION_ATTRIBUTES_IMPURE = FUNCTION_ATTRIBUTES(NO_INLINE(), false, true, false, FUNCTION_NOT_BUILTIN(), FP_NON_PARALLEL())::FunctionAttributes
 
-         @Uniontype Dimension begin
-              @Record DIM_INTEGER begin
+const FUNCTION_ATTRIBUTES_BUILTIN_IMPURE = FUNCTION_ATTRIBUTES(NO_INLINE(), false, true, false, FUNCTION_BUILTIN(NONE(), false), FP_NON_PARALLEL())::FunctionAttributes
 
-                       integer::ModelicaInteger
-              end
 
-              @Record DIM_BOOLEAN begin
+@Uniontype Dimension begin
+  @Record DIM_INTEGER begin
 
-              end
+    integer::ModelicaInteger
+  end
 
-              @Record DIM_ENUM begin
+  @Record DIM_BOOLEAN begin
 
-                       enumTypeName #= The enumeration type name. =#::Absyn.Path
-                       literals #= A list of the literals in the enumeration. =#::List{String}
-                       size #= The size of the enumeration. =#::ModelicaInteger
-              end
+  end
 
-              @Record DIM_EXP begin
+  @Record DIM_ENUM begin
 
-                       exp::Exp
-              end
+    enumTypeName #= The enumeration type name. =#::Absyn.Path
+    literals #= A list of the literals in the enumeration. =#::List{String}
+    size #= The size of the enumeration. =#::ModelicaInteger
+  end
 
-              @Record DIM_UNKNOWN begin
+  @Record DIM_EXP begin
 
-                       #= DimensionBinding dimensionBinding \"unknown dimension can be bound or unbound\";
-                       =#
-              end
-         end
+    exp::Exp
+  end
 
-         #=  adrpo: this is used to bind unknown dimensions to an expression
-         =#
-         #=         and when we do subtyping we add constrains to this expression.
-         =#
-         #=         this should be used for typechecking with unknown dimensions
-         =#
-         #=         when running checkModel. the binding acts like a type variable.
-         =#
+  @Record DIM_UNKNOWN begin
 
-         @Uniontype DimensionBinding begin
-              @Record DIM_UNBOUND begin
+    #= DimensionBinding dimensionBinding \"unknown dimension can be bound or unbound\";
+    =#
+  end
+end
 
-              end
+#=  adrpo: this is used to bind unknown dimensions to an expression
+=#
+#=         and when we do subtyping we add constrains to this expression.
+=#
+#=         this should be used for typechecking with unknown dimensions
+=#
+#=         when running checkModel. the binding acts like a type variable.
+=#
 
-              @Record DIM_BOUND begin
+@Uniontype DimensionBinding begin
+  @Record DIM_UNBOUND begin
 
-                       binding #= the dimension is bound to this expression =#::Exp
-                       constrains #= the bound has these constrains (collected when doing subtyping) =#::Dimensions
-              end
-         end
+  end
 
-         @Uniontype FuncArg begin
-              @Record FUNCARG begin
+  @Record DIM_BOUND begin
 
-                       name::String
-                       ty::Type
-                       isConst::Const
-                       par::VarParallelism
-                       defaultBinding::Option{Exp}
-              end
-         end
+    binding #= the dimension is bound to this expression =#::Exp
+    constrains #= the bound has these constrains (collected when doing subtyping) =#::Dimensions
+  end
+end
 
-          #= The degree of constantness of an expression is determined by the Const
-             datatype. Variables declared as \\'constant\\' will get C_CONST constantness.
-             Variables declared as \\'parameter\\' will get C_PARAM constantness and
-             all other variables are not constant and will get C_VAR constantness.
+@Uniontype FuncArg begin
+  @Record FUNCARG begin
 
-           - Variable properties =#
-         @Uniontype isConst begin
-              @Record C_CONST begin
+    name::String
+    ty::Type
+    isConst::Const
+    par::VarParallelism
+    defaultBinding::Option{Exp}
+  end
+end
 
-              end
+#= The degree of constantness of an expression is determined by the Const
+datatype. Variables declared as \\'constant\\' will get C_CONST constantness.
+Variables declared as \\'parameter\\' will get C_PARAM constantness and
+all other variables are not constant and will get C_VAR constantness.
 
-              @Record C_PARAM begin
+- Variable properties =#
+@Uniontype isConst begin
+  @Record C_CONST begin
 
-              end
+  end
 
-              @Record C_VAR begin
+  @Record C_PARAM begin
 
-              end
+  end
 
-              @Record C_UNKNOWN begin
+  @Record C_VAR begin
 
-              end
-         end
+  end
 
-          #= A tuple is added to the Types. This is used by functions whom returns multiple arguments.
-           Used by split_props
-           - Tuple constants =#
-         @Uniontype TupleConst begin
-              @Record SINGLE_CONST begin
+  @Record C_UNKNOWN begin
 
-                       isConst::Const
-              end
+  end
+end
 
-              @Record TUPLE_CONST begin
+#= A tuple is added to the Types. This is used by functions whom returns multiple arguments.
+Used by split_props
+- Tuple constants =#
+@Uniontype TupleConst begin
+  @Record SINGLE_CONST begin
 
-                       tupleConstLst::List{TupleConst}
-              end
-         end
+    isConst::Const
+  end
 
-          #= P.R 1.1 for multiple return arguments from functions,
-             one constant flag for each return argument.
+  @Record TUPLE_CONST begin
 
-           The datatype `Properties\\' contain information about an
-             expression.  The properties are created by analyzing the
-             expressions.
-           - Expression properties =#
-         @Uniontype Properties begin
-              @Record PROP begin
+    tupleConstLst::List{TupleConst}
+  end
+end
 
-                       type_ #= type =#::Type
-                       constFlag #= constFlag; if the type is a tuple, each element
-                                         have a const flag. =#::Const
-              end
+#= P.R 1.1 for multiple return arguments from functions,
+one constant flag for each return argument.
 
-              @Record PROP_TUPLE begin
+The datatype `Properties\\' contain information about an
+expression.  The properties are created by analyzing the
+expressions.
+- Expression properties =#
+@Uniontype Properties begin
+  @Record PROP begin
 
-                       type_::Type
-                       tupleConst #= tupleConst; The elements might be
-                                         tuple themselfs. =#::TupleConst
-              end
-         end
+    type_ #= type =#::Type
+    constFlag #= constFlag; if the type is a tuple, each element
+    have a const flag. =#::Const
+  end
 
-          #= To generate the correct set of equations, the translator has to
-           differentiate between the primitive types `Real\\', `Integer\\',
-           `String\\', `Boolean\\' and types directly derived from then from
-           other, complex types.  For arrays and matrices the type
-           `T_ARRAY\\' is used, with the first argument being the number of
-           dimensions, and the second being the type of the objects in the
-           array.  The `Type\\' type is used to store
-           information about whether a class is derived from a primitive
-           type, and whether a variable is of one of these types.
-           - Modification datatype, was originally in Mod =#
-         @Uniontype EqMod begin
-              @Record TYPED begin
+  @Record PROP_TUPLE begin
 
-                       modifierAsExp #= modifier as expression =#::Exp
-                       modifierAsValue #= modifier as Value option =#::Option{Values.Value}
-                       properties #= properties =#::Properties
-                       modifierAsAbsynExp #= keep the untyped modifier as an absyn expression for modification comparison =#::Absyn.Exp
-                       info::SourceInfo
-              end
+    type_::Type
+    tupleConst #= tupleConst; The elements might be
+    tuple themselfs. =#::TupleConst
+  end
+end
 
-              @Record UNTYPED begin
+const ReductionIterators = List  #= NOTE: OMC only handles one iterator for now =#
+#= To generate the correct set of equations, the translator has to
+differentiate between the primitive types `Real\\', `Integer\\',
+`String\\', `Boolean\\' and types directly derived from then from
+other, complex types.  For arrays and matrices the type
+`T_ARRAY\\' is used, with the first argument being the number of
+dimensions, and the second being the type of the objects in the
+array.  The `Type\\' type is used to store
+information about whether a class is derived from a primitive
+type, and whether a variable is of one of these types.
+- Modification datatype, was originally in Mod =#
+@Uniontype EqMod begin
+  @Record TYPED begin
 
-                       exp::Absyn.Exp
-              end
-         end
+    modifierAsExp #= modifier as expression =#::Exp
+    modifierAsValue #= modifier as Value option =#::Option{Values.Value}
+    properties #= properties =#::Properties
+    modifierAsAbsynExp #= keep the untyped modifier as an absyn expression for modification comparison =#::Absyn.Exp
+    info::SourceInfo
+  end
 
-          #= -Sub Modification =#
-         @Uniontype SubMod begin
-              @Record NAMEMOD begin
+  @Record UNTYPED begin
 
-                       ident #= component name =#::Ident
-                       mod #= modification =#::Mod
-              end
-         end
+    exp::Absyn.Exp
+  end
+end
 
-          #= Modification =#
-         @Uniontype Mod begin
-              @Record MOD begin
+#= -Sub Modification =#
+@Uniontype SubMod begin
+  @Record NAMEMOD begin
 
-                       finalPrefix #= final prefix =#::SCode.Final
-                       eachPrefix #= each prefix =#::SCode.Each
-                       subModLst::List{SubMod}
-                       binding::Option{EqMod}
-                       info::SourceInfo
-              end
+    ident #= component name =#::Ident
+    mod #= modification =#::Mod
+  end
+end
 
-              @Record REDECL begin
+#= Modification =#
+@Uniontype Mod begin
+  @Record MOD begin
 
-                       finalPrefix #= final prefix =#::SCode.Final
-                       eachPrefix #= each prefix =#::SCode.Each
-                       element::SCode.Element
-                       mod::Mod
-              end
+    finalPrefix #= final prefix =#::SCode.Final
+    eachPrefix #= each prefix =#::SCode.Each
+    subModLst::List{SubMod}
+    binding::Option{EqMod}
+    info::SourceInfo
+  end
 
-              @Record NOMOD begin
+  @Record REDECL begin
 
-              end
-         end
+    finalPrefix #= final prefix =#::SCode.Final
+    eachPrefix #= each prefix =#::SCode.Each
+    element::SCode.Element
+    mod::Mod
+  end
 
-         @Uniontype ClockKind begin
-              @Record INFERRED_CLOCK begin
+  @Record NOMOD begin
 
-              end
+  end
+end
 
-              @Record INTEGER_CLOCK begin
+@Uniontype ClockKind begin
+  @Record INFERRED_CLOCK begin
 
-                       intervalCounter::Exp
-                       resolution #=  integer type >= 1  =#::Exp
-              end
+  end
 
-              @Record REAL_CLOCK begin
+  @Record INTEGER_CLOCK begin
 
-                       interval::Exp
-              end
+    intervalCounter::Exp
+    resolution #=  integer type >= 1  =#::Exp
+  end
 
-              @Record BOOLEAN_CLOCK begin
+  @Record REAL_CLOCK begin
 
-                       condition::Exp
-                       startInterval #=  real type >= 0.0  =#::Exp
-              end
+    interval::Exp
+  end
 
-              @Record SOLVER_CLOCK begin
+  @Record BOOLEAN_CLOCK begin
 
-                       c::Exp
-                       solverMethod #=  string type  =#::Exp
-              end
-         end
+    condition::Exp
+    startInterval #=  real type >= 0.0  =#::Exp
+  end
 
-         #= /* -- End Types.mo -- */ =#
+  @Record SOLVER_CLOCK begin
 
-          #= Expressions
-           The 'Exp' datatype closely corresponds to the 'Absyn.Exp' datatype, but
-           is used for statically analyzed expressions. It includes explicit type
-           promotions and typed (non-overloaded) operators. It also contains expression
-           indexing with the 'ASUB' constructor. Indexing arbitrary array expressions
-           is currently not supported in Modelica, but it is needed here.
+    c::Exp
+    solverMethod #=  string type  =#::Exp
+  end
+end
 
-           When making additions, update at least the following functions:
-           * Expression.traverseExp
-           * Expression.traverseExpTopDown
-           * Expression.traverseExpBiDir
-           * ExpressionDump.printExpStr =#
-         @Uniontype Exp begin
-              @Record ICONST begin
+#= /* -- End Types.mo -- */ =#
 
-                       integer #= Integer constants =#::ModelicaInteger
-              end
+#= Expressions
+The 'Exp' datatype closely corresponds to the 'Absyn.Exp' datatype, but
+is used for statically analyzed expressions. It includes explicit type
+promotions and typed (non-overloaded) operators. It also contains expression
+indexing with the 'ASUB' constructor. Indexing arbitrary array expressions
+is currently not supported in Modelica, but it is needed here.
 
-              @Record RCONST begin
+When making additions, update at least the following functions:
+* Expression.traverseExp
+* Expression.traverseExpTopDown
+* Expression.traverseExpBiDir
+* ExpressionDump.printExpStr =#
+@Uniontype Exp begin
+  @Record ICONST begin
 
-                       real #= Real constants =#::ModelicaReal
-              end
+    integer #= Integer constants =#::ModelicaInteger
+  end
 
-              @Record SCONST begin
+  @Record RCONST begin
 
-                       string #= String constants =#::String
-              end
+    real #= Real constants =#::ModelicaReal
+  end
 
-              @Record BCONST begin
+  @Record SCONST begin
 
-                       bool #= Bool constants =#::Bool
-              end
+    string #= String constants =#::String
+  end
 
-              @Record CLKCONST begin
+  @Record BCONST begin
 
-                       clk #= Clock kinds =#::ClockKind
-              end
+    bool #= Bool constants =#::Bool
+  end
 
-              @Record ENUM_LITERAL begin
+  @Record CLKCONST begin
 
-                       name::Absyn.Path
-                       index::ModelicaInteger
-              end
+    clk #= Clock kinds =#::ClockKind
+  end
 
-              @Record CREF begin
+  @Record ENUM_LITERAL begin
 
-                       componentRef::ComponentRef
-                       ty::Type
-              end
+    name::Absyn.Path
+    index::ModelicaInteger
+  end
 
-              @Record BINARY begin
+  @Record CREF begin
 
-                       exp1::Exp
-                       operator::Operator
-                       exp2::Exp
-              end
+    componentRef::ComponentRef
+    ty::Type
+  end
 
-              @Record UNARY begin
+  @Record BINARY begin
 
-                       operator::Operator
-                       exp::Exp
-              end
+    exp1::Exp
+    operator::Operator
+    exp2::Exp
+  end
 
-              @Record LBINARY begin
+  @Record UNARY begin
 
-                       exp1::Exp
-                       operator::Operator
-                       exp2::Exp
-              end
+    operator::Operator
+    exp::Exp
+  end
 
-              @Record LUNARY begin
+  @Record LBINARY begin
 
-                       operator::Operator
-                       exp::Exp
-              end
+    exp1::Exp
+    operator::Operator
+    exp2::Exp
+  end
 
-              @Record RELATION begin
+  @Record LUNARY begin
 
-                       exp1::Exp
-                       operator::Operator
-                       exp2::Exp
-                       index #= Use -1 as a default; other indexes are used in the backend for some silly reasons =#::ModelicaInteger
-                       optionExpisASUB::Option{Tuple{Exp, ModelicaInteger, ModelicaInteger}}
-              end
+    operator::Operator
+    exp::Exp
+  end
 
-              @Record IFEXP begin
+  @Record RELATION begin
 
-                       expCond::Exp
-                       expThen::Exp
-                       expElse::Exp
-              end
+    exp1::Exp
+    operator::Operator
+    exp2::Exp
+    index #= Use -1 as a default; other indexes are used in the backend for some silly reasons =#::ModelicaInteger
+    optionExpisASUB::Option{Tuple{Exp, ModelicaInteger, ModelicaInteger}}
+  end
 
-              @Record CALL begin
+  @Record IFEXP begin
 
-                       path::Absyn.Path
-                       expLst::List{Exp}
-                       attr::CallAttributes
-              end
+    expCond::Exp
+    expThen::Exp
+    expElse::Exp
+  end
 
-              @Record RECORD begin
+  @Record CALL begin
 
-                       path::Absyn.Path
-                       exps #= component values =#::List{Exp}
-                       comp #= component name =#::List{String}
-                       ty::Type
-              end
+    path::Absyn.Path
+    expLst::List{Exp}
+    attr::CallAttributes
+  end
 
-              @Record PARTEVALFUNCTION begin
+  @Record RECORD begin
 
-                       path::Absyn.Path
-                       expList::List{Exp}
-                       ty::Type
-                       origType::Type
-              end
+    path::Absyn.Path
+    exps #= component values =#::List{Exp}
+    comp #= component name =#::List{String}
+    ty::Type
+  end
 
-              @Record ARRAY begin
+  @Record PARTEVALFUNCTION begin
 
-                       ty::Type
-                       scalar #= scalar for codegen =#::Bool
-                       array #= Array constructor, e.g. {1,3,4} =#::List{Exp}
-              end
+    path::Absyn.Path
+    expList::List{Exp}
+    ty::Type
+    origType::Type
+  end
 
-              @Record MATRIX begin
+  @Record ARRAY begin
 
-                       ty::Type
-                       integer #= Size of the first dimension =#::ModelicaInteger
-                       matrix::List{List{Exp}}
-              end
+    ty::Type
+    scalar #= scalar for codegen =#::Bool
+    array #= Array constructor, e.g. {1,3,4} =#::List{Exp}
+  end
 
-              @Record RANGE begin
+  @Record MATRIX begin
 
-                       ty #= the (array) type of the expression =#::Type
-                       start #= start value =#::Exp
-                       step #= step value =#::Option{Exp}
-                       stop #= stop value =#::Exp
-              end
+    ty::Type
+    integer #= Size of the first dimension =#::ModelicaInteger
+    matrix::List{List{Exp}}
+  end
 
-              @Record TUPLE begin
+  @Record RANGE begin
 
-                       PR #= PR. Tuples, used in func calls returning several
-                                         arguments =#::List{Exp}
-              end
+    ty #= the (array) type of the expression =#::Type
+    start #= start value =#::Exp
+    step #= step value =#::Option{Exp}
+    stop #= stop value =#::Exp
+  end
 
-              @Record CAST begin
+  @Record TUPLE begin
 
-                       ty #= This is the full type of this expression, i.e. ET_ARRAY(...) for arrays and matrices =#::Type
-                       exp::Exp
-              end
+    PR #= PR. Tuples, used in func calls returning several
+    arguments =#::List{Exp}
+  end
 
-              @Record ASUB begin
+  @Record CAST begin
 
-                       exp::Exp
-                       sub::List{Exp}
-              end
+    ty #= This is the full type of this expression, i.e. ET_ARRAY(...) for arrays and matrices =#::Type
+    exp::Exp
+  end
 
-              @Record TSUB begin
+  @Record ASUB begin
 
-                       exp::Exp
-                       ix::ModelicaInteger
-                       ty::Type
-              end
+    exp::Exp
+    sub::List{Exp}
+  end
 
-              @Record RSUB begin
+  @Record TSUB begin
 
-                       exp::Exp
-                       ix::ModelicaInteger
-                       #=  Used when generating code for MetaModelica records
-                       =#
-                       fieldName::String
-                       ty::Type
-              end
+    exp::Exp
+    ix::ModelicaInteger
+    ty::Type
+  end
 
-              @Record SIZE begin
+  @Record RSUB begin
 
-                       exp::Exp
-                       sz::Option{Exp}
-              end
+    exp::Exp
+    ix::ModelicaInteger
+    #=  Used when generating code for MetaModelica records
+    =#
+    fieldName::String
+    ty::Type
+  end
 
-              @Record CODE begin
+  @Record SIZE begin
 
-                       code::Absyn.CodeNode
-                       ty::Type
-              end
+    exp::Exp
+    sz::Option{Exp}
+  end
 
-              @Record EMPTY begin
+  @Record CODE begin
 
-                       scope #= the scope where we could not find the binding =#::String
-                       name #= the name of the variable =#::ComponentRef
-                       ty #= the type of the variable =#::Type
-                       tyStr::String
-              end
+    code::Absyn.CodeNode
+    ty::Type
+  end
 
-              @Record REDUCTION begin
+  @Record EMPTY begin
 
-                       reductionInfo::ReductionInfo
-                       expr #= expr, e.g i*i+1 =#::Exp
-                       iterators::ReductionIterators
-              end
+    scope #= the scope where we could not find the binding =#::String
+    name #= the name of the variable =#::ComponentRef
+    ty #= the type of the variable =#::Type
+    tyStr::String
+  end
 
-               #= /* Part of MetaModelica extension. KS */ =#
+  @Record REDUCTION begin
 
-              @Record LIST begin
+    reductionInfo::ReductionInfo
+    expr #= expr, e.g i*i+1 =#::Exp
+    iterators::ReductionIterators
+  end
 
-                       valList::List{Exp}
-              end
+  #= /* Part of MetaModelica extension. KS */ =#
 
-              @Record CONS begin
+  @Record LIST begin
 
-                       car::Exp
-                       cdr::Exp
-              end
+    valList::List{Exp}
+  end
 
-              @Record META_TUPLE begin
+  @Record CONS begin
 
-                       listExp::List{Exp}
-              end
+    car::Exp
+    cdr::Exp
+  end
 
-              @Record META_OPTION begin
+  @Record META_TUPLE begin
 
-                       exp::Option{Exp}
-              end
+    listExp::List{Exp}
+  end
 
-               #= /*
-                  Holds a metarecord call
-                   <metarecord>(<args>)
-                */ =#
+  @Record META_OPTION begin
 
-              @Record METARECORDCALL begin
+    exp::Option{Exp}
+  end
 
-                       #= Metamodelica extension, simbj
-                       =#
-                       path::Absyn.Path
-                       args::List{Exp}
-                       fieldNames::List{String}
-                       index::ModelicaInteger
-                       #= Index in the uniontype
-                       =#
-                       typeVars::List{Type}
-              end
+  #= /*
+  Holds a metarecord call
+  <metarecord>(<args>)
+  */ =#
 
-              @Record MATCHEXPRESSION begin
+  @Record METARECORDCALL begin
 
-                       matchType::MatchType
-                       inputs::List{Exp}
-                       aliases #= input aliases (input as-bindings) =#::List{List{String}}
-                       localDecls::List{Element}
-                       cases::List{MatchCase}
-                       et::Type
-              end
+    #= Metamodelica extension, simbj
+    =#
+    path::Absyn.Path
+    args::List{Exp}
+    fieldNames::List{String}
+    index::ModelicaInteger
+    #= Index in the uniontype
+    =#
+    typeVars::List{Type}
+  end
 
-              @Record BOX begin
+  @Record MATCHEXPRESSION begin
 
-                       exp::Exp
-              end
+    matchType::MatchType
+    inputs::List{Exp}
+    aliases #= input aliases (input as-bindings) =#::List{List{String}}
+    localDecls::List{Element}
+    cases::List{MatchCase}
+    et::Type
+  end
 
-              @Record UNBOX begin
+  @Record BOX begin
 
-                       exp::Exp
-                       ty::Type
-              end
+    exp::Exp
+  end
 
-              @Record SHARED_LITERAL begin
+  @Record UNBOX begin
 
-                       index #= A unique indexing that can be used to point to a single shared literal in generated code =#::ModelicaInteger
-                       exp #= For printing strings, code generators that do not support this kind of literal, or for getting the type in case the code generator needs that =#::Exp
-              end
+    exp::Exp
+    ty::Type
+  end
 
-              @Record PATTERN begin
+  @Record SHARED_LITERAL begin
 
-                       pattern::Pattern
-              end
+    index #= A unique indexing that can be used to point to a single shared literal in generated code =#::ModelicaInteger
+    exp #= For printing strings, code generators that do not support this kind of literal, or for getting the type in case the code generator needs that =#::Exp
+  end
 
-               #= /* --- */ =#
-         end
+  @Record PATTERN begin
 
-         @Uniontype TailCall begin
-              @Record NO_TAIL begin
+    pattern::Pattern
+  end
 
-              end
+  #= /* --- */ =#
+end
 
-              @Record TAIL begin
+@Uniontype TailCall begin
+  @Record NO_TAIL begin
 
-                       vars::List{String}
-                       outVars::List{String}
-              end
-         end
+  end
 
-         const callAttrBuiltinBool = CALL_ATTR(T_BOOL_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+  @Record TAIL begin
 
-         const callAttrBuiltinInteger = CALL_ATTR(T_INTEGER_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+    vars::List{String}
+    outVars::List{String}
+  end
+end
 
-         const callAttrBuiltinReal = CALL_ATTR(T_REAL_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+@Uniontype CallAttributes begin
+  @Record CALL_ATTR begin
 
-         const callAttrBuiltinString = CALL_ATTR(T_STRING_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+    ty #= The type of the return value, if several return values this is undefined =#::Type
+    tuple_ #= tuple =#::Bool
+    builtin #= builtin Function call =#::Bool
+    isImpure #= if the function has prefix *impure* is true, else false =#::Bool
+    isFunctionPointerCall::Bool
+    inlineType::InlineType
+    tailCall #= Input variables of the function if the call is tail-recursive =#::TailCall
+  end
+end
 
-         const callAttrBuiltinOther = CALL_ATTR(T_UNKNOWN_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+@Uniontype ReductionInfo begin
+  @Record REDUCTIONINFO begin
 
-         const callAttrBuiltinImpureBool = CALL_ATTR(T_BOOL_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+    path #= array, sum,.. =#::Absyn.Path
+    iterType::Absyn.ReductionIterType
+    exprType::Type
+    defaultValue #= if there is no default value, the reduction is not defined for 0-length arrays/lists =#::Option{Values.Value}
+    foldName::String
+    resultName #= Unique identifier for the resulting expression =#::String
+    foldExp #= For example, max(ident,$res) or ident+$res; array() does not use this feature; DO NOT TRAVERSE THIS EXPRESSION! =#::Option{Exp}
+  end
+end
 
-         const callAttrBuiltinImpureInteger = CALL_ATTR(T_INTEGER_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+@Uniontype ReductionIterator begin
+  @Record REDUCTIONITER begin
 
-         const callAttrBuiltinImpureReal = CALL_ATTR(T_REAL_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+    id::String
+    exp::Exp
+    guardExp::Option{Exp}
+    ty::Type
+  end
+end
 
-         const callAttrOther = CALL_ATTR(T_UNKNOWN_DEFAULT, false, false, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
 
-         @Uniontype CallAttributes begin
-              @Record CALL_ATTR begin
+@Uniontype MatchCase begin
+  @Record CASE begin
 
-                       ty #= The type of the return value, if several return values this is undefined =#::Type
-                       tuple_ #= tuple =#::Bool
-                       builtin #= builtin Function call =#::Bool
-                       isImpure #= if the function has prefix *impure* is true, else false =#::Bool
-                       isFunctionPointerCall::Bool
-                       inlineType::InlineType
-                       tailCall #= Input variables of the function if the call is tail-recursive =#::TailCall
-              end
-         end
+    patterns #= ELSE is handled by not doing pattern-matching =#::List{Pattern}
+    patternGuard #= Guard-expression =#::Option{Exp}
+    localDecls::List{Element}
+    body::List{Statement}
+    result::Option{Exp}
+    resultInfo #= We need to keep the line info here so we can set a breakpoint at the last statement of a match-expression =#::SourceInfo
+    jump #= the number of iterations we should skip if we succeed with pattern-matching, but don't succeed =#::ModelicaInteger
+    info::SourceInfo
+  end
+end
 
-         @Uniontype ReductionInfo begin
-              @Record REDUCTIONINFO begin
+@Uniontype MatchType begin
+  @Record MATCHCONTINUE begin
 
-                       path #= array, sum,.. =#::Absyn.Path
-                       iterType::Absyn.ReductionIterType
-                       exprType::Type
-                       defaultValue #= if there is no default value, the reduction is not defined for 0-length arrays/lists =#::Option{Values.Value}
-                       foldName::String
-                       resultName #= Unique identifier for the resulting expression =#::String
-                       foldExp #= For example, max(ident,$res) or ident+$res; array() does not use this feature; DO NOT TRAVERSE THIS EXPRESSION! =#::Option{Exp}
-              end
-         end
+  end
 
-         @Uniontype ReductionIterator begin
-              @Record REDUCTIONITER begin
+  @Record TRY_STACKOVERFLOW begin
 
-                       id::String
-                       exp::Exp
-                       guardExp::Option{Exp}
-                       ty::Type
-              end
-         end
+  end
 
-        ReductionIterators = List  #= NOTE: OMC only handles one iterator for now =#
+  @Record MATCH begin
 
-         @Uniontype MatchCase begin
-              @Record CASE begin
+    switch #= The index of the pattern to switch over, its type and the value to divide string hashes with =#::Option{Tuple{ModelicaInteger, Type, ModelicaInteger}}
+  end
+end
 
-                       patterns #= ELSE is handled by not doing pattern-matching =#::List{Pattern}
-                       patternGuard #= Guard-expression =#::Option{Exp}
-                       localDecls::List{Element}
-                       body::List{Statement}
-                       result::Option{Exp}
-                       resultInfo #= We need to keep the line info here so we can set a breakpoint at the last statement of a match-expression =#::SourceInfo
-                       jump #= the number of iterations we should skip if we succeed with pattern-matching, but don't succeed =#::ModelicaInteger
-                       info::SourceInfo
-              end
-         end
+#= Patterns deconstruct expressions =#
+@Uniontype Pattern begin
+  @Record PAT_WILD begin
 
-         @Uniontype MatchType begin
-              @Record MATCHCONTINUE begin
+  end
 
-              end
+  @Record PAT_CONSTANT begin
 
-              @Record TRY_STACKOVERFLOW begin
+    ty #= so we can unbox if needed =#::Option{Type}
+    exp::Exp
+  end
 
-              end
+  @Record PAT_AS begin
 
-              @Record MATCH begin
+    id::String
+    ty #= so we can unbox if needed =#::Option{Type}
+    attr #= so we know if the ident is parameter or assignable =#::Attributes
+    pat::Pattern
+  end
 
-                       switch #= The index of the pattern to switch over, its type and the value to divide string hashes with =#::Option{Tuple{ModelicaInteger, Type, ModelicaInteger}}
-              end
-         end
+  @Record PAT_AS_FUNC_PTR begin
 
-          #= Patterns deconstruct expressions =#
-         @Uniontype Pattern begin
-              @Record PAT_WILD begin
+    id::String
+    pat::Pattern
+  end
 
-              end
+  @Record PAT_META_TUPLE begin
 
-              @Record PAT_CONSTANT begin
+    patterns::List{Pattern}
+  end
 
-                       ty #= so we can unbox if needed =#::Option{Type}
-                       exp::Exp
-              end
+  @Record PAT_CALL_TUPLE begin
 
-              @Record PAT_AS begin
+    patterns::List{Pattern}
+  end
 
-                       id::String
-                       ty #= so we can unbox if needed =#::Option{Type}
-                       attr #= so we know if the ident is parameter or assignable =#::Attributes
-                       pat::Pattern
-              end
+  @Record PAT_CONS begin
 
-              @Record PAT_AS_FUNC_PTR begin
+    head::Pattern
+    tail::Pattern
+  end
 
-                       id::String
-                       pat::Pattern
-              end
+  @Record PAT_CALL begin
 
-              @Record PAT_META_TUPLE begin
+    name::Absyn.Path
+    index::ModelicaInteger
+    patterns::List{Pattern}
+    fields::List{Var}
+    #=  Needed to be able to bind a variable to the fields
+    =#
+    typeVars::List{Type}
+    knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
+  end
 
-                       patterns::List{Pattern}
-              end
+  @Record PAT_CALL_NAMED begin
 
-              @Record PAT_CALL_TUPLE begin
+    name::Absyn.Path
+    patterns::List{Tuple{Pattern, String, Type}}
+  end
 
-                       patterns::List{Pattern}
-              end
+  @Record PAT_SOME begin
 
-              @Record PAT_CONS begin
+    pat::Pattern
+  end
+end
 
-                       head::Pattern
-                       tail::Pattern
-              end
+#= Operators which are overloaded in the abstract syntax are here
+made type-specific.  The integer addition operator (`ADD(INT)\\')
+and the real addition operator (`ADD(REAL)\\') are two distinct
+operators. =#
+@Uniontype Operator begin
+  @Record ADD begin
 
-              @Record PAT_CALL begin
+    ty::Type
+  end
 
-                       name::Absyn.Path
-                       index::ModelicaInteger
-                       patterns::List{Pattern}
-                       fields::List{Var}
-                       #=  Needed to be able to bind a variable to the fields
-                       =#
-                       typeVars::List{Type}
-                       knownSingleton #= The runtime system (dynload), does not know if the value is a singleton. But optimizations are safe if this is true. =#::Bool
-              end
+  @Record SUB begin
 
-              @Record PAT_CALL_NAMED begin
+    ty::Type
+  end
 
-                       name::Absyn.Path
-                       patterns::List{Tuple{Pattern, String, Type}}
-              end
+  @Record MUL begin
 
-              @Record PAT_SOME begin
+    ty::Type
+  end
 
-                       pat::Pattern
-              end
-         end
+  @Record DIV begin
 
-          #= Operators which are overloaded in the abstract syntax are here
-             made type-specific.  The integer addition operator (`ADD(INT)\\')
-             and the real addition operator (`ADD(REAL)\\') are two distinct
-             operators. =#
-         @Uniontype Operator begin
-              @Record ADD begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record POW begin
 
-              @Record SUB begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record UMINUS begin
 
-              @Record MUL begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record UMINUS_ARR begin
 
-              @Record DIV begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record ADD_ARR begin
 
-              @Record POW begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record SUB_ARR begin
 
-              @Record UMINUS begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record MUL_ARR begin
 
-              @Record UMINUS_ARR begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record DIV_ARR begin
 
-              @Record ADD_ARR begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record MUL_ARRAY_SCALAR begin
 
-              @Record SUB_ARR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty::Type
-              end
+  @Record ADD_ARRAY_SCALAR begin
 
-              @Record MUL_ARR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty::Type
-              end
+  @Record SUB_SCALAR_ARRAY begin
 
-              @Record DIV_ARR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty::Type
-              end
+  @Record MUL_SCALAR_PRODUCT begin
 
-              @Record MUL_ARRAY_SCALAR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record MUL_MATRIX_PRODUCT begin
 
-              @Record ADD_ARRAY_SCALAR begin
+    ty #= {{..},..}  {{..},{..}} =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record DIV_ARRAY_SCALAR begin
 
-              @Record SUB_SCALAR_ARRAY begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record DIV_SCALAR_ARRAY begin
 
-              @Record MUL_SCALAR_PRODUCT begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record POW_ARRAY_SCALAR begin
 
-              @Record MUL_MATRIX_PRODUCT begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= {{..},..}  {{..},{..}} =#::Type
-              end
+  @Record POW_SCALAR_ARRAY begin
 
-              @Record DIV_ARRAY_SCALAR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record POW_ARR begin
 
-              @Record DIV_SCALAR_ARRAY begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record POW_ARR2 begin
 
-              @Record POW_ARRAY_SCALAR begin
+    ty #= type of the array =#::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record AND begin
 
-              @Record POW_SCALAR_ARRAY begin
+    ty::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record OR begin
 
-              @Record POW_ARR begin
+    ty::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record NOT begin
 
-              @Record POW_ARR2 begin
+    ty::Type
+  end
 
-                       ty #= type of the array =#::Type
-              end
+  @Record LESS begin
 
-              @Record AND begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record LESSEQ begin
 
-              @Record OR begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record GREATER begin
 
-              @Record NOT begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record GREATEREQ begin
 
-              @Record LESS begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record EQUAL begin
 
-              @Record LESSEQ begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record NEQUAL begin
 
-              @Record GREATER begin
+    ty::Type
+  end
 
-                       ty::Type
-              end
+  @Record USERDEFINED begin
 
-              @Record GREATEREQ begin
+    fqName #= The FQ name of the overloaded operator function =#::Absyn.Path
+  end
+end
 
-                       ty::Type
-              end
+#= - Component references
+CREF_QUAL(...) is used for qualified component names, e.g. a.b.c
+CREF_IDENT(..) is used for non-qualifed component names, e.g. x =#
+@Uniontype ComponentRef begin
+  @Record CREF_QUAL begin
 
-              @Record EQUAL begin
+    ident::Ident
+    identType #= type of the identifier, without considering the subscripts =#::Type
+    subscriptLst::List{Subscript}
+    componentRef::ComponentRef
+  end
 
-                       ty::Type
-              end
+  @Record CREF_IDENT begin
 
-              @Record NEQUAL begin
+    ident::Ident
+    identType #= type of the identifier, without considering the subscripts =#::Type
+    subscriptLst::List{Subscript}
+  end
 
-                       ty::Type
-              end
+  @Record CREF_ITER begin
 
-              @Record USERDEFINED begin
+    ident::Ident
+    index::ModelicaInteger
+    identType #= type of the identifier, without considering the subscripts =#::Type
+    subscriptLst::List{Subscript}
+  end
 
-                       fqName #= The FQ name of the overloaded operator function =#::Absyn.Path
-              end
-         end
+  @Record OPTIMICA_ATTR_INST_CREF begin
 
-          #= - Component references
-             CREF_QUAL(...) is used for qualified component names, e.g. a.b.c
-             CREF_IDENT(..) is used for non-qualifed component names, e.g. x =#
-         @Uniontype ComponentRef begin
-              @Record CREF_QUAL begin
+    componentRef::ComponentRef
+    instant::String
+  end
 
-                       ident::Ident
-                       identType #= type of the identifier, without considering the subscripts =#::Type
-                       subscriptLst::List{Subscript}
-                       componentRef::ComponentRef
-              end
+  @Record WILD begin
+  end
+end
 
-              @Record CREF_IDENT begin
+#= The `Subscript\\' and `ComponentRef\\' datatypes are simple
+translations of the corresponding types in the `Absyn\\' module. =#
+@Uniontype Subscript begin
+  @Record WHOLEDIM begin
 
-                       ident::Ident
-                       identType #= type of the identifier, without considering the subscripts =#::Type
-                       subscriptLst::List{Subscript}
-              end
+  end
 
-              @Record CREF_ITER begin
+  @Record SLICE begin
 
-                       ident::Ident
-                       index::ModelicaInteger
-                       identType #= type of the identifier, without considering the subscripts =#::Type
-                       subscriptLst::List{Subscript}
-              end
+    exp #= a{1:3,1}, a{1:2:10,2} =#::Exp
+  end
 
-              @Record OPTIMICA_ATTR_INST_CREF begin
+  @Record INDEX begin
 
-                       componentRef::ComponentRef
-                       instant::String
-              end
+    exp #= a[i+1] =#::Exp
+  end
 
-              @Record WILD begin
-              end
-         end
+  @Record WHOLE_NONEXP begin
 
-         const crefTime = CREF_IDENT("time", T_REAL_DEFAULT, nil)::ComponentRef
+    exp::Exp
+  end
+end
 
-         const crefTimeState = CREF_IDENT("time", T_REAL_DEFAULT, nil)::ComponentRef
+#= /* -- End Expression.mo -- */ =#
 
-         const emptyCref = CREF_IDENT("", T_UNKNOWN_DEFAULT, nil)::ComponentRef
+#= array cref expansion strategy =#
+@Uniontype Expand begin
+  @Record EXPAND begin
 
-          #= The `Subscript\\' and `ComponentRef\\' datatypes are simple
-           translations of the corresponding types in the `Absyn\\' module. =#
-         @Uniontype Subscript begin
-              @Record WHOLEDIM begin
+  end
 
-              end
+  @Record NOT_EXPAND begin
 
-              @Record SLICE begin
-
-                       exp #= a{1:3,1}, a{1:2:10,2} =#::Exp
-              end
-
-              @Record INDEX begin
-
-                       exp #= a[i+1] =#::Exp
-              end
-
-              @Record WHOLE_NONEXP begin
-
-                       exp::Exp
-              end
-         end
-
-         #= /* -- End Expression.mo -- */ =#
-
-          #= array cref expansion strategy =#
-         @Uniontype Expand begin
-              @Record EXPAND begin
-
-              end
-
-              @Record NOT_EXPAND begin
-
-              end
-         end
+  end
+end
 
 const emptyDae = DAE_LIST(nil)::DAElist
 const T_ASSERTIONLEVEL = T_ENUMERATION(NONE(), Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")), list("error", "warning"), nil, nil)::Type
@@ -2309,7 +2253,64 @@ const ASSERTIONLEVEL_ERROR = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absy
 const ASSERTIONLEVEL_WARNING = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absyn.IDENT("warning")), 2)::Exp
 
 
-    #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+const T_UNKNOWN_DEFAULT = T_UNKNOWN()
+const T_REAL_DEFAULT = T_REAL(nil)::Type
+const T_INTEGER_DEFAULT = T_INTEGER(nil)::Type
+const T_STRING_DEFAULT = T_STRING(nil)::Type
+const T_BOOL_DEFAULT = T_BOOL(nil)::Type
+const T_CLOCK_DEFAULT = T_CLOCK(nil)::Type
+const T_ENUMERATION_DEFAULT = T_ENUMERATION(NONE(), Absyn.IDENT(""), nil, nil, nil)::Type
+const T_REAL_BOXED = T_METABOXED(T_REAL_DEFAULT)::Type
+const T_INTEGER_BOXED = T_METABOXED(T_INTEGER_DEFAULT)::Type
+const T_STRING_BOXED = T_METABOXED(T_STRING_DEFAULT)::Type
+const T_BOOL_BOXED = T_METABOXED(T_BOOL_DEFAULT)::Type
+const T_METABOXED_DEFAULT = T_METABOXED(T_UNKNOWN_DEFAULT)::Type
+const T_METALIST_DEFAULT = T_METALIST(T_UNKNOWN_DEFAULT)::Type
+const T_NONE_DEFAULT = T_METAOPTION(T_UNKNOWN_DEFAULT)::Type
+const T_ANYTYPE_DEFAULT = T_ANYTYPE(NONE())::Type
+const T_UNKNOWN_DEFAULT = T_UNKNOWN()::Type
+const T_NORETCALL_DEFAULT = T_NORETCALL()::Type
+const T_METATYPE_DEFAULT = T_METATYPE(T_UNKNOWN_DEFAULT)::Type
+const T_COMPLEX_DEFAULT = T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()) #= default complex with unknown CiState =#::Type
+const T_COMPLEX_DEFAULT_RECORD = T_COMPLEX(ClassInf.RECORD(Absyn.IDENT("")), nil, NONE()) #= default complex with record CiState =#::Type
+const T_SOURCEINFO_DEFAULT_METARECORD = T_METARECORD(Absyn.QUALIFIED("SourceInfo", Absyn.IDENT("SOURCEINFO")), Absyn.IDENT("SourceInfo"), nil, 1, list(TYPES_VAR("fileName", dummyAttrVar, T_STRING_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("isReadOnly", dummyAttrVar, T_BOOL_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lineNumberStart", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("columnNumberStart", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lineNumberEnd", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("columnNumberEnd", dummyAttrVar, T_INTEGER_DEFAULT, UNBOUND(), NONE()), TYPES_VAR("lastModification", dummyAttrVar, T_REAL_DEFAULT, UNBOUND(), NONE())), true)::Type
+const T_SOURCEINFO_DEFAULT = T_METAUNIONTYPE(list(Absyn.QUALIFIED("SourceInfo", Absyn.IDENT("SOURCEINFO"))), nil, true, EVAL_SINGLETON_KNOWN_TYPE(T_SOURCEINFO_DEFAULT_METARECORD), Absyn.IDENT("SourceInfo"))::Type
+#=  Arrays of unknown dimension, eg. Real[:]
+=#
+
+const T_ARRAY_REAL_NODIM = T_ARRAY(T_REAL_DEFAULT, list(DIM_UNKNOWN()))::Type
+
+const T_ARRAY_INT_NODIM = T_ARRAY(T_INTEGER_DEFAULT, list(DIM_UNKNOWN()))::Type
+
+const T_ARRAY_BOOL_NODIM = T_ARRAY(T_BOOL_DEFAULT, list(DIM_UNKNOWN()))::Type
+
+const T_ARRAY_STRING_NODIM = T_ARRAY(T_STRING_DEFAULT, list(DIM_UNKNOWN()))::Type
+
+
+const callAttrBuiltinBool = CALL_ATTR(T_BOOL_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinInteger = CALL_ATTR(T_INTEGER_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinReal = CALL_ATTR(T_REAL_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinString = CALL_ATTR(T_STRING_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinOther = CALL_ATTR(T_UNKNOWN_DEFAULT, false, true, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinImpureBool = CALL_ATTR(T_BOOL_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinImpureInteger = CALL_ATTR(T_INTEGER_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrBuiltinImpureReal = CALL_ATTR(T_REAL_DEFAULT, false, true, true, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+const callAttrOther = CALL_ATTR(T_UNKNOWN_DEFAULT, false, false, false, false, NO_INLINE(), NO_TAIL())::CallAttributes
+
+
+const crefTime = CREF_IDENT("time", T_REAL_DEFAULT, nil)::ComponentRef
+const crefTimeState = CREF_IDENT("time", T_REAL_DEFAULT, nil)::ComponentRef
+const emptyCref = CREF_IDENT("", T_UNKNOWN_DEFAULT, nil)::ComponentRef
+
 @exportAll()
 export FunctionTree
-  end
+end
