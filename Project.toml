@@ -1,6 +1,6 @@
 name = "OMCompiler"
 uuid = "e8e5888a-c27f-11e9-30e9-2b2f6b0f211f"
-authors = ["johti <johti17@liu.se>"]
+authors = ["John Tinnerholm <johti17@liu.se>", "Martin Sjölund <martin.sjolund@liu.se>", "Adrian Pop <adrian.pop@liu.se>"]
 version = "0.1.0"
 
 [deps]
