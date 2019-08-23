@@ -10,6 +10,7 @@ ccall((:pcre2_jit_stack_assign_8, Base.PCRE.PCRE_LIB), Cvoid,
 #=TODO make it call the parserscript from OpenModelica home=#
 push!(LOAD_PATH, "src/Util/.")
 push!(LOAD_PATH, "src/Frontend/.")
+push!(LOAD_PATH, "src/FFrontend/.")
 push!(LOAD_PATH, ".")
 println(LOAD_PATH)
 # include("./Absyn.jl")

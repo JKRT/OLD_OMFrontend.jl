@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    const Dimensions = List  #= a list of dimensions =#
     @UniontypeDecl VarKind
     @UniontypeDecl ConnectorType
     @UniontypeDecl VarDirection
@@ -106,8 +106,6 @@
         import Prefix
         import Values
         import Connect
-
-        import DAEDump
 
         Ident = String
 
@@ -566,11 +564,6 @@
               end
          end
 
-         const T_ASSERTIONLEVEL = T_ENUMERATION(NONE(), Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")), list("error", "warning"), nil, nil)::Type
-
-         const ASSERTIONLEVEL_ERROR = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absyn.IDENT("error")), 1)::Exp
-
-         const ASSERTIONLEVEL_WARNING = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absyn.IDENT("warning")), 2)::Exp
 
          @Uniontype Function begin
               @Record FUNCTION begin
@@ -824,27 +817,24 @@
            algorithms, etc. are all found in this list.
           =#
          @Uniontype DAElist begin
-              @Record DAE begin
-
+              @Record DAE_LIST begin
                        elementLst::List{Element}
               end
          end
 
-         #= /* AVLTree for functions */ =#
-
-        FunctionTree = AvlTreePathFunction.Tree
-
-        module AvlTreePathFunction
+       module AvlTreePathFunction
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
-              import DAEDump
               using BaseAvlTree
               Key = Absyn.Path
               Value = Option
              addConflictDefault = addConflictReplace
           @exportAll()
         end
+
+#= /* AVLTree for functions */ =#
+const FunctionTree = AvlTreePathFunction.Tree
 
          #= /* -- Algorithm.mo -- */ =#
 
@@ -1414,7 +1404,6 @@
               end
          end
 
-        Dimensions = List  #= a list of dimensions =#
 
          @Uniontype Dimension begin
               @Record DIM_INTEGER begin
@@ -2312,8 +2301,15 @@
               end
          end
 
-         const emptyDae = DAE(nil)::DAElist
+const emptyDae = DAE_LIST(nil)::DAElist
+const T_ASSERTIONLEVEL = T_ENUMERATION(NONE(), Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")), list("error", "warning"), nil, nil)::Type
+
+const ASSERTIONLEVEL_ERROR = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absyn.IDENT("error")), 1)::Exp
+
+const ASSERTIONLEVEL_WARNING = ENUM_LITERAL(Absyn.QUALIFIED("AssertionLevel", Absyn.IDENT("warning")), 2)::Exp
+
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-    @exportAll()
+@exportAll()
+export FunctionTree
   end

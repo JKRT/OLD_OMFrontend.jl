@@ -1,4 +1,4 @@
-  module FCore 
+  module FCore
 
 
     using MetaModelica
@@ -6,21 +6,40 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl ImportTable 
-    @UniontypeDecl Node 
-    @UniontypeDecl ModScope 
-    @UniontypeDecl Data 
-    @UniontypeDecl Kind 
-    @UniontypeDecl Status 
-    @UniontypeDecl Visit 
-    @UniontypeDecl Visited 
-    @UniontypeDecl VAvlTree 
-    @UniontypeDecl VAvlTreeValue 
-    @UniontypeDecl Extra 
-    @UniontypeDecl Graph 
-    @UniontypeDecl Top 
-    @UniontypeDecl Cache 
-    @UniontypeDecl ScopeType 
+    @UniontypeDecl ImportTable
+    @UniontypeDecl Node
+    @UniontypeDecl ModScope
+    @UniontypeDecl Data
+    @UniontypeDecl Kind
+    @UniontypeDecl Status
+    @UniontypeDecl Visit
+    @UniontypeDecl Visited
+    @UniontypeDecl VAvlTree
+    @UniontypeDecl VAvlTreeValue
+    @UniontypeDecl Extra
+    @UniontypeDecl Graph
+    @UniontypeDecl Top
+    @UniontypeDecl Cache
+  @UniontypeDecl ScopeType
+
+  const Name = String  #= an identifier is just a string =#
+  const Names = List  #= list of names =#
+
+    module RefTree
+          using MetaModelica
+          #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+          using ExportAll
+
+              import BaseAvlTree
+              import FCore.Name
+              import FCore.Ref
+              import FCore.Node
+              using BaseAvlTree
+              Key = String
+              Value = Ref
+          #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+          @exportAll()
+        end
 
          #= /*
          * This file is part of OpenModelica.
@@ -53,32 +72,26 @@
          *
          */ =#
 
-        import Absyn
+  import Absyn
         import AbsynUtil
         import AvlSetCR
         import DAE
-        import MutableType
+        import Mutable
+        using Mutable: MutableType
         import SCode
         import Prefix
 
         import DAEUtil
-        import Config
-         #=  ************************ FNode structures ***************************
-         =#
-         #=  ************************ FNode structures ***************************
-         =#
-         #=  ************************ FNode structures ***************************
-         =#
-         #=  ************************ FNode structures ***************************
-         =#
+  import Config
 
-        Name = String  #= an identifier is just a string =#
-        Names = List  #= list of names =#
-        Import = Absyn.Import 
-        Id = ModelicaInteger 
-        Seq = ModelicaInteger 
-        Next = Seq 
-         const emptyImportTable = IMPORT_TABLE(false, nil, nil)::ImportTable
+  const Import = Absyn.Import
+  const Id = ModelicaInteger
+  const Seq = ModelicaInteger
+  const Next = Seq
+
+  const Refs = List
+  const Parents = Refs
+
 
          @Uniontype ImportTable begin
               @Record IMPORT_TABLE begin
@@ -99,7 +112,15 @@
               end
          end
 
-        Ref = Array  #= array of 1 =#
+
+const Scope = Refs
+const Children = RefTree.Tree
+const emptyScope = nil #= empty scope =#::Scope
+const emptyImportTable = IMPORT_TABLE(false, nil, nil)::ImportTable
+
+
+        #The question is can we just use Ref? I think so. Add Compatabilty for MetaModelica.jl for now...
+        #Ref = Array  #= array of 1 =#
 
          @Uniontype Node begin
               @Record N begin
@@ -156,9 +177,8 @@
               end
 
               @Record CL begin
-
                        e::SCode.Element
-                       pre::Prefix.Prefix
+                       pre::Prefix.PrefixType
                        mod #= modification =#::DAE.Mod
                        kind #= usedefined, builtin, basic type =#::Kind
                        status #= if it is untyped, typed or fully instantiated (dae) =#::Status
@@ -266,7 +286,7 @@
               @Record VR begin
 
                        source::Scope
-                       p::Prefix.Prefix
+                       p::Prefix.PrefixType
                        m::DAE.Mod
                        scopeType::Option{ScopeType}
               end
@@ -282,37 +302,6 @@
               end
          end
 
-        Refs = List 
-        Parents = Refs 
-        Scope = Refs 
-        Children = RefTree.Tree 
-
-         const emptyScope = nil #= empty scope =#::Scope
-
-        module RefTree 
-
-
-          using MetaModelica
-          #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-          using ExportAll
-
-              import BaseAvlTree
-              import FCore.Name
-              import FCore.Ref
-              import FCore.Node
-              extends BaseAvlTree
-              Key = Name 
-              Value = Ref 
-
-
-
-
-
-
-
-          #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-          @exportAll()
-        end
 
          @Uniontype Kind begin
               @Record USERDEFINED begin
@@ -393,9 +382,9 @@
               end
          end
 
-        VAvlKey = Id 
+        VAvlKey = Id
 
-        VAvlValue = Visit 
+        VAvlValue = Visit
 
           #= The binary tree data structure for visited =#
          @Uniontype VAvlTree begin
@@ -426,17 +415,6 @@
          =#
          #=  ************************ FGraph structures ***************************
          =#
-         const dummyTopModel = Absyn.IDENT("EMPTY")::Absyn.Path
-         const dummyExtra = EXTRA(dummyTopModel)::Extra
-         const recordConstructorSuffix = "recordconstructor"::String
-         const forScopeName = "for loop scope" #= a unique scope used in for equations =#::String
-         const forIterScopeName = "foriter loop scope" #= a unique scope used in for iterators =#::String
-         const parForScopeName = "pafor loop scope" #= a unique scope used in parfor loops =#::String
-         const parForIterScopeName = "parforiter loop scope" #= a unique scope used in parfor iterators =#::String
-         const matchScopeName = "match scope" #= a unique scope used by match expressions =#::String
-         const caseScopeName = "case scope" #= a unique scope used by match expressions; to be removed when local decls are deprecated =#::String
-         const patternTypeScope = "pattern type scope" #= a scope for specializing pattern types =#::String
-         const implicitScopeNames = list(forScopeName, forIterScopeName, parForScopeName, parForIterScopeName, matchScopeName, caseScopeName, patternTypeScope)::List
 
           #= propagate more info into env if needed =#
          @Uniontype Extra begin
@@ -470,6 +448,17 @@
               end
          end
 
+         const dummyTopModel = Absyn.IDENT("EMPTY")::Absyn.Path
+         const dummyExtra = EXTRA(dummyTopModel)::Extra
+         const recordConstructorSuffix = "recordconstructor"::String
+         const forScopeName = "for loop scope" #= a unique scope used in for equations =#::String
+         const forIterScopeName = "foriter loop scope" #= a unique scope used in for iterators =#::String
+         const parForScopeName = "pafor loop scope" #= a unique scope used in parfor loops =#::String
+         const parForIterScopeName = "parforiter loop scope" #= a unique scope used in parfor iterators =#::String
+         const matchScopeName = "match scope" #= a unique scope used by match expressions =#::String
+         const caseScopeName = "case scope" #= a unique scope used by match expressions; to be removed when local decls are deprecated =#::String
+         const patternTypeScope = "pattern type scope" #= a scope for specializing pattern types =#::String
+         const implicitScopeNames = list(forScopeName, forIterScopeName, parForScopeName, parForIterScopeName, matchScopeName, caseScopeName, patternTypeScope)::List
          const firstId = 0::Id
          #=  ************************ Cache structures ***************************
          =#
@@ -480,8 +469,8 @@
          #=  ************************ Cache structures ***************************
          =#
 
-        StructuralParameters = Tuple 
-
+        StructuralParameters = Tuple
+        test = DAE.FunctionTree
          @Uniontype Cache begin
               @Record CACHE begin
 
@@ -513,7 +502,7 @@
          #=  ************************ functions ***************************
          =#
 
-        function next(inext::Next) ::Next 
+        function next(inext::Next) ::Next
               local onext::Next
 
               onext = inext + 1
@@ -521,7 +510,7 @@
         end
 
          #= returns an empty cache =#
-        function emptyCache() ::Cache 
+        function emptyCache() ::Cache
               local cache::Cache
 
               local instFuncs::MutableType{DAE.FunctionTree}
@@ -534,14 +523,14 @@
         end
 
          #= returns an empty cache =#
-        function noCache() ::Cache 
+        function noCache() ::Cache
               local cache::Cache
 
               cache = NO_CACHE()
           cache
         end
 
-        function addEvaluatedCref(cache::Cache, var::SCode.Variability, cr::DAE.ComponentRef) ::Cache 
+        function addEvaluatedCref(cache::Cache, var::SCode.Variability, cr::DAE.ComponentRef) ::Cache
               local ocache::Cache
 
               ocache = begin
@@ -555,11 +544,11 @@
                   (CACHE(initialGraph, functions, (ht, crs <| st), p), SCode.PARAM(__), _)  => begin
                     CACHE(initialGraph, functions, (ht, _cons(_cons(cr, crs), st)), p)
                   end
-                  
+
                   (CACHE(initialGraph, functions, (ht,  nil()), p), SCode.PARAM(__), _)  => begin
                     CACHE(initialGraph, functions, (ht, _cons(list(cr), nil)), p)
                   end
-                  
+
                   _  => begin
                       cache
                   end
@@ -568,21 +557,21 @@
           ocache
         end
 
-        function getEvaluatedParams(cache::Cache) ::AvlSetCR.Tree 
+        function getEvaluatedParams(cache::Cache) ::AvlSetCR.Tree
               local ht::AvlSetCR.Tree
 
               @match CACHE(evaluatedParams = (ht, _)) = cache
           ht
         end
 
-        function printNumStructuralParameters(cache::Cache)  
+        function printNumStructuralParameters(cache::Cache)
               local crs::List{DAE.ComponentRef}
 
               @match CACHE(evaluatedParams = (_, _cons(crs, _))) = cache
               print("printNumStructuralParameters: " + intString(listLength(crs)) + "\\n")
         end
 
-        function setCacheClassName(inCache::Cache, p::Absyn.Path) ::Cache 
+        function setCacheClassName(inCache::Cache, p::Absyn.Path) ::Cache
               local outCache::Cache
 
               outCache = begin
@@ -593,7 +582,7 @@
                   (CACHE(igraph, ef, ht, _), _)  => begin
                     CACHE(igraph, ef, ht, p)
                   end
-                  
+
                   _  => begin
                       inCache
                   end
@@ -602,7 +591,7 @@
           outCache
         end
 
-        function isImplicitScope(inName::Name) ::Bool 
+        function isImplicitScope(inName::Name) ::Bool
               local isImplicit::Bool
 
               isImplicit = begin
@@ -611,7 +600,7 @@
                   id  => begin
                     stringGet(id, 1) == 36
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -623,7 +612,7 @@
         end
 
          #= returns the function in the set =#
-        function getCachedInstFunc(inCache::Cache, path::Absyn.Path) ::DAE.Function 
+        function getCachedInstFunc(inCache::Cache, path::Absyn.Path) ::DAE.Function
               local func::DAE.Function
 
               func = begin
@@ -639,7 +628,7 @@
         end
 
          #= succeeds if the FQ function is in the set of functions =#
-        function checkCachedInstFuncGuard(inCache::Cache, path::Absyn.Path)  
+        function checkCachedInstFuncGuard(inCache::Cache, path::Absyn.Path)
               _ = begin
                   local ef::MutableType{DAE.FunctionTree}
                 @match (inCache, path) begin
@@ -652,7 +641,7 @@
         end
 
          #= Selector function =#
-        function getFunctionTree(cache::Cache) ::DAE.FunctionTree 
+        function getFunctionTree(cache::Cache) ::DAE.FunctionTree
               local ft::DAE.FunctionTree
 
               ft = begin
@@ -661,7 +650,7 @@
                   CACHE(functions = ef)  => begin
                     Mutable.access(ef)
                   end
-                  
+
                   _  => begin
                       DAE.AvlTreePathFunction.Tree.EMPTY()
                   end
@@ -672,7 +661,7 @@
 
          #= adds the FQ path to the set of instantiated functions as NONE().
         This guards against recursive functions. =#
-        function addCachedInstFuncGuard(cache::Cache, func::Absyn.Path #= fully qualified function name =#) ::Cache 
+        function addCachedInstFuncGuard(cache::Cache, func::Absyn.Path #= fully qualified function name =#) ::Cache
               local outCache::Cache
 
               outCache = begin
@@ -687,12 +676,12 @@
                       checkCachedInstFuncGuard(cache, func)
                     cache
                   end
-                  
+
                   (CACHE(functions = ef), Absyn.FULLYQUALIFIED(_))  => begin
                       Mutable.update(ef, DAE.AvlTreePathFunction.add(Mutable.access(ef), func, NONE()))
                     cache
                   end
-                  
+
                   (_, _)  => begin
                     cache
                   end
@@ -710,7 +699,7 @@
         end
 
          #= adds the list<DAE.Function> to the set of instantiated functions =#
-        function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#) ::Cache 
+        function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#) ::Cache
               local outCache::Cache
 
               outCache = begin
@@ -723,7 +712,7 @@
                       Mutable.update(ef, DAEUtil.addDaeFunction(funcs, Mutable.access(ef)))
                     inCache
                   end
-                  
+
                   _  => begin
                       inCache
                   end
@@ -733,7 +722,7 @@
         end
 
          #= adds the external functions in list<DAE.Function> to the set of instantiated functions =#
-        function addDaeExtFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#) ::Cache 
+        function addDaeExtFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#) ::Cache
               local outCache::Cache
 
               outCache = begin
@@ -746,7 +735,7 @@
                       Mutable.update(ef, DAEUtil.addDaeExtFunction(funcs, Mutable.access(ef)))
                     inCache
                   end
-                  
+
                   _  => begin
                       inCache
                   end
@@ -755,14 +744,14 @@
           outCache
         end
 
-        function setCachedFunctionTree(inCache::Cache, inFunctions::DAE.FunctionTree)  
+        function setCachedFunctionTree(inCache::Cache, inFunctions::DAE.FunctionTree)
               _ = begin
                 @match inCache begin
                   CACHE(__)  => begin
                       Mutable.update(inCache.functions, inFunctions)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -773,7 +762,7 @@
          #= author BZ 2008-06
           This function checks wheter an InstStatus is typed or not.
           Currently used by Inst.updateComponentsInEnv. =#
-        function isTyped(is::Status) ::Bool 
+        function isTyped(is::Status) ::Bool
               local b::Bool
 
               b = begin
@@ -781,7 +770,7 @@
                   VAR_UNTYPED(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -792,7 +781,7 @@
 
          #= Returns true if the status indicates a deleted conditional component,
            otherwise false. =#
-        function isDeletedComp(status::Status) ::Bool 
+        function isDeletedComp(status::Status) ::Bool
               local isDeleted::Bool
 
               isDeleted = begin
@@ -800,7 +789,7 @@
                   VAR_DELETED(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -810,7 +799,7 @@
         end
 
          #= get the initial environment from the cache =#
-        function getCachedInitialGraph(cache::Cache) ::Graph 
+        function getCachedInitialGraph(cache::Cache) ::Graph
               local g::Graph
 
               g = begin
@@ -824,7 +813,7 @@
         end
 
          #= set the initial environment in the cache =#
-        function setCachedInitialGraph(cache::Cache, g::Graph) ::Cache 
+        function setCachedInitialGraph(cache::Cache, g::Graph) ::Cache
 
 
               cache = begin
@@ -833,7 +822,7 @@
                       cache.initialGraph = SOME(g)
                     cache
                   end
-                  
+
                   _  => begin
                       cache
                   end
@@ -845,7 +834,7 @@
          #= @author: adrpo
          adds suffix FCore.recordConstructorSuffix ($recordconstructor)
          to the given name. does not do it for MetaModelica =#
-        function getRecordConstructorName(inName::Name) ::Name 
+        function getRecordConstructorName(inName::Name) ::Name
               local outName::Name
 
               outName = if Config.acceptMetaModelicaGrammar()
@@ -856,7 +845,7 @@
           outName
         end
 
-        function getRecordConstructorPath(inPath::Absyn.Path) ::Absyn.Path 
+        function getRecordConstructorPath(inPath::Absyn.Path) ::Absyn.Path
               local outPath::Absyn.Path
 
               local lastId::Name

@@ -1,4 +1,4 @@
-  module AvlSetCR 
+  module AvlSetCR
 
 
     using MetaModelica
@@ -36,10 +36,10 @@
          *
          */ =#
         import BaseAvlSet
-        extends BaseAvlSet
+        using BaseAvlSet
         import DAE
         import ComponentReference
-        Key = DAE.ComponentRef 
+        Key = DAE.ComponentRef
 
 
 
