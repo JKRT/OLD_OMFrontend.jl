@@ -239,7 +239,6 @@ end
 end
 
 const SetTrie = SetTrieNode  #= A trie, a.k.a. prefix tree, that maps crefs to sets. =#
-
 const SetConnection = Tuple  #= A connection between two sets. =#
 
 @Uniontype OuterConnect begin
