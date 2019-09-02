@@ -1,4 +1,4 @@
-  module Patternm 
+  module Patternm
 
 
     using MetaModelica
@@ -99,7 +99,7 @@
           The named arguments a=1 and b=2 must be sorted and transformed into
           positional arguments (a,b is not necessarely the correct order).
          =#
-        function generatePositionalArgs(fieldNameList::List{<:Absyn.Ident}, namedArgList::List{<:Absyn.NamedArg}, accList::List{<:Absyn.Exp}) ::Tuple{List{Absyn.Exp}, List{Absyn.NamedArg}} 
+        function generatePositionalArgs(fieldNameList::List{<:Absyn.Ident}, namedArgList::List{<:Absyn.NamedArg}, accList::List{<:Absyn.Exp}) ::Tuple{List{Absyn.Exp}, List{Absyn.NamedArg}}
               local outInvalidNames::List{Absyn.NamedArg}
               local outList::List{Absyn.Exp}
 
@@ -113,7 +113,7 @@
                   ( nil(), _, localAccList)  => begin
                     (listReverse(localAccList), namedArgList)
                   end
-                  
+
                   (firstFieldName <| restFieldNames, localNamedArgList, localAccList)  => begin
                       (exp, localNamedArgList) = findFieldExpInList(firstFieldName, localNamedArgList)
                       (localAccList, localNamedArgList) = generatePositionalArgs(restFieldNames, localNamedArgList, _cons(exp, localAccList))
@@ -127,7 +127,7 @@
          #= author: KS
           Helper function to generatePositionalArgs
          =#
-        function findFieldExpInList(firstFieldName::Absyn.Ident, namedArgList::List{<:Absyn.NamedArg}) ::Tuple{Absyn.Exp, List{Absyn.NamedArg}} 
+        function findFieldExpInList(firstFieldName::Absyn.Ident, namedArgList::List{<:Absyn.NamedArg}) ::Tuple{Absyn.Exp, List{Absyn.NamedArg}}
               local outNamedArgList::List{Absyn.NamedArg}
               local outExp::Absyn.Exp
 
@@ -141,12 +141,12 @@
                   (_,  nil())  => begin
                     (Absyn.CREF(Absyn.WILD()), nil)
                   end
-                  
+
                   (localFieldName, Absyn.NAMEDARG(aName, e) <| rest)  => begin
                       @match true = stringEq(localFieldName, aName)
                     (e, rest)
                   end
-                  
+
                   (localFieldName, first <| rest)  => begin
                       (e, rest) = findFieldExpInList(localFieldName, rest)
                     (e, _cons(first, rest))
@@ -157,7 +157,7 @@
         end
 
          #= Checks that there are no invalid named arguments in the pattern =#
-        function checkInvalidPatternNamedArgs(args::List{<:Absyn.NamedArg}, fieldNameList::List{<:String}, status::Util.Status, info::SourceInfo) ::Util.Status 
+        function checkInvalidPatternNamedArgs(args::List{<:Absyn.NamedArg}, fieldNameList::List{<:String}, status::Util.Status, info::SourceInfo) ::Util.Status
               local outStatus::Util.Status
 
               outStatus = begin
@@ -168,7 +168,7 @@
                   ( nil(), _, _, _)  => begin
                     status
                   end
-                  
+
                   _  => begin
                         (argsNames, _) = AbsynUtil.getNamedFuncArgNamesAndValues(args)
                         str1 = stringDelimitList(argsNames, ",")
@@ -181,7 +181,7 @@
           outStatus
         end
 
-        function elabPatternCheckDuplicateBindings(cache::FCore.Cache, env::FCore.Graph, lhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Pattern} 
+        function elabPatternCheckDuplicateBindings(cache::FCore.Cache, env::FCore.Graph, lhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Pattern}
               local pattern::DAE.Pattern
               local outCache::FCore.Cache
 
@@ -190,7 +190,7 @@
           (outCache, pattern)
         end
 
-        function elabPattern(cache::FCore.Cache, env::FCore.Graph, lhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Pattern} 
+        function elabPattern(cache::FCore.Cache, env::FCore.Graph, lhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Pattern}
               local pattern::DAE.Pattern
               local outCache::FCore.Cache
 
@@ -198,7 +198,7 @@
           (outCache, pattern)
         end
 
-        function checkPatternsDuplicateAsBindings(patterns::List{<:DAE.Pattern}, info::SourceInfo)  
+        function checkPatternsDuplicateAsBindings(patterns::List{<:DAE.Pattern}, info::SourceInfo)
               local usedVariables::List{String}
 
               (_, usedVariables) = traversePatternList(patterns, findBoundVariables, nil)
@@ -209,7 +209,7 @@
               end
         end
 
-        function findBoundVariables(pat::DAE.Pattern, boundVars::List{<:String}) ::Tuple{DAE.Pattern, List{String}} 
+        function findBoundVariables(pat::DAE.Pattern, boundVars::List{<:String}) ::Tuple{DAE.Pattern, List{String}}
               local outBoundVars::List{String}
               local outPat::DAE.Pattern = pat
 
@@ -218,11 +218,11 @@
                   DAE.PAT_AS(__)  => begin
                     _cons(pat.id, boundVars)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(__)  => begin
                     _cons(pat.id, boundVars)
                   end
-                  
+
                   _  => begin
                       boundVars
                   end
@@ -231,7 +231,7 @@
           (outPat, outBoundVars)
         end
 
-        function elabPattern2(inCache::FCore.Cache, env::FCore.Graph, inLhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo, numError::ModelicaInteger) ::Tuple{FCore.Cache, DAE.Pattern} 
+        function elabPattern2(inCache::FCore.Cache, env::FCore.Graph, inLhs::Absyn.Exp, ty::DAE.Type, info::SourceInfo, numError::ModelicaInteger) ::Tuple{FCore.Cache, DAE.Pattern}
               local pattern::DAE.Pattern
               local outCache::FCore.Cache
 
@@ -271,126 +271,126 @@
                       et = validPatternType(ty, DAE.T_INTEGER_DEFAULT, inLhs, info)
                     (cache, DAE.PAT_CONSTANT(et, DAE.ICONST(i)))
                   end
-                  
+
                   (cache, _, Absyn.REAL(str), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_REAL_DEFAULT, inLhs, info)
                       r = System.stringReal(str)
                     (cache, DAE.PAT_CONSTANT(et, DAE.RCONST(r)))
                   end
-                  
+
                   (cache, _, Absyn.UNARY(Absyn.UMINUS(__), Absyn.INTEGER(i)), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_INTEGER_DEFAULT, inLhs, info)
                       i = -i
                     (cache, DAE.PAT_CONSTANT(et, DAE.ICONST(i)))
                   end
-                  
+
                   (cache, _, Absyn.UNARY(Absyn.UMINUS(__), Absyn.REAL(str)), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_REAL_DEFAULT, inLhs, info)
                       r = System.stringReal(str)
                       r = realNeg(r)
                     (cache, DAE.PAT_CONSTANT(et, DAE.RCONST(r)))
                   end
-                  
+
                   (cache, _, Absyn.STRING(s), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_STRING_DEFAULT, inLhs, info)
                       s = System.unescapedString(s)
                     (cache, DAE.PAT_CONSTANT(et, DAE.SCONST(s)))
                   end
-                  
+
                   (cache, _, Absyn.BOOL(b), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_BOOL_DEFAULT, inLhs, info)
                     (cache, DAE.PAT_CONSTANT(et, DAE.BCONST(b)))
                   end
-                  
+
                   (cache, _, Absyn.ARRAY( nil()), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_METALIST_DEFAULT, inLhs, info)
                     (cache, DAE.PAT_CONSTANT(et, DAE.LIST(nil)))
                   end
-                  
+
                   (cache, _, Absyn.ARRAY(exps && _ <| _), _, _, _)  => begin
                       lhs = ListUtil.fold(listReverse(exps), AbsynUtil.makeCons, Absyn.ARRAY(nil))
                       (cache, pattern) = elabPattern(cache, env, lhs, ty, info)
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, Absyn.CALL(Absyn.CREF_IDENT("NONE",  nil()), Absyn.FUNCTIONARGS( nil(),  nil())), _, _, _)  => begin
                       validPatternType(ty, DAE.T_NONE_DEFAULT, inLhs, info)
                     (cache, DAE.PAT_CONSTANT(NONE(), DAE.META_OPTION(NONE())))
                   end
-                  
+
                   (cache, _, Absyn.CALL(Absyn.CREF_IDENT("SOME",  nil()), Absyn.FUNCTIONARGS(exp <|  nil(),  nil())), DAE.T_METAOPTION(ty = ty2), _, _)  => begin
                       (cache, pattern) = elabPattern(cache, env, exp, ty2, info)
                     (cache, DAE.PAT_SOME(pattern))
                   end
-                  
+
                   (cache, _, Absyn.CONS(head, tail), tyTail && DAE.T_METALIST(ty = tyHead), _, _)  => begin
                       tyHead = Types.boxIfUnboxedType(tyHead)
                       (cache, patternHead) = elabPattern(cache, env, head, tyHead, info)
                       (cache, patternTail) = elabPattern(cache, env, tail, tyTail, info)
                     (cache, DAE.PAT_CONS(patternHead, patternTail))
                   end
-                  
+
                   (cache, _, Absyn.TUPLE(exps), DAE.T_METATUPLE(types = tys), _, _)  => begin
                       tys = ListUtil.map(tys, Types.boxIfUnboxedType)
                       (cache, patterns) = elabPatternTuple(cache, env, exps, tys, info, inLhs)
                     (cache, DAE.PAT_META_TUPLE(patterns))
                   end
-                  
+
                   (cache, _, Absyn.TUPLE(exps), DAE.T_TUPLE(types = tys), _, _)  => begin
                       (cache, patterns) = elabPatternTuple(cache, env, exps, tys, info, inLhs)
                     (cache, DAE.PAT_CALL_TUPLE(patterns))
                   end
-                  
+
                   (cache, _, lhs && Absyn.CALL(fcr, fargs), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(utPath)), _, _)  => begin
                       (cache, pattern) = elabPatternCall(cache, env, AbsynUtil.crefToPath(fcr), fargs, utPath, info, lhs)
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, lhs && Absyn.CALL(fcr, fargs), DAE.T_METAUNIONTYPE(path = utPath), _, _)  => begin
                       (cache, pattern) = elabPatternCall(cache, env, AbsynUtil.crefToPath(fcr), fargs, utPath, info, lhs)
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, lhs && Absyn.CALL(fcr, fargs), DAE.T_METARECORD(utPath = utPath), _, _)  => begin
                       (cache, pattern) = elabPatternCall(cache, env, AbsynUtil.crefToPath(fcr), fargs, utPath, info, lhs)
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, Absyn.CREF(__), ty1, _, _) where (Types.isBoxedType(ty1) || begin
                     @match Types.unboxedType(ty1) begin
                       DAE.T_ENUMERATION(__)  => begin
                         true
                       end
-                      
+
                       DAE.T_INTEGER(__)  => begin
                         true
                       end
-                      
+
                       DAE.T_REAL(__)  => begin
                         true
                       end
-                      
+
                       DAE.T_STRING(__)  => begin
                         true
                       end
-                      
+
                       DAE.T_BOOL(__)  => begin
                         true
                       end
-                      
+
                       _  => begin
                           false
                       end
                     end
                   end)  => begin
-                      @match (cache, elabExp, DAE.PROP(type_ = ty2, constFlag = const)) = Static.elabExp(cache, env, inLhs, false, false, Prefix.NOPRE(), info)
+                      @match (cache, elabExp, DAE.PROP(type_ = ty2, constFlag = constType)) = Static.elabExp(cache, env, inLhs, false, false, Prefix.NOPRE(), info)
                       et = validPatternType(ty1, ty2, inLhs, info)
-                      @match true = Types.isConstant(const)
+                      @match true = Types.isConstant(constType)
                       (cache, val) = Ceval.ceval(cache, env, elabExp, false, inMsg = Absyn.MSG(info))
                       elabExp = ValuesUtil.valueExp(val)
                     (cache, DAE.PAT_CONSTANT(et, elabExp))
                   end
-                  
+
                   (cache, _, Absyn.AS(id, exp), ty2, _, _)  => begin
                       @match (cache, DAE.TYPES_VAR(ty = ty1, attributes = attr), _, _, _, _) = Lookup.lookupIdent(cache, env, id)
                       lhs = Absyn.CREF(Absyn.CREF_IDENT(id, nil))
@@ -404,7 +404,7 @@
                           end
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, Absyn.CREF(Absyn.CREF_IDENT(id,  nil())), ty2, _, _)  => begin
                       @match (cache, DAE.TYPES_VAR(ty = ty1, attributes = (@match DAE.ATTR(variability = variability) = attr)), _, _, _, _) = Lookup.lookupIdent(cache, env, id)
                       if SCodeUtil.isParameterOrConst(variability)
@@ -420,30 +420,30 @@
                           end
                     (cache, pattern)
                   end
-                  
+
                   (cache, _, Absyn.AS(id, _), _, _, _)  => begin
                       @shouldFail (_, _, _, _, _, _) = Lookup.lookupIdent(cache, env, id)
                       Error.addSourceMessage(Error.LOOKUP_VARIABLE_ERROR, list(id, ""), info)
                     fail()
                   end
-                  
+
                   (cache, _, Absyn.CREF(Absyn.CREF_IDENT("NONE",  nil())), _, _, _)  => begin
                       @shouldFail (_, _, _, _, _, _) = Lookup.lookupIdent(cache, env, "NONE")
                       Error.addSourceMessage(Error.META_NONE_CREF, nil, info)
                     fail()
                   end
-                  
+
                   (cache, _, Absyn.CREF(Absyn.CREF_IDENT(id,  nil())), _, _, _)  => begin
                       @shouldFail (_, _, _, _, _, _) = Lookup.lookupIdent(cache, env, id)
                       @match false = "NONE" == id
                       Error.addSourceMessage(Error.LOOKUP_VARIABLE_ERROR, list(id, ""), info)
                     fail()
                   end
-                  
+
                   (cache, _, Absyn.CREF(Absyn.WILD(__)), _, _, _)  => begin
                     (cache, DAE.PAT_WILD())
                   end
-                  
+
                   (_, _, lhs, _, _, _)  => begin
                       @match true = numError == Error.getNumErrorMessages()
                       str = Dump.printExpStr(lhs) + " of type " + Types.unparseType(ty)
@@ -455,7 +455,7 @@
           (outCache, pattern)
         end
 
-        function elabPatternTuple(inCache::FCore.Cache, env::FCore.Graph, inExps::List{<:Absyn.Exp}, inTys::List{<:DAE.Type}, info::SourceInfo, lhs::Absyn.Exp #= for error messages =#) ::Tuple{FCore.Cache, List{DAE.Pattern}} 
+        function elabPatternTuple(inCache::FCore.Cache, env::FCore.Graph, inExps::List{<:Absyn.Exp}, inTys::List{<:DAE.Type}, info::SourceInfo, lhs::Absyn.Exp #= for error messages =#) ::Tuple{FCore.Cache, List{DAE.Pattern}}
               local patterns::List{DAE.Pattern}
               local outCache::FCore.Cache
 
@@ -471,13 +471,13 @@
                   (cache, _,  nil(),  nil(), _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, _, exp <| exps, ty <| tys, _, _)  => begin
                       (cache, pattern) = elabPattern(cache, env, exp, ty, info)
                       (cache, patterns) = elabPatternTuple(cache, env, exps, tys, info, lhs)
                     (cache, _cons(pattern, patterns))
                   end
-                  
+
                   _  => begin
                         s = Dump.printExpStr(lhs)
                         s = "pattern " + s
@@ -489,7 +489,7 @@
           (outCache, patterns)
         end
 
-        function elabPatternCall(inCache::FCore.Cache, env::FCore.Graph, callPath::Absyn.Path, fargs::Absyn.FunctionArgs, utPath::Absyn.Path, info::SourceInfo, lhs::Absyn.Exp #= for error messages =#) ::Tuple{FCore.Cache, DAE.Pattern} 
+        function elabPatternCall(inCache::FCore.Cache, env::FCore.Graph, callPath::Absyn.Path, fargs::Absyn.FunctionArgs, utPath::Absyn.Path, info::SourceInfo, lhs::Absyn.Exp #= for error messages =#) ::Tuple{FCore.Cache, DAE.Pattern}
               local pattern::DAE.Pattern
               local outCache::FCore.Cache
 
@@ -521,7 +521,7 @@
                       Error.addSourceMessage(Error.PATTERN_MIXED_POS_NAMED, list(AbsynUtil.pathString(callPath)), info)
                     fail()
                   end
-                  
+
                   (cache, _, _, Absyn.FUNCTIONARGS(funcArgs, namedArgList), utPath2, _, _)  => begin
                       (cache, _, _) = Lookup.lookupType(cache, env, callPath, NONE())
                       @match (cache, DAE.T_METARECORD(utPath = utPath1, index = index, fields = fieldVarList, typeVars = typeVars, knownSingleton = knownSingleton, path = fqPath), _) = Lookup.lookupType(cache, env, callPath, NONE())
@@ -536,7 +536,7 @@
                                   Error.addSourceMessage(Error.META_EMPTY_CALL_PATTERN, list(namedArg.argName), info)
                                 ()
                               end
-                              
+
                               _  => begin
                                   ()
                               end
@@ -551,7 +551,7 @@
                                 Absyn.CREF(Absyn.WILD(__))  => begin
                                   true
                                 end
-                                
+
                                 _  => begin
                                     false
                                 end
@@ -576,7 +576,7 @@
                       (cache, patterns) = elabPatternTuple(cache, env, funcArgs2, fieldTypeList, info, lhs)
                     (cache, DAE.PAT_CALL(fqPath, index, patterns, fieldVarList, typeVars, knownSingleton))
                   end
-                  
+
                   (cache, _, _, Absyn.FUNCTIONARGS(funcArgs, namedArgList), utPath2, _, _)  => begin
                       @match (cache, DAE.T_FUNCTION(funcResultType = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_), varLst = fieldVarList), path = fqPath), _) = Lookup.lookupType(cache, env, callPath, NONE())
                       @match true = AbsynUtil.pathEqual(fqPath, utPath2)
@@ -594,7 +594,7 @@
                       namedPatterns = ListUtil.filterOnTrue(namedPatterns, filterEmptyPattern)
                     (cache, DAE.PAT_CALL_NAMED(fqPath, namedPatterns))
                   end
-                  
+
                   (cache, _, _, _, _, _, _)  => begin
                       @shouldFail (_, _, _) = Lookup.lookupType(cache, env, callPath, NONE())
                       s = AbsynUtil.pathString(callPath)
@@ -606,7 +606,7 @@
           (outCache, pattern)
         end
 
-        function checkMissingArgs(path::Absyn.Path, numPosArgs::ModelicaInteger, missingFieldNames::List{<:String}, numNamedArgs::ModelicaInteger, info::SourceInfo)  
+        function checkMissingArgs(path::Absyn.Path, numPosArgs::ModelicaInteger, missingFieldNames::List{<:String}, numNamedArgs::ModelicaInteger, info::SourceInfo)
               _ = begin
                   local str::String
                   local strs::List{String}
@@ -614,7 +614,7 @@
                   (_, _,  nil(), 0, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -638,7 +638,7 @@
         end
 
          #= Converts a call REC(__) to REC(_,_,_,_) =#
-        function checkForAllWildCall(args::List{<:Absyn.Exp}, named::List{<:Absyn.NamedArg}, numFields::ModelicaInteger) ::Tuple{List{Absyn.Exp}, List{Absyn.NamedArg}} 
+        function checkForAllWildCall(args::List{<:Absyn.Exp}, named::List{<:Absyn.NamedArg}, numFields::ModelicaInteger) ::Tuple{List{Absyn.Exp}, List{Absyn.NamedArg}}
               local outNamed::List{Absyn.NamedArg}
               local outArgs::List{Absyn.Exp}
 
@@ -647,7 +647,7 @@
                   (Absyn.CREF(Absyn.ALLWILD(__)) <|  nil(),  nil(), _)  => begin
                     (nil, nil)
                   end
-                  
+
                   _  => begin
                       (args, named)
                   end
@@ -656,7 +656,7 @@
           (outArgs, outNamed)
         end
 
-        function validPatternType(inTy1::DAE.Type, inTy2::DAE.Type, lhs::Absyn.Exp, info::SourceInfo) ::Option{DAE.Type} 
+        function validPatternType(inTy1::DAE.Type, inTy2::DAE.Type, lhs::Absyn.Exp, info::SourceInfo) ::Option{DAE.Type}
               local ty::Option{DAE.Type}
 
               ty = begin
@@ -676,14 +676,14 @@
                       et = Types.simplifyType(ty1)
                     SOME(et)
                   end
-                  
+
                   (ty1, ty2, _, _)  => begin
                       cr = ComponentReference.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cr)
                       (_, _) = Types.matchType(crefExp, ty1, ty2, true)
                     NONE()
                   end
-                  
+
                   (ty1, ty2, _, _)  => begin
                       s = Dump.printExpStr(lhs)
                       s1 = Types.unparseType(ty1)
@@ -696,7 +696,7 @@
           ty
         end
 
-        function validUniontype(path1::Absyn.Path, path2::Absyn.Path, info::SourceInfo, lhs::Absyn.Exp)  
+        function validUniontype(path1::Absyn.Path, path2::Absyn.Path, info::SourceInfo, lhs::Absyn.Exp)
               _ = begin
                   local s::String
                   local s1::String
@@ -706,7 +706,7 @@
                       @match true = AbsynUtil.pathEqual(path1, path2)
                     ()
                   end
-                  
+
                   _  => begin
                         s = Dump.printExpStr(lhs)
                         s1 = AbsynUtil.pathString(path1)
@@ -719,7 +719,7 @@
         end
 
          #= Pattern to String unparsing =#
-        function patternStr(pattern::DAE.Pattern) ::String 
+        function patternStr(pattern::DAE.Pattern) ::String
               local str::String
 
               str = begin
@@ -737,36 +737,36 @@
                   DAE.PAT_WILD(__)  => begin
                     "_"
                   end
-                  
+
                   DAE.PAT_AS(id = id, pat = DAE.PAT_WILD(__))  => begin
                     id
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(id, DAE.PAT_WILD(__))  => begin
                     id
                   end
-                  
+
                   DAE.PAT_SOME(pat)  => begin
                       str = patternStr(pat)
                     "SOME(" + str + ")"
                   end
-                  
+
                   DAE.PAT_META_TUPLE(pats)  => begin
                       str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
                     "(" + str + ")"
                   end
-                  
+
                   DAE.PAT_CALL_TUPLE(pats)  => begin
                       str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
                     "(" + str + ")"
                   end
-                  
+
                   DAE.PAT_CALL(name = name, patterns = pats)  => begin
                       id = AbsynUtil.pathString(name)
                       str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
                     stringAppendList(list(id, "(", str, ")"))
                   end
-                  
+
                   DAE.PAT_CALL_NAMED(name = name, patterns = namedpats)  => begin
                       id = AbsynUtil.pathString(name)
                       fields = ListUtil.map(namedpats, Util.tuple32)
@@ -774,23 +774,23 @@
                       str = stringDelimitList(ListUtil.threadMap(fields, patsStr, stringAppend), ",")
                     stringAppendList(list(id, "(", str, ")"))
                   end
-                  
+
                   DAE.PAT_CONS(head, tail)  => begin
                     patternStr(head) + "::" + patternStr(tail)
                   end
-                  
+
                   DAE.PAT_CONSTANT(exp = exp)  => begin
                     ExpressionDump.printExpStr(exp)
                   end
-                  
+
                   DAE.PAT_AS(id = id, pat = pat)  => begin
                     id + " as " + patternStr(pat)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(id, pat)  => begin
                     id + " as " + patternStr(pat)
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Patternm.patternStr not implemented correctly"))
                       "*PATTERN*"
@@ -802,7 +802,7 @@
           str
         end
 
-        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -858,7 +858,7 @@
                       exp = DAE.MATCHEXPRESSION(elabMatchTy, elabExps, inputAliases, matchDecls, elabCases, et)
                     (cache, exp, prop)
                   end
-                  
+
                   _  => begin
                         @match true = numError == Error.getNumErrorMessages()
                         str = Dump.printExpStr(matchExp)
@@ -878,7 +878,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function checkConstantMatchInputs(inputs::List{<:DAE.Exp}, info::SourceInfo)  
+        function checkConstantMatchInputs(inputs::List{<:DAE.Exp}, info::SourceInfo)
               for i in inputs
                 if Expression.isConstValue(i)
                   Error.addSourceMessage(Error.META_MATCH_CONSTANT, list(ExpressionDump.printExpStr(i)), info)
@@ -894,7 +894,7 @@
             case (1,2) ... case (_,_) ... does not work
           .
            =#
-        function optimizeMatchToSwitch(matchTy::Absyn.MatchType, cases::List{<:DAE.MatchCase}, info::SourceInfo) ::Tuple{DAE.MatchType, List{DAE.MatchCase}} 
+        function optimizeMatchToSwitch(matchTy::Absyn.MatchType, cases::List{<:DAE.MatchCase}, info::SourceInfo) ::Tuple{DAE.MatchType, List{DAE.MatchCase}}
               local outCases::List{DAE.MatchCase}
               local outType::DAE.MatchType
 
@@ -909,7 +909,7 @@
                   (Absyn.MATCHCONTINUE(__), _, _)  => begin
                     (DAE.MATCHCONTINUE(), cases)
                   end
-                  
+
                   (_, _, _)  => begin
                       @match true = listLength(cases) > 2
                       for c in cases
@@ -925,7 +925,7 @@
                       outCases = optimizeSwitchedMatchCases(outType, cases)
                     (outType, outCases)
                   end
-                  
+
                   _  => begin
                       (DAE.MATCH(NONE()), cases)
                   end
@@ -935,7 +935,7 @@
         end
 
          #= This function optimizes the cases of a match that has been optimized into a switch. =#
-        function optimizeSwitchedMatchCases(inMatchType::DAE.MatchType, inCases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase} 
+        function optimizeSwitchedMatchCases(inMatchType::DAE.MatchType, inCases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -960,14 +960,14 @@
                             end
                           c
                         end
-                        
+
                         _  => begin
                             c
                         end
                       end
                     end for c in inCases)
                   end
-                  
+
                   _  => begin
                       inCases
                   end
@@ -976,7 +976,7 @@
           outCases
         end
 
-        function removeWildPatternColumnsFromMatrix(inPatternMatrix::List{<:List{<:DAE.Pattern}}, inAcc::List{<:Option{<:List{<:DAE.Pattern}}}, inNumAcc::ModelicaInteger) ::Tuple{List{Option{List{DAE.Pattern}}}, ModelicaInteger} 
+        function removeWildPatternColumnsFromMatrix(inPatternMatrix::List{<:List{<:DAE.Pattern}}, inAcc::List{<:Option{<:List{<:DAE.Pattern}}}, inNumAcc::ModelicaInteger) ::Tuple{List{Option{List{DAE.Pattern}}}, ModelicaInteger}
               local numNonEmptyColumns::ModelicaInteger
               local optPatternMatrix::List{Option{List{DAE.Pattern}}}
 
@@ -991,7 +991,7 @@
                   ( nil(), acc, numAcc)  => begin
                     (listReverse(acc), numAcc)
                   end
-                  
+
                   (pats <| patternMatrix, acc, numAcc)  => begin
                       alwaysMatch = allPatternsAlwaysMatch(ListUtil.stripLast(pats))
                       optPats = if alwaysMatch
@@ -1012,7 +1012,7 @@
           (optPatternMatrix, numNonEmptyColumns)
         end
 
-        function findPatternToConvertToSwitch(inPatternMatrix::List{<:Option{<:List{<:DAE.Pattern}}}, index::ModelicaInteger, numPatternsInMatrix::ModelicaInteger #= If there is only 1 pattern, we can optimize the default case =#, info::SourceInfo) ::Tuple{ModelicaInteger, DAE.Type, ModelicaInteger} 
+        function findPatternToConvertToSwitch(inPatternMatrix::List{<:Option{<:List{<:DAE.Pattern}}}, index::ModelicaInteger, numPatternsInMatrix::ModelicaInteger #= If there is only 1 pattern, we can optimize the default case =#, info::SourceInfo) ::Tuple{ModelicaInteger, DAE.Type, ModelicaInteger}
               local tpl::Tuple{ModelicaInteger, DAE.Type, ModelicaInteger}
 
               tpl = begin
@@ -1025,7 +1025,7 @@
                       (ty, extraarg) = findPatternToConvertToSwitch2(pats, nil, DAE.T_UNKNOWN_DEFAULT, true, numPatternsInMatrix)
                     (index, ty, extraarg)
                   end
-                  
+
                   (_ <| patternMatrix, _, _, _)  => begin
                     findPatternToConvertToSwitch(patternMatrix, index + 1, numPatternsInMatrix, info)
                   end
@@ -1034,7 +1034,7 @@
           tpl
         end
 
-        function findPatternToConvertToSwitch2(ipats::List{<:DAE.Pattern}, ixs::List{<:ModelicaInteger}, ity::DAE.Type, allSubPatternsMatch::Bool, numPatternsInMatrix::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger} 
+        function findPatternToConvertToSwitch2(ipats::List{<:DAE.Pattern}, ixs::List{<:ModelicaInteger}, ity::DAE.Type, allSubPatternsMatch::Bool, numPatternsInMatrix::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger}
               local extraarg::ModelicaInteger
               local outTy::DAE.Type
 
@@ -1051,35 +1051,35 @@
                       (ty, extraarg) = findPatternToConvertToSwitch2(pats, _cons(ix, ixs), DAE.T_STRING_DEFAULT, allSubPatternsMatch, numPatternsInMatrix)
                     (ty, extraarg)
                   end
-                  
+
                   (DAE.PAT_CALL(index = ix, patterns = subpats) <| pats, _, _, _, _)  => begin
                       @match false = listMember(ix, ixs)
                       (ty, extraarg) = findPatternToConvertToSwitch2(pats, _cons(ix, ixs), DAE.T_METATYPE_DEFAULT, allSubPatternsMatch && allPatternsAlwaysMatch(subpats), numPatternsInMatrix)
                     (ty, extraarg)
                   end
-                  
+
                   (DAE.PAT_CONSTANT(exp = DAE.ICONST(ix)) <| pats, _, _, _, _)  => begin
                       @match false = listMember(ix, ixs)
                       (ty, extraarg) = findPatternToConvertToSwitch2(pats, _cons(ix, ixs), DAE.T_INTEGER_DEFAULT, allSubPatternsMatch, numPatternsInMatrix)
                     (ty, extraarg)
                   end
-                  
+
                   ( nil(), _, DAE.T_STRING(__), _, _)  => begin
                       @match true = listLength(ixs) > 11
                       ix = findMinMod(ixs, 1)
                     (DAE.T_STRING_DEFAULT, ix)
                   end
-                  
+
                   (_ <|  nil(), _, DAE.T_STRING(__), _, 1)  => begin
                       @match true = listLength(ixs) > 11
                       ix = findMinMod(ixs, 1)
                     (DAE.T_STRING_DEFAULT, ix)
                   end
-                  
+
                   ( nil(), _, _, _, _)  => begin
                     (ity, 0)
                   end
-                  
+
                   (_ <|  nil(), _, _, true, 1)  => begin
                     (ity, 0)
                   end
@@ -1096,7 +1096,7 @@
           (outTy, extraarg)
         end
 
-        function findMinMod(inIxs::List{<:ModelicaInteger}, inMod::ModelicaInteger) ::ModelicaInteger 
+        function findMinMod(inIxs::List{<:ModelicaInteger}, inMod::ModelicaInteger) ::ModelicaInteger
               local outMod::ModelicaInteger
 
               outMod = begin
@@ -1109,7 +1109,7 @@
                       @match nil = ListUtil.sortedDuplicates(ixs, intEq)
                     mod
                   end
-                  
+
                   _  => begin
                         @match true = inMod < 65536
                       findMinMod(inIxs, inMod * 2)
@@ -1122,7 +1122,7 @@
         end
 
          #= case (1,_,_) then ...; case (2,_,_) then ...; => =#
-        function filterUnusedPatterns(inputs::List{<:DAE.Exp} #= We can only remove inputs that are free from side-effects =#, inAliases::List{<:List{<:String}}, inCases::List{<:DAE.MatchCase}) ::Tuple{List{DAE.Exp}, List{List{String}}, List{DAE.MatchCase}} 
+        function filterUnusedPatterns(inputs::List{<:DAE.Exp} #= We can only remove inputs that are free from side-effects =#, inAliases::List{<:List{<:String}}, inCases::List{<:DAE.MatchCase}) ::Tuple{List{DAE.Exp}, List{List{String}}, List{DAE.MatchCase}}
               local outCases::List{DAE.MatchCase}
               local outAliases::List{List{String}}
               local outInputs::List{DAE.Exp}
@@ -1138,7 +1138,7 @@
                       cases = setCasePatternsCheckZero(cases, patternMatrix)
                     (outInputs, outAliases, cases)
                   end
-                  
+
                   _  => begin
                       (inputs, inAliases, inCases)
                   end
@@ -1148,7 +1148,7 @@
         end
 
          #= Handles the case when the pattern matrix becomes empty because no input is matched =#
-        function setCasePatternsCheckZero(inCases::List{<:DAE.MatchCase}, patternMatrix::List{<:List{<:DAE.Pattern}}) ::List{DAE.MatchCase} 
+        function setCasePatternsCheckZero(inCases::List{<:DAE.MatchCase}, patternMatrix::List{<:List{<:DAE.Pattern}}) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -1156,11 +1156,11 @@
                   ( nil(),  nil())  => begin
                     inCases
                   end
-                  
+
                   (_,  nil())  => begin
                     ListUtil.map1(inCases, setCasePatterns, nil)
                   end
-                  
+
                   _  => begin
                       ListUtil.threadMap(inCases, patternMatrix, setCasePatterns)
                   end
@@ -1170,7 +1170,7 @@
         end
 
          #= case (1,_,_) then ...; case (2,_,_) then ...; => =#
-        function filterUnusedPatterns2(inInputs::List{<:DAE.Exp} #= We can only remove inputs that are free from side-effects =#, inAliases::List{<:List{<:String}}, inPatternMatrix::List{<:List{<:DAE.Pattern}}, change::Bool #= Only rebuild the cases if something changed =#, inputsAcc::List{<:DAE.Exp}, aliasesAcc::List{<:List{<:String}}, patternMatrixAcc::List{<:List{<:DAE.Pattern}}) ::Tuple{Bool, List{DAE.Exp}, List{List{String}}, List{List{DAE.Pattern}}} 
+        function filterUnusedPatterns2(inInputs::List{<:DAE.Exp} #= We can only remove inputs that are free from side-effects =#, inAliases::List{<:List{<:String}}, inPatternMatrix::List{<:List{<:DAE.Pattern}}, change::Bool #= Only rebuild the cases if something changed =#, inputsAcc::List{<:DAE.Exp}, aliasesAcc::List{<:List{<:String}}, patternMatrixAcc::List{<:List{<:DAE.Pattern}}) ::Tuple{Bool, List{DAE.Exp}, List{List{String}}, List{List{DAE.Pattern}}}
               local outPatternMatrix::List{List{DAE.Pattern}}
               local outAliases::List{List{String}}
               local outInputs::List{DAE.Exp}
@@ -1187,19 +1187,19 @@
                   ( nil(),  nil(),  nil(), true, _, _, _)  => begin
                     (true, listReverse(inputsAcc), listReverse(aliasesAcc), listReverse(patternMatrixAcc))
                   end
-                  
+
                   (e <| inputs, _ <| aliases, pats <| patternMatrix, _, _, _, _)  => begin
                       @match (_, true) = Expression.traverseExpBottomUp(e, Expression.hasNoSideEffects, true)
                       @match true = allPatternsWild(pats)
                       (outChange, outInputs, outAliases, outPatternMatrix) = filterUnusedPatterns2(inputs, aliases, patternMatrix, true, inputsAcc, aliasesAcc, patternMatrixAcc)
                     (outChange, outInputs, outAliases, outPatternMatrix)
                   end
-                  
+
                   (e <| inputs, alias <| aliases, pats <| patternMatrix, _, _, _, _)  => begin
                       (outChange, outInputs, outAliases, outPatternMatrix) = filterUnusedPatterns2(inputs, aliases, patternMatrix, change, _cons(e, inputsAcc), _cons(alias, aliasesAcc), _cons(pats, patternMatrixAcc))
                     (outChange, outInputs, outAliases, outPatternMatrix)
                   end
-                  
+
                   _  => begin
                       (false, nil, nil, nil)
                   end
@@ -1208,7 +1208,7 @@
           (outChange, outInputs, outAliases, outPatternMatrix)
         end
 
-        function getUsedLocalCrefs(skipFilterUnusedAsBindings::Bool #= if true, traverse the whole expression; else only the bodies and results =#, exp::DAE.Exp, hashSize::ModelicaInteger) ::HashTableStringToPath.HashTable 
+        function getUsedLocalCrefs(skipFilterUnusedAsBindings::Bool #= if true, traverse the whole expression; else only the bodies and results =#, exp::DAE.Exp, hashSize::ModelicaInteger) ::HashTableStringToPath.HashTable
               local ht::HashTableStringToPath.HashTable
 
               ht = begin
@@ -1218,7 +1218,7 @@
                       (_, ht) = Expression.traverseExpBottomUp(exp, addLocalCref, HashTableStringToPath.emptyHashTableSized(hashSize))
                     ht
                   end
-                  
+
                   (false, DAE.MATCHEXPRESSION(cases = cases), _)  => begin
                       (_, ht) = traverseCases(cases, addLocalCref, HashTableStringToPath.emptyHashTableSized(hashSize))
                     ht
@@ -1228,7 +1228,7 @@
           ht
         end
 
-        function filterUnusedAsBindings(inCases::List{<:DAE.MatchCase}, ht::HashTableStringToPath.HashTable) ::List{DAE.MatchCase} 
+        function filterUnusedAsBindings(inCases::List{<:DAE.MatchCase}, ht::HashTableStringToPath.HashTable) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -1245,7 +1245,7 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.CASE(patterns, guardPattern, localDecls, body, result, resultInfo, jump, info) <| cases, _)  => begin
                       (patterns, _) = traversePatternList(patterns, removePatternAsBinding, (ht, info))
                       cases = filterUnusedAsBindings(cases, ht)
@@ -1256,7 +1256,7 @@
           outCases
         end
 
-        function removePatternAsBinding(inPat::DAE.Pattern, inTpl::Tuple{<:HashTableStringToPath.HashTable, SourceInfo}) ::Tuple{DAE.Pattern, Tuple{HashTableStringToPath.HashTable, SourceInfo}} 
+        function removePatternAsBinding(inPat::DAE.Pattern, inTpl::Tuple{<:HashTableStringToPath.HashTable, SourceInfo}) ::Tuple{DAE.Pattern, Tuple{HashTableStringToPath.HashTable, SourceInfo}}
               local outTpl::Tuple{HashTableStringToPath.HashTable, SourceInfo} = inTpl
               local pat::DAE.Pattern = inPat
 
@@ -1271,12 +1271,12 @@
                       Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_UNUSED_AS_BINDING, list(id), info)
                     pat
                   end
-                  
+
                   (DAE.PAT_AS_FUNC_PTR(id = id, pat = pat), (ht, _))  => begin
                       @match true = BaseHashTable.hasKey(id, ht)
                     pat
                   end
-                  
+
                   _  => begin
                         pat = simplifyPattern(inPat, 1)
                       pat
@@ -1288,7 +1288,7 @@
 
          #= Use with Expression.traverseExpBottomUp to collect all CREF's that could be references to local
         variables. =#
-        function addLocalCref(inExp::DAE.Exp, inHt::HashTableStringToPath.HashTable) ::Tuple{DAE.Exp, HashTableStringToPath.HashTable} 
+        function addLocalCref(inExp::DAE.Exp, inHt::HashTableStringToPath.HashTable) ::Tuple{DAE.Exp, HashTableStringToPath.HashTable}
               local outHt::HashTableStringToPath.HashTable
               local outExp::DAE.Exp
 
@@ -1305,22 +1305,22 @@
                       ht = addLocalCrefHelper(cr, ht)
                     (exp, ht)
                   end
-                  
+
                   (exp && DAE.CALL(path = Absyn.IDENT(name), attr = DAE.CALL_ATTR(builtin = false)), ht)  => begin
                       ht = BaseHashTable.add((name, Absyn.IDENT("")), ht)
                     (exp, ht)
                   end
-                  
+
                   (exp && DAE.PATTERN(pattern = pat), ht)  => begin
                       (_, ht) = traversePattern(pat, addPatternAsBindings, ht)
                     (exp, ht)
                   end
-                  
+
                   (exp && DAE.MATCHEXPRESSION(cases = cases), ht)  => begin
                       ht = addCasesLocalCref(cases, ht)
                     (exp, ht)
                   end
-                  
+
                   _  => begin
                       (inExp, inHt)
                   end
@@ -1329,7 +1329,7 @@
           (outExp, outHt)
         end
 
-        function addLocalCrefHelper(cr::DAE.ComponentRef, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable 
+        function addLocalCrefHelper(cr::DAE.ComponentRef, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable
               local ht::HashTableStringToPath.HashTable
 
               ht = begin
@@ -1342,13 +1342,13 @@
                       ht = BaseHashTable.add((name, Absyn.IDENT("")), ht)
                     ht
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = name, subscriptLst = subs, componentRef = cr2), ht)  => begin
                       ht = addLocalCrefSubs(subs, ht)
                       ht = BaseHashTable.add((name, Absyn.IDENT("")), ht)
                     addLocalCrefHelper(cr2, ht)
                   end
-                  
+
                   _  => begin
                       iht
                   end
@@ -1358,7 +1358,7 @@
         end
 
          #= Cref subscripts may also contain crefs =#
-        function addLocalCrefSubs(isubs::List{<:DAE.Subscript}, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable 
+        function addLocalCrefSubs(isubs::List{<:DAE.Subscript}, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable
               local outHt::HashTableStringToPath.HashTable
 
               outHt = begin
@@ -1369,19 +1369,19 @@
                   ( nil(), ht)  => begin
                     ht
                   end
-                  
+
                   (DAE.SLICE(exp) <| subs, ht)  => begin
                       (_, ht) = Expression.traverseExpBottomUp(exp, addLocalCref, ht)
                       ht = addLocalCrefSubs(subs, ht)
                     ht
                   end
-                  
+
                   (DAE.INDEX(exp) <| subs, ht)  => begin
                       (_, ht) = Expression.traverseExpBottomUp(exp, addLocalCref, ht)
                       ht = addLocalCrefSubs(subs, ht)
                     ht
                   end
-                  
+
                   _  => begin
                       iht
                   end
@@ -1392,7 +1392,7 @@
 
          #= Use with Expression.traverseExpBottomUp to collect all CREF's that could be references to local
         variables. =#
-        function checkDefUse(inExp::DAE.Exp, inTpl::Tuple{<:AvlSetString.Tree, AvlSetString.Tree, SourceInfo}) ::Tuple{DAE.Exp, Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}} 
+        function checkDefUse(inExp::DAE.Exp, inTpl::Tuple{<:AvlSetString.Tree, AvlSetString.Tree, SourceInfo}) ::Tuple{DAE.Exp, Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}}
               local outTpl::Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}
               local outExp::DAE.Exp
 
@@ -1417,12 +1417,12 @@
                       end
                     (outExp, extra)
                   end
-                  
+
                   (DAE.PATTERN(pattern = pat), extra)  => begin
                       (pat, extra) = traversePattern(pat, checkDefUsePattern, extra)
                     (DAE.PATTERN(pat), extra)
                   end
-                  
+
                   _  => begin
                       (inExp, inTpl)
                   end
@@ -1432,7 +1432,7 @@
         end
 
          #= Replace unused assignments with wildcards =#
-        function checkDefUsePattern(inPat::DAE.Pattern, inTpl::Tuple{<:AvlSetString.Tree, AvlSetString.Tree, SourceInfo}) ::Tuple{DAE.Pattern, Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}} 
+        function checkDefUsePattern(inPat::DAE.Pattern, inTpl::Tuple{<:AvlSetString.Tree, AvlSetString.Tree, SourceInfo}) ::Tuple{DAE.Pattern, Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}}
               local outTpl::Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo} = inTpl
               local outPat::DAE.Pattern
 
@@ -1453,7 +1453,7 @@
                       end
                     pat
                   end
-                  
+
                   (DAE.PAT_AS_FUNC_PTR(id = name, pat = pat), (localsTree, useTree, info))  => begin
                       if AvlSetString.hasKey(localsTree, name) && ! AvlSetString.hasKey(useTree, name)
                         Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_UNUSED_AS_BINDING, list(name), info)
@@ -1462,7 +1462,7 @@
                       end
                     pat
                   end
-                  
+
                   _  => begin
                         (pat, _) = simplifyPattern(inPat, 1)
                       pat
@@ -1474,7 +1474,7 @@
 
          #= Use with Expression.traverseExpBottomUp to collect all CREF's that could be references to local
         variables. =#
-        function useLocalCref(inExp::DAE.Exp, inTree::AvlSetString.Tree) ::Tuple{DAE.Exp, AvlSetString.Tree} 
+        function useLocalCref(inExp::DAE.Exp, inTree::AvlSetString.Tree) ::Tuple{DAE.Exp, AvlSetString.Tree}
               local outTree::AvlSetString.Tree
               local outExp::DAE.Exp
 
@@ -1491,22 +1491,22 @@
                       tree = useLocalCrefHelper(cr, tree)
                     (exp, tree)
                   end
-                  
+
                   (exp && DAE.CALL(path = Absyn.IDENT(name), attr = DAE.CALL_ATTR(builtin = false)), tree)  => begin
                       tree = AvlSetString.add(tree, name)
                     (exp, tree)
                   end
-                  
+
                   (exp && DAE.PATTERN(pattern = pat), tree)  => begin
                       (_, tree) = traversePattern(pat, usePatternAsBindings, tree)
                     (exp, tree)
                   end
-                  
+
                   (exp && DAE.MATCHEXPRESSION(cases = cases), tree)  => begin
                       tree = useCasesLocalCref(cases, tree)
                     (exp, tree)
                   end
-                  
+
                   _  => begin
                       (inExp, inTree)
                   end
@@ -1515,7 +1515,7 @@
           (outExp, outTree)
         end
 
-        function useLocalCrefHelper(cr::DAE.ComponentRef, inTree::AvlSetString.Tree) ::AvlSetString.Tree 
+        function useLocalCrefHelper(cr::DAE.ComponentRef, inTree::AvlSetString.Tree) ::AvlSetString.Tree
               local tree::AvlSetString.Tree
 
               tree = begin
@@ -1527,13 +1527,13 @@
                       tree = useLocalCrefSubs(subs, inTree)
                     AvlSetString.add(tree, name)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = name, subscriptLst = subs, componentRef = cr2), _)  => begin
                       tree = useLocalCrefSubs(subs, inTree)
                       tree = AvlSetString.add(tree, name)
                     useLocalCrefHelper(cr2, tree)
                   end
-                  
+
                   _  => begin
                       inTree
                   end
@@ -1543,7 +1543,7 @@
         end
 
          #= Cref subscripts may also contain crefs =#
-        function useLocalCrefSubs(isubs::List{<:DAE.Subscript}, inTree::AvlSetString.Tree) ::AvlSetString.Tree 
+        function useLocalCrefSubs(isubs::List{<:DAE.Subscript}, inTree::AvlSetString.Tree) ::AvlSetString.Tree
               local tree::AvlSetString.Tree
 
               tree = begin
@@ -1553,19 +1553,19 @@
                   ( nil(), _)  => begin
                     inTree
                   end
-                  
+
                   (DAE.SLICE(exp) <| subs, _)  => begin
                       (_, tree) = Expression.traverseExpBottomUp(exp, useLocalCref, inTree)
                       tree = useLocalCrefSubs(subs, tree)
                     tree
                   end
-                  
+
                   (DAE.INDEX(exp) <| subs, _)  => begin
                       (_, tree) = Expression.traverseExpBottomUp(exp, useLocalCref, inTree)
                       tree = useLocalCrefSubs(subs, tree)
                     tree
                   end
-                  
+
                   _  => begin
                       inTree
                   end
@@ -1575,7 +1575,7 @@
         end
 
          #= Traverse patterns and as-bindings as variable references in the hashtable =#
-        function usePatternAsBindings(inPat::DAE.Pattern, inTree::AvlSetString.Tree) ::Tuple{DAE.Pattern, AvlSetString.Tree} 
+        function usePatternAsBindings(inPat::DAE.Pattern, inTree::AvlSetString.Tree) ::Tuple{DAE.Pattern, AvlSetString.Tree}
               local outTree::AvlSetString.Tree
               local outPat::DAE.Pattern = inPat
 
@@ -1584,11 +1584,11 @@
                   DAE.PAT_AS(__)  => begin
                     AvlSetString.add(inTree, inPat.id)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(__)  => begin
                     AvlSetString.add(inTree, inPat.id)
                   end
-                  
+
                   _  => begin
                       inTree
                   end
@@ -1597,7 +1597,7 @@
           (outPat, outTree)
         end
 
-        function useCasesLocalCref(icases::List{<:DAE.MatchCase}, inTree::AvlSetString.Tree) ::AvlSetString.Tree 
+        function useCasesLocalCref(icases::List{<:DAE.MatchCase}, inTree::AvlSetString.Tree) ::AvlSetString.Tree
               local tree::AvlSetString.Tree
 
               tree = begin
@@ -1607,7 +1607,7 @@
                   ( nil(), _)  => begin
                     inTree
                   end
-                  
+
                   (DAE.CASE(patterns = pats) <| cases, _)  => begin
                       (_, tree) = traversePatternList(pats, usePatternAsBindings, inTree)
                       tree = useCasesLocalCref(cases, tree)
@@ -1618,7 +1618,7 @@
           tree
         end
 
-        function addCasesLocalCref(icases::List{<:DAE.MatchCase}, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable 
+        function addCasesLocalCref(icases::List{<:DAE.MatchCase}, iht::HashTableStringToPath.HashTable) ::HashTableStringToPath.HashTable
               local outHt::HashTableStringToPath.HashTable
 
               outHt = begin
@@ -1629,7 +1629,7 @@
                   ( nil(), ht)  => begin
                     ht
                   end
-                  
+
                   (DAE.CASE(patterns = pats) <| cases, ht)  => begin
                       (_, ht) = traversePatternList(pats, addPatternAsBindings, ht)
                       ht = addCasesLocalCref(cases, ht)
@@ -1641,7 +1641,7 @@
         end
 
          #= Simplifies a pattern, for example (_,_,_)=>_. For use with traversePattern =#
-        function simplifyPattern(inPat::DAE.Pattern, extra::A) ::Tuple{DAE.Pattern, A} 
+        function simplifyPattern(inPat::DAE.Pattern, extra::A) ::Tuple{DAE.Pattern, A}
               local outExtra::A = extra
               local outPat::DAE.Pattern
 
@@ -1660,7 +1660,7 @@
                           DAE.PAT_CALL_NAMED(name, namedPatterns)
                         end
                   end
-                  
+
                   DAE.PAT_CALL_TUPLE(patterns)  => begin
                     if allPatternsWild(patterns)
                           DAE.PAT_WILD()
@@ -1668,7 +1668,7 @@
                           inPat
                         end
                   end
-                  
+
                   DAE.PAT_META_TUPLE(patterns)  => begin
                     if allPatternsWild(patterns)
                           DAE.PAT_WILD()
@@ -1676,7 +1676,7 @@
                           inPat
                         end
                   end
-                  
+
                   _  => begin
                       inPat
                   end
@@ -1686,7 +1686,7 @@
         end
 
          #= Traverse patterns and as-bindings as variable references in the hashtable =#
-        function addPatternAsBindings(inPat::DAE.Pattern, inHt::HashTableStringToPath.HashTable) ::Tuple{DAE.Pattern, HashTableStringToPath.HashTable} 
+        function addPatternAsBindings(inPat::DAE.Pattern, inHt::HashTableStringToPath.HashTable) ::Tuple{DAE.Pattern, HashTableStringToPath.HashTable}
               local ht::HashTableStringToPath.HashTable = inHt
               local pat::DAE.Pattern = inPat
 
@@ -1696,11 +1696,11 @@
                   DAE.PAT_AS(id = id)  => begin
                     BaseHashTable.add((id, Absyn.IDENT("")), ht)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(id = id)  => begin
                     BaseHashTable.add((id, Absyn.IDENT("")), ht)
                   end
-                  
+
                   _  => begin
                       ht
                   end
@@ -1752,21 +1752,21 @@
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(id, pat2)  => begin
                       (pat2, extra) = traversePattern(pat2, func, extra)
                       pat = DAE.PAT_AS_FUNC_PTR(id, pat2)
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_CALL(name, index, pats, fieldVars, typeVars, knownSingleton)  => begin
                       (pats, extra) = traversePatternList(pats, func, extra)
                       pat = DAE.PAT_CALL(name, index, pats, fieldVars, typeVars, knownSingleton)
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_CALL_NAMED(name, namedpats)  => begin
                       pats = ListUtil.map(namedpats, Util.tuple31)
                       fields = ListUtil.map(namedpats, Util.tuple32)
@@ -1777,21 +1777,21 @@
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_CALL_TUPLE(pats)  => begin
                       (pats, extra) = traversePatternList(pats, func, extra)
                       pat = DAE.PAT_CALL_TUPLE(pats)
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_META_TUPLE(pats)  => begin
                       (pats, extra) = traversePatternList(pats, func, extra)
                       pat = DAE.PAT_META_TUPLE(pats)
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_CONS(pat1, pat2)  => begin
                       (pat1, extra) = traversePattern(pat1, func, extra)
                       (pat2, extra) = traversePattern(pat2, func, extra)
@@ -1799,24 +1799,24 @@
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   pat && DAE.PAT_CONSTANT(__)  => begin
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   DAE.PAT_SOME(pat1)  => begin
                       (pat1, extra) = traversePattern(pat1, func, extra)
                       pat = DAE.PAT_SOME(pat1)
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   pat && DAE.PAT_WILD(__)  => begin
                       (pat, extra) = func(pat, extra)
                     (pat, extra)
                   end
-                  
+
                   pat  => begin
                       str = "Patternm.traversePattern failed: " + patternStr(pat)
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -1828,7 +1828,7 @@
         end
 
          #= Filters out unused local declarations =#
-        function filterUnusedDecls(matchDecls::List{<:DAE.Element}, ht::HashTableStringToPath.HashTable, iacc::List{<:DAE.Element}, iunusedHt::HashTableStringToPath.HashTable) ::Tuple{List{DAE.Element}, HashTableStringToPath.HashTable} 
+        function filterUnusedDecls(matchDecls::List{<:DAE.Element}, ht::HashTableStringToPath.HashTable, iacc::List{<:DAE.Element}, iunusedHt::HashTableStringToPath.HashTable) ::Tuple{List{DAE.Element}, HashTableStringToPath.HashTable}
               local outUnusedHt::HashTableStringToPath.HashTable
               local outDecls::List{DAE.Element}
 
@@ -1843,7 +1843,7 @@
                   ( nil(), _, acc, unusedHt)  => begin
                     (listReverse(acc), unusedHt)
                   end
-                  
+
                   (DAE.VAR(componentRef = DAE.CREF_IDENT(ident = name), source = DAE.SOURCE(info = info)) <| rest, _, acc, unusedHt)  => begin
                       @match false = BaseHashTable.hasKey(name, ht)
                       unusedHt = BaseHashTable.add((name, Absyn.IDENT("")), unusedHt)
@@ -1851,7 +1851,7 @@
                       (acc, unusedHt) = filterUnusedDecls(rest, ht, acc, unusedHt)
                     (acc, unusedHt)
                   end
-                  
+
                   (el <| rest, _, acc, unusedHt)  => begin
                       (acc, unusedHt) = filterUnusedDecls(rest, ht, _cons(el, acc), unusedHt)
                     (acc, unusedHt)
@@ -1865,7 +1865,7 @@
           match: Removes empty cases that can't be matched by subsequent cases
           match: Removes cases that can't be reached because a previous case has a dominating pattern
            =#
-        function caseDeadCodeElimination(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}, prevPatterns::List{<:List{<:DAE.Pattern}}, iacc::List{<:DAE.MatchCase}, iter::Bool #= If we remove some code, it may cascade. We should we loop more. =#) ::List{DAE.MatchCase} 
+        function caseDeadCodeElimination(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}, prevPatterns::List{<:List{<:DAE.Pattern}}, iacc::List{<:DAE.MatchCase}, iter::Bool #= If we remove some code, it may cascade. We should we loop more. =#) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -1878,23 +1878,23 @@
                   (_,  nil(), _, acc, false)  => begin
                     listReverse(acc)
                   end
-                  
+
                   (_,  nil(), _, acc, true)  => begin
                     caseDeadCodeElimination(matchType, listReverse(acc), nil, nil, false)
                   end
-                  
+
                   (_, DAE.CASE(body =  nil(), result = NONE(), info = info) <|  nil(), _, acc, _)  => begin
                       Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_DEAD_CODE, list("Last pattern is empty"), info)
                     caseDeadCodeElimination(matchType, listReverse(acc), nil, nil, false)
                   end
-                  
+
                   (Absyn.MATCHCONTINUE(__), DAE.CASE(patterns = pats, body =  nil(), result = NONE(), info = info) <| rest, _, acc, _)  => begin
                       @match true = Flags.isSet(Flags.PATTERNM_DCE)
                       Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_DEAD_CODE, list("Empty matchcontinue case"), info)
                       acc = caseDeadCodeElimination(matchType, rest, _cons(pats, prevPatterns), acc, true)
                     acc
                   end
-                  
+
                   (_, case_ && DAE.CASE(patterns = pats) <| rest, _, acc, _)  => begin
                     caseDeadCodeElimination(matchType, rest, _cons(pats, prevPatterns), _cons(case_, acc), iter)
                   end
@@ -1947,7 +1947,7 @@
               case (1,_) then ();  (10)
             end matchcontinue;
            =#
-        function optimizeContinueJumps(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase} 
+        function optimizeContinueJumps(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -1955,7 +1955,7 @@
                   (Absyn.MATCH(__), _)  => begin
                     cases
                   end
-                  
+
                   _  => begin
                       optimizeContinueJumps2(cases)
                   end
@@ -1964,7 +1964,7 @@
           outCases
         end
 
-        function optimizeContinueJumps2(icases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase} 
+        function optimizeContinueJumps2(icases::List{<:DAE.MatchCase}) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -1974,7 +1974,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   case_ <| cases  => begin
                       case_ = optimizeContinueJump(case_, cases, 0)
                       cases = optimizeContinueJumps2(cases)
@@ -1985,7 +1985,7 @@
           outCases
         end
 
-        function optimizeContinueJump(case_::DAE.MatchCase, icases::List{<:DAE.MatchCase}, jump::ModelicaInteger) ::DAE.MatchCase 
+        function optimizeContinueJump(case_::DAE.MatchCase, icases::List{<:DAE.MatchCase}, jump::ModelicaInteger) ::DAE.MatchCase
               local outCase::DAE.MatchCase
 
               outCase = begin
@@ -1997,12 +1997,12 @@
                   (case1,  nil(), _)  => begin
                     updateMatchCaseJump(case1, jump)
                   end
-                  
+
                   (case1 && DAE.CASE(patterns = ps1), DAE.CASE(patterns = ps2) <| cases, _)  => begin
                       @match true = patternListsDoNotOverlap(ps1, ps2)
                     optimizeContinueJump(case1, cases, jump + 1)
                   end
-                  
+
                   (case1, _, _)  => begin
                     updateMatchCaseJump(case1, jump)
                   end
@@ -2012,7 +2012,7 @@
         end
 
          #= Updates the jump field of a DAE.MatchCase =#
-        function updateMatchCaseJump(case_::DAE.MatchCase, jump::ModelicaInteger) ::DAE.MatchCase 
+        function updateMatchCaseJump(case_::DAE.MatchCase, jump::ModelicaInteger) ::DAE.MatchCase
               local outCase::DAE.MatchCase
 
               outCase = begin
@@ -2027,7 +2027,7 @@
                   (_, 0)  => begin
                     case_
                   end
-                  
+
                   (DAE.CASE(patterns, guardPattern, localDecls, body, result, resultInfo, _, info), _)  => begin
                     DAE.CASE(patterns, guardPattern, localDecls, body, result, resultInfo, jump, info)
                   end
@@ -2045,7 +2045,7 @@
               case 3 then ();
             end matchcontinue;
            =#
-        function optimizeContinueToMatch(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}, info::SourceInfo) ::Absyn.MatchType 
+        function optimizeContinueToMatch(matchType::Absyn.MatchType, cases::List{<:DAE.MatchCase}, info::SourceInfo) ::Absyn.MatchType
               local outMatchType::Absyn.MatchType
 
               outMatchType = begin
@@ -2053,7 +2053,7 @@
                   (Absyn.MATCH(__), _, _)  => begin
                     Absyn.MATCH()
                   end
-                  
+
                   _  => begin
                       optimizeContinueToMatch2(cases, nil, info)
                   end
@@ -2071,7 +2071,7 @@
               case 3 then ();
             end matchcontinue;
            =#
-        function optimizeContinueToMatch2(icases::List{<:DAE.MatchCase}, prevPatterns::List{<:List{<:DAE.Pattern}} #= All cases check its patterns against all previous patterns. If they overlap, we can't optimize away the continue =#, info::SourceInfo) ::Absyn.MatchType 
+        function optimizeContinueToMatch2(icases::List{<:DAE.MatchCase}, prevPatterns::List{<:List{<:DAE.Pattern}} #= All cases check its patterns against all previous patterns. If they overlap, we can't optimize away the continue =#, info::SourceInfo) ::Absyn.MatchType
               local outMatchType::Absyn.MatchType
 
               outMatchType = begin
@@ -2082,12 +2082,12 @@
                       Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.MATCHCONTINUE_TO_MATCH_OPTIMIZATION, nil, info)
                     Absyn.MATCH()
                   end
-                  
+
                   (DAE.CASE(patterns = patterns) <| cases, _, _)  => begin
                       assertAllPatternListsDoNotOverlap(prevPatterns, patterns)
                     optimizeContinueToMatch2(cases, _cons(patterns, prevPatterns), info)
                   end
-                  
+
                   _  => begin
                       Absyn.MATCHCONTINUE()
                   end
@@ -2105,7 +2105,7 @@
               case 3 then ();
             end matchcontinue;
            =#
-        function assertAllPatternListsDoNotOverlap(ipss1::List{<:List{<:DAE.Pattern}}, ps2::List{<:DAE.Pattern})  
+        function assertAllPatternListsDoNotOverlap(ipss1::List{<:List{<:DAE.Pattern}}, ps2::List{<:DAE.Pattern})
               _ = begin
                   local ps1::List{DAE.Pattern}
                   local pss1::List{List{DAE.Pattern}}
@@ -2113,7 +2113,7 @@
                   ( nil(), _)  => begin
                     ()
                   end
-                  
+
                   (ps1 <| pss1, _)  => begin
                       @match true = patternListsDoNotOverlap(ps1, ps2)
                       assertAllPatternListsDoNotOverlap(pss1, ps2)
@@ -2124,7 +2124,7 @@
         end
 
          #= Verifies that pats1 does not shadow pats2 =#
-        function patternListsDoNotOverlap(ips1::List{<:DAE.Pattern}, ips2::List{<:DAE.Pattern}) ::Bool 
+        function patternListsDoNotOverlap(ips1::List{<:DAE.Pattern}, ips2::List{<:DAE.Pattern}) ::Bool
               local b::Bool
 
               b = begin
@@ -2137,7 +2137,7 @@
                   ( nil(),  nil())  => begin
                     false
                   end
-                  
+
                   (p1 <| ps1, p2 <| ps2)  => begin
                       res = patternsDoNotOverlap(p1, p2)
                       res = if ! res
@@ -2153,7 +2153,7 @@
         end
 
          #= Verifies that p1 do not shadow p2 =#
-        function patternsDoNotOverlap(ip1::DAE.Pattern, ip2::DAE.Pattern) ::Bool 
+        function patternsDoNotOverlap(ip1::DAE.Pattern, ip2::DAE.Pattern) ::Bool
               local b::Bool
 
               b = begin
@@ -2176,39 +2176,39 @@
                   (DAE.PAT_WILD(__), _)  => begin
                     false
                   end
-                  
+
                   (_, DAE.PAT_WILD(__))  => begin
                     false
                   end
-                  
+
                   (DAE.PAT_AS_FUNC_PTR(__), _)  => begin
                     false
                   end
-                  
+
                   (DAE.PAT_AS(pat = p1), p2)  => begin
                     patternsDoNotOverlap(p1, p2)
                   end
-                  
+
                   (p1, DAE.PAT_AS(pat = p2))  => begin
                     patternsDoNotOverlap(p1, p2)
                   end
-                  
+
                   (DAE.PAT_CONS(head1, tail1), DAE.PAT_CONS(head2, tail2))  => begin
                     patternsDoNotOverlap(head1, head2) || patternsDoNotOverlap(tail1, tail2)
                   end
-                  
+
                   (DAE.PAT_SOME(p1), DAE.PAT_SOME(p2))  => begin
                     patternsDoNotOverlap(p1, p2)
                   end
-                  
+
                   (DAE.PAT_META_TUPLE(ps1), DAE.PAT_META_TUPLE(ps2))  => begin
                     patternListsDoNotOverlap(ps1, ps2)
                   end
-                  
+
                   (DAE.PAT_CALL_TUPLE(ps1), DAE.PAT_CALL_TUPLE(ps2))  => begin
                     patternListsDoNotOverlap(ps1, ps2)
                   end
-                  
+
                   (DAE.PAT_CALL(name1, ix1,  nil(), _, _), DAE.PAT_CALL(name2, ix2,  nil(), _, _))  => begin
                       res = ix1 == ix2
                       res = if res
@@ -2218,7 +2218,7 @@
                           end
                     ! res
                   end
-                  
+
                   (DAE.PAT_CALL(name1, ix1, ps1, _, _), DAE.PAT_CALL(name2, ix2, ps2, _, _))  => begin
                       res = ix1 == ix2
                       res = if res
@@ -2233,19 +2233,19 @@
                           end
                     res
                   end
-                  
+
                   (DAE.PAT_CONSTANT(exp = e1), DAE.PAT_CONSTANT(exp = e2))  => begin
                     ! Expression.expEqual(e1, e2)
                   end
-                  
+
                   (DAE.PAT_CONSTANT(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.PAT_CONSTANT(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2258,7 +2258,7 @@
           b
         end
 
-        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type} 
+        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type}
               local resType::DAE.Type
               local elabCases::List{DAE.MatchCase}
               local outCache::FCore.Cache
@@ -2273,7 +2273,7 @@
           (outCache, elabCases, resType)
         end
 
-        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}} 
+        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}}
               local resTypes::List{DAE.Type}
               local resExps::List{DAE.Exp}
               local elabCases::List{DAE.MatchCase}
@@ -2293,7 +2293,7 @@
                   (cache, _,  nil(), accExps, accTypes)  => begin
                     (cache, listReverse(inAccCases), listReverse(accExps), listReverse(accTypes))
                   end
-                  
+
                   (cache, env, case_ <| rest, accExps, accTypes)  => begin
                       (cache, elabCase, optExp, optType) = elabMatchCase(cache, env, case_, tys, inputAliases, matchExpLocalTree, impl, performVectorization, pre)
                       (cache, elabCases, accExps, accTypes) = elabMatchCases2(cache, env, rest, tys, inputAliases, matchExpLocalTree, impl, performVectorization, pre, _cons(elabCase, inAccCases), ListUtil.consOption(optExp, accExps), ListUtil.consOption(optType, accTypes))
@@ -2304,7 +2304,7 @@
           (outCache, elabCases, resExps, resTypes)
         end
 
-        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}} 
+        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resExp::Option{DAE.Exp}
               local elabCase::DAE.MatchCase
@@ -2367,7 +2367,7 @@
                       elabCase = DAE.CASE(elabPatterns, dPatternGuard, caseDecls, body, elabResult, resultInfo, 0, info)
                     (cache, elabCase, elabResult, resType)
                   end
-                  
+
                   (cache, env, Absyn.ELSE(localDecls = decls, classPart = cp, result = result, resultInfo = resultInfo, info = info))  => begin
                       len = listLength(tys)
                       patterns = ListUtil.fill(Absyn.CREF(Absyn.WILD()), listLength(tys))
@@ -2396,7 +2396,7 @@
           (outCache, elabCase, resExp, resType)
         end
 
-        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}} 
+        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resultInfo::SourceInfo
               local resExp::Option{DAE.Exp}
@@ -2415,7 +2415,7 @@
                   (cache, _, body, Absyn.CALL(function_ = Absyn.CREF_IDENT("fail",  nil()), functionArgs = Absyn.FUNCTIONARGS( nil(),  nil())))  => begin
                     (cache, body, NONE(), inInfo, NONE())
                   end
-                  
+
                   (cache, env, body, _)  => begin
                       (cache, elabExp, prop) = Static.elabExp(cache, env, exp, impl, performVectorization, pre, inInfo)
                       ty = Types.getPropType(prop)
@@ -2428,7 +2428,7 @@
           (outCache, outBody, resExp, resultInfo, resType)
         end
 
-        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}} 
+        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}}
               local outPatternGuard::Option{DAE.Exp}
               local outCache::FCore.Cache
 
@@ -2444,13 +2444,13 @@
                   (cache, _, NONE(), _, _, _, _)  => begin
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, SOME(exp), _, _, _, info)  => begin
                       (cache, elabExp, prop) = Static.elabExp(cache, env, exp, impl, performVectorization, pre, info)
                       (elabExp, _) = Types.matchType(elabExp, Types.getPropType(prop), DAE.T_BOOL_DEFAULT, true)
                     (cache, SOME(elabExp))
                   end
-                  
+
                   (cache, env, SOME(exp), _, _, _, info)  => begin
                       (_, _, prop) = Static.elabExp(cache, env, exp, impl, performVectorization, pre, info)
                       str = Types.unparseType(Types.getPropType(prop))
@@ -2473,7 +2473,7 @@
           This phase needs to be performed if we want to be able to discover places to
           optimize for tail recursion.
            =#
-        function elabResultExp2(skipPhase::Bool, body::List{<:DAE.Statement}, elabExp::DAE.Exp, info::SourceInfo) ::Tuple{List{DAE.Statement}, DAE.Exp, SourceInfo} 
+        function elabResultExp2(skipPhase::Bool, body::List{<:DAE.Statement}, elabExp::DAE.Exp, info::SourceInfo) ::Tuple{List{DAE.Statement}, DAE.Exp, SourceInfo}
               local outInfo::SourceInfo
               local outExp::DAE.Exp
               local outBody::List{DAE.Statement}
@@ -2490,21 +2490,21 @@
                   (true, b, e, i)  => begin
                     (b, e, i)
                   end
-                  
+
                   (_, b, elabCr2 && DAE.CREF(__), _)  => begin
                       @match (DAE.STMT_ASSIGN(exp1 = elabCr1, exp = e, source = DAE.SOURCE(info = i)), b) = ListUtil.splitLast(b)
                       @match true = Expression.expEqual(elabCr1, elabCr2)
                       (b, e, i) = elabResultExp2(false, b, e, i)
                     (b, e, i)
                   end
-                  
+
                   (_, b, DAE.TUPLE(elabCrs2), _)  => begin
                       @match (DAE.STMT_TUPLE_ASSIGN(expExpLst = elabCrs1, exp = e, source = DAE.SOURCE(info = i)), b) = ListUtil.splitLast(b)
                       ListUtil.threadMapAllValue(elabCrs1, elabCrs2, Expression.expEqual, true)
                       (b, e, i) = elabResultExp2(false, b, e, i)
                     (b, e, i)
                   end
-                  
+
                   _  => begin
                       (body, elabExp, info)
                   end
@@ -2513,7 +2513,7 @@
           (outBody, outExp, outInfo)
         end
 
-        function fixCaseReturnTypes(icases::List{<:DAE.MatchCase}, iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, info::SourceInfo) ::Tuple{List{DAE.MatchCase}, DAE.Type} 
+        function fixCaseReturnTypes(icases::List{<:DAE.MatchCase}, iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, info::SourceInfo) ::Tuple{List{DAE.MatchCase}, DAE.Type}
               local ty::DAE.Type
               local outCases::List{DAE.MatchCase}
 
@@ -2527,7 +2527,7 @@
                   (cases,  nil(),  nil(), _)  => begin
                     (cases, DAE.T_NORETCALL_DEFAULT)
                   end
-                  
+
                   (cases, exps, tys, _)  => begin
                       ty = ListUtil.reduce(ListUtil.map(tys, Types.boxIfUnboxedType), Types.superType)
                       ty = Types.superType(ty, ty)
@@ -2538,7 +2538,7 @@
                       cases = fixCaseReturnTypes2(cases, exps, info)
                     (cases, ty)
                   end
-                  
+
                   (cases, exps, tys, _)  => begin
                       ty = ListUtil.reduce(tys, Types.superType)
                       ty = Types.superType(ty, ty)
@@ -2549,7 +2549,7 @@
                       cases = fixCaseReturnTypes2(cases, exps, info)
                     (cases, ty)
                   end
-                  
+
                   _  => begin
                         tys = ListUtil.unionOnTrue(itys, nil, Types.equivtypes)
                         str = stringAppendList(ListUtil.map1r(ListUtil.map(tys, Types.unparseType), stringAppend, "\\n  "))
@@ -2563,7 +2563,7 @@
           (outCases, ty)
         end
 
-        function fixCaseReturnTypes2(inCases::List{<:DAE.MatchCase}, inExps::List{<:DAE.Exp}, inInfo::SourceInfo) ::List{DAE.MatchCase} 
+        function fixCaseReturnTypes2(inCases::List{<:DAE.MatchCase}, inExps::List{<:DAE.Exp}, inInfo::SourceInfo) ::List{DAE.MatchCase}
               local outCases::List{DAE.MatchCase}
 
               outCases = begin
@@ -2583,17 +2583,17 @@
                   ( nil(),  nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.CASE(patterns, patternGuard, decls, body, SOME(_), resultInfo, jump, info2) <| cases, exp <| exps, info)  => begin
                       cases = fixCaseReturnTypes2(cases, exps, info)
                     _cons(DAE.CASE(patterns, patternGuard, decls, body, SOME(exp), resultInfo, jump, info2), cases)
                   end
-                  
+
                   (case_ && DAE.CASE(result = NONE()) <| cases, exps, info)  => begin
                       cases = fixCaseReturnTypes2(cases, exps, info)
                     _cons(case_, cases)
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Patternm.fixCaseReturnTypes2 failed"), inInfo)
                       fail()
@@ -2637,7 +2637,7 @@
                       (outExp, outT) = func(outExp, outT)
                     outExp
                   end
-                  
+
                   _  => begin
                         (outExp, outT) = func(inExp, outT)
                       outExp
@@ -2661,7 +2661,7 @@
                       end
                     outPattern
                   end
-                  
+
                   _  => begin
                       inPattern
                   end
@@ -2670,7 +2670,7 @@
           (outPattern, extra)
         end
 
-        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::A) ::Tuple{List{DAE.MatchCase}, A} 
+        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::A) ::Tuple{List{DAE.MatchCase}, A}
               local oa::A
               local outCases::List{DAE.MatchCase}
 
@@ -2693,7 +2693,7 @@
                   ( nil(), _, a)  => begin
                     (nil, a)
                   end
-                  
+
                   (DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) <| cases, _, a)  => begin
                       (body1, (_, a)) = DAEUtil.traverseDAEEquationsStmts(body, Expression.traverseSubexpressionsHelper, (func, a))
                       (patternGuard1, a) = Expression.traverseExpOpt(patternGuard, func, a)
@@ -2744,7 +2744,7 @@
           (cases, a)
         end
 
-        function filterEmptyPattern(tpl::Tuple{<:DAE.Pattern, String, DAE.Type}) ::Bool 
+        function filterEmptyPattern(tpl::Tuple{<:DAE.Pattern, String, DAE.Type}) ::Bool
               local outB::Bool
 
               outB = begin
@@ -2752,7 +2752,7 @@
                   (DAE.PAT_WILD(__), _, _)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -2762,7 +2762,7 @@
         end
 
          #= Adds local declarations to the environment and returns the DAE =#
-        function addLocalDecls(inCache::FCore.Cache, inEnv::FCore.Graph, els::List{<:Absyn.ElementItem}, scopeName::String, impl::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{FCore.Graph, DAE.DAElist, AvlSetString.Tree}}} 
+        function addLocalDecls(inCache::FCore.Cache, inEnv::FCore.Graph, els::List{<:Absyn.ElementItem}, scopeName::String, impl::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{FCore.Graph, DAE.DAElist, AvlSetString.Tree}}}
               local res::Option{Tuple{FCore.Graph, DAE.DAElist, AvlSetString.Tree}}
               local outCache::FCore.Cache
 
@@ -2786,7 +2786,7 @@
                       declsTree = AvlSetString.new()
                     (cache, SOME((env, DAE.emptyDae, declsTree)))
                   end
-                  
+
                   (cache, env, ld, _, _, _)  => begin
                       env2 = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), scopeName, NONE())
                       ld2 = AbsynToSCode.translateEitemlist(ld, SCode.PROTECTED())
@@ -2810,7 +2810,7 @@
                           end
                     (cache, res)
                   end
-                  
+
                   (cache, _, ld, _, _, _)  => begin
                       ld2 = AbsynToSCode.translateEitemlist(ld, SCode.PROTECTED())
                       @match (@match _cons(_, _) = ld2) = ListUtil.filterOnTrue(ld2, SCodeUtil.isNotComponent)
@@ -2818,7 +2818,7 @@
                       Error.addSourceMessage(Error.META_INVALID_LOCAL_ELEMENT, list(str), info)
                     (cache, NONE())
                   end
-                  
+
                   (cache, _, ld, _, _, _)  => begin
                       ld2 = AbsynToSCode.translateEitemlist(ld, SCode.PROTECTED())
                       ld3 = ListUtil.select1(ld2, SCodeUtil.isComponentWithDirection, Absyn.INPUT())
@@ -2828,7 +2828,7 @@
                       Error.addSourceMessage(Error.META_INVALID_LOCAL_ELEMENT, list(str), info)
                     (cache, NONE())
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Patternm.addLocalDecls failed"), info)
                       (inCache, NONE())
@@ -2850,7 +2850,7 @@
           (outCache, res)
         end
 
-        function checkLocalShadowing(elt::SCode.Element, env::FCore.Graph, inTpl::Tuple{<:FCore.Cache, Bool}) ::Tuple{FCore.Cache, Bool} 
+        function checkLocalShadowing(elt::SCode.Element, env::FCore.Graph, inTpl::Tuple{<:FCore.Cache, Bool}) ::Tuple{FCore.Cache, Bool}
               local outTpl::Tuple{FCore.Cache, Bool} = inTpl
 
               local name::String
@@ -2868,7 +2868,7 @@
                     SCode.CONST(__)  => begin
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -2886,7 +2886,7 @@
           outTpl
         end
 
-        function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp} 
+        function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp}
               local exps::List{DAE.Exp}
 
               exps = begin
@@ -2896,12 +2896,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.CASE(result = SOME(exp)) <| cases  => begin
                       exps = resultExps(cases)
                     _cons(exp, exps)
                   end
-                  
+
                   _ <| cases  => begin
                     resultExps(cases)
                   end
@@ -2911,7 +2911,7 @@
         end
 
          #= Returns true if all patterns in the list are wildcards =#
-        function allPatternsWild(ipats::List{<:DAE.Pattern}) ::Bool 
+        function allPatternsWild(ipats::List{<:DAE.Pattern}) ::Bool
               local b::Bool
 
               b = begin
@@ -2920,11 +2920,11 @@
                    nil()  => begin
                     true
                   end
-                  
+
                   DAE.PAT_WILD(__) <| pats  => begin
                     allPatternsWild(pats)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2934,7 +2934,7 @@
         end
 
          #= Returns true if all patterns in the list are wildcards or as-bindings =#
-        function allPatternsAlwaysMatch(ipats::List{<:DAE.Pattern}) ::Bool 
+        function allPatternsAlwaysMatch(ipats::List{<:DAE.Pattern}) ::Bool
               local b::Bool
 
               b = begin
@@ -2944,19 +2944,19 @@
                    nil()  => begin
                     true
                   end
-                  
+
                   DAE.PAT_WILD(__) <| pats  => begin
                     allPatternsAlwaysMatch(pats)
                   end
-                  
+
                   DAE.PAT_AS(pat = pat) <| pats  => begin
                     allPatternsAlwaysMatch(_cons(pat, pats))
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(pat = pat) <| pats  => begin
                     allPatternsAlwaysMatch(_cons(pat, pats))
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2966,7 +2966,7 @@
         end
 
          #= Accessor function for DAE.Case =#
-        function getCasePatterns(case_::DAE.MatchCase) ::List{DAE.Pattern} 
+        function getCasePatterns(case_::DAE.MatchCase) ::List{DAE.Pattern}
               local pats::List{DAE.Pattern}
 
               @match DAE.CASE(patterns = pats) = case_
@@ -2974,7 +2974,7 @@
         end
 
          #= Sets the patterns field in a DAE.Case =#
-        function setCasePatterns(case1::DAE.MatchCase, pats::List{<:DAE.Pattern}) ::DAE.MatchCase 
+        function setCasePatterns(case1::DAE.MatchCase, pats::List{<:DAE.Pattern}) ::DAE.MatchCase
               local case2::DAE.MatchCase
 
               case2 = begin
@@ -2995,14 +2995,14 @@
         end
 
          #= Get the constructor index of a uniontype record based on its index in the uniontype =#
-        function getValueCtor(ix::ModelicaInteger) ::ModelicaInteger 
+        function getValueCtor(ix::ModelicaInteger) ::ModelicaInteger
               local ctor::ModelicaInteger
 
               ctor = ix + 3
           ctor
         end
 
-        function sortPatternsByComplexity(inPatterns::List{<:DAE.Pattern}) ::List{Tuple{DAE.Pattern, ModelicaInteger}} 
+        function sortPatternsByComplexity(inPatterns::List{<:DAE.Pattern}) ::List{Tuple{DAE.Pattern, ModelicaInteger}}
               local outPatterns::List{Tuple{DAE.Pattern, ModelicaInteger}}
 
               outPatterns = ListUtil.toListWithPositions(inPatterns)
@@ -3010,7 +3010,7 @@
           outPatterns
         end
 
-        function sortPatternsByComplexityWork(tpl1::Tuple{<:DAE.Pattern, ModelicaInteger}, tpl2::Tuple{<:DAE.Pattern, ModelicaInteger}) ::Bool 
+        function sortPatternsByComplexityWork(tpl1::Tuple{<:DAE.Pattern, ModelicaInteger}, tpl2::Tuple{<:DAE.Pattern, ModelicaInteger}) ::Bool
               local greater::Bool
 
               local pat1::DAE.Pattern
@@ -3046,7 +3046,7 @@
           greater
         end
 
-        function patternComplexity(inPat::DAE.Pattern, inComplexity::ModelicaInteger) ::Tuple{DAE.Pattern, ModelicaInteger} 
+        function patternComplexity(inPat::DAE.Pattern, inComplexity::ModelicaInteger) ::Tuple{DAE.Pattern, ModelicaInteger}
               local i::ModelicaInteger = inComplexity
               local outPat::DAE.Pattern = inPat
 
@@ -3058,19 +3058,19 @@
                       (_, i) = Expression.traverseExpBottomUp(exp, constantComplexity, i)
                     i
                   end
-                  
+
                   DAE.PAT_CONS(__)  => begin
                     i + 5
                   end
-                  
+
                   DAE.PAT_CALL(knownSingleton = false)  => begin
                     i + 5
                   end
-                  
+
                   DAE.PAT_SOME(__)  => begin
                     i + 5
                   end
-                  
+
                   _  => begin
                       i
                   end
@@ -3079,7 +3079,7 @@
           (outPat, i)
         end
 
-        function constantComplexity(inExp::DAE.Exp, ii::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function constantComplexity(inExp::DAE.Exp, ii::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local oi::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -3091,19 +3091,19 @@
                   (e && DAE.SCONST(str), i)  => begin
                     (e, i + 5 + stringLength(str))
                   end
-                  
+
                   (e && DAE.ICONST(_), i)  => begin
                     (e, i + 1)
                   end
-                  
+
                   (e && DAE.BCONST(_), i)  => begin
                     (e, i + 1)
                   end
-                  
+
                   (e && DAE.RCONST(_), i)  => begin
                     (e, i + 2)
                   end
-                  
+
                   (e, i)  => begin
                     (e, i + 5)
                   end
@@ -3114,7 +3114,7 @@
           (outExp, oi)
         end
 
-        function addEnvKnownAsBindings(inPat::DAE.Pattern, inEnv::FCore.Graph) ::Tuple{DAE.Pattern, FCore.Graph} 
+        function addEnvKnownAsBindings(inPat::DAE.Pattern, inEnv::FCore.Graph) ::Tuple{DAE.Pattern, FCore.Graph}
               local env::FCore.Graph = inEnv
               local pat::DAE.Pattern = inPat
 
@@ -3123,7 +3123,7 @@
                   DAE.PAT_AS(__)  => begin
                     addEnvKnownAsBindings2(pat, env, findFirstNonAsPattern(pat.pat))
                   end
-                  
+
                   _  => begin
                       env
                   end
@@ -3132,7 +3132,7 @@
           (pat, env)
         end
 
-        function addEnvKnownAsBindings2(inPat::DAE.Pattern, inEnv::FCore.Graph, firstPattern::DAE.Pattern) ::FCore.Graph 
+        function addEnvKnownAsBindings2(inPat::DAE.Pattern, inEnv::FCore.Graph, firstPattern::DAE.Pattern) ::FCore.Graph
               local env::FCore.Graph = inEnv
 
               env = begin
@@ -3154,7 +3154,7 @@
                       env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(name, NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_DAE(), FGraph.empty())
                     env
                   end
-                  
+
                   _  => begin
                       env
                   end
@@ -3163,7 +3163,7 @@
           env
         end
 
-        function findFirstNonAsPattern(inPattern::DAE.Pattern) ::DAE.Pattern 
+        function findFirstNonAsPattern(inPattern::DAE.Pattern) ::DAE.Pattern
               local outPattern::DAE.Pattern
 
               outPattern = begin
@@ -3171,7 +3171,7 @@
                   DAE.PAT_AS(pat = outPattern)  => begin
                     findFirstNonAsPattern(outPattern)
                   end
-                  
+
                   _  => begin
                       inPattern
                   end
@@ -3180,7 +3180,7 @@
           outPattern
         end
 
-        function getInputAsBinding(inExp::Absyn.Exp) ::Tuple{Absyn.Exp, List{String}, List{String}} 
+        function getInputAsBinding(inExp::Absyn.Exp) ::Tuple{Absyn.Exp, List{String}, List{String}}
               local aliasesAndCrefs::List{String}
               local aliases::List{String}
               local exp::Absyn.Exp
@@ -3191,12 +3191,12 @@
                   Absyn.CREF(componentRef = Absyn.CREF_IDENT(id,  nil()))  => begin
                     (inExp, nil, list(id))
                   end
-                  
+
                   Absyn.AS(id, exp)  => begin
                       (exp, aliases, aliasesAndCrefs) = getInputAsBinding(exp)
                     (exp, _cons(id, aliases), _cons(id, aliasesAndCrefs))
                   end
-                  
+
                   _  => begin
                       (inExp, nil, nil)
                   end
@@ -3205,7 +3205,7 @@
           (exp, aliases, aliasesAndCrefs)
         end
 
-        function addPatternAliasesList(inPatterns::List{<:DAE.Pattern}, inAliases::List{<:List{<:String}}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{DAE.Pattern}, FCore.Cache} 
+        function addPatternAliasesList(inPatterns::List{<:DAE.Pattern}, inAliases::List{<:List{<:String}}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{DAE.Pattern}, FCore.Cache}
               local outCache::FCore.Cache = inCache
               local outPatterns::List{DAE.Pattern} = nil
 
@@ -3221,7 +3221,7 @@
           (outPatterns, outCache)
         end
 
-        function addPatternAliases(inPattern::DAE.Pattern, inAliases::List{<:String}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{DAE.Pattern, FCore.Cache} 
+        function addPatternAliases(inPattern::DAE.Pattern, inAliases::List{<:String}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{DAE.Pattern, FCore.Cache}
               local outCache::FCore.Cache = inCache
               local pat::DAE.Pattern = inPattern
 
@@ -3234,7 +3234,7 @@
           (pat, outCache)
         end
 
-        function addAliasesToEnv(inEnv::FCore.Graph, inTypes::List{<:DAE.Type}, inAliases::List{<:List{<:String}}, info::SourceInfo) ::FCore.Graph 
+        function addAliasesToEnv(inEnv::FCore.Graph, inTypes::List{<:DAE.Type}, inAliases::List{<:List{<:String}}, info::SourceInfo) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -3249,11 +3249,11 @@
                   (_,  nil(),  nil(), _)  => begin
                     inEnv
                   end
-                  
+
                   (_, _ <| tys,  nil() <| aliases, _)  => begin
                     addAliasesToEnv(inEnv, tys, aliases, info)
                   end
-                  
+
                   (env, ty <| _, id <| rest <| aliases, _)  => begin
                       attr = DAE.dummyAttrInput
                       env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(Absyn.IDENT("dummy"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), info), DAE.NOMOD(), FCore.VAR_DAE(), FGraph.empty())
@@ -3264,7 +3264,7 @@
           outEnv
         end
 
-        function statementListFindDeadStoreRemoveEmptyStatements(inBody::List{<:DAE.Statement}, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{List{DAE.Statement}, AvlSetString.Tree} 
+        function statementListFindDeadStoreRemoveEmptyStatements(inBody::List{<:DAE.Statement}, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{List{DAE.Statement}, AvlSetString.Tree}
               local useTree::AvlSetString.Tree
               local body::List{DAE.Statement}
 
@@ -3274,7 +3274,7 @@
           (body, useTree)
         end
 
-        function statementFindDeadStore(inStatement::DAE.Statement, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{DAE.Statement, AvlSetString.Tree} 
+        function statementFindDeadStore(inStatement::DAE.Statement, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{DAE.Statement, AvlSetString.Tree}
               local useTree::AvlSetString.Tree
               local outStatement::DAE.Statement
 
@@ -3302,21 +3302,21 @@
                       outStatement = Algorithm.makeAssignmentNoTypeCheck(ty, lhs, exp, source)
                     (outStatement, useTree)
                   end
-                  
+
                   DAE.STMT_TUPLE_ASSIGN(type_ = ty, expExpLst = exps, exp = exp, source = source && DAE.SOURCE(info = info))  => begin
                       (_, useTree) = Expression.traverseExpBottomUp(exp, useLocalCref, inUseTree)
                       @match (DAE.TUPLE(exps), _) = Expression.traverseExpBottomUp(DAE.TUPLE(exps), checkDefUse, (localsTree, useTree, info))
                       outStatement = Algorithm.makeTupleAssignmentNoTypeCheck(ty, exps, exp, source)
                     (outStatement, useTree)
                   end
-                  
+
                   DAE.STMT_ASSIGN_ARR(type_ = ty, lhs = lhs, exp = exp, source = source && DAE.SOURCE(info = info))  => begin
                       (_, useTree) = Expression.traverseExpBottomUp(exp, useLocalCref, inUseTree)
                       lhs = Expression.traverseExpBottomUp(lhs, checkDefUse, (localsTree, useTree, info))
                       outStatement = Algorithm.makeArrayAssignmentNoTypeCheck(ty, lhs, exp, source)
                     (outStatement, useTree)
                   end
-                  
+
                   DAE.STMT_IF(exp = exp, statementLst = body, else_ = else_, source = source)  => begin
                       (else_, elseTree) = elseFindDeadStore(else_, localsTree, inUseTree)
                       (body, useTree) = statementListFindDeadStoreRemoveEmptyStatements(body, localsTree, inUseTree)
@@ -3324,7 +3324,7 @@
                       useTree = AvlSetString.join(useTree, elseTree)
                     (DAE.STMT_IF(exp, body, else_, source), useTree)
                   end
-                  
+
                   DAE.STMT_FOR(ty, b, id, index, exp, body, source)  => begin
                       ErrorExt.setCheckpoint(getInstanceName())
                       (_, useTree) = ListUtil.map1Fold(body, statementFindDeadStore, localsTree, inUseTree)
@@ -3334,7 +3334,7 @@
                       useTree = AvlSetString.join(useTree, inUseTree)
                     (DAE.STMT_FOR(ty, b, id, index, exp, body, source), useTree)
                   end
-                  
+
                   DAE.STMT_WHILE(exp = exp, statementLst = body, source = source)  => begin
                       ErrorExt.setCheckpoint(getInstanceName())
                       (_, useTree) = ListUtil.map1Fold(body, statementFindDeadStore, localsTree, inUseTree)
@@ -3344,56 +3344,56 @@
                       useTree = AvlSetString.join(useTree, inUseTree)
                     (DAE.STMT_WHILE(exp, body, source), useTree)
                   end
-                  
+
                   DAE.STMT_PARFOR(__)  => begin
                     fail()
                   end
-                  
+
                   DAE.STMT_ASSERT(cond = cond, msg = msg, level = level)  => begin
                       (_, useTree) = Expression.traverseExpBottomUp(cond, useLocalCref, inUseTree)
                       (_, useTree) = Expression.traverseExpBottomUp(msg, useLocalCref, useTree)
                       (_, useTree) = Expression.traverseExpBottomUp(level, useLocalCref, useTree)
                     (inStatement, useTree)
                   end
-                  
+
                   DAE.STMT_TERMINATE(msg = exp)  => begin
                       (_, useTree) = Expression.traverseExpBottomUp(exp, useLocalCref, AvlSetString.new())
                     (inStatement, useTree)
                   end
-                  
+
                   DAE.STMT_WHEN(__)  => begin
                     fail()
                   end
-                  
+
                   DAE.STMT_REINIT(__)  => begin
                     fail()
                   end
-                  
+
                   DAE.STMT_NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("fail")))  => begin
                     (inStatement, AvlSetString.new())
                   end
-                  
+
                   DAE.STMT_RETURN(__)  => begin
                     (inStatement, AvlSetString.new())
                   end
-                  
+
                   DAE.STMT_NORETCALL(exp = exp)  => begin
                       (_, useTree) = Expression.traverseExpBottomUp(exp, useLocalCref, inUseTree)
                     (inStatement, useTree)
                   end
-                  
+
                   DAE.STMT_BREAK(__)  => begin
                     (inStatement, inUseTree)
                   end
-                  
+
                   DAE.STMT_CONTINUE(__)  => begin
                     (inStatement, inUseTree)
                   end
-                  
+
                   DAE.STMT_ARRAY_INIT(__)  => begin
                     (inStatement, inUseTree)
                   end
-                  
+
                   DAE.STMT_FAILURE(body = body, source = source)  => begin
                       (body, useTree) = statementListFindDeadStoreRemoveEmptyStatements(body, localsTree, inUseTree)
                     (DAE.STMT_FAILURE(body, source), useTree)
@@ -3425,7 +3425,7 @@
           (outStatement, useTree)
         end
 
-        function elseFindDeadStore(inElse::DAE.Else, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{DAE.Else, AvlSetString.Tree} 
+        function elseFindDeadStore(inElse::DAE.Else, localsTree::AvlSetString.Tree, inUseTree::AvlSetString.Tree) ::Tuple{DAE.Else, AvlSetString.Tree}
               local useTree::AvlSetString.Tree
               local outElse::DAE.Else
 
@@ -3438,7 +3438,7 @@
                   (DAE.NOELSE(__), _, _)  => begin
                     (inElse, inUseTree)
                   end
-                  
+
                   (DAE.ELSEIF(exp, body, else_), _, _)  => begin
                       (body, useTree) = statementListFindDeadStoreRemoveEmptyStatements(body, localsTree, inUseTree)
                       (_, useTree) = Expression.traverseExpBottomUp(exp, useLocalCref, useTree)
@@ -3447,7 +3447,7 @@
                       else_ = DAE.ELSEIF(exp, body, else_)
                     (else_, useTree)
                   end
-                  
+
                   (DAE.ELSE(body), _, _)  => begin
                       (body, useTree) = statementListFindDeadStoreRemoveEmptyStatements(body, localsTree, inUseTree)
                       else_ = DAE.ELSE(body)
@@ -3458,7 +3458,7 @@
           (outElse, useTree)
         end
 
-        function isNotDummyStatement(statement::DAE.Statement) ::Bool 
+        function isNotDummyStatement(statement::DAE.Statement) ::Bool
               local b::Bool
 
               b = Algorithm.isNotDummyStatement(statement)
@@ -3466,7 +3466,7 @@
           b
         end
 
-        function makeTupleFromMetaTuple(inExp::DAE.Exp, inType::DAE.Type) ::Tuple{DAE.Exp, DAE.Type} 
+        function makeTupleFromMetaTuple(inExp::DAE.Exp, inType::DAE.Type) ::Tuple{DAE.Exp, DAE.Type}
               local ty::DAE.Type
               local exp::DAE.Exp
 
@@ -3481,7 +3481,7 @@
                       (exps, tys2) = Types.matchTypeTuple(exps, tys, tys2, false)
                     (DAE.TUPLE(exps), DAE.T_TUPLE(tys2, NONE()))
                   end
-                  
+
                   _  => begin
                       (inExp, inType)
                   end
@@ -3493,7 +3493,7 @@
          #= Converts an expression to a list of patterns. If the expression is a tuple
            then the contents of the tuple are returned, otherwise the expression itself
            is returned as a list. =#
-        function convertExpToPatterns(inExp::Absyn.Exp) ::List{Absyn.Exp} 
+        function convertExpToPatterns(inExp::Absyn.Exp) ::List{Absyn.Exp}
               local outInputs::List{Absyn.Exp}
 
               outInputs = begin
@@ -3501,7 +3501,7 @@
                   Absyn.TUPLE(__)  => begin
                     inExp.expressions
                   end
-                  
+
                   _  => begin
                       list(inExp)
                   end

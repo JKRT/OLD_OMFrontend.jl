@@ -1,7 +1,5 @@
 #= Partly automatically generated=#
 module File
-
-
     using MetaModelica
 
          #= /*

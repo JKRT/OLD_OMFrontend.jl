@@ -1,4 +1,4 @@
-  module AbsynDumpTpl 
+  module AbsynDumpTpl
 
 
     using MetaModelica
@@ -21,7 +21,7 @@
 
         import Flags
 
-        function lm_9(in_txt::Tpl.Text, in_items::List{<:Absyn.Class}, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function lm_9(in_txt::Tpl.Text, in_items::List{<:Absyn.Class}, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -33,7 +33,7 @@
                   (txt,  nil(), _)  => begin
                     txt
                   end
-                  
+
                   (txt, i_cls <| rest, a_options)  => begin
                       txt = dumpClass(txt, i_cls, a_options)
                       txt = Tpl.nextIter(txt)
@@ -45,7 +45,7 @@
           out_txt
         end
 
-        function dump(in_txt::Tpl.Text, in_a_program::Absyn.Program, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dump(in_txt::Tpl.Text, in_a_program::Absyn.Program, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -59,7 +59,7 @@
                   (txt, Absyn.PROGRAM(classes =  nil()), _)  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.PROGRAM(within_ = i_within__, classes = i_classes), a_options)  => begin
                       l_within__str = dumpWithin(Tpl.emptyTxt, i_within__)
                       l_cls__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING_LIST(list(";\\n", "\\n"), true)), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -70,7 +70,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, _, _)  => begin
                     txt
                   end
@@ -79,14 +79,14 @@
           out_txt
         end
 
-        function dumpClass(txt::Tpl.Text, a_cls::Absyn.Class, a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpClass(txt::Tpl.Text, a_cls::Absyn.Class, a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = dumpClassElement(txt, a_cls, "", "", "", "", a_options)
           out_txt
         end
 
-        function dumpWithin(in_txt::Tpl.Text, in_a_within::Absyn.Within) ::Tpl.Text 
+        function dumpWithin(in_txt::Tpl.Text, in_a_within::Absyn.Within) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -97,7 +97,7 @@
                   (txt, Absyn.TOP(__))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.WITHIN(path = i_path))  => begin
                       l_path__str = dumpPath(Tpl.emptyTxt, i_path)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("within "))
@@ -105,7 +105,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING_LIST(list(";\\n", "\\n"), true))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       Tpl.addSourceTemplateError("Unknown operation", Tpl.sourceInfo("AbsynDumpTpl.tpl", 29, 56))
                     txt
@@ -115,7 +115,7 @@
           out_txt
         end
 
-        function dumpClassHeader(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String) ::Tpl.Text 
+        function dumpClassHeader(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -136,7 +136,7 @@
                       txt = Tpl.writeText(txt, l_res__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _, _, _)  => begin
                     txt
                   end
@@ -145,7 +145,7 @@
           out_txt
         end
 
-        function dumpClassElement(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpClassElement(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -169,7 +169,7 @@
                       txt = Tpl.writeText(txt, l_body__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _, _, _, _)  => begin
                     txt
                   end
@@ -178,7 +178,7 @@
           out_txt
         end
 
-        function lm_15(in_txt::Tpl.Text, in_items::List{<:String}) ::Tpl.Text 
+        function lm_15(in_txt::Tpl.Text, in_items::List{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -189,7 +189,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_typevar <| rest)  => begin
                       txt = Tpl.writeStr(txt, i_typevar)
                       txt = Tpl.nextIter(txt)
@@ -201,7 +201,7 @@
           out_txt
         end
 
-        function fun_16(in_txt::Tpl.Text, in_a_typeVars::List{<:String}) ::Tpl.Text 
+        function fun_16(in_txt::Tpl.Text, in_a_typeVars::List{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -211,7 +211,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_typeVars)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("<"))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -225,7 +225,7 @@
           out_txt
         end
 
-        function lm_17(in_txt::Tpl.Text, in_items::List{<:Absyn.Annotation}) ::Tpl.Text 
+        function lm_17(in_txt::Tpl.Text, in_items::List{<:Absyn.Annotation}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -236,7 +236,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_a <| rest)  => begin
                       txt = dumpAnnotation(txt, i_a)
                       txt = Tpl.nextIter(txt)
@@ -248,7 +248,7 @@
           out_txt
         end
 
-        function lm_18(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function lm_18(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -261,7 +261,7 @@
                   (txt,  nil(), _)  => begin
                     txt
                   end
-                  
+
                   (txt, i_class__part <| rest, a_options)  => begin
                       x_idx = Tpl.getIteri_i0(txt)
                       txt = dumpClassPart(txt, i_class__part, x_idx, a_options)
@@ -274,7 +274,7 @@
           out_txt
         end
 
-        function fun_19(in_txt::Tpl.Text, in_a_ann__str::Tpl.Text) ::Tpl.Text 
+        function fun_19(in_txt::Tpl.Text, in_a_ann__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -284,7 +284,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_ann__str)  => begin
                       txt = Tpl.writeText(txt, i_ann__str)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
@@ -295,7 +295,7 @@
           out_txt
         end
 
-        function lm_20(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_20(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -306,7 +306,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_arg <| rest)  => begin
                       txt = dumpElementArg(txt, i_arg)
                       txt = Tpl.nextIter(txt)
@@ -318,7 +318,7 @@
           out_txt
         end
 
-        function fun_21(in_txt::Tpl.Text, in_a_arguments::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function fun_21(in_txt::Tpl.Text, in_a_arguments::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -328,7 +328,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_arguments)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -342,7 +342,7 @@
           out_txt
         end
 
-        function lm_22(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function lm_22(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -355,7 +355,7 @@
                   (txt,  nil(), _)  => begin
                     txt
                   end
-                  
+
                   (txt, i_class__part <| rest, a_options)  => begin
                       x_idx = Tpl.getIteri_i0(txt)
                       txt = dumpClassPart(txt, i_class__part, x_idx, a_options)
@@ -368,7 +368,7 @@
           out_txt
         end
 
-        function lm_23(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_23(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -379,7 +379,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_mod <| rest)  => begin
                       txt = dumpElementArg(txt, i_mod)
                       txt = Tpl.nextIter(txt)
@@ -391,7 +391,7 @@
           out_txt
         end
 
-        function fun_24(in_txt::Tpl.Text, in_a_modifications::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function fun_24(in_txt::Tpl.Text, in_a_modifications::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -401,7 +401,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_modifications)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -415,7 +415,7 @@
           out_txt
         end
 
-        function lm_25(in_txt::Tpl.Text, in_items::List{<:Absyn.Annotation}) ::Tpl.Text 
+        function lm_25(in_txt::Tpl.Text, in_items::List{<:Absyn.Annotation}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -426,7 +426,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_a <| rest)  => begin
                       txt = dumpAnnotation(txt, i_a)
                       txt = Tpl.nextIter(txt)
@@ -438,7 +438,7 @@
           out_txt
         end
 
-        function fun_26(in_txt::Tpl.Text, in_a_ann__str::Tpl.Text) ::Tpl.Text 
+        function fun_26(in_txt::Tpl.Text, in_a_ann__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -448,7 +448,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_ann__str)  => begin
                       txt = Tpl.writeText(txt, i_ann__str)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
@@ -459,7 +459,7 @@
           out_txt
         end
 
-        function lm_27(in_txt::Tpl.Text, in_items::List{<:Absyn.Path}) ::Tpl.Text 
+        function lm_27(in_txt::Tpl.Text, in_items::List{<:Absyn.Path}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -470,7 +470,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_fn <| rest)  => begin
                       txt = dumpPath(txt, i_fn)
                       txt = Tpl.nextIter(txt)
@@ -482,7 +482,7 @@
           out_txt
         end
 
-        function lm_28(in_txt::Tpl.Text, in_items::List{<:Absyn.Ident}) ::Tpl.Text 
+        function lm_28(in_txt::Tpl.Text, in_items::List{<:Absyn.Ident}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -493,7 +493,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_var <| rest)  => begin
                       txt = Tpl.writeStr(txt, i_var)
                       txt = Tpl.nextIter(txt)
@@ -505,7 +505,7 @@
           out_txt
         end
 
-        function dumpClassDef(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef, in_a_cls__name::String, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpClassDef(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef, in_a_cls__name::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -565,7 +565,7 @@
                       txt = Tpl.writeStr(txt, a_cls__name)
                     txt
                   end
-                  
+
                   (txt, Absyn.DERIVED(attributes = i_attributes, typeSpec = i_typeSpec, arguments = i_arguments, comment = i_comment_1), a_cls__name, _)  => begin
                       l_attr__str = dumpElementAttr(Tpl.emptyTxt, i_attributes)
                       l_ty__str = dumpTypeSpec(Tpl.emptyTxt, i_typeSpec)
@@ -579,7 +579,7 @@
                       txt = Tpl.writeText(txt, l_cmt__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.CLASS_EXTENDS(parts = i_parts, modifications = i_modifications, comment = i_comment, ann = i_ann, baseClassName = i_baseClassName), a_cls__name, a_options)  => begin
                       l_body__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_body__str = lm_22(l_body__str, i_parts, a_options)
@@ -605,7 +605,7 @@
                       txt = Tpl.writeStr(txt, a_cls__name)
                     txt
                   end
-                  
+
                   (txt, Absyn.ENUMERATION(enumLiterals = i_enumLiterals, comment = i_comment_1), a_cls__name, _)  => begin
                       l_enum__str = dumpEnumDef(Tpl.emptyTxt, i_enumLiterals)
                       l_cmt__str = dumpCommentOpt(Tpl.emptyTxt, i_comment_1)
@@ -616,7 +616,7 @@
                       txt = Tpl.writeText(txt, l_cmt__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.OVERLOAD(functionNames = i_functionNames, comment = i_comment_1), a_cls__name, _)  => begin
                       l_funcs__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_funcs__str = lm_27(l_funcs__str, i_functionNames)
@@ -629,7 +629,7 @@
                       txt = Tpl.writeText(txt, l_cmt__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.PDER(functionName = i_functionName, vars = i_vars), a_cls__name, _)  => begin
                       l_fn__str = dumpPath(Tpl.emptyTxt, i_functionName)
                       l_vars__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -643,7 +643,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, _, _, _)  => begin
                     txt
                   end
@@ -652,7 +652,7 @@
           out_txt
         end
 
-        function lm_30(in_txt::Tpl.Text, in_items::List{<:Absyn.EnumLiteral}) ::Tpl.Text 
+        function lm_30(in_txt::Tpl.Text, in_items::List{<:Absyn.EnumLiteral}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -663,7 +663,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_lit <| rest)  => begin
                       txt = dumpEnumLiteral(txt, i_lit)
                       txt = Tpl.nextIter(txt)
@@ -675,7 +675,7 @@
           out_txt
         end
 
-        function dumpEnumDef(in_txt::Tpl.Text, in_a_enum__def::Absyn.EnumDef) ::Tpl.Text 
+        function dumpEnumDef(in_txt::Tpl.Text, in_a_enum__def::Absyn.EnumDef) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -688,12 +688,12 @@
                       txt = Tpl.popIter(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.ENUM_COLON(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(":"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -702,7 +702,7 @@
           out_txt
         end
 
-        function dumpEnumLiteral(in_txt::Tpl.Text, in_a_lit::Absyn.EnumLiteral) ::Tpl.Text 
+        function dumpEnumLiteral(in_txt::Tpl.Text, in_a_lit::Absyn.EnumLiteral) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -717,7 +717,7 @@
                       txt = Tpl.writeText(txt, l_cmt__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -726,7 +726,7 @@
           out_txt
         end
 
-        function fun_33(in_txt::Tpl.Text, in_a_encapsulatedPrefix::Bool) ::Tpl.Text 
+        function fun_33(in_txt::Tpl.Text, in_a_encapsulatedPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -735,7 +735,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("encapsulated "))
                     txt
@@ -745,7 +745,7 @@
           out_txt
         end
 
-        function fun_34(in_txt::Tpl.Text, in_a_partialPrefix::Bool) ::Tpl.Text 
+        function fun_34(in_txt::Tpl.Text, in_a_partialPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -754,7 +754,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("partial "))
                     txt
@@ -764,7 +764,7 @@
           out_txt
         end
 
-        function fun_35(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String) ::Tpl.Text 
+        function fun_35(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -791,7 +791,7 @@
                       txt = Tpl.writeText(txt, l_partial__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _, _)  => begin
                     txt
                   end
@@ -800,14 +800,14 @@
           out_txt
         end
 
-        function dumpClassPrefixes(txt::Tpl.Text, a_cls::Absyn.Class, a_final__str::String, a_redecl__str::String, a_repl__str::String, a_io__str::String) ::Tpl.Text 
+        function dumpClassPrefixes(txt::Tpl.Text, a_cls::Absyn.Class, a_final__str::String, a_redecl__str::String, a_repl__str::String, a_io__str::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = fun_35(txt, a_cls, a_redecl__str, a_repl__str, a_io__str)
           out_txt
         end
 
-        function fun_37(in_txt::Tpl.Text, in_a_functionRestriction::Absyn.FunctionRestriction) ::Tpl.Text 
+        function fun_37(in_txt::Tpl.Text, in_a_functionRestriction::Absyn.FunctionRestriction) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -817,31 +817,31 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("impure "))
                     txt
                   end
-                  
+
                   (txt, Absyn.FR_NORMAL_FUNCTION(purity = Absyn.PURE(__)))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("pure "))
                     txt
                   end
-                  
+
                   (txt, Absyn.FR_NORMAL_FUNCTION(purity = Absyn.NO_PURITY(__)))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.FR_OPERATOR_FUNCTION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("operator "))
                     txt
                   end
-                  
+
                   (txt, Absyn.FR_PARALLEL_FUNCTION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("parallel "))
                     txt
                   end
-                  
+
                   (txt, Absyn.FR_KERNEL_FUNCTION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("kernel "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -850,7 +850,7 @@
           out_txt
         end
 
-        function lm_38(in_txt::Tpl.Text, in_items::List{<:String}) ::Tpl.Text 
+        function lm_38(in_txt::Tpl.Text, in_items::List{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -861,7 +861,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_tv <| rest)  => begin
                       txt = Tpl.writeStr(txt, i_tv)
                       txt = Tpl.nextIter(txt)
@@ -873,7 +873,7 @@
           out_txt
         end
 
-        function fun_39(in_txt::Tpl.Text, in_a_typeVars::List{<:String}) ::Tpl.Text 
+        function fun_39(in_txt::Tpl.Text, in_a_typeVars::List{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -883,7 +883,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_typeVars)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("<"))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(",")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -897,7 +897,7 @@
           out_txt
         end
 
-        function dumpRestriction(in_txt::Tpl.Text, in_a_restriction::Absyn.Restriction) ::Tpl.Text 
+        function dumpRestriction(in_txt::Tpl.Text, in_a_restriction::Absyn.Restriction) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -910,110 +910,110 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("class"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_OPTIMIZATION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("optimization"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_MODEL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("model"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_RECORD(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("record"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_BLOCK(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("block"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_CONNECTOR(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("connector"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_EXP_CONNECTOR(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("expandable connector"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_TYPE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("type"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PACKAGE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("package"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_FUNCTION(functionRestriction = i_functionRestriction))  => begin
                       l_prefix__str = fun_37(Tpl.emptyTxt, i_functionRestriction)
                       txt = Tpl.writeText(txt, l_prefix__str)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("function"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_OPERATOR(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("operator"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_OPERATOR_RECORD(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("operator record"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_ENUMERATION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("enumeration"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PREDEFINED_INTEGER(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("Integer"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PREDEFINED_REAL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("Real"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PREDEFINED_STRING(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("String"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PREDEFINED_BOOLEAN(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("Boolean"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_PREDEFINED_ENUMERATION(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("enumeration(:)"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_UNIONTYPE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("uniontype"))
                     txt
                   end
-                  
+
                   (txt, Absyn.R_METARECORD(typeVars = i_typeVars))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("metarecord"))
                       txt = fun_39(txt, i_typeVars)
                     txt
                   end
-                  
+
                   (txt, Absyn.R_UNKNOWN(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("*unknown*"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1022,7 +1022,7 @@
           out_txt
         end
 
-        function fun_41(in_txt::Tpl.Text, in_a_idx::ModelicaInteger) ::Tpl.Text 
+        function fun_41(in_txt::Tpl.Text, in_a_idx::ModelicaInteger) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1031,7 +1031,7 @@
                   (txt, 0)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("public"))
                     txt
@@ -1041,7 +1041,7 @@
           out_txt
         end
 
-        function lm_42(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_42(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1052,7 +1052,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_exp <| rest)  => begin
                       txt = dumpExp(txt, i_exp)
                       txt = Tpl.nextIter(txt)
@@ -1064,7 +1064,7 @@
           out_txt
         end
 
-        function lm_43(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function lm_43(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1075,7 +1075,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpEquationItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -1087,7 +1087,7 @@
           out_txt
         end
 
-        function lm_44(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function lm_44(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1098,7 +1098,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpEquationItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -1110,7 +1110,7 @@
           out_txt
         end
 
-        function lm_45(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function lm_45(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1121,7 +1121,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpAlgorithmItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -1133,7 +1133,7 @@
           out_txt
         end
 
-        function lm_46(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function lm_46(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1144,7 +1144,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpAlgorithmItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -1156,7 +1156,7 @@
           out_txt
         end
 
-        function fun_47(in_txt::Tpl.Text, in_a_annotation__::Option{<:Absyn.Annotation}) ::Tpl.Text 
+        function fun_47(in_txt::Tpl.Text, in_a_annotation__::Option{<:Absyn.Annotation}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1170,7 +1170,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1179,7 +1179,7 @@
           out_txt
         end
 
-        function fun_48(in_txt::Tpl.Text, in_a_funcName::Option{<:Absyn.Ident}) ::Tpl.Text 
+        function fun_48(in_txt::Tpl.Text, in_a_funcName::Option{<:Absyn.Ident}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1190,7 +1190,7 @@
                       txt = Tpl.writeStr(txt, i_fn)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1199,7 +1199,7 @@
           out_txt
         end
 
-        function fun_49(in_txt::Tpl.Text, in_a_lang::Option{<:String}) ::Tpl.Text 
+        function fun_49(in_txt::Tpl.Text, in_a_lang::Option{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1212,7 +1212,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("\\ "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1221,7 +1221,7 @@
           out_txt
         end
 
-        function fun_50(in_txt::Tpl.Text, in_a_output__::Option{<:Absyn.ComponentRef}) ::Tpl.Text 
+        function fun_50(in_txt::Tpl.Text, in_a_output__::Option{<:Absyn.ComponentRef}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1233,7 +1233,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(" = "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1242,7 +1242,7 @@
           out_txt
         end
 
-        function fun_51(in_txt::Tpl.Text, in_a_fn__str::Tpl.Text) ::Tpl.Text 
+        function fun_51(in_txt::Tpl.Text, in_a_fn__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1251,7 +1251,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("()"))
                     txt
@@ -1261,7 +1261,7 @@
           out_txt
         end
 
-        function lm_52(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_52(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1272,7 +1272,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_arg <| rest)  => begin
                       txt = dumpExp(txt, i_arg)
                       txt = Tpl.nextIter(txt)
@@ -1284,7 +1284,7 @@
           out_txt
         end
 
-        function fun_53(in_txt::Tpl.Text, in_a_args::List{<:Absyn.Exp}, in_a_fn__str::Tpl.Text) ::Tpl.Text 
+        function fun_53(in_txt::Tpl.Text, in_a_args::List{<:Absyn.Exp}, in_a_fn__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1296,7 +1296,7 @@
                       txt = fun_51(txt, a_fn__str)
                     txt
                   end
-                  
+
                   (txt, i_args, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -1310,7 +1310,7 @@
           out_txt
         end
 
-        function fun_54(in_txt::Tpl.Text, in_a_externalDecl::Absyn.ExternalDecl, in_a_ann__str::Tpl.Text) ::Tpl.Text 
+        function fun_54(in_txt::Tpl.Text, in_a_externalDecl::Absyn.ExternalDecl, in_a_ann__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1346,7 +1346,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _, _)  => begin
                     txt
                   end
@@ -1355,7 +1355,7 @@
           out_txt
         end
 
-        function dumpClassPart(in_txt::Tpl.Text, in_a_class__part::Absyn.ClassPart, in_a_idx::ModelicaInteger, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpClassPart(in_txt::Tpl.Text, in_a_class__part::Absyn.ClassPart, in_a_idx::ModelicaInteger, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1382,7 +1382,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.PROTECTED(contents = i_contents), _, a_options)  => begin
                       l_el__str = dumpElementItems(Tpl.emptyTxt, i_contents, "", true, a_options)
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("protected\\n"))
@@ -1391,7 +1391,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.CONSTRAINTS(contents = i_contents_1), _, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("constraint\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -1401,7 +1401,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.EQUATIONS(contents = i_contents_2), _, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("equation\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -1412,7 +1412,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.INITIALEQUATIONS(contents = i_contents_2), _, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("initial equation\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -1423,7 +1423,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.ALGORITHMS(contents = i_contents_3), _, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("algorithm\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -1434,7 +1434,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.INITIALALGORITHMS(contents = i_contents_3), _, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("initial algorithm\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -1445,13 +1445,13 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.EXTERNAL(annotation_ = i_annotation__, externalDecl = i_externalDecl), _, _)  => begin
                       l_ann__str = fun_47(Tpl.emptyTxt, i_annotation__)
                       txt = fun_54(txt, i_externalDecl, l_ann__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _)  => begin
                     txt
                   end
@@ -1460,7 +1460,7 @@
           out_txt
         end
 
-        function fun_56(in_txt::Tpl.Text, in_a_first::Bool, in_a_prevSpacing::String, in_a_spacing::Tpl.Text) ::Tpl.Text 
+        function fun_56(in_txt::Tpl.Text, in_a_first::Bool, in_a_prevSpacing::String, in_a_spacing::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1472,7 +1472,7 @@
                       txt = dumpElementItemPreSpacing(txt, Tpl.textString(a_spacing), a_prevSpacing)
                     txt
                   end
-                  
+
                   (txt, _, _, _)  => begin
                     txt
                   end
@@ -1481,7 +1481,7 @@
           out_txt
         end
 
-        function fun_57(in_txt::Tpl.Text, in_a_rest__str::Tpl.Text, in_a_spacing::Tpl.Text) ::Tpl.Text 
+        function fun_57(in_txt::Tpl.Text, in_a_rest__str::Tpl.Text, in_a_spacing::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1491,7 +1491,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()), _)  => begin
                     txt
                   end
-                  
+
                   (txt, _, a_spacing)  => begin
                       txt = Tpl.writeText(txt, a_spacing)
                     txt
@@ -1501,7 +1501,7 @@
           out_txt
         end
 
-        function fun_58(in_txt::Tpl.Text, in_a_rest__str::Tpl.Text) ::Tpl.Text 
+        function fun_58(in_txt::Tpl.Text, in_a_rest__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1511,7 +1511,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_rest__str)  => begin
                       txt = Tpl.writeText(txt, i_rest__str)
                     txt
@@ -1521,7 +1521,7 @@
           out_txt
         end
 
-        function dumpElementItems(in_txt::Tpl.Text, in_a_items::List{<:Absyn.ElementItem}, in_a_prevSpacing::String, in_a_first::Bool, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpElementItems(in_txt::Tpl.Text, in_a_items::List{<:Absyn.ElementItem}, in_a_prevSpacing::String, in_a_first::Bool, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1551,7 +1551,7 @@
                       txt = fun_58(txt, l_rest__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _, _)  => begin
                     txt
                   end
@@ -1560,7 +1560,7 @@
           out_txt
         end
 
-        function fun_60(in_txt::Tpl.Text, in_a_prevSpacing::String, in_a_curSpacing::String) ::Tpl.Text 
+        function fun_60(in_txt::Tpl.Text, in_a_prevSpacing::String, in_a_curSpacing::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1571,7 +1571,7 @@
                       txt = Tpl.writeStr(txt, a_curSpacing)
                     txt
                   end
-                  
+
                   (txt, _, _)  => begin
                     txt
                   end
@@ -1580,14 +1580,14 @@
           out_txt
         end
 
-        function dumpElementItemPreSpacing(txt::Tpl.Text, a_curSpacing::String, a_prevSpacing::String) ::Tpl.Text 
+        function dumpElementItemPreSpacing(txt::Tpl.Text, a_curSpacing::String, a_prevSpacing::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = fun_60(txt, a_prevSpacing, a_curSpacing)
           out_txt
         end
 
-        function dumpElementItemSpacing(in_txt::Tpl.Text, in_a_item::Absyn.ElementItem) ::Tpl.Text 
+        function dumpElementItemSpacing(in_txt::Tpl.Text, in_a_item::Absyn.ElementItem) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1598,7 +1598,7 @@
                       txt = dumpClassDefSpacing(txt, i_cdef)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1607,7 +1607,7 @@
           out_txt
         end
 
-        function dumpClassDefSpacing(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef) ::Tpl.Text 
+        function dumpClassDefSpacing(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1617,12 +1617,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_NEW_LINE())
                     txt
                   end
-                  
+
                   (txt, Absyn.CLASS_EXTENDS(baseClassName = _))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_NEW_LINE())
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1631,7 +1631,7 @@
           out_txt
         end
 
-        function dumpElementItem(in_txt::Tpl.Text, in_a_eitem::Absyn.ElementItem, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpElementItem(in_txt::Tpl.Text, in_a_eitem::Absyn.ElementItem, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1645,13 +1645,13 @@
                       txt = dumpElement(txt, i_element, a_options)
                     txt
                   end
-                  
+
                   (txt, Absyn.LEXER_COMMENT(comment = i_comment), _)  => begin
                       ret_0 = System.trimWhitespace(i_comment)
                       txt = Tpl.writeStr(txt, ret_0)
                     txt
                   end
-                  
+
                   (txt, _, _)  => begin
                     txt
                   end
@@ -1660,7 +1660,7 @@
           out_txt
         end
 
-        function fun_65(in_txt::Tpl.Text, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}) ::Tpl.Text 
+        function fun_65(in_txt::Tpl.Text, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1671,7 +1671,7 @@
                       txt = dumpRedeclare(txt, i_re)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1680,7 +1680,7 @@
           out_txt
         end
 
-        function fun_66(in_txt::Tpl.Text, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}) ::Tpl.Text 
+        function fun_66(in_txt::Tpl.Text, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1691,7 +1691,7 @@
                       txt = dumpReplaceable(txt, i_re)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1700,7 +1700,7 @@
           out_txt
         end
 
-        function fun_67(in_txt::Tpl.Text, in_a_constrainClass::Option{<:Absyn.ConstrainClass}) ::Tpl.Text 
+        function fun_67(in_txt::Tpl.Text, in_a_constrainClass::Option{<:Absyn.ConstrainClass}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1711,7 +1711,7 @@
                       txt = dumpConstrainClass(txt, i_cc)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1720,7 +1720,7 @@
           out_txt
         end
 
-        function fun_68(in_txt::Tpl.Text, in_mArg::Bool, in_a_constrainClass::Option{<:Absyn.ConstrainClass}, in_a_options::Dump.DumpOptions, in_a_specification::Absyn.ElementSpec, in_a_innerOuter::Absyn.InnerOuter, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}, in_a_finalPrefix::Bool) ::Tpl.Text 
+        function fun_68(in_txt::Tpl.Text, in_mArg::Bool, in_a_constrainClass::Option{<:Absyn.ConstrainClass}, in_a_options::Dump.DumpOptions, in_a_specification::Absyn.ElementSpec, in_a_innerOuter::Absyn.InnerOuter, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}, in_a_finalPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1741,7 +1741,7 @@
                   (txt, false, _, _, _, _, _, _)  => begin
                     txt
                   end
-                  
+
                   (txt, _, a_constrainClass, a_options, a_specification, a_innerOuter, a_redeclareKeywords, a_finalPrefix)  => begin
                       l_final__str = dumpFinal(Tpl.emptyTxt, a_finalPrefix)
                       l_redecl__str = fun_65(Tpl.emptyTxt, a_redeclareKeywords)
@@ -1759,7 +1759,7 @@
           out_txt
         end
 
-        function lm_69(in_txt::Tpl.Text, in_items::List{<:Absyn.NamedArg}) ::Tpl.Text 
+        function lm_69(in_txt::Tpl.Text, in_items::List{<:Absyn.NamedArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1770,7 +1770,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_arg <| rest)  => begin
                       txt = dumpNamedArg(txt, i_arg)
                       txt = lm_69(txt, rest)
@@ -1781,7 +1781,7 @@
           out_txt
         end
 
-        function fun_70(in_txt::Tpl.Text, in_a_args::List{<:Absyn.NamedArg}) ::Tpl.Text 
+        function fun_70(in_txt::Tpl.Text, in_a_args::List{<:Absyn.NamedArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1791,7 +1791,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_args)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = lm_69(txt, i_args)
@@ -1803,7 +1803,7 @@
           out_txt
         end
 
-        function fun_71(in_txt::Tpl.Text, in_a_optName::Option{<:Absyn.Ident}) ::Tpl.Text 
+        function fun_71(in_txt::Tpl.Text, in_a_optName::Option{<:Absyn.Ident}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1814,7 +1814,7 @@
                       txt = Tpl.writeStr(txt, i_name)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1823,7 +1823,7 @@
           out_txt
         end
 
-        function fun_72(in_txt::Tpl.Text, in_mArg::Bool, in_a_string::String, in_a_info::SourceInfo, in_a_optName::Option{<:Absyn.Ident}) ::Tpl.Text 
+        function fun_72(in_txt::Tpl.Text, in_mArg::Bool, in_a_string::String, in_a_info::SourceInfo, in_a_optName::Option{<:Absyn.Ident}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1837,7 +1837,7 @@
                   (txt, false, _, _, _)  => begin
                     txt
                   end
-                  
+
                   (txt, _, a_string, a_info, a_optName)  => begin
                       l_name__str = fun_71(Tpl.emptyTxt, a_optName)
                       l_info__str = dumpInfo(Tpl.emptyTxt, a_info)
@@ -1855,7 +1855,7 @@
           out_txt
         end
 
-        function dumpElement(in_txt::Tpl.Text, in_a_elem::Absyn.Element, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpElement(in_txt::Tpl.Text, in_a_elem::Absyn.Element, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1887,7 +1887,7 @@
                       txt = fun_68(txt, ret_3, i_constrainClass, a_options, i_specification, i_innerOuter, i_redeclareKeywords, i_finalPrefix)
                     txt
                   end
-                  
+
                   (txt, Absyn.DEFINEUNIT(args = i_args, name = i_name), _)  => begin
                       l_args__str = fun_70(Tpl.emptyTxt, i_args)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("defineunit "))
@@ -1896,13 +1896,13 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, Absyn.TEXT(info = i_info, optName = i_optName, string = i_string), a_options)  => begin
                       ret_5 = Dump.boolUnparseFileFromInfo(i_info, a_options)
                       txt = fun_72(txt, ret_5, i_string, i_info, i_optName)
                     txt
                   end
-                  
+
                   (txt, _, _)  => begin
                     txt
                   end
@@ -1911,7 +1911,7 @@
           out_txt
         end
 
-        function fun_74(in_txt::Tpl.Text, in_a_isReadOnly::Bool) ::Tpl.Text 
+        function fun_74(in_txt::Tpl.Text, in_a_isReadOnly::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1921,7 +1921,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("writable"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("readonly"))
                     txt
@@ -1931,7 +1931,7 @@
           out_txt
         end
 
-        function dumpInfo(in_txt::Tpl.Text, in_a_info::SourceInfo) ::Tpl.Text 
+        function dumpInfo(in_txt::Tpl.Text, in_a_info::SourceInfo) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1961,7 +1961,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")\\\\n"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -1970,7 +1970,7 @@
           out_txt
         end
 
-        function lm_76(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_76(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -1981,7 +1981,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_earg <| rest)  => begin
                       txt = dumpElementArg(txt, i_earg)
                       txt = Tpl.nextIter(txt)
@@ -1993,7 +1993,7 @@
           out_txt
         end
 
-        function dumpAnnotation(in_txt::Tpl.Text, in_a_ann::Absyn.Annotation) ::Tpl.Text 
+        function dumpAnnotation(in_txt::Tpl.Text, in_a_ann::Absyn.Annotation) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2006,7 +2006,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("annotation()"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ANNOTATION(elementArgs = i_elementArgs))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("annotation(\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -2020,7 +2020,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2029,7 +2029,7 @@
           out_txt
         end
 
-        function dumpAnnotationOpt(in_txt::Tpl.Text, in_a_oann::Option{<:Absyn.Annotation}) ::Tpl.Text 
+        function dumpAnnotationOpt(in_txt::Tpl.Text, in_a_oann::Option{<:Absyn.Annotation}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2040,7 +2040,7 @@
                       txt = dumpAnnotation(txt, i_ann)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2049,7 +2049,7 @@
           out_txt
         end
 
-        function dumpAnnotationOptSpace(in_txt::Tpl.Text, in_a_oann::Option{<:Absyn.Annotation}) ::Tpl.Text 
+        function dumpAnnotationOptSpace(in_txt::Tpl.Text, in_a_oann::Option{<:Absyn.Annotation}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2061,7 +2061,7 @@
                       txt = dumpAnnotation(txt, i_ann)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2070,7 +2070,7 @@
           out_txt
         end
 
-        function dumpComment(in_txt::Tpl.Text, in_a_cmt::Absyn.Comment) ::Tpl.Text 
+        function dumpComment(in_txt::Tpl.Text, in_a_cmt::Absyn.Comment) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2083,7 +2083,7 @@
                       txt = dumpAnnotationOptSpace(txt, i_annotation__)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2092,7 +2092,7 @@
           out_txt
         end
 
-        function dumpCommentOpt(in_txt::Tpl.Text, in_a_ocmt::Option{<:Absyn.Comment}) ::Tpl.Text 
+        function dumpCommentOpt(in_txt::Tpl.Text, in_a_ocmt::Option{<:Absyn.Comment}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2103,7 +2103,7 @@
                       txt = dumpComment(txt, i_cmt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2112,7 +2112,7 @@
           out_txt
         end
 
-        function fun_82(in_txt::Tpl.Text, in_a_modification::Option{<:Absyn.Modification}) ::Tpl.Text 
+        function fun_82(in_txt::Tpl.Text, in_a_modification::Option{<:Absyn.Modification}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2123,7 +2123,7 @@
                       txt = dumpModification(txt, i_mod)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2132,7 +2132,7 @@
           out_txt
         end
 
-        function fun_83(in_txt::Tpl.Text, in_a_constrainClass::Option{<:Absyn.ConstrainClass}) ::Tpl.Text 
+        function fun_83(in_txt::Tpl.Text, in_a_constrainClass::Option{<:Absyn.ConstrainClass}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2143,7 +2143,7 @@
                       txt = dumpConstrainClass(txt, i_cc)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2152,7 +2152,7 @@
           out_txt
         end
 
-        function dumpElementArg(in_txt::Tpl.Text, in_a_earg::Absyn.ElementArg) ::Tpl.Text 
+        function dumpElementArg(in_txt::Tpl.Text, in_a_earg::Absyn.ElementArg) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2189,7 +2189,7 @@
                       txt = Tpl.writeText(txt, l_cmt__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.REDECLARATION(eachPrefix = i_eachPrefix, finalPrefix = i_finalPrefix, redeclareKeywords = i_redeclareKeywords, elementSpec = i_elementSpec, constrainClass = i_constrainClass))  => begin
                       l_each__str = dumpEach(Tpl.emptyTxt, i_eachPrefix)
                       l_final__str = dumpFinal(Tpl.emptyTxt, i_finalPrefix)
@@ -2203,7 +2203,7 @@
                       txt = Tpl.writeText(txt, l_cc__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2212,7 +2212,7 @@
           out_txt
         end
 
-        function dumpEach(in_txt::Tpl.Text, in_a_each::Absyn.Each) ::Tpl.Text 
+        function dumpEach(in_txt::Tpl.Text, in_a_each::Absyn.Each) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2222,7 +2222,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("each "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2231,7 +2231,7 @@
           out_txt
         end
 
-        function dumpFinal(in_txt::Tpl.Text, in_a_final::Bool) ::Tpl.Text 
+        function dumpFinal(in_txt::Tpl.Text, in_a_final::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2240,7 +2240,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("final "))
                     txt
@@ -2250,7 +2250,7 @@
           out_txt
         end
 
-        function dumpRedeclare(in_txt::Tpl.Text, in_a_redecl::Absyn.RedeclareKeywords) ::Tpl.Text 
+        function dumpRedeclare(in_txt::Tpl.Text, in_a_redecl::Absyn.RedeclareKeywords) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2260,12 +2260,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("redeclare "))
                     txt
                   end
-                  
+
                   (txt, Absyn.REDECLARE_REPLACEABLE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("redeclare "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2274,7 +2274,7 @@
           out_txt
         end
 
-        function dumpReplaceable(in_txt::Tpl.Text, in_a_repl::Absyn.RedeclareKeywords) ::Tpl.Text 
+        function dumpReplaceable(in_txt::Tpl.Text, in_a_repl::Absyn.RedeclareKeywords) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2284,12 +2284,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("replaceable "))
                     txt
                   end
-                  
+
                   (txt, Absyn.REDECLARE_REPLACEABLE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("replaceable "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2298,7 +2298,7 @@
           out_txt
         end
 
-        function dumpInnerOuter(in_txt::Tpl.Text, in_a_io::Absyn.InnerOuter) ::Tpl.Text 
+        function dumpInnerOuter(in_txt::Tpl.Text, in_a_io::Absyn.InnerOuter) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2308,17 +2308,17 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("inner "))
                     txt
                   end
-                  
+
                   (txt, Absyn.OUTER(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("outer "))
                     txt
                   end
-                  
+
                   (txt, Absyn.INNER_OUTER(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("inner outer "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2327,7 +2327,7 @@
           out_txt
         end
 
-        function lm_90(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_90(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2338,7 +2338,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_earg <| rest)  => begin
                       txt = dumpElementArg(txt, i_earg)
                       txt = Tpl.nextIter(txt)
@@ -2350,7 +2350,7 @@
           out_txt
         end
 
-        function fun_91(in_txt::Tpl.Text, in_a_elementArgLst::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function fun_91(in_txt::Tpl.Text, in_a_elementArgLst::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2360,7 +2360,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_elementArgLst)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -2374,7 +2374,7 @@
           out_txt
         end
 
-        function dumpModification(in_txt::Tpl.Text, in_a_mod::Absyn.Modification) ::Tpl.Text 
+        function dumpModification(in_txt::Tpl.Text, in_a_mod::Absyn.Modification) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2391,7 +2391,7 @@
                       txt = Tpl.writeText(txt, l_eq__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2400,7 +2400,7 @@
           out_txt
         end
 
-        function dumpEqMod(in_txt::Tpl.Text, in_a_eqmod::Absyn.EqMod) ::Tpl.Text 
+        function dumpEqMod(in_txt::Tpl.Text, in_a_eqmod::Absyn.EqMod) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2413,7 +2413,7 @@
                       txt = dumpExp(txt, i_exp)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2422,7 +2422,7 @@
           out_txt
         end
 
-        function lm_94(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_94(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2433,7 +2433,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_earg <| rest)  => begin
                       txt = dumpElementArg(txt, i_earg)
                       txt = Tpl.nextIter(txt)
@@ -2445,7 +2445,7 @@
           out_txt
         end
 
-        function fun_95(in_txt::Tpl.Text, in_a_args__str::Tpl.Text) ::Tpl.Text 
+        function fun_95(in_txt::Tpl.Text, in_a_args__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2455,7 +2455,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_args__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.writeText(txt, i_args__str)
@@ -2467,7 +2467,7 @@
           out_txt
         end
 
-        function lm_96(in_txt::Tpl.Text, in_items::List{<:Absyn.ComponentItem}) ::Tpl.Text 
+        function lm_96(in_txt::Tpl.Text, in_items::List{<:Absyn.ComponentItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2478,7 +2478,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_comp <| rest)  => begin
                       txt = dumpComponentItem(txt, i_comp)
                       txt = Tpl.nextIter(txt)
@@ -2490,7 +2490,7 @@
           out_txt
         end
 
-        function dumpElementSpec(in_txt::Tpl.Text, in_a_elem::Absyn.ElementSpec, in_a_final::String, in_a_redecl::String, in_a_repl::String, in_a_io::String, in_a_options::Dump.DumpOptions) ::Tpl.Text 
+        function dumpElementSpec(in_txt::Tpl.Text, in_a_elem::Absyn.ElementSpec, in_a_final::String, in_a_redecl::String, in_a_repl::String, in_a_io::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2523,7 +2523,7 @@
                       txt = dumpClassElement(txt, i_class__, a_final, a_redecl, a_repl, a_io, a_options)
                     txt
                   end
-                  
+
                   (txt, Absyn.EXTENDS(path = i_path, elementArg = i_elementArg, annotationOpt = i_annotationOpt), _, _, _, _, _)  => begin
                       l_bc__str = dumpPath(Tpl.emptyTxt, i_path)
                       l_args__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -2537,7 +2537,7 @@
                       txt = Tpl.writeText(txt, l_ann__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.COMPONENTS(typeSpec = i_typeSpec, attributes = i_attributes, components = i_components), a_final, a_redecl, a_repl, a_io, _)  => begin
                       l_ty__str = dumpTypeSpec(Tpl.emptyTxt, i_typeSpec)
                       l_attr__str = dumpElementAttr(Tpl.emptyTxt, i_attributes)
@@ -2557,14 +2557,14 @@
                       txt = Tpl.writeText(txt, l_comps__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.IMPORT(import_ = i_import__), _, _, _, _, _)  => begin
                       l_imp__str = dumpImport(Tpl.emptyTxt, i_import__)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("import "))
                       txt = Tpl.writeText(txt, l_imp__str)
                     txt
                   end
-                  
+
                   (txt, _, _, _, _, _, _)  => begin
                     txt
                   end
@@ -2573,7 +2573,7 @@
           out_txt
         end
 
-        function fun_98(in_txt::Tpl.Text, in_a_flowPrefix::Bool) ::Tpl.Text 
+        function fun_98(in_txt::Tpl.Text, in_a_flowPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2582,7 +2582,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("flow "))
                     txt
@@ -2592,7 +2592,7 @@
           out_txt
         end
 
-        function fun_99(in_txt::Tpl.Text, in_a_streamPrefix::Bool) ::Tpl.Text 
+        function fun_99(in_txt::Tpl.Text, in_a_streamPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2601,7 +2601,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("stream "))
                     txt
@@ -2611,7 +2611,7 @@
           out_txt
         end
 
-        function dumpElementAttr(in_txt::Tpl.Text, in_a_attr::Absyn.ElementAttributes) ::Tpl.Text 
+        function dumpElementAttr(in_txt::Tpl.Text, in_a_attr::Absyn.ElementAttributes) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2644,7 +2644,7 @@
                       txt = Tpl.writeText(txt, l_dir__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2653,7 +2653,7 @@
           out_txt
         end
 
-        function dumpParallelism(in_txt::Tpl.Text, in_a_par::Absyn.Parallelism) ::Tpl.Text 
+        function dumpParallelism(in_txt::Tpl.Text, in_a_par::Absyn.Parallelism) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2663,16 +2663,16 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("parglobal "))
                     txt
                   end
-                  
+
                   (txt, Absyn.PARLOCAL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("parlocal "))
                     txt
                   end
-                  
+
                   (txt, Absyn.NON_PARALLEL(__))  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2681,7 +2681,7 @@
           out_txt
         end
 
-        function dumpIsField(in_txt::Tpl.Text, in_a_isField::Absyn.IsField) ::Tpl.Text 
+        function dumpIsField(in_txt::Tpl.Text, in_a_isField::Absyn.IsField) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2690,12 +2690,12 @@
                   (txt, Absyn.NONFIELD(__))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.FIELD(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("field "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2704,7 +2704,7 @@
           out_txt
         end
 
-        function dumpVariability(in_txt::Tpl.Text, in_a_var::Absyn.Variability) ::Tpl.Text 
+        function dumpVariability(in_txt::Tpl.Text, in_a_var::Absyn.Variability) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2713,22 +2713,22 @@
                   (txt, Absyn.VAR(__))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.DISCRETE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("discrete "))
                     txt
                   end
-                  
+
                   (txt, Absyn.PARAM(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("parameter "))
                     txt
                   end
-                  
+
                   (txt, Absyn.CONST(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("constant "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2737,7 +2737,7 @@
           out_txt
         end
 
-        function dumpDirection(in_txt::Tpl.Text, in_a_dir::Absyn.Direction) ::Tpl.Text 
+        function dumpDirection(in_txt::Tpl.Text, in_a_dir::Absyn.Direction) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2746,22 +2746,22 @@
                   (txt, Absyn.BIDIR(__))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.INPUT(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("input "))
                     txt
                   end
-                  
+
                   (txt, Absyn.OUTPUT(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("output "))
                     txt
                   end
-                  
+
                   (txt, Absyn.INPUT_OUTPUT(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("input output "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2770,7 +2770,7 @@
           out_txt
         end
 
-        function dumpElementAttrDim(in_txt::Tpl.Text, in_a_attr::Absyn.ElementAttributes) ::Tpl.Text 
+        function dumpElementAttrDim(in_txt::Tpl.Text, in_a_attr::Absyn.ElementAttributes) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2781,7 +2781,7 @@
                       txt = dumpSubscripts(txt, i_arrayDim)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2790,7 +2790,7 @@
           out_txt
         end
 
-        function lm_106(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function lm_106(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2801,7 +2801,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_e <| rest)  => begin
                       txt = dumpElementArg(txt, i_e)
                       txt = Tpl.nextIter(txt)
@@ -2813,7 +2813,7 @@
           out_txt
         end
 
-        function fun_107(in_txt::Tpl.Text, in_a_el::List{<:Absyn.ElementArg}) ::Tpl.Text 
+        function fun_107(in_txt::Tpl.Text, in_a_el::List{<:Absyn.ElementArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2823,7 +2823,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_el)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -2837,7 +2837,7 @@
           out_txt
         end
 
-        function dumpConstrainClass(in_txt::Tpl.Text, in_a_cc::Absyn.ConstrainClass) ::Tpl.Text 
+        function dumpConstrainClass(in_txt::Tpl.Text, in_a_cc::Absyn.ConstrainClass) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2861,7 +2861,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2870,7 +2870,7 @@
           out_txt
         end
 
-        function dumpComponentItem(in_txt::Tpl.Text, in_a_comp::Absyn.ComponentItem) ::Tpl.Text 
+        function dumpComponentItem(in_txt::Tpl.Text, in_a_comp::Absyn.ComponentItem) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2891,7 +2891,7 @@
                       txt = Tpl.writeText(txt, l_cmt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2900,7 +2900,7 @@
           out_txt
         end
 
-        function fun_110(in_txt::Tpl.Text, in_a_modification::Option{<:Absyn.Modification}) ::Tpl.Text 
+        function fun_110(in_txt::Tpl.Text, in_a_modification::Option{<:Absyn.Modification}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2911,7 +2911,7 @@
                       txt = dumpModification(txt, i_mod)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2920,7 +2920,7 @@
           out_txt
         end
 
-        function dumpComponent(in_txt::Tpl.Text, in_a_comp::Absyn.Component) ::Tpl.Text 
+        function dumpComponent(in_txt::Tpl.Text, in_a_comp::Absyn.Component) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2939,7 +2939,7 @@
                       txt = Tpl.writeText(txt, l_mod__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2948,7 +2948,7 @@
           out_txt
         end
 
-        function dumpComponentCondition(in_txt::Tpl.Text, in_a_cond::Option{<:Absyn.ComponentCondition}) ::Tpl.Text 
+        function dumpComponentCondition(in_txt::Tpl.Text, in_a_cond::Option{<:Absyn.ComponentCondition}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2964,7 +2964,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -2973,7 +2973,7 @@
           out_txt
         end
 
-        function lm_113(in_txt::Tpl.Text, in_items::List{<:Absyn.GroupImport}) ::Tpl.Text 
+        function lm_113(in_txt::Tpl.Text, in_items::List{<:Absyn.GroupImport}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2984,7 +2984,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_group <| rest)  => begin
                       txt = dumpGroupImport(txt, i_group)
                       txt = Tpl.nextIter(txt)
@@ -2996,7 +2996,7 @@
           out_txt
         end
 
-        function dumpImport(in_txt::Tpl.Text, in_a_imp::Absyn.Import) ::Tpl.Text 
+        function dumpImport(in_txt::Tpl.Text, in_a_imp::Absyn.Import) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3014,18 +3014,18 @@
                       txt = dumpPath(txt, i_path)
                     txt
                   end
-                  
+
                   (txt, Absyn.QUAL_IMPORT(path = i_path))  => begin
                       txt = dumpPath(txt, i_path)
                     txt
                   end
-                  
+
                   (txt, Absyn.UNQUAL_IMPORT(path = i_path))  => begin
                       txt = dumpPath(txt, i_path)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".*"))
                     txt
                   end
-                  
+
                   (txt, Absyn.GROUP_IMPORT(prefix = i_prefix, groups = i_groups))  => begin
                       l_prefix__str = dumpPath(Tpl.emptyTxt, i_prefix)
                       l_groups__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(",")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3037,7 +3037,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("}"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3046,7 +3046,7 @@
           out_txt
         end
 
-        function dumpGroupImport(in_txt::Tpl.Text, in_a_gimp::Absyn.GroupImport) ::Tpl.Text 
+        function dumpGroupImport(in_txt::Tpl.Text, in_a_gimp::Absyn.GroupImport) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3058,14 +3058,14 @@
                       txt = Tpl.writeStr(txt, i_name)
                     txt
                   end
-                  
+
                   (txt, Absyn.GROUP_IMPORT_RENAME(rename = i_rename, name = i_name))  => begin
                       txt = Tpl.writeStr(txt, i_rename)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(" = "))
                       txt = Tpl.writeStr(txt, i_name)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3074,7 +3074,7 @@
           out_txt
         end
 
-        function dumpEquationItem(in_txt::Tpl.Text, in_a_eq::Absyn.EquationItem) ::Tpl.Text 
+        function dumpEquationItem(in_txt::Tpl.Text, in_a_eq::Absyn.EquationItem) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3094,7 +3094,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQUATIONITEMCOMMENT(comment = i_comment_1))  => begin
                       txt = Tpl.pushBlock(txt, Tpl.BT_ABS_INDENT(0))
                       ret_2 = System.trimWhitespace(i_comment_1)
@@ -3102,7 +3102,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3111,7 +3111,7 @@
           out_txt
         end
 
-        function lm_117(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function lm_117(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3122,7 +3122,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpEquationItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -3134,7 +3134,7 @@
           out_txt
         end
 
-        function dumpEquationItems(txt::Tpl.Text, a_eql::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function dumpEquationItems(txt::Tpl.Text, a_eql::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3143,7 +3143,7 @@
           out_txt
         end
 
-        function lm_119(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::Tpl.Text 
+        function lm_119(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3155,7 +3155,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, (i_c, i_b) <| rest)  => begin
                       txt = dumpEquationBranch(txt, i_c, i_b, "elseif")
                       txt = Tpl.nextIter(txt)
@@ -3167,7 +3167,7 @@
           out_txt
         end
 
-        function fun_120(in_txt::Tpl.Text, in_a_else__branch__str::Tpl.Text) ::Tpl.Text 
+        function fun_120(in_txt::Tpl.Text, in_a_else__branch__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3177,7 +3177,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_else__branch__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("else\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -3190,7 +3190,7 @@
           out_txt
         end
 
-        function lm_121(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::Tpl.Text 
+        function lm_121(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3202,7 +3202,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, (i_c, i_b) <| rest)  => begin
                       txt = dumpEquationBranch(txt, i_c, i_b, "elsewhen")
                       txt = Tpl.nextIter(txt)
@@ -3214,7 +3214,7 @@
           out_txt
         end
 
-        function dumpEquation(in_txt::Tpl.Text, in_a_eq::Absyn.Equation) ::Tpl.Text 
+        function dumpEquation(in_txt::Tpl.Text, in_a_eq::Absyn.Equation) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3269,7 +3269,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end if"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_EQUALS(leftSide = i_leftSide, rightSide = i_rightSide))  => begin
                       l_lhs = dumpLhsExp(Tpl.emptyTxt, i_leftSide)
                       l_rhs = dumpExp(Tpl.emptyTxt, i_rightSide)
@@ -3278,7 +3278,7 @@
                       txt = Tpl.writeText(txt, l_rhs)
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_PDE(leftSide = i_leftSide, rightSide = i_rightSide, domain = i_domain))  => begin
                       l_lhs = dumpLhsExp(Tpl.emptyTxt, i_leftSide)
                       l_rhs = dumpExp(Tpl.emptyTxt, i_rightSide)
@@ -3290,7 +3290,7 @@
                       txt = Tpl.writeText(txt, l_domain__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_CONNECT(connector1 = i_connector1, connector2 = i_connector2))  => begin
                       l_c1__str = dumpCref(Tpl.emptyTxt, i_connector1)
                       l_c2__str = dumpCref(Tpl.emptyTxt, i_connector2)
@@ -3301,7 +3301,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_FOR(iterators = i_iterators, forEquations = i_forEquations))  => begin
                       l_iter__str = dumpForIterators(Tpl.emptyTxt, i_iterators)
                       l_body__str = dumpEquationItems(Tpl.emptyTxt, i_forEquations)
@@ -3315,7 +3315,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end for"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_WHEN_E(whenExp = i_whenExp, whenEquations = i_whenEquations, elseWhenEquations = i_elseWhenEquations))  => begin
                       l_when__str = dumpEquationBranch(Tpl.emptyTxt, i_whenExp, i_whenEquations, "when")
                       l_elsewhen__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3328,7 +3328,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end when"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_NORETCALL(functionName = i_functionName, functionArgs = i_functionArgs))  => begin
                       l_name__str = dumpCref(Tpl.emptyTxt, i_functionName)
                       l_args__str = dumpFunctionArgs(Tpl.emptyTxt, i_functionArgs)
@@ -3338,7 +3338,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQ_FAILURE(equ = i_equ))  => begin
                       l_eq__str = dumpEquationItem(Tpl.emptyTxt, i_equ)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("failure("))
@@ -3346,7 +3346,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3355,7 +3355,7 @@
           out_txt
         end
 
-        function lm_123(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function lm_123(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3366,7 +3366,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpEquationItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -3378,7 +3378,7 @@
           out_txt
         end
 
-        function dumpEquationBranch(txt::Tpl.Text, a_cond::Absyn.Exp, a_body::List{<:Absyn.EquationItem}, a_header::String) ::Tpl.Text 
+        function dumpEquationBranch(txt::Tpl.Text, a_cond::Absyn.Exp, a_body::List{<:Absyn.EquationItem}, a_header::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               local l_body__str::Tpl.Text
@@ -3398,7 +3398,7 @@
           out_txt
         end
 
-        function lm_125(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function lm_125(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3409,7 +3409,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_alg <| rest)  => begin
                       txt = dumpAlgorithmItem(txt, i_alg)
                       txt = Tpl.nextIter(txt)
@@ -3421,7 +3421,7 @@
           out_txt
         end
 
-        function dumpAlgorithmItems(txt::Tpl.Text, a_algs::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function dumpAlgorithmItems(txt::Tpl.Text, a_algs::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3430,7 +3430,7 @@
           out_txt
         end
 
-        function dumpAlgorithmItem(in_txt::Tpl.Text, in_a_alg::Absyn.AlgorithmItem) ::Tpl.Text 
+        function dumpAlgorithmItem(in_txt::Tpl.Text, in_a_alg::Absyn.AlgorithmItem) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3450,7 +3450,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALGORITHMITEMCOMMENT(comment = i_comment_1))  => begin
                       txt = Tpl.pushBlock(txt, Tpl.BT_ABS_INDENT(0))
                       ret_2 = System.trimWhitespace(i_comment_1)
@@ -3458,7 +3458,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3467,7 +3467,7 @@
           out_txt
         end
 
-        function lm_128(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.AlgorithmItem}}}) ::Tpl.Text 
+        function lm_128(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.AlgorithmItem}}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3479,7 +3479,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, (i_c, i_b) <| rest)  => begin
                       txt = dumpAlgorithmBranch(txt, i_c, i_b, "elseif", "then")
                       txt = Tpl.nextIter(txt)
@@ -3491,7 +3491,7 @@
           out_txt
         end
 
-        function fun_129(in_txt::Tpl.Text, in_a_else__branch__str::Tpl.Text) ::Tpl.Text 
+        function fun_129(in_txt::Tpl.Text, in_a_else__branch__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3501,7 +3501,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, i_else__branch__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("else\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(2))
@@ -3514,7 +3514,7 @@
           out_txt
         end
 
-        function lm_130(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.AlgorithmItem}}}) ::Tpl.Text 
+        function lm_130(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.AlgorithmItem}}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3526,7 +3526,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, (i_c, i_b) <| rest)  => begin
                       txt = dumpAlgorithmBranch(txt, i_c, i_b, "elsewhen", "then")
                       txt = Tpl.nextIter(txt)
@@ -3538,7 +3538,7 @@
           out_txt
         end
 
-        function fun_131(in_txt::Tpl.Text, in_a_equ::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function fun_131(in_txt::Tpl.Text, in_a_equ::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3549,7 +3549,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("..."))
                     txt
                   end
-                  
+
                   (txt, i_equ)  => begin
                       txt = dumpAlgorithmItems(txt, i_equ)
                     txt
@@ -3559,7 +3559,7 @@
           out_txt
         end
 
-        function dumpAlgorithm(in_txt::Tpl.Text, in_a_alg::Absyn.Algorithm) ::Tpl.Text 
+        function dumpAlgorithm(in_txt::Tpl.Text, in_a_alg::Absyn.Algorithm) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3607,7 +3607,7 @@
                       txt = Tpl.writeText(txt, l_rhs__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_IF(ifExp = i_ifExp, trueBranch = i_trueBranch, elseIfAlgorithmBranch = i_elseIfAlgorithmBranch, elseBranch = i_elseBranch))  => begin
                       l_if__str = dumpAlgorithmBranch(Tpl.emptyTxt, i_ifExp, i_trueBranch, "if", "then")
                       l_elseif__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3624,7 +3624,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end if"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_FOR(iterators = i_iterators, forBody = i_forBody))  => begin
                       l_iter__str = dumpForIterators(Tpl.emptyTxt, i_iterators)
                       l_body__str = dumpAlgorithmItems(Tpl.emptyTxt, i_forBody)
@@ -3638,7 +3638,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end for"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_PARFOR(iterators = i_iterators, parforBody = i_parforBody))  => begin
                       l_iter__str = dumpForIterators(Tpl.emptyTxt, i_iterators)
                       l_body__str = dumpAlgorithmItems(Tpl.emptyTxt, i_parforBody)
@@ -3652,7 +3652,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end parfor"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_WHILE(boolExpr = i_boolExpr, whileBody = i_whileBody))  => begin
                       l_while__str = dumpAlgorithmBranch(Tpl.emptyTxt, i_boolExpr, i_whileBody, "while", "loop")
                       txt = Tpl.writeText(txt, l_while__str)
@@ -3660,7 +3660,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end while"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_WHEN_A(boolExpr = i_boolExpr, whenBody = i_whenBody, elseWhenAlgorithmBranch = i_elseWhenAlgorithmBranch))  => begin
                       l_when__str = dumpAlgorithmBranch(Tpl.emptyTxt, i_boolExpr, i_whenBody, "when", "then")
                       l_elsewhen__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3673,7 +3673,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end when"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_NORETCALL(functionCall = i_functionCall, functionArgs = i_functionArgs))  => begin
                       l_name__str = dumpCref(Tpl.emptyTxt, i_functionCall)
                       l_args__str = dumpFunctionArgs(Tpl.emptyTxt, i_functionArgs)
@@ -3683,17 +3683,17 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_RETURN(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("return"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_BREAK(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("break"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_FAILURE(equ = i_equ))  => begin
                       l_arg__str = fun_131(Tpl.emptyTxt, i_equ)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("failure("))
@@ -3701,7 +3701,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_TRY(body = i_body, elseBody = i_elseBody))  => begin
                       l_arg1 = dumpAlgorithmItems(Tpl.emptyTxt, i_body)
                       l_arg2 = dumpAlgorithmItems(Tpl.emptyTxt, i_elseBody)
@@ -3718,12 +3718,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end try;"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ALG_CONTINUE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("continue"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3732,7 +3732,7 @@
           out_txt
         end
 
-        function lm_133(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function lm_133(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3743,7 +3743,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpAlgorithmItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -3755,7 +3755,7 @@
           out_txt
         end
 
-        function dumpAlgorithmBranch(txt::Tpl.Text, a_cond::Absyn.Exp, a_body::List{<:Absyn.AlgorithmItem}, a_header::String, a_exec__str::String) ::Tpl.Text 
+        function dumpAlgorithmBranch(txt::Tpl.Text, a_cond::Absyn.Exp, a_body::List{<:Absyn.AlgorithmItem}, a_header::String, a_exec__str::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               local l_body__str::Tpl.Text
@@ -3777,7 +3777,7 @@
           out_txt
         end
 
-        function fun_135(in_txt::Tpl.Text, in_mArg::Bool, in_a_path::Absyn.Path, in_a_name::Absyn.Ident) ::Tpl.Text 
+        function fun_135(in_txt::Tpl.Text, in_mArg::Bool, in_a_path::Absyn.Path, in_a_name::Absyn.Ident) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3791,7 +3791,7 @@
                       txt = dumpPath(txt, a_path)
                     txt
                   end
-                  
+
                   (txt, _, a_path, a_name)  => begin
                       txt = Tpl.writeStr(txt, a_name)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("__"))
@@ -3803,7 +3803,7 @@
           out_txt
         end
 
-        function dumpPath(in_txt::Tpl.Text, in_a_path::Absyn.Path) ::Tpl.Text 
+        function dumpPath(in_txt::Tpl.Text, in_a_path::Absyn.Path) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3817,18 +3817,18 @@
                       txt = dumpPath(txt, i_path)
                     txt
                   end
-                  
+
                   (txt, Absyn.QUALIFIED(name = i_name, path = i_path))  => begin
                       ret_0 = Flags.getConfigBool(Flags.MODELICA_OUTPUT)
                       txt = fun_135(txt, ret_0, i_path, i_name)
                     txt
                   end
-                  
+
                   (txt, Absyn.IDENT(name = i_name))  => begin
                       txt = Tpl.writeStr(txt, i_name)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = errorMsg(txt, "SCodeDump.dumpPath: Unknown path.")
                     txt
@@ -3838,7 +3838,7 @@
           out_txt
         end
 
-        function dumpPathNoQual(in_txt::Tpl.Text, in_a_path::Absyn.Path) ::Tpl.Text 
+        function dumpPathNoQual(in_txt::Tpl.Text, in_a_path::Absyn.Path) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3849,7 +3849,7 @@
                       txt = dumpPath(txt, i_path)
                     txt
                   end
-                  
+
                   (txt, i_path)  => begin
                       txt = dumpPath(txt, i_path)
                     txt
@@ -3859,7 +3859,7 @@
           out_txt
         end
 
-        function dumpStringCommentOption(in_txt::Tpl.Text, in_a_cmt::Option{<:String}) ::Tpl.Text 
+        function dumpStringCommentOption(in_txt::Tpl.Text, in_a_cmt::Option{<:String}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3873,7 +3873,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("\\"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3882,7 +3882,7 @@
           out_txt
         end
 
-        function lm_139(in_txt::Tpl.Text, in_items::List{<:Absyn.TypeSpec}) ::Tpl.Text 
+        function lm_139(in_txt::Tpl.Text, in_items::List{<:Absyn.TypeSpec}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3893,7 +3893,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_ty <| rest)  => begin
                       txt = dumpTypeSpec(txt, i_ty)
                       txt = Tpl.nextIter(txt)
@@ -3905,7 +3905,7 @@
           out_txt
         end
 
-        function dumpTypeSpec(in_txt::Tpl.Text, in_a_typeSpec::Absyn.TypeSpec) ::Tpl.Text 
+        function dumpTypeSpec(in_txt::Tpl.Text, in_a_typeSpec::Absyn.TypeSpec) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3924,7 +3924,7 @@
                       txt = Tpl.writeText(txt, l_arraydim__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.TCOMPLEX(path = i_path, typeSpecs = i_typeSpecs, arrayDim = i_arrayDim))  => begin
                       l_path__str = dumpPath(Tpl.emptyTxt, i_path)
                       l_ty__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -3938,7 +3938,7 @@
                       txt = Tpl.writeText(txt, l_arraydim__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3947,7 +3947,7 @@
           out_txt
         end
 
-        function dumpArrayDimOpt(in_txt::Tpl.Text, in_a_arraydim::Option{<:Absyn.ArrayDim}) ::Tpl.Text 
+        function dumpArrayDimOpt(in_txt::Tpl.Text, in_a_arraydim::Option{<:Absyn.ArrayDim}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3958,7 +3958,7 @@
                       txt = dumpSubscripts(txt, i_ad)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -3967,7 +3967,7 @@
           out_txt
         end
 
-        function lm_142(in_txt::Tpl.Text, in_items::List{<:Absyn.Subscript}) ::Tpl.Text 
+        function lm_142(in_txt::Tpl.Text, in_items::List{<:Absyn.Subscript}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -3978,7 +3978,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_s <| rest)  => begin
                       txt = dumpSubscript(txt, i_s)
                       txt = Tpl.nextIter(txt)
@@ -3990,7 +3990,7 @@
           out_txt
         end
 
-        function dumpSubscripts(in_txt::Tpl.Text, in_a_subscripts::List{<:Absyn.Subscript}) ::Tpl.Text 
+        function dumpSubscripts(in_txt::Tpl.Text, in_a_subscripts::List{<:Absyn.Subscript}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4001,7 +4001,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_subscripts)  => begin
                       l_sub__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_sub__str = lm_142(l_sub__str, i_subscripts)
@@ -4016,7 +4016,7 @@
           out_txt
         end
 
-        function dumpSubscript(in_txt::Tpl.Text, in_a_subscript::Absyn.Subscript) ::Tpl.Text 
+        function dumpSubscript(in_txt::Tpl.Text, in_a_subscript::Absyn.Subscript) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4027,12 +4027,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(":"))
                     txt
                   end
-                  
+
                   (txt, Absyn.SUBSCRIPT(subscript = i_subscript))  => begin
                       txt = dumpExp(txt, i_subscript)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4041,7 +4041,7 @@
           out_txt
         end
 
-        function lm_145(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_145(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4052,7 +4052,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_e <| rest)  => begin
                       txt = dumpExp(txt, i_e)
                       txt = Tpl.nextIter(txt)
@@ -4064,7 +4064,7 @@
           out_txt
         end
 
-        function lm_146(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_146(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4075,7 +4075,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_e <| rest)  => begin
                       txt = dumpExp(txt, i_e)
                       txt = Tpl.nextIter(txt)
@@ -4087,7 +4087,7 @@
           out_txt
         end
 
-        function lm_147(in_txt::Tpl.Text, in_items::List{<:List{<:Absyn.Exp}}) ::Tpl.Text 
+        function lm_147(in_txt::Tpl.Text, in_items::List{<:List{<:Absyn.Exp}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4098,7 +4098,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_row <| rest)  => begin
                       txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       txt = lm_146(txt, i_row)
@@ -4112,7 +4112,7 @@
           out_txt
         end
 
-        function lm_148(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_148(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4123,7 +4123,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_e <| rest)  => begin
                       txt = dumpExp(txt, i_e)
                       txt = Tpl.nextIter(txt)
@@ -4135,7 +4135,7 @@
           out_txt
         end
 
-        function lm_149(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_149(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4146,7 +4146,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_e <| rest)  => begin
                       txt = dumpExp(txt, i_e)
                       txt = Tpl.nextIter(txt)
@@ -4158,7 +4158,7 @@
           out_txt
         end
 
-        function dumpExp(in_txt::Tpl.Text, in_a_exp::Absyn.Exp) ::Tpl.Text 
+        function dumpExp(in_txt::Tpl.Text, in_a_exp::Absyn.Exp) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4206,17 +4206,17 @@
                       txt = Tpl.writeStr(txt, intString(i_value))
                     txt
                   end
-                  
+
                   (txt, Absyn.REAL(value = i_value_1))  => begin
                       txt = Tpl.writeStr(txt, i_value_1)
                     txt
                   end
-                  
+
                   (txt, Absyn.CREF(componentRef = i_componentRef))  => begin
                       txt = dumpCref(txt, i_componentRef)
                     txt
                   end
-                  
+
                   (txt, Absyn.STRING(value = i_value_1))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("\\"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_ABS_INDENT(0))
@@ -4225,12 +4225,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("\\"))
                     txt
                   end
-                  
+
                   (txt, Absyn.BOOL(value = i_value_2))  => begin
                       txt = Tpl.writeStr(txt, Tpl.booleanString(i_value_2))
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.BINARY(exp1 = i_exp1, exp2 = i_exp2, op = i_op))  => begin
                       l_lhs__str = dumpOperand(Tpl.emptyTxt, i_exp1, i_e, true)
                       l_rhs__str = dumpOperand(Tpl.emptyTxt, i_exp2, i_e, false)
@@ -4242,7 +4242,7 @@
                       txt = Tpl.writeText(txt, l_rhs__str)
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.UNARY(exp = i_exp, op = i_op))  => begin
                       l_exp__str = dumpOperand(Tpl.emptyTxt, i_exp, i_e, false)
                       l_op__str = dumpOperator(Tpl.emptyTxt, i_op)
@@ -4250,7 +4250,7 @@
                       txt = Tpl.writeText(txt, l_exp__str)
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.LBINARY(exp1 = i_exp1, exp2 = i_exp2, op = i_op))  => begin
                       l_lhs__str = dumpOperand(Tpl.emptyTxt, i_exp1, i_e, true)
                       l_rhs__str = dumpOperand(Tpl.emptyTxt, i_exp2, i_e, false)
@@ -4262,7 +4262,7 @@
                       txt = Tpl.writeText(txt, l_rhs__str)
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.LUNARY(exp = i_exp, op = i_op))  => begin
                       l_exp__str = dumpOperand(Tpl.emptyTxt, i_exp, i_e, false)
                       l_op__str = dumpOperator(Tpl.emptyTxt, i_op)
@@ -4271,7 +4271,7 @@
                       txt = Tpl.writeText(txt, l_exp__str)
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.RELATION(exp1 = i_exp1, exp2 = i_exp2, op = i_op))  => begin
                       l_lhs__str = dumpOperand(Tpl.emptyTxt, i_exp1, i_e, true)
                       l_rhs__str = dumpOperand(Tpl.emptyTxt, i_exp2, i_e, false)
@@ -4283,20 +4283,20 @@
                       txt = Tpl.writeText(txt, l_rhs__str)
                     txt
                   end
-                  
+
                   (txt, i_exp && Absyn.IFEXP(ifExp = _))  => begin
                       txt = dumpIfExp(txt, i_exp)
                     txt
                   end
-                  
-                  (txt, Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "$array"), functionArgs = i_functionArgs))  => begin
+
+                  (txt, Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "\$array"), functionArgs = i_functionArgs))  => begin
                       l_args__str = dumpFunctionArgs(Tpl.emptyTxt, i_functionArgs)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("{"))
                       txt = Tpl.writeText(txt, l_args__str)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("}"))
                     txt
                   end
-                  
+
                   (txt, Absyn.CALL(function_ = i_function__, functionArgs = i_functionArgs))  => begin
                       l_func__str = dumpCref(Tpl.emptyTxt, i_function__)
                       l_args__str = dumpFunctionArgs(Tpl.emptyTxt, i_functionArgs)
@@ -4306,7 +4306,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.PARTEVALFUNCTION(function_ = i_function__, functionArgs = i_functionArgs))  => begin
                       l_func__str = dumpCref(Tpl.emptyTxt, i_function__)
                       l_args__str = dumpFunctionArgs(Tpl.emptyTxt, i_functionArgs)
@@ -4317,7 +4317,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ARRAY(arrayExp = i_arrayExp))  => begin
                       l_array__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_array__str = lm_145(l_array__str, i_arrayExp)
@@ -4327,7 +4327,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("}"))
                     txt
                   end
-                  
+
                   (txt, Absyn.MATRIX(matrix = i_matrix))  => begin
                       l_matrix__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING("; ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_matrix__str = lm_147(l_matrix__str, i_matrix)
@@ -4337,7 +4337,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("]"))
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.RANGE(step = SOME(i_step), start = i_start, stop = i_stop))  => begin
                       l_start__str = dumpOperand(Tpl.emptyTxt, i_start, i_e, false)
                       l_step__str = dumpOperand(Tpl.emptyTxt, i_step, i_e, false)
@@ -4349,7 +4349,7 @@
                       txt = Tpl.writeText(txt, l_stop__str)
                     txt
                   end
-                  
+
                   (txt, i_e && Absyn.RANGE(step = NONE(), start = i_start, stop = i_stop))  => begin
                       l_start__str = dumpOperand(Tpl.emptyTxt, i_start, i_e, false)
                       l_stop__str = dumpOperand(Tpl.emptyTxt, i_stop, i_e, false)
@@ -4358,7 +4358,7 @@
                       txt = Tpl.writeText(txt, l_stop__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.TUPLE(expressions = i_expressions))  => begin
                       l_tuple__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, SOME(Tpl.ST_STRING("")), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_tuple__str = lm_148(l_tuple__str, i_expressions)
@@ -4368,19 +4368,19 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.END(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("end"))
                     txt
                   end
-                  
+
                   (txt, Absyn.CODE(code = i_code))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("Code("))
                       txt = dumpCodeNode(txt, i_code)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, Absyn.AS(exp = i_exp, id = i_id))  => begin
                       l_exp__str = dumpExp(Tpl.emptyTxt, i_exp)
                       txt = Tpl.writeStr(txt, i_id)
@@ -4388,7 +4388,7 @@
                       txt = Tpl.writeText(txt, l_exp__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.CONS(head = i_head, rest = i_rest))  => begin
                       l_head__str = dumpExp(Tpl.emptyTxt, i_head)
                       l_rest__str = dumpExp(Tpl.emptyTxt, i_rest)
@@ -4397,12 +4397,12 @@
                       txt = Tpl.writeText(txt, l_rest__str)
                     txt
                   end
-                  
+
                   (txt, i_exp && Absyn.MATCHEXP(matchTy = _))  => begin
                       txt = dumpMatchExp(txt, i_exp)
                     txt
                   end
-                  
+
                   (txt, Absyn.LIST(exps = i_exps))  => begin
                       l_list__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
                       l_list__str = lm_149(l_list__str, i_exps)
@@ -4412,14 +4412,14 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("}"))
                     txt
                   end
-                  
+
                   (txt, Absyn.DOT(exp = i_exp, index = i_index))  => begin
                       txt = dumpExp(txt, i_exp)
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("."))
                       txt = dumpExp(txt, i_index)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("/* AbsynDumpTpl.dumpExp: UNHANDLED Abyn.Exp */"))
                     txt
@@ -4429,7 +4429,7 @@
           out_txt
         end
 
-        function dumpLhsExp(in_txt::Tpl.Text, in_a_lhs::Absyn.Exp) ::Tpl.Text 
+        function dumpLhsExp(in_txt::Tpl.Text, in_a_lhs::Absyn.Exp) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4442,7 +4442,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(")"))
                     txt
                   end
-                  
+
                   (txt, i_lhs)  => begin
                       txt = dumpExp(txt, i_lhs)
                     txt
@@ -4452,7 +4452,7 @@
           out_txt
         end
 
-        function fun_152(in_txt::Tpl.Text, in_mArg::Bool, in_a_op__str::Tpl.Text) ::Tpl.Text 
+        function fun_152(in_txt::Tpl.Text, in_mArg::Bool, in_a_op__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4463,7 +4463,7 @@
                       txt = Tpl.writeText(txt, a_op__str)
                     txt
                   end
-                  
+
                   (txt, _, a_op__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("("))
                       txt = Tpl.writeText(txt, a_op__str)
@@ -4475,7 +4475,7 @@
           out_txt
         end
 
-        function dumpOperand(txt::Tpl.Text, a_operand::Absyn.Exp, a_operation::Absyn.Exp, a_lhs::Bool) ::Tpl.Text 
+        function dumpOperand(txt::Tpl.Text, a_operand::Absyn.Exp, a_operation::Absyn.Exp, a_lhs::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               local ret_1::Bool
@@ -4487,7 +4487,7 @@
           out_txt
         end
 
-        function dumpIfExp(in_txt::Tpl.Text, in_a_if__exp::Absyn.Exp) ::Tpl.Text 
+        function dumpIfExp(in_txt::Tpl.Text, in_a_if__exp::Absyn.Exp) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4515,7 +4515,7 @@
                       txt = Tpl.writeText(txt, l_else__branch__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4524,7 +4524,7 @@
           out_txt
         end
 
-        function lm_155(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}) ::Tpl.Text 
+        function lm_155(in_txt::Tpl.Text, in_items::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4538,7 +4538,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, (i_cond, i_branch) <| rest)  => begin
                       l_cond__str = dumpExp(Tpl.emptyTxt, i_cond)
                       l_branch__str = dumpExp(Tpl.emptyTxt, i_branch)
@@ -4557,7 +4557,7 @@
           out_txt
         end
 
-        function dumpElseIfExp(txt::Tpl.Text, a_else__if::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}) ::Tpl.Text 
+        function dumpElseIfExp(txt::Tpl.Text, a_else__if::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_NEW_LINE()), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -4566,7 +4566,7 @@
           out_txt
         end
 
-        function fun_157(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text 
+        function fun_157(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4575,7 +4575,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("initial "))
                     txt
@@ -4585,7 +4585,7 @@
           out_txt
         end
 
-        function fun_158(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text 
+        function fun_158(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4594,7 +4594,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("initial "))
                     txt
@@ -4604,7 +4604,7 @@
           out_txt
         end
 
-        function fun_159(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text 
+        function fun_159(in_txt::Tpl.Text, in_a_boolean::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4613,7 +4613,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("initial "))
                     txt
@@ -4623,7 +4623,7 @@
           out_txt
         end
 
-        function dumpCodeNode(in_txt::Tpl.Text, in_a_code::Absyn.CodeNode) ::Tpl.Text 
+        function dumpCodeNode(in_txt::Tpl.Text, in_a_code::Absyn.CodeNode) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4644,12 +4644,12 @@
                       txt = dumpPath(txt, i_path)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_VARIABLENAME(componentRef = i_componentRef))  => begin
                       txt = dumpCref(txt, i_componentRef)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_CONSTRAINTSECTION(boolean = i_boolean, equationItemLst = i_equationItemLst))  => begin
                       l_initial__str = fun_157(Tpl.emptyTxt, i_boolean)
                       l_eql__str = dumpEquationItems(Tpl.emptyTxt, i_equationItemLst)
@@ -4660,7 +4660,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_EQUATIONSECTION(boolean = i_boolean, equationItemLst = i_equationItemLst))  => begin
                       l_initial__str = fun_158(Tpl.emptyTxt, i_boolean)
                       l_eql__str = dumpEquationItems(Tpl.emptyTxt, i_equationItemLst)
@@ -4671,7 +4671,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_ALGORITHMSECTION(boolean = i_boolean, algorithmItemLst = i_algorithmItemLst))  => begin
                       l_initial__str = fun_159(Tpl.emptyTxt, i_boolean)
                       l_algs__str = dumpAlgorithmItems(Tpl.emptyTxt, i_algorithmItemLst)
@@ -4682,22 +4682,22 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_ELEMENT(element = i_element))  => begin
                       txt = dumpElement(txt, i_element, Dump.defaultDumpOptions)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_EXPRESSION(exp = i_exp))  => begin
                       txt = dumpExp(txt, i_exp)
                     txt
                   end
-                  
+
                   (txt, Absyn.C_MODIFICATION(modification = i_modification))  => begin
                       txt = dumpModification(txt, i_modification)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4706,7 +4706,7 @@
           out_txt
         end
 
-        function lm_161(in_txt::Tpl.Text, in_items::List{<:Absyn.Case}) ::Tpl.Text 
+        function lm_161(in_txt::Tpl.Text, in_items::List{<:Absyn.Case}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4717,7 +4717,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_c <| rest)  => begin
                       txt = dumpMatchCase(txt, i_c)
                       txt = Tpl.nextIter(txt)
@@ -4729,7 +4729,7 @@
           out_txt
         end
 
-        function dumpMatchExp(in_txt::Tpl.Text, in_a_match__exp::Absyn.Exp) ::Tpl.Text 
+        function dumpMatchExp(in_txt::Tpl.Text, in_a_match__exp::Absyn.Exp) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4768,7 +4768,7 @@
                       txt = Tpl.writeText(txt, l_ty__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4777,7 +4777,7 @@
           out_txt
         end
 
-        function dumpMatchType(in_txt::Tpl.Text, in_a_match__type::Absyn.MatchType) ::Tpl.Text 
+        function dumpMatchType(in_txt::Tpl.Text, in_a_match__type::Absyn.MatchType) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4787,12 +4787,12 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("match"))
                     txt
                   end
-                  
+
                   (txt, Absyn.MATCHCONTINUE(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("matchcontinue"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4801,7 +4801,7 @@
           out_txt
         end
 
-        function lm_164(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementItem}) ::Tpl.Text 
+        function lm_164(in_txt::Tpl.Text, in_items::List{<:Absyn.ElementItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4812,7 +4812,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_decl <| rest)  => begin
                       txt = dumpElementItem(txt, i_decl, Dump.defaultDumpOptions)
                       txt = Tpl.nextIter(txt)
@@ -4824,7 +4824,7 @@
           out_txt
         end
 
-        function dumpMatchLocals(in_txt::Tpl.Text, in_a_locals::List{<:Absyn.ElementItem}) ::Tpl.Text 
+        function dumpMatchLocals(in_txt::Tpl.Text, in_a_locals::List{<:Absyn.ElementItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4834,7 +4834,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_locals)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_LINE("  local\\n"))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(4))
@@ -4851,7 +4851,7 @@
           out_txt
         end
 
-        function lm_166(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text 
+        function lm_166(in_txt::Tpl.Text, in_items::List{<:Absyn.EquationItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4862,7 +4862,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_eq <| rest)  => begin
                       txt = dumpEquationItem(txt, i_eq)
                       txt = Tpl.nextIter(txt)
@@ -4874,7 +4874,7 @@
           out_txt
         end
 
-        function lm_167(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text 
+        function lm_167(in_txt::Tpl.Text, in_items::List{<:Absyn.AlgorithmItem}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4885,7 +4885,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_alg <| rest)  => begin
                       txt = dumpAlgorithmItem(txt, i_alg)
                       txt = Tpl.nextIter(txt)
@@ -4897,7 +4897,7 @@
           out_txt
         end
 
-        function dumpMatchEquations(in_txt::Tpl.Text, in_a_cp::Absyn.ClassPart) ::Tpl.Text 
+        function dumpMatchEquations(in_txt::Tpl.Text, in_a_cp::Absyn.ClassPart) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4908,7 +4908,7 @@
                   (txt, Absyn.EQUATIONS(contents =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.EQUATIONS(contents = i_eql))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING_LIST(list("\\n", "  equation\\n"), true))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(4))
@@ -4918,11 +4918,11 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, Absyn.ALGORITHMS(contents =  nil()))  => begin
                     txt
                   end
-                  
+
                   (txt, Absyn.ALGORITHMS(contents = i_algs))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING_LIST(list("\\n", "  algorithm\\n"), true))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(4))
@@ -4932,7 +4932,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4941,7 +4941,7 @@
           out_txt
         end
 
-        function fun_169(in_txt::Tpl.Text, in_a_patternGuard::Option{<:Absyn.Exp}) ::Tpl.Text 
+        function fun_169(in_txt::Tpl.Text, in_a_patternGuard::Option{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4954,7 +4954,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(" "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -4963,7 +4963,7 @@
           out_txt
         end
 
-        function fun_170(in_txt::Tpl.Text, in_a_eql__str::Tpl.Text, in_a_result__str::Tpl.Text) ::Tpl.Text 
+        function fun_170(in_txt::Tpl.Text, in_a_eql__str::Tpl.Text, in_a_result__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -4975,7 +4975,7 @@
                       txt = Tpl.writeText(txt, a_result__str)
                     txt
                   end
-                  
+
                   (txt, _, a_result__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING_LIST(list("\\n", "  then\\n"), true))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(4))
@@ -4988,7 +4988,7 @@
           out_txt
         end
 
-        function fun_171(in_txt::Tpl.Text, in_a_eql__str::Tpl.Text, in_a_result__str::Tpl.Text) ::Tpl.Text 
+        function fun_171(in_txt::Tpl.Text, in_a_eql__str::Tpl.Text, in_a_result__str::Tpl.Text) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5000,7 +5000,7 @@
                       txt = Tpl.writeText(txt, a_result__str)
                     txt
                   end
-                  
+
                   (txt, _, a_result__str)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING_LIST(list("\\n", "  then\\n"), true))
                       txt = Tpl.pushBlock(txt, Tpl.BT_INDENT(4))
@@ -5013,7 +5013,7 @@
           out_txt
         end
 
-        function dumpMatchCase(in_txt::Tpl.Text, in_a_c::Absyn.Case) ::Tpl.Text 
+        function dumpMatchCase(in_txt::Tpl.Text, in_a_c::Absyn.Case) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5047,7 +5047,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ELSE(classPart = i_classPart, result = i_result, comment = i_comment))  => begin
                       l_eql__str = dumpMatchEquations(Tpl.emptyTxt, i_classPart)
                       l_result__str = dumpExp(Tpl.emptyTxt, i_result)
@@ -5060,7 +5060,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(";"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5069,7 +5069,7 @@
           out_txt
         end
 
-        function dumpOperator(in_txt::Tpl.Text, in_a_op::Absyn.Operator) ::Tpl.Text 
+        function dumpOperator(in_txt::Tpl.Text, in_a_op::Absyn.Operator) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5079,117 +5079,117 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("+"))
                     txt
                   end
-                  
+
                   (txt, Absyn.SUB(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("-"))
                     txt
                   end
-                  
+
                   (txt, Absyn.MUL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("*"))
                     txt
                   end
-                  
+
                   (txt, Absyn.DIV(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("/"))
                     txt
                   end
-                  
+
                   (txt, Absyn.POW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("^"))
                     txt
                   end
-                  
+
                   (txt, Absyn.UPLUS(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("+"))
                     txt
                   end
-                  
+
                   (txt, Absyn.UMINUS(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("-"))
                     txt
                   end
-                  
+
                   (txt, Absyn.ADD_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".+"))
                     txt
                   end
-                  
+
                   (txt, Absyn.SUB_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".-"))
                     txt
                   end
-                  
+
                   (txt, Absyn.MUL_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".*"))
                     txt
                   end
-                  
+
                   (txt, Absyn.DIV_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("./"))
                     txt
                   end
-                  
+
                   (txt, Absyn.POW_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".^"))
                     txt
                   end
-                  
+
                   (txt, Absyn.UPLUS_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".+"))
                     txt
                   end
-                  
+
                   (txt, Absyn.UMINUS_EW(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(".-"))
                     txt
                   end
-                  
+
                   (txt, Absyn.AND(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("and"))
                     txt
                   end
-                  
+
                   (txt, Absyn.OR(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("or"))
                     txt
                   end
-                  
+
                   (txt, Absyn.NOT(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("not"))
                     txt
                   end
-                  
+
                   (txt, Absyn.LESS(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("<"))
                     txt
                   end
-                  
+
                   (txt, Absyn.LESSEQ(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("<="))
                     txt
                   end
-                  
+
                   (txt, Absyn.GREATER(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(">"))
                     txt
                   end
-                  
+
                   (txt, Absyn.GREATEREQ(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(">="))
                     txt
                   end
-                  
+
                   (txt, Absyn.EQUAL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("=="))
                     txt
                   end
-                  
+
                   (txt, Absyn.NEQUAL(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("<>"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5198,7 +5198,7 @@
           out_txt
         end
 
-        function fun_174(in_txt::Tpl.Text, in_mArg::Bool) ::Tpl.Text 
+        function fun_174(in_txt::Tpl.Text, in_mArg::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5207,7 +5207,7 @@
                   (txt, false)  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("_"))
                     txt
@@ -5217,7 +5217,7 @@
           out_txt
         end
 
-        function dumpCref(in_txt::Tpl.Text, in_a_cref::Absyn.ComponentRef) ::Tpl.Text 
+        function dumpCref(in_txt::Tpl.Text, in_a_cref::Absyn.ComponentRef) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5234,30 +5234,30 @@
                       txt = dumpCref(txt, i_componentRef)
                     txt
                   end
-                  
+
                   (txt, Absyn.CREF_IDENT(name = i_name, subscripts = i_subscripts))  => begin
                       txt = Tpl.writeStr(txt, i_name)
                       txt = dumpSubscripts(txt, i_subscripts)
                     txt
                   end
-                  
+
                   (txt, Absyn.CREF_FULLYQUALIFIED(componentRef = i_componentRef))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("."))
                       txt = dumpCref(txt, i_componentRef)
                     txt
                   end
-                  
+
                   (txt, Absyn.WILD(__))  => begin
                       ret_0 = Config.acceptMetaModelicaGrammar()
                       txt = fun_174(txt, ret_0)
                     txt
                   end
-                  
+
                   (txt, Absyn.ALLWILD(__))  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("__"))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5266,7 +5266,7 @@
           out_txt
         end
 
-        function lm_176(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text 
+        function lm_176(in_txt::Tpl.Text, in_items::List{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5277,7 +5277,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_arg <| rest)  => begin
                       txt = dumpExp(txt, i_arg)
                       txt = Tpl.nextIter(txt)
@@ -5289,7 +5289,7 @@
           out_txt
         end
 
-        function lm_177(in_txt::Tpl.Text, in_items::List{<:Absyn.NamedArg}) ::Tpl.Text 
+        function lm_177(in_txt::Tpl.Text, in_items::List{<:Absyn.NamedArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5300,7 +5300,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_narg <| rest)  => begin
                       txt = dumpNamedArg(txt, i_narg)
                       txt = Tpl.nextIter(txt)
@@ -5312,7 +5312,7 @@
           out_txt
         end
 
-        function fun_178(in_txt::Tpl.Text, in_a_argNames::List{<:Absyn.NamedArg}) ::Tpl.Text 
+        function fun_178(in_txt::Tpl.Text, in_a_argNames::List{<:Absyn.NamedArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5321,7 +5321,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING(", "))
                     txt
@@ -5331,7 +5331,7 @@
           out_txt
         end
 
-        function fun_179(in_txt::Tpl.Text, in_a_args__str::Tpl.Text, in_a_argNames::List{<:Absyn.NamedArg}) ::Tpl.Text 
+        function fun_179(in_txt::Tpl.Text, in_a_args__str::Tpl.Text, in_a_argNames::List{<:Absyn.NamedArg}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5341,7 +5341,7 @@
                   (txt, Tpl.MEM_TEXT(tokens =  nil()), _)  => begin
                     txt
                   end
-                  
+
                   (txt, _, a_argNames)  => begin
                       txt = fun_178(txt, a_argNames)
                     txt
@@ -5351,7 +5351,7 @@
           out_txt
         end
 
-        function lm_180(in_txt::Tpl.Text, in_items::Absyn.ForIterators) ::Tpl.Text 
+        function lm_180(in_txt::Tpl.Text, in_items::Absyn.ForIterators) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5362,7 +5362,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_i <| rest)  => begin
                       txt = dumpForIterator(txt, i_i)
                       txt = Tpl.nextIter(txt)
@@ -5374,7 +5374,7 @@
           out_txt
         end
 
-        function fun_181(in_txt::Tpl.Text, in_a_iterType::Absyn.ReductionIterType) ::Tpl.Text 
+        function fun_181(in_txt::Tpl.Text, in_a_iterType::Absyn.ReductionIterType) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5384,7 +5384,7 @@
                       txt = Tpl.writeTok(txt, Tpl.ST_STRING("threaded "))
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5393,7 +5393,7 @@
           out_txt
         end
 
-        function dumpFunctionArgs(in_txt::Tpl.Text, in_a_args::Absyn.FunctionArgs) ::Tpl.Text 
+        function dumpFunctionArgs(in_txt::Tpl.Text, in_a_args::Absyn.FunctionArgs) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5422,7 +5422,7 @@
                       txt = Tpl.writeText(txt, l_namedargs__str)
                     txt
                   end
-                  
+
                   (txt, Absyn.FOR_ITER_FARG(exp = i_exp, iterators = i_iterators, iterType = i_iterType))  => begin
                       l_exp__str = dumpExp(Tpl.emptyTxt, i_exp)
                       l_iter__str = Tpl.pushIter(Tpl.emptyTxt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -5435,7 +5435,7 @@
                       txt = Tpl.writeText(txt, l_iter__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5444,7 +5444,7 @@
           out_txt
         end
 
-        function dumpNamedArg(in_txt::Tpl.Text, in_a_narg::Absyn.NamedArg) ::Tpl.Text 
+        function dumpNamedArg(in_txt::Tpl.Text, in_a_narg::Absyn.NamedArg) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5458,7 +5458,7 @@
                       txt = dumpExp(txt, i_argValue)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5467,7 +5467,7 @@
           out_txt
         end
 
-        function lm_184(in_txt::Tpl.Text, in_items::Absyn.ForIterators) ::Tpl.Text 
+        function lm_184(in_txt::Tpl.Text, in_items::Absyn.ForIterators) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5478,7 +5478,7 @@
                   (txt,  nil())  => begin
                     txt
                   end
-                  
+
                   (txt, i_i <| rest)  => begin
                       txt = dumpForIterator(txt, i_i)
                       txt = Tpl.nextIter(txt)
@@ -5490,7 +5490,7 @@
           out_txt
         end
 
-        function dumpForIterators(txt::Tpl.Text, a_iters::Absyn.ForIterators) ::Tpl.Text 
+        function dumpForIterators(txt::Tpl.Text, a_iters::Absyn.ForIterators) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = Tpl.pushIter(txt, Tpl.ITER_OPTIONS(0, NONE(), SOME(Tpl.ST_STRING(", ")), 0, 0, Tpl.ST_NEW_LINE(), 0, Tpl.ST_NEW_LINE()))
@@ -5499,7 +5499,7 @@
           out_txt
         end
 
-        function fun_186(in_txt::Tpl.Text, in_a_range::Option{<:Absyn.Exp}) ::Tpl.Text 
+        function fun_186(in_txt::Tpl.Text, in_a_range::Option{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5513,7 +5513,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5522,7 +5522,7 @@
           out_txt
         end
 
-        function fun_187(in_txt::Tpl.Text, in_a_guardExp::Option{<:Absyn.Exp}) ::Tpl.Text 
+        function fun_187(in_txt::Tpl.Text, in_a_guardExp::Option{<:Absyn.Exp}) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5536,7 +5536,7 @@
                       txt = Tpl.popBlock(txt)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5545,7 +5545,7 @@
           out_txt
         end
 
-        function dumpForIterator(in_txt::Tpl.Text, in_a_iterator::Absyn.ForIterator) ::Tpl.Text 
+        function dumpForIterator(in_txt::Tpl.Text, in_a_iterator::Absyn.ForIterator) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -5564,7 +5564,7 @@
                       txt = Tpl.writeText(txt, l_range__str)
                     txt
                   end
-                  
+
                   (txt, _)  => begin
                     txt
                   end
@@ -5573,7 +5573,7 @@
           out_txt
         end
 
-        function errorMsg(txt::Tpl.Text, a_errMessage::String) ::Tpl.Text 
+        function errorMsg(txt::Tpl.Text, a_errMessage::String) ::Tpl.Text
               local out_txt::Tpl.Text
 
               Tpl.addTemplateError(a_errMessage)
@@ -5584,8 +5584,8 @@
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()
   end
-  
-  module Connect 
+
+  module Connect
 
 
     using MetaModelica
@@ -5593,13 +5593,13 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Face 
-    @UniontypeDecl ConnectorType 
-    @UniontypeDecl ConnectorElement 
-    @UniontypeDecl SetTrieNode 
-    @UniontypeDecl OuterConnect 
-    @UniontypeDecl Sets 
-    @UniontypeDecl Set 
+    @UniontypeDecl Face
+    @UniontypeDecl ConnectorType
+    @UniontypeDecl ConnectorElement
+    @UniontypeDecl SetTrieNode
+    @UniontypeDecl OuterConnect
+    @UniontypeDecl Sets
+    @UniontypeDecl Set
 
          #= /*
          * This file is part of OpenModelica.
@@ -5719,7 +5719,7 @@
          @Uniontype OuterConnect begin
               @Record OUTERCONNECT begin
 
-                       scope #= the scope where this connect was created =#::Prefix.Prefix
+                       scope #= the scope where this connect was created =#::Prefix.PrefixType
                        cr1 #= the lhs component reference =#::DAE.ComponentRef
                        io1 #= inner/outer attribute for cr1 component =#::Absyn.InnerOuter
                        f1 #= the face of the lhs component =#::Face

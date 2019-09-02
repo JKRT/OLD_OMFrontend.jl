@@ -1,4 +1,4 @@
-  module GraphML 
+  module GraphML
 
 
     using MetaModelica
@@ -6,19 +6,19 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl GraphInfo 
-    @UniontypeDecl Graph 
-    @UniontypeDecl Node 
-    @UniontypeDecl Edge 
-    @UniontypeDecl Attribute 
-    @UniontypeDecl NodeLabel 
-    @UniontypeDecl EdgeLabel 
-    @UniontypeDecl FontStyle 
-    @UniontypeDecl ShapeType 
-    @UniontypeDecl LineType 
-    @UniontypeDecl ArrowType 
-    @UniontypeDecl AttributeType 
-    @UniontypeDecl AttributeTarget 
+    @UniontypeDecl GraphInfo
+    @UniontypeDecl Graph
+    @UniontypeDecl Node
+    @UniontypeDecl Edge
+    @UniontypeDecl Attribute
+    @UniontypeDecl NodeLabel
+    @UniontypeDecl EdgeLabel
+    @UniontypeDecl FontStyle
+    @UniontypeDecl ShapeType
+    @UniontypeDecl LineType
+    @UniontypeDecl ArrowType
+    @UniontypeDecl AttributeType
+    @UniontypeDecl AttributeTarget
 
          #= /*
          * This file is part of OpenModelica.
@@ -52,8 +52,6 @@
          */ =#
 
         import ListUtil
-
-        import GraphMLDumpTpl
 
         import Tpl
 
@@ -377,7 +375,7 @@
 
          #= author: marcusw
           Creates a new and empty graphInfo. =#
-        function createGraphInfo() ::GraphInfo 
+        function createGraphInfo() ::GraphInfo
               local oGraphInfo::GraphInfo
 
               oGraphInfo = GRAPHINFO(nil, 0, nil, 0, nil, 0, nil, "gi1", "gi2")
@@ -386,7 +384,7 @@
 
          #= author: marcusw
           Adds a new graph to the given graphInfo. =#
-        function addGraph(id::String, directed::Bool, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Graph, ModelicaInteger}} 
+        function addGraph(id::String, directed::Bool, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Graph, ModelicaInteger}}
               local oGraph::Tuple{Graph, ModelicaInteger}
               local oGraphInfo::GraphInfo
 
@@ -418,7 +416,7 @@
 
          #= author: marcusw
           Adds a new node to the given graph which is part of the given graphInfo. =#
-        function addNode(id::String, backgroundColor::String, borderWidth::ModelicaReal, nodeLabels::List{<:NodeLabel}, shapeType::ShapeType, optDesc::Option{<:String}, attValues::List{<:Tuple{<:ModelicaInteger, String}}, iGraphIdx::ModelicaInteger, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Node, ModelicaInteger}} 
+        function addNode(id::String, backgroundColor::String, borderWidth::ModelicaReal, nodeLabels::List{<:NodeLabel}, shapeType::ShapeType, optDesc::Option{<:String}, attValues::List{<:Tuple{<:ModelicaInteger, String}}, iGraphIdx::ModelicaInteger, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Node, ModelicaInteger}}
               local oNode::Tuple{Node, ModelicaInteger}
               local oGraphInfo::GraphInfo
 
@@ -464,7 +462,7 @@
 
          #= author: marcusw
           Adds a new group node to the given graphInfo. The created node contains a new graph which is returned as second output-argument. =#
-        function addGroupNode(id::String, iGraphIdx::ModelicaInteger, isFolded::Bool, iHeader::String, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Node, ModelicaInteger}, Tuple{Graph, ModelicaInteger}} 
+        function addGroupNode(id::String, iGraphIdx::ModelicaInteger, isFolded::Bool, iHeader::String, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Node, ModelicaInteger}, Tuple{Graph, ModelicaInteger}}
               local oGraph::Tuple{Graph, ModelicaInteger}
               local oNode::Tuple{Node, ModelicaInteger}
               local oGraphInfo::GraphInfo
@@ -523,7 +521,7 @@
 
          #= author: marcusw
           Adds a new edge to the graphInfo-structure. Edges are always added to the top-level graph. =#
-        function addEdge(id::String, target::String, source::String, color::String, lineType::LineType, lineWidth::ModelicaReal, smooth::Bool, labels::List{<:EdgeLabel}, arrows::Tuple{<:ArrowType, ArrowType}, attValues::List{<:Tuple{<:ModelicaInteger, String}}, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Edge, ModelicaInteger}} 
+        function addEdge(id::String, target::String, source::String, color::String, lineType::LineType, lineWidth::ModelicaReal, smooth::Bool, labels::List{<:EdgeLabel}, arrows::Tuple{<:ArrowType, ArrowType}, attValues::List{<:Tuple{<:ModelicaInteger, String}}, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Edge, ModelicaInteger}}
               local oEdge::Tuple{Edge, ModelicaInteger}
               local oGraphInfo::GraphInfo
 
@@ -558,7 +556,7 @@
          #= author: marcusw
           Adds a new attribute to the given graphInfo.
           These attributes can be used by graphs, nodes and edges to display some additional informations. =#
-        function addAttribute(defaultValue::String, name::String, attType::AttributeType, attTarget::AttributeTarget, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Attribute, ModelicaInteger}} 
+        function addAttribute(defaultValue::String, name::String, attType::AttributeType, attTarget::AttributeTarget, iGraphInfo::GraphInfo) ::Tuple{GraphInfo, Tuple{Attribute, ModelicaInteger}}
               local oAttribute::Tuple{Attribute, ModelicaInteger}
               local oGraphInfo::GraphInfo
 
@@ -593,7 +591,7 @@
 
          #= author: marcusw
           Adds a new value for a given attribute to the graph. =#
-        function addGraphAttributeValue(iValue::Tuple{<:ModelicaInteger, String}, iGraphIdx::ModelicaInteger, iGraphInfo::GraphInfo) ::GraphInfo 
+        function addGraphAttributeValue(iValue::Tuple{<:ModelicaInteger, String}, iGraphIdx::ModelicaInteger, iGraphInfo::GraphInfo) ::GraphInfo
               local oGraphInfo::GraphInfo
 
                #= values of graphinfo
@@ -646,7 +644,7 @@
          #= author: marcusw
           This function will return the top-level graph (usually with index 1) if there is one in the graphInfo-structure.
           Otherwise it will return NONE(). =#
-        function getMainGraph(iGraphInfo::GraphInfo) ::Option{Tuple{ModelicaInteger, Graph}} 
+        function getMainGraph(iGraphInfo::GraphInfo) ::Option{Tuple{ModelicaInteger, Graph}}
               local oGraph::Option{Tuple{ModelicaInteger, Graph}}
 
               local graphs::List{Graph}
@@ -657,7 +655,7 @@
                   GRAPHINFO(graphCount = 0)  => begin
                     NONE()
                   end
-                  
+
                   GRAPHINFO(graphs = graphs)  => begin
                       firstGraph = listHead(graphs)
                     SOME((1, firstGraph))
@@ -667,7 +665,7 @@
           oGraph
         end
 
-        function getAttributeByNameAndTarget(iAttributeName::String, iAttributeTarget::AttributeTarget, iGraphInfo::GraphInfo) ::Option{Tuple{Attribute, ModelicaInteger}} 
+        function getAttributeByNameAndTarget(iAttributeName::String, iAttributeTarget::AttributeTarget, iGraphInfo::GraphInfo) ::Option{Tuple{Attribute, ModelicaInteger}}
               local oAttribute::Option{Tuple{Attribute, ModelicaInteger}}
 
               local attributes::List{Attribute}
@@ -679,7 +677,7 @@
                       tmpRes = getAttributeByNameAndTargetTail(attributes, iAttributeName, iAttributeTarget)
                     tmpRes
                   end
-                  
+
                   (_, _, GRAPHINFO(attributes = attributes))  => begin
                       tmpRes = getAttributeByNameAndTargetTail(attributes, iAttributeName, iAttributeTarget)
                     tmpRes
@@ -689,7 +687,7 @@
           oAttribute
         end
 
-        function getAttributeByNameAndTargetTail(iList::List{<:Attribute}, iAttributeName::String, iAttributeTarget::AttributeTarget) ::Option{Tuple{Attribute, ModelicaInteger}} 
+        function getAttributeByNameAndTargetTail(iList::List{<:Attribute}, iAttributeName::String, iAttributeTarget::AttributeTarget) ::Option{Tuple{Attribute, ModelicaInteger}}
               local oAttribute::Option{Tuple{Attribute, ModelicaInteger}}
 
               local rest::List{Attribute}
@@ -706,12 +704,12 @@
                       @match true = compareAttributeTargets(iAttributeTarget, attTarget)
                     SOME((head, attIdx))
                   end
-                  
+
                   (head <| rest, _, _)  => begin
                       tmpAttribute = getAttributeByNameAndTargetTail(rest, iAttributeName, iAttributeTarget)
                     tmpAttribute
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -720,7 +718,7 @@
           oAttribute
         end
 
-        function compareAttributeTargets(iTarget1::AttributeTarget, iTarget2::AttributeTarget) ::Bool 
+        function compareAttributeTargets(iTarget1::AttributeTarget, iTarget2::AttributeTarget) ::Bool
               local oEqual::Bool
 
               local tarInt1::ModelicaInteger
@@ -732,7 +730,7 @@
           oEqual
         end
 
-        function compareAttributeTarget0(iTarget::AttributeTarget) ::ModelicaInteger 
+        function compareAttributeTarget0(iTarget::AttributeTarget) ::ModelicaInteger
               local oCodec::ModelicaInteger
 
               oCodec = begin
@@ -740,11 +738,11 @@
                   TARGET_NODE(__)  => begin
                     0
                   end
-                  
+
                   TARGET_EDGE(__)  => begin
                     1
                   end
-                  
+
                   TARGET_GRAPH(__)  => begin
                     1
                   end
@@ -762,16 +760,12 @@
 
          #= author: marcusw
           Dumps the graph into a *.graphml-file. =#
-        function dumpGraph(iGraphInfo::GraphInfo, iFileName::String)  
-              local iGraphInfoArr::GraphInfo
-
-              iGraphInfoArr = convertToGraphInfoArr(iGraphInfo)
-              Tpl.tplNoret2(GraphMLDumpTpl.dumpGraphInfo, iGraphInfoArr, iFileName)
+        function dumpGraph(iGraphInfo::GraphInfo, iFileName::String)
         end
 
          #= author: marcusw
           Converts the given GRAPHINFO-object into a GRAPHINFOARR-object. =#
-        function convertToGraphInfoArr(iGraphInfo::GraphInfo) ::GraphInfo 
+        function convertToGraphInfoArr(iGraphInfo::GraphInfo) ::GraphInfo
               local oGraphInfo::GraphInfo
 
                #= values of graphinfo
@@ -810,7 +804,7 @@
          #=  -------------------------
          =#
 
-        function printGraphInfo(iGraphInfo::GraphInfo)  
+        function printGraphInfo(iGraphInfo::GraphInfo)
               local graphs::List{Graph}
               local graphCount::ModelicaInteger
                #= number of graphs in the graphs list
@@ -833,7 +827,7 @@
               print("graphCount: " + intString(graphCount) + "\\n")
         end
 
-        function printNode(node::Node)  
+        function printNode(node::Node)
               local id::String
               local atts::String
               local color::String

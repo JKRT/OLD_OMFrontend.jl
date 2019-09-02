@@ -1,4 +1,4 @@
-  module Ceval 
+  module Ceval
 
 
     using MetaModelica
@@ -117,7 +117,7 @@
 
         import MetaModelica.Dangerous.listReverseInPlace
 
-         #= 
+         #=
           This function is used when the value of a constant expression is
           needed.  It takes an environment and an expression and calculates
           its value.
@@ -125,7 +125,7 @@
           interactive environment (implicit instantiation), in which case function
           calls are evaluated.
           The last argument is an optional dimension. =#
-        function ceval(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg = Absyn.NO_MSG(), numIter::ModelicaInteger = 0 #= Maximum recursion depth =#) ::Tuple{FCore.Cache, Values.Value} 
+        function ceval(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg = Absyn.NO_MSG(), numIter::ModelicaInteger = 0 #= Maximum recursion depth =#) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -133,7 +133,7 @@
           (outCache, outValue)
         end
 
-        function cevalWork1(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger #= Maximum recursion depth =#, iterReached::Bool) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalWork1(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger #= Maximum recursion depth =#, iterReached::Bool) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -147,7 +147,7 @@
                       (outCache, outValue) = cevalWork2(inCache, inEnv, inExp, inBoolean, inMsg, numIter)
                     (outCache, outValue)
                   end
-                  
+
                   (_, _, _, _, Absyn.MSG(info = info), _, true)  => begin
                       str1 = intString(Global.recursionDepthLimit)
                       str2 = ExpressionDump.printExpStr(inExp)
@@ -159,7 +159,7 @@
           (outCache, outValue)
         end
 
-         #= 
+         #=
           This function is used when the value of a constant expression is
           needed.  It takes an environment and an expression and calculates
           its value.
@@ -167,7 +167,7 @@
           interactive environment (implicit instantiation), in which case function
           calls are evaluated.
           The last argument is an optional dimension. =#
-        function cevalWork2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalWork2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -285,37 +285,37 @@
                   (cache, _, DAE.ICONST(integer = i), _, _, _)  => begin
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, _, DAE.RCONST(real = r), _, _, _)  => begin
                     (cache, Values.REAL(r))
                   end
-                  
+
                   (cache, _, DAE.SCONST(string = s), _, _, _)  => begin
                     (cache, Values.STRING(s))
                   end
-                  
+
                   (cache, _, DAE.BCONST(bool = b), _, _, _)  => begin
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, DAE.ENUM_LITERAL(name = name, index = i), _, _, _)  => begin
                     (cache, Values.ENUM_LITERAL(name, i))
                   end
-                  
+
                   (cache, env, DAE.CODE(code = Absyn.C_EXPRESSION(exp = exp)), impl, msg, _)  => begin
                       (cache, exp_1) = cevalAstExp(cache, env, exp, impl, msg, AbsynUtil.dummyInfo)
                     (cache, Values.CODE(Absyn.C_EXPRESSION(exp_1)))
                   end
-                  
+
                   (cache, env, DAE.CODE(code = Absyn.C_ELEMENT(element = elt)), impl, msg, _)  => begin
                       (cache, elt_1) = cevalAstElt(cache, env, elt, impl, msg)
                     (cache, Values.CODE(Absyn.C_ELEMENT(elt_1)))
                   end
-                  
+
                   (cache, _, DAE.CODE(code = c), _, _, _)  => begin
                     (cache, Values.CODE(c))
                   end
-                  
+
                   (cache, env, DAE.ARRAY(array = es, ty = DAE.T_ARRAY(dims = arrayDims)), impl, msg, _)  => begin
                       (cache, es_1) = cevalList(cache, env, es, impl, msg, numIter)
                       v = begin
@@ -325,7 +325,7 @@
                               v = Values.ARRAY(es_1, dims)
                             v
                           end
-                          
+
                           _  => begin
                                 v = ValuesUtil.makeArray(es_1)
                               v
@@ -334,110 +334,110 @@
                       end
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.MATRIX(matrix = expll, ty = DAE.T_ARRAY(dims = arrayDims)), impl, msg, _)  => begin
                       dims = ListUtil.map(arrayDims, Expression.dimensionSize)
                       (cache, elts) = cevalMatrixElt(cache, env, expll, impl, msg, numIter + 1)
                     (cache, Values.ARRAY(elts, dims))
                   end
-                  
+
                   (cache, env, DAE.LIST(valList = expl), impl, msg, _)  => begin
                       (cache, es_1) = cevalList(cache, env, expl, impl, msg, numIter)
                     (cache, Values.LIST(es_1))
                   end
-                  
+
                   (cache, env, DAE.BOX(exp = e1), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, e1, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.UNBOX(exp = e1), impl, msg, _)  => begin
                       @match (cache, Values.META_BOX(v)) = ceval(cache, env, e1, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.CONS(car = e1, cdr = e2), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, e1, impl, msg, numIter + 1)
                       @match (cache, Values.LIST(vallst)) = ceval(cache, env, e2, impl, msg, numIter)
                     (cache, Values.LIST(_cons(v, vallst)))
                   end
-                  
+
                   (_, _, DAE.CREF(componentRef = cr, ty = DAE.T_FUNCTION_REFERENCE_VAR(__)), _, Absyn.MSG(info = info), _)  => begin
                       str = ComponentReference.crefStr(cr)
                       Error.addSourceMessage(Error.META_CEVAL_FUNCTION_REFERENCE, list(str), info)
                     fail()
                   end
-                  
+
                   (_, _, DAE.CREF(componentRef = cr, ty = DAE.T_FUNCTION_REFERENCE_FUNC(__)), _, Absyn.MSG(info = info), _)  => begin
                       str = ComponentReference.crefStr(cr)
                       Error.addSourceMessage(Error.META_CEVAL_FUNCTION_REFERENCE, list(str), info)
                     fail()
                   end
-                  
+
                   (cache, env, DAE.METARECORDCALL(path = funcpath, args = expl, fieldNames = fieldNames, index = index), impl, msg, _)  => begin
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                     (cache, Values.RECORD(funcpath, vallst, fieldNames, index))
                   end
-                  
+
                   (cache, _, DAE.META_OPTION(NONE()), _, _, _)  => begin
                     (cache, Values.OPTION(NONE()))
                   end
-                  
+
                   (cache, env, DAE.META_OPTION(SOME(expExp)), impl, msg, _)  => begin
                       (cache, value) = ceval(cache, env, expExp, impl, msg, numIter + 1)
                     (cache, Values.OPTION(SOME(value)))
                   end
-                  
+
                   (cache, env, DAE.META_TUPLE(expl), impl, msg, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                     (cache, Values.META_TUPLE(vallst))
                   end
-                  
+
                   (cache, env, DAE.TUPLE(expl), impl, msg, _)  => begin
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                     (cache, Values.TUPLE(vallst))
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), false, msg, _)  => begin
                       (cache, v) = cevalCref(cache, env, cr, false, msg, numIter + 1) #= When in interactive mode, always evaluate crefs, i.e non-implicit mode.. =#
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), impl, msg, _)  => begin
                       (cache, v) = cevalCref(cache, env, cr, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, expExp, impl, msg, _)  => begin
                       (cache, v) = cevalBuiltin(cache, env, expExp, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, expLst = DAE.ICONST(0) <| expExp <|  nil(), attr = DAE.CALL_ATTR(isImpure = false)), impl, msg, _)  => begin
                       @match Absyn.IDENT("smooth") = AbsynUtil.makeNotFullyQualified(funcpath)
                       (cache, value) = ceval(cache, env, expExp, impl, msg, numIter + 1)
                     (cache, value)
                   end
-                  
+
                   (cache, env, e && DAE.CALL(path = funcpath, expLst = expl, attr = DAE.CALL_ATTR(isImpure = false)), impl, msg, _)  => begin
                       @match false = AbsynUtil.pathEqual(Absyn.QUALIFIED("Connection", Absyn.IDENT("isRoot")), funcpath)
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                       (cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
                     (cache, newval)
                   end
-                  
+
                   (cache, env, DAE.CAST(ty = ty, exp = e), impl, msg, _)  => begin
                       @match true = Types.isRecord(ty)
                       (cache, value) = ceval(cache, env, e, impl, msg, numIter + 1)
                     (cache, value)
                   end
-                  
+
                   (cache, env, e && DAE.CALL(__), true, msg, _)  => begin
                       (cache, value) = BackendInterface.cevalInteractiveFunctions(cache, env, e, msg, numIter + 1)
                     (cache, value)
                   end
-                  
+
                   (_, _, e && DAE.CALL(__), _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Ceval.ceval DAE.CALL failed: ")
@@ -445,117 +445,117 @@
                       Debug.traceln(str)
                     fail()
                   end
-                  
+
                   (cache, env, DAE.RECORD(path = funcpath, exps = expl, comp = fieldNames), impl, msg, _)  => begin
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                     (cache, Values.RECORD(funcpath, vallst, fieldNames, -1))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.ADD(ty = DAE.T_STRING(__)), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.STRING(lhvStr)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.STRING(rhvStr)) = ceval(cache, env, rh, impl, msg, numIter)
                       str = stringAppend(lhvStr, rhvStr)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.ADD(ty = DAE.T_REAL(__)), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.REAL(lhvReal)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.REAL(rhvReal)) = ceval(cache, env, rh, impl, msg, numIter)
                       sum = lhvReal + rhvReal
                     (cache, Values.REAL(sum))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.ADD_ARR(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vlst1, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(vlst2, _)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.addElementwiseArrayelt(vlst1, vlst2)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.SUB_ARR(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vlst1, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(vlst2, _)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.subElementwiseArrayelt(vlst1, vlst2)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_ARR(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vlst1, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(vlst2, _)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.mulElementwiseArrayelt(vlst1, vlst2)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV_ARR(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vlst1, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(vlst2, _)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.divElementwiseArrayelt(vlst1, vlst2)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.POW_ARR2(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vlst1, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(vlst2, _)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.powElementwiseArrayelt(vlst1, vlst2)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_ARRAY_SCALAR(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, rh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       reslst = ValuesUtil.multScalarArrayelt(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.ADD_ARRAY_SCALAR(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, rh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       reslst = ValuesUtil.addScalarArrayelt(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.SUB_SCALAR_ARRAY(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.subScalarArrayelt(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.POW_SCALAR_ARRAY(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.powScalarArrayelt(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.POW_ARRAY_SCALAR(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, rh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       reslst = ValuesUtil.powArrayeltScalar(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV_SCALAR_ARRAY(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, lh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, rh, impl, msg, numIter)
                       reslst = ValuesUtil.divScalarArrayelt(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV_ARRAY_SCALAR(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, sval) = ceval(cache, env, rh, impl, msg, numIter + 1)
                       @match (cache, Values.ARRAY(aval, dims)) = ceval(cache, env, lh, impl, msg, numIter)
                       reslst = ValuesUtil.divArrayeltScalar(sval, aval)
                     (cache, Values.ARRAY(reslst, dims))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_SCALAR_PRODUCT(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = rhvals)) = ceval(cache, env, rh, impl, msg, numIter)
                       @match (cache, Values.ARRAY(valueLst = lhvals)) = ceval(cache, env, lh, impl, msg, numIter)
                       resVal = ValuesUtil.multScalarProduct(rhvals, lhvals)
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_MATRIX_PRODUCT(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = (@match _cons(elt1, _) = lhvals))) = ceval(cache, env, lh, impl, msg, numIter) #= {{..}..{..}}  {...} =#
                       @match (cache, Values.ARRAY(valueLst = (@match _cons(elt2, _) = rhvals))) = ceval(cache, env, rh, impl, msg, numIter)
@@ -564,7 +564,7 @@
                       resVal = ValuesUtil.multScalarProduct(lhvals, rhvals)
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_MATRIX_PRODUCT(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = (@match _cons(elt1, _) = rhvals))) = ceval(cache, env, rh, impl, msg, numIter) #= {...}  {{..}..{..}} =#
                       @match (cache, Values.ARRAY(valueLst = (@match _cons(elt2, _) = lhvals))) = ceval(cache, env, lh, impl, msg, numIter)
@@ -573,7 +573,7 @@
                       resVal = ValuesUtil.multScalarProduct(lhvals, rhvals)
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL_MATRIX_PRODUCT(__), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY((@match _cons(elt1, _) = rhvals), _)) = ceval(cache, env, rh, impl, msg, numIter + 1) #= {{..}..{..}}  {{..}..{..}} =#
                       @match (cache, Values.ARRAY((@match _cons(elt2, _) = lhvals), _)) = ceval(cache, env, lh, impl, msg, numIter + 1)
@@ -582,28 +582,28 @@
                       vallst = ValuesUtil.multMatrix(lhvals, rhvals)
                     (cache, ValuesUtil.makeArray(vallst))
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.POW(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, lhvVal) = ceval(cache, env, lh, impl, msg, numIter)
                       (cache, rhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       resVal = ValuesUtil.safeIntRealOp(lhvVal, rhvVal, Values.POWOP())
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.MUL(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, lhvVal) = ceval(cache, env, lh, impl, msg, numIter)
                       (cache, rhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       resVal = ValuesUtil.safeIntRealOp(lhvVal, rhvVal, Values.MULOP())
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, lhvVal) = ceval(cache, env, lh, impl, msg, numIter)
                       (cache, rhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       resVal = ValuesUtil.safeIntRealOp(lhvVal, rhvVal, Values.DIVOP())
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV(__), exp2 = rh), impl, msg && Absyn.MSG(info = info), _)  => begin
                       (_, lhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       @match true = ValuesUtil.isZero(lhvVal)
@@ -612,33 +612,33 @@
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lhvStr, rhvStr), info)
                     fail()
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.ADD(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, lhvVal) = ceval(cache, env, lh, impl, msg, numIter)
                       (cache, rhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       resVal = ValuesUtil.safeIntRealOp(lhvVal, rhvVal, Values.ADDOP())
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.SUB(__), exp2 = rh), impl, msg, _)  => begin
                       (cache, lhvVal) = ceval(cache, env, lh, impl, msg, numIter)
                       (cache, rhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       resVal = ValuesUtil.safeIntRealOp(lhvVal, rhvVal, Values.SUBOP())
                     (cache, resVal)
                   end
-                  
+
                   (cache, env, DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = daeExp), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(arr, dims)) = ceval(cache, env, daeExp, impl, msg, numIter + 1)
                       arr_1 = ListUtil.map(arr, ValuesUtil.valueNeg)
                     (cache, Values.ARRAY(arr_1, dims))
                   end
-                  
+
                   (cache, env, DAE.UNARY(operator = DAE.UMINUS(__), exp = daeExp), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, daeExp, impl, msg, numIter + 1)
                       v_1 = ValuesUtil.valueNeg(v)
                     (cache, v_1)
                   end
-                  
+
                   (cache, env, DAE.LBINARY(exp1 = lh, operator = DAE.AND(_), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.BOOL(lhvBool)) = ceval(cache, env, lh, impl, msg, numIter)
                       if ! lhvBool
@@ -650,7 +650,7 @@
                       end
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.LBINARY(exp1 = lh, operator = DAE.OR(_), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, Values.BOOL(lhvBool)) = ceval(cache, env, lh, impl, msg, numIter)
                       if lhvBool
@@ -662,40 +662,40 @@
                       end
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.LBINARY(exp1 = lh, operator = DAE.OR(_), exp2 = rh), impl, msg, _)  => begin
                       @match (cache, (@match Values.BOOL(_) = v)) = ceval(cache, env, lh, impl, msg, numIter)
                       @shouldFail ceval(cache, env, rh, impl, msg, numIter)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.LUNARY(operator = DAE.NOT(_), exp = e), impl, msg, _)  => begin
                       @match (cache, Values.BOOL(b)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       b_1 = boolNot(b)
                     (cache, Values.BOOL(b_1))
                   end
-                  
+
                   (cache, env, DAE.RELATION(exp1 = lhs, operator = relop, exp2 = rhs), impl, msg, _)  => begin
                       (cache, lhs_1) = ceval(cache, env, lhs, impl, msg, numIter)
                       (cache, rhs_1) = ceval(cache, env, rhs, impl, msg, numIter)
                       v = cevalRelation(lhs_1, relop, rhs_1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = DAE.T_BOOL(__), start = start, step = NONE(), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.BOOL(bstart)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.BOOL(bstop)) = ceval(cache, env, stop, impl, msg, numIter + 1)
                       arr = ListUtil.map(ExpressionSimplify.simplifyRangeBool(bstart, bstop), ValuesUtil.makeBoolean)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = DAE.T_INTEGER(__), start = start, step = NONE(), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(start_1)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(stop_1)) = ceval(cache, env, stop, impl, msg, numIter + 1)
                       arr = ListUtil.map(ExpressionSimplify.simplifyRange(start_1, 1, stop_1), ValuesUtil.makeInteger)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = DAE.T_INTEGER(__), start = start, step = SOME(step), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(start_1)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(step_1)) = ceval(cache, env, step, impl, msg, numIter + 1)
@@ -703,14 +703,14 @@
                       arr = ListUtil.map(ExpressionSimplify.simplifyRange(start_1, step_1, stop_1), ValuesUtil.makeInteger)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = t && DAE.T_ENUMERATION(__), start = start, step = NONE(), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.ENUM_LITERAL(index = start_1)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.ENUM_LITERAL(index = stop_1)) = ceval(cache, env, stop, impl, msg, numIter + 1)
                       arr = cevalRangeEnum(start_1, stop_1, t)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = DAE.T_REAL(__), start = start, step = NONE(), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.REAL(realStart1)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.REAL(realStop1)) = ceval(cache, env, stop, impl, msg, numIter + 1)
@@ -718,7 +718,7 @@
                       arr = ListUtil.map(ExpressionSimplify.simplifyRangeReal(realStart1, realStep1, realStop1), ValuesUtil.makeReal)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.RANGE(ty = DAE.T_REAL(__), start = start, step = SOME(step), stop = stop), impl, msg, _)  => begin
                       @match (cache, Values.REAL(realStart1)) = ceval(cache, env, start, impl, msg, numIter + 1)
                       @match (cache, Values.REAL(realStep1)) = ceval(cache, env, step, impl, msg, numIter + 1)
@@ -726,32 +726,32 @@
                       arr = ListUtil.map(ExpressionSimplify.simplifyRangeReal(realStart1, realStep1, realStop1), ValuesUtil.makeReal)
                     (cache, ValuesUtil.makeArray(arr))
                   end
-                  
+
                   (cache, env, DAE.CAST(ty = DAE.T_REAL(__), exp = e), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(i)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       r = intReal(i)
                     (cache, Values.REAL(r))
                   end
-                  
+
                   (cache, env, DAE.CAST(ty = DAE.T_INTEGER(__), exp = e), impl, msg, _)  => begin
                       @match (cache, Values.REAL(r)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       i = realInt(r)
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, env, DAE.CAST(ty = DAE.T_ENUMERATION(path = path, names = n), exp = e), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(i)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       str = listGet(n, i)
                       path = AbsynUtil.joinPaths(path, Absyn.IDENT(str))
                     (cache, Values.ENUM_LITERAL(path, i))
                   end
-                  
+
                   (cache, env, DAE.CAST(ty = DAE.T_ARRAY(ty = DAE.T_REAL(__)), exp = e), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(ivals, dims)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       rvals = ValuesUtil.typeConvert(DAE.T_INTEGER_DEFAULT, DAE.T_REAL_DEFAULT, ivals)
                     (cache, Values.ARRAY(rvals, dims))
                   end
-                  
+
                   (cache, env, DAE.IFEXP(expCond = cond, expThen = e1, expElse = e2), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, cond, impl, msg, numIter + 1)
                       @match Values.BOOL(resBool) = v
@@ -762,13 +762,13 @@
                           end, impl, msg, numIter)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.ASUB(exp = e, sub = DAE.ICONST(indx) <|  nil()), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vals, _)) = ceval(cache, env, e, impl, msg, numIter + 1) #= asub =#
                       v = listGet(vals, indx)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.ASUB(exp = e, sub = expl), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(vals, dims)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       (cache, es_1) = cevalList(cache, env, expl, impl, msg, numIter)
@@ -776,13 +776,13 @@
                       v = ValuesUtil.nthnthArrayelt(es_1, Values.ARRAY(vals, dims), v)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.TSUB(exp = e, ix = indx), impl, msg, _)  => begin
                       @match (cache, Values.TUPLE(vals)) = ceval(cache, env, e, impl, msg, numIter + 1)
                       v = listGet(vals, indx)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(iterType = iterType, path = path, foldName = foldName, resultName = resultName, foldExp = foldExp, defaultValue = ov, exprType = ty), expr = daeExp, iterators = iterators), impl, msg, _)  => begin
                       env = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
                       (cache, valMatrix, names, dims, tys) = cevalReductionIterators(cache, env, iterators, impl, msg, numIter + 1)
@@ -792,7 +792,7 @@
                       value = backpatchArrayReduction(path, iterType, value, dims)
                     (cache, value)
                   end
-                  
+
                   (_, _, DAE.EMPTY(__), _, _, _)  => begin
                        #=  Special case for a boolean expression like if( expression or ARRAY_IDEX_OUT_OF_BOUNDS_ERROR)
                        =#
@@ -844,13 +844,13 @@
                       v = Types.typeToValue(inExp.ty)
                     (inCache, Values.EMPTY(inExp.scope, s, v, inExp.tyStr))
                   end
-                  
+
                   (_, _, _, _, _, _) where (Config.getGraphicsExpMode())  => begin
                       ty = Expression.typeof(inExp)
                       v = Types.typeToValue(ty)
                     (inCache, Values.EMPTY("#graphicsExp#", ExpressionDump.printExpStr(inExp), v, Types.unparseType(ty)))
                   end
-                  
+
                   (_, env, e, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.traceln("- Ceval.ceval failed: " + ExpressionDump.printExpStr(e))
@@ -872,7 +872,7 @@
            or if the expression is a call of parameter constness whose return type
            contains unknown dimensions (in which case we need to determine the size of
            those dimensions). =#
-        function cevalIfConstant(cache::FCore.Cache, inEnv::FCore.Graph, exp::DAE.Exp, prop::DAE.Properties, impl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function cevalIfConstant(cache::FCore.Cache, inEnv::FCore.Graph, exp::DAE.Exp, prop::DAE.Properties, impl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
 
 
 
@@ -889,7 +889,7 @@
                   DAE.PROP(constFlag = DAE.C_PARAM(__), type_ = tp) where (! Flags.getConfigBool(Flags.CEVAL_EQUATION))  => begin
                     (cache, exp, DAE.PROP(tp, DAE.C_VAR()))
                   end
-                  
+
                   DAE.PROP(constFlag = DAE.C_CONST(__), type_ = tp)  => begin
                        #=  BoschRexroth specifics
                        =#
@@ -898,14 +898,14 @@
                       exp = ValuesUtil.fixZeroSizeArray(exp, tp)
                     (cache, exp, prop)
                   end
-                  
+
                   DAE.PROP_TUPLE(__)  => begin
                       @match DAE.C_CONST() = Types.propAllConst(prop)
                       (cache, v) = ceval(cache, inEnv, exp, false, Absyn.NO_MSG(), 0)
                       exp = ValuesUtil.valueExp(v)
                     (cache, exp, prop)
                   end
-                  
+
                   DAE.PROP_TUPLE(__) where (! Flags.getConfigBool(Flags.CEVAL_EQUATION))  => begin
                        #=  BoschRexroth specifics
                        =#
@@ -913,7 +913,7 @@
                       print(" tuple non constant evaluation not implemented yet\\n")
                     fail()
                   end
-                  
+
                   _ where (Expression.isConst(exp) && ! Config.acceptMetaModelicaGrammar())  => begin
                        #=  Structural parameters and the like... we can ceval them if we want to
                        =#
@@ -922,7 +922,7 @@
                       exp = ValuesUtil.fixZeroSizeArray(exp, Types.getPropType(prop))
                     (cache, exp, prop)
                   end
-                  
+
                   _  => begin
                          #=  If we fail to evaluate, at least we should simplify the expression
                          =#
@@ -936,7 +936,7 @@
 
          #= Helper function to cevalIfConstant. Determines the size of any unknown
            dimensions in a function calls return type. =#
-        function cevalWholedimRetCall(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph, inInfo::SourceInfo, numIter::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Properties} 
+        function cevalWholedimRetCall(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph, inInfo::SourceInfo, numIter::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Properties}
               local outProp::DAE.Properties
               local outExp::DAE.Exp
 
@@ -970,7 +970,7 @@
         end
 
          #= Constant evaluates the limits of a range if they are constant. =#
-        function cevalRangeIfConstant(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inProp::DAE.Properties, impl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp} 
+        function cevalRangeIfConstant(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inProp::DAE.Properties, impl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
               local outExp::DAE.Exp
               local outCache::FCore.Cache
 
@@ -986,7 +986,7 @@
                       (_, e2, _) = cevalIfConstant(cache, inEnv, e2, inProp, impl, inInfo)
                     (inCache, DAE.RANGE(ty, e1, e3, e2))
                   end
-                  
+
                   _  => begin
                       (inCache, inExp)
                   end
@@ -998,7 +998,7 @@
          #= Helper for ceval. Parts for builtin calls are moved here, for readability.
           See ceval for documentation.
           NOTE:    It\\'s ok if cevalBuiltin fails. Just means the call was not a builtin function =#
-        function cevalBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1024,19 +1024,19 @@
                       (cache, v) = cevalBuiltinSize(cache, env, exp, dim, impl, msg, numIter + 1) #= Handle size separately =#
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.SIZE(exp = exp, sz = NONE()), impl, msg, _)  => begin
                       (cache, v) = cevalBuiltinSizeMatrix(cache, env, exp, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, DAE.CALL(path = path, expLst = args, attr = DAE.CALL_ATTR(builtin = true)), impl, msg, _)  => begin
                       id = AbsynUtil.pathString(path)
                       handler = cevalBuiltinHandler(id)
                       (cache, v) = handler(cache, env, args, impl, msg, numIter + 1)
                     (cache, v)
                   end
-                  
+
                   (cache, env, e && DAE.CALL(expLst = expl, attr = DAE.CALL_ATTR(builtin = true)), impl, msg, _)  => begin
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
                       (cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
@@ -1053,7 +1053,7 @@
           function or operator.
           NOTE: size handled specially. see cevalBuiltin:
                 removed: case (\\\"size\\\") => cevalBuiltinSize =#
-        function cevalBuiltinHandler(inIdent::Absyn.Ident) ::HandlerFunc 
+        function cevalBuiltinHandler(inIdent::Absyn.Ident) ::HandlerFunc
               local handler::HandlerFunc
 
               handler = begin
@@ -1062,259 +1062,259 @@
                   "floor"  => begin
                     cevalBuiltinFloor
                   end
-                  
+
                   "ceil"  => begin
                     cevalBuiltinCeil
                   end
-                  
+
                   "abs"  => begin
                     cevalBuiltinAbs
                   end
-                  
+
                   "sqrt"  => begin
                     cevalBuiltinSqrt
                   end
-                  
+
                   "div"  => begin
                     cevalBuiltinDiv
                   end
-                  
+
                   "sin"  => begin
                     cevalBuiltinSin
                   end
-                  
+
                   "cos"  => begin
                     cevalBuiltinCos
                   end
-                  
+
                   "tan"  => begin
                     cevalBuiltinTan
                   end
-                  
+
                   "sinh"  => begin
                     cevalBuiltinSinh
                   end
-                  
+
                   "cosh"  => begin
                     cevalBuiltinCosh
                   end
-                  
+
                   "tanh"  => begin
                     cevalBuiltinTanh
                   end
-                  
+
                   "asin"  => begin
                     cevalBuiltinAsin
                   end
-                  
+
                   "acos"  => begin
                     cevalBuiltinAcos
                   end
-                  
+
                   "atan"  => begin
                     cevalBuiltinAtan
                   end
-                  
+
                   "atan2"  => begin
                     cevalBuiltinAtan2
                   end
-                  
+
                   "log"  => begin
                     cevalBuiltinLog
                   end
-                  
+
                   "log10"  => begin
                     cevalBuiltinLog10
                   end
-                  
+
                   "integer"  => begin
                     cevalBuiltinInteger
                   end
-                  
+
                   "boolean"  => begin
                     cevalBuiltinBoolean
                   end
-                  
+
                   "mod"  => begin
                     cevalBuiltinMod
                   end
-                  
+
                   "max"  => begin
                     cevalBuiltinMax
                   end
-                  
+
                   "min"  => begin
                     cevalBuiltinMin
                   end
-                  
+
                   "rem"  => begin
                     cevalBuiltinRem
                   end
-                  
+
                   "sum"  => begin
                     cevalBuiltinSum
                   end
-                  
+
                   "diagonal"  => begin
                     cevalBuiltinDiagonal
                   end
-                  
+
                   "sign"  => begin
                     cevalBuiltinSign
                   end
-                  
+
                   "exp"  => begin
                     cevalBuiltinExp
                   end
-                  
+
                   "noEvent"  => begin
                     cevalBuiltinNoevent
                   end
-                  
+
                   "cat"  => begin
                     cevalBuiltinCat
                   end
-                  
+
                   "identity"  => begin
                     cevalBuiltinIdentity
                   end
-                  
+
                   "promote"  => begin
                     cevalBuiltinPromote
                   end
-                  
+
                   "String"  => begin
                     cevalBuiltinString
                   end
-                  
+
                   "Integer"  => begin
                     cevalBuiltinIntegerEnumeration
                   end
-                  
+
                   "rooted"  => begin
                     cevalBuiltinRooted
                   end
-                  
+
                   "cross"  => begin
                     cevalBuiltinCross
                   end
-                  
+
                   "fill"  => begin
                     cevalBuiltinFill
                   end
-                  
+
                   "Modelica.Utilities.Strings.substring"  => begin
                     cevalBuiltinSubstring
                   end
-                  
+
                   "print"  => begin
                     cevalBuiltinPrint
                   end
-                  
+
                   "fail"  => begin
                     cevalBuiltinFail
                   end
-                  
+
                   "intString" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntString
                   end
-                  
+
                   "realString" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalRealString
                   end
-                  
+
                   "stringCharInt" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringCharInt
                   end
-                  
+
                   "intStringChar" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntStringChar
                   end
-                  
+
                   "stringLength" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringLength
                   end
-                  
+
                   "stringInt" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringInt
                   end
-                  
+
                   "stringListStringChar" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringListStringChar
                   end
-                  
+
                   "listStringCharString" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListStringCharString
                   end
-                  
+
                   "stringAppendList" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringAppendList
                   end
-                  
+
                   "stringDelimitList" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalStringDelimitList
                   end
-                  
+
                   "listLength" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListLength
                   end
-                  
+
                   "listAppend" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListAppend
                   end
-                  
+
                   "listReverse" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListReverse
                   end
-                  
+
                   "listHead" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListFirst
                   end
-                  
+
                   "listRest" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListRest
                   end
-                  
+
                   "listMember" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListMember
                   end
-                  
+
                   "anyString" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalAnyString
                   end
-                  
+
                   "listArrayLiteral" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalListArrayLiteral
                   end
-                  
+
                   "intBitAnd" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntBitAnd
                   end
-                  
+
                   "intBitOr" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntBitOr
                   end
-                  
+
                   "intBitXor" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntBitXor
                   end
-                  
+
                   "intBitLShift" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntBitLShift
                   end
-                  
+
                   "intBitRShift" where (Config.acceptMetaModelicaGrammar())  => begin
                     cevalIntBitRShift
                   end
-                  
+
                   "numBits"  => begin
                     cevalNumBits
                   end
-                  
+
                   "integerMax"  => begin
                     cevalIntegerMax
                   end
-                  
+
                   id  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.traceln("No cevalBuiltinHandler found for " + id)
@@ -1322,7 +1322,7 @@
                   end
                 end
               end
-               #= 
+               #=
                =#
                #=  BTH
                =#
@@ -1341,7 +1341,7 @@
         end
 
          #= Evaluates external functions that are known, e.g. all math functions. =#
-        function cevalKnownExternalFuncs(inCache::FCore.Cache, env::FCore.Graph, funcpath::Absyn.Path, vals::List{<:Values.Value}, msg::Absyn.Msg) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalKnownExternalFuncs(inCache::FCore.Cache, env::FCore.Graph, funcpath::Absyn.Path, vals::List{<:Values.Value}, msg::Absyn.Msg) ::Tuple{FCore.Cache, Values.Value}
               local res::Values.Value
               local outCache::FCore.Cache
 
@@ -1369,113 +1369,113 @@
         end
 
          #= \\\"known\\\", i.e. no compilation required. =#
-        function isKnownExternalFunc(id::String)  
+        function isKnownExternalFunc(id::String)
               _ = begin
                 @match id begin
                   "acos"  => begin
                     ()
                   end
-                  
+
                   "asin"  => begin
                     ()
                   end
-                  
+
                   "atan"  => begin
                     ()
                   end
-                  
+
                   "atan2"  => begin
                     ()
                   end
-                  
+
                   "cos"  => begin
                     ()
                   end
-                  
+
                   "cosh"  => begin
                     ()
                   end
-                  
+
                   "exp"  => begin
                     ()
                   end
-                  
+
                   "log"  => begin
                     ()
                   end
-                  
+
                   "log10"  => begin
                     ()
                   end
-                  
+
                   "sin"  => begin
                     ()
                   end
-                  
+
                   "sinh"  => begin
                     ()
                   end
-                  
+
                   "tan"  => begin
                     ()
                   end
-                  
+
                   "tanh"  => begin
                     ()
                   end
-                  
+
                   "print"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStreams_closeFile"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStrings_substring"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStrings_length"  => begin
                     ()
                   end
-                  
+
                   "ModelicaInternal_print"  => begin
                     ()
                   end
-                  
+
                   "ModelicaInternal_countLines"  => begin
                     ()
                   end
-                  
+
                   "ModelicaInternal_readLine"  => begin
                     ()
                   end
-                  
+
                   "ModelicaInternal_stat"  => begin
                     ()
                   end
-                  
+
                   "ModelicaInternal_fullPathName"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStrings_compare"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStrings_scanReal"  => begin
                     ()
                   end
-                  
+
                   "ModelicaStrings_skipWhiteSpace"  => begin
                     ()
                   end
-                  
+
                   "ModelicaError"  => begin
                     ()
                   end
-                  
+
                   "OpenModelica_regex"  => begin
                     ()
                   end
@@ -1484,7 +1484,7 @@
         end
 
          #= Helper function to cevalKnownExternalFuncs, does the evaluation. =#
-        function cevalKnownExternalFuncs2(id::String, inValuesValueLst::List{<:Values.Value}, inMsg::Absyn.Msg) ::Values.Value 
+        function cevalKnownExternalFuncs2(id::String, inValuesValueLst::List{<:Values.Value}, inMsg::Absyn.Msg) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -1516,110 +1516,110 @@
                       rv_1 = acos(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("asin", Values.REAL(real = rv) <|  nil(), _)  => begin
                       @match true = rv >= (-1.0) && rv <= 1.0
                       rv_1 = asin(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("atan", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = atan(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("atan2", Values.REAL(real = rv1) <| Values.REAL(real = rv2) <|  nil(), _)  => begin
                       rv_1 = atan2(rv1, rv2)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("cos", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = cos(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("cosh", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = cosh(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("exp", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = exp(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("log", Values.REAL(real = rv) <|  nil(), _)  => begin
                       @match true = rv > 0
                       rv_1 = log(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("log10", Values.REAL(real = rv) <|  nil(), _)  => begin
                       @match true = rv > 0
                       rv_1 = log10(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("sin", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = sin(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("sinh", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = sinh(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("tan", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = tan(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("tanh", Values.REAL(real = rv) <|  nil(), _)  => begin
                       rv_1 = tanh(rv)
                     Values.REAL(rv_1)
                   end
-                  
+
                   ("ModelicaStrings_substring", Values.STRING(string = str) <| Values.INTEGER(integer = start) <| Values.INTEGER(integer = stop) <|  nil(), _)  => begin
                       str = System.substring(str, start, stop)
                     Values.STRING(str)
                   end
-                  
+
                   ("ModelicaStrings_length", Values.STRING(str) <|  nil(), _)  => begin
                       i = stringLength(str)
                     Values.INTEGER(i)
                   end
-                  
+
                   ("print", Values.STRING(str) <|  nil(), _)  => begin
                       print(str)
                     Values.NORETCALL()
                   end
-                  
+
                   ("ModelicaStreams_closeFile", Values.STRING(fileName) <|  nil(), _)  => begin
                       ModelicaExternalC.Streams_close(fileName)
                     Values.NORETCALL()
                   end
-                  
+
                   ("ModelicaInternal_print", Values.STRING(str) <| Values.STRING(fileName) <|  nil(), _)  => begin
                       ModelicaExternalC.Streams_print(str, fileName)
                     Values.NORETCALL()
                   end
-                  
+
                   ("ModelicaInternal_countLines", Values.STRING(fileName) <|  nil(), _)  => begin
                       i = ModelicaExternalC.Streams_countLines(fileName)
                     Values.INTEGER(i)
                   end
-                  
+
                   ("ModelicaInternal_readLine", Values.STRING(fileName) <| Values.INTEGER(lineNumber) <|  nil(), _)  => begin
                       (str, b) = ModelicaExternalC.Streams_readLine(fileName, lineNumber)
                     Values.TUPLE(list(Values.STRING(str), Values.BOOL(b)))
                   end
-                  
+
                   ("ModelicaInternal_fullPathName", Values.STRING(fileName) <|  nil(), _)  => begin
                       fileName = ModelicaExternalC.File_fullPathName(fileName)
                     Values.STRING(fileName)
                   end
-                  
+
                   ("ModelicaInternal_stat", Values.STRING(str) <|  nil(), _)  => begin
                       i = ModelicaExternalC.File_stat(str)
                       str = listGet(list("NoFile", "RegularFile", "Directory", "SpecialFile"), i)
@@ -1627,23 +1627,23 @@
                       v = Values.ENUM_LITERAL(p, i)
                     v
                   end
-                  
+
                   ("ModelicaStrings_compare", Values.STRING(str1) <| Values.STRING(str2) <| Values.BOOL(b) <|  nil(), _)  => begin
                       i = ModelicaExternalC.Strings_compare(str1, str2, b)
                       p = listGet(list(EnumCompareLess, EnumCompareEqual, EnumCompareGreater), i)
                     Values.ENUM_LITERAL(p, i)
                   end
-                  
+
                   ("ModelicaStrings_scanReal", Values.STRING(str) <| Values.INTEGER(i) <| Values.BOOL(b) <|  nil(), _)  => begin
                       (i, r) = ModelicaExternalC.Strings_advanced_scanReal(str, i, b)
                     Values.TUPLE(list(Values.INTEGER(i), Values.REAL(r)))
                   end
-                  
+
                   ("ModelicaStrings_skipWhiteSpace", Values.STRING(str) <| Values.INTEGER(i) <|  nil(), _)  => begin
                       i = ModelicaExternalC.Strings_advanced_skipWhiteSpace(str, i)
                     Values.INTEGER(i)
                   end
-                  
+
                   ("OpenModelica_regex", Values.STRING(str) <| Values.STRING(re) <| Values.INTEGER(i) <| Values.BOOL(extended) <| Values.BOOL(insensitive) <|  nil(), _)  => begin
                       (n, strs) = System.regex(str, re, i, extended, insensitive)
                       vals = ListUtil.map(strs, ValuesUtil.makeString)
@@ -1662,7 +1662,7 @@
          const EnumCompareGreater = Absyn.QUALIFIED("Modelica", Absyn.QUALIFIED("Utilities", Absyn.QUALIFIED("Types", Absyn.QUALIFIED("Compare", Absyn.IDENT("Greater")))))::Absyn.Path
 
          #= Evaluates the expression of a matrix constructor, e.g. {1,2;3,4} =#
-        function cevalMatrixElt(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}} #= matrix constr. elts =#, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function cevalMatrixElt(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}} #= matrix constr. elts =#, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}}
               local outValues::List{Values.Value} = nil
               local outCache::FCore.Cache = inCache
 
@@ -1679,7 +1679,7 @@
         end
 
          #= Evaluates the size operator. =#
-        function cevalBuiltinSize(inCache::FCore.Cache, inEnv1::FCore.Graph, inExp2::DAE.Exp, inDimExp::DAE.Exp, inBoolean4::Bool, inMsg6::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSize(inCache::FCore.Cache, inEnv1::FCore.Graph, inExp2::DAE.Exp, inDimExp::DAE.Exp, inBoolean4::Bool, inMsg6::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1722,12 +1722,12 @@
                       i = listLength(mat)
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, _, DAE.MATRIX(matrix = mat), DAE.ICONST(2), _, _, _)  => begin
                       i = listLength(listHead(mat))
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, env, DAE.MATRIX(matrix = mat), DAE.ICONST(dim), impl, msg, _)  => begin
                       bl = dim > 2
                       @match true = bl
@@ -1736,7 +1736,7 @@
                       @match (cache, Values.INTEGER(i)) = cevalBuiltinSize(cache, env, e, DAE.ICONST(dim_1), impl, msg, numIter + 1)
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), dimExp, impl, msg, _)  => begin
                       (cache, _, tp, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr) #= If dimensions known, always ceval =#
                       @match true = Types.dimensionsKnown(tp)
@@ -1745,7 +1745,7 @@
                       i = listGet(sizelst, dim)
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), dimExp, impl && false, msg, _)  => begin
                       (cache, dims) = InstUtil.elabComponentArraydimFromEnv(cache, env, cr, AbsynUtil.dummyInfo) #= If component not instantiated yet, recursive definition.
                                For example,
@@ -1758,7 +1758,7 @@
                       (cache, v2) = cevalDimension(cache, env, ddim, impl, msg, numIter + 1)
                     (cache, v2)
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), dimExp, false, Absyn.MSG(info = info), _)  => begin
                       (_, _, tp, binding, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr) #= If dimensions not known and impl=false, error message =#
                       if ! Types.dimensionsKnown(tp)
@@ -1779,7 +1779,7 @@
                       end
                     fail()
                   end
-                  
+
                   (cache, env, DAE.CREF(componentRef = cr), dimExp, impl, msg, _)  => begin
                       (cache, _, _, binding, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr)
                       @match (cache, Values.INTEGER(dimv)) = ceval(cache, env, dimExp, impl, msg, numIter + 1)
@@ -1787,7 +1787,7 @@
                       v2 = cevalBuiltinSize2(val, dimv)
                     (cache, v2)
                   end
-                  
+
                   (cache, env, DAE.ARRAY(array = exp <| es), dimExp, impl, msg, _)  => begin
                       _ = Expression.typeof(exp) #= Special case for array expressions with nonconstant
                                                               values For now: only arrays of scalar elements:
@@ -1796,7 +1796,7 @@
                       len = listLength(_cons(exp, es))
                     (cache, Values.INTEGER(len))
                   end
-                  
+
                   (cache, env, exp, dimExp, impl, msg, _)  => begin
                       (cache, val) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(dimv)) = ceval(cache, env, dimExp, impl, msg, numIter + 1)
@@ -1805,7 +1805,7 @@
                           Values.ARRAY( nil(), adims)  => begin
                             Values.INTEGER(listGet(adims, dimv))
                           end
-                          
+
                           _  => begin
                               cevalBuiltinSize2(val, dimv)
                           end
@@ -1813,7 +1813,7 @@
                       end
                     (cache, v2)
                   end
-                  
+
                   (_, _, exp, _, _, Absyn.MSG(__), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Print.printErrorBuf("#-- Ceval.cevalBuiltinSize failed: ")
@@ -1836,7 +1836,7 @@
         end
 
          #= Helper function to cevalBuiltinSize =#
-        function cevalBuiltinSize2(inValue::Values.Value, inInteger::ModelicaInteger) ::Values.Value 
+        function cevalBuiltinSize2(inValue::Values.Value, inInteger::ModelicaInteger) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -1851,13 +1851,13 @@
                       dim = listLength(lst)
                     Values.INTEGER(dim)
                   end
-                  
+
                   (Values.ARRAY(valueLst = l <| _), ind)  => begin
                       ind_1 = ind - 1
                       dimVal = cevalBuiltinSize2(l, ind_1)
                     dimVal
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Ceval.cevalBuiltinSize2 failed\\n")
@@ -1871,7 +1871,7 @@
          #= author: PA
           Helper function to cevalBuiltinSize.
           Used when recursive definition (attribute modifiers using size) is used. =#
-        function cevalBuiltinSize3(inDims::DAE.Dimensions, inIndex::ModelicaInteger) ::Values.Value 
+        function cevalBuiltinSize3(inDims::DAE.Dimensions, inIndex::ModelicaInteger) ::Values.Value
               local outValue::Values.Value
 
               local v::ModelicaInteger
@@ -1883,7 +1883,7 @@
 
          #= author: LP
           Evaluates the abs operator. =#
-        function cevalBuiltinAbs(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinAbs(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1902,7 +1902,7 @@
                       rv_1 = realAbs(rv)
                     (cache, Values.REAL(rv_1))
                   end
-                  
+
                   (cache, env, exp <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(iv)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       iv = intAbs(iv)
@@ -1915,7 +1915,7 @@
 
          #= author: PA
           Evaluates the sign operator. =#
-        function cevalBuiltinSign(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSign(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1940,7 +1940,7 @@
                           Values.REAL(rv)  => begin
                             (rv > 0.0, rv < 0.0, rv == 0.0)
                           end
-                          
+
                           Values.INTEGER(iv)  => begin
                             (iv > 0, iv < 0, iv == 0)
                           end
@@ -1956,7 +1956,7 @@
 
          #= author: PA
           Evaluates the exp function =#
-        function cevalBuiltinExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1971,7 +1971,7 @@
                 @match (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, exp <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.REAL(rv)) = ceval(cache, env, exp, impl, msg, numIter + 1)
-                      rv_1 = .exp(rv)
+                      rv_1 = exp(rv)
                     (cache, Values.REAL(rv_1))
                   end
                 end
@@ -1983,7 +1983,7 @@
           Evaluates the noEvent operator. During constant evaluation events are not
           considered, so evaluation will simply remove the operator and evaluate the
           operand. =#
-        function cevalBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2006,7 +2006,7 @@
 
          #= author: PA
           Evaluates the cat operator, for matrix concatenation. =#
-        function cevalBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2034,7 +2034,7 @@
 
          #= author: PA
           Evaluates the identity operator. =#
-        function cevalBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2065,7 +2065,7 @@
 
          #= author: PA
           Evaluates the internal promote operator, for promotion of arrays =#
-        function cevalBuiltinPromote(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinPromote(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2093,7 +2093,7 @@
         end
 
          #= Helper function to cevalBuiltinPromote =#
-        function cevalBuiltinPromote2(inValue::Values.Value, inInteger::ModelicaInteger) ::Values.Value 
+        function cevalBuiltinPromote2(inValue::Values.Value, inInteger::ModelicaInteger) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2108,20 +2108,20 @@
                   (v, 0)  => begin
                     Values.ARRAY(list(v), list(1))
                   end
-                  
+
                   (Values.ARRAY(valueLst = vs, dimLst = i <| _), n)  => begin
                       n_1 = n - 1
                       @match (@match _cons(Values.ARRAY(dimLst = il), _) = vs_1) = ListUtil.map1(vs, cevalBuiltinPromote2, n_1)
                     Values.ARRAY(vs_1, _cons(i, il))
                   end
-                  
+
                   (v, n)  => begin
                       @shouldFail @match Values.ARRAY() = v
                       n_1 = n - 1
                       @match (@match Values.ARRAY(dimLst = il) = v) = cevalBuiltinPromote2(v, n_1)
                     Values.ARRAY(list(v), _cons(1, il))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Ceval.cevalBuiltinPromote2 failed\\n")
@@ -2132,11 +2132,11 @@
           outValue
         end
 
-         #= 
+         #=
           author: PA
           Evaluates the String operator String(r), String(i), String(b), String(e).
           TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
-        function cevalBuiltinSubstring(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSubstring(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2164,11 +2164,11 @@
           (outCache, outValue)
         end
 
-         #= 
+         #=
           author: PA
           Evaluates the String operator String(r), String(i), String(b), String(e).
           TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
-        function cevalBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2199,11 +2199,11 @@
                           Values.INTEGER(i)  => begin
                             intString(i)
                           end
-                          
+
                           Values.BOOL(b)  => begin
                             boolString(b)
                           end
-                          
+
                           Values.ENUM_LITERAL(name = p)  => begin
                             AbsynUtil.pathLastIdent(p)
                           end
@@ -2212,7 +2212,7 @@
                       (cache, str) = cevalBuiltinStringFormat(cache, env, str, len_exp, justified_exp, impl, msg, numIter + 1)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, env, exp <| sig_dig <| len_exp <| justified_exp <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.REAL(r)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(len)) = ceval(cache, env, len_exp, impl, msg, numIter + 1)
@@ -2233,7 +2233,7 @@
 
          #= This function formats a string by using the minimumLength and leftJustified
           arguments to the String function. =#
-        function cevalBuiltinStringFormat(inCache::FCore.Cache, inEnv::FCore.Graph, inString::String, lengthExp::DAE.Exp, justifiedExp::DAE.Exp, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, String} 
+        function cevalBuiltinStringFormat(inCache::FCore.Cache, inEnv::FCore.Graph, inString::String, lengthExp::DAE.Exp, justifiedExp::DAE.Exp, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, String}
               local outString::String
               local outCache::FCore.Cache
 
@@ -2255,7 +2255,7 @@
         end
 
          #= Prints a String to stdout =#
-        function cevalBuiltinPrint(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinPrint(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2277,7 +2277,7 @@
           (outCache, outValue)
         end
 
-        function cevalIntString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2300,7 +2300,7 @@
           (outCache, outValue)
         end
 
-        function cevalRealString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalRealString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2325,7 +2325,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringCharInt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringCharInt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2348,7 +2348,7 @@
           (outCache, outValue)
         end
 
-        function cevalIntStringChar(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntStringChar(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2371,7 +2371,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringInt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringInt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2394,7 +2394,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringLength(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringLength(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2417,7 +2417,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringListStringChar(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringListStringChar(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2442,14 +2442,14 @@
           (outCache, outValue)
         end
 
-        function generateValueString(str::String) ::Values.Value 
+        function generateValueString(str::String) ::Values.Value
               local val::Values.Value
 
               val = Values.STRING(str)
           val
         end
 
-        function cevalListStringCharString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListStringCharString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2482,7 +2482,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringAppendList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringAppendList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2507,7 +2507,7 @@
           (outCache, outValue)
         end
 
-        function cevalStringDelimitList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalStringDelimitList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2534,7 +2534,7 @@
           (outCache, outValue)
         end
 
-        function cevalListLength(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListLength(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2557,7 +2557,7 @@
           (outCache, outValue)
         end
 
-        function cevalListAppend(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListAppend(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2583,7 +2583,7 @@
           (outCache, outValue)
         end
 
-        function cevalListReverse(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListReverse(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2606,7 +2606,7 @@
           (outCache, outValue)
         end
 
-        function cevalListRest(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListRest(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2627,7 +2627,7 @@
           (outCache, outValue)
         end
 
-        function cevalListMember(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListMember(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2653,7 +2653,7 @@
           (outCache, outValue)
         end
 
-        function cevalListArrayLiteral(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListArrayLiteral(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2676,7 +2676,7 @@
           (outCache, outValue)
         end
 
-        function cevalAnyString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalAnyString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2699,7 +2699,7 @@
           (outCache, outValue)
         end
 
-        function cevalNumBits(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalNumBits(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2715,7 +2715,7 @@
           (outCache, outValue)
         end
 
-        function cevalIntegerMax(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntegerMax(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2731,7 +2731,7 @@
           (outCache, outValue)
         end
 
-        function cevalIntBitAnd(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntBitAnd(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local result::Values.Value
 
 
@@ -2747,7 +2747,7 @@
           (cache, result)
         end
 
-        function cevalIntBitOr(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntBitOr(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local result::Values.Value
 
 
@@ -2763,7 +2763,7 @@
           (cache, result)
         end
 
-        function cevalIntBitXor(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntBitXor(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local result::Values.Value
 
 
@@ -2779,7 +2779,7 @@
           (cache, result)
         end
 
-        function cevalIntBitLShift(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntBitLShift(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local result::Values.Value
 
 
@@ -2795,7 +2795,7 @@
           (cache, result)
         end
 
-        function cevalIntBitRShift(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalIntBitRShift(cache::FCore.Cache, env::FCore.Graph, args::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local result::Values.Value
 
 
@@ -2813,7 +2813,7 @@
 
          #= Needed to be able to resolve modelica: during runtime, etc.
         Should not be part of CevalScript since ModelicaServices needs this feature and the frontend needs to take care of it. =#
-        function makeLoadLibrariesEntry(cl::SCode.Element, acc::List{<:Values.Value}) ::List{Values.Value} 
+        function makeLoadLibrariesEntry(cl::SCode.Element, acc::List{<:Values.Value}) ::List{Values.Value}
               local out::List{Values.Value}
 
               out = begin
@@ -2826,7 +2826,7 @@
                   (SCode.CLASS(info = SOURCEINFO(fileName = "<interactive>")), _)  => begin
                     acc
                   end
-                  
+
                   (SCode.CLASS(name = name, info = SOURCEINFO(fileName = fileName)), _)  => begin
                       dir = System.dirname(fileName)
                       fileName = System.basename(fileName)
@@ -2839,7 +2839,7 @@
           out
         end
 
-        function cevalListFirst(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalListFirst(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2860,7 +2860,7 @@
           (outCache, outValue)
         end
 
-        function extractValueStringChar(val::Values.Value) ::String 
+        function extractValueStringChar(val::Values.Value) ::String
               local str::String
 
               str = begin
@@ -2876,7 +2876,7 @@
 
          #= evaluates the cat operator given a list of
           array values and a concatenation dimension. =#
-        function cevalCat(v_lst::List{<:Values.Value}, dim::ModelicaInteger) ::Values.Value 
+        function cevalCat(v_lst::List{<:Values.Value}, dim::ModelicaInteger) ::Values.Value
               local outValue::Values.Value
 
               local v_lst_1::List{Values.Value}
@@ -2888,7 +2888,7 @@
 
          #= Helper function to cevalCat, concatenates a list
           arrays as Values, given a dimension as integer. =#
-        function catDimension(inValuesValueLst::List{<:Values.Value}, inInteger::ModelicaInteger) ::List{Values.Value} 
+        function catDimension(inValuesValueLst::List{<:Values.Value}, inInteger::ModelicaInteger) ::List{Values.Value}
               local outValuesValueLst::List{Values.Value}
 
               outValuesValueLst = begin
@@ -2909,7 +2909,7 @@
                       v_lst_1 = ListUtil.flatten(vlst_lst)
                     v_lst_1
                   end
-                  
+
                   (vlst, dim)  => begin
                       v_lst_lst = ListUtil.map(vlst, ValuesUtil.arrayValues)
                       dim_1 = dim - 1
@@ -2928,7 +2928,7 @@
 
          #= author: PA
           Helper function to catDimension. =#
-        function catDimension2(inValuesValueLstLst::List{<:List{<:Values.Value}}, inInteger::ModelicaInteger) ::List{List{Values.Value}} 
+        function catDimension2(inValuesValueLstLst::List{<:List{<:Values.Value}}, inInteger::ModelicaInteger) ::List{List{Values.Value}}
               local outValuesValueLstLst::List{List{Values.Value}}
 
               outValuesValueLstLst = begin
@@ -2950,7 +2950,7 @@
                       first_lst_2 = ListUtil.map(first_lst_1, ListUtil.create)
                     first_lst_2
                   end
-                  
+
                   (lst, dim)  => begin
                       first_lst = ListUtil.map(lst, listHead)
                       rest = ListUtil.map(lst, ListUtil.rest)
@@ -2966,7 +2966,7 @@
 
          #= author: LP
           evaluates the floor operator. =#
-        function cevalBuiltinFloor(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinFloor(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2991,7 +2991,7 @@
 
          #= author: LP
           evaluates the ceil operator. =#
-        function cevalBuiltinCeil(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinCeil(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3030,7 +3030,7 @@
 
          #= author: LP
           Evaluates the builtin sqrt operator. =#
-        function cevalBuiltinSqrt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSqrt(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3062,7 +3062,7 @@
 
          #= author: LP
           Evaluates the builtin sin function. =#
-        function cevalBuiltinSin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3087,7 +3087,7 @@
 
          #= author: PA
           Evaluates the builtin sinh function. =#
-        function cevalBuiltinSinh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSinh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3112,7 +3112,7 @@
 
          #= author: LP
           Evaluates the builtin cos function. =#
-        function cevalBuiltinCos(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinCos(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3137,7 +3137,7 @@
 
          #= author: PA
           Evaluates the builtin cosh function. =#
-        function cevalBuiltinCosh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinCosh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3162,7 +3162,7 @@
 
          #= author: LP
           Evaluates the builtin Log function. =#
-        function cevalBuiltinLog(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinLog(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3188,7 +3188,7 @@
           (outCache, outValue)
         end
 
-        function cevalBuiltinLog10(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinLog10(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3216,7 +3216,7 @@
 
          #= author: LP
           Evaluates the builtin tan function. =#
-        function cevalBuiltinTan(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinTan(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3239,7 +3239,7 @@
 
          #= author: PA
           Evaluates the builtin tanh function. =#
-        function cevalBuiltinTanh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinTanh(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3264,7 +3264,7 @@
 
          #= author: PA
           Evaluates the builtin asin function. =#
-        function cevalBuiltinAsin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinAsin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3290,7 +3290,7 @@
 
          #= author: PA
           Evaluates the builtin acos function. =#
-        function cevalBuiltinAcos(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinAcos(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3316,7 +3316,7 @@
 
          #= author: PA
           Evaluates the builtin atan function. =#
-        function cevalBuiltinAtan(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinAtan(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3340,7 +3340,7 @@
           (outCache, outValue)
         end
 
-        function cevalBuiltinAtan2(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinAtan2(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3368,7 +3368,7 @@
 
          #= author: LP
           Evaluates the builtin div operator. =#
-        function cevalBuiltinDiv(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinDiv(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3406,7 +3406,7 @@
                           end
                     (cache, Values.REAL(rv_2))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(ri)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       rv1 = intReal(ri)
@@ -3421,7 +3421,7 @@
                           end
                     (cache, Values.REAL(rv_2))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.REAL(rv1)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(ri)) = ceval(cache, env, exp2, impl, msg, numIter + 1)
@@ -3436,14 +3436,14 @@
                           end
                     (cache, Values.REAL(rv_2))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(ri1)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(ri2)) = ceval(cache, env, exp2, impl, msg, numIter + 1)
                       ri_1 = intDiv(ri1, ri2)
                     (cache, Values.INTEGER(ri_1))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, Absyn.MSG(info = info), _)  => begin
                       @match (_, Values.REAL(rv2)) = ceval(cache, env, exp2, impl, inMsg, numIter + 1)
                       if ! rv2 == 0.0
@@ -3454,7 +3454,7 @@
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
-                  
+
                   (cache, env, _ <| exp2 <|  nil(), impl, Absyn.NO_MSG(__), _)  => begin
                       @match (_, Values.REAL(rv2)) = ceval(cache, env, exp2, impl, Absyn.NO_MSG(), numIter + 1)
                       if ! rv2 == 0.0
@@ -3462,7 +3462,7 @@
                       end
                     fail()
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, Absyn.MSG(info = info), _)  => begin
                       @match (_, Values.INTEGER(ri2)) = ceval(cache, env, exp2, impl, inMsg, numIter + 1)
                       if ! ri2 == 0
@@ -3473,7 +3473,7 @@
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lh_str, rh_str), info)
                     fail()
                   end
-                  
+
                   (cache, env, _ <| exp2 <|  nil(), impl, Absyn.NO_MSG(__), _)  => begin
                       @match (_, Values.INTEGER(ri2)) = ceval(cache, env, exp2, impl, Absyn.NO_MSG(), numIter + 1)
                       if ! ri2 == 0
@@ -3488,7 +3488,7 @@
 
          #= author: LP
           Evaluates the builtin mod operator. =#
-        function cevalBuiltinMod(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinMod(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local cache::FCore.Cache = inCache
 
@@ -3513,26 +3513,26 @@
                   (Values.REAL(rv1), Values.REAL(rv2), _)  => begin
                     Values.REAL(mod(rv1, rv2))
                   end
-                  
+
                   (Values.INTEGER(ri), Values.REAL(rv2), _)  => begin
                     Values.REAL(mod(ri, rv2))
                   end
-                  
+
                   (Values.REAL(rv1), Values.INTEGER(ri), _)  => begin
                     Values.REAL(mod(rv1, ri))
                   end
-                  
+
                   (Values.INTEGER(ri1), Values.INTEGER(ri2), _)  => begin
                     Values.INTEGER(mod(ri1, ri2))
                   end
-                  
+
                   (_, Values.REAL(rv2), Absyn.MSG(info = info)) where (rv2 == 0.0)  => begin
                       lhs_str = ExpressionDump.printExpStr(exp1)
                       rhs_str = ExpressionDump.printExpStr(exp2)
                       Error.addSourceMessage(Error.MODULO_BY_ZERO, list(lhs_str, rhs_str), info)
                     fail()
                   end
-                  
+
                   (_, Values.INTEGER(0), Absyn.MSG(info = info))  => begin
                       lhs_str = ExpressionDump.printExpStr(exp1)
                       rhs_str = ExpressionDump.printExpStr(exp2)
@@ -3545,7 +3545,7 @@
         end
 
          #= Evaluates the builtin sum function. =#
-        function cevalBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3582,7 +3582,7 @@
 
          #= author: LP
           Evaluates the builtin max function. =#
-        function cevalBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3604,7 +3604,7 @@
                       v_1 = cevalBuiltinMaxArr(v)
                     (cache, v_1)
                   end
-                  
+
                   (cache, env, s1 <| s2 <|  nil(), impl, msg, _)  => begin
                       (cache, v1) = ceval(cache, env, s1, impl, msg, numIter + 1)
                       (cache, v2) = ceval(cache, env, s2, impl, msg, numIter + 1)
@@ -3616,7 +3616,7 @@
           (outCache, outValue)
         end
 
-        function cevalBuiltinMax2(v1::Values.Value, v2::Values.Value) ::Values.Value 
+        function cevalBuiltinMax2(v1::Values.Value, v2::Values.Value) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -3632,15 +3632,15 @@
                   (Values.INTEGER(i1), Values.INTEGER(i2))  => begin
                     Values.INTEGER(max(i1, i2))
                   end
-                  
+
                   (Values.REAL(r1), Values.REAL(r2))  => begin
                     Values.REAL(max(r1, r2))
                   end
-                  
+
                   (Values.BOOL(b1), Values.BOOL(b2))  => begin
                     Values.BOOL(b1 || b2)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     if v1.index > v2.index
                           v1
@@ -3648,7 +3648,7 @@
                           v2
                         end
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         s1 = ValuesUtil.valString(v1)
@@ -3662,7 +3662,7 @@
         end
 
          #= Helper function to cevalBuiltinMax. =#
-        function cevalBuiltinMaxArr(inValue::Values.Value) ::Values.Value 
+        function cevalBuiltinMaxArr(inValue::Values.Value) ::Values.Value
               local outValue::Values.Value
 
               local vals::List{Values.Value}
@@ -3674,7 +3674,7 @@
 
          #= author: PA
           Constant evaluation of builtin min function. =#
-        function cevalBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3696,7 +3696,7 @@
                       v_1 = cevalBuiltinMinArr(v)
                     (cache, v_1)
                   end
-                  
+
                   (cache, env, s1 <| s2 <|  nil(), impl, msg, _)  => begin
                       (cache, v1) = ceval(cache, env, s1, impl, msg, numIter + 1)
                       (cache, v2) = ceval(cache, env, s2, impl, msg, numIter + 1)
@@ -3708,7 +3708,7 @@
           (outCache, outValue)
         end
 
-        function cevalBuiltinMin2(v1::Values.Value, v2::Values.Value) ::Values.Value 
+        function cevalBuiltinMin2(v1::Values.Value, v2::Values.Value) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -3725,15 +3725,15 @@
                   (Values.INTEGER(i1), Values.INTEGER(i2))  => begin
                     Values.INTEGER(min(i1, i2))
                   end
-                  
+
                   (Values.REAL(r1), Values.REAL(r2))  => begin
                     Values.REAL(min(r1, r2))
                   end
-                  
+
                   (Values.BOOL(b1), Values.BOOL(b2))  => begin
                     Values.BOOL(b1 && b2)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     if v1.index < v2.index
                           v1
@@ -3741,7 +3741,7 @@
                           v2
                         end
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         s1 = ValuesUtil.valString(v1)
@@ -3755,7 +3755,7 @@
         end
 
          #= Helper function to cevalBuiltinMin. =#
-        function cevalBuiltinMinArr(inValue::Values.Value) ::Values.Value 
+        function cevalBuiltinMinArr(inValue::Values.Value) ::Values.Value
               local outValue::Values.Value
 
               local vals::List{Values.Value}
@@ -3767,7 +3767,7 @@
 
          #= author: LP
           Evaluates the builtin rem operator =#
-        function cevalBuiltinRem(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinRem(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3798,7 +3798,7 @@
                       rvd = rv1 - rv2 * dr
                     (cache, Values.REAL(rvd))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(ri)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       rv1 = intReal(ri)
@@ -3807,7 +3807,7 @@
                       rvd = rv1 - rv2 * dr
                     (cache, Values.REAL(rvd))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.REAL(rv1)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(ri)) = ceval(cache, env, exp2, impl, msg, numIter + 1)
@@ -3816,7 +3816,7 @@
                       rvd = rv1 - rv2 * dr
                     (cache, Values.REAL(rvd))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.INTEGER(ri1)) = ceval(cache, env, exp1, impl, msg, numIter + 1)
                       @match (cache, Values.INTEGER(ri2)) = ceval(cache, env, exp2, impl, msg, numIter + 1)
@@ -3824,7 +3824,7 @@
                       ri_1 = ri1 - ri2 * di
                     (cache, Values.INTEGER(ri_1))
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, Absyn.MSG(info = info), _)  => begin
                       @match (_, Values.REAL(rv2)) = ceval(cache, env, exp2, impl, inMsg, numIter + 1)
                       if ! rv2 == 0.0
@@ -3835,7 +3835,7 @@
                       Error.addSourceMessage(Error.REM_ARG_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
-                  
+
                   (cache, env, exp1 <| exp2 <|  nil(), impl, Absyn.MSG(info = info), _)  => begin
                       @match (_, Values.INTEGER(ri2)) = ceval(cache, env, exp2, impl, inMsg, numIter + 1)
                       if ! ri2 == 0
@@ -3853,7 +3853,7 @@
 
          #= author: LP
           Evaluates the builtin integer operator =#
-        function cevalBuiltinInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3878,7 +3878,7 @@
 
          #=  @author: adrpo
           Evaluates the builtin boolean operator =#
-        function cevalBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3903,11 +3903,11 @@
                           Values.REAL(rv)  => begin
                             ! realEq(rv, 0.0)
                           end
-                          
+
                           Values.INTEGER(iv)  => begin
                             ! intEq(iv, 0)
                           end
-                          
+
                           Values.BOOL(bv)  => begin
                             bv
                           end
@@ -3922,7 +3922,7 @@
 
          #= author: adrpo
           Evaluates the builtin rooted operator from MultiBody =#
-        function cevalBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3944,7 +3944,7 @@
 
          #= author: LP
           Evaluates the builtin Integer operator =#
-        function cevalBuiltinIntegerEnumeration(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinIntegerEnumeration(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3968,7 +3968,7 @@
          #= This function generates a matrix{n,n} (A) of the vector {a,b,...,n}
           where the diagonal of A is the vector {a,b,...,n}
           ie A{1,1} == a, A{2,2} == b ... =#
-        function cevalBuiltinDiagonal(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinDiagonal(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -3998,7 +3998,7 @@
                           end for i in 1:dimension), list(dimension)) for j in 1:dimension), list(dimension, dimension))
                     (cache, res)
                   end
-                  
+
                   (_, _, _, _, Absyn.MSG(info = info), _)  => begin
                       Error.addSourceMessage(Error.COMPILER_ERROR, list("Could not evaluate diagonal. Ceval.cevalBuiltinDiagonal failed."), info)
                     fail()
@@ -4008,9 +4008,9 @@
           (outCache, outValue)
         end
 
-         #= 
+         #=
           x,y => {x[2]*y[3]-x[3]*y[2],x[3]*y[1]-x[1]*y[3],x[1]*y[2]-x[2]*y[1]} =#
-        function cevalBuiltinCross(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinCross(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4033,7 +4033,7 @@
                       res = ValuesUtil.crossProduct(xv, yv)
                     (cache, res)
                   end
-                  
+
                   (_, _, _, _, Absyn.MSG(info = info), _)  => begin
                       str = "cross" + ExpressionDump.printExpStr(DAE.TUPLE(inExpExpLst))
                       Error.addSourceMessage(Error.FAILED_TO_EVALUATE_EXPRESSION, list(str), info)
@@ -4046,7 +4046,7 @@
 
          #= author: PA
           Helper function to cevalBuiltinTranspose =#
-        function cevalBuiltinTranspose2(inValuesValueLst1::List{<:Values.Value}, inInteger2::ModelicaInteger #= index =#, inDims::List{<:ModelicaInteger} #= dimension =#) ::List{Values.Value} 
+        function cevalBuiltinTranspose2(inValuesValueLst1::List{<:Values.Value}, inInteger2::ModelicaInteger #= index =#, inDims::List{<:ModelicaInteger} #= dimension =#) ::List{Values.Value}
               local outValuesValueLst::List{Values.Value}
 
               outValuesValueLst = begin
@@ -4066,7 +4066,7 @@
                       rest = cevalBuiltinTranspose2(vlst, indx_1, inDims)
                     _cons(Values.ARRAY(transposed_row, inDims), rest)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -4076,7 +4076,7 @@
         end
 
          #= Helper function for cevalBuiltinSize, for size(A) where A is a matrix. =#
-        function cevalBuiltinSizeMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinSizeMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4100,13 +4100,13 @@
                       v = ValuesUtil.intlistToValue(sizelst)
                     (cache, v)
                   end
-                  
+
                   (cache, _, DAE.MATRIX(ty = DAE.T_ARRAY(dims = dims)), _, _, _)  => begin
                       sizelst = ListUtil.map(dims, Expression.dimensionSize)
                       v = ValuesUtil.intlistToValue(sizelst)
                     (cache, v)
                   end
-                  
+
                   (cache, env, exp, impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(dimLst = sizelst)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       v = ValuesUtil.intlistToValue(sizelst)
@@ -4122,7 +4122,7 @@
         end
 
          #= This function constant evaluates calls to the fail() function. =#
-        function cevalBuiltinFail(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinFail(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4132,7 +4132,7 @@
         end
 
          #= This function constant evaluates calls to the fill function. =#
-        function cevalBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4152,7 +4152,7 @@
           (outCache, outValue)
         end
 
-        function cevalBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inFillValue::Values.Value, inDims::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inFillValue::Values.Value, inDims::List{<:DAE.Exp}, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4168,7 +4168,7 @@
                   (cache, _, _,  nil(), _, _, _)  => begin
                     (cache, inFillValue)
                   end
-                  
+
                   (cache, _, _, dim <| rest_dims, _, _, _)  => begin
                       (cache, fill_value) = cevalBuiltinFill2(cache, inEnv, inFillValue, rest_dims, inImpl, inMsg, numIter)
                       @match (cache, Values.INTEGER(int_dim)) = ceval(cache, inEnv, dim, inImpl, inMsg, numIter + 1)
@@ -4183,7 +4183,7 @@
         end
 
          #= Performs the arithmetic relation check and gives a boolean result. =#
-        function cevalRelation(inValue1::Values.Value, inOperator::DAE.Operator, inValue2::Values.Value) ::Values.Value 
+        function cevalRelation(inValue1::Values.Value, inOperator::DAE.Operator, inValue2::Values.Value) ::Values.Value
               local outValue::Values.Value
 
               local result::Bool
@@ -4193,27 +4193,27 @@
                   DAE.GREATER(__)  => begin
                     cevalRelationLess(inValue2, inValue1)
                   end
-                  
+
                   DAE.LESS(__)  => begin
                     cevalRelationLess(inValue1, inValue2)
                   end
-                  
+
                   DAE.LESSEQ(__)  => begin
                     cevalRelationLessEq(inValue1, inValue2)
                   end
-                  
+
                   DAE.GREATEREQ(__)  => begin
                     cevalRelationGreaterEq(inValue1, inValue2)
                   end
-                  
+
                   DAE.EQUAL(__)  => begin
                     cevalRelationEqual(inValue1, inValue2)
                   end
-                  
+
                   DAE.NEQUAL(__)  => begin
                     cevalRelationNotEqual(inValue1, inValue2)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Ceval.cevalRelation failed on: " + ValuesUtil.printValStr(inValue1) + ExpressionDump.relopSymbol(inOperator) + ValuesUtil.printValStr(inValue2))
@@ -4226,7 +4226,7 @@
         end
 
          #= Returns whether the first value is less than the second value. =#
-        function cevalRelationLess(inValue1::Values.Value, inValue2::Values.Value) ::Bool 
+        function cevalRelationLess(inValue1::Values.Value, inValue2::Values.Value) ::Bool
               local result::Bool
 
               result = begin
@@ -4234,35 +4234,35 @@
                   (Values.STRING(__), Values.STRING(__))  => begin
                     stringCompare(inValue1.string, inValue2.string) < 0
                   end
-                  
+
                   (Values.BOOL(__), Values.BOOL(__))  => begin
                     inValue1.boolean < inValue2.boolean
                   end
-                  
+
                   (Values.INTEGER(__), Values.INTEGER(__))  => begin
                     inValue1.integer < inValue2.integer
                   end
-                  
+
                   (Values.REAL(__), Values.REAL(__))  => begin
                     inValue1.real < inValue2.real
                   end
-                  
+
                   (Values.INTEGER(__), Values.REAL(__))  => begin
                     intReal(inValue1.integer) < inValue2.real
                   end
-                  
+
                   (Values.REAL(__), Values.INTEGER(__))  => begin
                     inValue1.real < intReal(inValue2.integer)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.index < inValue2.index
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.INTEGER(__))  => begin
                     inValue1.index < inValue2.integer
                   end
-                  
+
                   (Values.INTEGER(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.integer < inValue2.index
                   end
@@ -4272,7 +4272,7 @@
         end
 
          #= Returns whether the first value is less than or equal to the second value. =#
-        function cevalRelationLessEq(inValue1::Values.Value, inValue2::Values.Value) ::Bool 
+        function cevalRelationLessEq(inValue1::Values.Value, inValue2::Values.Value) ::Bool
               local result::Bool
 
               result = begin
@@ -4280,35 +4280,35 @@
                   (Values.STRING(__), Values.STRING(__))  => begin
                     stringCompare(inValue1.string, inValue2.string) <= 0
                   end
-                  
+
                   (Values.BOOL(__), Values.BOOL(__))  => begin
                     inValue1.boolean <= inValue2.boolean
                   end
-                  
+
                   (Values.INTEGER(__), Values.INTEGER(__))  => begin
                     inValue1.integer <= inValue2.integer
                   end
-                  
+
                   (Values.REAL(__), Values.REAL(__))  => begin
                     inValue1.real <= inValue2.real
                   end
-                  
+
                   (Values.INTEGER(__), Values.REAL(__))  => begin
                     intReal(inValue1.integer) <= inValue2.real
                   end
-                  
+
                   (Values.REAL(__), Values.INTEGER(__))  => begin
                     inValue1.real <= intReal(inValue2.integer)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.index <= inValue2.index
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.INTEGER(__))  => begin
                     inValue1.index <= inValue2.integer
                   end
-                  
+
                   (Values.INTEGER(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.integer <= inValue2.index
                   end
@@ -4318,7 +4318,7 @@
         end
 
          #= Returns whether the first value is greater than or equal to the second value. =#
-        function cevalRelationGreaterEq(inValue1::Values.Value, inValue2::Values.Value) ::Bool 
+        function cevalRelationGreaterEq(inValue1::Values.Value, inValue2::Values.Value) ::Bool
               local result::Bool
 
               result = begin
@@ -4326,35 +4326,35 @@
                   (Values.STRING(__), Values.STRING(__))  => begin
                     stringCompare(inValue1.string, inValue2.string) >= 0
                   end
-                  
+
                   (Values.BOOL(__), Values.BOOL(__))  => begin
                     inValue1.boolean >= inValue2.boolean
                   end
-                  
+
                   (Values.INTEGER(__), Values.INTEGER(__))  => begin
                     inValue1.integer >= inValue2.integer
                   end
-                  
+
                   (Values.REAL(__), Values.REAL(__))  => begin
                     inValue1.real >= inValue2.real
                   end
-                  
+
                   (Values.INTEGER(__), Values.REAL(__))  => begin
                     intReal(inValue1.integer) >= inValue2.real
                   end
-                  
+
                   (Values.REAL(__), Values.INTEGER(__))  => begin
                     inValue1.real >= intReal(inValue2.integer)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.index >= inValue2.index
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.INTEGER(__))  => begin
                     inValue1.index >= inValue2.integer
                   end
-                  
+
                   (Values.INTEGER(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.integer >= inValue2.index
                   end
@@ -4364,7 +4364,7 @@
         end
 
          #= Returns whether the first value is equal to the second value. =#
-        function cevalRelationEqual(inValue1::Values.Value, inValue2::Values.Value) ::Bool 
+        function cevalRelationEqual(inValue1::Values.Value, inValue2::Values.Value) ::Bool
               local result::Bool
 
               result = begin
@@ -4372,35 +4372,35 @@
                   (Values.STRING(__), Values.STRING(__))  => begin
                     stringCompare(inValue1.string, inValue2.string) == 0
                   end
-                  
+
                   (Values.BOOL(__), Values.BOOL(__))  => begin
                     inValue1.boolean == inValue2.boolean
                   end
-                  
+
                   (Values.INTEGER(__), Values.INTEGER(__))  => begin
                     inValue1.integer == inValue2.integer
                   end
-                  
+
                   (Values.REAL(__), Values.REAL(__))  => begin
                     inValue1.real == inValue2.real
                   end
-                  
+
                   (Values.INTEGER(__), Values.REAL(__))  => begin
                     intReal(inValue1.integer) == inValue2.real
                   end
-                  
+
                   (Values.REAL(__), Values.INTEGER(__))  => begin
                     inValue1.real == intReal(inValue2.integer)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.index == inValue2.index
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.INTEGER(__))  => begin
                     inValue1.index == inValue2.integer
                   end
-                  
+
                   (Values.INTEGER(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.integer == inValue2.index
                   end
@@ -4410,7 +4410,7 @@
         end
 
          #= Returns whether the first value is not equal to the second value. =#
-        function cevalRelationNotEqual(inValue1::Values.Value, inValue2::Values.Value) ::Bool 
+        function cevalRelationNotEqual(inValue1::Values.Value, inValue2::Values.Value) ::Bool
               local result::Bool
 
               result = begin
@@ -4418,35 +4418,35 @@
                   (Values.STRING(__), Values.STRING(__))  => begin
                     stringCompare(inValue1.string, inValue2.string) != 0
                   end
-                  
+
                   (Values.BOOL(__), Values.BOOL(__))  => begin
                     inValue1.boolean != inValue2.boolean
                   end
-                  
+
                   (Values.INTEGER(__), Values.INTEGER(__))  => begin
                     inValue1.integer != inValue2.integer
                   end
-                  
+
                   (Values.REAL(__), Values.REAL(__))  => begin
                     inValue1.real != inValue2.real
                   end
-                  
+
                   (Values.INTEGER(__), Values.REAL(__))  => begin
                     intReal(inValue1.integer) != inValue2.real
                   end
-                  
+
                   (Values.REAL(__), Values.INTEGER(__))  => begin
                     inValue1.real != intReal(inValue2.integer)
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.index != inValue2.index
                   end
-                  
+
                   (Values.ENUM_LITERAL(__), Values.INTEGER(__))  => begin
                     inValue1.index != inValue2.integer
                   end
-                  
+
                   (Values.INTEGER(__), Values.ENUM_LITERAL(__))  => begin
                     inValue1.integer != inValue2.index
                   end
@@ -4456,7 +4456,7 @@
         end
 
          #= Evaluates a range expression on the form enum.lit1 : enum.lit2 =#
-        function cevalRangeEnum(startIndex::ModelicaInteger, stopIndex::ModelicaInteger, enumType::DAE.Type) ::List{Values.Value} 
+        function cevalRangeEnum(startIndex::ModelicaInteger, stopIndex::ModelicaInteger, enumType::DAE.Type) ::List{Values.Value}
               local enumValList::List{Values.Value}
 
               enumValList = begin
@@ -4480,7 +4480,7 @@
           enumValList
         end
 
-        function makeEnumValue(name::Absyn.Path, index::ModelicaInteger) ::Tuple{Values.Value, ModelicaInteger} 
+        function makeEnumValue(name::Absyn.Path, index::ModelicaInteger) ::Tuple{Values.Value, ModelicaInteger}
               local newIndex::ModelicaInteger
               local enumValue::Values.Value
 
@@ -4491,7 +4491,7 @@
 
          #= This function does constant
           evaluation on a list of expressions. =#
-        function cevalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function cevalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}}
               local outValuesValueLst::List{Values.Value} = nil
               local outCache::FCore.Cache = inCache
 
@@ -4508,7 +4508,7 @@
 
          #= Evaluates ComponentRef, i.e. variables, by
           looking up variables in the environment. =#
-        function cevalCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4538,7 +4538,7 @@
                       (cache, v) = cevalCref_dispatch(cache, env, c, attr, ty, binding, const_for_range, splicedExpData, classEnv, componentEnv, name, impl, msg, numIter)
                     (cache, v)
                   end
-                  
+
                   (cache, env, c, false, Absyn.MSG(info = info), _)  => begin
                       @shouldFail (_, _, _, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, c)
                       scope_str = FGraph.printGraphPathStr(env)
@@ -4563,7 +4563,7 @@
         end
 
          #= Helper function to cevalCref =#
-        function cevalCref_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttr::DAE.Attributes, inType::DAE.Type, inBinding::DAE.Binding, constForRange::Option{<:DAE.Const}, inSplicedExpData::InstTypes.SplicedExpData, inClassEnv::FCore.Graph, inComponentEnv::FCore.Graph, inFQName::String, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCref_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttr::DAE.Attributes, inType::DAE.Type, inBinding::DAE.Binding, constForRange::Option{<:DAE.Const}, inSplicedExpData::InstTypes.SplicedExpData, inClassEnv::FCore.Graph, inComponentEnv::FCore.Graph, inFQName::String, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4583,7 +4583,7 @@
                   (_, _, _, _, _, DAE.UNBOUND(__), SOME(_), _, _, _, _, _, _, _)  => begin
                     fail()
                   end
-                  
+
                   (_, _, _, _, _, DAE.UNBOUND(__), NONE(), _, _, _, _, false, Absyn.MSG(__), _)  => begin
                       str = ComponentReference.printComponentRefStr(inCref)
                       scope_str = FGraph.printGraphPathStr(inEnv)
@@ -4597,7 +4597,7 @@
                       v = Values.EMPTY(s1, s2, v, s3)
                     (inCache, v)
                   end
-                  
+
                   (_, _, _, DAE.ATTR(variability = variability), _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = SCodeUtil.isParameterOrConst(variability) || inImpl || FGraph.inForLoopScope(inEnv)
                       @match false = crefEqualValue(inCref, inBinding)
@@ -4630,7 +4630,7 @@
 
          #= Helper function to cevalCref.
           Evaluates variables by evaluating their bindings. =#
-        function cevalCrefBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBinding::DAE.Binding, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCrefBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBinding::DAE.Binding, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4676,7 +4676,7 @@
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (cache, env, DAE.CREF_IDENT(_, ty,  nil()), DAE.UNBOUND(__), _, Absyn.MSG(info), _)  => begin
                       @match DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = tpath), varLst = vl) = Types.arrayElementType(ty)
                       @match true = Types.allHaveBindings(vl)
@@ -4684,17 +4684,17 @@
                       (cache, res) = cevalCrefBinding(cache, env, inComponentRef, binding, inBoolean, inMsg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (_, _, _, DAE.UNBOUND(__), false, Absyn.MSG(_), _)  => begin
                     fail()
                   end
-                  
+
                   (_, _, _, DAE.UNBOUND(__), true, Absyn.MSG(_), _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.trace("#- Ceval.cevalCrefBinding: Ignoring unbound when implicit\\n")
                     fail()
                   end
-                  
+
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
                       @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = list(DAE.REDUCTIONITER())) = exp
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
@@ -4702,20 +4702,20 @@
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (cache, env, cr, DAE.EQBOUND(evaluatedExp = SOME(e_val)), impl, msg, _)  => begin
                       subsc = ComponentReference.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, e_val, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       subsc = ComponentReference.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_PARAM(__)), impl, msg, _)  => begin
                       @match false = isRecursiveBinding(cr, exp)
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
@@ -4723,7 +4723,7 @@
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (_, _, _, DAE.EQBOUND(exp = exp, constant_ = DAE.C_VAR(__)), _, Absyn.MSG(_), _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.trace("#- Ceval.cevalCrefBinding failed (nonconstant EQBOUND(")
@@ -4732,7 +4732,7 @@
                       Debug.traceln("))")
                     fail()
                   end
-                  
+
                   (_, env, e1, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       s1 = ComponentReference.printComponentRefStr(e1)
@@ -4766,7 +4766,7 @@
         end
 
          #=  help function to cevalCrefBinding =#
-        function isRecursiveBinding(cr::DAE.ComponentRef, exp::DAE.Exp) ::Bool 
+        function isRecursiveBinding(cr::DAE.ComponentRef, exp::DAE.Exp) ::Bool
               local res::Bool
 
               res = begin
@@ -4775,7 +4775,7 @@
                       res = ListUtil.map1BoolOr(Expression.extractCrefsFromExp(exp), ComponentReference.crefEqual, cr)
                     res
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4786,7 +4786,7 @@
 
          #= Helper function to cevalCrefBinding. It applies
           subscripts to array values to extract array elements. =#
-        function cevalSubscriptValue(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript} #= subscripts to extract =#, inValue::Values.Value, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalSubscriptValue(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript} #= subscripts to extract =#, inValue::Values.Value, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -4815,7 +4815,7 @@
                           Values.INTEGER(n)  => begin
                             n
                           end
-                          
+
                           Values.ENUM_LITERAL(index = n)  => begin
                             n
                           end
@@ -4825,7 +4825,7 @@
                       (cache, res) = cevalSubscriptValue(cache, env, subs, subval, impl, msg, numIter + 1)
                     (cache, res)
                   end
-                  
+
                   (cache, env, DAE.SLICE(exp = exp) <| subs, Values.ARRAY(valueLst = lst), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = sliceLst)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       slice = ListUtil.map(sliceLst, ValuesUtil.valueInteger)
@@ -4834,7 +4834,7 @@
                       res = ValuesUtil.makeArray(lst)
                     (cache, res)
                   end
-                  
+
                   (cache, env, DAE.WHOLEDIM(__) <| subs, subval && Values.ARRAY(__), impl, msg, _)  => begin
                        #=  slices
                        =#
@@ -4850,7 +4850,7 @@
                        =#
                     (cache, res)
                   end
-                  
+
                   (cache, _,  nil(), v, _, _, _)  => begin
                     (cache, v)
                   end
@@ -4874,7 +4874,7 @@
         end
 
          #= Applies subscripts to array values to extract array elements. =#
-        function cevalSubscriptValueList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript} #= subscripts to extract =#, inValue::List{<:Values.Value}, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function cevalSubscriptValueList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript} #= subscripts to extract =#, inValue::List{<:Values.Value}, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}}
               local outValue::List{Values.Value}
               local outCache::FCore.Cache
 
@@ -4892,7 +4892,7 @@
                   (cache, _, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, subs, subval <| subvals, impl, msg, _)  => begin
                       (cache, res) = cevalSubscriptValue(cache, env, subs, subval, impl, msg, numIter + 1)
                       (cache, lst) = cevalSubscriptValueList(cache, env, subs, subvals, impl, msg, numIter)
@@ -4909,7 +4909,7 @@
           the subscript list {1,p,q} (as in x[1,p,q]) where p and q have constant values 2,3 respectively will become
           {1,2,3} (resulting in x[1,2,3]).
           adrpo: do not fail if you cannot evaluate one, just move to the next one! =#
-        function cevalSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript}, inIntegerLst::List{<:ModelicaInteger}, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Subscript}} 
+        function cevalSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inExpSubscriptLst::List{<:DAE.Subscript}, inIntegerLst::List{<:ModelicaInteger}, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Subscript}}
               local outExpSubscriptLst::List{DAE.Subscript}
               local outCache::FCore.Cache
 
@@ -4930,13 +4930,13 @@
                   (cache, _,  nil(), _, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, sub <| subs, dim <| dims, impl, msg, _)  => begin
                       (cache, sub_1) = cevalSubscript(cache, env, sub, dim, impl, msg, numIter + 1)
                       (cache, subs_1) = cevalSubscripts(cache, env, subs, dims, impl, msg, numIter)
                     (cache, _cons(sub_1, subs_1))
                   end
-                  
+
                   (cache, env, sub <| subs, dim <| dims, impl, msg, _)  => begin
                       @shouldFail (_, _) = cevalSubscript(cache, env, sub, dim, impl, msg, numIter + 1)
                       (cache, subs_1) = cevalSubscripts(cache, env, subs, dims, impl, msg, numIter)
@@ -4953,7 +4953,7 @@
 
          #= This function relates a subscript to its canonical forms, which
           is when all expressions are evaluated to constant values. =#
-        function cevalSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::DAE.Subscript, inInteger::ModelicaInteger, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, DAE.Subscript} 
+        function cevalSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::DAE.Subscript, inInteger::ModelicaInteger, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, DAE.Subscript}
               local outSubscript::DAE.Subscript
               local outCache::FCore.Cache
 
@@ -4973,11 +4973,11 @@
                   (cache, _, DAE.WHOLEDIM(__), _, _, _, _)  => begin
                     (cache, DAE.WHOLEDIM())
                   end
-                  
+
                   (cache, _, DAE.INDEX(exp = DAE.ENUM_LITERAL(__)), _, _, _, _)  => begin
                     (cache, inSubscript)
                   end
-                  
+
                   (cache, env, DAE.INDEX(exp = e1), _, impl, msg, _)  => begin
                       (cache, v1) = ceval(cache, env, e1, impl, msg, numIter + 1)
                       e1_1 = begin
@@ -4985,11 +4985,11 @@
                           Values.INTEGER(_)  => begin
                             ValuesUtil.valueExp(v1)
                           end
-                          
+
                           Values.ENUM_LITERAL(__)  => begin
                             ValuesUtil.valueExp(v1)
                           end
-                          
+
                           Values.BOOL(_)  => begin
                             ValuesUtil.valueExp(v1)
                           end
@@ -4997,7 +4997,7 @@
                       end
                     (cache, DAE.INDEX(e1_1))
                   end
-                  
+
                   (cache, env, DAE.SLICE(exp = e1), _, impl, msg, _)  => begin
                       (cache, v1) = ceval(cache, env, e1, impl, msg, numIter + 1)
                       e1_1 = ValuesUtil.valueExp(v1)
@@ -5015,7 +5015,7 @@
         end
 
          #=  =#
-        function crefEqualValue(c::DAE.ComponentRef, v::DAE.Binding) ::Bool 
+        function crefEqualValue(c::DAE.ComponentRef, v::DAE.Binding) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -5024,7 +5024,7 @@
                   (_, DAE.EQBOUND(DAE.CREF(cr, _), NONE(), _, _))  => begin
                     ComponentReference.crefEqual(c, cr)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5033,10 +5033,10 @@
           outBoolean
         end
 
-         #= 
+         #=
         Checks that the values of a dimension slice is all in the range 1 to dim size
         if so returns true, else returns false =#
-        function dimensionSliceInRange(arr::Values.Value, dimSize::ModelicaInteger) ::Bool 
+        function dimensionSliceInRange(arr::Values.Value, dimSize::ModelicaInteger) ::Bool
               local inRange::Bool
 
               inRange = begin
@@ -5048,7 +5048,7 @@
                   (Values.ARRAY(valueLst =  nil()), _)  => begin
                     true
                   end
-                  
+
                   (Values.ARRAY(valueLst = Values.INTEGER(indx) <| vlst, dimLst = dim <| dims), _)  => begin
                       dim = dim - 1
                       dims = _cons(dim, dims)
@@ -5056,7 +5056,7 @@
                       @match true = dimensionSliceInRange(Values.ARRAY(vlst, dims), dimSize)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5067,7 +5067,7 @@
 
          #= Help function to ceval. Evaluates reductions calls, such as
             'sum(i for i in 1:5)' =#
-        function cevalReduction(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, exp::DAE.Exp, exprType::DAE.Type, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, iteratorNames::List{<:String}, inValueMatrix::List{<:List{<:Values.Value}}, iterTypes::List{<:DAE.Type}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}} 
+        function cevalReduction(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, exp::DAE.Exp, exprType::DAE.Type, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, iteratorNames::List{<:String}, inValueMatrix::List{<:List{<:Values.Value}}, iterTypes::List{<:DAE.Type}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}}
               local result::Option{Values.Value}
               local newCache::FCore.Cache
 
@@ -5084,20 +5084,20 @@
                       vals = listReverse(vals)
                     (cache, SOME(Values.LIST(vals)))
                   end
-                  
+
                   (cache, _, Absyn.IDENT("listReverse"), SOME(Values.LIST(_)), _, _, _, _, _, _,  nil(), _, _, _, _)  => begin
                     (cache, inCurValue)
                   end
-                  
+
                   (cache, _, Absyn.IDENT("array"), SOME(Values.ARRAY(vals, dims)), _, _, _, _, _, _,  nil(), _, _, _, _)  => begin
                       vals = listReverse(vals)
                     (cache, SOME(Values.ARRAY(vals, dims)))
                   end
-                  
+
                   (cache, _, _, curValue, _, _, _, _, _, _,  nil(), _, _, _, _)  => begin
                     (cache, curValue)
                   end
-                  
+
                   (cache, env, _, curValue, _, _, _, _, _, _, vals <| valueMatrix, _, _, _, _)  => begin
                       new_env = extendFrameForIterators(env, iteratorNames, vals, iterTypes)
                       (cache, curValue) = cevalReductionEvalAndFold(cache, new_env, opPath, curValue, exp, exprType, foldName, resultName, foldExp, impl, msg, numIter + 1)
@@ -5118,7 +5118,7 @@
         end
 
          #= Evaluate the reduction body and fold =#
-        function cevalReductionEvalAndFold(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, exp::DAE.Exp, exprType::DAE.Type, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}} 
+        function cevalReductionEvalAndFold(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, exp::DAE.Exp, exprType::DAE.Type, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}}
               local result::Option{Values.Value}
               local newCache::FCore.Cache
 
@@ -5143,7 +5143,7 @@
         end
 
          #= Fold the reduction body =#
-        function cevalReductionFold(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, inValue::Values.Value, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, exprType::DAE.Type, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}} 
+        function cevalReductionFold(inCache::FCore.Cache, inEnv::FCore.Graph, opPath::Absyn.Path, inCurValue::Option{<:Values.Value}, inValue::Values.Value, foldName::String, resultName::String, foldExp::Option{<:DAE.Exp}, exprType::DAE.Type, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Option{Values.Value}}
               local result::Option{Values.Value}
               local newCache::FCore.Cache
 
@@ -5157,21 +5157,21 @@
                       value = valueArrayCons(ValuesUtil.unboxIfBoxedVal(inValue), value)
                     (cache, SOME(value))
                   end
-                  
+
                   (cache, Absyn.IDENT("list"), SOME(value), _)  => begin
                       value = valueCons(ValuesUtil.unboxIfBoxedVal(inValue), value)
                     (cache, SOME(value))
                   end
-                  
+
                   (cache, Absyn.IDENT("listReverse"), SOME(value), _)  => begin
                       value = valueCons(ValuesUtil.unboxIfBoxedVal(inValue), value)
                     (cache, SOME(value))
                   end
-                  
+
                   (cache, _, NONE(), _)  => begin
                     (cache, SOME(inValue))
                   end
-                  
+
                   (cache, _, SOME(value), SOME(exp))  => begin
                       env = FGraph.addForIterator(inEnv, foldName, exprType, DAE.VALBOUND(inValue, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       env = FGraph.addForIterator(env, resultName, exprType, DAE.VALBOUND(value, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
@@ -5187,7 +5187,7 @@
         end
 
          #= Returns the cons of two values. Used by cevalReduction for array reductions. =#
-        function valueArrayCons(v1::Values.Value, v2::Values.Value) ::Values.Value 
+        function valueArrayCons(v1::Values.Value, v2::Values.Value) ::Values.Value
               local res::Values.Value
 
               res = begin
@@ -5199,7 +5199,7 @@
                       dim_size = dim_size + 1
                     Values.ARRAY(_cons(v1, vals), _cons(dim_size, rest_dims))
                   end
-                  
+
                   _  => begin
                       Values.ARRAY(list(v1, v2), list(2))
                   end
@@ -5209,7 +5209,7 @@
         end
 
          #= Returns the cons of two values. Used by cevalReduction for list reductions. =#
-        function valueCons(inV1::Values.Value, inV2::Values.Value) ::Values.Value 
+        function valueCons(inV1::Values.Value, inV2::Values.Value) ::Values.Value
               local res::Values.Value
 
               res = begin
@@ -5219,7 +5219,7 @@
                   (Values.META_BOX(v1), Values.LIST(vals))  => begin
                     Values.LIST(_cons(v1, vals))
                   end
-                  
+
                   (v1, Values.LIST(vals))  => begin
                     Values.LIST(_cons(v1, vals))
                   end
@@ -5228,7 +5228,7 @@
           res
         end
 
-        function cevalReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::List{<:DAE.ReductionIterator}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{List{Values.Value}}, List{String}, List{ModelicaInteger}, List{DAE.Type}} 
+        function cevalReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::List{<:DAE.ReductionIterator}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{List{Values.Value}}, List{String}, List{ModelicaInteger}, List{DAE.Type}}
               local tys::List{DAE.Type}
               local dims::List{ModelicaInteger}
               local names::List{String}
@@ -5250,7 +5250,7 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil, nil, nil, nil)
                   end
-                  
+
                   (cache, env, DAE.REDUCTIONITER(id, exp, guardExp, ty) <| iterators, _, _, _)  => begin
                       (cache, val) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       iterVals = ValuesUtil.arrayOrListVals(val, true)
@@ -5264,7 +5264,7 @@
           (outCache, vals, names, dims, tys)
         end
 
-        function filterReductionIterator(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ty::DAE.Type, inVals::List{<:Values.Value}, guardExp::Option{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function filterReductionIterator(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ty::DAE.Type, inVals::List{<:Values.Value}, guardExp::Option{<:DAE.Exp}, impl::Bool, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, List{Values.Value}}
               local outVals::List{Values.Value}
               local outCache::FCore.Cache
 
@@ -5280,7 +5280,7 @@
                   (cache, _, _, _,  nil(), _, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, _, _, val <| vals, SOME(exp), _, _, _)  => begin
                       new_env = FGraph.addForIterator(env, id, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       @match (cache, Values.BOOL(b)) = ceval(cache, new_env, exp, impl, msg, numIter + 1)
@@ -5292,7 +5292,7 @@
                           end
                     (cache, vals)
                   end
-                  
+
                   (cache, _, _, _, vals, NONE(), _, _, _)  => begin
                     (cache, vals)
                   end
@@ -5301,7 +5301,7 @@
           (outCache, outVals)
         end
 
-        function extendFrameForIterators(inEnv::FCore.Graph, inNames::List{<:String}, inVals::List{<:Values.Value}, inTys::List{<:DAE.Type}) ::FCore.Graph 
+        function extendFrameForIterators(inEnv::FCore.Graph, inNames::List{<:String}, inVals::List{<:Values.Value}, inTys::List{<:DAE.Type}) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -5316,7 +5316,7 @@
                   (env,  nil(),  nil(),  nil())  => begin
                     env
                   end
-                  
+
                   (env, name <| names, val <| vals, ty <| tys)  => begin
                       env = FGraph.addForIterator(env, name, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       env = extendFrameForIterators(env, names, vals, tys)
@@ -5327,7 +5327,7 @@
           outEnv
         end
 
-        function backpatchArrayReduction(path::Absyn.Path, iterType::Absyn.ReductionIterType, inValue::Values.Value, dims::List{<:ModelicaInteger}) ::Values.Value 
+        function backpatchArrayReduction(path::Absyn.Path, iterType::Absyn.ReductionIterType, inValue::Values.Value, dims::List{<:ModelicaInteger}) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -5337,22 +5337,22 @@
                   (_, _, value, _ <|  nil())  => begin
                     value
                   end
-                  
+
                   (Absyn.IDENT("array"), Absyn.COMBINE(__), Values.ARRAY(valueLst = vals), _)  => begin
                       value = backpatchArrayReduction3(vals, listReverse(dims), ValuesUtil.makeArray)
                     value
                   end
-                  
+
                   (Absyn.IDENT("list"), Absyn.COMBINE(__), Values.LIST(vals), _)  => begin
                       value = backpatchArrayReduction3(vals, listReverse(dims), ValuesUtil.makeList)
                     value
                   end
-                  
+
                   (Absyn.IDENT("listReverse"), Absyn.COMBINE(__), Values.LIST(vals), _)  => begin
                       value = backpatchArrayReduction3(vals, listReverse(dims), ValuesUtil.makeList)
                     value
                   end
-                  
+
                   _  => begin
                       inValue
                   end
@@ -5367,7 +5367,7 @@
           outValue
         end
 
-        function backpatchArrayReduction3(inVals::List{<:Values.Value}, inDims::List{<:ModelicaInteger}, makeSequence::Func) ::Values.Value 
+        function backpatchArrayReduction3(inVals::List{<:Values.Value}, inDims::List{<:ModelicaInteger}, makeSequence::Func) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -5381,7 +5381,7 @@
                       value = makeSequence(vals)
                     value
                   end
-                  
+
                   (vals, dim <| dims, _)  => begin
                       valMatrix = ListUtil.partition(vals, dim)
                       vals = ListUtil.map(valMatrix, makeSequence)
@@ -5400,7 +5400,7 @@
         end
 
          #= A simple expression does not need cache, etc =#
-        function cevalSimple(exp::DAE.Exp) ::Values.Value 
+        function cevalSimple(exp::DAE.Exp) ::Values.Value
               local val::Values.Value
 
               (_, val) = ceval(FCore.emptyCache(), FGraph.empty(), exp, false, Absyn.MSG(AbsynUtil.dummyInfo), 0)
@@ -5408,7 +5408,7 @@
         end
 
          #= A simple expression does not need cache, etc =#
-        function cevalSimpleWithFunctionTreeReturnExp(exp::DAE.Exp, functions::DAE.FunctionTree) ::DAE.Exp 
+        function cevalSimpleWithFunctionTreeReturnExp(exp::DAE.Exp, functions::DAE.FunctionTree) ::DAE.Exp
               local oexp::DAE.Exp
 
               local val::Values.Value
@@ -5430,7 +5430,7 @@
 
           Example: y = Code(1 + x)
                    2 + 5  ( x + Eval(y) )  =>   2 + 5  ( x + 1 + x ) =#
-        function cevalAstExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.Exp} 
+        function cevalAstExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.Exp}
               local outExp::Absyn.Exp
               local outCache::FCore.Cache
 
@@ -5468,51 +5468,51 @@
                   (cache, _, e && Absyn.INTEGER(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, _, e && Absyn.REAL(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, _, e && Absyn.CREF(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, _, e && Absyn.STRING(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, _, e && Absyn.BOOL(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, env, Absyn.BINARY(exp1 = e1, op = op, exp2 = e2), impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e2_1) = cevalAstExp(cache, env, e2, impl, msg, info)
                     (cache, Absyn.BINARY(e1_1, op, e2_1))
                   end
-                  
+
                   (cache, env, Absyn.UNARY(op = op, exp = e), impl, msg, _)  => begin
                       (cache, e_1) = cevalAstExp(cache, env, e, impl, msg, info)
                     (cache, Absyn.UNARY(op, e_1))
                   end
-                  
+
                   (cache, env, Absyn.LBINARY(exp1 = e1, op = op, exp2 = e2), impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e2_1) = cevalAstExp(cache, env, e2, impl, msg, info)
                     (cache, Absyn.LBINARY(e1_1, op, e2_1))
                   end
-                  
+
                   (cache, env, Absyn.LUNARY(op = op, exp = e), impl, msg, _)  => begin
                       (cache, e_1) = cevalAstExp(cache, env, e, impl, msg, info)
                     (cache, Absyn.LUNARY(op, e_1))
                   end
-                  
+
                   (cache, env, Absyn.RELATION(exp1 = e1, op = op, exp2 = e2), impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e2_1) = cevalAstExp(cache, env, e2, impl, msg, info)
                     (cache, Absyn.RELATION(e1_1, op, e2_1))
                   end
-                  
+
                   (cache, env, Absyn.IFEXP(ifExp = cond, trueBranch = then_, elseBranch = else_, elseIfBranch = nest), impl, msg, _)  => begin
                       (cache, cond_1) = cevalAstExp(cache, env, cond, impl, msg, info)
                       (cache, then_1) = cevalAstExp(cache, env, then_, impl, msg, info)
@@ -5520,49 +5520,49 @@
                       (cache, nest_1) = cevalAstExpexpList(cache, env, nest, impl, msg, info)
                     (cache, Absyn.IFEXP(cond_1, then_1, else_1, nest_1))
                   end
-                  
+
                   (cache, env, Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "Eval", subscripts =  nil()), functionArgs = Absyn.FUNCTIONARGS(args = e <|  nil(), argNames =  nil())), impl, msg, _)  => begin
                       (cache, daeExp, _) = Static.elabExp(cache, env, e, impl, true, Prefix.NOPRE(), info)
                       @match (cache, Values.CODE(Absyn.C_EXPRESSION(exp))) = ceval(cache, env, daeExp, impl, msg, 0)
                     (cache, exp)
                   end
-                  
+
                   (cache, _, e && Absyn.CALL(__), _, _, _)  => begin
                     (cache, e)
                   end
-                  
+
                   (cache, env, Absyn.ARRAY(arrayExp = expl), impl, msg, _)  => begin
                       (cache, expl_1) = cevalAstExpList(cache, env, expl, impl, msg, info)
                     (cache, Absyn.ARRAY(expl_1))
                   end
-                  
+
                   (cache, env, Absyn.MATRIX(matrix = lstExpl), impl, msg, _)  => begin
                       (cache, lstExpl_1) = cevalAstExpListList(cache, env, lstExpl, impl, msg, info)
                     (cache, Absyn.MATRIX(lstExpl_1))
                   end
-                  
+
                   (cache, env, Absyn.RANGE(start = e1, step = SOME(e2), stop = e3), impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e2_1) = cevalAstExp(cache, env, e2, impl, msg, info)
                       (cache, e3_1) = cevalAstExp(cache, env, e3, impl, msg, info)
                     (cache, Absyn.RANGE(e1_1, SOME(e2_1), e3_1))
                   end
-                  
+
                   (cache, env, Absyn.RANGE(start = e1, step = NONE(), stop = e3), impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e3_1) = cevalAstExp(cache, env, e3, impl, msg, info)
                     (cache, Absyn.RANGE(e1_1, NONE(), e3_1))
                   end
-                  
+
                   (cache, env, Absyn.TUPLE(expressions = expl), impl, msg, _)  => begin
                       (cache, expl_1) = cevalAstExpList(cache, env, expl, impl, msg, info)
                     (cache, Absyn.TUPLE(expl_1))
                   end
-                  
+
                   (cache, _, Absyn.END(__), _, _, _)  => begin
                     (cache, Absyn.END())
                   end
-                  
+
                   (cache, _, e && Absyn.CODE(__), _, _, _)  => begin
                     (cache, e)
                   end
@@ -5572,7 +5572,7 @@
         end
 
          #= List version of cevalAstExp =#
-        function cevalAstExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.Exp}} 
+        function cevalAstExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.Exp}}
               local outAbsynExpLst::List{Absyn.Exp}
               local outCache::FCore.Cache
 
@@ -5589,7 +5589,7 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, e <| es, impl, msg, _)  => begin
                       (cache, _) = cevalAstExp(cache, env, e, impl, msg, info)
                       (cache, res) = cevalAstExpList(cache, env, es, impl, msg, info)
@@ -5601,7 +5601,7 @@
         end
 
          #= function: cevalAstExpListList =#
-        function cevalAstExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLstLst::List{<:List{<:Absyn.Exp}}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{List{Absyn.Exp}}} 
+        function cevalAstExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLstLst::List{<:List{<:Absyn.Exp}}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{List{Absyn.Exp}}}
               local outAbsynExpLstLst::List{List{Absyn.Exp}}
               local outCache::FCore.Cache
 
@@ -5618,7 +5618,7 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, e <| es, impl, msg, _)  => begin
                       (cache, _) = cevalAstExpList(cache, env, e, impl, msg, info)
                       (cache, res) = cevalAstExpListList(cache, env, es, impl, msg, info)
@@ -5631,7 +5631,7 @@
 
          #= Evaluates an ast constructor for Element nodes, e.g.
           Code(parameter Real x=1;) =#
-        function cevalAstElt(inCache::FCore.Cache, inEnv::FCore.Graph, inElement::Absyn.Element, inBoolean::Bool, inMsg::Absyn.Msg) ::Tuple{FCore.Cache, Absyn.Element} 
+        function cevalAstElt(inCache::FCore.Cache, inEnv::FCore.Graph, inElement::Absyn.Element, inBoolean::Bool, inMsg::Absyn.Msg) ::Tuple{FCore.Cache, Absyn.Element}
               local outElement::Absyn.Element
               local outCache::FCore.Cache
 
@@ -5666,7 +5666,7 @@
         end
 
          #= Helper function to cevalAstElt. =#
-        function cevalAstCitems(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynComponentItemLst::List{<:Absyn.ComponentItem}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.ComponentItem}} 
+        function cevalAstCitems(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynComponentItemLst::List{<:Absyn.ComponentItem}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.ComponentItem}}
               local outAbsynComponentItemLst::List{Absyn.ComponentItem}
               local outCache::FCore.Cache
 
@@ -5689,14 +5689,14 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, Absyn.COMPONENTITEM(component = Absyn.COMPONENT(name = id, arrayDim = ad, modification = modopt), condition = cond, comment = cmt) <| xs, impl, msg, _)  => begin
                       (cache, res) = cevalAstCitems(cache, env, xs, impl, msg, info)
                       (cache, modopt_1) = cevalAstModopt(cache, env, modopt, impl, msg, info)
                       (cache, ad_1) = cevalAstArraydim(cache, env, ad, impl, msg, info)
                     (cache, _cons(Absyn.COMPONENTITEM(Absyn.COMPONENT(id, ad_1, modopt_1), cond, cmt), res))
                   end
-                  
+
                   (cache, env, x <| xs, impl, msg, _)  => begin
                       (cache, res) = cevalAstCitems(cache, env, xs, impl, msg, info)
                     (cache, _cons(x, res))
@@ -5709,7 +5709,7 @@
         end
 
          #= function: cevalAstModopt =#
-        function cevalAstModopt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynModificationOption::Option{<:Absyn.Modification}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Option{Absyn.Modification}} 
+        function cevalAstModopt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynModificationOption::Option{<:Absyn.Modification}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Option{Absyn.Modification}}
               local outAbsynModificationOption::Option{Absyn.Modification}
               local outCache::FCore.Cache
 
@@ -5725,7 +5725,7 @@
                       (cache, res) = cevalAstModification(cache, env, mod, impl, msg, info)
                     (cache, SOME(res))
                   end
-                  
+
                   (cache, _, NONE(), _, _, _)  => begin
                     (cache, NONE())
                   end
@@ -5736,7 +5736,7 @@
 
          #= This function evaluates Eval(variable) inside an AST Modification  and replaces
           the Eval operator with the value of the variable if it has a type \\\"Expression\\\" =#
-        function cevalAstModification(inCache::FCore.Cache, inEnv::FCore.Graph, inModification::Absyn.Modification, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.Modification} 
+        function cevalAstModification(inCache::FCore.Cache, inEnv::FCore.Graph, inModification::Absyn.Modification, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.Modification}
               local outModification::Absyn.Modification
               local outCache::FCore.Cache
 
@@ -5756,7 +5756,7 @@
                       (cache, eltargs_1) = cevalAstEltargs(cache, env, eltargs, impl, msg, info)
                     (cache, Absyn.CLASSMOD(eltargs_1, Absyn.EQMOD(e_1, info2)))
                   end
-                  
+
                   (cache, env, Absyn.CLASSMOD(elementArgLst = eltargs, eqMod = Absyn.NOMOD(__)), impl, msg, _)  => begin
                       (cache, eltargs_1) = cevalAstEltargs(cache, env, eltargs, impl, msg, info)
                     (cache, Absyn.CLASSMOD(eltargs_1, Absyn.NOMOD()))
@@ -5767,7 +5767,7 @@
         end
 
          #= Helper function to cevalAstModification. =#
-        function cevalAstEltargs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynElementArgLst::List{<:Absyn.ElementArg}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.ElementArg}} 
+        function cevalAstEltargs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynElementArgLst::List{<:Absyn.ElementArg}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Absyn.ElementArg}}
               local outAbsynElementArgLst::List{Absyn.ElementArg}
               local outCache::FCore.Cache
 
@@ -5790,13 +5790,13 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, Absyn.MODIFICATION(finalPrefix = b, eachPrefix = e, path = p, modification = SOME(mod), comment = stropt, info = mod_info) <| args, impl, msg, _)  => begin
                       (cache, mod_1) = cevalAstModification(cache, env, mod, impl, msg, info)
                       (cache, res) = cevalAstEltargs(cache, env, args, impl, msg, info)
                     (cache, _cons(Absyn.MODIFICATION(b, e, p, SOME(mod_1), stropt, mod_info), res))
                   end
-                  
+
                   (cache, env, m <| args, impl, msg, _)  => begin
                       (cache, res) = cevalAstEltargs(cache, env, args, impl, msg, info)
                     (cache, _cons(m, res))
@@ -5809,7 +5809,7 @@
         end
 
          #= Helper function to cevaAstCitems =#
-        function cevalAstArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inArrayDim::Absyn.ArrayDim, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.ArrayDim} 
+        function cevalAstArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inArrayDim::Absyn.ArrayDim, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, Absyn.ArrayDim}
               local outArrayDim::Absyn.ArrayDim
               local outCache::FCore.Cache
 
@@ -5826,12 +5826,12 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, Absyn.NOSUB(__) <| xs, impl, msg, _)  => begin
                       (cache, res) = cevalAstArraydim(cache, env, xs, impl, msg, info)
                     (cache, _cons(Absyn.NOSUB(), res))
                   end
-                  
+
                   (cache, env, Absyn.SUBSCRIPT(subscript = e) <| xs, impl, msg, _)  => begin
                       (cache, res) = cevalAstArraydim(cache, env, xs, impl, msg, info)
                       (cache, _) = cevalAstExp(cache, env, e, impl, msg, info)
@@ -5843,7 +5843,7 @@
         end
 
          #= For IFEXP =#
-        function cevalAstExpexpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpTpls::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{Absyn.Exp, Absyn.Exp}}} 
+        function cevalAstExpexpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpTpls::List{<:Tuple{<:Absyn.Exp, Absyn.Exp}}, inBoolean::Bool, inMsg::Absyn.Msg, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{Absyn.Exp, Absyn.Exp}}}
               local outExpTpls::List{Tuple{Absyn.Exp, Absyn.Exp}}
               local outCache::FCore.Cache
 
@@ -5862,7 +5862,7 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, (e1, e2) <| xs, impl, msg, _)  => begin
                       (cache, e1_1) = cevalAstExp(cache, env, e1, impl, msg, info)
                       (cache, e2_1) = cevalAstExp(cache, env, e2, impl, msg, info)
@@ -5875,7 +5875,7 @@
         end
 
          #= Constant evaluates a dimension, returning the size of the dimension as a value. =#
-        function cevalDimension(inCache::FCore.Cache, inEnv::FCore.Graph, inDimension::DAE.Dimension, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalDimension(inCache::FCore.Cache, inEnv::FCore.Graph, inDimension::DAE.Dimension, inImpl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -5890,15 +5890,15 @@
                   (_, _, DAE.DIM_INTEGER(integer = dim_int), _, _, _)  => begin
                     (inCache, Values.INTEGER(dim_int))
                   end
-                  
+
                   (_, _, DAE.DIM_ENUM(size = dim_int), _, _, _)  => begin
                     (inCache, Values.INTEGER(dim_int))
                   end
-                  
+
                   (_, _, DAE.DIM_BOOLEAN(__), _, _, _)  => begin
                     (inCache, Values.INTEGER(2))
                   end
-                  
+
                   (_, _, DAE.DIM_EXP(exp = exp), _, _, _)  => begin
                       (cache, res) = ceval(inCache, inEnv, exp, inImpl, inMsg, numIter + 1)
                     (cache, res)
@@ -5912,7 +5912,7 @@
           (outCache, outValue)
         end
 
-        function makeReductionAllCombinations(inValMatrix::List{<:List{<:Values.Value}}, rtype::Absyn.ReductionIterType) ::List{List{Values.Value}} 
+        function makeReductionAllCombinations(inValMatrix::List{<:List{<:Values.Value}}, rtype::Absyn.ReductionIterType) ::List{List{Values.Value}}
               local valMatrix::List{List{Values.Value}}
 
               valMatrix = begin
@@ -5920,7 +5920,7 @@
                   (_, Absyn.COMBINE(__))  => begin
                     listReverse(ListUtil.allCombinations(inValMatrix, SOME(100000), AbsynUtil.dummyInfo))
                   end
-                  
+
                   (_, Absyn.THREAD(__))  => begin
                     listReverse(ListUtil.transposeList(inValMatrix))
                   end

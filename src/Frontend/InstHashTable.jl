@@ -1,4 +1,4 @@
-  module InstHashTable 
+  module InstHashTable
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl CachedInstItem 
+    @UniontypeDecl CachedInstItem
     FuncHashKey = Function
     FuncKeyEqual = Function
     FuncKeyStr = Function
@@ -55,17 +55,16 @@
         import Global
         import OperatorOverloading
 
-        Key = Absyn.Path 
-        Value = CachedInstItems 
-        CachedInstItemInputs = Tuple 
-        CachedInstItemOutputs = Tuple 
-        CachedPartialInstItemInputs = Tuple 
-        CachedPartialInstItemOutputs = Tuple 
-        CachedInstItems = List 
+        Key = Absyn.Path
+        Value = CachedInstItems
+        CachedInstItemInputs = Tuple
+        CachedInstItemOutputs = Tuple
+        CachedPartialInstItemInputs = Tuple
+        CachedPartialInstItemOutputs = Tuple
+        CachedInstItems = List
 
-        function init()  
-              local ht::HashTable
-
+        function init()
+          local ht::HashTable
                #= /* adrpo: reuse it if is already there! */ =#
               try
                 ht = getGlobalRoot(Global.instHashIndex)
@@ -76,12 +75,12 @@
               end
         end
 
-        function release()  
+        function release()
               setGlobalRoot(Global.instHashIndex, emptyInstHashTable())
               OperatorOverloading.initCache()
         end
 
-        function get(k::Key) ::Value 
+        function get(k::Key) ::Value
               local v::Value
 
               local ht::HashTable
@@ -111,7 +110,7 @@
               end
          end
 
-        function addToInstCache(fullEnvPathPlusClass::Absyn.Path, fullInstOpt::Option{<:CachedInstItem}, partialInstOpt::Option{<:CachedInstItem})  
+        function addToInstCache(fullEnvPathPlusClass::Absyn.Path, fullInstOpt::Option{<:CachedInstItem}, partialInstOpt::Option{<:CachedInstItem})
               _ = begin
                   local fullInst::CachedInstItem
                   local partialInst::CachedInstItem
@@ -125,14 +124,14 @@
                       @match false = Flags.isSet(Flags.CACHE)
                     ()
                   end
-                  
+
                   (_, SOME(_), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
                       instHash = BaseHashTable.add((fullEnvPathPlusClass, list(fullInstOpt, partialInstOpt)), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
-                  
+
                   (_, NONE(), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
                       @match list(opt, _) = BaseHashTable.get(fullEnvPathPlusClass, instHash)
@@ -140,14 +139,14 @@
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
-                  
+
                   (_, NONE(), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
                       instHash = BaseHashTable.add((fullEnvPathPlusClass, list(NONE(), partialInstOpt)), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
-                  
+
                   (_, SOME(_), NONE())  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
                       @match _cons(_, (@match list(SOME(_)) = lst)) = BaseHashTable.get(fullEnvPathPlusClass, instHash)
@@ -155,14 +154,14 @@
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
-                  
+
                   (_, SOME(_), NONE())  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
                       instHash = BaseHashTable.add((fullEnvPathPlusClass, list(fullInstOpt, NONE())), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -194,9 +193,9 @@
                =#
         end
 
-        HashTableKeyFunctionsType = Tuple 
+        HashTableKeyFunctionsType = Tuple
 
-        HashTable = Tuple 
+        HashTable = Tuple
 
 
 
@@ -207,7 +206,7 @@
 
 
          #= Don't actually print what is stored in the value... It's too damn long. =#
-        function opaqVal(v::Value) ::String 
+        function opaqVal(v::Value) ::String
               local str::String
 
               str = "OPAQUE_VALUE"
@@ -215,7 +214,7 @@
         end
 
          #= Returns an empty HashTable. =#
-        function emptyInstHashTable() ::HashTable 
+        function emptyInstHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyInstHashTableSized(Flags.getConfigInt(Flags.INST_CACHE_SIZE))
@@ -224,7 +223,7 @@
         end
 
          #= Returns an empty HashTable, using the given bucket size. =#
-        function emptyInstHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyInstHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
               hashTable = BaseHashTable.emptyHashTableWork(size, (AbsynUtil.pathHashMod, AbsynUtil.pathEqual, AbsynUtil.pathStringDefault, opaqVal))

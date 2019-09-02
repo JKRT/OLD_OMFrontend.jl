@@ -1,4 +1,4 @@
-  module ConnectionGraph 
+  module ConnectionGraph
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl ConnectionGraph 
+    @UniontypeDecl ConnectionGraphType
 
          #= /*
          * This file is part of OpenModelica.
@@ -74,7 +74,7 @@
         PotentialRoots = List  #= potential roots defined with Connections.potentialRoot =#
 
           #= Input structure for connection breaking algorithm. It is collected during instantiation phase. =#
-         @Uniontype ConnectionGraph begin
+         @Uniontype ConnectionGraphType begin
               @Record GRAPH begin
 
                        updateGraph::Bool
@@ -86,9 +86,9 @@
               end
          end
 
-         const EMPTY = GRAPH(true, nil, nil, nil, nil, nil) #= Initial connection graph with no edges in it. =#::ConnectionGraph
+         const EMPTY = GRAPH(true, nil, nil, nil, nil, nil) #= Initial connection graph with no edges in it. =#::ConnectionGraphType
 
-         const NOUPDATE_EMPTY = GRAPH(false, nil, nil, nil, nil, nil) #= Initial connection graph with updateGraph set to false. =#::ConnectionGraph
+         const NOUPDATE_EMPTY = GRAPH(false, nil, nil, nil, nil, nil) #= Initial connection graph with updateGraph set to false. =#::ConnectionGraphType
 
          #= author: adrpo
          this function gets the connection graph and the existing DAE and:
@@ -96,13 +96,13 @@
          - evaluates Connections.isRoot in the input DAE
          - evaluates Connections.uniqueRootIndices in the input DAE
          - evaluates the rooted operator in the input DAE =#
-        function handleOverconstrainedConnections(inGraph::ConnectionGraph, modelNameQualified::String, inDAE::DAE.DAElist) ::Tuple{DAE.DAElist, DaeEdges, DaeEdges} 
+        function handleOverconstrainedConnections(inGraph::ConnectionGraphType, modelNameQualified::String, inDAE::DAE.DAElist) ::Tuple{DAE.DAElist, DaeEdges, DaeEdges}
               local outBroken::DaeEdges
               local outConnected::DaeEdges
               local outDAE::DAE.DAElist
 
               (outDAE, outConnected, outBroken) = begin
-                  local graph::ConnectionGraph
+                  local graph::ConnectionGraphType
                   local elts::List{DAE.Element}
                   local roots::List{DAE.ComponentRef}
                   local broken::DaeEdges
@@ -113,7 +113,7 @@
                   (GRAPH(_,  nil(),  nil(),  nil(),  nil(),  nil()), _, _)  => begin
                     (inDAE, nil, nil)
                   end
-                  
+
                   (graph, _, DAE.DAE(elts))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("Summary: \\n\\t" + "Nr Roots:           " + intString(listLength(getDefiniteRoots(graph))) + "\\n\\t" + "Nr Potential Roots: " + intString(listLength(getPotentialRoots(graph))) + "\\n\\t" + "Nr Unique Roots:    " + intString(listLength(getUniqueRoots(graph))) + "\\n\\t" + "Nr Branches:        " + intString(listLength(getBranches(graph))) + "\\n\\t" + "Nr Connections:     " + intString(listLength(getConnections(graph))))
@@ -127,7 +127,7 @@
                       elts = evalConnectionsOperators(roots, graph, elts)
                     (DAE.DAE(elts), connected, broken)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("- ConnectionGraph.handleOverconstrainedConnections failed for model: " + modelNameQualified)
@@ -141,8 +141,8 @@
         end
 
          #= Adds a new definite root to ConnectionGraph =#
-        function addDefiniteRoot(inGraph::ConnectionGraph, inRoot::DAE.ComponentRef) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+        function addDefiniteRoot(inGraph::ConnectionGraphType, inRoot::DAE.ComponentRef) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -164,9 +164,9 @@
           outGraph
         end
 
-         #= Adds a new potential root to ConnectionGraph =#
-        function addPotentialRoot(inGraph::ConnectionGraph, inRoot::DAE.ComponentRef, inPriority::ModelicaReal) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+         #= Adds a new potential root to ConnectionGraphType =#
+        function addPotentialRoot(inGraph::ConnectionGraphType, inRoot::DAE.ComponentRef, inPriority::ModelicaReal) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -190,8 +190,8 @@
         end
 
          #= Adds a new definite root to ConnectionGraph =#
-        function addUniqueRoots(inGraph::ConnectionGraph, inRoots::DAE.Exp, inMessage::DAE.Exp) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+        function addUniqueRoots(inGraph::ConnectionGraphType, inRoots::DAE.Exp, inMessage::DAE.Exp) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -202,7 +202,7 @@
                   local uniqueRoots::UniqueRoots
                   local branches::Edges
                   local connections::DaeEdges
-                  local graph::ConnectionGraph
+                  local graph::ConnectionGraphType
                   local ty::DAE.Type
                   local scalar::Bool
                   local rest::List{DAE.Exp}
@@ -215,11 +215,11 @@
                       end
                     GRAPH(updateGraph, definiteRoots, potentialRoots, _cons((root, inMessage), uniqueRoots), branches, connections)
                   end
-                  
+
                   (GRAPH(__), DAE.ARRAY(_, _,  nil()), _)  => begin
                     inGraph
                   end
-                  
+
                   (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), DAE.ARRAY(ty, scalar, DAE.CREF(root, _) <| rest), _)  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("- ConnectionGraph.addUniqueRoots(" + ComponentReference.printComponentRefStr(root) + ", " + ExpressionDump.printExpStr(inMessage) + ")")
@@ -228,7 +228,7 @@
                       graph = addUniqueRoots(graph, DAE.ARRAY(ty, scalar, rest), inMessage)
                     graph
                   end
-                  
+
                   (_, _, _)  => begin
                     inGraph
                   end
@@ -240,8 +240,8 @@
         end
 
          #= Adds a new branch to ConnectionGraph =#
-        function addBranch(inGraph::ConnectionGraph, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+        function addBranch(inGraph::ConnectionGraphType, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -265,8 +265,8 @@
         end
 
          #= Adds a new connection to ConnectionGraph =#
-        function addConnection(inGraph::ConnectionGraph, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef, inDae::List{<:DAE.Element}) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+        function addConnection(inGraph::ConnectionGraphType, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef, inDae::List{<:DAE.Element}) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -290,11 +290,11 @@
           outGraph
         end
 
-         #=  ************************************* 
+         #=  *************************************
          =#
-         #=  ********* protected section ********* 
+         #=  ********* protected section *********
          =#
-         #=  ************************************* 
+         #=  *************************************
          =#
 
         import BaseHashTable
@@ -321,7 +321,7 @@
 
          #= Returns the canonical element of the component where input element belongs to.
          See explanation at the top of file. =#
-        function canonical(inPartition::HashTableCG.HashTable, inRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function canonical(inPartition::HashTableCG.HashTable, inRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outCanonical::DAE.ComponentRef
 
               outCanonical = begin
@@ -336,7 +336,7 @@
                       parentCanonical = canonical(partition, parent)
                     parentCanonical
                   end
-                  
+
                   (_, ref)  => begin
                     ref
                   end
@@ -361,7 +361,7 @@
 
          #= Tells whether the elements belong to the same component.
          See explanation at the top of file. =#
-        function areInSameComponent(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::Bool 
+        function areInSameComponent(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::Bool
               local outResult::Bool
 
                #=  canonical(inPartition,inRef1) = canonical(inPartition,inRef2);
@@ -379,7 +379,7 @@
                       @match true = ComponentReference.crefEqualNoStringCompare(canon1, canon2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -392,7 +392,7 @@
          on wheter the connection success or not (i.e are the components already
          connected), adds either inConnectionDae or inBreakDae to the list of
          DAE elements. =#
-        function connectBranchComponents(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::HashTableCG.HashTable 
+        function connectBranchComponents(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::HashTableCG.HashTable
               local outPartition::HashTableCG.HashTable
 
               outPartition = begin
@@ -410,7 +410,7 @@
                       @match (partition, true) = connectCanonicalComponents(partition, canon1, canon2)
                     partition
                   end
-                  
+
                   (partition, _, _)  => begin
                     partition
                   end
@@ -425,7 +425,7 @@
          on wheter the connection success or not (i.e are the components already
          connected), adds either inConnectionDae or inBreakDae to the list of
          DAE elements. =#
-        function connectComponents(inPartition::HashTableCG.HashTable, inDaeEdge::DaeEdge) ::Tuple{HashTableCG.HashTable, DaeEdges, DaeEdges} 
+        function connectComponents(inPartition::HashTableCG.HashTable, inDaeEdge::DaeEdge) ::Tuple{HashTableCG.HashTable, DaeEdges, DaeEdges}
               local outBrokenConnections::DaeEdges
               local outConnectedConnections::DaeEdges
               local outPartition::HashTableCG.HashTable
@@ -443,19 +443,19 @@
                       @shouldFail _ = canonical(partition, ref1)
                     (partition, list(inDaeEdge), nil)
                   end
-                  
+
                   (partition, (_, ref2, _))  => begin
                       @shouldFail _ = canonical(partition, ref2)
                     (partition, list(inDaeEdge), nil)
                   end
-                  
+
                   (partition, (ref1, ref2, _))  => begin
                       canon1 = canonical(partition, ref1)
                       canon2 = canonical(partition, ref2)
                       @match (partition, true) = connectCanonicalComponents(partition, canon1, canon2)
                     (partition, list(inDaeEdge), nil)
                   end
-                  
+
                   (partition, (ref1, ref2, _))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.trace("- ConnectionGraph.connectComponents: should remove equations generated from: connect(" + ComponentReference.printComponentRefStr(ref1) + ", " + ComponentReference.printComponentRefStr(ref2) + ") and add {0, ..., 0} = equalityConstraint(cr1, cr2) instead.\\n")
@@ -469,7 +469,7 @@
 
          #= Tries to connect two components whose canonical elements are given.
          Helper function for connectionComponents. =#
-        function connectCanonicalComponents(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::Tuple{HashTableCG.HashTable, Bool} 
+        function connectCanonicalComponents(inPartition::HashTableCG.HashTable, inRef1::DAE.ComponentRef, inRef2::DAE.ComponentRef) ::Tuple{HashTableCG.HashTable, Bool}
               local outReallyConnected::Bool
               local outPartition::HashTableCG.HashTable
 
@@ -484,7 +484,7 @@
                       @match true = ComponentReference.crefEqualNoStringCompare(ref1, ref2)
                     (partition, false)
                   end
-                  
+
                   (partition, ref1, ref2)  => begin
                       partition = BaseHashTable.add((ref1, ref2), partition)
                     (partition, true)
@@ -497,7 +497,7 @@
         end
 
          #= Adds a root the the graph. This is implemented by connecting the root to inFirstRoot element. =#
-        function addRootsToTable(inTable::HashTableCG.HashTable, inRoots::List{<:DAE.ComponentRef}, inFirstRoot::DAE.ComponentRef) ::HashTableCG.HashTable 
+        function addRootsToTable(inTable::HashTableCG.HashTable, inRoots::List{<:DAE.ComponentRef}, inFirstRoot::DAE.ComponentRef) ::HashTableCG.HashTable
               local outTable::HashTableCG.HashTable
 
               outTable = begin
@@ -511,7 +511,7 @@
                       table = addRootsToTable(table, tail, firstRoot)
                     table
                   end
-                  
+
                   (table,  nil(), _)  => begin
                     table
                   end
@@ -521,7 +521,7 @@
         end
 
          #= Creates an initial graph with given definite roots. =#
-        function resultGraphWithRoots(roots::List{<:DAE.ComponentRef}) ::HashTableCG.HashTable 
+        function resultGraphWithRoots(roots::List{<:DAE.ComponentRef}) ::HashTableCG.HashTable
               local outTable::HashTableCG.HashTable
 
               local table0::HashTableCG.HashTable
@@ -534,7 +534,7 @@
         end
 
          #= Adds all branches to the graph. =#
-        function addBranchesToTable(inTable::HashTableCG.HashTable, inBranches::Edges) ::HashTableCG.HashTable 
+        function addBranchesToTable(inTable::HashTableCG.HashTable, inBranches::Edges) ::HashTableCG.HashTable
               local outTable::HashTableCG.HashTable
 
               outTable = begin
@@ -550,7 +550,7 @@
                       table2 = addBranchesToTable(table1, tail)
                     table2
                   end
-                  
+
                   (table,  nil())  => begin
                     table
                   end
@@ -560,7 +560,7 @@
         end
 
          #= An ordering function for potential roots. =#
-        function ord(inEl1::PotentialRoot, inEl2::PotentialRoot) ::Bool 
+        function ord(inEl1::PotentialRoot, inEl2::PotentialRoot) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -578,7 +578,7 @@
                       @match 1 = stringCompare(s1, s2)
                     true
                   end
-                  
+
                   ((_, r1), (_, r2))  => begin
                     r1 > r2
                   end
@@ -590,7 +590,7 @@
         end
 
          #= Adds all potential roots to graph. =#
-        function addPotentialRootsToTable(inTable::HashTableCG.HashTable, inPotentialRoots::PotentialRoots, inRoots::DefiniteRoots, inFirstRoot::DAE.ComponentRef) ::Tuple{HashTableCG.HashTable, DefiniteRoots} 
+        function addPotentialRootsToTable(inTable::HashTableCG.HashTable, inPotentialRoots::PotentialRoots, inRoots::DefiniteRoots, inFirstRoot::DAE.ComponentRef) ::Tuple{HashTableCG.HashTable, DefiniteRoots}
               local outRoots::DefiniteRoots
               local outTable::HashTableCG.HashTable
 
@@ -607,7 +607,7 @@
                   (table,  nil(), roots, _)  => begin
                     (table, roots)
                   end
-                  
+
                   (table, (potentialRoot, _) <| tail, roots, firstRoot)  => begin
                       canon1 = canonical(table, potentialRoot)
                       canon2 = canonical(table, firstRoot)
@@ -615,7 +615,7 @@
                       (table, finalRoots) = addPotentialRootsToTable(table, tail, _cons(potentialRoot, roots), firstRoot)
                     (table, finalRoots)
                   end
-                  
+
                   (table, _ <| tail, roots, firstRoot)  => begin
                       (table, finalRoots) = addPotentialRootsToTable(table, tail, roots, firstRoot)
                     (table, finalRoots)
@@ -626,7 +626,7 @@
         end
 
          #= Adds all connections to graph. =#
-        function addConnections(inTable::HashTableCG.HashTable, inConnections::DaeEdges) ::Tuple{HashTableCG.HashTable, DaeEdges, DaeEdges} 
+        function addConnections(inTable::HashTableCG.HashTable, inConnections::DaeEdges) ::Tuple{HashTableCG.HashTable, DaeEdges, DaeEdges}
               local outBrokenConnections::DaeEdges
               local outConnectedConnections::DaeEdges
               local outTable::HashTableCG.HashTable
@@ -647,7 +647,7 @@
                   (table,  nil())  => begin
                     (table, nil, nil)
                   end
-                  
+
                   (table, e <| tail)  => begin
                       (table, connected1, broken1) = connectComponents(table, e)
                       (table, connected2, broken2) = addConnections(table, tail)
@@ -664,7 +664,7 @@
 
          #= Given ConnectionGraph structure, breaks all connections,
          determines roots and generates a list of dae elements. =#
-        function findResultGraph(inGraph::ConnectionGraph, modelNameQualified::String) ::Tuple{DefiniteRoots, DaeEdges, DaeEdges} 
+        function findResultGraph(inGraph::ConnectionGraphType, modelNameQualified::String) ::Tuple{DefiniteRoots, DaeEdges, DaeEdges}
               local outBrokenConnections::DaeEdges
               local outConnectedConnections::DaeEdges
               local outRoots::DefiniteRoots
@@ -691,7 +691,7 @@
                   (GRAPH(definiteRoots =  nil(), potentialRoots =  nil(), uniqueRoots =  nil(), branches =  nil(), connections =  nil()), _)  => begin
                     (nil, nil, nil)
                   end
-                  
+
                   (GRAPH(definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), _)  => begin
                       connections = listReverse(connections)
                       table = resultGraphWithRoots(definiteRoots)
@@ -723,7 +723,7 @@
           (outRoots, outConnectedConnections, outBrokenConnections)
         end
 
-        function orderConnectsGuidedByUser(inConnections::DaeEdges, inUserSelectedBreaking::List{<:Tuple{<:String, String}}) ::DaeEdges 
+        function orderConnectsGuidedByUser(inConnections::DaeEdges, inUserSelectedBreaking::List{<:Tuple{<:String, String}}) ::DaeEdges
               local outOrderedConnections::DaeEdges
 
               local front::DaeEdges = nil
@@ -751,7 +751,7 @@
           outOrderedConnections
         end
 
-        function printTupleStr(inTpl::Tuple{<:String, String}) ::String 
+        function printTupleStr(inTpl::Tuple{<:String, String}) ::String
               local out::String
 
               out = begin
@@ -766,7 +766,7 @@
           out
         end
 
-        function makeTuple(inLstLst::List{<:List{<:String}}) ::List{Tuple{String, String}} 
+        function makeTuple(inLstLst::List{<:List{<:String}}) ::List{Tuple{String, String}}
               local outLst::List{Tuple{String, String}}
 
               outLst = begin
@@ -781,22 +781,22 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   c1 <| c2 <|  nil() <| rest  => begin
                       lst = makeTuple(rest)
                     _cons((c1, c2), lst)
                   end
-                  
+
                   "" <|  nil() <| rest  => begin
                       lst = makeTuple(rest)
                     lst
                   end
-                  
+
                    nil() <| rest  => begin
                       lst = makeTuple(rest)
                     lst
                   end
-                  
+
                   bad <| rest  => begin
                       Debug.traceln("The following output from GraphViz OpenModelica assistant cannot be parsed:" + stringDelimitList(bad, ", ") + "\\nExpected format from GrapViz: cref1|cref2#cref3|cref4#. Ignoring malformed input.")
                       lst = makeTuple(rest)
@@ -815,7 +815,7 @@
           outLst
         end
 
-        function printPotentialRootTuple(potentialRoot::PotentialRoot) ::String 
+        function printPotentialRootTuple(potentialRoot::PotentialRoot) ::String
               local outStr::String
 
               outStr = begin
@@ -832,7 +832,7 @@
           outStr
         end
 
-        function setRootDistance(finalRoots::List{<:DAE.ComponentRef}, table::HashTable3.HashTable, distance::ModelicaInteger, nextLevel::List{<:DAE.ComponentRef}, irooted::HashTable.HashTable) ::HashTable.HashTable 
+        function setRootDistance(finalRoots::List{<:DAE.ComponentRef}, table::HashTable3.HashTable, distance::ModelicaInteger, nextLevel::List{<:DAE.ComponentRef}, irooted::HashTable.HashTable) ::HashTable.HashTable
               local orooted::HashTable.HashTable
 
               orooted = begin
@@ -844,11 +844,11 @@
                   ( nil(), _, _,  nil(), _)  => begin
                     irooted
                   end
-                  
+
                   ( nil(), _, _, _, _)  => begin
                     setRootDistance(nextLevel, table, distance + 1, nil, irooted)
                   end
-                  
+
                   (cr <| rest, _, _, _, _)  => begin
                       @match false = BaseHashTable.hasKey(cr, irooted)
                       rooted = BaseHashTable.add((cr, distance), irooted)
@@ -856,13 +856,13 @@
                       next = listAppend(nextLevel, next)
                     setRootDistance(rest, table, distance, next, rooted)
                   end
-                  
+
                   (cr <| rest, _, _, _, _)  => begin
                       @match false = BaseHashTable.hasKey(cr, irooted)
                       rooted = BaseHashTable.add((cr, distance), irooted)
                     setRootDistance(rest, table, distance, nextLevel, rooted)
                   end
-                  
+
                   (_ <| rest, _, _, _, _)  => begin
                     setRootDistance(rest, table, distance, nextLevel, irooted)
                   end
@@ -895,7 +895,7 @@
           orooted
         end
 
-        function addBranches(edge::Edge, itable::HashTable3.HashTable) ::HashTable3.HashTable 
+        function addBranches(edge::Edge, itable::HashTable3.HashTable) ::HashTable3.HashTable
               local otable::HashTable3.HashTable
 
               local cref1::DAE.ComponentRef
@@ -907,7 +907,7 @@
           otable
         end
 
-        function addConnectionsRooted(connection::DaeEdge, itable::HashTable3.HashTable) ::HashTable3.HashTable 
+        function addConnectionsRooted(connection::DaeEdge, itable::HashTable3.HashTable) ::HashTable3.HashTable
               local otable::HashTable3.HashTable
 
               local cref1::DAE.ComponentRef
@@ -919,7 +919,7 @@
           otable
         end
 
-        function addConnectionRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, itable::HashTable3.HashTable) ::HashTable3.HashTable 
+        function addConnectionRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, itable::HashTable3.HashTable) ::HashTable3.HashTable
               local otable::HashTable3.HashTable
 
               otable = begin
@@ -932,7 +932,7 @@
                           ()  => begin
                             BaseHashTable.get(cref1, itable)
                           end
-                          
+
                           _  => begin
                               nil
                           end
@@ -955,7 +955,7 @@
             https:trac.modelica.org/Modelica/ticket/984 and
             http:www.ep.liu.se/ecp/043/041/ecp09430108.pdf
            for a specification of this operator =#
-        function evalConnectionsOperators(inRoots::List{<:DAE.ComponentRef}, graph::ConnectionGraph, inDae::List{<:DAE.Element}) ::List{DAE.Element} 
+        function evalConnectionsOperators(inRoots::List{<:DAE.ComponentRef}, graph::ConnectionGraphType, inDae::List{<:DAE.Element}) ::List{DAE.Element}
               local outDae::List{DAE.Element}
 
               outDae = begin
@@ -967,7 +967,7 @@
                   (_, _,  nil())  => begin
                     nil
                   end
-                  
+
                   _  => begin
                         table = HashTable3.emptyHashTable()
                         branches = getBranches(graph)
@@ -998,12 +998,12 @@
         end
 
          #= Helper function for evaluation of Connections.rooted, Connections.isRoot, Connections.uniqueRootIndices =#
-        function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTable.HashTable, List{<:DAE.ComponentRef}, ConnectionGraph}) ::Tuple{DAE.Exp, Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraph}} 
-              local outRoots::Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraph}
+        function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTable.HashTable, List{<:DAE.ComponentRef}, ConnectionGraphType}) ::Tuple{DAE.Exp, Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraphType}}
+              local outRoots::Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraphType}
               local outExp::DAE.Exp
 
               (outExp, outRoots) = begin
-                  local graph::ConnectionGraph
+                  local graph::ConnectionGraphType
                   local exp::DAE.Exp
                   local uroots::DAE.Exp
                   local nodes::DAE.Exp
@@ -1024,7 +1024,7 @@
                       end
                     (DAE.BCONST(false), (rooted, roots, graph))
                   end
-                  
+
                   (DAE.CALL(path = Absyn.IDENT("rooted"), expLst = DAE.CREF(componentRef = cref) <|  nil()), (rooted, roots, graph))  => begin
                       branches = getBranches(graph)
                       cref1 = getEdge(cref, branches)
@@ -1037,25 +1037,25 @@
                       end
                     (DAE.BCONST(result), (rooted, roots, graph))
                   end
-                  
+
                   (exp, (rooted, roots &&  nil(), graph))  => begin
                     (exp, (rooted, roots, graph))
                   end
-                  
+
                   (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.ARRAY(array =  nil()) <|  nil()), (rooted, roots, graph))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
                       end
                     (DAE.BCONST(false), (rooted, roots, graph))
                   end
-                  
+
                   (DAE.LUNARY(DAE.NOT(_), DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.ARRAY(array =  nil()) <|  nil())), (rooted, roots, graph))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
                       end
                     (DAE.BCONST(false), (rooted, roots, graph))
                   end
-                  
+
                   (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.CREF(componentRef = cref) <|  nil()), (rooted, roots, graph))  => begin
                       result = ListUtil.isMemberOnTrue(cref, roots, ComponentReference.crefEqualNoStringCompare)
                       if Flags.isSet(Flags.CGRAPH)
@@ -1063,7 +1063,7 @@
                       end
                     (DAE.BCONST(result), (rooted, roots, graph))
                   end
-                  
+
                   (DAE.LUNARY(DAE.NOT(_), DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.CREF(componentRef = cref) <|  nil())), (rooted, roots, graph))  => begin
                       result = ListUtil.isMemberOnTrue(cref, roots, ComponentReference.crefEqualNoStringCompare)
                       result = boolNot(result)
@@ -1072,7 +1072,7 @@
                       end
                     (DAE.BCONST(result), (rooted, roots, graph))
                   end
-                  
+
                   (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("uniqueRootIndices")), expLst = uroots && DAE.ARRAY(array = lst) <| nodes <| message <|  nil()), (rooted, roots, graph))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: Connections.uniqueRootsIndicies(" + ExpressionDump.printExpStr(uroots) + "," + ExpressionDump.printExpStr(nodes) + "," + ExpressionDump.printExpStr(message) + ")")
@@ -1080,7 +1080,7 @@
                       lst = ListUtil.fill(DAE.ICONST(1), listLength(lst))
                     (DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, lst), (rooted, roots, graph))
                   end
-                  
+
                   _  => begin
                       (inExp, inRoots)
                   end
@@ -1095,7 +1095,7 @@
           (outExp, outRoots)
         end
 
-        function getRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, rooted::HashTable.HashTable) ::Bool 
+        function getRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, rooted::HashTable.HashTable) ::Bool
               local result::Bool
 
               result = begin
@@ -1107,7 +1107,7 @@
                       i2 = BaseHashTable.get(cref2, rooted)
                     intLt(i1, i2)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -1119,7 +1119,7 @@
         end
 
          #= return the Edge partner of a edge, fails if not found =#
-        function getEdge(cr::DAE.ComponentRef, edges::Edges) ::DAE.ComponentRef 
+        function getEdge(cr::DAE.ComponentRef, edges::Edges) ::DAE.ComponentRef
               local ocr::DAE.ComponentRef
 
               ocr = begin
@@ -1131,7 +1131,7 @@
                       cref1 = getEdge1(cr, cref1, cref2)
                     cref1
                   end
-                  
+
                   (_, _ <| rest)  => begin
                     getEdge(cr, rest)
                   end
@@ -1141,7 +1141,7 @@
         end
 
          #= return the Edge partner of a edge, fails if not found =#
-        function getEdge1(cr::DAE.ComponentRef, cref1::DAE.ComponentRef, cref2::DAE.ComponentRef) ::DAE.ComponentRef 
+        function getEdge1(cr::DAE.ComponentRef, cref1::DAE.ComponentRef, cref2::DAE.ComponentRef) ::DAE.ComponentRef
               local ocr::DAE.ComponentRef
 
               ocr = begin
@@ -1150,7 +1150,7 @@
                       @match true = ComponentReference.crefEqualNoStringCompare(cr, cref1)
                     cref2
                   end
-                  
+
                   _  => begin
                         @match true = ComponentReference.crefEqualNoStringCompare(cr, cref2)
                       cref1
@@ -1161,7 +1161,7 @@
         end
 
          #= prints the connection str =#
-        function printConnectionStr(connectTuple::DaeEdge, ty::String) ::String 
+        function printConnectionStr(connectTuple::DaeEdge, ty::String) ::String
               local outStr::String
 
               outStr = begin
@@ -1179,7 +1179,7 @@
         end
 
          #= Prints a list of edges to stdout. =#
-        function printEdges(inEdges::Edges)  
+        function printEdges(inEdges::Edges)
               _ = begin
                   local c1::DAE.ComponentRef
                   local c2::DAE.ComponentRef
@@ -1188,7 +1188,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   (c1, c2) <| tail  => begin
                       print("    ")
                       print(ComponentReference.printComponentRefStr(c1))
@@ -1203,7 +1203,7 @@
         end
 
          #= Prints a list of dae edges to stdout. =#
-        function printDaeEdges(inEdges::DaeEdges)  
+        function printDaeEdges(inEdges::DaeEdges)
               _ = begin
                   local c1::DAE.ComponentRef
                   local c2::DAE.ComponentRef
@@ -1212,7 +1212,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   (c1, c2, _) <| tail  => begin
                       print("    ")
                       print(ComponentReference.printComponentRefStr(c1))
@@ -1227,7 +1227,7 @@
         end
 
          #= Prints the content of ConnectionGraph structure. =#
-        function printConnectionGraph(inGraph::ConnectionGraph)  
+        function printConnectionGraph(inGraph::ConnectionGraphType)
               _ = begin
                   local connections::DaeEdges
                   local branches::Edges
@@ -1244,7 +1244,7 @@
         end
 
          #= Accessor for ConnectionGraph.definiteRoots. =#
-        function getDefiniteRoots(inGraph::ConnectionGraph) ::DefiniteRoots 
+        function getDefiniteRoots(inGraph::ConnectionGraphType) ::DefiniteRoots
               local outResult::DefiniteRoots
 
               outResult = begin
@@ -1259,7 +1259,7 @@
         end
 
          #= Accessor for ConnectionGraph.uniqueRoots. =#
-        function getUniqueRoots(inGraph::ConnectionGraph) ::UniqueRoots 
+        function getUniqueRoots(inGraph::ConnectionGraphType) ::UniqueRoots
               local outResult::UniqueRoots
 
               outResult = begin
@@ -1274,7 +1274,7 @@
         end
 
          #= Accessor for ConnectionGraph.potentialRoots. =#
-        function getPotentialRoots(inGraph::ConnectionGraph) ::PotentialRoots 
+        function getPotentialRoots(inGraph::ConnectionGraphType) ::PotentialRoots
               local outResult::PotentialRoots
 
               outResult = begin
@@ -1289,7 +1289,7 @@
         end
 
          #= Accessor for ConnectionGraph.branches. =#
-        function getBranches(inGraph::ConnectionGraph) ::Edges 
+        function getBranches(inGraph::ConnectionGraphType) ::Edges
               local outResult::Edges
 
               outResult = begin
@@ -1304,7 +1304,7 @@
         end
 
          #= Accessor for ConnectionGraph.connections. =#
-        function getConnections(inGraph::ConnectionGraph) ::DaeEdges 
+        function getConnections(inGraph::ConnectionGraphType) ::DaeEdges
               local outResult::DaeEdges
 
               outResult = begin
@@ -1319,8 +1319,8 @@
         end
 
          #= merge two ConnectionGraphs =#
-        function merge(inGraph1::ConnectionGraph, inGraph2::ConnectionGraph) ::ConnectionGraph 
-              local outGraph::ConnectionGraph
+        function merge(inGraph1::ConnectionGraphType, inGraph2::ConnectionGraphType) ::ConnectionGraphType
+              local outGraph::ConnectionGraphType
 
               outGraph = begin
                   local updateGraph::Bool
@@ -1347,16 +1347,16 @@
                   (_, GRAPH(definiteRoots =  nil(), potentialRoots =  nil(), uniqueRoots =  nil(), branches =  nil(), connections =  nil()))  => begin
                     inGraph1
                   end
-                  
+
                   (GRAPH(definiteRoots =  nil(), potentialRoots =  nil(), uniqueRoots =  nil(), branches =  nil(), connections =  nil()), _)  => begin
                     inGraph2
                   end
-                  
+
                   (_, _)  => begin
                       equality(inGraph1, inGraph2)
                     inGraph1
                   end
-                  
+
                   (GRAPH(updateGraph = updateGraph1, definiteRoots = definiteRoots1, potentialRoots = potentialRoots1, uniqueRoots = uniqueRoots1, branches = branches1, connections = connections1), GRAPH(updateGraph = updateGraph2, definiteRoots = definiteRoots2, potentialRoots = potentialRoots2, uniqueRoots = uniqueRoots2, branches = branches2, connections = connections2))  => begin
                       if Flags.isSet(Flags.CGRAPH)
                         Debug.trace("- ConnectionGraph.merge()\\n")
@@ -1378,7 +1378,7 @@
          #= /******************************************* GraphViz generation *******************************************************/ =#
          #= /***********************************************************************************************************************/ =#
 
-        function graphVizEdge(inEdge::Edge) ::String 
+        function graphVizEdge(inEdge::Edge) ::String
               local out::String
 
               out = begin
@@ -1395,7 +1395,7 @@
           out
         end
 
-        function graphVizDaeEdge(inDaeEdge::DaeEdge, inBrokenDaeEdges::DaeEdges) ::String 
+        function graphVizDaeEdge(inDaeEdge::DaeEdge, inBrokenDaeEdges::DaeEdges) ::String
               local out::String
 
               out = begin
@@ -1450,7 +1450,7 @@
           out
         end
 
-        function graphVizDefiniteRoot(inDefiniteRoot::DefiniteRoot, inFinalRoots::DefiniteRoots) ::String 
+        function graphVizDefiniteRoot(inDefiniteRoot::DefiniteRoot, inFinalRoots::DefiniteRoots) ::String
               local out::String
 
               out = begin
@@ -1472,7 +1472,7 @@
           out
         end
 
-        function graphVizPotentialRoot(inPotentialRoot::PotentialRoot, inFinalRoots::DefiniteRoots) ::String 
+        function graphVizPotentialRoot(inPotentialRoot::PotentialRoot, inFinalRoots::DefiniteRoots) ::String
               local out::String
 
               out = begin
@@ -1497,7 +1497,7 @@
 
          #= @author: adrpo
           Generate a graphviz file out of the connection graph =#
-        function generateGraphViz(modelNameQualified::String, definiteRoots::DefiniteRoots, potentialRoots::PotentialRoots, uniqueRoots::UniqueRoots, branches::Edges, connections::DaeEdges, finalRoots::DefiniteRoots, broken::DaeEdges) ::String 
+        function generateGraphViz(modelNameQualified::String, definiteRoots::DefiniteRoots, potentialRoots::PotentialRoots, uniqueRoots::UniqueRoots, branches::Edges, connections::DaeEdges, finalRoots::DefiniteRoots, broken::DaeEdges) ::String
               local brokenConnectsViaGraphViz::String
 
               brokenConnectsViaGraphViz = begin
@@ -1525,7 +1525,7 @@
                       @match false = boolOr(Flags.isSet(Flags.CGRAPH_GRAPHVIZ_FILE), Flags.isSet(Flags.CGRAPH_GRAPHVIZ_SHOW))
                     ""
                   end
-                  
+
                   (_, _, _, _, _, _, _, _)  => begin
                       tStart = clock()
                       i = "\\t"
@@ -1604,7 +1604,7 @@
           brokenConnectsViaGraphViz
         end
 
-        function showGraphViz(fileNameGraphViz::String, modelNameQualified::String) ::String 
+        function showGraphViz(fileNameGraphViz::String, modelNameQualified::String) ::String
               local brokenConnectsViaGraphViz::String
 
               brokenConnectsViaGraphViz = begin
@@ -1620,7 +1620,7 @@
                       @match false = Flags.isSet(Flags.CGRAPH_GRAPHVIZ_SHOW)
                     ""
                   end
-                  
+
                   _  => begin
                         fileNameTraceRemovedConnections = modelNameQualified + "_removed_connections.txt"
                         Debug.traceln("Tyring to start GraphViz *lefty* to visualize the graph. You need to have lefty in your PATH variable")
@@ -1655,7 +1655,7 @@
          Basically is implmented like this:
          1. remove all the broken connects from the inConnects -> newConnects
          2. add all the connected connects BACK to newConnects =#
-        function removeBrokenConnects(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges, inBroken::DaeEdges) ::List{List{Connect.ConnectorElement}} 
+        function removeBrokenConnects(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges, inBroken::DaeEdges) ::List{List{Connect.ConnectorElement}}
               local outConnects::List{List{Connect.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
 
               outConnects = begin
@@ -1670,7 +1670,7 @@
                   (_, _,  nil())  => begin
                     list(inConnects)
                   end
-                  
+
                   (_, _, _)  => begin
                       toRemove = filterFromSet(inConnects, inBroken, nil, "removed")
                       if listEmpty(toRemove)
@@ -1698,7 +1698,7 @@
           outConnects #= we return a list of lists of elements as a particular connection set might be broken into several! =#
         end
 
-        function splitSetByAllowed(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges) ::List{List{Connect.ConnectorElement}} 
+        function splitSetByAllowed(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges) ::List{List{Connect.ConnectorElement}}
               local outConnects::List{List{Connect.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
 
               local cset::List{Connect.ConnectorElement}
@@ -1732,7 +1732,7 @@
 
          #= @author: adrpo
          given an EQU set filter the given DaeEdges =#
-        function filterFromSet(inConnects::List{<:Connect.ConnectorElement}, inFilter::DaeEdges, inAcc::List{<:DAE.ComponentRef}, msg::String) ::List{DAE.ComponentRef} 
+        function filterFromSet(inConnects::List{<:Connect.ConnectorElement}, inFilter::DaeEdges, inAcc::List{<:DAE.ComponentRef}, msg::String) ::List{DAE.ComponentRef}
               local filteredCrefs::List{DAE.ComponentRef}
 
               filteredCrefs = begin
@@ -1744,7 +1744,7 @@
                   (_,  nil(), _)  => begin
                     ListUtil.unique(inAcc)
                   end
-                  
+
                   (_, (c1, c2, _) <| rest, _)  => begin
                       @match true = ConnectUtil.isReferenceInConnects(inConnects, c1)
                       @match true = ConnectUtil.isReferenceInConnects(inConnects, c2)
@@ -1754,7 +1754,7 @@
                       filtered = filterFromSet(inConnects, rest, _cons(c1, _cons(c2, inAcc)), msg)
                     filtered
                   end
-                  
+
                   (_, _ <| rest, _)  => begin
                       filtered = filterFromSet(inConnects, rest, inAcc, msg)
                     filtered
@@ -1766,7 +1766,7 @@
           filteredCrefs
         end
 
-        function removeFromConnects(inConnects::List{<:Connect.ConnectorElement}, inToRemove::List{<:DAE.ComponentRef}) ::List{Connect.ConnectorElement} 
+        function removeFromConnects(inConnects::List{<:Connect.ConnectorElement}, inToRemove::List{<:DAE.ComponentRef}) ::List{Connect.ConnectorElement}
               local outConnects::List{Connect.ConnectorElement}
 
               outConnects = begin
@@ -1777,7 +1777,7 @@
                   (_,  nil())  => begin
                     inConnects
                   end
-                  
+
                   (cset, c <| rest)  => begin
                       @match (cset, true) = ConnectUtil.removeReferenceFromConnects(cset, c)
                       cset = removeFromConnects(cset, rest)
@@ -1790,7 +1790,7 @@
 
          #= @author: adrpo
          adds all the equalityConstraint equations from broken connections =#
-        function addBrokenEqualityConstraintEquations(inDAE::DAE.DAElist, inBroken::DaeEdges) ::DAE.DAElist 
+        function addBrokenEqualityConstraintEquations(inDAE::DAE.DAElist, inBroken::DaeEdges) ::DAE.DAElist
               local outDAE::DAE.DAElist
 
               outDAE = begin
@@ -1800,7 +1800,7 @@
                   (_,  nil())  => begin
                     inDAE
                   end
-                  
+
                   _  => begin
                         equalityConstraintElements = ListUtil.flatten(ListUtil.map(inBroken, Util.tuple33))
                         dae = DAEUtil.joinDaes(DAE.DAE(equalityConstraintElements), inDAE)
