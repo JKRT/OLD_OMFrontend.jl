@@ -1,4 +1,4 @@
-  module FGraphDump 
+  module FGraphDump
 
 
     using MetaModelica
@@ -43,25 +43,25 @@
         import FGraph
         import GraphML
 
-        Name = FCore.Name 
-        Id = FCore.Id 
-        Seq = FCore.Seq 
-        Next = FCore.Next 
-        Node = FCore.Node 
-        Data = FCore.Data 
-        Kind = FCore.Kind 
-        Ref = FCore.Ref 
-        Refs = FCore.Refs 
-        RefTree = FCore.RefTree 
-        Children = FCore.Children 
-        Parents = FCore.Parents 
-        ImportTable = FCore.ImportTable 
-        Extra = FCore.Extra 
-        Visited = FCore.Visited 
-        Import = FCore.Import 
-        Graph = FCore.Graph 
-        Type = DAE.Type 
-        Types = List 
+        const Name = FCore.Name
+        const Id = FCore.Id
+        const Seq = FCore.Seq
+        const Next = FCore.Next
+        const Node = FCore.Node
+        const Data = FCore.Data
+        const Kind = FCore.Kind
+        const Ref = FCore.Ref
+        const Refs = FCore.Refs
+        const RefTree = FCore.RefTree
+        const Children = FCore.Children
+        const Parents = FCore.Parents
+        const ImportTable = FCore.ImportTable
+        const Extra = FCore.Extra
+        const Visited = FCore.Visited
+        const Import = FCore.Import
+        const Graph = FCore.Graph
+        const Type = DAE.Type
+        const Types = List
 
         import Flags
         import Dump
@@ -70,7 +70,7 @@
         import SCodeUtil
         import Util
 
-        function dumpGraph(inGraph::Graph, fileName::String)  
+        function dumpGraph(inGraph::Graph, fileName::String)
               _ = begin
                   local g::ModelicaInteger
                   local gi::GraphML.GraphInfo
@@ -80,7 +80,7 @@
                       @match false = Flags.isSet(Flags.GRAPH_INST_GEN_GRAPH)
                     ()
                   end
-                  
+
                   (_, _)  => begin
                       gi = GraphML.createGraphInfo()
                       (gi, (_, g)) = GraphML.addGraph("G", false, gi)
@@ -95,7 +95,7 @@
               end
         end
 
-        function addNodes(gin::Tuple{<:GraphML.GraphInfo, ModelicaInteger}, inRefs::List{<:Ref}) ::Tuple{GraphML.GraphInfo, ModelicaInteger} 
+        function addNodes(gin::Tuple{<:GraphML.GraphInfo, ModelicaInteger}, inRefs::List{<:Ref}) ::Tuple{GraphML.GraphInfo, ModelicaInteger}
               local gout::Tuple{GraphML.GraphInfo, ModelicaInteger}
 
               gout = begin
@@ -106,11 +106,11 @@
                   (_,  nil())  => begin
                     gin
                   end
-                  
+
                   (g, n <| rest) where (! FNode.isRefTop(n) && ! FNode.isRefUserDefined(n))  => begin
                     addNodes(g, rest)
                   end
-                  
+
                   (g, n <| rest)  => begin
                       g = addNode(g, FNode.fromRef(n))
                     addNodes(g, rest)
@@ -122,7 +122,7 @@
           gout
         end
 
-        function addNode(gin::Tuple{<:GraphML.GraphInfo, ModelicaInteger}, node::Node) ::Tuple{GraphML.GraphInfo, ModelicaInteger} 
+        function addNode(gin::Tuple{<:GraphML.GraphInfo, ModelicaInteger}, node::Node) ::Tuple{GraphML.GraphInfo, ModelicaInteger}
               local gout::Tuple{GraphML.GraphInfo, ModelicaInteger}
 
               gout = begin
@@ -154,7 +154,7 @@
                       (gi, i) = addNodes((gi, i), nrefs)
                     (gi, i)
                   end
-                  
+
                   ((gi, i), FCore.N(parents = nr <| _, children = kids, data = FCore.REF( nil())))  => begin
                       (color, shape, nds) = graphml(node, true)
                       labelText = nds
@@ -165,7 +165,7 @@
                       (gi, i) = addNodes((gi, i), nrefs)
                     (gi, i)
                   end
-                  
+
                   ((gi, i), FCore.N(parents = nr <| _, children = kids, data = FCore.REF(_ <| _)))  => begin
                       (color, shape, nds) = graphml(node, true)
                       labelText = nds
@@ -176,11 +176,11 @@
                       (gi, i) = addNodes((gi, i), nrefs)
                     (gi, i)
                   end
-                  
+
                   ((gi, i), FCore.N(parents = _ <| _, data = FCore.VR(__)))  => begin
                     (gi, i)
                   end
-                  
+
                   ((gi, i), FCore.N(parents = nr <| _, children = kids))  => begin
                       (color, shape, nds) = graphml(node, true)
                       labelText = nds
@@ -236,7 +236,7 @@
           gout
         end
 
-        function graphml(node::Node, escape::Bool) ::Tuple{String, GraphML.ShapeType, String} 
+        function graphml(node::Node, escape::Bool) ::Tuple{String, GraphML.ShapeType, String}
               local nname::String
               local shape::GraphML.ShapeType
               local color::String
@@ -272,7 +272,7 @@
                       s = s + FNode.name(node)
                     (GraphML.COLOR_YELLOW, GraphML.HEXAGON(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, FCore.CL(e = e)), _)  => begin
                       @match true = SCodeUtil.isElementRedeclare(e)
                       b = FNode.isClassExtends(node)
@@ -284,47 +284,47 @@
                       s = s + FNode.name(node)
                     (GraphML.COLOR_YELLOW, GraphML.HEXAGON(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, FCore.CL(e = e)), _)  => begin
                       @match true = SCodeUtil.isElementReplaceable(e)
                       s = "rpC:" + FNode.name(node)
                     (GraphML.COLOR_RED, GraphML.RECTANGLE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, FCore.CO(e = e)), _)  => begin
                       @match true = SCodeUtil.isElementRedeclare(e)
                       @match true = SCodeUtil.isElementReplaceable(e)
                       s = "rdrpc:" + FNode.name(node)
                     (GraphML.COLOR_YELLOW, GraphML.ELLIPSE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, FCore.CO(e = e)), _)  => begin
                       @match true = SCodeUtil.isElementRedeclare(e)
                       s = "rdc:" + FNode.name(node)
                     (GraphML.COLOR_YELLOW, GraphML.ELLIPSE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, FCore.CO(e = e)), _)  => begin
                       @match true = SCodeUtil.isElementReplaceable(e)
                       s = "rpc:" + FNode.name(node)
                     (GraphML.COLOR_RED, GraphML.ELLIPSE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.CL(__)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.name(node)
                     (GraphML.COLOR_GRAY, GraphML.RECTANGLE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.CO(__)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.name(node)
                     (GraphML.COLOR_WHITE, GraphML.ELLIPSE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.EX(__)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.name(node)
                     (GraphML.COLOR_GREEN, GraphML.ROUNDRECTANGLE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.EXP(e = exp)), _)  => begin
                       s = Dump.printExpStr(exp)
                       s = FNode.dataStr(nd) + ":" + (if escape
@@ -334,7 +334,7 @@
                           end)
                     (GraphML.COLOR_PURPLE, GraphML.HEXAGON(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.DIMS(dims = dims)), _)  => begin
                       s = Dump.printArraydimStr(dims)
                       s = FNode.dataStr(nd) + ":" + (if escape
@@ -344,27 +344,27 @@
                           end)
                     (GraphML.COLOR_PINK, GraphML.TRIANGLE(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.CR(r = r)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + AbsynUtil.printComponentRefStr(r)
                     (GraphML.COLOR_PURPLE, GraphML.OCTAGON(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.ASSERT(s)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.name(node)
                     (GraphML.COLOR_RED, GraphML.PARALLELOGRAM(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.REF( nil())), _)  => begin
                       s = FNode.dataStr(nd) + ":" + "UNRESOLVED"
                     (GraphML.COLOR_RED, GraphML.PARALLELOGRAM(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd && FCore.REF(target <| _)), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.toPathStr(FNode.fromRef(target))
                     (GraphML.COLOR_GREEN, GraphML.TRAPEZOID(), s)
                   end
-                  
+
                   (FCore.N(_, _, _, _, nd), _)  => begin
                       s = FNode.dataStr(nd) + ":" + FNode.name(node)
                     (GraphML.COLOR_BLUE, GraphML.ELLIPSE(), s)

@@ -1,4 +1,4 @@
-  module UnitAbsyn 
+  module UnitAbsyn
 
 
     using MetaModelica
@@ -6,13 +6,13 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl UnitCheckResult 
-    @UniontypeDecl SpecUnit 
-    @UniontypeDecl TypeParameter 
-    @UniontypeDecl Unit 
-    @UniontypeDecl UnitTerm 
-    @UniontypeDecl Store 
-    @UniontypeDecl InstStore 
+    @UniontypeDecl UnitCheckResult
+    @UniontypeDecl SpecUnit
+    @UniontypeDecl TypeParameter
+    @UniontypeDecl Unit
+    @UniontypeDecl UnitTerm
+    @UniontypeDecl Store
+    @UniontypeDecl InstStore
 
          #= /*
          * This file is part of OpenModelica.
@@ -153,7 +153,7 @@
               end
          end
 
-        UnitTerms = List 
+        UnitTerms = List
 
          @Uniontype Store begin
               @Record STORE begin
@@ -170,7 +170,7 @@
               @Record INSTSTORE begin
 
                        store::Store
-                       ht::HashTable.HashTable
+                       ht::HashTable.HashTableType
                        checkResult #= when a check is done the result is stored here =#::Option{UnitCheckResult}
               end
 

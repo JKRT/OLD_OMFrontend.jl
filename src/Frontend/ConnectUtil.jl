@@ -1,4 +1,4 @@
-  module ConnectUtil 
+  module ConnectUtil
 
 
     using MetaModelica
@@ -101,7 +101,7 @@
          #=  Set graph represented as an adjacency list.
          =#
 
-        SetGraph = Array 
+        SetGraph = Array
 
          #= This function creates a 'new' set for the given prefix. This means that it
           makes a set with a new empty trie, but copies the set count and connection
@@ -109,7 +109,7 @@
           connections down in the instance hierarchy, but the list of connection crefs
           needs to be propagated to be able to evaluate the cardinality operator. See
           comments in addSet below for how the sets are merged later. =#
-        function newSet(prefix::Prefix.Prefix, sets::Sets) ::Sets 
+        function newSet(prefix::Prefix.Prefix, sets::Sets) ::Sets
 
 
               local pstr::String
@@ -129,7 +129,7 @@
         end
 
          #= This function adds a child set to a parent set. =#
-        function addSet(parentSets::Sets, childSets::Sets) ::Sets 
+        function addSet(parentSets::Sets, childSets::Sets) ::Sets
               local sets::Sets
 
               sets = begin
@@ -145,11 +145,11 @@
                   (_, _) where (isEmptySet(childSets))  => begin
                     parentSets
                   end
-                  
+
                   (Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))), Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))))  => begin
                     childSets
                   end
-                  
+
                   (Sets.SETS(sets = node && SetTrieNode.SET_TRIE_NODE(__)), Sets.SETS(__))  => begin
                        #=  If both sets are nameless, i.e. a top scope set, just return the child
                        =#
@@ -164,7 +164,7 @@
                       _ = setTrieGetNode(setTrieNodeName(childSets.sets), node.nodes)
                     parentSets
                   end
-                  
+
                   (Sets.SETS(node && SetTrieNode.SET_TRIE_NODE(__), _, c1, o1), Sets.SETS(_, sc, c2, o2))  => begin
                        #=  In the normal case we add the trie on the child sets to the parent, and
                        =#
@@ -181,7 +181,7 @@
         end
 
          #= Check if a given set is empty. =#
-        function isEmptySet(sets::Sets) ::Bool 
+        function isEmptySet(sets::Sets) ::Bool
               local isEmpty::Bool
 
               isEmpty = begin
@@ -189,7 +189,7 @@
                   Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(nodes =  nil()), connections =  nil(), outerConnects =  nil())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -200,7 +200,7 @@
 
          #= Adds a new connection by looking up both the given connector elements in the
            set trie and merging the sets together. =#
-        function addConnection(sets::Sets, cref1::DAE.ComponentRef, face1::Face, cref2::DAE.ComponentRef, face2::Face, connectorType::DAE.ConnectorType, source::DAE.ElementSource) ::Sets 
+        function addConnection(sets::Sets, cref1::DAE.ComponentRef, face1::Face, cref2::DAE.ComponentRef, face2::Face, connectorType::DAE.ConnectorType, source::DAE.ElementSource) ::Sets
 
 
               local e1::ConnectorElement
@@ -214,7 +214,7 @@
           sets
         end
 
-        function getConnectCount(cref::DAE.ComponentRef, trie::SetTrie) ::ModelicaInteger 
+        function getConnectCount(cref::DAE.ComponentRef, trie::SetTrie) ::ModelicaInteger
               local count::ModelicaInteger
 
               local node::SetTrieNode
@@ -226,7 +226,7 @@
                     SetTrieNode.SET_TRIE_NODE(__)  => begin
                       node.connectCount
                     end
-                    
+
                     SetTrieNode.SET_TRIE_LEAF(__)  => begin
                       node.connectCount
                     end
@@ -239,7 +239,7 @@
         end
 
          #= Connects two arrays of connectors. =#
-        function addArrayConnection(sets::Sets, cref1::DAE.ComponentRef, face1::Face, cref2::DAE.ComponentRef, face2::Face, source::DAE.ElementSource, connectorType::DAE.ConnectorType) ::Sets 
+        function addArrayConnection(sets::Sets, cref1::DAE.ComponentRef, face1::Face, cref2::DAE.ComponentRef, face2::Face, source::DAE.ElementSource, connectorType::DAE.ConnectorType) ::Sets
 
 
               local crefs1::List{DAE.ComponentRef}
@@ -256,7 +256,7 @@
         end
 
          #= Creates a connector type from the flow or stream prefix given. =#
-        function makeConnectorType(connectorType::DAE.ConnectorType) ::ConnectorType 
+        function makeConnectorType(connectorType::DAE.ConnectorType) ::ConnectorType
               local ty::ConnectorType
 
               local flowName::Option{DAE.ComponentRef}
@@ -266,19 +266,19 @@
                   DAE.POTENTIAL(__)  => begin
                     ConnectorType.EQU()
                   end
-                  
+
                   DAE.FLOW(__)  => begin
                     ConnectorType.FLOW()
                   end
-                  
+
                   DAE.STREAM(flowName)  => begin
                     ConnectorType.STREAM(flowName)
                   end
-                  
+
                   DAE.NON_CONNECTOR(__)  => begin
                     ConnectorType.NO_TYPE()
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("ConnectUtil.makeConnectorType: invalid connector type."))
                       fail()
@@ -290,7 +290,7 @@
 
          #= If the class state indicates a connector, this function adds all flow
           variables in the dae as inside connectors to the connection sets. =#
-        function addConnectorVariablesFromDAE(ignore::Bool, classState::ClassInf.State, prefix::Prefix.Prefix, vars::List{<:DAE.Var}, info::SourceInfo, elementSource::DAE.ElementSource, sets::Sets) ::Sets 
+        function addConnectorVariablesFromDAE(ignore::Bool, classState::ClassInf.State, prefix::Prefix.Prefix, vars::List{<:DAE.Var}, info::SourceInfo, elementSource::DAE.ElementSource, sets::Sets) ::Sets
 
 
               sets = begin
@@ -311,7 +311,7 @@
                       end
                     sets
                   end
-                  
+
                   _  => begin
                       sets
                   end
@@ -321,7 +321,7 @@
         end
 
          #= Adds a flow variable from the DAE to the sets as an inside flow variable. =#
-        function addFlowVariableFromDAE(variable::DAE.Var, elementSource::DAE.ElementSource, prefix::Prefix.Prefix, sets::Sets) ::Sets 
+        function addFlowVariableFromDAE(variable::DAE.Var, elementSource::DAE.ElementSource, prefix::Prefix.Prefix, sets::Sets) ::Sets
 
 
               local crefs::List{DAE.ComponentRef}
@@ -333,7 +333,7 @@
           sets
         end
 
-        function isExpandable(name::DAE.ComponentRef) ::Bool 
+        function isExpandable(name::DAE.ComponentRef) ::Bool
               local expandableConnector::Bool
 
               expandableConnector = begin
@@ -341,11 +341,11 @@
                   DAE.CREF_IDENT(__)  => begin
                     Types.isExpandableConnector(name.identType)
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                     Types.isExpandableConnector(name.identType) || isExpandable(name.componentRef)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -355,7 +355,7 @@
         end
 
          #= Checks if a DAE contains any expandable connectors. =#
-        function daeHasExpandableConnectors(DAE::DAE.DAElist) ::Bool 
+        function daeHasExpandableConnectors(DAE::DAE.DAElist) ::Bool
               local hasExpandable::Bool
 
               local vars::List{DAE.Element}
@@ -369,7 +369,7 @@
           hasExpandable
         end
 
-        function isVarExpandable(var::DAE.Element) ::Bool 
+        function isVarExpandable(var::DAE.Element) ::Bool
               local isExpandable::Bool
 
               isExpandable = begin
@@ -377,7 +377,7 @@
                   DAE.VAR(__)  => begin
                     isExpandable(var.componentRef)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -389,7 +389,7 @@
          #= @author: adrpo
            Goes through a list of expandable variables
            THAT HAVE NO BINDING and returns their crefs =#
-        function getExpandableVariablesWithNoBinding(variables::List{<:DAE.Element}) ::List{DAE.ComponentRef} 
+        function getExpandableVariablesWithNoBinding(variables::List{<:DAE.Element}) ::List{DAE.ComponentRef}
               local potential::List{DAE.ComponentRef} = nil
 
               local name::DAE.ComponentRef
@@ -407,7 +407,7 @@
                         end
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -419,7 +419,7 @@
 
          #= Goes through a list of variables and filters out all flow and stream
            variables into separate lists. =#
-        function getStreamAndFlowVariables(variables::List{<:DAE.Var}) ::Tuple{List{DAE.Var}, List{DAE.Var}} 
+        function getStreamAndFlowVariables(variables::List{<:DAE.Var}) ::Tuple{List{DAE.Var}, List{DAE.Var}}
               local streams::List{DAE.Var} = nil
               local flows::List{DAE.Var} = nil
 
@@ -430,12 +430,12 @@
                         flows = _cons(var, flows)
                       ()
                     end
-                    
+
                     DAE.TYPES_VAR(attributes = DAE.ATTR(connectorType = DAE.STREAM(__)))  => begin
                         streams = _cons(var, streams)
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -447,7 +447,7 @@
 
          #= Adds information to the connection sets about which flow variables each
           stream variable is associated to. =#
-        function addStreamFlowAssociations(sets::Sets, prefix::Prefix.Prefix, streamVars::List{<:DAE.Var}, flowVars::List{<:DAE.Var}) ::Sets 
+        function addStreamFlowAssociations(sets::Sets, prefix::Prefix.Prefix, streamVars::List{<:DAE.Var}, flowVars::List{<:DAE.Var}) ::Sets
 
 
               local flow_var::DAE.Var
@@ -474,7 +474,7 @@
         end
 
          #= Converts a DAE.Var to a list of crefs. =#
-        function daeVarToCrefs(var::DAE.Var) ::List{DAE.ComponentRef} 
+        function daeVarToCrefs(var::DAE.Var) ::List{DAE.ComponentRef}
               local crefs::List{DAE.ComponentRef}
 
               local name::String
@@ -490,7 +490,7 @@
                   DAE.T_REAL(__)  => begin
                     list(DAE.CREF_IDENT(name, ty, nil))
                   end
-                  
+
                   DAE.T_COMPLEX(__)  => begin
                        #=  Scalar
                        =#
@@ -500,7 +500,7 @@
                       cr = DAE.CREF_IDENT(name, DAE.T_REAL_DEFAULT, nil)
                     list(ComponentReference.joinCrefs(cr, c) for c in crs)
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                        #=  Array
                        =#
@@ -508,7 +508,7 @@
                       cr = DAE.CREF_IDENT(name, ty, nil)
                     expandArrayCref(cr, dims)
                   end
-                  
+
                   _  => begin
                         Error.addInternalError("Unknown var " + name + " in ConnectUtil.daeVarToCrefs", sourceInfo())
                       fail()
@@ -520,7 +520,7 @@
 
          #= This function takes an array cref and a list of dimensions, and generates all
           scalar crefs by expanding the dimensions into subscripts. =#
-        function expandArrayCref(cref::DAE.ComponentRef, dims::DAE.Dimensions, accumCrefs::List{<:DAE.ComponentRef} = nil) ::List{DAE.ComponentRef} 
+        function expandArrayCref(cref::DAE.ComponentRef, dims::DAE.Dimensions, accumCrefs::List{<:DAE.ComponentRef} = nil) ::List{DAE.ComponentRef}
               local crefs::List{DAE.ComponentRef}
 
               crefs = begin
@@ -533,7 +533,7 @@
                    nil()  => begin
                     _cons(cref, accumCrefs)
                   end
-                  
+
                   dim <| rest_dims  => begin
                       (idx, dim) = getNextIndex(dim)
                       cr = ComponentReference.subscriptCref(cref, list(DAE.INDEX(idx)))
@@ -541,7 +541,7 @@
                       crs = expandArrayCref(cref, _cons(dim, rest_dims), crs)
                     crs
                   end
-                  
+
                   _  => begin
                       accumCrefs
                   end
@@ -554,7 +554,7 @@
           returns the given dimension if it's not an enumeration. This is used by
           getNextIndex that starts from the end, so that it can take the first literal
           in the list instead of the last (more efficient). =#
-        function reverseEnumType(dim::DAE.Dimension) ::DAE.Dimension 
+        function reverseEnumType(dim::DAE.Dimension) ::DAE.Dimension
 
 
               _ = begin
@@ -563,7 +563,7 @@
                       dim.literals = listReverse(dim.literals)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -574,7 +574,7 @@
 
          #= Returns the next index given a dimension, and updates the dimension. Fails
           when there are no indices left. =#
-        function getNextIndex(dim::DAE.Dimension) ::Tuple{DAE.Exp, DAE.Dimension} 
+        function getNextIndex(dim::DAE.Dimension) ::Tuple{DAE.Exp, DAE.Dimension}
               local restDim::DAE.Dimension
               local nextIndex::DAE.Exp
 
@@ -589,16 +589,16 @@
                   DAE.DIM_INTEGER(integer = 0)  => begin
                     fail()
                   end
-                  
+
                   DAE.DIM_ENUM(size = 0)  => begin
                     fail()
                   end
-                  
+
                   DAE.DIM_INTEGER(integer = new_idx)  => begin
                       dim_size = new_idx - 1
                     (DAE.ICONST(new_idx), DAE.DIM_INTEGER(dim_size))
                   end
-                  
+
                   DAE.DIM_ENUM(p, l <| l_rest, new_idx)  => begin
                        #=  Assumes that the enum has been reversed with reverseEnumType.
                        =#
@@ -612,7 +612,7 @@
         end
 
          #= Adds a single inside flow variable to the connection sets. =#
-        function addInsideFlowVariable(sets::Sets, cref::DAE.ComponentRef, source::DAE.ElementSource, prefix::Prefix.Prefix) ::Sets 
+        function addInsideFlowVariable(sets::Sets, cref::DAE.ComponentRef, source::DAE.ElementSource, prefix::Prefix.Prefix) ::Sets
 
 
               local e::ConnectorElement
@@ -632,7 +632,7 @@
         end
 
          #= Adds an association between a stream variable and a flow. =#
-        function addStreamFlowAssociation(streamCref::DAE.ComponentRef, flowCref::DAE.ComponentRef, sets::Sets) ::Sets 
+        function addStreamFlowAssociation(streamCref::DAE.ComponentRef, flowCref::DAE.ComponentRef, sets::Sets) ::Sets
 
 
               sets = updateSetLeaf(sets, streamCref, flowCref, addStreamFlowAssociation2)
@@ -641,7 +641,7 @@
 
          #= Helper function to addSTreamFlowAssocication, sets the flow association in a
            leaf node. =#
-        function addStreamFlowAssociation2(flowCref::DAE.ComponentRef, node::SetTrieNode) ::SetTrieNode 
+        function addStreamFlowAssociation2(flowCref::DAE.ComponentRef, node::SetTrieNode) ::SetTrieNode
 
 
               _ = begin
@@ -656,7 +656,7 @@
         end
 
          #= Returns the associated flow variable for a stream variable. =#
-        function getStreamFlowAssociation(streamCref::DAE.ComponentRef, sets::Sets) ::DAE.ComponentRef 
+        function getStreamFlowAssociation(streamCref::DAE.ComponentRef, sets::Sets) ::DAE.ComponentRef
               local flowCref::DAE.ComponentRef
 
               @match SetTrieNode.SET_TRIE_LEAF(flowAssociation = SOME(flowCref)) = setTrieGet(streamCref, sets.sets, false)
@@ -666,7 +666,7 @@
          #= Adds a connection with a reference to an outer connector These are added to a
            special list, such that they can be moved up in the instance hierarchy to a
            place where both instances are defined. =#
-        function addOuterConnection(scope::Prefix.Prefix, sets::Sets, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, f1::Face, f2::Face, source::DAE.ElementSource) ::Sets 
+        function addOuterConnection(scope::Prefix.Prefix, sets::Sets, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, f1::Face, f2::Face, source::DAE.ElementSource) ::Sets
 
 
               local new_oc::OuterConnect
@@ -682,7 +682,7 @@
 
          #= Returns true if Connect.OuterConnect matches the two component references
           passed as argument. =#
-        function outerConnectionMatches(oc::OuterConnect, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool 
+        function outerConnectionMatches(oc::OuterConnect, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Bool
               local matches::Bool
 
               matches = begin
@@ -700,7 +700,7 @@
           we have an outer connection connect(world, a2.aPin), the connection is added
           to the sets, resulting in {world.v, topPin.v, a2.aPin.v}. Returns the updated
           sets and a boolean that indicates if anything was added or not. =#
-        function addOuterConnectToSets(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, face1::Face, face2::Face, sets::Sets, inInfo::SourceInfo) ::Tuple{Sets, Bool} 
+        function addOuterConnectToSets(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, face1::Face, face2::Face, sets::Sets, inInfo::SourceInfo) ::Tuple{Sets, Bool}
               local added::Bool
 
 
@@ -717,11 +717,11 @@
                       Error.addSourceMessage(Error.UNSUPPORTED_LANGUAGE_FEATURE, list("Connections where both connectors are outer references", "No suggestion"), inInfo)
                     false
                   end
-                  
+
                   (false, false)  => begin
                     false
                   end
-                  
+
                   (true, false)  => begin
                        #=  Both are inner => do nothing.
                        =#
@@ -730,7 +730,7 @@
                       (sets, added) = addOuterConnectToSets2(cref1, cref2, face1, face2, sets)
                     added
                   end
-                  
+
                   (false, true)  => begin
                        #=  The first is inner and the second outer, call addOuterConnectToSets2 with
                        =#
@@ -746,7 +746,7 @@
 
          #= Helper function to addOuterConnectToSets. Tries to add connections between
            the inner and outer components. =#
-        function addOuterConnectToSets2(outerCref::DAE.ComponentRef, innerCref::DAE.ComponentRef, outerFace::Face, innerFace::Face, sets::Sets) ::Tuple{Sets, Bool} 
+        function addOuterConnectToSets2(outerCref::DAE.ComponentRef, innerCref::DAE.ComponentRef, outerFace::Face, innerFace::Face, sets::Sets) ::Tuple{Sets, Bool}
               local added::Bool
 
 
@@ -779,7 +779,7 @@
         end
 
          #= Collects all connector elements with a certain face from a trie node. =#
-        function collectOuterElements(node::SetTrieNode, face::Face) ::List{ConnectorElement} 
+        function collectOuterElements(node::SetTrieNode, face::Face) ::List{ConnectorElement}
               local outerElements::List{ConnectorElement}
 
               outerElements = begin
@@ -787,7 +787,7 @@
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                     ListUtil.map2Flat(node.nodes, collectOuterElements2, face, NONE())
                   end
-                  
+
                   _  => begin
                       collectOuterElements2(node, face, NONE())
                   end
@@ -797,7 +797,7 @@
         end
 
          #= Helper function to collectOuterElements. =#
-        function collectOuterElements2(node::SetTrieNode, face::Face, prefix::Option{<:DAE.ComponentRef}) ::List{ConnectorElement} 
+        function collectOuterElements2(node::SetTrieNode, face::Face, prefix::Option{<:DAE.ComponentRef}) ::List{ConnectorElement}
               local outerElements::List{ConnectorElement}
 
               outerElements = begin
@@ -809,7 +809,7 @@
                       cr = optPrefixCref(prefix, cr)
                     ListUtil.map2Flat(node.nodes, collectOuterElements2, face, SOME(cr))
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                       e = setTrieGetLeafElement(node, face)
                       cr = getElementName(e)
@@ -822,7 +822,7 @@
         end
 
          #= Finds or creates an inner element based on a given outer element. =#
-        function findInnerElement(outerElement::ConnectorElement, innerCref::DAE.ComponentRef, innerFace::Face, sets::Sets) ::ConnectorElement 
+        function findInnerElement(outerElement::ConnectorElement, innerCref::DAE.ComponentRef, innerFace::Face, sets::Sets) ::ConnectorElement
               local innerElement::ConnectorElement
 
               local name::DAE.ComponentRef
@@ -836,7 +836,7 @@
         end
 
          #= Appends an optional prefix to a cref. =#
-        function optPrefixCref(prefix::Option{<:DAE.ComponentRef}, cref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function optPrefixCref(prefix::Option{<:DAE.ComponentRef}, cref::DAE.ComponentRef) ::DAE.ComponentRef
 
 
               cref = begin
@@ -845,7 +845,7 @@
                   NONE()  => begin
                     cref
                   end
-                  
+
                   SOME(cr)  => begin
                     ComponentReference.joinCrefs(cr, cref)
                   end
@@ -856,7 +856,7 @@
 
          #= Tries to find a connector element in the sets given a cref and a face. If no
            element can be found it creates a new one. =#
-        function findElement(cref::DAE.ComponentRef, face::Face, ty::ConnectorType, source::DAE.ElementSource, sets::Sets) ::ConnectorElement 
+        function findElement(cref::DAE.ComponentRef, face::Face, ty::ConnectorType, source::DAE.ElementSource, sets::Sets) ::ConnectorElement
               local element::ConnectorElement
 
               try
@@ -868,7 +868,7 @@
         end
 
          #= Creates a new connector element. =#
-        function newElement(cref::DAE.ComponentRef, face::Face, ty::ConnectorType, source::DAE.ElementSource, set::ModelicaInteger) ::ConnectorElement 
+        function newElement(cref::DAE.ComponentRef, face::Face, ty::ConnectorType, source::DAE.ElementSource, set::ModelicaInteger) ::ConnectorElement
               local element::ConnectorElement
 
               element = ConnectorElement.CONNECTOR_ELEMENT(cref, face, ty, source, set)
@@ -876,7 +876,7 @@
         end
 
          #= Checks if the element is new, i.e. hasn't been assigned to a set yet. =#
-        function isNewElement(element::ConnectorElement) ::Bool 
+        function isNewElement(element::ConnectorElement) ::Bool
               local isNew::Bool
 
               local set::ModelicaInteger
@@ -887,7 +887,7 @@
         end
 
          #= Returns the set index of a connector element. =#
-        function getElementSetIndex(inElement::ConnectorElement) ::ModelicaInteger 
+        function getElementSetIndex(inElement::ConnectorElement) ::ModelicaInteger
               local outIndex::ModelicaInteger
 
               @match ConnectorElement.CONNECTOR_ELEMENT(set = outIndex) = inElement
@@ -895,7 +895,7 @@
         end
 
          #= Sets the set index of a connector element. =#
-        function setElementSetIndex(element::ConnectorElement, index::ModelicaInteger) ::ConnectorElement 
+        function setElementSetIndex(element::ConnectorElement, index::ModelicaInteger) ::ConnectorElement
 
 
               element.set = index
@@ -903,7 +903,7 @@
         end
 
          #= Returns the name of a connector element. =#
-        function getElementName(element::ConnectorElement) ::DAE.ComponentRef 
+        function getElementName(element::ConnectorElement) ::DAE.ComponentRef
               local name::DAE.ComponentRef
 
               @match ConnectorElement.CONNECTOR_ELEMENT(name = name) = element
@@ -911,7 +911,7 @@
         end
 
          #= Sets the name of a connector element. =#
-        function setElementName(element::ConnectorElement, name::DAE.ComponentRef) ::ConnectorElement 
+        function setElementName(element::ConnectorElement, name::DAE.ComponentRef) ::ConnectorElement
 
 
               element.name = name
@@ -919,7 +919,7 @@
         end
 
          #= Returns the element source of a connector element. =#
-        function getElementSource(element::ConnectorElement) ::DAE.ElementSource 
+        function getElementSource(element::ConnectorElement) ::DAE.ElementSource
               local source::DAE.ElementSource
 
               @match ConnectorElement.CONNECTOR_ELEMENT(source = source) = element
@@ -927,7 +927,7 @@
         end
 
          #= Creates a new trie leaf. =#
-        function setTrieNewLeaf(id::String, element::ConnectorElement) ::SetTrieNode 
+        function setTrieNewLeaf(id::String, element::ConnectorElement) ::SetTrieNode
               local leaf::SetTrieNode
 
               leaf = begin
@@ -935,7 +935,7 @@
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__))  => begin
                     SetTrieNode.SET_TRIE_LEAF(id, SOME(element), NONE(), NONE(), 0)
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.OUTSIDE(__))  => begin
                     SetTrieNode.SET_TRIE_LEAF(id, NONE(), SOME(element), NONE(), 0)
                   end
@@ -945,7 +945,7 @@
         end
 
          #= Creates a new trie node. =#
-        function setTrieNewNode(cref::DAE.ComponentRef, element::ConnectorElement) ::SetTrieNode 
+        function setTrieNewNode(cref::DAE.ComponentRef, element::ConnectorElement) ::SetTrieNode
               local node::SetTrieNode
 
               node = begin
@@ -958,7 +958,7 @@
                       id = ComponentReference.printComponentRefStr(cref)
                     setTrieNewLeaf(id, setElementName(element, cref))
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                        #=  A qualified identifier, call this function recursively.
                        =#
@@ -974,7 +974,7 @@
           node
         end
 
-        function setTrieNodeName(node::SetTrieNode) ::String 
+        function setTrieNodeName(node::SetTrieNode) ::String
               local name::String
 
               name = begin
@@ -982,7 +982,7 @@
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                     node.name
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                     node.name
                   end
@@ -992,7 +992,7 @@
         end
 
          #= Merges two sets. =#
-        function mergeSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets 
+        function mergeSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets
 
 
               local new1::Bool
@@ -1006,7 +1006,7 @@
 
          #= Helper function to mergeSets, dispatches to the correct function based on if
            the elements are new or not. =#
-        function mergeSets2(element1::ConnectorElement, element2::ConnectorElement, isNew1::Bool, isNew2::Bool, sets::Sets) ::Sets 
+        function mergeSets2(element1::ConnectorElement, element2::ConnectorElement, isNew1::Bool, isNew2::Bool, sets::Sets) ::Sets
 
 
               sets = begin
@@ -1014,15 +1014,15 @@
                   (true, true)  => begin
                     addNewSet(element1, element2, sets)
                   end
-                  
+
                   (true, false)  => begin
                     addToSet(element1, element2, sets)
                   end
-                  
+
                   (false, true)  => begin
                     addToSet(element2, element1, sets)
                   end
-                  
+
                   (false, false)  => begin
                     connectSets(element1, element2, sets)
                   end
@@ -1044,7 +1044,7 @@
         end
 
          #= Adds a new set containing the given two elements to the sets. =#
-        function addNewSet(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets 
+        function addNewSet(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets
 
 
               local node::SetTrie
@@ -1063,7 +1063,7 @@
         end
 
          #= Adds the first connector element to the same set as the second. =#
-        function addToSet(element::ConnectorElement, set::ConnectorElement, sets::Sets) ::Sets 
+        function addToSet(element::ConnectorElement, set::ConnectorElement, sets::Sets) ::Sets
 
 
               local index::ModelicaInteger
@@ -1076,7 +1076,7 @@
         end
 
          #= Connects two sets. =#
-        function connectSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets 
+        function connectSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets
 
 
               local set1::ModelicaInteger
@@ -1093,7 +1093,7 @@
         end
 
          #= Fetches a connector element from the trie given a cref and a face. =#
-        function setTrieGetElement(cref::DAE.ComponentRef, face::Face, trie::SetTrie) ::ConnectorElement 
+        function setTrieGetElement(cref::DAE.ComponentRef, face::Face, trie::SetTrie) ::ConnectorElement
               local element::ConnectorElement
 
               local node::SetTrieNode
@@ -1104,7 +1104,7 @@
         end
 
          #= Adds a connector element to a trie leaf. =#
-        function setTrieAddLeafElement(element::ConnectorElement, node::SetTrieNode) ::SetTrieNode 
+        function setTrieAddLeafElement(element::ConnectorElement, node::SetTrieNode) ::SetTrieNode
 
 
               _ = begin
@@ -1116,7 +1116,7 @@
                               node.insideElement = SOME(element)
                             ()
                           end
-                          
+
                           Face.OUTSIDE(__)  => begin
                               node.outsideElement = SOME(element)
                             ()
@@ -1131,7 +1131,7 @@
         end
 
          #= Returns the connector element of a trie leaf, given a face. =#
-        function setTrieGetLeafElement(node::SetTrieNode, face::Face) ::ConnectorElement 
+        function setTrieGetLeafElement(node::SetTrieNode, face::Face) ::ConnectorElement
               local element::ConnectorElement
 
               element = begin
@@ -1140,7 +1140,7 @@
                   (Face.INSIDE(__), SetTrieNode.SET_TRIE_LEAF(insideElement = SOME(e)))  => begin
                     e
                   end
-                  
+
                   (Face.OUTSIDE(__), SetTrieNode.SET_TRIE_LEAF(outsideElement = SOME(e)))  => begin
                     e
                   end
@@ -1150,7 +1150,7 @@
         end
 
          #= Adds a connector element to the trie. =#
-        function setTrieAdd(element::ConnectorElement, trie::SetTrie) ::SetTrie 
+        function setTrieAdd(element::ConnectorElement, trie::SetTrie) ::SetTrie
 
 
               local cref::DAE.ComponentRef
@@ -1184,7 +1184,7 @@
                       trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
                     ()
                   end
-                  
+
                   (DAE.CREF_IDENT(__), SetTrieNode.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
                       trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
@@ -1234,7 +1234,7 @@
                       node = updateFunc(arg, node)
                     _cons(node, nodes)
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                       cr = ComponentReference.crefFirstCref(cref)
                       id = ComponentReference.printComponentRefStr(cr)
@@ -1294,7 +1294,7 @@
                       node.nodes = nodes
                     ()
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                       (node, arg) = updateFunc(node, arg)
                     ()
@@ -1306,7 +1306,7 @@
 
          #= Fetches a node from the trie given a cref to search for. If inMatchPrefix is
           true it also matches a prefix of the cref if the full cref couldn't be found. =#
-        function setTrieGet(cref::DAE.ComponentRef, trie::SetTrie, matchPrefix::Bool) ::SetTrieNode 
+        function setTrieGet(cref::DAE.ComponentRef, trie::SetTrie, matchPrefix::Bool) ::SetTrieNode
               local leaf::SetTrieNode
 
               local nodes::List{SetTrieNode}
@@ -1352,7 +1352,7 @@
 
          #= Returns a node with a given name from a list of nodes, or fails if no such
           node exists in the list. =#
-        function setTrieGetNode(id::String, nodes::List{<:SetTrieNode}) ::SetTrieNode 
+        function setTrieGetNode(id::String, nodes::List{<:SetTrieNode}) ::SetTrieNode
               local node::SetTrieNode
 
               node = ListUtil.getMemberOnTrue(id, nodes, setTrieNodeNamed)
@@ -1361,7 +1361,7 @@
 
          #= Returns true if the given node has the same name as the given string,
           otherwise false. =#
-        function setTrieNodeNamed(id::String, node::SetTrieNode) ::Bool 
+        function setTrieNodeNamed(id::String, node::SetTrieNode) ::Bool
               local isNamed::Bool
 
               isNamed = begin
@@ -1369,11 +1369,11 @@
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                     id == node.name
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                     id == node.name
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1384,7 +1384,7 @@
 
          #= Returns a leaf node with a given name from a list of nodes, or fails if no
           such node exists in the list. =#
-        function setTrieGetLeaf(id::String, nodes::List{<:SetTrieNode}) ::SetTrieNode 
+        function setTrieGetLeaf(id::String, nodes::List{<:SetTrieNode}) ::SetTrieNode
               local node::SetTrieNode
 
               node = ListUtil.getMemberOnTrue(id, nodes, setTrieLeafNamed)
@@ -1393,7 +1393,7 @@
 
          #= Returns true if the given leaf node has the same name as the given string,
           otherwise false. =#
-        function setTrieLeafNamed(id::String, node::SetTrieNode) ::Bool 
+        function setTrieLeafNamed(id::String, node::SetTrieNode) ::Bool
               local isNamed::Bool
 
               isNamed = begin
@@ -1401,7 +1401,7 @@
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                     id == node.name
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1410,7 +1410,7 @@
           isNamed
         end
 
-        function setTrieIsNode(node::SetTrieNode) ::Bool 
+        function setTrieIsNode(node::SetTrieNode) ::Bool
               local isNode::Bool
 
               isNode = begin
@@ -1418,7 +1418,7 @@
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1429,7 +1429,7 @@
 
          #= Generates equations from a connection set and evaluates stream operators if
           called from the top scope, otherwise does nothing. =#
-        function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraph, modelNameQualified::String) ::DAE.DAElist 
+        function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraph, modelNameQualified::String) ::DAE.DAElist
 
 
               local set_list::List{Set}
@@ -1479,7 +1479,7 @@
 
          #= @author: adrpo
          returns only the sets containing expandable connectors =#
-        function getExpandableEquSetsAsCrefs(sets::List{<:Set}) ::List{List{DAE.ComponentRef}} 
+        function getExpandableEquSetsAsCrefs(sets::List{<:Set}) ::List{List{DAE.ComponentRef}}
               local crefSets::List{List{DAE.ComponentRef}} = nil
 
               local cref_set::List{DAE.ComponentRef}
@@ -1494,7 +1494,7 @@
                         end
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -1504,14 +1504,14 @@
           crefSets
         end
 
-        function removeCrefsFromSets(sets::List{<:Set}, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::List{Set} 
+        function removeCrefsFromSets(sets::List{<:Set}, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::List{Set}
 
 
               sets = ListUtil.select1(sets, removeCrefsFromSets2, nonUsefulExpandable)
           sets
         end
 
-        function removeCrefsFromSets2(set::Set, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::Bool 
+        function removeCrefsFromSets2(set::Set, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::Bool
               local isInSet::Bool
 
               local setCrefs::List{DAE.ComponentRef}
@@ -1523,7 +1523,7 @@
           isInSet
         end
 
-        function mergeEquSetsAsCrefs(setsAsCrefs::List{<:List{<:DAE.ComponentRef}}) ::List{List{DAE.ComponentRef}} 
+        function mergeEquSetsAsCrefs(setsAsCrefs::List{<:List{<:DAE.ComponentRef}}) ::List{List{DAE.ComponentRef}}
 
 
               setsAsCrefs = begin
@@ -1534,11 +1534,11 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   set <|  nil()  => begin
                     list(set)
                   end
-                  
+
                   set <| rest  => begin
                       (set, rest) = mergeWithRest(set, rest)
                       sets = mergeEquSetsAsCrefs(rest)
@@ -1549,7 +1549,7 @@
           setsAsCrefs
         end
 
-        function mergeWithRest(set::List{<:DAE.ComponentRef}, sets::List{<:List{<:DAE.ComponentRef}}, acc::List{<:List{<:DAE.ComponentRef}} = nil) ::Tuple{List{DAE.ComponentRef}, List{List{DAE.ComponentRef}}} 
+        function mergeWithRest(set::List{<:DAE.ComponentRef}, sets::List{<:List{<:DAE.ComponentRef}}, acc::List{<:List{<:DAE.ComponentRef}} = nil) ::Tuple{List{DAE.ComponentRef}, List{List{DAE.ComponentRef}}}
 
 
 
@@ -1562,7 +1562,7 @@
                   (_,  nil())  => begin
                     (set, listReverse(acc))
                   end
-                  
+
                   (set1, set2 <| rest)  => begin
                        #=  Could be faster if we had a function for intersectionExist in a set
                        =#
@@ -1580,7 +1580,7 @@
           (set, sets)
         end
 
-        function getOnlyExpandableConnectedCrefs(sets::List{<:List{<:DAE.ComponentRef}}) ::List{DAE.ComponentRef} 
+        function getOnlyExpandableConnectedCrefs(sets::List{<:List{<:DAE.ComponentRef}}) ::List{DAE.ComponentRef}
               local usefulConnectedExpandable::List{DAE.ComponentRef} = nil
 
               for set in sets
@@ -1591,7 +1591,7 @@
           usefulConnectedExpandable
         end
 
-        function allCrefsAreExpandable(connects::List{<:DAE.ComponentRef}) ::Bool 
+        function allCrefsAreExpandable(connects::List{<:DAE.ComponentRef}) ::Bool
               local allAreExpandable::Bool
 
               for cr in connects
@@ -1605,7 +1605,7 @@
         end
 
          #= Generates an array of sets from a connection set. =#
-        function generateSetArray(sets::Sets) ::Array{Set} 
+        function generateSetArray(sets::Sets) ::Array{Set}
               local setArray::Array{Set}
 
                #=  Create a new array.
@@ -1628,7 +1628,7 @@
           that belongs to set 2 are instead added to set 1. To make sure that we get
           correct pointers we build a graph and use an algorithm to find the strongly
           connected components in it. =#
-        function setArrayAddConnections(connections::List{<:SetConnection}, setCount::ModelicaInteger, sets::Array{<:Set}) ::Array{Set} 
+        function setArrayAddConnections(connections::List{<:SetConnection}, setCount::ModelicaInteger, sets::Array{<:Set}) ::Array{Set}
 
 
               local graph::SetGraph
@@ -1648,7 +1648,7 @@
         end
 
          #= Adds a connection to the set graph. =#
-        function addConnectionToGraph(connection::SetConnection, graph::SetGraph) ::SetGraph 
+        function addConnectionToGraph(connection::SetConnection, graph::SetGraph) ::SetGraph
 
 
               local set1::ModelicaInteger
@@ -1666,7 +1666,7 @@
 
          #= Helper function to setArrayAddConnections, adds a connection pointer to the
            set array. =#
-        function setArrayAddConnection(set::ModelicaInteger, edges::List{<:ModelicaInteger}, sets::Array{<:Set}, graph::SetGraph) ::Tuple{Array{Set}, SetGraph} 
+        function setArrayAddConnection(set::ModelicaInteger, edges::List{<:ModelicaInteger}, sets::Array{<:Set}, graph::SetGraph) ::Tuple{Array{Set}, SetGraph}
 
 
 
@@ -1687,7 +1687,7 @@
 
          #= Helper function to setArrayAddConnection, adds a pointer from the given
            pointer to the pointee. =#
-        function setArrayAddConnection2(setPointer::ModelicaInteger, setPointee::ModelicaInteger, sets::Array{<:Set}) ::Array{Set} 
+        function setArrayAddConnection2(setPointer::ModelicaInteger, setPointee::ModelicaInteger, sets::Array{<:Set}) ::Array{Set}
 
 
               local set::Set
@@ -1698,7 +1698,7 @@
                   Set.SET(__)  => begin
                     arrayUpdate(sets, setPointer, Set.SET_POINTER(setPointee))
                   end
-                  
+
                   Set.SET_POINTER(__)  => begin
                     setArrayAddConnection2(setPointer, set.index, sets)
                   end
@@ -1714,7 +1714,7 @@
         end
 
          #= This function fills the set array with the sets from the set trie. =#
-        function generateSetArray2(sets::SetTrie, prefix::List{<:DAE.ComponentRef}, setArray::Array{<:Set}) ::Array{Set} 
+        function generateSetArray2(sets::SetTrie, prefix::List{<:DAE.ComponentRef}, setArray::Array{<:Set}) ::Array{Set}
 
 
               setArray = begin
@@ -1726,11 +1726,11 @@
                   SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))  => begin
                     ListUtil.fold1(sets.nodes, generateSetArray2, prefix, setArray)
                   end
-                  
+
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                     ListUtil.fold1(sets.nodes, generateSetArray2, _cons(sets.cref, prefix), setArray)
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(insideElement = ie, outsideElement = oe, flowAssociation = flow_cr)  => begin
                       ie = insertFlowAssociationInStreamElement(ie, flow_cr)
                       oe = insertFlowAssociationInStreamElement(oe, flow_cr)
@@ -1739,7 +1739,7 @@
                       setArray = setArrayAddElement(oe, prefix_cr, setArray)
                     setArray
                   end
-                  
+
                   _  => begin
                       setArray
                   end
@@ -1750,7 +1750,7 @@
 
          #= If the given element is a stream element, sets the associated flow. Otherwise
           does nothing. =#
-        function insertFlowAssociationInStreamElement(element::Option{<:ConnectorElement}, flowCref::Option{<:DAE.ComponentRef}) ::Option{ConnectorElement} 
+        function insertFlowAssociationInStreamElement(element::Option{<:ConnectorElement}, flowCref::Option{<:DAE.ComponentRef}) ::Option{ConnectorElement}
 
 
               local el::ConnectorElement
@@ -1763,7 +1763,7 @@
                         el.ty = ConnectorType.STREAM(flowCref)
                       SOME(el)
                     end
-                    
+
                     _  => begin
                         element
                     end
@@ -1774,7 +1774,7 @@
         end
 
          #= Adds a connector element to the set array. =#
-        function setArrayAddElement(element::Option{<:ConnectorElement}, prefix::Option{<:DAE.ComponentRef}, sets::Array{<:Set}) ::Array{Set} 
+        function setArrayAddElement(element::Option{<:ConnectorElement}, prefix::Option{<:DAE.ComponentRef}, sets::Array{<:Set}) ::Array{Set}
 
 
               sets = begin
@@ -1786,11 +1786,11 @@
                   (NONE(), _)  => begin
                     sets
                   end
-                  
+
                   (SOME(el && ConnectorElement.CONNECTOR_ELEMENT(__)), NONE())  => begin
                     setArrayUpdate(sets, el.set, el)
                   end
-                  
+
                   (SOME(el && ConnectorElement.CONNECTOR_ELEMENT(__)), SOME(prefix_cr))  => begin
                        #=  An element but no prefix, add the element as it is.
                        =#
@@ -1807,7 +1807,7 @@
         end
 
          #= Helper function to generateSetArray2, build a prefix from a list of crefs. =#
-        function buildElementPrefix(prefix::List{<:DAE.ComponentRef}) ::Option{DAE.ComponentRef} 
+        function buildElementPrefix(prefix::List{<:DAE.ComponentRef}) ::Option{DAE.ComponentRef}
               local cref::Option{DAE.ComponentRef}
 
               local cr::DAE.ComponentRef
@@ -1832,7 +1832,7 @@
         end
 
          #= Updates the element at a given index in the set array. =#
-        function setArrayUpdate(sets::Array{<:Set}, index::ModelicaInteger, element::ConnectorElement) ::Array{Set} 
+        function setArrayUpdate(sets::Array{<:Set}, index::ModelicaInteger, element::ConnectorElement) ::Array{Set}
 
 
               local set::Set
@@ -1853,7 +1853,7 @@
                        =#
                     arrayUpdate(sets, index, Set.SET(element.ty, el))
                   end
-                  
+
                   (Set.SET_POINTER(__), _)  => begin
                     setArrayUpdate(sets, set.index, element)
                   end
@@ -1865,7 +1865,7 @@
         end
 
          #= Comparison function used by setArrayUpdate2 to order equ sets. =#
-        function equSetElementLess(element1::ConnectorElement, element2::ConnectorElement) ::Bool 
+        function equSetElementLess(element1::ConnectorElement, element2::ConnectorElement) ::Bool
               local isLess::Bool
 
               isLess = ComponentReference.crefSortFunc(element2.name, element1.name)
@@ -1873,7 +1873,7 @@
         end
 
          #= Returns the set on a given index in the set array. =#
-        function setArrayGet(setArray::Array{<:Set}, index::ModelicaInteger) ::Set 
+        function setArrayGet(setArray::Array{<:Set}, index::ModelicaInteger) ::Set
               local set::Set
 
               set = setArray[index]
@@ -1882,7 +1882,7 @@
                   Set.SET(__)  => begin
                     set
                   end
-                  
+
                   Set.SET_POINTER(__)  => begin
                     setArrayGet(setArray, set.index)
                   end
@@ -1893,7 +1893,7 @@
 
          #= Dispatches to the correct equation generating function based on the type of
           the given set. =#
-        function equationsDispatch(sets::List{<:Set}, connected::ConnectionGraph.DaeEdges, broken::ConnectionGraph.DaeEdges) ::DAE.DAElist 
+        function equationsDispatch(sets::List{<:Set}, connected::ConnectionGraph.DaeEdges, broken::ConnectionGraph.DaeEdges) ::DAE.DAElist
               local DAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{ConnectorElement}
@@ -1907,7 +1907,7 @@
                     Set.SET_POINTER(__)  => begin
                       DAE
                     end
-                    
+
                     Set.SET(ty = ConnectorType.EQU(__))  => begin
                          #=  A set pointer left from generateSetList, ignore it.
                          =#
@@ -1919,22 +1919,22 @@
                         end
                       DAE
                     end
-                    
+
                     Set.SET(ty = ConnectorType.FLOW(__), elements = eql)  => begin
                       DAEUtil.joinDaes(generateFlowEquations(eql), DAE)
                     end
-                    
+
                     Set.SET(ty = ConnectorType.STREAM(__), elements = eql)  => begin
                       DAEUtil.joinDaes(generateStreamEquations(eql, flowThreshold), DAE)
                     end
-                    
+
                     Set.SET(ty = ConnectorType.NO_TYPE(__))  => begin
                          #=  Should never happen.
                          =#
                         Error.addMessage(Error.INTERNAL_ERROR, list("ConnectUtil.equationsDispatch failed on connection set with no type."))
                       fail()
                     end
-                    
+
                     _  => begin
                           Error.addMessage(Error.INTERNAL_ERROR, list("ConnectUtil.equationsDispatch failed because of unknown reason."))
                         fail()
@@ -1951,7 +1951,7 @@
            X, Y.A and Z.B, the equations generated will be X = Y.A and X = Z.B. The
            order of the equations depends on whether the compiler flag orderConnections
            is true or false. =#
-        function generateEquEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist 
+        function generateEquEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist
               local DAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{DAE.Element} = nil
@@ -1990,7 +1990,7 @@
            case we check if the cref of the first argument to the first connection
            stored in the element source is a prefix of the connector element cref. If
            it isn't, indicate that we should flip the generated equation. =#
-        function shouldFlipEquEquation(lhsCref::DAE.ComponentRef, lhsSource::DAE.ElementSource) ::Bool 
+        function shouldFlipEquEquation(lhsCref::DAE.ComponentRef, lhsSource::DAE.ElementSource) ::Bool
               local shouldFlip::Bool
 
               shouldFlip = begin
@@ -1999,7 +1999,7 @@
                   DAE.SOURCE(connectEquationOptLst = (lhs, _) <| _)  => begin
                     ! ComponentReference.crefPrefixOf(lhs, lhsCref)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2013,7 +2013,7 @@
            whether the components were inside or outside connectors. This function
            creates a sum expression of all components (some of which will be negated),
            and the returns the equation where this sum is equal to 0.0. =#
-        function generateFlowEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist 
+        function generateFlowEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist
               local DAE::DAE.DAElist
 
               local sum::DAE.Exp
@@ -2031,7 +2031,7 @@
 
          #= Creates an expression from a connector element, which is the element itself
            if it's an inside connector, or negated if it's outside. =#
-        function makeFlowExp(element::ConnectorElement) ::DAE.Exp 
+        function makeFlowExp(element::ConnectorElement) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = Expression.crefExp(element.name)
@@ -2041,7 +2041,7 @@
           exp
         end
 
-        function increaseConnectRefCount(lhsCref::DAE.ComponentRef, rhsCref::DAE.ComponentRef, sets::Sets) ::Sets 
+        function increaseConnectRefCount(lhsCref::DAE.ComponentRef, rhsCref::DAE.ComponentRef, sets::Sets) ::Sets
 
 
               local crefs::List{DAE.ComponentRef}
@@ -2055,7 +2055,7 @@
           sets
         end
 
-        function increaseConnectRefCount2(crefs::List{<:DAE.ComponentRef}, sets::SetTrie) ::SetTrie 
+        function increaseConnectRefCount2(crefs::List{<:DAE.ComponentRef}, sets::SetTrie) ::SetTrie
 
 
               for cr in crefs
@@ -2064,7 +2064,7 @@
           sets
         end
 
-        function increaseRefCount(amount::ModelicaInteger, node::SetTrieNode) ::SetTrieNode 
+        function increaseRefCount(amount::ModelicaInteger, node::SetTrieNode) ::SetTrieNode
 
 
               _ = begin
@@ -2073,7 +2073,7 @@
                       node.connectCount = node.connectCount + amount
                     ()
                   end
-                  
+
                   SetTrieNode.SET_TRIE_LEAF(__)  => begin
                       node.connectCount = node.connectCount + amount
                     ()
@@ -2084,7 +2084,7 @@
         end
 
          #= Generates the equations for a stream connection set. =#
-        function generateStreamEquations(elements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist 
+        function generateStreamEquations(elements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist
               local DAE::DAE.DAElist
 
               DAE = begin
@@ -2106,11 +2106,11 @@
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
                     DAE.emptyDae
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <| ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
                     DAE.emptyDae
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(name = cr1, face = Face.OUTSIDE(__), source = src1) <| ConnectorElement.CONNECTOR_ELEMENT(name = cr2, face = Face.OUTSIDE(__), source = src2) <|  nil()  => begin
                        #=  Both inside, do nothing!
                        =#
@@ -2128,7 +2128,7 @@
                       dae = DAE.DAE(list(DAE.EQUATION(cref1, e1, src), DAE.EQUATION(cref2, e2, src)))
                     dae
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(name = cr1, source = src1) <| ConnectorElement.CONNECTOR_ELEMENT(name = cr2, source = src2) <|  nil()  => begin
                        #=  One inside, one outside:
                        =#
@@ -2140,7 +2140,7 @@
                       dae = DAE.DAE(list(DAE.EQUATION(e1, e2, src)))
                     dae
                   end
-                  
+
                   _  => begin
                          #=  The general case with N inside connectors and M outside:
                          =#
@@ -2154,7 +2154,7 @@
         end
 
          #= Returns true if the connector element belongs to an outside connector. =#
-        function isOutsideElement(element::ConnectorElement) ::Bool 
+        function isOutsideElement(element::ConnectorElement) ::Bool
               local isOutside::Bool
 
               isOutside = begin
@@ -2162,7 +2162,7 @@
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.OUTSIDE(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2172,7 +2172,7 @@
         end
 
          #= Returns true if the given flow attribute of a connector is zero. =#
-        function isZeroFlowMinMax(streamCref::DAE.ComponentRef, element::ConnectorElement) ::Bool 
+        function isZeroFlowMinMax(streamCref::DAE.ComponentRef, element::ConnectorElement) ::Bool
               local isZero::Bool
 
               if compareCrefStreamSet(streamCref, element)
@@ -2186,7 +2186,7 @@
         end
 
          #= Returns true if the given flow attribute of a connector is zero. =#
-        function isZeroFlow(element::ConnectorElement, attr::String) ::Bool 
+        function isZeroFlow(element::ConnectorElement, attr::String) ::Bool
               local isZero::Bool
 
               local ty::DAE.Type
@@ -2207,7 +2207,7 @@
         end
 
          #= Generates an equation for an outside stream connector element. =#
-        function streamEquationGeneral(outsideElements::List{<:ConnectorElement}, insideElements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist 
+        function streamEquationGeneral(outsideElements::List{<:ConnectorElement}, insideElements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist
               local DAE::DAE.DAElist
 
               local outside::List{ConnectorElement}
@@ -2239,7 +2239,7 @@
 
           where eps = inFlowThreshold.
            =#
-        function streamSumEquationExp(outsideElements::List{<:ConnectorElement}, insideElements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function streamSumEquationExp(outsideElements::List{<:ConnectorElement}, insideElements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.Exp
               local sumExp::DAE.Exp
 
               local outside_sum1::DAE.Exp
@@ -2274,7 +2274,7 @@
 
          #= Creates a sum expression by applying the given function on the list of
           elements and summing up the resulting expressions. =#
-        function sumMap(elements::List{<:ConnectorElement}, func::FuncType, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function sumMap(elements::List{<:ConnectorElement}, func::FuncType, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = Expression.expAdd(func(e, flowThreshold) for e in listReverse(elements))
@@ -2282,7 +2282,7 @@
         end
 
          #= Returns the stream and flow component in a stream set element as expressions. =#
-        function streamFlowExp(element::ConnectorElement) ::Tuple{DAE.Exp, DAE.Exp} 
+        function streamFlowExp(element::ConnectorElement) ::Tuple{DAE.Exp, DAE.Exp}
               local flowExp::DAE.Exp
               local streamExp::DAE.Exp
 
@@ -2295,7 +2295,7 @@
         end
 
          #= Returns the flow component in a stream set element as an expression. =#
-        function flowExp(element::ConnectorElement) ::DAE.Exp 
+        function flowExp(element::ConnectorElement) ::DAE.Exp
               local flowExp::DAE.Exp
 
               local flow_cr::DAE.ComponentRef
@@ -2308,7 +2308,7 @@
          #= Helper function to streamSumEquationExp. Returns the expression
             max(flow_exp, eps) * inStream(stream_exp)
           given a stream set element. =#
-        function sumOutside1(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function sumOutside1(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local stream_exp::DAE.Exp
@@ -2324,7 +2324,7 @@
          #= Helper function to streamSumEquationExp. Returns the expression
             max(-flow_exp, eps) * stream_exp
           given a stream set element. =#
-        function sumInside1(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function sumInside1(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local stream_exp::DAE.Exp
@@ -2344,7 +2344,7 @@
          #= Helper function to streamSumEquationExp. Returns the expression
             max(flow_exp, eps)
           given a stream set element. =#
-        function sumOutside2(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function sumOutside2(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local flow_exp::DAE.Exp
@@ -2357,7 +2357,7 @@
          #= Helper function to streamSumEquationExp. Returns the expression
             max(-flow_exp, eps)
           given a stream set element. =#
-        function sumInside2(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function sumInside2(element::ConnectorElement, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local flow_exp::DAE.Exp
@@ -2371,13 +2371,13 @@
         end
 
          #= Test for face equality. =#
-        function faceEqual(face1::Face, face2::Face) ::Bool 
+        function faceEqual(face1::Face, face2::Face) ::Bool
               local sameFaces::Bool = valueConstructor(face1) == valueConstructor(face2)
           sameFaces
         end
 
          #= Creates an inStream call expression. =#
-        function makeInStreamCall(streamExp::DAE.Exp) ::DAE.Exp 
+        function makeInStreamCall(streamExp::DAE.Exp) ::DAE.Exp
               local inStreamCall::DAE.Exp
 
               local ty::DAE.Type
@@ -2388,7 +2388,7 @@
         end
 
          #= Generates a max(flow_exp, eps) call. =#
-        function makePositiveMaxCall(flowExp::DAE.Exp, flowThreshold::DAE.Exp) ::DAE.Exp 
+        function makePositiveMaxCall(flowExp::DAE.Exp, flowThreshold::DAE.Exp) ::DAE.Exp
               local positiveMaxCall::DAE.Exp
 
               local ty::DAE.Type
@@ -2412,7 +2412,7 @@
 
          #= Evaluates connection operators inStream, actualStream and cardinality in the
            given DAE. =#
-        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:Set}, DAE::DAE.DAElist) ::DAE.DAElist 
+        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:Set}, DAE::DAE.DAElist) ::DAE.DAElist
 
 
               local flow_threshold::ModelicaReal
@@ -2429,7 +2429,7 @@
         end
 
          #= Helper function to evaluateConnectionOperators. =#
-        function evaluateConnectionOperators2(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, hasCardinality::Bool, flowThreshold::ModelicaReal) ::Tuple{DAE.Exp, Sets} 
+        function evaluateConnectionOperators2(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, hasCardinality::Bool, flowThreshold::ModelicaReal) ::Tuple{DAE.Exp, Sets}
 
 
 
@@ -2447,7 +2447,7 @@
          #= Helper function to evaluateConnectionOperators2. Checks if the given
            expression is a call to inStream or actualStream, and if so calls the
            appropriate function in ConnectUtil to evaluate the call. =#
-        function evaluateConnectionOperatorsExp(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal, changed::Bool) ::Tuple{DAE.Exp, Bool} 
+        function evaluateConnectionOperatorsExp(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal, changed::Bool) ::Tuple{DAE.Exp, Bool}
 
 
 
@@ -2461,19 +2461,19 @@
                        =#
                     (e, true)
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("actualStream"), expLst = DAE.CREF(componentRef = cr) <|  nil())  => begin
                       e = evaluateActualStream(cr, sets, setArray, flowThreshold)
                        #= print(\"Evaluated actualStream(\" + ExpressionDump.dumpExpStr(DAE.CREF(cr, ty), 0) + \") ->\\n\" + ExpressionDump.dumpExpStr(e, 0) + \"\\n\");
                        =#
                     (e, true)
                   end
-                  
+
                   DAE.CALL(path = Absyn.IDENT("cardinality"), expLst = DAE.CREF(componentRef = cr) <|  nil())  => begin
                       e = evaluateCardinality(cr, sets)
                     (e, true)
                   end
-                  
+
                   _  => begin
                       (exp, changed)
                   end
@@ -2484,7 +2484,7 @@
 
          #= @author: adrpo
          does an array out of exp if needed =#
-        function mkArrayIfNeeded(ty::DAE.Type, exp::DAE.Exp) ::DAE.Exp 
+        function mkArrayIfNeeded(ty::DAE.Type, exp::DAE.Exp) ::DAE.Exp
 
 
               exp = Expression.arrayFill(Types.getDimensions(ty), exp)
@@ -2493,7 +2493,7 @@
 
          #= This function evaluates the inStream operator for a component reference,
            given the connection sets. =#
-        function evaluateInStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function evaluateInStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local e::ConnectorElement
@@ -2526,7 +2526,7 @@
 
          #= Helper function to evaluateInStream. Generates an expression for inStream
           given a connection set. =#
-        function generateInStreamExp(streamCref::DAE.ComponentRef, streams::List{<:ConnectorElement}, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function generateInStreamExp(streamCref::DAE.ComponentRef, streams::List{<:ConnectorElement}, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local reducedStreams::List{ConnectorElement}
@@ -2548,7 +2548,7 @@
                   ConnectorElement.CONNECTOR_ELEMENT(name = c, face = Face.INSIDE(__)) <|  nil()  => begin
                     Expression.crefExp(c)
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <| ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
                        #=  Two inside connected stream connectors:
                        =#
@@ -2560,7 +2560,7 @@
                       e = Expression.crefExp(c)
                     e
                   end
-                  
+
                   ConnectorElement.CONNECTOR_ELEMENT(face = f1) <| ConnectorElement.CONNECTOR_ELEMENT(face = f2) <|  nil() where (! faceEqual(f1, f2))  => begin
                        #=  One inside, one outside connected stream connector:
                        =#
@@ -2570,7 +2570,7 @@
                       e = evaluateInStream(c, sets, setArray, flowThreshold)
                     e
                   end
-                  
+
                   _  => begin
                          #=  The general case:
                          =#
@@ -2593,7 +2593,7 @@
 
          #= This function evaluates the actualStream operator for a component reference,
           given the connection sets. =#
-        function evaluateActualStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp 
+        function evaluateActualStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local flow_cr::DAE.ComponentRef
@@ -2633,7 +2633,7 @@
          #= Checks the min/max attributes of a flow variables type to try and determine
           the flow direction. If the flow is positive 1 is returned, if it is negative
           -1, otherwise 0 if the direction can't be decided. =#
-        function evaluateFlowDirection(ty::DAE.Type) ::ModelicaInteger 
+        function evaluateFlowDirection(ty::DAE.Type) ::ModelicaInteger
               local direction::ModelicaInteger = 0
 
               local attr::List{DAE.Var}
@@ -2653,7 +2653,7 @@
                   (NONE(), NONE())  => begin
                     0
                   end
-                  
+
                   (SOME(Values.REAL(min_val)), NONE())  => begin
                     if min_val >= 0
                           1
@@ -2661,7 +2661,7 @@
                           0
                         end
                   end
-                  
+
                   (NONE(), SOME(Values.REAL(max_val)))  => begin
                     if max_val <= 0
                           -1
@@ -2669,7 +2669,7 @@
                           0
                         end
                   end
-                  
+
                   (SOME(Values.REAL(min_val)), SOME(Values.REAL(max_val)))  => begin
                     if min_val >= 0 && max_val >= min_val
                           1
@@ -2679,7 +2679,7 @@
                           0
                         end
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -2698,7 +2698,7 @@
           direction
         end
 
-        function evaluateCardinality(cref::DAE.ComponentRef, sets::Sets) ::DAE.Exp 
+        function evaluateCardinality(cref::DAE.ComponentRef, sets::Sets) ::DAE.Exp
               local exp::DAE.Exp
 
               exp = DAE.ICONST(getConnectCount(cref, sets.sets))
@@ -2706,7 +2706,7 @@
         end
 
          #= run this only if we have cardinality =#
-        function simplifyDAEElements(hasCardinality::Bool, DAE::DAE.DAElist) ::DAE.DAElist 
+        function simplifyDAEElements(hasCardinality::Bool, DAE::DAE.DAElist) ::DAE.DAElist
 
 
               if hasCardinality
@@ -2715,7 +2715,7 @@
           DAE
         end
 
-        function simplifyDAEElement(element::DAE.Element) ::List{DAE.Element} 
+        function simplifyDAEElement(element::DAE.Element) ::List{DAE.Element}
               local elements::List{DAE.Element}
 
               elements = begin
@@ -2726,15 +2726,15 @@
                   DAE.IF_EQUATION(conds, branches, else_branch)  => begin
                     simplifyDAEIfEquation(conds, branches, else_branch)
                   end
-                  
+
                   DAE.INITIAL_IF_EQUATION(conds, branches, else_branch)  => begin
                     simplifyDAEIfEquation(conds, branches, else_branch)
                   end
-                  
+
                   DAE.ASSERT(condition = DAE.BCONST(true))  => begin
                     nil
                   end
-                  
+
                   _  => begin
                       list(element)
                   end
@@ -2743,7 +2743,7 @@
           elements
         end
 
-        function simplifyDAEIfEquation(conditions::List{<:DAE.Exp}, branches::List{<:List{<:DAE.Element}}, elseBranch::List{<:DAE.Element}) ::List{DAE.Element} 
+        function simplifyDAEIfEquation(conditions::List{<:DAE.Exp}, branches::List{<:List{<:DAE.Element}}, elseBranch::List{<:DAE.Element}) ::List{DAE.Element}
               local elements::List{DAE.Element}
 
               local cond_value::Bool
@@ -2768,7 +2768,7 @@
         end
 
          #= This function removes the given cref from a connection set. =#
-        function removeStreamSetElement(cref::DAE.ComponentRef, elements::List{<:ConnectorElement}) ::List{ConnectorElement} 
+        function removeStreamSetElement(cref::DAE.ComponentRef, elements::List{<:ConnectorElement}) ::List{ConnectorElement}
 
 
               elements = ListUtil.deleteMemberOnTrue(cref, elements, compareCrefStreamSet)
@@ -2777,7 +2777,7 @@
 
          #= Helper function to removeStreamSetElement. Checks if the cref in a stream set
           element matches the given cref. =#
-        function compareCrefStreamSet(cref::DAE.ComponentRef, element::ConnectorElement) ::Bool 
+        function compareCrefStreamSet(cref::DAE.ComponentRef, element::ConnectorElement) ::Bool
               local matches::Bool
 
               matches = ComponentReference.crefEqualNoStringCompare(cref, element.name)
@@ -2797,7 +2797,7 @@
           All other connector elements that are hierarchically inside M, but not in one of the outside connectors
           of M, is called an inside connector with respect to M. This is done **BEFORE** resolving outer elements
           to corresponding inner ones. =#
-        function componentFace(env::FCore.Graph, componentRef::DAE.ComponentRef) ::Face 
+        function componentFace(env::FCore.Graph, componentRef::DAE.ComponentRef) ::Face
               local face::Face
 
               face = begin
@@ -2808,14 +2808,14 @@
                   DAE.CREF_IDENT(__)  => begin
                     Face.OUTSIDE()
                   end
-                  
+
                   DAE.CREF_QUAL(ident = id)  => begin
                        #=  is a qualified cref and is a connector => OUTSIDE
                        =#
                       @match (_, _, DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)), _, _, _, _, _, _) = Lookup.lookupVar(FCore.emptyCache(), env, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                     Face.OUTSIDE()
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                     Face.INSIDE()
                   end
@@ -2840,7 +2840,7 @@
           All other connector elements that are hierarchically inside M, but not in one of the outside connectors
           of M, is called an inside connector with respect to M. This is done **BEFORE** resolving outer elements
           to corresponding inner ones. =#
-        function componentFaceType(inComponentRef::DAE.ComponentRef) ::Face 
+        function componentFaceType(inComponentRef::DAE.ComponentRef) ::Face
               local outFace::Face
 
               outFace = begin
@@ -2848,15 +2848,15 @@
                   DAE.CREF_IDENT(__)  => begin
                     Face.OUTSIDE()
                   end
-                  
+
                   DAE.CREF_QUAL(identType = DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)))  => begin
                     Face.OUTSIDE()
                   end
-                  
+
                   DAE.CREF_QUAL(identType = DAE.T_ARRAY(ty = DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _))))  => begin
                     Face.OUTSIDE()
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                     Face.INSIDE()
                   end
@@ -2875,7 +2875,7 @@
 
          #= Checks if a connector class is balanced or not, according to the rules in the
           Modelica 3.2 specification. =#
-        function checkConnectorBalance(vars::List{<:DAE.Var}, path::Absyn.Path, info::SourceInfo)  
+        function checkConnectorBalance(vars::List{<:DAE.Var}, path::Absyn.Path, info::SourceInfo)
               local potentials::ModelicaInteger
               local flows::ModelicaInteger
               local streams::ModelicaInteger
@@ -2892,7 +2892,7 @@
                =#
         end
 
-        function checkConnectorBalance2(potentialVars::ModelicaInteger, flowVars::ModelicaInteger, streamVars::ModelicaInteger, path::Absyn.Path, info::SourceInfo) ::Bool 
+        function checkConnectorBalance2(potentialVars::ModelicaInteger, flowVars::ModelicaInteger, streamVars::ModelicaInteger, path::Absyn.Path, info::SourceInfo) ::Bool
               local isBalanced::Bool = true
 
               local error_str::String
@@ -2902,7 +2902,7 @@
 
                #=  Don't check connector balance for language version 2.x and earlier.
                =#
-              if Config.languageStandardAtMost(Config.LanguageStandard.'2.x')
+              if Config.languageStandardAtMost(Config.LanguageStandard.S2_x)
                 return isBalanced
               end
                #=  Modelica 3.2 section 9.3.1:
@@ -2940,7 +2940,7 @@
 
          #= Given a list of connector variables, this function counts how many potential,
           flow and stream variables it contains. =#
-        function countConnectorVars(vars::List{<:DAE.Var}) ::Tuple{ModelicaInteger, ModelicaInteger, ModelicaInteger} 
+        function countConnectorVars(vars::List{<:DAE.Var}) ::Tuple{ModelicaInteger, ModelicaInteger, ModelicaInteger}
               local streamVars::ModelicaInteger = 0
               local flowVars::ModelicaInteger = 0
               local potentialVars::ModelicaInteger = 0
@@ -2984,21 +2984,21 @@
                           flowVars = flowVars + sizeOfType(var.ty)
                         ()
                       end
-                      
+
                       DAE.ATTR(connectorType = DAE.STREAM(__))  => begin
                            #=  A stream variable.
                            =#
                           streamVars = streamVars + sizeOfType(var.ty)
                         ()
                       end
-                      
+
                       DAE.ATTR(direction = Absyn.BIDIR(__), variability = SCode.VAR(__))  => begin
                            #=  A potential variable.
                            =#
                           potentialVars = potentialVars + sizeOfType(var.ty)
                         ()
                       end
-                      
+
                       _  => begin
                           ()
                       end
@@ -3010,7 +3010,7 @@
         end
 
          #= Calls sizeOfVariable on a list of variables, and adds up the results. =#
-        function sizeOfVariableList(vars::List{<:DAE.Var}) ::ModelicaInteger 
+        function sizeOfVariableList(vars::List{<:DAE.Var}) ::ModelicaInteger
               local size::ModelicaInteger = 0
 
               for var in vars
@@ -3021,7 +3021,7 @@
 
          #= Different types of variables have different size, for example arrays. This
            function checks the size of one variable. =#
-        function sizeOfType(ty::DAE.Type) ::ModelicaInteger 
+        function sizeOfType(ty::DAE.Type) ::ModelicaInteger
               local size::ModelicaInteger
 
               size = begin
@@ -3034,43 +3034,43 @@
                   DAE.T_INTEGER(__)  => begin
                     1
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     1
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     1
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     1
                   end
-                  
+
                   DAE.T_ENUMERATION(index = NONE())  => begin
                     1
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                     intMul(Expression.dimensionSize(dim) for dim in ty.dims) * sizeOfType(ty.ty)
                   end
-                  
+
                   DAE.T_COMPLEX(varLst = v, equalityConstraint = NONE())  => begin
                     sizeOfVariableList(v)
                   end
-                  
+
                   DAE.T_COMPLEX(equalityConstraint = SOME((_, n, _)))  => begin
                     n
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
                     0
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                     sizeOfType(t)
                   end
-                  
+
                   _  => begin
                          #=  The size of an array is its dimension multiplied with the size of its type.
                          =#
@@ -3099,7 +3099,7 @@
 
          #= Checks a short connector definition that has extended a basic type, i.e.
            connector C = Real;. =#
-        function checkShortConnectorDef(state::ClassInf.State, attributes::SCode.Attributes, info::SourceInfo) ::Bool 
+        function checkShortConnectorDef(state::ClassInf.State, attributes::SCode.Attributes, info::SourceInfo) ::Bool
               local isValid::Bool
 
               isValid = begin
@@ -3130,7 +3130,7 @@
                       end
                     checkConnectorBalance2(pv, fv, sv, state.path, info)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -3141,7 +3141,7 @@
           isValid
         end
 
-        function isReferenceInConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Bool 
+        function isReferenceInConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Bool
               local isThere::Bool = false
 
               for ce in connects
@@ -3153,7 +3153,7 @@
           isThere
         end
 
-        function removeReferenceFromConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Tuple{List{ConnectorElement}, Bool} 
+        function removeReferenceFromConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Tuple{List{ConnectorElement}, Bool}
               local wasRemoved::Bool
 
 
@@ -3164,7 +3164,7 @@
           (connects, wasRemoved)
         end
 
-        function removeReferenceFromConnects2(cref::DAE.ComponentRef, element::ConnectorElement) ::Bool 
+        function removeReferenceFromConnects2(cref::DAE.ComponentRef, element::ConnectorElement) ::Bool
               local matches::Bool
 
               matches = ComponentReference.crefPrefixOf(cref, element.name)
@@ -3172,7 +3172,7 @@
         end
 
          #= Prints a Sets to a String. =#
-        function printSetsStr(sets::Sets) ::String 
+        function printSetsStr(sets::Sets) ::String
               local string::String
 
               string = String(sets.setCount) + " sets:\\n"
@@ -3183,7 +3183,7 @@
         end
 
          #= Prints a SetTrie to a String. =#
-        function printSetTrieStr(trie::SetTrie, accumName::String) ::String 
+        function printSetTrieStr(trie::SetTrie, accumName::String) ::String
               local string::String
 
               string = begin
@@ -3197,11 +3197,11 @@
                       res = res + printOptFlowAssociation(trie.flowAssociation) + "\\n"
                     res
                   end
-                  
+
                   SetTrieNode.SET_TRIE_NODE(name = "")  => begin
                     stringAppendList(ListUtil.map1(trie.nodes, printSetTrieStr, accumName))
                   end
-                  
+
                   SetTrieNode.SET_TRIE_NODE(__)  => begin
                       name = accumName + "." + trie.name
                       res = stringAppendList(ListUtil.map1(trie.nodes, printSetTrieStr, name))
@@ -3213,7 +3213,7 @@
         end
 
          #= Prints an optional connector element to a String. =#
-        function printLeafElementStr(element::Option{<:ConnectorElement}) ::String 
+        function printLeafElementStr(element::Option{<:ConnectorElement}) ::String
               local string::String
 
               string = begin
@@ -3225,7 +3225,7 @@
                       res = res + printConnectorTypeStr(e.ty) + " [" + String(e.set) + "]"
                     res
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -3235,7 +3235,7 @@
         end
 
          #= Prints a connector element to a String. =#
-        function printElementStr(element::ConnectorElement) ::String 
+        function printElementStr(element::ConnectorElement) ::String
               local string::String
 
               string = ComponentReference.printComponentRefStr(element.name) + " "
@@ -3245,7 +3245,7 @@
         end
 
          #= Prints the Face to a String. =#
-        function printFaceStr(face::Face) ::String 
+        function printFaceStr(face::Face) ::String
               local string::String
 
               string = begin
@@ -3253,11 +3253,11 @@
                   Face.INSIDE(__)  => begin
                     "inside"
                   end
-                  
+
                   Face.OUTSIDE(__)  => begin
                     "outside"
                   end
-                  
+
                   Face.NO_FACE(__)  => begin
                     "unknown"
                   end
@@ -3267,7 +3267,7 @@
         end
 
          #= Prints the connector type to a String. =#
-        function printConnectorTypeStr(ty::ConnectorType) ::String 
+        function printConnectorTypeStr(ty::ConnectorType) ::String
               local string::String
 
               string = begin
@@ -3275,11 +3275,11 @@
                   ConnectorType.EQU(__)  => begin
                     "equ"
                   end
-                  
+
                   ConnectorType.FLOW(__)  => begin
                     "flow"
                   end
-                  
+
                   ConnectorType.STREAM(__)  => begin
                     "stream"
                   end
@@ -3289,7 +3289,7 @@
         end
 
          #= Print an optional flow association to a String. =#
-        function printOptFlowAssociation(cref::Option{<:DAE.ComponentRef}) ::String 
+        function printOptFlowAssociation(cref::Option{<:DAE.ComponentRef}) ::String
               local string::String
 
               string = begin
@@ -3298,7 +3298,7 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   SOME(cr)  => begin
                     " associated flow: " + ComponentReference.printComponentRefStr(cr)
                   end
@@ -3308,7 +3308,7 @@
         end
 
          #= Prints a list of set connection to a String. =#
-        function printSetConnections(connections::List{<:SetConnection}) ::String 
+        function printSetConnections(connections::List{<:SetConnection}) ::String
               local string::String
 
               string = stringAppendList(ListUtil.map(connections, printSetConnection))
@@ -3316,7 +3316,7 @@
         end
 
          #= Prints a set connection to a String. =#
-        function printSetConnection(connection::SetConnection) ::String 
+        function printSetConnection(connection::SetConnection) ::String
               local string::String
 
               local set1::ModelicaInteger
@@ -3328,7 +3328,7 @@
         end
 
          #= Prints a Set to a String. =#
-        function printSetStr(set::Set) ::String 
+        function printSetStr(set::Set) ::String
               local string::String
 
               string = begin
@@ -3336,7 +3336,7 @@
                   Set.SET(__)  => begin
                     stringDelimitList(ListUtil.map(set.elements, printElementStr), ", ")
                   end
-                  
+
                   Set.SET_POINTER(__)  => begin
                     "pointer to set " + intString(set.index)
                   end
@@ -3347,7 +3347,7 @@
 
          #= @author: adrpo
          return all crefs present in EQU sets =#
-        function getAllEquCrefs(sets::List{<:Set}) ::List{DAE.ComponentRef} 
+        function getAllEquCrefs(sets::List{<:Set}) ::List{DAE.ComponentRef}
               local crefs::List{DAE.ComponentRef} = nil
 
               for set in sets
@@ -3359,7 +3359,7 @@
                         end
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -3381,7 +3381,7 @@
          7. substract (2) from (1)
          8. substract (6) from (7)
          9. remove (8) from the DAE (5) =#
-        function removeUnusedExpandableVariablesAndConnections(sets::List{<:Set}, DAE::DAE.DAElist) ::Tuple{List{Set}, DAE.DAElist} 
+        function removeUnusedExpandableVariablesAndConnections(sets::List{<:Set}, DAE::DAE.DAElist) ::Tuple{List{Set}, DAE.DAElist}
 
 
 
@@ -3442,7 +3442,7 @@
           (sets, DAE)
         end
 
-        function isEquType(ty::ConnectorType) ::Bool 
+        function isEquType(ty::ConnectorType) ::Bool
               local isEqu::Bool
 
               isEqu = begin
@@ -3450,7 +3450,7 @@
                   ConnectorType.EQU(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end

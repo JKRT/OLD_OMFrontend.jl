@@ -1,4 +1,4 @@
-  module HashSet 
+  module HashSet
 
 
     using MetaModelica
@@ -54,24 +54,18 @@
 
         import ComponentReference
 
-        Key = DAE.ComponentRef 
+        Key = DAE.ComponentRef
 
-        HashSetCrefFunctionsType = Tuple 
+        HashSetCrefFunctionsType = Tuple
 
-        HashSet = Tuple 
+        const HashSetType = Tuple
 
-
-
-
-
-
-
-         #= 
+         #=
           Returns an empty HashSet.
           Using the default bucketsize..
          =#
-        function emptyHashSet() ::HashSet 
-              local hashSet::HashSet
+        function emptyHashSet() ::HashSet
+              local hashSet::HashSetType
 
               hashSet = emptyHashSetSized(BaseHashSet.defaultBucketSize)
           hashSet
@@ -79,8 +73,8 @@
 
          #= Returns an empty HashSet.
          Using the bucketsize size =#
-        function emptyHashSetSized(size::ModelicaInteger) ::HashSet 
-              local hashSet::HashSet
+        function emptyHashSetSized(size::ModelicaInteger) ::HashSet
+              local hashSet::HashSetType
 
               hashSet = BaseHashSet.emptyHashSetWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr))
           hashSet

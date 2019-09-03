@@ -1,4 +1,4 @@
-  module Static 
+  module Static
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Slot 
+    @UniontypeDecl Slot
     PartialElabExpFunc = Function
 
     extraFunc = Function
@@ -14,7 +14,7 @@
     HandlerFunc = Function
 
     HandlerFunc = Function
-    @UniontypeDecl ForceFunctionInst 
+    @UniontypeDecl ForceFunctionInst
 
          #= /*
          * This file is part of OpenModelica.
@@ -113,7 +113,7 @@
         import VarTransform
 
          #= Expression elaboration of Absyn.Exp list, i.e. lists of expressions. =#
-        function elabExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumeration :) =#) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}} 
+        function elabExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumeration :) =#) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -143,7 +143,7 @@
                         prop = DAE.PROP(last_ty, DAE.C_CONST())
                       ()
                     end
-                    
+
                     _  => begin
                           (outCache, exp, prop) = elabExpInExpression(outCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
                           last_ty = Types.getPropType(prop)
@@ -159,7 +159,7 @@
           (outCache, outExpl, outProperties)
         end
 
-        function elabExpList_enum(inExp::Absyn.Exp, inLastType::DAE.Type) ::ModelicaInteger 
+        function elabExpList_enum(inExp::Absyn.Exp, inLastType::DAE.Type) ::ModelicaInteger
               local outIndex::ModelicaInteger
 
               outIndex = begin
@@ -176,7 +176,7 @@
                       @match true = AbsynUtil.pathEqual(path1, path2)
                     ListUtil.position(name, names)
                   end
-                  
+
                   _  => begin
                       -1
                   end
@@ -187,7 +187,7 @@
 
          #= Expression elaboration of lists of lists of expressions.
           Used in for instance matrices, etc. =#
-        function elabExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:List{<:Absyn.Exp}}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumerations :) =#) ::Tuple{FCore.Cache, List{List{DAE.Exp}}, List{List{DAE.Properties}}} 
+        function elabExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:List{<:Absyn.Exp}}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumerations :) =#) ::Tuple{FCore.Cache, List{List{DAE.Exp}}, List{List{DAE.Properties}}}
               local outProperties::List{List{DAE.Properties}} = nil
               local outExpl::List{List{DAE.Exp}} = nil
               local outCache::FCore.Cache = inCache
@@ -207,9 +207,9 @@
           (outCache, outExpl, outProperties)
         end
 
-         #= 
+         #=
           elabExp, but for Option<Absyn.Exp>,DAE.Type => Option<DAE.Exp> =#
-        function elabExpOptAndMatchType(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Option{<:Absyn.Exp}, inDefaultType::DAE.Type, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}, DAE.Properties} 
+        function elabExpOptAndMatchType(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Option{<:Absyn.Exp}, inDefaultType::DAE.Type, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::Option{DAE.Exp}
               local outCache::FCore.Cache = inCache
@@ -230,14 +230,14 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         function: elabExp
           Static analysis of expressions means finding out the properties of
           the expression.  These properties are described by the
           DAE.Properties type, and include the type and the variability of the
           expression.  This function performs analysis, and returns an
           DAE.Exp and the properties. =#
-        function elabExp()  
+        function elabExp()
               local e::Absyn.Exp
               local num_errmsgs::ModelicaInteger
               local exp::DAE.Exp
@@ -264,79 +264,79 @@
                         Error.addSourceMessage(Error.END_ILLEGAL_USE_ERROR, nil, inInfo)
                       fail()
                     end
-                    
+
                     Absyn.CREF(__)  => begin
                       elabExp_Cref
                     end
-                    
+
                     Absyn.BINARY(__)  => begin
                       elabExp_Binary
                     end
-                    
+
                     Absyn.UNARY(__)  => begin
                       elabExp_Unary
                     end
-                    
+
                     Absyn.LBINARY(__)  => begin
                       elabExp_Binary
                     end
-                    
+
                     Absyn.LUNARY(__)  => begin
                       elabExp_LUnary
                     end
-                    
+
                     Absyn.RELATION(__)  => begin
                       elabExp_Binary
                     end
-                    
+
                     Absyn.IFEXP(__)  => begin
                       elabExp_If
                     end
-                    
+
                     Absyn.CALL(__)  => begin
                       elabExp_Call
                     end
-                    
+
                     Absyn.PARTEVALFUNCTION(__)  => begin
                       elabExp_PartEvalFunction
                     end
-                    
+
                     Absyn.TUPLE(__)  => begin
                       elabExp_Tuple
                     end
-                    
+
                     Absyn.RANGE(__)  => begin
                       elabExp_Range
                     end
-                    
+
                     Absyn.ARRAY(__)  => begin
                       elabExp_Array
                     end
-                    
+
                     Absyn.MATRIX(__)  => begin
                       elabExp_Matrix
                     end
-                    
+
                     Absyn.CODE(__)  => begin
                       elabExp_Code
                     end
-                    
+
                     Absyn.CONS(__)  => begin
                       elabExp_Cons
                     end
-                    
+
                     Absyn.LIST(__)  => begin
                       elabExp_List
                     end
-                    
+
                     Absyn.MATCHEXP(__)  => begin
                       Patternm.elabMatchExpression
                     end
-                    
+
                     Absyn.DOT(__)  => begin
                       elabExp_Dot
                     end
-                    
+
                     _  => begin
                         elabExp_BuiltinType
                     end
@@ -352,21 +352,21 @@
 
 
 
-        function elabExp_BuiltinType()  
+        function elabExp_BuiltinType()
               (outExp, outProperties) = begin
                 @match inExp begin
                   Absyn.INTEGER(__)  => begin
                     (DAE.ICONST(inExp.value), DAE.PROP(DAE.T_INTEGER_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   Absyn.REAL(__)  => begin
                     (DAE.RCONST(System.stringReal(inExp.value)), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   Absyn.STRING(__)  => begin
                     (DAE.SCONST(System.unescapedString(inExp.value)), DAE.PROP(DAE.T_STRING_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   Absyn.BOOL(__)  => begin
                     (DAE.BCONST(inExp.value), DAE.PROP(DAE.T_BOOL_DEFAULT, DAE.C_CONST()))
                   end
@@ -380,7 +380,7 @@
                =#
         end
 
-        function elabExp_Cref()  
+        function elabExp_Cref()
               local cr::Absyn.ComponentRef
               local ty::DAE.Type
               local c::DAE.Const
@@ -399,7 +399,7 @@
               end
         end
 
-        function elabExp_Binary()  
+        function elabExp_Binary()
               local e1::Absyn.Exp
               local e2::Absyn.Exp
               local op::Absyn.Operator
@@ -413,11 +413,11 @@
                   Absyn.BINARY(exp1 = e1, op = op, exp2 = e2)  => begin
                     ()
                   end
-                  
+
                   Absyn.LBINARY(exp1 = e1, op = op, exp2 = e2)  => begin
                     ()
                   end
-                  
+
                   Absyn.RELATION(exp1 = e1, op = op, exp2 = e2)  => begin
                     ()
                   end
@@ -428,7 +428,7 @@
               (outCache, outExp, outProperties) = OperatorOverloading.binary(outCache, inEnv, op, prop1, exp1, prop2, exp2, inExp, e1, e2, inImplicit, inPrefix, inInfo)
         end
 
-        function elabExp_Unary()  
+        function elabExp_Unary()
               local e::Absyn.Exp
               local op::Absyn.Operator
               local ty::DAE.Type
@@ -441,7 +441,7 @@
               end
         end
 
-        function elabExp_LUnary()  
+        function elabExp_LUnary()
               local e::Absyn.Exp
               local op::Absyn.Operator
 
@@ -454,7 +454,7 @@
            the condition is parameter or constant; it is evaluated and the correct branch is selected.
            This is a dirty hack to make MSL CombiTable models work!
            Note: Because of this, the function has to rollback or delete an ErrorExt checkpoint. =#
-        function elabExp_If()  
+        function elabExp_If()
               local cond_e::Absyn.Exp
               local true_e::Absyn.Exp
               local false_e::Absyn.Exp
@@ -479,7 +479,7 @@
                       ErrorExt.delCheckpoint("Static.elabExp:IFEXP")
                     ()
                   end
-                  
+
                   ()  => begin
                       ErrorExt.setCheckpoint("Static.elabExp:IFEXP:HACK") #= Extra rollback point so we get the regular error message only once if the hack fails =#
                       @match true = Types.isParameterOrConstant(Types.propAllConst(cond_prop))
@@ -493,7 +493,7 @@
                       ErrorExt.rollBack("Static.elabExp:IFEXP")
                     ()
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("Static.elabExp:IFEXP:HACK")
                         ErrorExt.delCheckpoint("Static.elabExp:IFEXP")
@@ -503,7 +503,7 @@
               end
         end
 
-        function elabExp_Call()  
+        function elabExp_Call()
               local func_name::Absyn.ComponentRef
               local args::Absyn.FunctionArgs
               local arg::Absyn.Exp
@@ -517,7 +517,7 @@
                       outExp = ExpressionSimplify.simplify1(outExp)
                     ()
                   end
-                  
+
                   Absyn.FOR_ITER_FARG(__)  => begin
                       (outCache, outExp, outProperties) = elabCallReduction(inCache, inEnv, func_name, args.exp, args.iterType, args.iterators, inImplicit, inDoVect, inPrefix, inInfo)
                     ()
@@ -526,7 +526,7 @@
               end
         end
 
-        function elabExp_Dot()  
+        function elabExp_Dot()
               (outExp, outProperties) = begin
                   local s::String
                   local ty::DAE.Type
@@ -537,7 +537,7 @@
                           Absyn.CREF(Absyn.CREF_IDENT(name = s))  => begin
                             s
                           end
-                          
+
                           _  => begin
                                 Error.addSourceMessage(Error.COMPILER_ERROR, list("Dot operator is only allowed when indexing using a single simple name, got: " + Dump.printExpStr(inExp.index)), inInfo)
                               fail()
@@ -560,7 +560,7 @@
                               outProperties = DAE.PROP(listGet(ty.types, i), Types.propAllConst(outProperties))
                             ()
                           end
-                          
+
                           _  => begin
                                 Error.addSourceMessage(Error.COMPILER_ERROR, list("Dot operator is only allowed when the expression returns a named tuple. Got expression: " + ExpressionDump.printExpStr(outExp) + " with type " + Types.unparseType(ty)), inInfo)
                               fail()
@@ -574,7 +574,7 @@
         end
 
          #= turns an Absyn.PARTEVALFUNCTION into an DAE.PARTEVALFUNCTION =#
-        function elabExp_PartEvalFunction()  
+        function elabExp_PartEvalFunction()
               local cref::Absyn.ComponentRef
               local pos_args::List{Absyn.Exp}
               local named_args::List{Absyn.NamedArg}
@@ -609,11 +609,11 @@
               end
         end
 
-        function elabExp_Tuple()  
+        function elabExp_Tuple()
               (outCache, outExp, outProperties) = elabExp_Tuple_LHS_RHS(inCache, inEnv, inExp, inImplicit, inDoVect, inPrefix, inInfo)
         end
 
-        function elabExp_Tuple_LHS_RHS(isLhs::Bool = false)  
+        function elabExp_Tuple_LHS_RHS(isLhs::Bool = false)
               local el::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -627,14 +627,14 @@
         end
 
          #= Special check for tuples, which only occur on the LHS =#
-        function elabExpLHS()  
+        function elabExpLHS()
               (outCache, outExp, outProperties) = begin
                 @match inExp begin
                   Absyn.TUPLE(__)  => begin
                       (outCache, outExp, outProperties) = elabExp_Tuple_LHS_RHS(inCache, inEnv, inExp, inImplicit, inDoVect, inPrefix, inInfo, isLhs = true)
                     (outCache, outExp, outProperties)
                   end
-                  
+
                   _  => begin
                         (outCache, outExp, outProperties) = elabExp(inCache, inEnv, inExp, inImplicit, inDoVect, inPrefix, inInfo)
                       (outCache, outExp, outProperties)
@@ -644,7 +644,7 @@
         end
 
          #= Elaborates a range expression on the form start:stop or start:step:stop. =#
-        function elabExp_Range()  
+        function elabExp_Range()
               local start::Absyn.Exp
               local step::Absyn.Exp
               local stop::Absyn.Exp
@@ -691,7 +691,7 @@
               outProperties = DAE.PROP(ty, c)
         end
 
-        function elabExp_Array()  
+        function elabExp_Array()
               local es::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -705,7 +705,7 @@
                   Absyn.ARRAY( nil()) where (Config.acceptMetaModelicaGrammar())  => begin
                     (DAE.LIST(nil), DAE.PROP(DAE.T_METALIST_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   Absyn.ARRAY(arrayExp = es)  => begin
                        #=  Part of the MetaModelica extension. This eliminates elabArray failed
                        =#
@@ -723,7 +723,7 @@
                       exp = elabMatrixToMatrixExp(exp)
                     (exp, DAE.PROP(arr_ty, c))
                   end
-                  
+
                   Absyn.ARRAY(arrayExp = es) where (Config.acceptMetaModelicaGrammar())  => begin
                        #=  Part of the MetaModelica extension. KS
                        =#
@@ -734,7 +734,7 @@
               end
         end
 
-        function elabExp_Matrix()  
+        function elabExp_Matrix()
               local ess::List{List{Absyn.Exp}}
               local dess::List{List{DAE.Exp}}
               local dess2::List{List{DAE.Exp}}
@@ -775,7 +775,7 @@
         end
 
          #= Casts an expression and property to Real if it's current type is Integer. =#
-        function elabExp_Matrix_realCast(inExp::DAE.Exp, inProperties::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties} 
+        function elabExp_Matrix_realCast(inExp::DAE.Exp, inProperties::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -794,7 +794,7 @@
           (outExp, outProperties)
         end
 
-        function elabExp_Code()  
+        function elabExp_Code()
               local ty::DAE.Type
               local ty2::DAE.Type
               local cn::Absyn.CodeNode
@@ -806,7 +806,7 @@
               outProperties = DAE.PROP(ty, DAE.C_CONST())
         end
 
-        function elabExp_Cons()  
+        function elabExp_Cons()
               local e1::Absyn.Exp
               local e2::Absyn.Exp
               local exp1::DAE.Exp
@@ -850,7 +850,7 @@
                =#
         end
 
-        function elabExp_List()  
+        function elabExp_List()
               local es::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -880,7 +880,7 @@
         end
 
          #= Like elabExp but casts PROP_TUPLE to a PROP =#
-        function elabExpInExpression(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabExpInExpression(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -890,7 +890,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabExpInExpression2(inExp::DAE.Exp, inProperties::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties} 
+        function elabExpInExpression2(inExp::DAE.Exp, inProperties::DAE.Properties) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -898,10 +898,10 @@
                   local ty::DAE.Type
                   local c::DAE.Const
                 @match (inExp, inProperties) begin
-                  (_, DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(types = ty <| _), tupleConst = DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(const = c) <| _)))  => begin
+                  (_, DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(types = ty <| _), tupleConst = DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(constType = c) <| _)))  => begin
                     (DAE.TSUB(inExp, 1, ty), DAE.PROP(ty, c))
                   end
-                  
+
                   _  => begin
                       (inExp, inProperties)
                   end
@@ -910,7 +910,7 @@
           (outExp, outProperties)
         end
 
-        function checkAssignmentToInput(inExp::Absyn.Exp, inAttributes::DAE.Attributes, inEnv::FCore.Graph, inAllowTopLevelInputs::Bool, inInfo::SourceInfo)  
+        function checkAssignmentToInput(inExp::Absyn.Exp, inAttributes::DAE.Attributes, inEnv::FCore.Graph, inAllowTopLevelInputs::Bool, inInfo::SourceInfo)
                #=  If we don't allow top level inputs and we're in a function scope and not
                =#
                #=  using parmodelica, check for assignment to input.
@@ -920,7 +920,7 @@
               end
         end
 
-        function checkAssignmentToInput2(inExp::Absyn.Exp, inAttributes::DAE.Attributes, inInfo::SourceInfo)  
+        function checkAssignmentToInput2(inExp::Absyn.Exp, inAttributes::DAE.Attributes, inInfo::SourceInfo)
               _ = begin
                   local cr::Absyn.ComponentRef
                   local cr_str::String
@@ -930,7 +930,7 @@
                       Error.addSourceMessage(Error.ASSIGN_READONLY_ERROR, list("input", cr_str), inInfo)
                     fail()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -938,14 +938,14 @@
               end
         end
 
-        function checkAssignmentToInputs(inExpCrefs::List{<:Absyn.Exp}, inAttributes::List{<:DAE.Attributes}, inEnv::FCore.Graph, inInfo::SourceInfo)  
+        function checkAssignmentToInputs(inExpCrefs::List{<:Absyn.Exp}, inAttributes::List{<:DAE.Attributes}, inEnv::FCore.Graph, inInfo::SourceInfo)
               if FGraph.inFunctionScope(inEnv)
                 ListUtil.threadMap1_0(inExpCrefs, inAttributes, checkAssignmentToInput2, inInfo)
               end
         end
 
          #= elaborates a list of expressions that are only component references. =#
-        function elabExpCrefNoEvalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}, List{DAE.Attributes}} 
+        function elabExpCrefNoEvalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}, List{DAE.Attributes}}
               local outAttributes::List{DAE.Attributes} = nil
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
@@ -998,7 +998,7 @@
          #= Function that elaborates the MetaModelica list type,
         for instance list<Integer>.
         This is used by Inst.mo when handling a var := {...} statement =#
-        function elabListExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpList::List{<:Absyn.Exp}, inProp::DAE.Properties, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabListExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpList::List{<:Absyn.Exp}, inProp::DAE.Properties, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -1013,7 +1013,7 @@
                    nil()  => begin
                     (inCache, DAE.LIST(nil), inProp)
                   end
-                  
+
                   _  => begin
                       @match DAE.PROP(DAE.T_METALIST(), c) = inProp
                       (outCache, expl, props) = elabExpList(inCache, inEnv, inExpList, inImplicit, inDoVect, inPrefix, inInfo)
@@ -1022,7 +1022,7 @@
                       outProperties = DAE.PROP(DAE.T_METALIST(ty), c)
                     (outCache, DAE.LIST(expl), outProperties)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Static.elabListExp failed, non-matching args in list constructor?")
@@ -1045,7 +1045,7 @@
              (var1,_,MYREC(...)) = func(...);
             fail();
          then 1; =#
-        function fromEquationsToAlgAssignments(cp::Absyn.ClassPart) ::List{Absyn.AlgorithmItem} 
+        function fromEquationsToAlgAssignments(cp::Absyn.ClassPart) ::List{Absyn.AlgorithmItem}
               local algsOut::List{Absyn.AlgorithmItem}
 
               algsOut = begin
@@ -1056,11 +1056,11 @@
                   Absyn.ALGORITHMS(alg)  => begin
                     alg
                   end
-                  
+
                   Absyn.EQUATIONS(rest)  => begin
                     fromEquationsToAlgAssignmentsWork(rest)
                   end
-                  
+
                   _  => begin
                         str = Dump.unparseClassPart(cp)
                         Error.addInternalError("Static.fromEquationsToAlgAssignments: Unknown classPart in match expression:\\n" + str, sourceInfo())
@@ -1081,7 +1081,7 @@
                  fail();
                then
                  1; =#
-        function fromEquationsToAlgAssignmentsWork(eqsIn::List{<:Absyn.EquationItem}) ::List{Absyn.AlgorithmItem} 
+        function fromEquationsToAlgAssignmentsWork(eqsIn::List{<:Absyn.EquationItem}) ::List{Absyn.AlgorithmItem}
               local algsOut::List{Absyn.AlgorithmItem} = nil
 
               for ei in eqsIn
@@ -1096,7 +1096,7 @@
                         algsOut = listAppend(algs, algsOut)
                       ()
                     end
-                    
+
                     Absyn.EQUATIONITEMCOMMENT(__)  => begin
                       ()
                     end
@@ -1108,7 +1108,7 @@
         end
 
          #= Converts equations to algorithm assignments. =#
-        function fromEquationBranchesToAlgBranches(eqsIn::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::List{Tuple{Absyn.Exp, List{Absyn.AlgorithmItem}}} 
+        function fromEquationBranchesToAlgBranches(eqsIn::List{<:Tuple{<:Absyn.Exp, List{<:Absyn.EquationItem}}}) ::List{Tuple{Absyn.Exp, List{Absyn.AlgorithmItem}}}
               local algsOut::List{Tuple{Absyn.Exp, List{Absyn.AlgorithmItem}}} = nil
 
               local e::Absyn.Exp
@@ -1125,7 +1125,7 @@
         end
 
          #= function: fromEquationToAlgAssignment =#
-        function fromEquationToAlgAssignment(eq::Absyn.Equation, comment::Option{<:Absyn.Comment}, info::SourceInfo) ::List{Absyn.AlgorithmItem} 
+        function fromEquationToAlgAssignment(eq::Absyn.Equation, comment::Option{<:Absyn.Comment}, info::SourceInfo) ::List{Absyn.AlgorithmItem}
               local algStatement::List{Absyn.AlgorithmItem}
 
               algStatement = begin
@@ -1156,47 +1156,47 @@
                       @match true = strLeft == strRight
                     nil
                   end
-                  
+
                   Absyn.EQ_EQUALS(left, Absyn.BOOL(true))  => begin
                       @shouldFail @match Absyn.CREF(_) = left
                       algItem1 = Absyn.ALGORITHMITEM(Absyn.ALG_NORETCALL(Absyn.CREF_IDENT("fail", nil), Absyn.FUNCTIONARGS(nil, nil)), comment, info)
                       algItem2 = Absyn.ALGORITHMITEM(Absyn.ALG_IF(Absyn.LUNARY(Absyn.NOT(), left), list(algItem1), nil, nil), comment, info)
                     list(algItem2)
                   end
-                  
+
                   Absyn.EQ_EQUALS(left, Absyn.BOOL(false))  => begin
                       @shouldFail @match Absyn.CREF(_) = left
                       algItem1 = Absyn.ALGORITHMITEM(Absyn.ALG_NORETCALL(Absyn.CREF_IDENT("fail", nil), Absyn.FUNCTIONARGS(nil, nil)), comment, info)
                       algItem2 = Absyn.ALGORITHMITEM(Absyn.ALG_IF(left, list(algItem1), nil, nil), comment, info)
                     list(algItem2)
                   end
-                  
+
                   Absyn.EQ_PDE(__)  => begin
                       fail()
                     nil
                   end
-                  
+
                   Absyn.EQ_NORETCALL(Absyn.CREF_IDENT("fail", _), _)  => begin
                       algItem = Absyn.ALGORITHMITEM(Absyn.ALG_NORETCALL(Absyn.CREF_IDENT("fail", nil), Absyn.FUNCTIONARGS(nil, nil)), comment, info)
                     list(algItem)
                   end
-                  
+
                   Absyn.EQ_NORETCALL(cref, fargs)  => begin
                       algItem = Absyn.ALGORITHMITEM(Absyn.ALG_NORETCALL(cref, fargs), comment, info)
                     list(algItem)
                   end
-                  
+
                   Absyn.EQ_EQUALS(left, right)  => begin
                       algItem = Absyn.ALGORITHMITEM(Absyn.ALG_ASSIGN(left, right), comment, info)
                     list(algItem)
                   end
-                  
+
                   Absyn.EQ_FAILURE(Absyn.EQUATIONITEM(eq2, comment2, info2))  => begin
                       algs = fromEquationToAlgAssignment(eq2, comment2, info2)
                       res = Absyn.ALGORITHMITEM(Absyn.ALG_FAILURE(algs), comment, info)
                     list(res)
                   end
-                  
+
                   Absyn.EQ_IF(ifExp = e, equationTrueItems = eqTrueItems, elseIfBranches = eqBranches, equationElseItems = eqElseItems)  => begin
                       algTrueItems = fromEquationsToAlgAssignmentsWork(eqTrueItems)
                       algElseItems = fromEquationsToAlgAssignmentsWork(eqElseItems)
@@ -1204,7 +1204,7 @@
                       res = Absyn.ALGORITHMITEM(Absyn.ALG_IF(e, algTrueItems, algBranches, algElseItems), comment, info)
                     list(res)
                   end
-                  
+
                   _  => begin
                         str = Dump.equationName(eq)
                         Error.addSourceMessage(Error.META_MATCH_EQUATION_FORBIDDEN, list(str), info)
@@ -1224,7 +1224,7 @@
         end
 
          #= Convert an 2-dimensional array expression to a matrix expression. =#
-        function elabMatrixToMatrixExp(inExp::DAE.Exp) ::DAE.Exp 
+        function elabMatrixToMatrixExp(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -1241,7 +1241,7 @@
                       @match true = Expression.typeBuiltin(Expression.unliftArray(Expression.unliftArray(a)))
                     DAE.MATRIX(a, d1, mexpl)
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -1257,7 +1257,7 @@
           constructor as.
           max(2, ndims(A), ndims(B), ndims(C),..) for matrix constructor arguments
           A, B, C, ... =#
-        function matrixConstrMaxDim(inTypes::List{<:DAE.Type}) ::ModelicaInteger 
+        function matrixConstrMaxDim(inTypes::List{<:DAE.Type}) ::ModelicaInteger
               local outMaxDim::ModelicaInteger = 2
 
               for ty in inTypes
@@ -1268,7 +1268,7 @@
 
          #= This function elaborates reduction expressions that look like function
           calls. For example an array constructor. =#
-        function elabCallReduction(inCache::FCore.Cache, inEnv::FCore.Graph, inReductionFn::Absyn.ComponentRef, inReductionExp::Absyn.Exp, inIterType::Absyn.ReductionIterType, inIterators::Absyn.ForIterators, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabCallReduction(inCache::FCore.Cache, inEnv::FCore.Graph, inReductionFn::Absyn.ComponentRef, inReductionExp::Absyn.Exp, inIterType::Absyn.ReductionIterType, inIterators::Absyn.ForIterators, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -1302,7 +1302,7 @@
                     Absyn.CREF_IDENT("$array",  nil())  => begin
                       Absyn.IDENT("array")
                     end
-                    
+
                     _  => begin
                         AbsynUtil.crefToPath(inReductionFn)
                     end
@@ -1335,7 +1335,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function fixDimsIterType(iterType::Absyn.ReductionIterType, dims::List{<:DAE.Dimension}) ::List{DAE.Dimension} 
+        function fixDimsIterType(iterType::Absyn.ReductionIterType, dims::List{<:DAE.Dimension}) ::List{DAE.Dimension}
               local outDims::List{DAE.Dimension}
 
               outDims = begin
@@ -1343,7 +1343,7 @@
                   Absyn.COMBINE(__)  => begin
                     dims
                   end
-                  
+
                   _  => begin
                       list(listHead(dims))
                   end
@@ -1356,7 +1356,7 @@
           outDims
         end
 
-        function elabCallReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::Absyn.ForIterators, inReductionExp::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List{DAE.ReductionIterator}, List{DAE.Dimension}, DAE.Const, Bool} 
+        function elabCallReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::Absyn.ForIterators, inReductionExp::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List{DAE.ReductionIterator}, List{DAE.Dimension}, DAE.Const, Bool}
               local outHasGuard::Bool = false
               local outConst::DAE.Const = DAE.C_CONST()
               local outDims::List{DAE.Dimension} = nil
@@ -1431,7 +1431,7 @@
            based on how an iterator is used. It does this by analysing the reduction
            expression to find out where the iterator is used as a subscript, and uses
            the subscripted components' dimensions to determine the size of the range. =#
-        function deduceIterationRange(inIterator::String, inCrefs::List{<:AbsynUtil.IteratorIndexedCref}, inEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Absyn.Info) ::Tuple{DAE.Exp, DAE.Properties, FCore.Cache} 
+        function deduceIterationRange(inIterator::String, inCrefs::List{<:AbsynUtil.IteratorIndexedCref}, inEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Absyn.Info) ::Tuple{DAE.Exp, DAE.Properties, FCore.Cache}
               local outCache::FCore.Cache = inCache
               local outProperties::DAE.Properties
               local outRange::DAE.Exp
@@ -1510,7 +1510,7 @@
         end
 
          #= Checks whether two cref-index pairs are equal. =#
-        function iteratorIndexedCrefsEqual(inCref1::Tuple{<:Absyn.ComponentRef, ModelicaInteger}, inCref2::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Bool 
+        function iteratorIndexedCrefsEqual(inCref1::Tuple{<:Absyn.ComponentRef, ModelicaInteger}, inCref2::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Bool
               local outEqual::Bool
 
               local cr1::Absyn.ComponentRef
@@ -1526,7 +1526,7 @@
 
          #= Traversal function used by deduceReductionIterationRange. Used to find crefs
            which are subscripted by a given iterator. =#
-        function deduceReductionIterationRange_traverser(inExp::Absyn.Exp, inCrefs::List{<:Tuple{<:Absyn.ComponentRef, ModelicaInteger}}, inIterator::String) ::Tuple{Absyn.Exp, List{Tuple{Absyn.ComponentRef, ModelicaInteger}}} 
+        function deduceReductionIterationRange_traverser(inExp::Absyn.Exp, inCrefs::List{<:Tuple{<:Absyn.ComponentRef, ModelicaInteger}}, inIterator::String) ::Tuple{Absyn.Exp, List{Tuple{Absyn.ComponentRef, ModelicaInteger}}}
               local outCrefs::List{Tuple{Absyn.ComponentRef, ModelicaInteger}}
               local outExp::Absyn.Exp = inExp
 
@@ -1536,7 +1536,7 @@
                   Absyn.CREF(componentRef = cref)  => begin
                     getIteratorIndexedCrefs(cref, inIterator, inCrefs)
                   end
-                  
+
                   _  => begin
                       inCrefs
                   end
@@ -1551,7 +1551,7 @@
            cref without subscripts, and the index is the subscripted dimension. E.g. for
            iterator i:
              a[i] => (a, 1), b[1, i] => (b, 2), c[i+1] => (), d[2].e[i] => (d[2].e, 1) =#
-        function getIteratorIndexedCrefs(inCref::Absyn.ComponentRef, inIterator::String, inCrefs::List{<:Tuple{<:Absyn.ComponentRef, ModelicaInteger}}) ::List{Tuple{Absyn.ComponentRef, ModelicaInteger}} 
+        function getIteratorIndexedCrefs(inCref::Absyn.ComponentRef, inIterator::String, inCrefs::List{<:Tuple{<:Absyn.ComponentRef, ModelicaInteger}}) ::List{Tuple{Absyn.ComponentRef, ModelicaInteger}}
               local outCrefs::List{Tuple{Absyn.ComponentRef, ModelicaInteger}} = inCrefs
 
               local crefs::List{Tuple{Absyn.ComponentRef, ModelicaInteger}}
@@ -1578,7 +1578,7 @@
                                 end
                               ()
                             end
-                            
+
                             _  => begin
                                 ()
                             end
@@ -1588,7 +1588,7 @@
                       end
                     outCrefs
                   end
-                  
+
                   Absyn.CREF_QUAL(name = id, subscripts = subs, componentRef = cref)  => begin
                       crefs = getIteratorIndexedCrefs(cref, inIterator, nil)
                        #=  Append the prefix from the qualified cref to any matches, and add
@@ -1601,7 +1601,7 @@
                       end
                     getIteratorIndexedCrefs(Absyn.CREF_IDENT(id, subs), inIterator, outCrefs)
                   end
-                  
+
                   Absyn.CREF_FULLYQUALIFIED(componentRef = cref)  => begin
                       crefs = getIteratorIndexedCrefs(cref, inIterator, nil)
                        #=  Make any matches fully qualified, and add the to the result list.
@@ -1612,7 +1612,7 @@
                       end
                     outCrefs
                   end
-                  
+
                   _  => begin
                       inCrefs
                   end
@@ -1623,7 +1623,7 @@
 
          #= Helper function to deduceReductionIterationRange. Constructs a range based on
            the given dimension. =#
-        function deduceReductionIterationRange2(inDimension::DAE.Dimension, inCref::DAE.ComponentRef #= The subscripted component without subscripts. =#, inType::DAE.Type #= The type of the subscripted component. =#, inIndex::ModelicaInteger #= The index of the dimension. =#) ::Tuple{DAE.Exp, DAE.Properties} 
+        function deduceReductionIterationRange2(inDimension::DAE.Dimension, inCref::DAE.ComponentRef #= The subscripted component without subscripts. =#, inType::DAE.Type #= The type of the subscripted component. =#, inIndex::ModelicaInteger #= The index of the dimension. =#) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties #= The properties of the range expression. =#
               local outRange::DAE.Exp #= The range expression. =#
 
@@ -1644,7 +1644,7 @@
                       range_const = DAE.C_CONST()
                     DAE.RANGE(range_ty, DAE.BCONST(false), NONE(), DAE.BCONST(true))
                   end
-                  
+
                   DAE.DIM_ENUM(enumTypeName = enum_path, literals = enum_lits)  => begin
                        #=  Enumeration dimension => Enum.first:Enum.last
                        =#
@@ -1654,7 +1654,7 @@
                       range_const = DAE.C_CONST()
                     DAE.RANGE(range_ty, DAE.ENUM_LITERAL(enum_start, 1), NONE(), DAE.ENUM_LITERAL(enum_end, listLength(enum_lits)))
                   end
-                  
+
                   DAE.DIM_INTEGER(integer = sz)  => begin
                        #=  Integer dimension => 1:size
                        =#
@@ -1662,7 +1662,7 @@
                       range_const = DAE.C_CONST()
                     DAE.RANGE(range_ty, DAE.ICONST(1), NONE(), DAE.ICONST(sz))
                   end
-                  
+
                   _  => begin
                          #=  Any other kind of dimension => 1:size(cref, index)
                          =#
@@ -1678,7 +1678,7 @@
           (outRange #= The range expression. =#, outProperties #= The properties of the range expression. =#)
         end
 
-        function makeReductionFoldExp(inEnv::FCore.Graph, path::Absyn.Path, expty::DAE.Type, resultTy::DAE.Type, foldId::String, resultId::String) ::Tuple{FCore.Graph, Option{Absyn.Exp}} 
+        function makeReductionFoldExp(inEnv::FCore.Graph, path::Absyn.Path, expty::DAE.Type, resultTy::DAE.Type, foldId::String, resultId::String) ::Tuple{FCore.Graph, Option{Absyn.Exp}}
               local afoldExp::Option{Absyn.Exp}
               local outEnv::FCore.Graph
 
@@ -1694,19 +1694,19 @@
                   Absyn.IDENT("$array")  => begin
                     (inEnv, NONE())
                   end
-                  
+
                   Absyn.IDENT("array")  => begin
                     (inEnv, NONE())
                   end
-                  
+
                   Absyn.IDENT("list")  => begin
                     (inEnv, NONE())
                   end
-                  
+
                   Absyn.IDENT("listReverse")  => begin
                     (inEnv, NONE())
                   end
-                  
+
                   Absyn.IDENT("sum")  => begin
                       env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
                       env = FGraph.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
@@ -1715,7 +1715,7 @@
                       exp = Absyn.BINARY(Absyn.CREF(cr2), Absyn.ADD(), Absyn.CREF(cr1))
                     (env, SOME(exp))
                   end
-                  
+
                   Absyn.IDENT("product")  => begin
                       env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
                       env = FGraph.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
@@ -1724,7 +1724,7 @@
                       exp = Absyn.BINARY(Absyn.CREF(cr2), Absyn.MUL(), Absyn.CREF(cr1))
                     (env, SOME(exp))
                   end
-                  
+
                   _  => begin
                         cr = AbsynUtil.pathToCref(path)
                         env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
@@ -1741,7 +1741,7 @@
           (outEnv, afoldExp)
         end
 
-        function reductionType(inCache::FCore.Cache, inEnv::FCore.Graph, inFn::Absyn.Path, inExp::DAE.Exp, inType::DAE.Type, unboxedType::DAE.Type, dims::DAE.Dimensions, hasGuardExp::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Type, DAE.Type, Option{Values.Value}, Absyn.Path} 
+        function reductionType(inCache::FCore.Cache, inEnv::FCore.Graph, inFn::Absyn.Path, inExp::DAE.Exp, inType::DAE.Type, unboxedType::DAE.Type, dims::DAE.Dimensions, hasGuardExp::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Type, DAE.Type, Option{Values.Value}, Absyn.Path}
               local outPath::Absyn.Path
               local defaultValue::Option{Values.Value}
               local resultType::DAE.Type
@@ -1771,142 +1771,142 @@
                       ty = ListUtil.foldr(dims, Types.liftArray, inType)
                     (inExp, ty, ty, SOME(Values.ARRAY(nil, list(0))), fn)
                   end
-                  
+
                   (Absyn.IDENT(name = "$array"), _)  => begin
                       ty = ListUtil.foldr(dims, Types.liftArray, inType)
                     (inExp, ty, ty, SOME(Values.ARRAY(nil, list(0))), fn)
                   end
-                  
+
                   (Absyn.IDENT(name = "list"), _)  => begin
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_METABOXED_DEFAULT, true)
                       ty = ListUtil.foldr(dims, Types.liftList, ty)
                     (exp, ty, ty, SOME(Values.LIST(nil)), fn)
                   end
-                  
+
                   (Absyn.IDENT(name = "listReverse"), _)  => begin
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_METABOXED_DEFAULT, true)
                       ty = ListUtil.foldr(dims, Types.liftList, ty)
                     (exp, ty, ty, SOME(Values.LIST(nil)), fn)
                   end
-                  
+
                   (Absyn.IDENT("min"), DAE.T_REAL(__))  => begin
                       r = System.realMaxLit()
                       v = Values.REAL(r)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_REAL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("min"), DAE.T_INTEGER(__))  => begin
                       i = System.intMaxLit()
                       v = Values.INTEGER(i)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_INTEGER_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("min"), DAE.T_BOOL(__))  => begin
                       v = Values.BOOL(true)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_BOOL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("min"), DAE.T_STRING(__))  => begin
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_STRING_DEFAULT, true)
                     (exp, ty, ty, NONE(), fn)
                   end
-                  
+
                   (Absyn.IDENT("min"), DAE.T_ENUMERATION(__))  => begin
                       v = Values.ENUM_LITERAL(AbsynUtil.suffixPath(unboxedType.path, ListUtil.last(unboxedType.names)), listLength(unboxedType.names))
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_ENUMERATION_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("max"), DAE.T_REAL(__))  => begin
                       r = realNeg(System.realMaxLit())
                       v = Values.REAL(r)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_REAL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("max"), DAE.T_INTEGER(__))  => begin
                       i = intNeg(System.intMaxLit())
                       v = Values.INTEGER(i)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_INTEGER_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("max"), DAE.T_BOOL(__))  => begin
                       v = Values.BOOL(false)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_BOOL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("max"), DAE.T_STRING(__))  => begin
                       v = Values.STRING("")
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_STRING_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("max"), DAE.T_ENUMERATION(__))  => begin
                       v = Values.ENUM_LITERAL(AbsynUtil.suffixPath(unboxedType.path, listHead(unboxedType.names)), 1)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_ENUMERATION_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("sum"), DAE.T_REAL(__))  => begin
                       v = Values.REAL(0.0)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_REAL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("sum"), DAE.T_INTEGER(__))  => begin
                       v = Values.INTEGER(0)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_INTEGER_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("sum"), DAE.T_BOOL(__))  => begin
                       v = Values.BOOL(false)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_BOOL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("sum"), DAE.T_STRING(__))  => begin
                       v = Values.STRING("")
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_STRING_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("sum"), DAE.T_ARRAY(__))  => begin
                     (inExp, inType, inType, NONE(), fn)
                   end
-                  
+
                   (Absyn.IDENT("product"), DAE.T_REAL(__))  => begin
                       v = Values.REAL(1.0)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_REAL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("product"), DAE.T_INTEGER(__))  => begin
                       v = Values.INTEGER(1)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_INTEGER_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("product"), DAE.T_BOOL(__))  => begin
                       v = Values.BOOL(true)
                       (exp, ty) = Types.matchType(inExp, inType, DAE.T_BOOL_DEFAULT, true)
                     (exp, ty, ty, SOME(v), fn)
                   end
-                  
+
                   (Absyn.IDENT("product"), DAE.T_STRING(__))  => begin
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list("product reduction not defined for String"), info)
                     fail()
                   end
-                  
+
                   (Absyn.IDENT("product"), DAE.T_ARRAY(__))  => begin
                     (inExp, inType, inType, NONE(), fn)
                   end
-                  
+
                   _  => begin
                         (outCache, fnTypes) = Lookup.lookupFunctionsInEnv(inCache, inEnv, inFn, info)
                         (typeA, typeB, resType, defaultBinding, path) = checkReductionType1(inEnv, inFn, fnTypes, info)
@@ -1931,7 +1931,7 @@
           (outCache, outExp, outType, resultType, defaultValue, outPath)
         end
 
-        function checkReductionType1(inEnv::FCore.Graph, inPath::Absyn.Path, fnTypes::List{<:DAE.Type}, info::SourceInfo) ::Tuple{DAE.Type, DAE.Type, DAE.Type, Option{Values.Value}, Absyn.Path} 
+        function checkReductionType1(inEnv::FCore.Graph, inPath::Absyn.Path, fnTypes::List{<:DAE.Type}, info::SourceInfo) ::Tuple{DAE.Type, DAE.Type, DAE.Type, Option{Values.Value}, Absyn.Path}
               local outPath::Absyn.Path
               local startValue::Option{Values.Value}
               local resType::DAE.Type
@@ -1952,16 +1952,16 @@
                       Error.addSourceMessage(Error.LOOKUP_FUNCTION_ERROR, list(str1, str2), info)
                     fail()
                   end
-                  
-                  DAE.T_FUNCTION(funcArg = DAE.FUNCARG(ty = typeA, const = DAE.C_VAR(__)) <| DAE.FUNCARG(ty = typeB, const = DAE.C_VAR(__), defaultBinding = SOME(e)) <|  nil(), funcResultType = resType, path = path) <|  nil()  => begin
+
+                  DAE.T_FUNCTION(funcArg = DAE.FUNCARG(ty = typeA, constType = DAE.C_VAR(__)) <| DAE.FUNCARG(ty = typeB, constType = DAE.C_VAR(__), defaultBinding = SOME(e)) <|  nil(), funcResultType = resType, path = path) <|  nil()  => begin
                       v = Ceval.cevalSimple(e)
                     (typeA, typeB, resType, SOME(v), path)
                   end
-                  
-                  DAE.T_FUNCTION(funcArg = DAE.FUNCARG(ty = typeA, const = DAE.C_VAR(__)) <| DAE.FUNCARG(ty = typeB, const = DAE.C_VAR(__), defaultBinding = NONE()) <|  nil(), funcResultType = resType, path = path) <|  nil()  => begin
+
+                  DAE.T_FUNCTION(funcArg = DAE.FUNCARG(ty = typeA, constType = DAE.C_VAR(__)) <| DAE.FUNCARG(ty = typeB, constType = DAE.C_VAR(__), defaultBinding = NONE()) <|  nil(), funcResultType = resType, path = path) <|  nil()  => begin
                     (typeA, typeB, resType, NONE(), path)
                   end
-                  
+
                   _  => begin
                         str1 = stringDelimitList(ListUtil.map(fnTypes, Types.unparseType), ",")
                         Error.addSourceMessage(Error.UNSUPPORTED_REDUCTION_TYPE, list(str1), info)
@@ -1972,7 +1972,7 @@
           (typeA, typeB, resType, startValue, outPath)
         end
 
-        function checkReductionType2(inExp::DAE.Exp, expType::DAE.Type, typeA::DAE.Type, typeB::DAE.Type, typeC::DAE.Type, equivAB::Bool, equivBC::Bool, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Type} 
+        function checkReductionType2(inExp::DAE.Exp, expType::DAE.Type, typeA::DAE.Type, typeB::DAE.Type, typeC::DAE.Type, equivAB::Bool, equivBC::Bool, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Type}
               local outTy::DAE.Type
               local outExp::DAE.Exp
 
@@ -1984,7 +1984,7 @@
                   (true, true)  => begin
                     (inExp, typeA)
                   end
-                  
+
                   (_, false)  => begin
                        #=  (exp,outTy) = Types.matchType(exp,expType,typeA,true);
                        =#
@@ -1993,14 +1993,14 @@
                       Error.addSourceMessage(Error.REDUCTION_TYPE_ERROR, list("second argument", "result-type", "identical", str1, str2), info)
                     fail()
                   end
-                  
+
                   (false, true)  => begin
                       str1 = Types.unparseType(typeA)
                       str2 = Types.unparseType(typeB)
                       Error.addSourceMessage(Error.REDUCTION_TYPE_ERROR, list("first", "second arguments", "identical", str1, str2), info)
                     fail()
                   end
-                  
+
                   (true, true)  => begin
                       str1 = Types.unparseType(expType)
                       str2 = Types.unparseType(typeA)
@@ -2013,23 +2013,23 @@
         end
 
          #= translates an DAE.Const to a SCode.Variability =#
-        function constToVariability(const::DAE.Const) ::SCode.Variability 
+        function constToVariability(constType::DAE.Const) ::SCode.Variability
               local variability::SCode.Variability
 
               variability = begin
-                @match const begin
+                @match constType begin
                   DAE.C_VAR(__)  => begin
                     SCode.VAR()
                   end
-                  
+
                   DAE.C_PARAM(__)  => begin
                     SCode.PARAM()
                   end
-                  
+
                   DAE.C_CONST(__)  => begin
                     SCode.CONST()
                   end
-                  
+
                   DAE.C_UNKNOWN(__)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Static.constToVariability failed on DAE.C_UNKNOWN()\\n")
@@ -2047,7 +2047,7 @@
                 arrayType = type(i in 1:5) = (T_ARRAY(DIM(5), T_UNKNOWN),NONE())
                 expType = type(r[i]) = (T_REAL,NONE())
               => resType = (T_ARRAY(DIM(5), (T_REAL,NONE())),NONE()) =#
-        function constructArrayType(arrayType::DAE.Type, expType::DAE.Type) ::DAE.Type 
+        function constructArrayType(arrayType::DAE.Type, expType::DAE.Type) ::DAE.Type
               local resType::DAE.Type
 
               resType = begin
@@ -2058,7 +2058,7 @@
                   DAE.T_UNKNOWN(__)  => begin
                     expType
                   end
-                  
+
                   DAE.T_ARRAY(dims = dim <|  nil(), ty = ty)  => begin
                       ty = constructArrayType(ty, expType)
                     DAE.T_ARRAY(ty, list(dim))
@@ -2071,7 +2071,7 @@
          #= This function will construct the correct type for the given Code expression.
            The types are built-in classes of different types. E.g. the class TypeName is
            the type of Code expressions corresponding to a type name Code expression. =#
-        function elabCodeType(inCode::Absyn.CodeNode) ::DAE.Type 
+        function elabCodeType(inCode::Absyn.CodeNode) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2079,27 +2079,27 @@
                   Absyn.C_TYPENAME(__)  => begin
                     DAE.T_CODE(DAE.C_TYPENAME())
                   end
-                  
+
                   Absyn.C_VARIABLENAME(__)  => begin
                     DAE.T_CODE(DAE.C_VARIABLENAME())
                   end
-                  
+
                   Absyn.C_EQUATIONSECTION(__)  => begin
                     DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("EquationSection")), nil, NONE())
                   end
-                  
+
                   Absyn.C_ALGORITHMSECTION(__)  => begin
                     DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("AlgorithmSection")), nil, NONE())
                   end
-                  
+
                   Absyn.C_ELEMENT(__)  => begin
                     DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("Element")), nil, NONE())
                   end
-                  
+
                   Absyn.C_EXPRESSION(__)  => begin
                     DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("Expression")), nil, NONE())
                   end
-                  
+
                   Absyn.C_MODIFICATION(__)  => begin
                     DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("Modification")), nil, NONE())
                   end
@@ -2112,7 +2112,7 @@
           These have an array of records representing graphical objects. These
           elements can have different types, therefore elab_graphic_exp will allow
           arrays with elements of varying types.  =#
-        function elabGraphicsExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabGraphicsExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -2160,7 +2160,7 @@
                   local c::DAE.Const
                   local c_start::DAE.Const
                   local c_stop::DAE.Const
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local c_step::DAE.Const
                   local e::Absyn.Exp
                   local e1::Absyn.Exp
@@ -2192,66 +2192,66 @@
                   (cache, _, Absyn.INTEGER(value = i), _, _, _)  => begin
                     (cache, DAE.ICONST(i), DAE.PROP(DAE.T_INTEGER_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   (cache, _, Absyn.REAL(value = s), _, _, _)  => begin
                       r = System.stringReal(s)
                     (cache, DAE.RCONST(r), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   (cache, _, Absyn.STRING(value = s), _, _, _)  => begin
                       s = System.unescapedString(s)
                     (cache, DAE.SCONST(s), DAE.PROP(DAE.T_STRING_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   (cache, _, Absyn.BOOL(value = b), _, _, _)  => begin
                     (cache, DAE.BCONST(b), DAE.PROP(DAE.T_BOOL_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   (cache, env, Absyn.CREF(componentRef = cr), impl, pre, _)  => begin
                       @match (cache, SOME((dexp, prop, _))) = elabCref(cache, env, cr, impl, true, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, exp && Absyn.BINARY(exp1 = e1, op = op, exp2 = e2), impl, pre, _)  => begin
                       (cache, e1_1, prop1) = elabGraphicsExp(cache, env, e1, impl, pre, info)
                       (cache, e2_1, prop2) = elabGraphicsExp(cache, env, e2, impl, pre, info)
                       (cache, dexp, prop) = OperatorOverloading.binary(cache, env, op, prop1, e1_1, prop2, e2_1, exp, e1, e2, impl, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, e && Absyn.UNARY(op = Absyn.UPLUS(__)), impl, pre, _)  => begin
                       @match (cache, e_1, DAE.PROP(t, c)) = elabGraphicsExp(cache, env, e, impl, pre, info)
                       @match true = Types.isRealOrSubTypeReal(Types.arrayElementType(t))
                       prop = DAE.PROP(t, c)
                     (cache, e_1, prop)
                   end
-                  
+
                   (cache, env, exp && Absyn.UNARY(op = op, exp = e), impl, pre, _)  => begin
                       (cache, e_1, prop1) = elabGraphicsExp(cache, env, e, impl, pre, info)
                       (cache, dexp, prop) = OperatorOverloading.unary(cache, env, op, prop1, e_1, exp, e, impl, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, exp && Absyn.LBINARY(exp1 = e1, op = op, exp2 = e2), impl, pre, _)  => begin
                       (cache, e1_1, prop1) = elabGraphicsExp(cache, env, e1, impl, pre, info)
                       (cache, e2_1, prop2) = elabGraphicsExp(cache, env, e2, impl, pre, info)
                       (cache, dexp, prop) = OperatorOverloading.binary(cache, env, op, prop1, e1_1, prop2, e2_1, exp, e1, e2, impl, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, exp && Absyn.LUNARY(op = op, exp = e), impl, pre, _)  => begin
                       (cache, e_1, prop1) = elabGraphicsExp(cache, env, e, impl, pre, info)
                       (cache, dexp, prop) = OperatorOverloading.unary(cache, env, op, prop1, e_1, exp, e, impl, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, exp && Absyn.RELATION(exp1 = e1, op = op, exp2 = e2), impl, pre, _)  => begin
                       (cache, e1_1, prop1) = elabGraphicsExp(cache, env, e1, impl, pre, info)
                       (cache, e2_1, prop2) = elabGraphicsExp(cache, env, e2, impl, pre, info)
                       (cache, dexp, prop) = OperatorOverloading.binary(cache, env, op, prop1, e1_1, prop2, e2_1, exp, e1, e2, impl, pre, info)
                     (cache, dexp, prop)
                   end
-                  
+
                   (cache, env, e && Absyn.IFEXP(__), impl, pre, _)  => begin
                       @match Absyn.IFEXP(ifExp = e1, trueBranch = e2, elseBranch = e3) = AbsynUtil.canonIfExp(e)
                       (cache, e1_1, prop1) = elabGraphicsExp(cache, env, e1, impl, pre, info)
@@ -2260,46 +2260,46 @@
                       (cache, e_1, prop) = makeIfExp(cache, env, e1_1, prop1, e2_1, prop2, e3_1, prop3, impl, pre, info)
                     (cache, e_1, prop)
                   end
-                  
+
                   (cache, env, Absyn.CALL(function_ = fn, functionArgs = Absyn.FUNCTIONARGS(args = args, argNames = nargs)), _, pre, _)  => begin
                       (cache, e_1, prop) = elabCall(cache, env, fn, args, nargs, true, pre, info)
                     (cache, e_1, prop)
                   end
-                  
+
                   (cache, env, Absyn.TUPLE(expressions = es && _ <| _), impl, pre, _)  => begin
                       (cache, es_1, props) = elabTuple(cache, env, es, impl, false, pre, info, false)
                       (types, consts) = splitProps(props)
                     (cache, DAE.TUPLE(es_1), DAE.PROP_TUPLE(DAE.T_TUPLE(types, NONE()), DAE.TUPLE_CONST(consts)))
                   end
-                  
+
                   (cache, env, Absyn.RANGE(start = start, step = NONE(), stop = stop), impl, pre, _)  => begin
                       @match (cache, start_1, DAE.PROP(start_t, c_start)) = elabGraphicsExp(cache, env, start, impl, pre, info)
                       @match (cache, stop_1, DAE.PROP(stop_t, c_stop)) = elabGraphicsExp(cache, env, stop, impl, pre, info)
                       @match (_, NONE(), _, rt) = deoverloadRange(start_1, start_t, NONE(), NONE(), stop_1, stop_t, info)
-                      const = Types.constAnd(c_start, c_stop)
-                      (cache, t) = elabRangeType(cache, env, start_1, NONE(), stop_1, start_t, rt, const, impl)
-                    (cache, DAE.RANGE(rt, start_1, NONE(), stop_1), DAE.PROP(t, const))
+                      constType = Types.constAnd(c_start, c_stop)
+                      (cache, t) = elabRangeType(cache, env, start_1, NONE(), stop_1, start_t, rt, constType, impl)
+                    (cache, DAE.RANGE(rt, start_1, NONE(), stop_1), DAE.PROP(t, constType))
                   end
-                  
+
                   (cache, env, Absyn.RANGE(start = start, step = SOME(step), stop = stop), impl, pre, _)  => begin
                       @match (cache, start_1, DAE.PROP(start_t, c_start)) = elabGraphicsExp(cache, env, start, impl, pre, info) #= fprintln(\\\"setr\\\", \\\"elab_graphics_exp_range2\\\") & =#
                       @match (cache, step_1, DAE.PROP(step_t, c_step)) = elabGraphicsExp(cache, env, step, impl, pre, info)
                       @match (cache, stop_1, DAE.PROP(stop_t, c_stop)) = elabGraphicsExp(cache, env, stop, impl, pre, info)
                       @match (start_2, SOME(step_2), stop_2, rt) = deoverloadRange(start_1, start_t, SOME(step_1), SOME(step_t), stop_1, stop_t, info)
                       c1 = Types.constAnd(c_start, c_step)
-                      const = Types.constAnd(c1, c_stop)
-                      (cache, t) = elabRangeType(cache, env, start_1, SOME(step_1), stop_1, start_t, rt, const, impl)
-                    (cache, DAE.RANGE(rt, start_2, SOME(step_2), stop_2), DAE.PROP(t, const))
+                      constType = Types.constAnd(c1, c_stop)
+                      (cache, t) = elabRangeType(cache, env, start_1, SOME(step_1), stop_1, start_t, rt, constType, impl)
+                    (cache, DAE.RANGE(rt, start_2, SOME(step_2), stop_2), DAE.PROP(t, constType))
                   end
-                  
+
                   (cache, env, Absyn.ARRAY(arrayExp = es), impl, pre, _)  => begin
-                      @match (cache, es_1, DAE.PROP(t, const)) = elabGraphicsArray(cache, env, es, impl, pre, info)
+                      @match (cache, es_1, DAE.PROP(t, constType)) = elabGraphicsArray(cache, env, es, impl, pre, info)
                       l = listLength(es_1)
                       at = Types.simplifyType(t)
                       a = Types.isArray(t)
-                    (cache, DAE.ARRAY(at, a, es_1), DAE.PROP(DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(l))), const))
+                    (cache, DAE.ARRAY(at, a, es_1), DAE.PROP(DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(l))), constType))
                   end
-                  
+
                   (cache, env, Absyn.MATRIX(matrix = ess), impl, pre, _)  => begin
                       (cache, dess, tps) = elabExpListList(cache, env, ess, impl, true, pre, info)
                       tps_1 = ListUtil.mapList(tps, Types.getPropType)
@@ -2312,7 +2312,7 @@
                       t_2 = Types.unliftArray(t_1)
                     (cache, mexp, DAE.PROP(DAE.T_ARRAY(DAE.T_ARRAY(t_2, list(dim2)), list(dim1)), c))
                   end
-                  
+
                   (_, _, e, _, pre, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Print.printErrorBuf("- Inst.elabGraphicsExp failed: ")
@@ -2372,7 +2372,7 @@
          #= Does deoverloading of range expressions.
           They can be both Integer ranges and Real ranges.
           This function determines which one to use. =#
-        function deoverloadRange(inStartExp::DAE.Exp, inStartType::DAE.Type, inStepExp::Option{<:DAE.Exp}, inStepType::Option{<:DAE.Type}, inStopExp::DAE.Exp, inStopType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, Option{DAE.Exp}, DAE.Exp, DAE.Type} 
+        function deoverloadRange(inStartExp::DAE.Exp, inStartType::DAE.Type, inStepExp::Option{<:DAE.Exp}, inStepType::Option{<:DAE.Type}, inStopExp::DAE.Exp, inStopType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, Option{DAE.Exp}, DAE.Exp, DAE.Type}
               local outRangeType::DAE.Type
               local outStop::DAE.Exp
               local outStep::Option{DAE.Exp}
@@ -2394,15 +2394,15 @@
                   (DAE.T_BOOL(__), NONE(), DAE.T_BOOL(__))  => begin
                     (inStartExp, NONE(), inStopExp, DAE.T_BOOL_DEFAULT)
                   end
-                  
+
                   (DAE.T_INTEGER(__), NONE(), DAE.T_INTEGER(__))  => begin
                     (inStartExp, inStepExp, inStopExp, DAE.T_INTEGER_DEFAULT)
                   end
-                  
+
                   (DAE.T_INTEGER(__), SOME(DAE.T_INTEGER(__)), DAE.T_INTEGER(__))  => begin
                     (inStartExp, inStepExp, inStopExp, DAE.T_INTEGER_DEFAULT)
                   end
-                  
+
                   (DAE.T_ENUMERATION(names = ns), NONE(), DAE.T_ENUMERATION(names = ne))  => begin
                        #=  Enumeration range has no step value.
                        =#
@@ -2423,12 +2423,12 @@
                        =#
                     (inStartExp, NONE(), inStopExp, et)
                   end
-                  
+
                   (_, NONE(), _)  => begin
                       @match (list(outStart, outStop), _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (inStopExp, inStopType)))
                     (outStart, NONE(), outStop, DAE.T_REAL_DEFAULT)
                   end
-                  
+
                   (_, SOME(step_ty), _)  => begin
                       @match SOME(step_exp) = inStepExp
                       @match (list(outStart, step_exp, outStop), _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (step_exp, step_ty), (inStopExp, inStopType)))
@@ -2442,7 +2442,7 @@
          #= This function creates a type for a range expression given by a start, stop,
           and optional step expression. This function always succeeds, but may return an
           array-type of unknown size if the expressions can't be constant evaluated. =#
-        function elabRangeType(inCache::FCore.Cache, inEnv::FCore.Graph, inStart::DAE.Exp, inStep::Option{<:DAE.Exp}, inStop::DAE.Exp, inType::DAE.Type, inExpType::DAE.Type, co::DAE.Const, inImpl::Bool) ::Tuple{FCore.Cache, DAE.Type} 
+        function elabRangeType(inCache::FCore.Cache, inEnv::FCore.Graph, inStart::DAE.Exp, inStep::Option{<:DAE.Exp}, inStop::DAE.Exp, inType::DAE.Type, inExpType::DAE.Type, co::DAE.Const, inImpl::Bool) ::Tuple{FCore.Cache, DAE.Type}
               local outType::DAE.Type
               local outCache::FCore.Cache
 
@@ -2457,14 +2457,14 @@
                   (_, DAE.C_VAR(__))  => begin
                     (inCache, DAE.T_ARRAY(inType, list(DAE.DIM_UNKNOWN())))
                   end
-                  
+
                   (NONE(), _)  => begin
                       (cache, start_val) = Ceval.ceval(inCache, inEnv, inStart, inImpl)
                       (cache, stop_val) = Ceval.ceval(cache, inEnv, inStop, inImpl)
                       dim = elabRangeSize(start_val, NONE(), stop_val)
                     (cache, DAE.T_ARRAY(inType, list(DAE.DIM_INTEGER(dim))))
                   end
-                  
+
                   (SOME(step_exp), _)  => begin
                       (cache, start_val) = Ceval.ceval(inCache, inEnv, inStart, inImpl)
                       (cache, step_val) = Ceval.ceval(cache, inEnv, step_exp, inImpl)
@@ -2472,7 +2472,7 @@
                       dim = elabRangeSize(start_val, SOME(step_val), stop_val)
                     (cache, DAE.T_ARRAY(inType, list(DAE.DIM_INTEGER(dim))))
                   end
-                  
+
                   _  => begin
                       (inCache, DAE.T_ARRAY(inType, list(DAE.DIM_UNKNOWN())))
                   end
@@ -2488,7 +2488,7 @@
         end
 
          #= Returns the size of a range, given a start, stop, and optional step value. =#
-        function elabRangeSize(inStartValue::Values.Value, inStepValue::Option{<:Values.Value}, inStopValue::Values.Value) ::ModelicaInteger 
+        function elabRangeSize(inStartValue::Values.Value, inStepValue::Option{<:Values.Value}, inStopValue::Values.Value) ::ModelicaInteger
               local outSize::ModelicaInteger
 
               outSize = begin
@@ -2506,39 +2506,39 @@
                       @match false = ValuesUtil.safeLessEq(inStartValue, inStopValue)
                     0
                   end
-                  
+
                   (Values.INTEGER(int_start), NONE(), Values.INTEGER(int_stop))  => begin
                       dim = int_stop - int_start + 1
                     dim
                   end
-                  
+
                   (Values.INTEGER(int_start), SOME(Values.INTEGER(int_step)), Values.INTEGER(int_stop))  => begin
                       dim = int_stop - int_start
                       dim = intDiv(dim, int_step) + 1
                     dim
                   end
-                  
+
                   (Values.REAL(real_start), NONE(), Values.REAL(real_stop))  => begin
                     Util.realRangeSize(real_start, 1.0, real_stop)
                   end
-                  
+
                   (Values.REAL(real_start), SOME(Values.REAL(real_step)), Values.REAL(real_stop))  => begin
                     Util.realRangeSize(real_start, real_step, real_stop)
                   end
-                  
+
                   (Values.ENUM_LITERAL(index = int_start), NONE(), Values.ENUM_LITERAL(index = int_stop))  => begin
                       dim = int_stop - int_start + 1
                     dim
                   end
-                  
+
                   (Values.BOOL(true), NONE(), Values.BOOL(false))  => begin
                     0
                   end
-                  
+
                   (Values.BOOL(false), NONE(), Values.BOOL(true))  => begin
                     2
                   end
-                  
+
                   (Values.BOOL(_), NONE(), Values.BOOL(_))  => begin
                     1
                   end
@@ -2550,7 +2550,7 @@
         end
 
          #= This function does elaboration of tuples, i.e. function calls returning several values. =#
-        function elabTuple(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, isLhs::Bool) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}} 
+        function elabTuple(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, isLhs::Bool) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -2579,7 +2579,7 @@
           (outCache, outExpl, outProperties)
         end
 
-        function stripExtraArgsFromType(slots::List{<:Slot}, inType::DAE.Type) ::DAE.Type 
+        function stripExtraArgsFromType(slots::List{<:Slot}, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type = inType
 
               outType = begin
@@ -2588,7 +2588,7 @@
                       outType.funcArg = stripExtraArgsFromType2(slots, outType.funcArg)
                     outType
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Static.stripExtraArgsFromType failed\\n")
@@ -2599,7 +2599,7 @@
           outType
         end
 
-        function stripExtraArgsFromType2(inSlots::List{<:Slot}, inType::List{<:DAE.FuncArg}, inAccumType::List{<:DAE.FuncArg} = nil) ::List{DAE.FuncArg} 
+        function stripExtraArgsFromType2(inSlots::List{<:Slot}, inType::List{<:DAE.FuncArg}, inAccumType::List{<:DAE.FuncArg} = nil) ::List{DAE.FuncArg}
               local outType::List{DAE.FuncArg}
 
               outType = begin
@@ -2610,11 +2610,11 @@
                   (SLOT(slotFilled = true) <| slotsRest, _ <| rest)  => begin
                     stripExtraArgsFromType2(slotsRest, rest, inAccumType)
                   end
-                  
+
                   (SLOT(slotFilled = false) <| slotsRest, arg <| rest)  => begin
                     stripExtraArgsFromType2(slotsRest, rest, _cons(arg, inAccumType))
                   end
-                  
+
                   ( nil(),  nil())  => begin
                     listReverse(inAccumType)
                   end
@@ -2628,7 +2628,7 @@
            All types of an array should be equivalent. However, mixed Integer and Real
            elements are allowed in an array and in that case the Integer elements are
            converted to Real elements. =#
-        function elabArray(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties} 
+        function elabArray(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpLst::List{DAE.Exp}
 
@@ -2666,7 +2666,7 @@
 
          #= Helper function to elabArray. Checks if a list of types contains both
            Integer and Real types, and returns the first Real type if it does. =#
-        function elabArrayHasMixedIntReals(inTypes::List{<:DAE.Type}) ::Tuple{DAE.Type, Bool} 
+        function elabArrayHasMixedIntReals(inTypes::List{<:DAE.Type}) ::Tuple{DAE.Type, Bool}
               local outIsMixed::Bool = true
               local outType::DAE.Type
 
@@ -2700,7 +2700,7 @@
         end
 
          #= Constructs a const value from a list of properties, using constAnd. =#
-        function elabArrayConst(inProperties::List{<:DAE.Properties}) ::DAE.Const 
+        function elabArrayConst(inProperties::List{<:DAE.Properties}) ::DAE.Const
               local outConst::DAE.Const = DAE.C_CONST()
 
               for prop in inProperties
@@ -2711,7 +2711,7 @@
 
          #= Applies type_convert to all expressions in a list to the type given as
            argument. =#
-        function elabArrayReal2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inExpectedType::DAE.Type) ::List{DAE.Exp} 
+        function elabArrayReal2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inExpectedType::DAE.Type) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp} = nil
 
               local exp::DAE.Exp
@@ -2731,7 +2731,7 @@
         end
 
          #= Helper function to elabArray, checks that all elements are equivalent. =#
-        function elabArray2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Type} 
+        function elabArray2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Type}
               local outType::DAE.Type
               local outExpl::List{DAE.Exp}
 
@@ -2774,7 +2774,7 @@
         end
 
          #= This function elaborates array expressions for graphics elaboration. =#
-        function elabGraphicsArray(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, DAE.Properties} 
+        function elabGraphicsArray(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -2802,7 +2802,7 @@
 
          #= This function is a helper function for elabMatrixSemi.
           It elaborates one matrix row of a matrix. =#
-        function elabMatrixComma(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inHaveReal::Bool, inDims::ModelicaInteger, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension} 
+        function elabMatrixComma(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inHaveReal::Bool, inDims::ModelicaInteger, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension}
               local outDim2::DAE.Dimension
               local outDim1::DAE.Dimension
               local outProperties::DAE.Properties
@@ -2853,7 +2853,7 @@
           concatenates each array element along the second dimension.
           For instance
           elab_matrix_cat_two( {{1,2;5,6}, {3,4;7,8}}) => {1,2,3,4;5,6,7,8} =#
-        function elabMatrixCatTwoExp(inExp::DAE.Exp) ::DAE.Exp 
+        function elabMatrixCatTwoExp(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local expl::List{DAE.Exp}
@@ -2873,7 +2873,7 @@
          #= author: PA
           Concatenates a list of matrix(or higher dim) expressions along
           the second dimension. =#
-        function elabMatrixCatTwo(inExpl::List{<:DAE.Exp}) ::DAE.Exp 
+        function elabMatrixCatTwo(inExpl::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty::DAE.Type
@@ -2890,7 +2890,7 @@
          #= Helper function to elabMatrixCatTwo
           Concatenates two array expressions that are matrices (or higher dimension)
           along the first dimension (row). =#
-        function elabMatrixCatTwo2(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp 
+        function elabMatrixCatTwo2(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local expl1::List{DAE.Exp}
@@ -2907,7 +2907,7 @@
           outExp
         end
 
-        function elabMatrixCatTwo3(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp 
+        function elabMatrixCatTwo3(inExp1::DAE.Exp, inExp2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty1::DAE.Type
@@ -2928,7 +2928,7 @@
           Concatenates a list of matrix(or higher dim) expressions along
           the first dimension.
           i.e. elabMatrixCatOne( { {1,2;3,4}, {5,6;7,8} }) => {1,2;3,4;5,6;7,8} =#
-        function elabMatrixCatOne(inExpl::List{<:DAE.Exp}) ::DAE.Exp 
+        function elabMatrixCatOne(inExpl::List{<:DAE.Exp}) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty::DAE.Type
@@ -2944,7 +2944,7 @@
 
          #= Helper function to elabMatrixCatOne. Concatenates two arrays along the
           first dimension. =#
-        function elabMatrixCatOne2(inArray1::DAE.Exp, inArray2::DAE.Exp) ::DAE.Exp 
+        function elabMatrixCatOne2(inArray1::DAE.Exp, inArray2::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ety::DAE.Type
@@ -2966,7 +2966,7 @@
         end
 
          #= Wrapper function for Expression.promoteExp which also handles Properties. =#
-        function promoteExp(inExp::DAE.Exp, inProperties::DAE.Properties, inDims::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Properties} 
+        function promoteExp(inExp::DAE.Exp, inProperties::DAE.Properties, inDims::ModelicaInteger) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -2986,7 +2986,7 @@
 
          #= This function elaborates Matrix expressions, e.g. {1,0;2,1}
           A row is elaborated with elabMatrixComma. =#
-        function elabMatrixSemi(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}}, inProperties::List{<:List{<:DAE.Properties}}, inImpl::Bool, inHaveReal::Bool, inDims::ModelicaInteger, inDoVectorization::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension} 
+        function elabMatrixSemi(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}}, inProperties::List{<:List{<:DAE.Properties}}, inImpl::Bool, inHaveReal::Bool, inDims::ModelicaInteger, inDoVectorization::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension}
               local outDim2::DAE.Dimension
               local outDim1::DAE.Dimension
               local outProperties::DAE.Properties
@@ -3050,11 +3050,11 @@
           (outCache, outExp, outProperties, outDim1, outDim2)
         end
 
-         #= 
+         #=
          Author BZ, 2009-02
           This function validates that arguments to function are of a correct type.
           Then call elabCallArgs to vectorize/type-match. =#
-        function verifyBuiltInHandlerType(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inTypeChecker::extraFunc, inFnName::String, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function verifyBuiltInHandlerType(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inTypeChecker::extraFunc, inFnName::String, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3073,7 +3073,7 @@
 
          #= author: PA
           This function elaborates the cardinality operator. =#
-        function elabBuiltinCardinality(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinCardinality(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3099,7 +3099,7 @@
           The only allowed types for expr in smooth are: real expressions, arrays of
           allowed expressions, and records containing only components of allowed
           expressions. =#
-        function elabBuiltinSmooth(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSmooth(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3132,7 +3132,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function printBuiltinFnArgError(inFnName::String, inMsg::String, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inPrefix::Prefix.Prefix, inInfo::SourceInfo)  
+        function printBuiltinFnArgError(inFnName::String, inMsg::String, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inPrefix::Prefix.Prefix, inInfo::SourceInfo)
               local args_str::String
               local pre_str::String
               local msg_str::String
@@ -3150,7 +3150,7 @@
          #= This function elaborates the size operator.
           Input is the list of arguments to size as Absyn.Exp
           expressions and the environment, FCore.Graph. =#
-        function elabBuiltinSize(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSize(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3186,7 +3186,7 @@
                       @match (SOME(exp), SOME(prop)) = elabBuiltinSizeIndex(arraycrefe, prop, ety, dimp, dims, env, info)
                     (cache, exp, prop)
                   end
-                  
+
                   (cache, env, arraycr <|  nil(), impl, pre)  => begin
                       @match (cache, arraycrefe, DAE.PROP(arrtp, _)) = elabExpInExpression(cache, env, arraycr, impl, false, pre, info)
                       ety = Expression.typeof(arraycrefe)
@@ -3204,7 +3204,7 @@
         end
 
          #= Helper function to elabBuiltinSize. Elaborates the size(A) operator. =#
-        function elabBuiltinSizeNoIndex(inArrayExp::DAE.Exp, inArrayExpType::DAE.Type, inDimensions::DAE.Dimensions, inArrayType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties} 
+        function elabBuiltinSizeNoIndex(inArrayExp::DAE.Exp, inArrayExpType::DAE.Type, inDimensions::DAE.Dimensions, inArrayType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outSizeExp::DAE.Exp
 
@@ -3228,7 +3228,7 @@
                       Error.addSourceMessage(Error.INVALID_ARGUMENT_TYPE_FIRST_ARRAY, list(size_str), inInfo)
                     fail()
                   end
-                  
+
                   _ <| _  => begin
                       dim_expl = ListUtil.map(inDimensions, Expression.dimensionSizeExp)
                       dim_int = listLength(dim_expl)
@@ -3237,7 +3237,7 @@
                       prop = DAE.PROP(ty, DAE.C_CONST())
                     (exp, prop)
                   end
-                  
+
                   _ <| _  => begin
                       b = Types.dimensionsKnown(inArrayType)
                       cnst = Types.boolConstSize(b)
@@ -3266,7 +3266,7 @@
         end
 
          #= Helper function to elabBuiltinSize. Elaborates the size(A, x) operator. =#
-        function elabBuiltinSizeIndex(inArrayExp::DAE.Exp, inArrayProp::DAE.Properties, inArrayType::DAE.Type, inIndexExp::DAE.Exp, inDimensions::DAE.Dimensions, inEnv::FCore.Graph, inInfo::SourceInfo) ::Tuple{Option{DAE.Exp}, Option{DAE.Properties}} 
+        function elabBuiltinSizeIndex(inArrayExp::DAE.Exp, inArrayProp::DAE.Properties, inArrayType::DAE.Type, inIndexExp::DAE.Exp, inDimensions::DAE.Dimensions, inEnv::FCore.Graph, inInfo::SourceInfo) ::Tuple{Option{DAE.Exp}, Option{DAE.Properties}}
               local outProperties::Option{DAE.Properties}
               local outSizeExp::Option{DAE.Exp}
 
@@ -3292,7 +3292,7 @@
                       Error.addSourceMessage(Error.INVALID_ARGUMENT_TYPE_FIRST_ARRAY, list(size_str), inInfo)
                     (NONE(), NONE())
                   end
-                  
+
                   _  => begin
                       dim_int = Expression.expInt(inIndexExp)
                       dim_count = listLength(inDimensions)
@@ -3302,7 +3302,7 @@
                       prop = DAE.PROP(DAE.T_INTEGER_DEFAULT, DAE.C_CONST())
                     (SOME(exp), SOME(prop))
                   end
-                  
+
                   _  => begin
                       @match false = Types.isUnknownType(inArrayType)
                       dim_int = Expression.expInt(inIndexExp)
@@ -3314,7 +3314,7 @@
                       Error.addSourceMessage(Error.INVALID_SIZE_INDEX, list(index_str, exp_str, dim_str), inInfo)
                     (NONE(), NONE())
                   end
-                  
+
                   _  => begin
                         exp = DAE.SIZE(inArrayExp, SOME(inIndexExp))
                         cnst = DAE.C_PARAM()
@@ -3352,7 +3352,7 @@
          #= @author Stefan Vorkoetter <svorkoetter@maplesoft.com>
          ndims(A) : Returns the number of dimensions k of array expression A, with k >= 0.
          =#
-        function elabBuiltinNDims(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinNDims(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3376,7 +3376,7 @@
                       exp = DAE.ICONST(nd)
                     (cache, exp, DAE.PROP(DAE.T_INTEGER_DEFAULT, DAE.C_CONST()))
                   end
-                  
+
                   (_, _, expl, _, _, pre, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       sp = PrefixUtil.printPrefixStr3(pre)
@@ -3390,7 +3390,7 @@
 
          #= This function elaborates the builtin operator fill.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3431,7 +3431,7 @@
                       (cache, exp, prop) = elabBuiltinFill2(cache, env, s_1, sty, dimvals, c1, pre, dims, info)
                     (cache, exp, prop)
                   end
-                  
+
                   (cache, env, s <| dims, _, impl, pre, _)  => begin
                       c1 = unevaluatedFunctionVariability(env)
                       (cache, s_1, prop) = elabExpInExpression(cache, env, s, impl, true, pre, info)
@@ -3444,7 +3444,7 @@
                       exp = Expression.makePureBuiltinCall("fill", _cons(s_1, dims_1), exp_type)
                     (cache, exp, prop)
                   end
-                  
+
                   (cache, env, s <| dims, _, impl, pre, _)  => begin
                       @match false = Config.splitArrays()
                       @match (cache, s_1, DAE.PROP(sty, c1)) = elabExpInExpression(cache, env, s, impl, true, pre, info)
@@ -3456,13 +3456,13 @@
                       exp = Expression.makePureBuiltinCall("fill", _cons(s_1, dims_1), exp_type)
                     (cache, exp, prop)
                   end
-                  
+
                   (_, env, dims, _, _, _, _)  => begin
                       str = "Static.elabBuiltinFill failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraph.printGraphPathStr(env) + " for expression: fill(" + Dump.printExpLstStr(dims) + ")"
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
                     fail()
                   end
-                  
+
                   (_, _, dims, _, impl, pre, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Static.elabBuiltinFill: Couldn't elaborate fill(): ")
@@ -3487,13 +3487,13 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
           function: elabBuiltinFill2
           Helper function to: elabBuiltinFill
 
           Public since it is used by ExpressionSimplify.simplifyBuiltinCalls.
          =#
-        function elabBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inType::DAE.Type, inValuesValueLst::List{<:Values.Value}, constVar::DAE.Const, inPrefix::Prefix.Prefix, inDims::List{<:Absyn.Exp}, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inType::DAE.Type, inValuesValueLst::List{<:Values.Value}, constVar::DAE.Const, inPrefix::Prefix.Prefix, inDims::List{<:Absyn.Exp}, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3527,7 +3527,7 @@
                       a = Types.isArray(sty2)
                     (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
                   end
-                  
+
                   (cache, _, s, sty, Values.INTEGER(integer = v) <|  nil(), c1, _, _, _)  => begin
                       arraylist = ListUtil.fill(s, v)
                       sty2 = DAE.T_ARRAY(sty, list(DAE.DIM_INTEGER(v)))
@@ -3535,7 +3535,7 @@
                       a = Types.isArray(sty2)
                     (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
                   end
-                  
+
                   (cache, env, s, sty, Values.INTEGER(integer = v) <| rest, c1, pre, _, _)  => begin
                       @match (cache, exp, DAE.PROP(ty, _)) = elabBuiltinFill2(cache, env, s, sty, rest, c1, pre, inDims, inInfo)
                       arraylist = ListUtil.fill(exp, v)
@@ -3544,7 +3544,7 @@
                       a = Types.isArray(sty2)
                     (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
                   end
-                  
+
                   _  => begin
                         str = "Static.elabBuiltinFill2 failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraph.printGraphPathStr(inEnv) + " for expression: fill(" + Dump.printExpLstStr(inDims) + ")"
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), inInfo)
@@ -3558,7 +3558,7 @@
         end
 
          #= This function elaborates the builtin operator symmetric =#
-        function elabBuiltinSymmetric(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSymmetric(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3592,7 +3592,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinClassDirectory(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinClassDirectory(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3611,7 +3611,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinSourceInfo(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSourceInfo(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3630,7 +3630,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinSome(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSome(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3655,7 +3655,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinNone(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinNone(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3676,7 +3676,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinHomotopy(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinHomotopy(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3705,7 +3705,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function getHomotopyArguments(args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}) ::List{Absyn.Exp} 
+        function getHomotopyArguments(args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}) ::List{Absyn.Exp}
               local outPositionalArgs::List{Absyn.Exp}
 
               outPositionalArgs = begin
@@ -3717,19 +3717,19 @@
                   (e1 <| e2 <|  nil(), _)  => begin
                     list(e1, e2)
                   end
-                  
+
                   ( nil(), Absyn.NAMEDARG("actual", e1) <| Absyn.NAMEDARG("simplified", e2) <|  nil())  => begin
                     list(e1, e2)
                   end
-                  
+
                   ( nil(), Absyn.NAMEDARG("simplified", e2) <| Absyn.NAMEDARG("actual", e1) <|  nil())  => begin
                     list(e1, e2)
                   end
-                  
+
                   (e1 <|  nil(), Absyn.NAMEDARG("simplified", e2) <|  nil())  => begin
                     list(e1, e2)
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("+replaceHomotopy: homotopy called with wrong arguments: " + Dump.printFunctionArgsStr(Absyn.FUNCTIONARGS(args, nargs)))
                       fail()
@@ -3746,7 +3746,7 @@
          #= Elaborates DynamicSelect statements in annotations for OMEdit.
            Currently only text annotations with one String statement accessing
            one variable are supported. Otherwise the first argument is returned. =#
-        function elabBuiltinDynamicSelect(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinDynamicSelect(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3787,11 +3787,11 @@
                             Absyn.NAMEDARG(argName = "significantDigits", argValue = Absyn.INTEGER(value = digits)) <|  nil()  => begin
                               Expression.makeArray(list(dstatic, ddynamic, DAE.ICONST(digits)), ty, true)
                             end
-                            
+
                             Absyn.NAMEDARG(__) <| Absyn.NAMEDARG(argName = "significantDigits", argValue = Absyn.INTEGER(value = digits)) <|  nil()  => begin
                               Expression.makeArray(list(dstatic, ddynamic, DAE.ICONST(digits)), ty, true)
                             end
-                            
+
                             _  => begin
                                 Expression.makeArray(list(dstatic, ddynamic), ty, true)
                             end
@@ -3799,7 +3799,7 @@
                         end
                       outExp
                     end
-                    
+
                     (Absyn.BOOL(__), Absyn.CREF(componentRef = acref))  => begin
                       Expression.makeArray(list(dstatic, Expression.crefToExp(absynCrefToComponentReference(acref))), ty, true)
                     end
@@ -3816,7 +3816,7 @@
         end
 
          #= Elaborates the builtin operator transpose. =#
-        function elabBuiltinTranspose(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinTranspose(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3846,7 +3846,7 @@
 
          #= This function elaborates the builtin operator sum.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3886,7 +3886,7 @@
 
          #= This function elaborates the builtin operator product.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinProduct(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinProduct(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3917,7 +3917,7 @@
                       Error.addSourceMessage(Error.BUILTIN_FUNCTION_PRODUCT_HAS_SCALAR_PARAMETER, list(str_exp, str_pre), info)
                     (cache, exp_1, DAE.PROP(DAE.T_INTEGER_DEFAULT, c))
                   end
-                  
+
                   (cache, env, arrexp <|  nil(), impl, pre)  => begin
                       @match (cache, exp_1, DAE.PROP(ty, c)) = elabExpInExpression(cache, env, arrexp, impl, true, pre, info)
                       (exp_1, _) = Types.matchType(exp_1, ty, DAE.T_REAL_DEFAULT, true)
@@ -3926,7 +3926,7 @@
                       Error.addSourceMessage(Error.BUILTIN_FUNCTION_PRODUCT_HAS_SCALAR_PARAMETER, list(str_exp, str_pre), info)
                     (cache, exp_1, DAE.PROP(DAE.T_REAL_DEFAULT, c))
                   end
-                  
+
                   (cache, env, arrexp <|  nil(), impl, pre)  => begin
                       @match (cache, exp_1, DAE.PROP((@match DAE.T_ARRAY(dims = list(_), ty = tp) = t), c)) = elabExpInExpression(cache, env, arrexp, impl, true, pre, info)
                       tp = Types.arrayElementType(t)
@@ -3942,7 +3942,7 @@
 
          #= Replaces product({a1,a2,...an}) with a1*a2*...*an} and
            product([a11,a12,...,a1n;...,am1,am2,..amn]) with a11*a12*...*amn =#
-        function elabBuiltinProduct2(inExp::DAE.Exp) ::DAE.Exp 
+        function elabBuiltinProduct2(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -3952,7 +3952,7 @@
                   DAE.CALL(expLst = array_exp <|  nil())  => begin
                     Expression.makeProductLst(Expression.arrayElements(array_exp))
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -3963,7 +3963,7 @@
 
          #= This function elaborates the builtin operator pre.
           Input is the arguments to the pre operator and the environment, FCore.Graph. =#
-        function elabBuiltinPre(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinPre(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4010,7 +4010,7 @@
         end
 
          #= Help function for elabBuiltinPre, when type is array, send it here. =#
-        function elabBuiltinPre2(inExp::DAE.Exp, inType::DAE.Type) ::Tuple{List{DAE.Exp}, Bool} 
+        function elabBuiltinPre2(inExp::DAE.Exp, inType::DAE.Type) ::Tuple{List{DAE.Exp}, Bool}
               local outScalar::Bool
               local outExp::List{DAE.Exp}
 
@@ -4024,12 +4024,12 @@
                   DAE.CALL(expLst = DAE.ARRAY(scalar = sc, array = expl) <|  nil())  => begin
                     (makePreLst(expl, inType), sc)
                   end
-                  
+
                   DAE.CALL(expLst = DAE.MATRIX(ty = ty, integer = i, matrix = mexpl) <|  nil())  => begin
                       mexpl = list(makePreLst(e, inType) for e in mexpl)
                     (list(DAE.MATRIX(ty, i, mexpl)), false)
                   end
-                  
+
                   _  => begin
                       (list(inExp), false)
                   end
@@ -4040,7 +4040,7 @@
 
          #= This function elaborates the builtin operator inStream.
           Input is the arguments to the inStream operator and the environment, FCore.Graph. =#
-        function elabBuiltinInStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinInStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4063,7 +4063,7 @@
 
          #= This function elaborates the builtin operator actualStream.
           Input is the arguments to the actualStream operator and the environment, FCore.Graph. =#
-        function elabBuiltinActualStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinActualStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4084,7 +4084,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinStreamOperator(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator::String, inExp::DAE.Exp, inType::DAE.Type, inInfo::SourceInfo) ::DAE.Exp 
+        function elabBuiltinStreamOperator(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator::String, inExp::DAE.Exp, inType::DAE.Type, inInfo::SourceInfo) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4094,7 +4094,7 @@
                   DAE.ARRAY(array =  nil())  => begin
                     inExp
                   end
-                  
+
                   _  => begin
                         @match _cons(exp, _) = Expression.flattenArrayExpToList(inExp)
                         validateBuiltinStreamOperator(inCache, inEnv, exp, inType, inOperator, inInfo)
@@ -4107,7 +4107,7 @@
           outExp
         end
 
-        function validateBuiltinStreamOperator(inCache::FCore.Cache, inEnv::FCore.Graph, inOperand::DAE.Exp, inType::DAE.Type, inOperator::String, inInfo::SourceInfo)  
+        function validateBuiltinStreamOperator(inCache::FCore.Cache, inEnv::FCore.Graph, inOperand::DAE.Exp, inType::DAE.Type, inOperator::String, inInfo::SourceInfo)
               _ = begin
                   local cr::DAE.ComponentRef
                   local attr::DAE.Attributes
@@ -4120,7 +4120,7 @@
                       @match DAE.ATTR(connectorType = DAE.STREAM()) = attr
                     ()
                   end
-                  
+
                   _  => begin
                          #=  Operand is not a stream variable, error!
                          =#
@@ -4133,7 +4133,7 @@
         end
 
          #= Takes a list of expressions and makes a list of pre - expressions =#
-        function makePreLst(inExpl::List{<:DAE.Exp}, inType::DAE.Type) ::List{DAE.Exp} 
+        function makePreLst(inExpl::List{<:DAE.Exp}, inType::DAE.Type) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp}
 
               local ty::DAE.Type
@@ -4144,7 +4144,7 @@
         end
 
          #= Help function for elabBuiltinPreMatrix, when type is matrix, send it here. =#
-        function elabBuiltinPreMatrix(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp 
+        function elabBuiltinPreMatrix(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4154,7 +4154,7 @@
                       exp.matrix = list(makePreLst(row, inType) for row in exp.matrix)
                     exp
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -4163,12 +4163,12 @@
           outExp
         end
 
-         #= 
+         #=
           This function elaborates the builtin operator \\'array\\'. For instance,
           array(1,4,6) which is the same as {1,4,6}.
           Input is the list of arguments to the operator, as Absyn.Exp list.
          =#
-        function elabBuiltinArray(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinArray(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4192,7 +4192,7 @@
 
          #= Helper function to elabBuiltinArray.
            Asserts that all types are of same dimensionality and of same builtin types. =#
-        function elabBuiltinArray2(inExpl::List{<:DAE.Exp}, inProperties::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties} 
+        function elabBuiltinArray2(inExpl::List{<:DAE.Exp}, inProperties::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpl::List{DAE.Exp}
 
@@ -4215,7 +4215,7 @@
         end
 
          #= Helper function to elab_builtin_array. =#
-        function elabBuiltinArray3(inExpl::List{<:DAE.Exp}, inPropertiesLst::List{<:DAE.Properties}, inProperties::DAE.Properties) ::Tuple{List{DAE.Exp}, DAE.Properties} 
+        function elabBuiltinArray3(inExpl::List{<:DAE.Exp}, inPropertiesLst::List{<:DAE.Properties}, inProperties::DAE.Properties) ::Tuple{List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties = listHead(inPropertiesLst)
               local outExpl::List{DAE.Exp} = nil
 
@@ -4232,7 +4232,7 @@
         end
 
          #= This function elaborates the builtin operator zeros(n). =#
-        function elabBuiltinZeros(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinZeros(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4243,7 +4243,7 @@
 
          #= This function returns true if all properties, containing types, have the same
           dimensions, otherwise false. =#
-        function sameDimensions(inProps::List{<:DAE.Properties}) ::Bool 
+        function sameDimensions(inProps::List{<:DAE.Properties}) ::Bool
               local res::Bool
 
               local types::List{DAE.Type}
@@ -4257,7 +4257,7 @@
 
          #= This function returns true if all properties, containing types, have the same
           dimensions (except for dimension X), otherwise false. =#
-        function sameDimensionsExceptionDimX(inProps::List{<:DAE.Properties}, dimException::ModelicaInteger) ::Bool 
+        function sameDimensionsExceptionDimX(inProps::List{<:DAE.Properties}, dimException::ModelicaInteger) ::Bool
               local res::Bool
 
               local types::List{DAE.Type}
@@ -4272,7 +4272,7 @@
 
          #= Helper function to sameDimensions. Checks that each list of dimensions has
            the same dimensions as the other lists. =#
-        function sameDimensions2(inDimensions::List{<:DAE.Dimensions}) ::Bool 
+        function sameDimensions2(inDimensions::List{<:DAE.Dimensions}) ::Bool
               local outSame::Bool = true
 
               local dims::DAE.Dimensions
@@ -4298,7 +4298,7 @@
         end
 
          #= Helper function to sameDimensions2. Check that all dimensions in a list are equal. =#
-        function sameDimensions3(inDims::DAE.Dimensions) ::Bool 
+        function sameDimensions3(inDims::DAE.Dimensions) ::Bool
               local outSame::Bool = true
 
               local dim1::DAE.Dimension
@@ -4317,7 +4317,7 @@
         end
 
          #= This function elaborates on the builtin opeator ones(n). =#
-        function elabBuiltinOnes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinOnes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4327,7 +4327,7 @@
         end
 
          #= This function elaborates on the builtin operator max(a, b). =#
-        function elabBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4337,7 +4337,7 @@
         end
 
          #= This function elaborates the builtin operator min(a, b) =#
-        function elabBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4348,7 +4348,7 @@
 
          #= Helper function to elabBuiltinMin and elabBuiltinMax, containing common
           functionality. =#
-        function elabBuiltinMinMaxCommon(cache::FCore.Cache, env::FCore.Graph, inFnName::String, inFnArgs::List{<:Absyn.Exp}, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinMinMaxCommon(cache::FCore.Cache, env::FCore.Graph, inFnName::String, inFnArgs::List{<:Absyn.Exp}, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -4383,7 +4383,7 @@
                       call = Expression.makePureBuiltinCall(inFnName, list(arrexp_1), tp)
                     (call, DAE.PROP(elt_ty, c))
                   end
-                  
+
                   s1 <| s2 <|  nil()  => begin
                       @match (cache, s1_1, DAE.PROP(ty1, c1)) = elabExpInExpression(cache, env, s1, impl, true, prefix, info)
                       @match (cache, s2_1, DAE.PROP(ty2, c2)) = elabExpInExpression(cache, env, s2, impl, true, prefix, info)
@@ -4403,7 +4403,7 @@
 
          #= Author: BTH
            This function elaborates the builtin Clock constructor Clock(..). =#
-        function elabBuiltinClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4448,7 +4448,7 @@
                       call = DAE.CLKCONST(DAE.INFERRED_CLOCK())
                     (cache, call, DAE.PROP(DAE.T_CLOCK_DEFAULT, DAE.C_VAR()))
                   end
-                  
+
                   (cache, env, aintervalCounter <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, intervalCounter, prop1) = elabExpInExpression(cache, env, aintervalCounter, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4456,7 +4456,7 @@
                       call = DAE.CLKCONST(DAE.INTEGER_CLOCK(intervalCounter, DAE.ICONST(1)))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, aintervalCounter <| aresolution <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, intervalCounter, prop1) = elabExpInExpression(cache, env, aintervalCounter, impl, true, pre, info)
                       (cache, resolution, prop2) = elabExpInExpression(cache, env, aresolution, impl, true, pre, info)
@@ -4470,7 +4470,7 @@
                       call = DAE.CLKCONST(DAE.INTEGER_CLOCK(intervalCounter, resolution))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, ainterval <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, interval, prop1) = elabExpInExpression(cache, env, ainterval, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4478,7 +4478,7 @@
                       call = DAE.CLKCONST(DAE.REAL_CLOCK(interval))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, acondition <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, condition, prop1) = elabExpInExpression(cache, env, acondition, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4486,7 +4486,7 @@
                       call = DAE.CLKCONST(DAE.BOOLEAN_CLOCK(condition, DAE.RCONST(0.0)))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, acondition <| astartInterval <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, condition, prop1) = elabExpInExpression(cache, env, acondition, impl, true, pre, info)
                       (cache, startInterval, prop2) = elabExpInExpression(cache, env, astartInterval, impl, true, pre, info)
@@ -4497,7 +4497,7 @@
                       call = DAE.CLKCONST(DAE.BOOLEAN_CLOCK(condition, startInterval))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, ac <| asolverMethod <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, c, prop1) = elabExpInExpression(cache, env, ac, impl, true, pre, info)
                       (cache, solverMethod, prop2) = elabExpInExpression(cache, env, asolverMethod, impl, true, pre, info)
@@ -4510,7 +4510,7 @@
                       call = DAE.CLKCONST(DAE.SOLVER_CLOCK(c, solverMethod))
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, ac <|  nil(), Absyn.NAMEDARG(argName = "solverMethod", argValue = asolverMethod) <|  nil(), impl, pre, _)  => begin
                       (cache, c, prop1) = elabExpInExpression(cache, env, ac, impl, true, pre, info)
                       (cache, solverMethod, prop2) = elabExpInExpression(cache, env, asolverMethod, impl, true, pre, info)
@@ -4554,10 +4554,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator hold(u). =#
-        function elabBuiltinHold(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinHold(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4588,10 +4588,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator sample(..) variants. =#
-        function elabBuiltinSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4631,7 +4631,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("sample"), args, nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <| ac <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       (cache, c, prop2) = elabExpInExpression(cache, env, ac, impl, true, pre, info)
@@ -4643,7 +4643,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("sample"), args, nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4659,10 +4659,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator shiftSample(u,shiftCounter,resolution). =#
-        function elabBuiltinShiftSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinShiftSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4702,7 +4702,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("shiftSample"), list(au, ashiftCounter, aresolution), nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <| ashiftCounter <| aresolution <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       (cache, shiftCounter, prop2) = elabExpInExpression(cache, env, ashiftCounter, impl, true, pre, info)
@@ -4733,10 +4733,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator backSample(u,backCounter,resolution). =#
-        function elabBuiltinBackSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinBackSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4776,7 +4776,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("backSample"), list(au, abackCounter, aresolution), nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <| abackCounter <| aresolution <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       (cache, backCounter, prop2) = elabExpInExpression(cache, env, abackCounter, impl, true, pre, info)
@@ -4807,10 +4807,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator noClock(u). =#
-        function elabBuiltinNoClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinNoClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4841,9 +4841,9 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
          This function elaborates the builtin operator firstTick(u). =#
-        function elabBuiltinFirstTick(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinFirstTick(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4866,7 +4866,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("firstTick"), args, nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4879,10 +4879,10 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator interval(u). =#
-        function elabBuiltinInterval(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinInterval(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4905,7 +4905,7 @@
                       @match (cache, SOME((call, prop))) = elabCallArgs3(cache, env, list(ty), Absyn.IDENT("interval"), args, nargs, impl, pre, info)
                     (cache, call, prop)
                   end
-                  
+
                   (cache, env, au <|  nil(),  nil(), impl, pre, _)  => begin
                       (cache, _, prop1) = elabExpInExpression(cache, env, au, impl, true, pre, info)
                       ty1 = Types.arrayElementType(Types.getPropType(prop1))
@@ -4918,7 +4918,7 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabBuiltinTransition.
         This function checks whether a type is complex.
@@ -4926,7 +4926,7 @@
         This is not perfect since there are also other instances that are 'complex' types which are not block instances.
         But allowing more might not be so bad anyway, since the MLS 3.3 restriction to block seems more restrictive than necessary,
         e.g., one can be more lenient and allow models as states, too... =#
-        function isBlockTypeWorkaround(ity::DAE.Type) ::Bool 
+        function isBlockTypeWorkaround(ity::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -4934,11 +4934,11 @@
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     isBlockTypeWorkaround(ity.complexType)
                   end
-                  
+
                   DAE.T_COMPLEX(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4947,11 +4947,11 @@
           b
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator
         transition(from, to, condition, immediate=true, reset=true, synchronize=false, priority=1). =#
-        function elabBuiltinTransition(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinTransition(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4996,11 +4996,11 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabBuiltinTransition.
         Check if the \\\"from\\\" argument or the \\\"to\\\" argument is of complex type. =#
-        function elabBuiltinTransition2(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, argName::Absyn.Ident, n::ModelicaInteger, strMsg0::String, strPre::String) ::DAE.Type 
+        function elabBuiltinTransition2(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, argName::Absyn.Ident, n::ModelicaInteger, strMsg0::String, strPre::String) ::DAE.Type
               local ty::DAE.Type
 
               local arg1::Absyn.Exp
@@ -5035,11 +5035,11 @@
           ty
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabBuiltinTransition.
         Checks if namedArg.argName == name =#
-        function elabBuiltinTransition3(name::Absyn.Ident, namedArg::Absyn.NamedArg) ::Bool 
+        function elabBuiltinTransition3(name::Absyn.Ident, namedArg::Absyn.NamedArg) ::Bool
               local outIsEqual::Bool
 
               outIsEqual = begin
@@ -5049,7 +5049,7 @@
                   Absyn.NAMEDARG(__)  => begin
                     stringEq(name, namedArg.argName)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5058,21 +5058,21 @@
           outIsEqual
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabBuiltinTransition.
         Extract element argValue. =#
-        function elabBuiltinTransition4(inElement::Absyn.NamedArg) ::Absyn.Exp 
+        function elabBuiltinTransition4(inElement::Absyn.NamedArg) ::Absyn.Exp
               local argValue::Absyn.Exp
 
               @match Absyn.NAMEDARG(argValue = argValue) = inElement
           argValue
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabBuiltinTransition. =#
-        function elabBuiltinTransition5(argName::String, getAsNamedArg::Bool, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}) ::Absyn.Exp 
+        function elabBuiltinTransition5(argName::String, getAsNamedArg::Bool, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}) ::Absyn.Exp
               local argValue::Absyn.Exp
 
               argValue = begin
@@ -5082,16 +5082,16 @@
                       namedArg = ListUtil.getMemberOnTrue("from", nargs, elabBuiltinTransition3)
                     elabBuiltinTransition4(namedArg)
                   end
-                  
+
                   ("from", false)  => begin
                     listHead(args)
                   end
-                  
+
                   ("to", true)  => begin
                       namedArg = ListUtil.getMemberOnTrue("to", nargs, elabBuiltinTransition3)
                     elabBuiltinTransition4(namedArg)
                   end
-                  
+
                   ("to", false)  => begin
                     listGet(args, 2)
                   end
@@ -5100,11 +5100,11 @@
           argValue
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator
         initialState(state). =#
-        function elabBuiltinInitialState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinInitialState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5139,11 +5139,11 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator
         activeState(state). =#
-        function elabBuiltinActiveState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinActiveState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5178,11 +5178,11 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator
         ticksInState(). =#
-        function elabBuiltinTicksInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinTicksInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5206,11 +5206,11 @@
           (outCache, outExp, outProperties)
         end
 
-         #= 
+         #=
         Author: BTH
         This function elaborates the builtin operator
         timeInState(). =#
-        function elabBuiltinTimeInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinTimeInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5236,7 +5236,7 @@
 
          #= This function elaborates on the builtin operator boolean, which extracts
            the boolean value of a Real, Integer or Boolean value. =#
-        function elabBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5247,7 +5247,7 @@
 
          #= This function elaborates on the builtin operator Integer for Enumerations, which extracts
           the Integer value of a Enumeration element. =#
-        function elabBuiltinIntegerEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinIntegerEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5258,7 +5258,7 @@
 
          #= The builtin operator noEvent makes sure that events are not generated for the
            expression. =#
-        function elabBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5273,7 +5273,7 @@
         end
 
          #= This function handles the built in edge operator. =#
-        function elabBuiltinEdge(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinEdge(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5304,7 +5304,7 @@
         end
 
          #= This function handles the built in der operator. =#
-        function elabBuiltinDer(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinDer(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5349,7 +5349,7 @@
         end
 
          #= This function handles the built in change operator. =#
-        function elabBuiltinChange(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinChange(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5415,7 +5415,7 @@
         end
 
          #= This function handles the built in cat operator. =#
-        function elabBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5492,7 +5492,7 @@
         end
 
          #= This function handles the built in identity operator. =#
-        function elabBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5548,7 +5548,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function zeroSizeOverconstrainedOperator(inExp::DAE.Exp, inFExp::DAE.Exp, inInfo::SourceInfo)  
+        function zeroSizeOverconstrainedOperator(inExp::DAE.Exp, inFExp::DAE.Exp, inInfo::SourceInfo)
               _ = begin
                   local s::String
                 @match inExp begin
@@ -5557,7 +5557,7 @@
                       Error.addSourceMessage(Error.OVERCONSTRAINED_OPERATOR_SIZE_ZERO_RETURN_FALSE, list(s), inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -5566,7 +5566,7 @@
         end
 
          #= This function elaborates on the builtin operator Connections.isRoot. =#
-        function elabBuiltinIsRoot(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinIsRoot(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5584,7 +5584,7 @@
          #= author: adrpo
           This function handles the built-in rooted operator. (MultiBody).
           See more here: http:trac.modelica.org/Modelica/ticket/95 =#
-        function elabBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5612,7 +5612,7 @@
           and
           http:www.ep.liu.se/ecp/043/041/ecp09430108.pdf
          for a specification of this operator =#
-        function elabBuiltinUniqueRootIndices(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinUniqueRootIndices(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5642,7 +5642,7 @@
                       ty = DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_INTEGER(dim)))
                     (cache, DAE.CALL(Absyn.QUALIFIED("Connections", Absyn.IDENT("uniqueRootIndices")), list(exp1, exp2, exp3), DAE.CALL_ATTR(ty, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL())), DAE.PROP(ty, DAE.C_VAR()))
                   end
-                  
+
                   (cache, env, aexp1 <| aexp2 <| _ <|  nil(),  nil(), _, pre, _)  => begin
                       @match (cache, (@match DAE.ARRAY(array = lst) = exp1), _) = elabExpInExpression(cache, env, aexp1, false, false, pre, info)
                       dim = listLength(lst)
@@ -5651,7 +5651,7 @@
                       ty = DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_INTEGER(dim)))
                     (cache, DAE.CALL(Absyn.QUALIFIED("Connections", Absyn.IDENT("uniqueRootIndices")), list(exp1, exp2, exp3), DAE.CALL_ATTR(ty, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL())), DAE.PROP(ty, DAE.C_VAR()))
                   end
-                  
+
                   (cache, env, aexp1 <| aexp2 <|  nil(), Absyn.NAMEDARG("message", _) <|  nil(), _, pre, _)  => begin
                       @match (cache, (@match DAE.ARRAY(array = lst) = exp1), _) = elabExpInExpression(cache, env, aexp1, false, false, pre, info)
                       dim = listLength(lst)
@@ -5667,7 +5667,7 @@
 
          #= This function handles the built in scalar operator.
            For example, scalar({1}) => 1 or scalar({a}) => a =#
-        function elabBuiltinScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5705,10 +5705,10 @@
          const STRING_ARG_LEFTJUSTIFIED = SLOT(DAE.FUNCARG("leftJustified", DAE.T_BOOL_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), false, SOME(DAE.BCONST(true)), nil, 3, SLOT_NOT_EVALUATED)::Slot
          const STRING_ARG_SIGNIFICANT_DIGITS = SLOT(DAE.FUNCARG("significantDigits", DAE.T_INTEGER_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), false, SOME(DAE.ICONST(6)), nil, 4, SLOT_NOT_EVALUATED)::Slot
 
-         #= 
+         #=
           author: PA
           This function handles the built-in String operator. =#
-        function elabBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5776,7 +5776,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinGetInstanceName(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinGetInstanceName(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -5802,7 +5802,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinIsPresent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinIsPresent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -5825,7 +5825,7 @@
                               Error.addSourceMessage(Error.IS_PRESENT_WRONG_DIRECTION, nil, info)
                             fail()
                           end
-                          
+
                           _  => begin
                               ()
                           end
@@ -5833,7 +5833,7 @@
                       end
                     Expression.makeImpureBuiltinCall("isPresent", _cons(DAE.CREF(DAE.CREF_IDENT(str, DAE.T_BOOL_DEFAULT, nil), DAE.T_BOOL_DEFAULT), nil), DAE.T_BOOL_DEFAULT)
                   end
-                  
+
                   exp  => begin
                       Error.addSourceMessage(Error.IS_PRESENT_INVALID_EXP, list(Dump.printExpStr(exp)), info)
                     fail()
@@ -5845,7 +5845,7 @@
         end
 
          #= This function handles the built in vector operator. =#
-        function elabBuiltinVector(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinVector(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5901,7 +5901,7 @@
 
          #= Checks that the argument to vector has at most one dimension which is larger
            than one, otherwise prints an error and fails. =#
-        function checkBuiltinVectorDims(inExp::Absyn.Exp, inEnv::FCore.Graph, inType::DAE.Type, inPrefix::Prefix.Prefix, inInfo::SourceInfo)  
+        function checkBuiltinVectorDims(inExp::Absyn.Exp, inEnv::FCore.Graph, inType::DAE.Type, inPrefix::Prefix.Prefix, inInfo::SourceInfo)
               local found_dim_sz_one::Bool = false
               local dims::List{ModelicaInteger}
               local arg_str::String
@@ -5925,7 +5925,7 @@
               end
         end
 
-        function flattenArray(arr::List{<:DAE.Exp}) ::List{DAE.Exp} 
+        function flattenArray(arr::List{<:DAE.Exp}) ::List{DAE.Exp}
               local flattenedExpl::List{DAE.Exp}
 
               flattenedExpl = begin
@@ -5937,19 +5937,19 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.ARRAY(array = expl) <| rest_expl  => begin
                       expl = flattenArray(expl)
                       expl2 = flattenArray(rest_expl)
                       expl2 = listAppend(expl, expl2)
                     expl2
                   end
-                  
+
                   DAE.MATRIX(matrix = e <|  nil() <|  nil()) <| rest_expl  => begin
                       expl = flattenArray(rest_expl)
                     _cons(e, expl)
                   end
-                  
+
                   e <| expl  => begin
                       expl = flattenArray(expl)
                     _cons(e, expl)
@@ -5960,7 +5960,7 @@
         end
 
          #= Elaborates the builtin matrix function. =#
-        function elabBuiltinMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabBuiltinMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5976,7 +5976,7 @@
 
          #= Helper function to elabBuiltinMatrix, evaluates the matrix function given the
            elaborated argument. =#
-        function elabBuiltinMatrix2(inCache::FCore.Cache, inEnv::FCore.Graph, inArg::DAE.Exp, inProperties::DAE.Properties, inType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties} 
+        function elabBuiltinMatrix2(inCache::FCore.Cache, inEnv::FCore.Graph, inArg::DAE.Exp, inProperties::DAE.Properties, inType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -5996,18 +5996,18 @@
                       (exp, props) = promoteExp(inArg, inProperties, 2)
                     (exp, props)
                   end
-                  
+
                   _ where (Types.numberOfDimensions(inType) == 1)  => begin
                        #=  1-dimensional array
                        =#
                       (exp, props) = promoteExp(inArg, inProperties, 2)
                     (exp, props)
                   end
-                  
+
                   DAE.MATRIX(__)  => begin
                     (inArg, inProperties)
                   end
-                  
+
                   DAE.ARRAY(ty = DAE.T_ARRAY(ety, dim1 <| dim2 <| _), scalar = scalar, array = expl)  => begin
                        #=  Matrix
                        =#
@@ -6025,7 +6025,7 @@
         end
 
          #= Helper function to elabBuiltinMatrix2. =#
-        function elabBuiltinMatrix3(inExp::DAE.Exp, inInfo::SourceInfo) ::DAE.Exp 
+        function elabBuiltinMatrix3(inExp::DAE.Exp, inInfo::SourceInfo) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -6041,7 +6041,7 @@
                       expl = list(arrayScalar(e, 3, "matrix", inInfo) for e in expl)
                     DAE.ARRAY(DAE.T_ARRAY(ety, list(dim)), scalar, expl)
                   end
-                  
+
                   DAE.MATRIX(ty = DAE.T_ARRAY(ety, dim <| dims), matrix = matrix_expl)  => begin
                       ety2 = DAE.T_ARRAY(ety, dims)
                       expl = list(Expression.makeArray(e, ety2, true) for e in matrix_expl)
@@ -6055,7 +6055,7 @@
 
          #= Returns the scalar value of an array, or prints an error message and fails if
            any dimension of the array isn't of size 1. =#
-        function arrayScalar(inExp::DAE.Exp, inDim::ModelicaInteger #= The current dimension, used for error message. =#, inOperator::String #= The current operator name, used for error message. =#, inInfo::SourceInfo) ::DAE.Exp 
+        function arrayScalar(inExp::DAE.Exp, inDim::ModelicaInteger #= The current dimension, used for error message. =#, inOperator::String #= The current operator name, used for error message. =#, inInfo::SourceInfo) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -6071,7 +6071,7 @@
                   DAE.ARRAY(array = exp <|  nil())  => begin
                     arrayScalar(exp, inDim + 1, inOperator, inInfo)
                   end
-                  
+
                   DAE.ARRAY(array = expl)  => begin
                        #=  Any other array.
                        =#
@@ -6080,11 +6080,11 @@
                       Error.addSourceMessage(Error.INVALID_ARRAY_DIM_IN_CONVERSION_OP, list(dim_str, inOperator, "1", size_str), inInfo)
                     fail()
                   end
-                  
+
                   DAE.MATRIX(ty = ty, matrix = expl <|  nil())  => begin
                     arrayScalar(DAE.ARRAY(ty, true, expl), inDim + 1, inOperator, inInfo)
                   end
-                  
+
                   DAE.MATRIX(matrix = mexpl)  => begin
                        #=  A matrix where the first dimension is 1.
                        =#
@@ -6095,7 +6095,7 @@
                       Error.addSourceMessage(Error.INVALID_ARRAY_DIM_IN_CONVERSION_OP, list(dim_str, inOperator, "1", size_str), inInfo)
                     fail()
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -6109,7 +6109,7 @@
          #= This function dispatches the elaboration of builtin operators by returning
            the appropriate function. When a new builtin operator is added, a new rule
            has to be added to this function. =#
-        function elabBuiltinHandler(inIdent::String) ::HandlerFunc 
+        function elabBuiltinHandler(inIdent::String) ::HandlerFunc
               local outHandler::HandlerFunc
 
               outHandler = begin
@@ -6117,220 +6117,220 @@
                   "smooth"  => begin
                     elabBuiltinSmooth
                   end
-                  
+
                   "size"  => begin
                     elabBuiltinSize
                   end
-                  
+
                   "ndims"  => begin
                     elabBuiltinNDims
                   end
-                  
+
                   "zeros"  => begin
                     elabBuiltinZeros
                   end
-                  
+
                   "ones"  => begin
                     elabBuiltinOnes
                   end
-                  
+
                   "fill"  => begin
                     elabBuiltinFill
                   end
-                  
+
                   "max"  => begin
                     elabBuiltinMax
                   end
-                  
+
                   "min"  => begin
                     elabBuiltinMin
                   end
-                  
+
                   "transpose"  => begin
                     elabBuiltinTranspose
                   end
-                  
+
                   "symmetric"  => begin
                     elabBuiltinSymmetric
                   end
-                  
+
                   "array"  => begin
                     elabBuiltinArray
                   end
-                  
+
                   "sum"  => begin
                     elabBuiltinSum
                   end
-                  
+
                   "product"  => begin
                     elabBuiltinProduct
                   end
-                  
+
                   "pre"  => begin
                     elabBuiltinPre
                   end
-                  
+
                   "firstTick"  => begin
                     elabBuiltinFirstTick
                   end
-                  
+
                   "interval"  => begin
                     elabBuiltinInterval
                   end
-                  
+
                   "boolean"  => begin
                     elabBuiltinBoolean
                   end
-                  
+
                   "noEvent"  => begin
                     elabBuiltinNoevent
                   end
-                  
+
                   "edge"  => begin
                     elabBuiltinEdge
                   end
-                  
+
                   "der"  => begin
                     elabBuiltinDer
                   end
-                  
+
                   "change"  => begin
                     elabBuiltinChange
                   end
-                  
+
                   "cat"  => begin
                     elabBuiltinCat
                   end
-                  
+
                   "identity"  => begin
                     elabBuiltinIdentity
                   end
-                  
+
                   "vector"  => begin
                     elabBuiltinVector
                   end
-                  
+
                   "matrix"  => begin
                     elabBuiltinMatrix
                   end
-                  
+
                   "scalar"  => begin
                     elabBuiltinScalar
                   end
-                  
+
                   "String"  => begin
                     elabBuiltinString
                   end
-                  
+
                   "rooted"  => begin
                     elabBuiltinRooted
                   end
-                  
+
                   "Integer"  => begin
                     elabBuiltinIntegerEnum
                   end
-                  
+
                   "EnumToInteger"  => begin
                     elabBuiltinIntegerEnum
                   end
-                  
+
                   "inStream"  => begin
                     elabBuiltinInStream
                   end
-                  
+
                   "actualStream"  => begin
                     elabBuiltinActualStream
                   end
-                  
+
                   "getInstanceName"  => begin
                     elabBuiltinGetInstanceName
                   end
-                  
+
                   "classDirectory"  => begin
                     elabBuiltinClassDirectory
                   end
-                  
+
                   "sample"  => begin
                     elabBuiltinSample
                   end
-                  
+
                   "cardinality"  => begin
                     elabBuiltinCardinality
                   end
-                  
+
                   "homotopy"  => begin
                     elabBuiltinHomotopy
                   end
-                  
+
                   "DynamicSelect"  => begin
                     elabBuiltinDynamicSelect
                   end
-                  
+
                   "Clock"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinClock
                   end
-                  
+
                   "hold"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinHold
                   end
-                  
+
                   "shiftSample"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinShiftSample
                   end
-                  
+
                   "backSample"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinBackSample
                   end
-                  
+
                   "noClock"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinNoClock
                   end
-                  
+
                   "transition"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinTransition
                   end
-                  
+
                   "initialState"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinInitialState
                   end
-                  
+
                   "activeState"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinActiveState
                   end
-                  
+
                   "ticksInState"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinTicksInState
                   end
-                  
+
                   "timeInState"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     elabBuiltinTimeInState
                   end
-                  
+
                   "sourceInfo"  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                     elabBuiltinSourceInfo
                   end
-                  
+
                   "SOME"  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                     elabBuiltinSome
                   end
-                  
+
                   "NONE"  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                     elabBuiltinNone
                   end
-                  
+
                   "isPresent"  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                     elabBuiltinIsPresent
@@ -6343,7 +6343,7 @@
          #= Returns true if the function name given as argument
           is a builtin function, which either has a elabBuiltinHandler function
           or can be found in the builtin environment. =#
-        function isBuiltinFunc(inPath::Absyn.Path #= the path of the found function =#, ty::DAE.Type) ::Tuple{DAE.FunctionBuiltin, Bool, Absyn.Path} 
+        function isBuiltinFunc(inPath::Absyn.Path #= the path of the found function =#, ty::DAE.Type) ::Tuple{DAE.FunctionBuiltin, Bool, Absyn.Path}
               local outPath::Absyn.Path #= make the path non-FQ =#
               local b::Bool
               local isBuiltin::DAE.FunctionBuiltin
@@ -6356,26 +6356,26 @@
                       path = AbsynUtil.makeNotFullyQualified(path)
                     (isBuiltin, true, path)
                   end
-                  
+
                   (path, DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isBuiltin = isBuiltin && DAE.FUNCTION_BUILTIN_PTR(__))))  => begin
                       path = AbsynUtil.makeNotFullyQualified(path)
                     (isBuiltin, false, path)
                   end
-                  
+
                   (Absyn.IDENT(name = id), _)  => begin
                       elabBuiltinHandler(id)
                     (DAE.FUNCTION_BUILTIN(SOME(id), false), true, inPath)
                   end
-                  
+
                   (Absyn.FULLYQUALIFIED(path), _)  => begin
                       @match ((@match DAE.FUNCTION_BUILTIN() = isBuiltin), _, path) = isBuiltinFunc(path, ty)
                     (isBuiltin, true, path)
                   end
-                  
+
                   (Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), _)  => begin
                     (DAE.FUNCTION_BUILTIN(NONE(), false), true, inPath)
                   end
-                  
+
                   _  => begin
                       (DAE.FUNCTION_NOT_BUILTIN(), false, inPath)
                   end
@@ -6386,7 +6386,7 @@
 
          #= This function elaborates on builtin operators (such as \\\"pre\\\", \\\"der\\\" etc.),
            by calling the builtin handler to retrieve the correct function to call. =#
-        function elabCallBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnName::Absyn.ComponentRef, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabCallBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnName::Absyn.ComponentRef, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -6399,20 +6399,20 @@
                       handler = elabBuiltinHandler(inFnName.name)
                     handler(inCache, inEnv, inPosArgs, inNamedArgs, inImplicit, inPrefix, inInfo)
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "isRoot"))  => begin
                     elabBuiltinIsRoot(inCache, inEnv, inPosArgs, inNamedArgs, inImplicit, inPrefix, inInfo)
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "uniqueRootIndices"))  => begin
                       Error.addSourceMessage(Error.NON_STANDARD_OPERATOR, list("Connections.uniqueRootIndices"), inInfo)
                     elabBuiltinUniqueRootIndices(inCache, inEnv, inPosArgs, inNamedArgs, inImplicit, inPrefix, inInfo)
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "rooted"))  => begin
                     elabBuiltinRooted(inCache, inEnv, inPosArgs, inNamedArgs, inImplicit, inPrefix, inInfo)
                   end
-                  
+
                   Absyn.CREF_FULLYQUALIFIED(cr)  => begin
                     elabCallBuiltin(inCache, inEnv, cr, inPosArgs, inNamedArgs, inImplicit, inPrefix, inInfo)
                   end
@@ -6423,7 +6423,7 @@
 
          #= This function elaborates on a function call.  It converts the name to a
            Absyn.Path, and used the Static.elabCallArgs to do the rest of the work. =#
-        function elabCall(cache::FCore.Cache, env::FCore.Graph, fn::Absyn.ComponentRef, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabCall(cache::FCore.Cache, env::FCore.Graph, fn::Absyn.ComponentRef, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local prop::DAE.Properties
               local e::DAE.Exp
 
@@ -6472,7 +6472,7 @@
                       ErrorExt.delCheckpoint("elabCall_InteractiveFunction")
                     (cache, e, prop)
                   end
-                  
+
                   ()  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Static.elabCall failed\\n")
@@ -6488,7 +6488,7 @@
                       Debug.traceln(prestr)
                     fail()
                   end
-                  
+
                   ()  => begin
                        #= /* Handle the scripting interface */ =#
                       (cache, e, prop) = BackendInterface.elabCallInteractive(cache, env, fn, args, nargs, impl, pre, info) #= Elaborate interactive function calls, such as simulate(), plot() etc. =#
@@ -6500,7 +6500,7 @@
         end
 
          #= Determine if a function has a builtin handler or not. =#
-        function hasBuiltInHandler(fn::Absyn.ComponentRef) ::Bool 
+        function hasBuiltInHandler(fn::Absyn.ComponentRef) ::Bool
               local b::Bool
 
               b = begin
@@ -6511,23 +6511,23 @@
                       elabBuiltinHandler(name)
                     true
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "isRoot"))  => begin
                     true
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "uniqueRootIndices"))  => begin
                     true
                   end
-                  
+
                   Absyn.CREF_QUAL(name = "Connections", componentRef = Absyn.CREF_IDENT(name = "rooted"))  => begin
                     true
                   end
-                  
+
                   Absyn.CREF_FULLYQUALIFIED(cr)  => begin
                     hasBuiltInHandler(cr)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6540,7 +6540,7 @@
           be used in e.g. plot(model,{v1{3},v2.t}) It should only be used in interactive
           functions that uses variablenames as componentreferences.
          =#
-        function elabVariablenames(inExpl::List{<:Absyn.Exp}) ::List{DAE.Exp} 
+        function elabVariablenames(inExpl::List{<:Absyn.Exp}) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp} = nil
 
               local exp::DAE.Exp
@@ -6551,7 +6551,7 @@
                   Absyn.CREF(__)  => begin
                     DAE.CODE(Absyn.C_VARIABLENAME(e.componentRef), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   Absyn.CALL(Absyn.CREF_IDENT(name = "der"), Absyn.FUNCTIONARGS(Absyn.CREF(__) <|  nil(),  nil()))  => begin
                     DAE.CODE(Absyn.C_EXPRESSION(e), DAE.T_UNKNOWN_DEFAULT)
                   end
@@ -6560,7 +6560,7 @@
           outExpl
         end
 
-        function getOptionalNamedArgExpList(name::String, nargs::List{<:Absyn.NamedArg}) ::List{DAE.Exp} 
+        function getOptionalNamedArgExpList(name::String, nargs::List{<:Absyn.NamedArg}) ::List{DAE.Exp}
               local out::List{DAE.Exp}
 
               out = begin
@@ -6571,12 +6571,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   Absyn.NAMEDARG(argName = argName, argValue = Absyn.ARRAY(arrayExp = absynExpList)) <| _  => begin
                       @match true = stringEq(name, argName)
                     absynExpListToDaeExpList(absynExpList)
                   end
-                  
+
                   _ <| rest  => begin
                     getOptionalNamedArgExpList(name, rest)
                   end
@@ -6585,7 +6585,7 @@
           out
         end
 
-        function absynExpListToDaeExpList(absynExpList::List{<:Absyn.Exp}) ::List{DAE.Exp} 
+        function absynExpListToDaeExpList(absynExpList::List{<:Absyn.Exp}) ::List{DAE.Exp}
               local out::List{DAE.Exp}
 
               out = begin
@@ -6599,7 +6599,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   Absyn.CREF(componentRef = absynCr) <| absynRest  => begin
                       absynPath = AbsynUtil.crefToPath(absynCr)
                       daeCr = ComponentReference.pathToCref(absynPath)
@@ -6607,7 +6607,7 @@
                       daeExpList = absynExpListToDaeExpList(absynRest)
                     _cons(crefExp, daeExpList)
                   end
-                  
+
                   _ <| absynRest  => begin
                     absynExpListToDaeExpList(absynRest)
                   end
@@ -6618,7 +6618,7 @@
 
          #= This function is used to 'elaborate' interactive functions' optional parameters,
            e.g. simulate(A.b, startTime=1), startTime is an optional parameter. =#
-        function getOptionalNamedArg(inCache::FCore.Cache, inEnv::FCore.Graph, inImplicit::Bool, inArgName::String, inType::DAE.Type, inArgs::List{<:Absyn.NamedArg}, inDefaultExp::DAE.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp} 
+        function getOptionalNamedArg(inCache::FCore.Cache, inEnv::FCore.Graph, inImplicit::Bool, inArgName::String, inType::DAE.Type, inArgs::List{<:Absyn.NamedArg}, inDefaultExp::DAE.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
               local outExp::DAE.Exp = inDefaultExp
               local outCache::FCore.Cache = inCache
 
@@ -6656,7 +6656,7 @@
          #= This function elaborates a ComponentRef without adding type information.
            Environment is passed along, such that constant subscripts can be elabed
            using existing functions. =#
-        function elabUntypedCref(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function elabUntypedCref(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCref::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -6668,7 +6668,7 @@
                       (outCache, subs) = elabSubscripts(inCache, inEnv, inCref.subscripts, inImplicit, inPrefix, inInfo)
                     ComponentReference.makeCrefIdent(inCref.name, DAE.T_UNKNOWN_DEFAULT, subs)
                   end
-                  
+
                   Absyn.CREF_QUAL(__)  => begin
                       (outCache, subs) = elabSubscripts(inCache, inEnv, inCref.subscripts, inImplicit, inPrefix, inInfo)
                       (outCache, cr) = elabUntypedCref(outCache, inEnv, inCref.componentRef, inImplicit, inPrefix, inInfo)
@@ -6679,7 +6679,7 @@
           (outCache, outCref)
         end
 
-        function needToRebuild(newFile::String, oldFile::String, buildTime::ModelicaReal) ::Bool 
+        function needToRebuild(newFile::String, oldFile::String, buildTime::ModelicaReal) ::Bool
               local buildNeeded::Bool
 
               buildNeeded = begin
@@ -6691,14 +6691,14 @@
                   ("", "")  => begin
                     true
                   end
-                  
+
                   (newf, oldf)  => begin
                       @match true = stringEq(newf, oldf)
                       @match SOME(nfmt) = System.getFileModificationTime(newf)
                       @match true = realGt(buildTime, nfmt)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -6715,21 +6715,21 @@
           buildNeeded
         end
 
-        function createDummyFarg(name::String) ::DAE.FuncArg 
+        function createDummyFarg(name::String) ::DAE.FuncArg
               local farg::DAE.FuncArg
 
               farg = DAE.FUNCARG(name, DAE.T_UNKNOWN_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())
           farg
         end
 
-         #= 
+         #=
         function: elabCallArgs
           Given the name of a function and two lists of expression and
           NamedArg respectively to be used
           as actual arguments in a function call to that function, this
           function finds the function definition and matches the actual
           arguments to the formal parameters. =#
-        function elabCallArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabCallArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -6744,7 +6744,7 @@
            parameter structural since it decides the dimension of an array.  We fall
            back to not evaluating the parameter if we fail since the dimension may not
            be structural (used in another call or reduction, etc). =#
-        function elabCallArgsEvaluateArrayLength(inCache::FCore.Cache, env::FCore.Graph, inProperties::DAE.Properties, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Properties} 
+        function elabCallArgsEvaluateArrayLength(inCache::FCore.Cache, env::FCore.Graph, inProperties::DAE.Properties, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Properties}
               local outProperties::DAE.Properties
               local outCache::FCore.Cache
 
@@ -6766,7 +6766,7 @@
           (outCache, outProperties)
         end
 
-        function elabCallArgsEvaluateArrayLength2(ty::DAE.Type, inTpl::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph}} 
+        function elabCallArgsEvaluateArrayLength2(ty::DAE.Type, inTpl::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph}}
               local outTpl::Tuple{FCore.Cache, FCore.Graph}
               local oty::DAE.Type = ty
 
@@ -6779,7 +6779,7 @@
                       oty.dims = dims
                     (oty, tpl)
                   end
-                  
+
                   _  => begin
                       (oty, inTpl)
                   end
@@ -6788,7 +6788,7 @@
           (oty, outTpl)
         end
 
-        function elabCallArgsEvaluateArrayLength3(inDim::DAE.Dimension, inTpl::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{DAE.Dimension, Tuple{FCore.Cache, FCore.Graph}} 
+        function elabCallArgsEvaluateArrayLength3(inDim::DAE.Dimension, inTpl::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{DAE.Dimension, Tuple{FCore.Cache, FCore.Graph}}
               local outTpl::Tuple{FCore.Cache, FCore.Graph}
               local outDim::DAE.Dimension
 
@@ -6802,7 +6802,7 @@
                       @match (cache, Values.INTEGER(i)) = Ceval.ceval(cache, env, exp, false, Absyn.NO_MSG(), 0)
                     (DAE.DIM_INTEGER(i), (cache, env))
                   end
-                  
+
                   _  => begin
                       (inDim, inTpl)
                   end
@@ -6816,7 +6816,7 @@
           to the variable replacement structure. This is needed to
           be able to replace input variables in default values.
           Example: ...  =#
-        function createInputVariableReplacements(inSlotLst::List{<:Slot}, inVarsRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements 
+        function createInputVariableReplacements(inSlotLst::List{<:Slot}, inVarsRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements
               local outVarsRepl::VarTransform.VariableReplacements
 
               outVarsRepl = begin
@@ -6830,14 +6830,14 @@
                    nil()  => begin
                     inVarsRepl
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = id), slotFilled = true, arg = SOME(e)) <| rest  => begin
                        #=  only interested in filled slots that have a optional expression
                        =#
                       o = VarTransform.addReplacement(inVarsRepl, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil), e)
                     createInputVariableReplacements(rest, o)
                   end
-                  
+
                   _  => begin
                       createInputVariableReplacements(listRest(inSlotLst), inVarsRepl)
                   end
@@ -6848,14 +6848,14 @@
           outVarsRepl
         end
 
-         #= 
+         #=
         function: elabCallArgs
           Given the name of a function and two lists of expression and
           NamedArg respectively to be used
           as actual arguments in a function call to that function, this
           function finds the function definition and matches the actual
           arguments to the formal parameters. =#
-        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}} 
+        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -6879,7 +6879,7 @@
                   local constlist::List{DAE.Const}
                   local constInputArgs::List{DAE.Const}
                   local constDefaultArgs::List{DAE.Const}
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local tyconst::DAE.TupleConst
                   local prop::DAE.Properties
                   local prop_1::DAE.Properties
@@ -6951,7 +6951,7 @@
                       tp = complexTypeFromSlots(newslots2, ClassInf.UNKNOWN(Absyn.IDENT("")))
                     (cache, SOME((DAE.CALL(fn, args_2, DAE.CALL_ATTR(tp, false, false, false, false, DAE.NO_INLINE(), DAE.NO_TAIL())), DAE.PROP(DAE.T_UNKNOWN_DEFAULT, DAE.C_CONST()))))
                   end
-                  
+
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       ErrorExt.setCheckpoint("RecordConstructor")
                       (cache, func) = InstFunction.getRecordConstructorFunction(cache, env, fn)
@@ -6962,8 +6962,8 @@
                       (args_2, newslots2) = addDefaultArgs(newslots, info)
                       vect_dims = slotsVectorizable(newslots2, info)
                       constlist = constInputArgs
-                      const = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
-                      tyconst = elabConsts(outtype, const)
+                      constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
+                      tyconst = elabConsts(outtype, constType)
                       prop = getProperties(outtype, tyconst)
                       callExp = DAE.CALL(path, args_2, DAE.CALL_ATTR(outtype, false, false, false, false, DAE.NO_INLINE(), DAE.NO_TAIL()))
                       (call_exp, prop_1) = vectorizeCall(callExp, vect_dims, newslots2, prop, info)
@@ -6972,7 +6972,7 @@
                       ErrorExt.rollBack("RecordConstructor")
                     (cache, expProps)
                   end
-                  
+
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       @match false = Mutable.access(stopElab)
                       (cache, recordCl, recordEnv) = Lookup.lookupClass(cache, env, fn)
@@ -6987,7 +6987,7 @@
                       ErrorExt.rollBack("RecordConstructor")
                     (cache, expProps)
                   end
-                  
+
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       ErrorExt.delCheckpoint("RecordConstructor")
                       @match true = Config.acceptMetaModelicaGrammar()
@@ -6997,7 +6997,7 @@
                       (cache, expProps) = elabCallArgsMetarecord(cache, env, t, args, nargs, impl, stopElab, pre, info)
                     (cache, expProps)
                   end
-                  
+
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       ErrorExt.setCheckpoint("elabCallArgs2FunctionLookup")
                       @match false = Mutable.access(stopElab)
@@ -7013,7 +7013,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, expProps)
                   end
-                  
+
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       @match (cache, (@match list(tp1) = typelist)) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
                       (cache, args_1, _, _, functype, _, _) = elabTypes(cache, env, args, nargs, typelist, true, false, impl, pre, info)
@@ -7025,7 +7025,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, fn, _, _, _, _)  => begin
                       @match (cache, SCode.CLASS(restriction = re), _) = Lookup.lookupClass(cache, env, fn)
                       @match false = SCodeUtil.isFunctionRestriction(re)
@@ -7035,7 +7035,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, fn, _, _, _, pre)  => begin
                       @match (cache, (@match _cons(_, _cons(_, _)) = typelist)) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
                       t_lst = ListUtil.map(typelist, Types.unparseType)
@@ -7046,7 +7046,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, fn, Absyn.CREF(Absyn.CREF_IDENT(name, _)) <|  nil(), _, impl, pre) where (Config.acceptOptimicaGrammar())  => begin
                       cref = AbsynUtil.pathToCref(fn)
                       @match (cache, SOME(((@match DAE.CREF(daecref, tp) = daeexp), prop, _))) = elabCref(cache, env, cref, impl, true, pre, info)
@@ -7055,7 +7055,7 @@
                       expProps = SOME((daeexp, prop))
                     (cache, expProps)
                   end
-                  
+
                   (cache, env, fn, _, _, _, _)  => begin
                       @shouldFail (_, _, _) = Lookup.lookupType(cache, env, fn, NONE()) #= msg =#
                       scope = FGraph.printGraphPathStr(env) + " (looking for a function or record)"
@@ -7064,7 +7064,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, fn, _, _, _, pre)  => begin
                       @match (cache, nil) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
                       fn_str = AbsynUtil.pathString(fn)
@@ -7074,7 +7074,7 @@
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                     (cache, NONE())
                   end
-                  
+
                   (_, env, fn, _, _, _, _)  => begin
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                       @match true = Flags.isSet(Flags.FAILTRACE)
@@ -7121,7 +7121,7 @@
         end
 
          #= Elaborates the input given a set of viable function candidates, and vectorizes the arguments+performs type checking =#
-        function elabCallArgs3(inCache::FCore.Cache, inEnv::FCore.Graph, typelist::List{<:DAE.Type}, fn::Absyn.Path, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}} 
+        function elabCallArgs3(inCache::FCore.Cache, inEnv::FCore.Graph, typelist::List{<:DAE.Type}, fn::Absyn.Path, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -7130,7 +7130,7 @@
               local args_1::List{DAE.Exp}
               local args_2::List{DAE.Exp}
               local constlist::List{DAE.Const}
-              local const::DAE.Const
+              local constType::DAE.Const
               local restype::DAE.Type
               local functype::DAE.Type
               local isBuiltin::DAE.FunctionBuiltin
@@ -7166,14 +7166,14 @@
                #= check the env to see if a call to a parallel or kernel function is a valid one.
                =#
               @match true = isValidWRTParallelScope(fn, builtin, funcParal, inEnv, info)
-              const = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
-              const = if Flags.isSet(Flags.RML) && ! builtin || ! isPure
+              constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
+              constType = if Flags.isSet(Flags.RML) && ! builtin || ! isPure
                     DAE.C_VAR()
                   else
-                    const
+                    constType
                   end #= in RML no function needs to be ceval'ed; this speeds up compilation significantly when bootstrapping =#
-              (cache, const) = determineConstSpecialFunc(cache, inEnv, const, fn_1)
-              tyconst = elabConsts(restype, const)
+              (cache, constType) = determineConstSpecialFunc(cache, inEnv, constType, fn_1)
+              tyconst = elabConsts(restype, constType)
               prop = getProperties(restype, tyconst)
               tp = Types.simplifyType(restype)
                #=  adrpo: 2011-09-30 NOTE THAT THIS WILL NOT ADD DEFAULT ARGS
@@ -7236,7 +7236,7 @@
           (outCache, expProps)
         end
 
-        function inlineBuiltin(isBuiltin::DAE.FunctionBuiltin, inlineType::DAE.InlineType) ::DAE.InlineType 
+        function inlineBuiltin(isBuiltin::DAE.FunctionBuiltin, inlineType::DAE.InlineType) ::DAE.InlineType
               local outInlineType::DAE.InlineType
 
               outInlineType = begin
@@ -7244,7 +7244,7 @@
                   DAE.FUNCTION_BUILTIN_PTR(__)  => begin
                     DAE.BUILTIN_EARLY_INLINE()
                   end
-                  
+
                   _  => begin
                       inlineType
                   end
@@ -7253,14 +7253,14 @@
           outInlineType
         end
 
-        function isValidWRTParallelScope(inFn::Absyn.Path, isBuiltin::Bool, inFuncParallelism::DAE.FunctionParallelism, inEnv::FCore.Graph, inInfo::SourceInfo) ::Bool 
+        function isValidWRTParallelScope(inFn::Absyn.Path, isBuiltin::Bool, inFuncParallelism::DAE.FunctionParallelism, inEnv::FCore.Graph, inInfo::SourceInfo) ::Bool
               local isValid::Bool
 
               isValid = isValidWRTParallelScope_dispatch(inFn, isBuiltin, inFuncParallelism, FGraph.currentScope(inEnv), inInfo)
           isValid
         end
 
-        function isValidWRTParallelScope_dispatch(inFn::Absyn.Path, isBuiltin::Bool, inFuncParallelism::DAE.FunctionParallelism, inScope::FCore.Scope, inInfo::SourceInfo) ::Bool 
+        function isValidWRTParallelScope_dispatch(inFn::Absyn.Path, isBuiltin::Bool, inFuncParallelism::DAE.FunctionParallelism, inScope::FCore.Scope, inInfo::SourceInfo) ::Bool
               local isValid::Bool
 
               isValid = begin
@@ -7274,7 +7274,7 @@
                   (_, true, DAE.FP_NON_PARALLEL(__), _, _)  => begin
                     true
                   end
-                  
+
                   (_, _, _, ref <| restScope, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7282,17 +7282,17 @@
                       @match false = stringEq(scopeName, FCore.parForScopeName)
                     isValidWRTParallelScope_dispatch(inFn, isBuiltin, inFuncParallelism, restScope, inInfo)
                   end
-                  
+
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
                       @match true = FGraph.checkScopeType(list(ref), SOME(FCore.CLASS_SCOPE()))
                     true
                   end
-                  
+
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
                       @match true = FGraph.checkScopeType(list(ref), SOME(FCore.FUNCTION_SCOPE()))
                     true
                   end
-                  
+
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7301,7 +7301,7 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7309,7 +7309,7 @@
                       @match false = stringEqual(scopeName, AbsynUtil.pathString(inFn))
                     true
                   end
-                  
+
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7319,14 +7319,14 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
                       @match true = stringEqual(scopeName, FCore.parForScopeName)
                     true
                   end
-                  
+
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7334,7 +7334,7 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_KERNEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7343,7 +7343,7 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_KERNEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7352,7 +7352,7 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_KERNEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
@@ -7361,14 +7361,14 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   (_, _, DAE.FP_KERNEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
                       @match false = stringEqual(scopeName, AbsynUtil.pathString(inFn))
                     true
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -7437,7 +7437,7 @@
           isValid
         end
 
-        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}} 
+        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -7452,7 +7452,7 @@
                   local fargs::List{DAE.FuncArg}
                   local slots::List{Slot}
                   local const_lst::List{DAE.Const}
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local ty_const::DAE.TupleConst
                   local prop::DAE.Properties
                   local args::List{DAE.Exp}
@@ -7464,22 +7464,22 @@
                       Error.addSourceMessage(Error.METARECORD_CONTAINS_METARECORD_MEMBER, list(fn_str, str), inInfo)
                     (inCache, NONE())
                   end
-                  
+
                   DAE.T_METARECORD(__)  => begin
                       @match false = listLength(inType.fields) == listLength(inPosArgs) + listLength(inNamedArgs)
                       fn_str = Types.unparseType(inType)
                       Error.addSourceMessage(Error.WRONG_NO_OF_ARGS, list(fn_str), inInfo)
                     (inCache, NONE())
                   end
-                  
+
                   DAE.T_METARECORD(path = fq_path)  => begin
                       field_names = list(Types.getVarName(var) for var in inType.fields)
                       tys = list(Types.getVarType(var) for var in inType.fields)
                       fargs = list(@do_threaded_for Types.makeDefaultFuncArg(n, t) (n, t) (field_names, tys))
                       slots = makeEmptySlots(fargs)
                       (outCache, _, slots, const_lst, bindings) = elabInputArgs(inCache, inEnv, inPosArgs, inNamedArgs, slots, true, true, inImplicit, inPrefix, inInfo, inType, inType.utPath)
-                      const = ListUtil.fold(const_lst, Types.constAnd, DAE.C_CONST())
-                      ty_const = elabConsts(inType, const)
+                      constType = ListUtil.fold(const_lst, Types.constAnd, DAE.C_CONST())
+                      ty_const = elabConsts(inType, constType)
                       @match true = ListUtil.fold(slots, slotAnd, true)
                       args = slotListArgs(slots)
                       if ! listEmpty(bindings)
@@ -7492,7 +7492,7 @@
                       end
                     (outCache, SOME((DAE.METARECORDCALL(fq_path, args, field_names, inType.index, inType.typeVars), prop)))
                   end
-                  
+
                   DAE.T_METARECORD(path = fq_path)  => begin
                        #=  MetaRecord failure.
                        =#
@@ -7503,7 +7503,7 @@
                       Error.addSourceMessage(Error.META_RECORD_FOUND_FAILURE, list(fn_str, str), inInfo)
                     (outCache, NONE())
                   end
-                  
+
                   DAE.T_METARECORD(path = fq_path)  => begin
                        #=  MetaRecord failure (args).
                        =#
@@ -7529,7 +7529,7 @@
 
          #= Help function to elabCallArgs. Instantiates the function as a DAE and adds it
            to the functiontree of a newly created DAE. =#
-        function instantiateDaeFunction(inCache::FCore.Cache, env::FCore.Graph, name::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#) ::Tuple{FCore.Cache, Util.Status} 
+        function instantiateDaeFunction(inCache::FCore.Cache, env::FCore.Graph, name::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#) ::Tuple{FCore.Cache, Util.Status}
               local status::Util.Status
               local outCache::FCore.Cache
 
@@ -7539,7 +7539,7 @@
 
          #= Help function to elabCallArgs. Instantiates the function as a DAE and adds it
            to the functiontree of a newly created DAE. =#
-        function instantiateDaeFunctionFromTypes(inCache::FCore.Cache, env::FCore.Graph, tys::List{<:DAE.Type}, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#, acc::Util.Status) ::Tuple{FCore.Cache, Util.Status} 
+        function instantiateDaeFunctionFromTypes(inCache::FCore.Cache, env::FCore.Graph, tys::List{<:DAE.Type}, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#, acc::Util.Status) ::Tuple{FCore.Cache, Util.Status}
               local status::Util.Status
               local outCache::FCore.Cache
 
@@ -7553,7 +7553,7 @@
                       (outCache, status) = instantiateDaeFunction(inCache, env, name, builtin, clOpt, printErrorMsg)
                     instantiateDaeFunctionFromTypes(inCache, env, rest, builtin, clOpt, printErrorMsg, status)
                   end
-                  
+
                   _  => begin
                       (inCache, acc)
                   end
@@ -7564,7 +7564,7 @@
 
          #= Help function to elabCallArgs. Instantiates the function as a DAE and adds it
            to the functiontree of a newly created DAE. =#
-        function instantiateDaeFunctionForceInst(inCache::FCore.Cache, env::FCore.Graph, name::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#) ::Tuple{FCore.Cache, Util.Status} 
+        function instantiateDaeFunctionForceInst(inCache::FCore.Cache, env::FCore.Graph, name::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#) ::Tuple{FCore.Cache, Util.Status}
               local status::Util.Status
               local outCache::FCore.Cache
 
@@ -7574,7 +7574,7 @@
 
          #= Help function to elabCallArgs. Instantiates the function as a DAE and adds it
            to the functiontree of a newly created DAE. =#
-        function instantiateDaeFunction2(inCache::FCore.Cache, inEnv::FCore.Graph, inName::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#, forceFunctionInst::ForceFunctionInst) ::Tuple{FCore.Cache, Util.Status} 
+        function instantiateDaeFunction2(inCache::FCore.Cache, inEnv::FCore.Graph, inName::Absyn.Path, builtin::Bool #= builtin functions create empty dae =#, clOpt::Option{<:SCode.Element} #= if not present, looked up by name in environment =#, printErrorMsg::Bool #= if true, prints an error message if the function could not be instantiated =#, forceFunctionInst::ForceFunctionInst) ::Tuple{FCore.Cache, Util.Status}
               local status::Util.Status
               local outCache::FCore.Cache
 
@@ -7600,11 +7600,11 @@
                        =#
                     (inCache, Util.SUCCESS())
                   end
-                  
+
                   (true, _, _, _)  => begin
                     (inCache, Util.SUCCESS())
                   end
-                  
+
                   (_, _, _, NORMAL_FUNCTION_INST(__))  => begin
                        #=  Builtin functions skipped
                        =#
@@ -7613,7 +7613,7 @@
                       @match (_, true) = isExternalObjectFunction(inCache, inEnv, inName)
                     (inCache, Util.SUCCESS())
                   end
-                  
+
                   (_, NONE(), _, _)  => begin
                        #=  Recursive calls (by looking at environment) skipped
                        =#
@@ -7621,7 +7621,7 @@
                       @match true = AbsynUtil.pathSuffixOf(inName, FGraph.getGraphName(inEnv))
                     (inCache, Util.SUCCESS())
                   end
-                  
+
                   (_, _, _, _)  => begin
                        #=  Recursive calls (by looking in cache) skipped
                        =#
@@ -7629,7 +7629,7 @@
                       FCore.checkCachedInstFuncGuard(outCache, name)
                     (outCache, Util.SUCCESS())
                   end
-                  
+
                   (_, NONE(), _, _)  => begin
                        #=  class must be looked up
                        =#
@@ -7638,7 +7638,7 @@
                       outCache = InstFunction.implicitFunctionInstantiation(outCache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (outCache, Util.SUCCESS())
                   end
-                  
+
                   (_, SOME(cl), _, _)  => begin
                        #=  class already available
                        =#
@@ -7646,7 +7646,7 @@
                       outCache = InstFunction.implicitFunctionInstantiation(outCache, inEnv, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (outCache, Util.SUCCESS())
                   end
-                  
+
                   (_, NONE(), _, _)  => begin
                        #=  call to function reference variable
                        =#
@@ -7655,7 +7655,7 @@
                       @match DAE.T_FUNCTION() = ty
                     (outCache, Util.SUCCESS())
                   end
-                  
+
                   (_, _, true, _)  => begin
                       @match true = Error.getNumErrorMessages() == numError
                       envStr = FGraph.printGraphPathStr(inEnv)
@@ -7663,7 +7663,7 @@
                       Error.addMessage(Error.GENERIC_INST_FUNCTION, list(pathStr, envStr))
                     fail()
                   end
-                  
+
                   _  => begin
                       (inCache, Util.FAILURE())
                   end
@@ -7672,7 +7672,7 @@
           (outCache, status)
         end
 
-        function lookupAndFullyQualify(inCache::FCore.Cache, inEnv::FCore.Graph, inFunctionName::Absyn.Path) ::Tuple{FCore.Cache, FCore.Graph, SCode.Element, Absyn.Path} 
+        function lookupAndFullyQualify(inCache::FCore.Cache, inEnv::FCore.Graph, inFunctionName::Absyn.Path) ::Tuple{FCore.Cache, FCore.Graph, SCode.Element, Absyn.Path}
               local outFunctionName::Absyn.Path
               local outClass::SCode.Element
               local outEnv::FCore.Graph
@@ -7698,7 +7698,7 @@
           record constructors for those components. These are implicit record
           constructors, because they are not explicitly called, but are needed when code
           is generated for record instances as function input arguments. =#
-        function instantiateImplicitRecordConstructors(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:DAE.Exp}) ::FCore.Cache 
+        function instantiateImplicitRecordConstructors(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:DAE.Exp}) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -7711,12 +7711,12 @@
                    nil()  => begin
                     inCache
                   end
-                  
+
                   DAE.CREF(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = record_name))) <| rest_args  => begin
                       @match (cache, Util.SUCCESS()) = instantiateDaeFunction(inCache, inEnv, record_name, false, NONE(), false)
                     instantiateImplicitRecordConstructors(cache, inEnv, rest_args)
                   end
-                  
+
                   _ <| rest_args  => begin
                     instantiateImplicitRecordConstructors(inCache, inEnv, rest_args)
                   end
@@ -7726,7 +7726,7 @@
         end
 
          #= Adds default values to a list of function slots. =#
-        function addDefaultArgs(inSlots::List{<:Slot}, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, List{Slot}} 
+        function addDefaultArgs(inSlots::List{<:Slot}, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, List{Slot}}
               local outSlots::List{Slot}
               local outArgs::List{DAE.Exp}
 
@@ -7735,7 +7735,7 @@
         end
 
          #= Fills a function slot with it's default value if it hasn't already been filled. =#
-        function fillDefaultSlot(inSlot::Slot, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::Tuple{DAE.Exp, Slot} 
+        function fillDefaultSlot(inSlot::Slot, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::Tuple{DAE.Exp, Slot}
               local outSlot::Slot
               local outArg::DAE.Exp
 
@@ -7749,11 +7749,11 @@
                   SLOT(slotFilled = true, arg = SOME(arg))  => begin
                     (arg, inSlot)
                   end
-                  
+
                   SLOT(slotFilled = false, defaultArg = DAE.FUNCARG(defaultBinding = SOME(_)), idx = idx)  => begin
                     fillDefaultSlot2(inSlotArray[idx], inSlotArray, inInfo)
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = id))  => begin
                       Error.addSourceMessage(Error.UNFILLED_SLOT, list(id), inInfo)
                     fail()
@@ -7767,7 +7767,7 @@
           (outArg, outSlot)
         end
 
-        function fillDefaultSlot2(inSlot::Slot, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::Tuple{DAE.Exp, Slot} 
+        function fillDefaultSlot2(inSlot::Slot, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::Tuple{DAE.Exp, Slot}
               local outSlot::Slot = inSlot
               local outArg::DAE.Exp
 
@@ -7786,14 +7786,14 @@
                   SLOT(arg = SOME(exp), evalStatus = 2)  => begin
                     (exp, inSlot)
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = id), evalStatus = 1)  => begin
                        #=  A slot in the process of being evaluated => cyclic bindings.
                        =#
                       Error.addSourceMessage(Error.CYCLIC_DEFAULT_VALUE, list(id), inInfo)
                     fail()
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(defaultBinding = SOME(exp)), idx = idx, evalStatus = 0)  => begin
                        #=  A slot with an unevaluated binding, evaluate the binding and return it.
                        =#
@@ -7813,14 +7813,14 @@
 
          #= Evaluates a slot's binding by recursively replacing references to other slots
            with their bindings. =#
-        function evaluateSlotExp(inExp::DAE.Exp, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::DAE.Exp 
+        function evaluateSlotExp(inExp::DAE.Exp, inSlotArray::Array{<:Slot}, inInfo::SourceInfo) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = Expression.traverseExpBottomUp(inExp, evaluateSlotExp_traverser, (inSlotArray, inInfo))
           outExp
         end
 
-        function evaluateSlotExp_traverser(inExp::DAE.Exp, inTuple::Tuple{<:Array{<:Slot}, SourceInfo}) ::Tuple{DAE.Exp, Tuple{Array{Slot}, SourceInfo}} 
+        function evaluateSlotExp_traverser(inExp::DAE.Exp, inTuple::Tuple{<:Array{<:Slot}, SourceInfo}) ::Tuple{DAE.Exp, Tuple{Array{Slot}, SourceInfo}}
               local outTuple::Tuple{Array{Slot}, SourceInfo}
               local outExp::DAE.Exp
 
@@ -7839,7 +7839,7 @@
                       exp = getOptSlotDefaultExp(slot, slots, info, orig_exp)
                     (exp, (slots, info))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -7850,7 +7850,7 @@
 
          #= Looks up the given name in an array of slots, and returns either SOME(slot)
            if a slot with that name was found, or NONE() if a slot couldn't be found. =#
-        function lookupSlotInArray(inSlotName::String, inSlots::Array{<:Slot}) ::Option{Slot} 
+        function lookupSlotInArray(inSlotName::String, inSlots::Array{<:Slot}) ::Option{Slot}
               local outSlot::Option{Slot}
 
               local slot::Slot
@@ -7864,7 +7864,7 @@
           outSlot
         end
 
-        function isSlotNamed(inName::String, inSlot::Slot) ::Bool 
+        function isSlotNamed(inName::String, inSlot::Slot) ::Bool
               local outIsNamed::Bool
 
               local id::String
@@ -7876,7 +7876,7 @@
 
          #= Takes an optional slot and tries to evaluate the slot's binding if it's SOME,
            otherwise returns the original expression if it's NONE. =#
-        function getOptSlotDefaultExp(inSlot::Option{<:Slot}, inSlots::Array{<:Slot}, inInfo::SourceInfo, inOrigExp::DAE.Exp) ::DAE.Exp 
+        function getOptSlotDefaultExp(inSlot::Option{<:Slot}, inSlots::Array{<:Slot}, inInfo::SourceInfo, inOrigExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -7889,7 +7889,7 @@
                       exp = fillDefaultSlot(slot, inSlots, inInfo)
                     exp
                   end
-                  
+
                   NONE()  => begin
                     inOrigExp
                   end
@@ -7903,7 +7903,7 @@
          #= For the special functions constructor and destructor, in external object, the
            constantness is always variable, even if arguments are constant, because they
            should be called during runtime and not during compiletime. =#
-        function determineConstSpecialFunc(inCache::FCore.Cache, inEnv::FCore.Graph, inConst::DAE.Const, inFuncName::Absyn.Path) ::Tuple{FCore.Cache, DAE.Const} 
+        function determineConstSpecialFunc(inCache::FCore.Cache, inEnv::FCore.Graph, inConst::DAE.Const, inFuncName::Absyn.Path) ::Tuple{FCore.Cache, DAE.Const}
               local outConst::DAE.Const
               local outCache::FCore.Cache
 
@@ -7918,7 +7918,7 @@
           (outCache, outConst)
         end
 
-        function isExternalObjectFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, Bool} 
+        function isExternalObjectFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, Bool}
               local outIsExt::Bool
               local outCache::FCore.Cache
 
@@ -7937,7 +7937,7 @@
           (outCache, outIsExt)
         end
 
-         const vectorizeArg = "vectorizeArg"::String
+         constType vectorizeArg = "vectorizeArg"::String
 
          #= author: PA
           Takes an expression and a list of array dimensions and the Slot list.
@@ -7946,7 +7946,7 @@
           For example foo:(Real,Real[:])=> Real
           foo(1:2,{1,2;3,4}) vectorizes with arraydim [2] to
           {foo(1,{1,2}),foo(2,{3,4})} =#
-        function vectorizeCall(inExp::DAE.Exp, inDims::DAE.Dimensions, inSlots::List{<:Slot}, inProperties::DAE.Properties, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties} 
+        function vectorizeCall(inExp::DAE.Exp, inDims::DAE.Dimensions, inSlots::List{<:Slot}, inProperties::DAE.Properties, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -7981,11 +7981,11 @@
                   (e,  nil(), prop)  => begin
                     (e, prop)
                   end
-                  
+
                   (e, DAE.DIM_UNKNOWN(__) <| ad, prop) where (Flags.getConfigBool(Flags.CHECK_MODEL))  => begin
                     vectorizeCall(e, _cons(DAE.DIM_INTEGER(1), ad), inSlots, prop, info)
                   end
-                  
+
                   (e && DAE.CALL(__), dim <| ad, DAE.PROP(tp, c))  => begin
                        #=  If the dimension is not defined we can't vectorize the call. If we are running
                        =#
@@ -8000,7 +8000,7 @@
                       tp = Types.liftArray(tp, dim)
                     vectorizeCall(vect_exp, ad, inSlots, DAE.PROP(tp, c), info)
                   end
-                  
+
                   (DAE.ARRAY(__), dim <| ad, DAE.PROP(tp, c))  => begin
                        #= /* array expression of function calls */ =#
                       int_dim = Expression.dimensionSize(dim)
@@ -8010,7 +8010,7 @@
                       tp = Types.liftArrayRight(tp, dim)
                     vectorizeCall(vect_exp, ad, inSlots, DAE.PROP(tp, c), info)
                   end
-                  
+
                   (DAE.CALL(fn, es, attr), dim <| ad, prop && DAE.PROP(tp, c))  => begin
                        #= /* Multiple dimensions are possible to change to a reduction, like:
                            * f(arr1,arr2) => array(f(x,y) thread for x in arr1, y in arr2)
@@ -8033,14 +8033,14 @@
                       rinfo = DAE.REDUCTIONINFO(Absyn.IDENT("array"), iterType, tp, SOME(Values.ARRAY(nil, list(0))), foldName, resultName, NONE())
                     (DAE.REDUCTION(rinfo, e, riters), prop)
                   end
-                  
+
                   (DAE.CALL(__), DAE.DIM_EXP(__) <| _, DAE.PROP(__))  => begin
                        #= /* Scalar expression, non-constant but known dimensions */ =#
                       str = "Cannot vectorize call with dimensions [" + ExpressionDump.dimensionsString(inDims) + "]"
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         str = ExpressionDump.dimensionString(listHead(inDims))
@@ -8053,7 +8053,7 @@
         end
 
          #= Returns the new call arguments and a reduction iterator argument =#
-        function vectorizeCallUnknownDimension(inEs::List{<:DAE.Exp}, inSlots::List{<:Slot}, info::SourceInfo) ::Tuple{List{DAE.Exp}, List{DAE.ReductionIterator}} 
+        function vectorizeCallUnknownDimension(inEs::List{<:DAE.Exp}, inSlots::List{<:Slot}, info::SourceInfo) ::Tuple{List{DAE.Exp}, List{DAE.ReductionIterator}}
               local ofound::List{DAE.ReductionIterator} = nil
               local oes::List{DAE.Exp} = nil
 
@@ -8086,7 +8086,7 @@
 
          #= Helper function to vectorizeCall, vectorizes an ARRAY expression to an array
            of array expressions. =#
-        function vectorizeCallArray(inExp::DAE.Exp, inDim::ModelicaInteger, inSlots::List{<:Slot}) ::DAE.Exp 
+        function vectorizeCallArray(inExp::DAE.Exp, inDim::ModelicaInteger, inSlots::List{<:Slot}) ::DAE.Exp
               local outExp::DAE.Exp
 
               local ty::DAE.Type
@@ -8102,7 +8102,7 @@
         end
 
          #= Helper function to vectorizeCallArray =#
-        function vectorizeCallArray2(inExpl::List{<:DAE.Exp}, inType::DAE.Type, inDim::ModelicaInteger, inSlots::List{<:Slot}) ::List{DAE.Exp} 
+        function vectorizeCallArray2(inExpl::List{<:DAE.Exp}, inType::DAE.Type, inDim::ModelicaInteger, inSlots::List{<:Slot}) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp}
 
               outExpl = list(begin
@@ -8110,7 +8110,7 @@
                   DAE.CALL(__)  => begin
                     vectorizeCallScalar(e, inType, inDim, inSlots)
                   end
-                  
+
                   DAE.ARRAY(__)  => begin
                     vectorizeCallArray(e, inDim, inSlots)
                   end
@@ -8122,7 +8122,7 @@
          #= author: PA
           Helper function to vectorizeCall, vectorizes CALL expressions to
           array expressions. =#
-        function vectorizeCallScalar(exp::DAE.Exp #= e.g. abs(v) =#, ty::DAE.Type #=  e.g. Real[3], result of vectorized call =#, dim::ModelicaInteger, slots::List{<:Slot}) ::DAE.Exp 
+        function vectorizeCallScalar(exp::DAE.Exp #= e.g. abs(v) =#, ty::DAE.Type #=  e.g. Real[3], result of vectorized call =#, dim::ModelicaInteger, slots::List{<:Slot}) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -8141,7 +8141,7 @@
                       new_exp = DAE.ARRAY(arr_type, scalar, expl)
                     new_exp
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-Static.vectorizeCallScalar failed\\n")
@@ -8153,7 +8153,7 @@
         end
 
          #= Iterates through vectorized dimension an creates argument list according to vectorized dimension in corresponding slot. =#
-        function vectorizeCallScalar2(fn::Absyn.Path, exps::List{<:DAE.Exp}, attr::DAE.CallAttributes, slots::List{<:Slot}, dim::ModelicaInteger) ::List{DAE.Exp} 
+        function vectorizeCallScalar2(fn::Absyn.Path, exps::List{<:DAE.Exp}, attr::DAE.CallAttributes, slots::List{<:Slot}, dim::ModelicaInteger) ::List{DAE.Exp}
               local res::List{DAE.Exp} = nil
 
               local callargs::List{DAE.Exp}
@@ -8167,7 +8167,7 @@
 
          #= author: PA
           Helper function to vectorizeCallScalar2 =#
-        function vectorizeCallScalar3(inExpl::List{<:DAE.Exp}, inSlots::List{<:Slot}, inIndex::ModelicaInteger) ::List{DAE.Exp} 
+        function vectorizeCallScalar3(inExpl::List{<:DAE.Exp}, inSlots::List{<:Slot}, inIndex::ModelicaInteger) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp} = nil
 
               local rest_slots::List{Slot} = inSlots
@@ -8190,7 +8190,7 @@
          #= This function is used to deoverload function calls. It investigates the
           type of the function to see if it has the optional functionname set. If
           so this is returned. Otherwise return input. =#
-        function deoverloadFuncname(inPath::Absyn.Path, inType::DAE.Type, inEnv::FCore.Graph) ::Tuple{Absyn.Path, DAE.Type} 
+        function deoverloadFuncname(inPath::Absyn.Path, inType::DAE.Type, inEnv::FCore.Graph) ::Tuple{Absyn.Path, DAE.Type}
               local outType::DAE.Type
               local outPath::Absyn.Path
 
@@ -8203,11 +8203,11 @@
                       tty.path = Absyn.IDENT(name)
                     (tty.path, tty)
                   end
-                  
+
                   DAE.T_FUNCTION(path = fn)  => begin
                     (fn, inType)
                   end
-                  
+
                   _  => begin
                       (inPath, inType)
                   end
@@ -8218,7 +8218,7 @@
 
          #= Elaborate input parameters to a function and select matching function type
            from a list of types. =#
-        function elabTypes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inTypes::List{<:DAE.Type}, inOnlyOneFunction::Bool #= if true, we can report errors as soon as possible =#, inCheckTypes::Bool #= if true, checks types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Const}, DAE.Type, DAE.Type, DAE.Dimensions, List{Slot}} 
+        function elabTypes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inTypes::List{<:DAE.Type}, inOnlyOneFunction::Bool #= if true, we can report errors as soon as possible =#, inCheckTypes::Bool #= if true, checks types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Const}, DAE.Type, DAE.Type, DAE.Dimensions, List{Slot}}
               local outSlots::List{Slot}
               local outDimensions::DAE.Dimensions
               local outFunctionType::DAE.Type
@@ -8284,7 +8284,7 @@
                                 slot.arg = SOME(Expression.unboxExp(arg))
                               slot
                             end
-                            
+
                             _  => begin
                                 slot
                             end
@@ -8298,7 +8298,7 @@
                           end
                         end for p in params), Types.unboxedType(res_ty))
                       end
-                      
+
                       _  => begin
                           (outArgs, outSlots, params, res_ty)
                       end
@@ -8333,7 +8333,7 @@
          #= This function is yet another hack trying to handle function parameters with
            unknown dimensions. It uses the input arguments to try and figure out the
            actual dimensions of the dimensions. =#
-        function applyArgTypesToFuncType(inSlots::List{<:Slot}, inParameters::List{<:DAE.FuncArg}, inResultType::DAE.Type, inEnv::FCore.Graph, checkTypes::Bool, inInfo::SourceInfo) ::Tuple{List{DAE.FuncArg}, DAE.Type} 
+        function applyArgTypesToFuncType(inSlots::List{<:Slot}, inParameters::List{<:DAE.FuncArg}, inResultType::DAE.Type, inEnv::FCore.Graph, checkTypes::Bool, inInfo::SourceInfo) ::Tuple{List{DAE.FuncArg}, DAE.Type}
               local outResultType::DAE.Type
               local outParameters::List{DAE.FuncArg}
 
@@ -8398,7 +8398,7 @@
         end
 
          #= Return the dimensions of an output type. =#
-        function getAllOutputDimensions(inOutputType::DAE.Type) ::List{DAE.Dimension} 
+        function getAllOutputDimensions(inOutputType::DAE.Type) ::List{DAE.Dimension}
               local outDimensions::List{DAE.Dimension}
 
               outDimensions = begin
@@ -8409,7 +8409,7 @@
                   DAE.T_TUPLE(types = tys)  => begin
                     ListUtil.mapFlat(tys, Types.getDimensions)
                   end
-                  
+
                   _  => begin
                       Types.getDimensions(inOutputType)
                   end
@@ -8419,7 +8419,7 @@
         end
 
          #= Extracts a list of unique names referenced by the given list of dimensions. =#
-        function extractNamesFromDims(inDimensions::List{<:DAE.Dimension}, inAccumNames::List{<:String} = nil) ::List{String} 
+        function extractNamesFromDims(inDimensions::List{<:DAE.Dimension}, inAccumNames::List{<:String} = nil) ::List{String}
               local outNames::List{String}
 
               outNames = begin
@@ -8433,11 +8433,11 @@
                       names = ListUtil.fold(crefs, extractNamesFromDims2, inAccumNames)
                     extractNamesFromDims(rest_dims, names)
                   end
-                  
+
                   _ <| rest_dims  => begin
                     extractNamesFromDims(rest_dims, inAccumNames)
                   end
-                  
+
                    nil()  => begin
                     inAccumNames
                   end
@@ -8446,7 +8446,7 @@
           outNames
         end
 
-        function extractNamesFromDims2(inCref::DAE.ComponentRef, inAccumNames::List{<:String}) ::List{String} 
+        function extractNamesFromDims2(inCref::DAE.ComponentRef, inAccumNames::List{<:String}) ::List{String}
               local outNames::List{String}
 
               outNames = begin
@@ -8466,7 +8466,7 @@
                           end
                     outNames
                   end
-                  
+
                   _  => begin
                       inAccumNames
                   end
@@ -8477,7 +8477,7 @@
 
          #= Checks if a slot is used, in the sense that it's referenced by a function
            parameter dimension. =#
-        function isSlotUsed(inSlot::Slot, inUsedNames::List{<:String}) ::Bool 
+        function isSlotUsed(inSlot::Slot, inUsedNames::List{<:String}) ::Bool
               local outIsUsed::Bool
 
               local slot_name::String
@@ -8488,7 +8488,7 @@
         end
 
          #= Converts a Slot to a DAE.Var. =#
-        function makeVarFromSlot(inSlot::Slot, inEnv::FCore.Graph, inCache::FCore.Cache) ::DAE.Var 
+        function makeVarFromSlot(inSlot::Slot, inEnv::FCore.Graph, inCache::FCore.Cache) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -8514,7 +8514,7 @@
                       binding = DAE.EQBOUND(exp, NONE(), DAE.C_CONST(), DAE.BINDING_FROM_DEFAULT_VALUE())
                     DAE.TYPES_VAR(name, DAE.dummyAttrParam, ty, binding, NONE())
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = name), arg = SOME(exp))  => begin
                        #=  Otherwise, try to constant evaluate the expression.
                        =#
@@ -8528,7 +8528,7 @@
                       binding = DAE.EQBOUND(exp, SOME(val), DAE.C_CONST(), DAE.BINDING_FROM_DEFAULT_VALUE())
                     DAE.TYPES_VAR(name, DAE.dummyAttrParam, ty, binding, NONE())
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = name, ty = ty))  => begin
                     DAE.TYPES_VAR(name, DAE.dummyAttrParam, ty, DAE.UNBOUND(), NONE())
                   end
@@ -8537,7 +8537,7 @@
           outVar
         end
 
-        function evaluateStructuralSlots2(inCache::FCore.Cache, inEnv::FCore.Graph, inSlots::List{<:Slot}, usedSlots::List{<:String}, acc::List{<:Slot}) ::Tuple{FCore.Cache, List{Slot}} 
+        function evaluateStructuralSlots2(inCache::FCore.Cache, inEnv::FCore.Graph, inSlots::List{<:Slot}, usedSlots::List{<:String}, acc::List{<:Slot}) ::Tuple{FCore.Cache, List{Slot}}
               local slots::List{Slot}
               local cache::FCore.Cache
 
@@ -8558,13 +8558,13 @@
                    nil()  => begin
                     (inCache, listReverse(acc))
                   end
-                  
+
                   slot <| rest  => begin
                       @match false = isSlotUsed(slot, usedSlots)
                       (cache, slots) = evaluateStructuralSlots2(inCache, inEnv, rest, usedSlots, _cons(slot, acc))
                     (cache, slots)
                   end
-                  
+
                   SLOT(defaultArg && DAE.FUNCARG(__), _, SOME(exp), dims, idx, ses) <| rest  => begin
                        #=  If we are suggested the argument is structural, evaluate it
                        =#
@@ -8578,7 +8578,7 @@
                       (cache, slots) = evaluateStructuralSlots2(cache, inEnv, rest, usedSlots, _cons(slot, acc))
                     (cache, slots)
                   end
-                  
+
                   slot <| rest  => begin
                       (cache, slots) = evaluateStructuralSlots2(inCache, inEnv, rest, usedSlots, _cons(slot, acc))
                     (cache, slots)
@@ -8588,7 +8588,7 @@
           (cache, slots)
         end
 
-        function evaluateStructuralSlots(inCache::FCore.Cache, inEnv::FCore.Graph, inSlots::List{<:Slot}, funcType::DAE.Type) ::Tuple{FCore.Cache, List{Slot}} 
+        function evaluateStructuralSlots(inCache::FCore.Cache, inEnv::FCore.Graph, inSlots::List{<:Slot}, funcType::DAE.Type) ::Tuple{FCore.Cache, List{Slot}}
               local slots::List{Slot}
               local cache::FCore.Cache
 
@@ -8613,7 +8613,7 @@
                       (cache, slots) = evaluateStructuralSlots2(inCache, inEnv, inSlots, used_args, nil)
                     (cache, slots)
                   end
-                  
+
                   _  => begin
                       (inCache, inSlots)
                   end
@@ -8626,7 +8626,7 @@
 
          #= Helper function to applyArgTypesToFuncType, creates a dummy function
            environment. =#
-        function makeDummyFuncEnv(inEnv::FCore.Graph, inVars::List{<:DAE.Var}, inDummyVar::SCode.Element) ::FCore.Graph 
+        function makeDummyFuncEnv(inEnv::FCore.Graph, inVars::List{<:DAE.Var}, inDummyVar::SCode.Element) ::FCore.Graph
               local outEnv::FCore.Graph = inEnv
 
               local dummy_var::SCode.Element
@@ -8640,7 +8640,7 @@
 
          #= Constant evaluates the dimensions of a FuncArg and then makes
           sure the type matches with the expected type in the slot. =#
-        function evaluateFuncParamDimAndMatchTypes(inSlot::Slot, inParam::DAE.FuncArg, inEnv::FCore.Graph, inCache::FCore.Cache, inInfo::SourceInfo) ::DAE.FuncArg 
+        function evaluateFuncParamDimAndMatchTypes(inSlot::Slot, inParam::DAE.FuncArg, inEnv::FCore.Graph, inCache::FCore.Cache, inInfo::SourceInfo) ::DAE.FuncArg
               local outParam::DAE.FuncArg
 
               outParam = begin
@@ -8664,7 +8664,7 @@
                   (_, DAE.FUNCARG(ty = DAE.T_CODE(__)))  => begin
                     inParam
                   end
-                  
+
                   (SLOT(arg = SOME(DAE.ARRAY(ty = sty)), dims = vdims), _)  => begin
                        #=  If we have an array constant-evaluate the dimensions and make sure
                        =#
@@ -8683,7 +8683,7 @@
                       outParam = Types.setFuncArgType(inParam, pty)
                     outParam
                   end
-                  
+
                   (SLOT(arg = SOME(DAE.MATRIX(ty = sty)), dims = vdims), _)  => begin
                       @match DAE.FUNCARG(ty = pty) = inParam
                        #=  evaluate the dimesions
@@ -8698,7 +8698,7 @@
                       outParam = Types.setFuncArgType(inParam, pty)
                     outParam
                   end
-                  
+
                   _  => begin
                         @match DAE.FUNCARG(ty = pty) = inParam
                         pty = evaluateFuncArgTypeDims(pty, inEnv, inCache)
@@ -8711,7 +8711,7 @@
         end
 
          #= Constant evaluates the dimensions of a type. =#
-        function evaluateFuncArgTypeDims(inType::DAE.Type, inEnv::FCore.Graph, inCache::FCore.Cache) ::DAE.Type 
+        function evaluateFuncArgTypeDims(inType::DAE.Type, inEnv::FCore.Graph, inCache::FCore.Cache) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -8728,19 +8728,19 @@
                       ty = evaluateFuncArgTypeDims(ty, inEnv, inCache)
                     DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(n)))
                   end
-                  
+
                   DAE.T_ARRAY(ty, dim <|  nil())  => begin
                        #=  Previous case failed, keep the dimension but evaluate the rest of the type.
                        =#
                       ty = evaluateFuncArgTypeDims(ty, inEnv, inCache)
                     DAE.T_ARRAY(ty, list(dim))
                   end
-                  
+
                   ty && DAE.T_TUPLE(__)  => begin
                       ty.types = ListUtil.map2(ty.types, evaluateFuncArgTypeDims, inEnv, inCache)
                     ty
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -8751,7 +8751,7 @@
 
          #= Creates the actual function type of a CALL expression, used for error messages.
          This type is only created if checkTypes is false. =#
-        function createActualFunctype(tp::DAE.Type, slots::List{<:Slot}, checkTypes::Bool) ::DAE.Type 
+        function createActualFunctype(tp::DAE.Type, slots::List{<:Slot}, checkTypes::Bool) ::DAE.Type
               local outTp::DAE.Type = tp
 
               outTp = begin
@@ -8763,7 +8763,7 @@
                   (_, true)  => begin
                     tp
                   end
-                  
+
                   (DAE.T_FUNCTION(__), _)  => begin
                        #=  When not checking types, create function type by looking at the filled slots
                        =#
@@ -8779,7 +8779,7 @@
           This function checks all vectorized array dimensions in the slots and
           confirms that they all are of same dimension,or no dimension, i.e. not
           vectorized. The uniform vectorized array dimension is returned. =#
-        function slotsVectorizable(inSlots::List{<:Slot}, info::SourceInfo) ::DAE.Dimensions 
+        function slotsVectorizable(inSlots::List{<:Slot}, info::SourceInfo) ::DAE.Dimensions
               local outDims::DAE.Dimensions
 
               outDims = begin
@@ -8791,16 +8791,16 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   SLOT(defaultArg = DAE.FUNCARG(name = name), arg = SOME(exp), dims = ad && _ <| _) <| rest  => begin
                       sameSlotsVectorizable(rest, ad, name, exp, info)
                     ad
                   end
-                  
+
                   SLOT(dims =  nil()) <| rest  => begin
                     slotsVectorizable(rest, info)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-slots_vectorizable failed\\n")
@@ -8816,7 +8816,7 @@
           dimension as given by the second argument or no array dimension at all.
           The array dimension must match both in dimension size and number of
           dimensions. =#
-        function sameSlotsVectorizable(inSlots::List{<:Slot}, inDims::DAE.Dimensions, name::String, exp::DAE.Exp, info::SourceInfo)  
+        function sameSlotsVectorizable(inSlots::List{<:Slot}, inDims::DAE.Dimensions, name::String, exp::DAE.Exp, info::SourceInfo)
               _ = begin
                   local slot_ad::DAE.Dimensions
                   local rest::List{Slot}
@@ -8830,14 +8830,14 @@
                       sameSlotsVectorizable(rest, inDims, name, exp, info)
                     ()
                   end
-                  
+
                   SLOT(dims =  nil()) <| rest  => begin
                        #=  Empty array dims matches too.
                        =#
                       sameSlotsVectorizable(rest, inDims, name, exp, info)
                     ()
                   end
-                  
+
                    nil()  => begin
                     ()
                   end
@@ -8847,7 +8847,7 @@
 
          #= author: PA
           Helper function to sameSlotsVectorizable.  =#
-        function sameArraydimLst(inDims1::DAE.Dimensions, name1::String, exp1::DAE.Exp, inDims2::DAE.Dimensions, name2::String, exp2::DAE.Exp, info::SourceInfo)  
+        function sameArraydimLst(inDims1::DAE.Dimensions, name1::String, exp1::DAE.Exp, inDims2::DAE.Dimensions, name2::String, exp2::DAE.Exp, info::SourceInfo)
               _ = begin
                   local i1::ModelicaInteger
                   local i2::ModelicaInteger
@@ -8868,22 +8868,22 @@
                       sameArraydimLst(ads1, name1, exp1, ads2, name2, exp2, info)
                     ()
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__) <| ads1, DAE.DIM_UNKNOWN(__) <| ads2)  => begin
                       sameArraydimLst(ads1, name1, exp1, ads2, name2, exp2, info)
                     ()
                   end
-                  
+
                   (DAE.DIM_EXP(e1) <| ads1, DAE.DIM_EXP(e2) <| ads2)  => begin
                       @match true = Expression.expEqual(e1, e2)
                       sameArraydimLst(ads1, name1, exp1, ads2, name2, exp2, info)
                     ()
                   end
-                  
+
                   ( nil(),  nil())  => begin
                     ()
                   end
-                  
+
                   (ad1 <| _, ad2 <| _)  => begin
                       str1 = ExpressionDump.printExpStr(exp1)
                       str2 = ExpressionDump.printExpStr(exp2)
@@ -8898,37 +8898,37 @@
 
          #= This function creates a Properties object from a DAE.Type and a
           DAE.TupleConst value. =#
-        function getProperties(inType::DAE.Type, inTupleConst::DAE.TupleConst) ::DAE.Properties 
+        function getProperties(inType::DAE.Type, inTupleConst::DAE.TupleConst) ::DAE.Properties
               local outProperties::DAE.Properties
 
               outProperties = begin
                   local tt::DAE.Type
                   local t::DAE.Type
                   local ty::DAE.Type
-                  local const::DAE.TupleConst
+                  local constType::DAE.TupleConst
                   local b::DAE.Const
                   local tystr::String
                   local conststr::String
                    #=  At least two elements in the type list, this is a tuple. LS: Tuples are fixed before here
                    =#
                 @match (inType, inTupleConst) begin
-                  (tt && DAE.T_TUPLE(__), const)  => begin
-                    DAE.PROP_TUPLE(tt, const)
+                  (tt && DAE.T_TUPLE(__), constType)  => begin
+                    DAE.PROP_TUPLE(tt, constType)
                   end
-                  
-                  (t, DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(const = b) <|  nil()))  => begin
+
+                  (t, DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(constType = b) <|  nil()))  => begin
                     DAE.PROP(t, b)
                   end
-                  
-                  (t, DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(const = b) <|  nil()))  => begin
+
+                  (t, DAE.TUPLE_CONST(tupleConstLst = DAE.SINGLE_CONST(constType = b) <|  nil()))  => begin
                     DAE.PROP(t, b)
                   end
-                  
-                  (t, DAE.SINGLE_CONST(const = b))  => begin
+
+                  (t, DAE.SINGLE_CONST(constType = b))  => begin
                     DAE.PROP(t, b)
                   end
-                  
-                  (ty, const)  => begin
+
+                  (ty, constType)  => begin
                        #=  One type, this is a tuple with one element. The resulting properties is then identical to that of a single expression.
                        =#
                        #=  failure
@@ -8936,7 +8936,7 @@
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Static.getProperties failed: ")
                       tystr = Types.unparseType(ty)
-                      conststr = Types.printTupleConstStr(const)
+                      conststr = Types.printTupleConstStr(constType)
                       Debug.trace(tystr)
                       Debug.trace(", ")
                       Debug.traceln(conststr)
@@ -8951,7 +8951,7 @@
           This just splits the properties list into a type list and a const list.
           LS: Changed to take a Type, which is the functions return type.
           LS: Update: const is derived from the input arguments and sent here. =#
-        function elabConsts(inType::DAE.Type, inConst::DAE.Const) ::DAE.TupleConst 
+        function elabConsts(inType::DAE.Type, inConst::DAE.Const) ::DAE.TupleConst
               local outTupleConst::DAE.TupleConst
 
               outTupleConst = begin
@@ -8964,7 +8964,7 @@
                       consts = checkConsts(tys, c)
                     DAE.TUPLE_CONST(consts)
                   end
-                  
+
                   (ty, c)  => begin
                       consts = checkConsts(list(ty), c)
                     DAE.TUPLE_CONST(consts)
@@ -8981,7 +8981,7 @@
          #= LS: Changed to take a Type list, which is the functions return type. Only
            for functions returning a tuple
           LS: Update: const is derived from the input arguments and sent here  =#
-        function checkConsts(inTypes::List{<:DAE.Type}, inConst::DAE.Const) ::List{DAE.TupleConst} 
+        function checkConsts(inTypes::List{<:DAE.Type}, inConst::DAE.Const) ::List{DAE.TupleConst}
               local outTupleConsts::List{DAE.TupleConst}
 
               outTupleConsts = list(checkConst(ty, inConst) for ty in inTypes)
@@ -8995,7 +8995,7 @@
           LS: Adapted to check one type instead of funcarg, since it just checks
           return type
           LS: Update: const is derived from the input arguments and sent here =#
-        function checkConst(inType::DAE.Type, c::DAE.Const) ::DAE.TupleConst 
+        function checkConst(inType::DAE.Type, c::DAE.Const) ::DAE.TupleConst
               local outTupleConst::DAE.TupleConst
 
               outTupleConst = begin
@@ -9004,7 +9004,7 @@
                       Error.addInternalError("No support for tuples built by tuples", sourceInfo())
                     fail()
                   end
-                  
+
                   _  => begin
                       DAE.SINGLE_CONST(c)
                   end
@@ -9014,7 +9014,7 @@
         end
 
          #= Splits the properties list into the separated types list and const list. =#
-        function splitProps(inProperties::List{<:DAE.Properties}) ::Tuple{List{DAE.Type}, List{DAE.TupleConst}} 
+        function splitProps(inProperties::List{<:DAE.Properties}) ::Tuple{List{DAE.Type}, List{DAE.TupleConst}}
               local outConsts::List{DAE.TupleConst} = nil
               local outTypes::List{DAE.Type} = nil
 
@@ -9028,7 +9028,7 @@
                     DAE.PROP(type_ = ty, constFlag = c)  => begin
                       DAE.SINGLE_CONST(c)
                     end
-                    
+
                     DAE.PROP_TUPLE(type_ = ty, tupleConst = tc)  => begin
                       tc
                     end
@@ -9041,7 +9041,7 @@
         end
 
          #= This function returns the types of a DAE.FuncArg list. =#
-        function getTypes(farg::List{<:DAE.FuncArg}) ::List{DAE.Type} 
+        function getTypes(farg::List{<:DAE.FuncArg}) ::List{DAE.Type}
               local outTypes::List{DAE.Type}
 
               outTypes = list(Types.funcArgType(arg) for arg in farg)
@@ -9056,7 +9056,7 @@
              1. Positional arguments fill the first slots according to their position.
              2. Named arguments fill slots with the same name as the named argument.
              3. Unfilled slots are checked so that they have default values, otherwise error. =#
-        function elabInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inFuncType::DAE.Type #= Used to determine which arguments are structural. We will evaluate them later to figure if they are used in dimensions. So we evaluate them here to get a more optimised DAE =#, inPath::Absyn.Path, isGraphicsExp::Bool = false) ::Tuple{FCore.Cache, List{DAE.Exp}, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings} 
+        function elabInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inFuncType::DAE.Type #= Used to determine which arguments are structural. We will evaluate them later to figure if they are used in dimensions. So we evaluate them here to get a more optimised DAE =#, inPath::Absyn.Path, isGraphicsExp::Bool = false) ::Tuple{FCore.Cache, List{DAE.Exp}, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = nil
               local outConsts::List{DAE.Const}
               local outSlots::List{Slot} = inSlots
@@ -9091,14 +9091,14 @@
         end
 
          #= Creates a list of empty slots given a list of function parameters. =#
-        function makeEmptySlots(inArgs::List{<:DAE.FuncArg}) ::List{Slot} 
+        function makeEmptySlots(inArgs::List{<:DAE.FuncArg}) ::List{Slot}
               local outSlots::List{Slot}
 
               outSlots = ListUtil.mapFold(inArgs, makeEmptySlot, 1)
           outSlots
         end
 
-        function makeEmptySlot(inArg::DAE.FuncArg, inIndex::ModelicaInteger) ::Tuple{Slot, ModelicaInteger} 
+        function makeEmptySlot(inArg::DAE.FuncArg, inIndex::ModelicaInteger) ::Tuple{Slot, ModelicaInteger}
               local outIndex::ModelicaInteger
               local outSlot::Slot
 
@@ -9108,14 +9108,14 @@
         end
 
          #= Converts a list of Slot to a list of FuncArg. =#
-        function funcArgsFromSlots(inSlots::List{<:Slot}) ::List{DAE.FuncArg} 
+        function funcArgsFromSlots(inSlots::List{<:Slot}) ::List{DAE.FuncArg}
               local outFuncArgs::List{DAE.FuncArg}
 
               outFuncArgs = list(funcArgFromSlot(slot) for slot in inSlots)
           outFuncArgs
         end
 
-        function funcArgFromSlot(inSlot::Slot) ::DAE.FuncArg 
+        function funcArgFromSlot(inSlot::Slot) ::DAE.FuncArg
               local outFuncArg::DAE.FuncArg
 
               @match SLOT(defaultArg = outFuncArg) = inSlot
@@ -9124,7 +9124,7 @@
 
          #= Creates an DAE.T_COMPLEX type from a list of slots.
            Used to create type of record constructors  =#
-        function complexTypeFromSlots(inSlots::List{<:Slot}, complexClassType::ClassInf.State) ::DAE.Type 
+        function complexTypeFromSlots(inSlots::List{<:Slot}, complexClassType::ClassInf.State) ::DAE.Type
               local outType::DAE.Type
 
               local id::String
@@ -9141,7 +9141,7 @@
         end
 
          #= Gets the argument expressions from a list of slots. =#
-        function slotListArgs(inSlots::List{<:Slot}) ::List{DAE.Exp} 
+        function slotListArgs(inSlots::List{<:Slot}) ::List{DAE.Exp}
               local outArgs::List{DAE.Exp}
 
               outArgs = ListUtil.filterMap(inSlots, slotArg)
@@ -9149,7 +9149,7 @@
         end
 
          #= Gets the argument from a slot. =#
-        function slotArg(inSlot::Slot) ::DAE.Exp 
+        function slotArg(inSlot::Slot) ::DAE.Exp
               local outArg::DAE.Exp
 
               @match SLOT(arg = SOME(outArg)) = inSlot
@@ -9160,7 +9160,7 @@
           and fills  default values into slots which have not been filled.
 
           Special case for graphics exps =#
-        function fillGraphicsDefaultSlots(inCache::FCore.Cache, inSlots::List{<:Slot}, inClass::SCode.Element, inEnv::FCore.Graph, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings} 
+        function fillGraphicsDefaultSlots(inCache::FCore.Cache, inSlots::List{<:Slot}, inClass::SCode.Element, inEnv::FCore.Graph, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = nil
               local outConsts::List{DAE.Const} = nil
               local outSlots::List{Slot} = nil
@@ -9185,13 +9185,13 @@
                           @match SCode.COMPONENT(modifications = SCode.MOD(binding = SOME(e))) = SCodeUtil.getElementNamed(defarg.name, inClass)
                           @match (outCache, exp, DAE.PROP(ty, c)) = elabExpInExpression(outCache, inEnv, e, inImplicit, true, inPrefix, inInfo)
                           (exp, _, outPolymorphicBindings) = Types.matchTypePolymorphic(exp, ty, defarg.ty, FGraph.getGraphPathNoImplicitScope(inEnv), outPolymorphicBindings, false)
-                          @match true = Types.constEqualOrHigher(c, defarg.const)
+                          @match true = Types.constEqualOrHigher(c, defarg.constType)
                           outConsts = _cons(c, outConsts)
                           slot.slotFilled = true
                           slot.arg = SOME(exp)
                         slot
                       end
-                      
+
                       _  => begin
                           slot
                       end
@@ -9206,7 +9206,7 @@
         end
 
          #= prints the slots to a string =#
-        function printSlotsStr(inSlots::List{<:Slot}) ::String 
+        function printSlotsStr(inSlots::List{<:Slot}) ::String
               local outString::String
 
               outString = begin
@@ -9239,7 +9239,7 @@
                       res = stringAppend(s1, s2)
                     res
                   end
-                  
+
                    nil()  => begin
                     ""
                   end
@@ -9249,7 +9249,7 @@
         end
 
          #= Checks if inExp is a an expression of free parameters. =#
-        function isFreeParameterExp(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Bool, FCore.Cache} 
+        function isFreeParameterExp(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Bool, FCore.Cache}
               local outCache::FCore.Cache
               local isFree::Bool
 
@@ -9266,19 +9266,19 @@
                   DAE.ICONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.RCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.SCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.BCONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.CREF(componentRef = cr)  => begin
                       (outCache, _, _, binding, _, _, _, _, _) = Lookup.lookupVar(inCache, inEnv, cr)
                     begin
@@ -9286,40 +9286,40 @@
                         DAE.VALBOUND(__)  => begin
                           true
                         end
-                        
+
                         DAE.EQBOUND(exp = exp1) where (Expression.isConst(exp1))  => begin
                           true
                         end
-                        
+
                         _  => begin
                             false
                         end
                       end
                     end
                   end
-                  
+
                   DAE.BINARY(exp1 = exp1, exp2 = exp2)  => begin
                       (isFree, outCache) = isFreeParameterExp(exp1, inCache, inEnv)
                       (isFree2, outCache) = isFreeParameterExp(exp2, outCache, inEnv)
                     isFree && isFree2
                   end
-                  
+
                   DAE.UNARY(exp = exp1)  => begin
                       (isFree, outCache) = isFreeParameterExp(exp1, inCache, inEnv)
                     isFree
                   end
-                  
+
                   DAE.LBINARY(exp1 = exp1, exp2 = exp2)  => begin
                       (isFree, outCache) = isFreeParameterExp(exp1, inCache, inEnv)
                       (isFree2, outCache) = isFreeParameterExp(exp2, outCache, inEnv)
                     isFree && isFree2
                   end
-                  
+
                   DAE.LUNARY(exp = exp1)  => begin
                       (isFree, outCache) = isFreeParameterExp(exp1, inCache, inEnv)
                     isFree
                   end
-                  
+
                   DAE.CALL(expLst = exps)  => begin
                       outCache = inCache
                       isFree = true
@@ -9329,7 +9329,7 @@
                       end
                     isFree
                   end
-                  
+
                   DAE.ARRAY(array = exps)  => begin
                       outCache = inCache
                       isFree = true
@@ -9339,7 +9339,7 @@
                       end
                     isFree
                   end
-                  
+
                   DAE.MATRIX(matrix = mat)  => begin
                       outCache = inCache
                       isFree = true
@@ -9351,12 +9351,12 @@
                       end
                     isFree
                   end
-                  
+
                   DAE.CAST(exp = exp1)  => begin
                       (isFree, outCache) = isFreeParameterExp(exp1, inCache, inEnv)
                     isFree
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9368,7 +9368,7 @@
          #= This function elaborates the positional input arguments of a function.
           A list of slots is filled from the beginning with types of each
           positional argument. =#
-        function elabPositionalInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inFuncArgs::List{<:DAE.FuncArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inPath::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings} 
+        function elabPositionalInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inFuncArgs::List{<:DAE.FuncArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inPath::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = inPolymorphicBindings
               local outConsts::List{DAE.Const} = nil
               local outSlots::List{Slot} = inSlots
@@ -9392,7 +9392,7 @@
          #= This function elaborates the positional input arguments of a function.
           A list of slots is filled from the beginning with types of each
           positional argument. =#
-        function elabPositionalInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, farg::DAE.FuncArg, position::ModelicaInteger, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings} 
+        function elabPositionalInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, farg::DAE.FuncArg, position::ModelicaInteger, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outConst::DAE.Const
               local outSlotLst::List{Slot}
@@ -9435,7 +9435,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, DAE.C_VAR(), pr, NONE()), e_1, nil, slots, pre, info, path)
                     (cache, slots_1, DAE.C_VAR(), polymorphicBindings)
                   end
-                  
+
                   (cache, env, e, DAE.FUNCARG(name = id, ty = vt, par = pr), _, slots, _, true, _, polymorphicBindings, pre)  => begin
                       (cache, e_1, props) = elabExpInExpression(cache, env, e, impl, true, pre, info)
                       t = Types.getPropType(props)
@@ -9445,7 +9445,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, nil, slots, pre, info, path) #= no vectorized dim =#
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, env, e, DAE.FUNCARG(name = id, ty = vt, par = pr), _, slots, _, true, _, polymorphicBindings, pre)  => begin
                       (cache, e_1, props) = elabExpInExpression(cache, env, e, impl, true, pre, info)
                       t = Types.getPropType(props)
@@ -9455,7 +9455,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, ds, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, env, e, DAE.FUNCARG(name = id, par = pr), _, slots, _, false, _, polymorphicBindings, pre)  => begin
                       (cache, e_1, props) = elabExpInExpression(cache, env, e, impl, true, pre, info)
                       t = Types.getPropType(props)
@@ -9463,7 +9463,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, t, c1, pr, NONE()), e_1, nil, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, env, e, DAE.FUNCARG(name = id, ty = vt), _, _, true, true, _, _, pre)  => begin
                       @match true = Error.getNumErrorMessages() == numErrors
                       (cache, e_1, prop) = elabExpInExpression(cache, env, e, impl, true, pre, info)
@@ -9497,7 +9497,7 @@
           If a slot is filled twice the function fails. If a slot is not filled at
           all and the
           value is not a parameter or a constant the function also fails. =#
-        function elabNamedInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings} 
+        function elabNamedInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outTypesConstLst::List{DAE.Const}
               local outSlotLst::List{Slot}
@@ -9533,7 +9533,7 @@
                   (cache, _,  nil(), _, slots, _)  => begin
                     (cache, slots, nil, inPolymorphicBindings)
                   end
-                  
+
                   (cache, env, na <| nas, farg, slots, polymorphicBindings)  => begin
                       (cache, slots, c1, polymorphicBindings) = elabNamedInputArg(cache, env, na, farg, slots, onlyOneFunction, checkTypes, impl, polymorphicBindings, inPrefix, info, path, Error.getNumErrorMessages(), isGraphicsExp)
                       (cache, slots, clist, polymorphicBindings) = elabNamedInputArgs(cache, env, nas, farg, slots, onlyOneFunction, checkTypes, impl, polymorphicBindings, inPrefix, info, path, isGraphicsExp)
@@ -9550,7 +9550,7 @@
           If a slot is filled twice the function fails. If a slot is not filled at
           all and the
           value is not a parameter or a constant the function also fails. =#
-        function elabNamedInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inNamedArg::Absyn.NamedArg, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, numErrors::ModelicaInteger, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings} 
+        function elabNamedInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inNamedArg::Absyn.NamedArg, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, numErrors::ModelicaInteger, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outTypesConstLst::DAE.Const
               local outSlotLst::List{Slot}
@@ -9593,7 +9593,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, DAE.C_VAR(), pr, NONE()), e_1, nil, slots, pre, info, path)
                     (cache, slots_1, DAE.C_VAR(), polymorphicBindings)
                   end
-                  
+
                   (cache, env, Absyn.NAMEDARG(argName = id, argValue = e), farg, slots, _, true, _, polymorphicBindings, pre)  => begin
                       vt = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
@@ -9602,7 +9602,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, nil, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, env, Absyn.NAMEDARG(argName = id, argValue = e), farg, slots, _, true, _, polymorphicBindings, pre)  => begin
                       vt = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
@@ -9611,7 +9611,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, ds, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, env, Absyn.NAMEDARG(argName = id, argValue = e), farg, slots, _, false, _, polymorphicBindings, pre)  => begin
                       vt = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
@@ -9619,7 +9619,7 @@
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_1, nil, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
-                  
+
                   (cache, _, Absyn.NAMEDARG(argName = id), farg, slots, true, _, _, polymorphicBindings, _)  => begin
                       @shouldFail _ = findNamedArgType(id, farg)
                       s1 = AbsynUtil.pathStringNoQual(path)
@@ -9627,7 +9627,7 @@
                       @match true = isGraphicsExp
                     (cache, slots, DAE.C_CONST(), polymorphicBindings)
                   end
-                  
+
                   (cache, env, Absyn.NAMEDARG(argName = id, argValue = e), farg, _, true, true, _, _, pre)  => begin
                       @match true = Error.getNumErrorMessages() == numErrors
                       vt = findNamedArgType(id, farg)
@@ -9655,7 +9655,7 @@
           (outCache, outSlotLst, outTypesConstLst, outPolymorphicBindings)
         end
 
-        function findNamedArg(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.FuncArg 
+        function findNamedArg(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.FuncArg
               local outArg::DAE.FuncArg
 
               local id::String
@@ -9680,7 +9680,7 @@
          #= This function takes an Ident and a FuncArg list, and returns the FuncArg
            which has  that identifier.
            Used for instance when looking up named arguments from the function type. =#
-        function findNamedArgType(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.Type 
+        function findNamedArgType(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.Type
               local outType::DAE.Type
 
               @match DAE.FUNCARG(ty = outType) = findNamedArg(inIdent, inArgs)
@@ -9689,7 +9689,7 @@
 
          #= This function takes an Ident and a FuncArg list, and returns the
            parallelism of the FuncArg which has  that identifier. =#
-        function findNamedArgParallelism(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.VarParallelism 
+        function findNamedArgParallelism(inIdent::String, inArgs::List{<:DAE.FuncArg}) ::DAE.VarParallelism
               local outParallelism::DAE.VarParallelism
 
               @match DAE.FUNCARG(par = outParallelism) = findNamedArg(inIdent, inArgs)
@@ -9699,7 +9699,7 @@
          #= This function takses a `FuncArg\\' and an DAE.Exp and a Slot list and fills
           the slot holding the FuncArg, by setting the boolean value of the slot
           and setting the expression. The function fails if the slot is allready set. =#
-        function fillSlot(inFuncArg::DAE.FuncArg, inExp::DAE.Exp, inDims::DAE.Dimensions, inSlotLst::List{<:Slot}, inPrefix::Prefix.Prefix, inInfo::SourceInfo, fn::Absyn.Path) ::List{Slot} 
+        function fillSlot(inFuncArg::DAE.FuncArg, inExp::DAE.Exp, inDims::DAE.Dimensions, inSlotLst::List{<:Slot}, inPrefix::Prefix.Prefix, inInfo::SourceInfo, fn::Absyn.Path) ::List{Slot}
               local outSlotLst::List{Slot} = nil
 
               local fa1::String
@@ -9753,13 +9753,13 @@
           outSlotLst
         end
 
-         #= 
+         #=
         function: elabCref
           Elaborate on a component reference.  Check the type of the
           component referred to, and check if the environment contains
           either a constant binding for that variable, or if it contains an
           equation binding with a constant expression. =#
-        function elabCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}} 
+        function elabCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
               local res::Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}
               local outCache::FCore.Cache
 
@@ -9767,9 +9767,9 @@
           (outCache, res)
         end
 
-         #= 
+         #=
           Some functions expect a DAE.ComponentRef back and use this instead of elabCref :) =#
-        function elabCrefNoEval(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Attributes} 
+        function elabCrefNoEval(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Attributes}
               local outAttributes::DAE.Attributes
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
@@ -9779,13 +9779,13 @@
           (outCache, outExp, outProperties, outAttributes)
         end
 
-         #= 
+         #=
         function: elabCref
           Elaborate on a component reference.  Check the type of the
           component referred to, and check if the environment contains
           either a constant binding for that variable, or if it contains an
           equation binding with a constant expression. =#
-        function elabCref1(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}} 
+        function elabCref1(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
               local res::Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}
               local outCache::FCore.Cache
 
@@ -9839,13 +9839,13 @@
                       crefExp = Expression.makeCrefExp(DAE.WILD(), et)
                     (cache, SOME((crefExp, DAE.PROP(t, DAE.C_VAR()), DAE.dummyAttrVar)))
                   end
-                  
+
                   (cache, _, Absyn.CREF_IDENT(name = "Boolean"), _, _)  => begin
                       exp = Expression.makeScalarArray(list(DAE.BCONST(false), DAE.BCONST(true)), DAE.T_BOOL_DEFAULT)
                       t = DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_INTEGER(2)))
                     (cache, SOME((exp, DAE.PROP(t, DAE.C_CONST()), DAE.dummyAttrConst)))
                   end
-                  
+
                   (_, _, Absyn.CREF_IDENT(name = "time"), _, _)  => begin
                        #=  Boolean => {false, true}
                        =#
@@ -9856,7 +9856,7 @@
                           end
                     (inCache, res)
                   end
-                  
+
                   (cache, env, Absyn.CREF_IDENT(name = id, subscripts = Absyn.SUBSCRIPT(e) <|  nil()), impl, pre)  => begin
                        #=  MetaModelica arrays are only used in function context as IDENT, and at most one subscript
                        =#
@@ -9881,11 +9881,11 @@
                         exp2 = DAE.UNBOX(exp2, sub_ty)
                       end
                       @match true = Types.isScalarInteger(sub_ty)
-                      const = Types.constAnd(const1, const2)
+                      constType = Types.constAnd(const1, const2)
                       exp = Expression.makeASUB(exp1, list(exp2))
-                    (cache, SOME((exp, DAE.PROP(t, const), attr)))
+                    (cache, SOME((exp, DAE.PROP(t, constType), attr)))
                   end
-                  
+
                   (cache, env, c, impl, pre)  => begin
                        #=  a normal cref
                        =#
@@ -9899,12 +9899,12 @@
                       (cache, attr, t, binding, forIteratorConstOpt, splicedExpData) = Lookup.lookupVar(cache, env, c_1)
                        #=  get the binding if is a constant
                        =#
-                      (cache, exp, const, attr) = elabCref2(cache, env, c_1, attr, constSubs, forIteratorConstOpt, t, binding, performVectorization, splicedExpData, pre, evalCref, info)
+                      (cache, exp, constType, attr) = elabCref2(cache, env, c_1, attr, constSubs, forIteratorConstOpt, t, binding, performVectorization, splicedExpData, pre, evalCref, info)
                       t = fixEnumerationType(t)
-                      (exp, const) = evaluateEmptyVariable(hasZeroSizeDim && evalCref, exp, t, const)
-                    (cache, SOME((exp, DAE.PROP(t, const), attr)))
+                      (exp, constType) = evaluateEmptyVariable(hasZeroSizeDim && evalCref, exp, t, constType)
+                    (cache, SOME((exp, DAE.PROP(t, constType), attr)))
                   end
-                  
+
                   (cache, env, c, _, _)  => begin
                       c = replaceEnd(c)
                       path = AbsynUtil.crefToPath(c)
@@ -9915,7 +9915,7 @@
                       (exp, t) = makeEnumerationArray(path, enum_lit_strs)
                     (cache, SOME((exp, DAE.PROP(t, DAE.C_CONST()), DAE.dummyAttrConst)))
                   end
-                  
+
                   (cache, env, c, _, _)  => begin
                        #=  An enumeration type => array of enumeration literals.
                        =#
@@ -9949,19 +9949,19 @@
                       @match (cache, Util.SUCCESS()) = instantiateDaeFunction(cache, env, path, isBuiltinFn, NONE(), true)
                     (cache, SOME((exp, DAE.PROP(t, DAE.C_VAR()), DAE.dummyAttrConst)))
                   end
-                  
+
                   (cache, _, Absyn.CREF_IDENT("NONE",  nil()), _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       Error.addSourceMessage(Error.META_NONE_CREF, nil, info)
                     (cache, NONE())
                   end
-                  
+
                   (_, env, c, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Static.elabCref failed: " + Dump.printComponentRefStr(c) + " in env: " + FGraph.printGraphPathStr(env))
                     fail()
                   end
-                  
+
                   (cache, env, c, impl, pre)  => begin
                       @shouldFail (_, _, _, _) = elabCrefSubs(cache, env, env, c, pre, Prefix.NOPRE(), impl, false, info)
                       s = Dump.printComponentRefStr(c)
@@ -9998,7 +9998,7 @@
         end
 
          #= Checks if time is allowed to be used in the current scope. =#
-        function isValidTimeScope(inEnv::FCore.Graph, inInfo::SourceInfo) ::Bool 
+        function isValidTimeScope(inEnv::FCore.Graph, inInfo::SourceInfo) ::Bool
               local outIsValid::Bool
 
               local res::SCode.Restriction
@@ -10014,19 +10014,19 @@
                   SCode.R_CLASS(__)  => begin
                     true
                   end
-                  
+
                   SCode.R_OPTIMIZATION(__)  => begin
                     true
                   end
-                  
+
                   SCode.R_MODEL(__)  => begin
                     true
                   end
-                  
+
                   SCode.R_BLOCK(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INVALID_TIME_SCOPE, nil, inInfo)
                       false
@@ -10036,7 +10036,7 @@
           outIsValid
         end
 
-        function lookupFunctionsInEnvNoError(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupFunctionsInEnvNoError(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outTypesTypeLst::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -10048,7 +10048,7 @@
                       ErrorExt.rollBack("Static.lookupFunctionsInEnvNoError")
                     (outCache, outTypesTypeLst)
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("Static.lookupFunctionsInEnvNoError")
                       fail()
@@ -10064,7 +10064,7 @@
 
          #= A variable with a 0-length dimension can be evaluated.
           This is good to do because otherwise the C-code contains references to non-existing variables =#
-        function evaluateEmptyVariable(hasZeroSizeDim::Bool, inExp::DAE.Exp, ty::DAE.Type, c::DAE.Const) ::Tuple{DAE.Exp, DAE.Const} 
+        function evaluateEmptyVariable(hasZeroSizeDim::Bool, inExp::DAE.Exp, ty::DAE.Type, c::DAE.Const) ::Tuple{DAE.Exp, DAE.Const}
               local oc::DAE.Const
               local oexp::DAE.Exp
 
@@ -10085,7 +10085,7 @@
                       exp = Expression.makeASUB(exp, sub)
                     (exp, c)
                   end
-                  
+
                   (true, DAE.CREF(componentRef = cr), _, _)  => begin
                       a = Types.isArray(ty)
                       sc = boolNot(a)
@@ -10094,7 +10094,7 @@
                       exp = DAE.ARRAY(et, sc, nil)
                     (exp, c)
                   end
-                  
+
                   (true, DAE.CREF(componentRef = cr), _, _)  => begin
                       a = Types.isArray(ty)
                       sc = boolNot(a)
@@ -10104,7 +10104,7 @@
                       exp = Expression.makeASUB(exp, ListUtil.map(ss, Expression.getSubscriptExp))
                     (exp, c)
                   end
-                  
+
                   _  => begin
                       (inExp, c)
                   end
@@ -10118,7 +10118,7 @@
         end
 
          #= Removes the index from an enumeration type. =#
-        function fixEnumerationType(inType::DAE.Type) ::DAE.Type 
+        function fixEnumerationType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -10130,7 +10130,7 @@
                   DAE.T_ENUMERATION(index = SOME(_), path = p, names = n, literalVarLst = v, attributeLst = al)  => begin
                     DAE.T_ENUMERATION(NONE(), p, n, v, al)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -10144,7 +10144,7 @@
             parameter with variable subscripts => variable
             constant with variable subscripts => variable
             constant with parameter subscripts => parameter =#
-        function applySubscriptsVariability(inVariability::SCode.Variability, inSubsConst::DAE.Const) ::SCode.Variability 
+        function applySubscriptsVariability(inVariability::SCode.Variability, inSubsConst::DAE.Const) ::SCode.Variability
               local outVariability::SCode.Variability
 
               outVariability = begin
@@ -10152,15 +10152,15 @@
                   (SCode.PARAM(__), DAE.C_VAR(__))  => begin
                     SCode.VAR()
                   end
-                  
+
                   (SCode.CONST(__), DAE.C_VAR(__))  => begin
                     SCode.VAR()
                   end
-                  
+
                   (SCode.CONST(__), DAE.C_PARAM(__))  => begin
                     SCode.PARAM()
                   end
-                  
+
                   _  => begin
                       inVariability
                   end
@@ -10170,7 +10170,7 @@
         end
 
          #= Expands an enumeration type to an array of it's enumeration literals. =#
-        function makeEnumerationArray(enumTypeName::Absyn.Path, enumLiterals::List{<:String}) ::Tuple{DAE.Exp, DAE.Type} 
+        function makeEnumerationArray(enumTypeName::Absyn.Path, enumLiterals::List{<:String}) ::Tuple{DAE.Exp, DAE.Type}
               local enumArrayType::DAE.Type
               local enumArray::DAE.Exp
 
@@ -10190,7 +10190,7 @@
           It investigates a DAE.Type in order to fill the subscript lists of a
           component reference. For instance, the name a.b with the type array of
           one dimension will become a.b[:]. =#
-        function fillCrefSubscripts(inComponentRef::DAE.ComponentRef, inType::DAE.Type) ::DAE.ComponentRef 
+        function fillCrefSubscripts(inComponentRef::DAE.ComponentRef, inType::DAE.Type) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -10209,12 +10209,12 @@
                   (e && DAE.CREF_IDENT(subscriptLst =  nil()), _)  => begin
                     e
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = id, identType = ty2, subscriptLst = subs), t)  => begin
                       subs_1 = fillSubscripts(subs, t)
                     ComponentReference.makeCrefIdent(id, ty2, subs_1)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, subscriptLst = subs, componentRef = cref, identType = ty2), t)  => begin
                       subs = fillSubscripts(subs, ty2)
                       t = stripPrefixType(t, ty2)
@@ -10230,7 +10230,7 @@
           outComponentRef
         end
 
-        function stripPrefixType(inType::DAE.Type, inPrefixType::DAE.Type) ::DAE.Type 
+        function stripPrefixType(inType::DAE.Type, inPrefixType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -10240,7 +10240,7 @@
                   (DAE.T_ARRAY(ty = t), DAE.T_ARRAY(ty = pt))  => begin
                     stripPrefixType(t, pt)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -10250,7 +10250,7 @@
         end
 
          #= Helper function to fillCrefSubscripts. =#
-        function fillSubscripts(inExpSubscriptLst::List{<:DAE.Subscript}, inType::DAE.Type) ::List{DAE.Subscript} 
+        function fillSubscripts(inExpSubscriptLst::List{<:DAE.Subscript}, inType::DAE.Type) ::List{DAE.Subscript}
               local outExpSubscriptLst::List{DAE.Subscript}
 
               outExpSubscriptLst = begin
@@ -10265,7 +10265,7 @@
                       subs = listAppend(inExpSubscriptLst, subs)
                     subs
                   end
-                  
+
                   _  => begin
                       inExpSubscriptLst
                   end
@@ -10278,7 +10278,7 @@
 
          #= This function does some more processing of crefs, like replacing a constant
            with its value and vectorizing a non-constant. =#
-        function elabCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttributes::DAE.Attributes, constSubs::DAE.Const, inIteratorConst::Option{<:DAE.Const}, inType::DAE.Type, inBinding::DAE.Binding, inVectorize::Bool #= true => vectorized expressions =#, splicedExpData::InstTypes.SplicedExpData, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Const, DAE.Attributes} 
+        function elabCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttributes::DAE.Attributes, constSubs::DAE.Const, inIteratorConst::Option{<:DAE.Const}, inType::DAE.Type, inBinding::DAE.Binding, inVectorize::Bool #= true => vectorized expressions =#, splicedExpData::InstTypes.SplicedExpData, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Const, DAE.Attributes}
               local outAttributes::DAE.Attributes
               local outConst::DAE.Const
               local outExp::DAE.Exp
@@ -10299,7 +10299,7 @@
                   local sexp::Option{DAE.Exp}
                   local v::Values.Value
                   local env::FCore.Graph
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local s::String
                   local str::String
                   local scope::String
@@ -10317,10 +10317,10 @@
                 @matchcontinue (var, inType, inBinding, splicedExpData) begin
                   (_, DAE.T_UNKNOWN(__), _, _)  => begin
                       expTy = Types.simplifyType(inType)
-                      const = Types.variabilityToConst(var)
-                    (DAE.CREF(inCref, expTy), const, inAttributes)
+                      constType = Types.variabilityToConst(var)
+                    (DAE.CREF(inCref, expTy), constType, inAttributes)
                   end
-                  
+
                   (SCode.PARAM(__), _, DAE.EQBOUND(source = DAE.BINDING_FROM_START_VALUE(__)), _)  => begin
                        #=  adrpo: report a warning if the binding came from a start value!
                        =#
@@ -10338,24 +10338,24 @@
                        #=  Error.addSourceMessage(Error.UNBOUND_PARAMETER_WITH_START_VALUE_WARNING, {s,str}, info);  Don't add source info here... Many models give multiple errors that are not filtered out
                        =#
                       binding = DAEUtil.setBindingSource(inBinding, DAE.BINDING_FROM_DEFAULT_VALUE())
-                      (outCache, e, const, attr) = elabCref2(outCache, inEnv, inCref, inAttributes, constSubs, inIteratorConst, inType, binding, inVectorize, splicedExpData, inPrefix, evalCref, info)
-                    (e, const, attr)
+                      (outCache, e, constType, attr) = elabCref2(outCache, inEnv, inCref, inAttributes, constSubs, inIteratorConst, inType, binding, inVectorize, splicedExpData, inPrefix, evalCref, info)
+                    (e, constType, attr)
                   end
-                  
+
                   (SCode.CONST(__), DAE.T_ENUMERATION(index = SOME(i), path = p), _, _) where (evalCref)  => begin
                        #=  an enumeration literal -> simplify to a literal expression
                        =#
                       p = AbsynUtil.joinPaths(p, ComponentReference.crefLastPath(inCref))
                     (DAE.ENUM_LITERAL(p, i), DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, _, _) where (! evalCref)  => begin
                        #=  Don't evaluate constants if evalCref is false.
                        =#
                       expTy = Types.simplifyType(inType)
                     (Expression.makeCrefExp(inCref, expTy), DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, _, InstTypes.SPLICEDEXPDATA(__)) where (Types.isVar(constSubs))  => begin
                        #=  a constant with variable subscript
                        =#
@@ -10366,7 +10366,7 @@
                       e = Expression.makeASUB(e, list(Expression.getSubscriptExp(sub) for sub in subsc))
                     (e, DAE.C_VAR(), inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, binding, InstTypes.SPLICEDEXPDATA(_, idTy))  => begin
                        #=  a constant -> evaluate binding
                        =#
@@ -10380,19 +10380,19 @@
                       end
                        #=  Couldn't evaluate binding, replace the cref with the unevaluated binding.
                        =#
-                      const = DAE.C_CONST()
+                      constType = DAE.C_CONST()
                        #= Types.constAnd(DAE.C_CONST(), constSubs);
                        =#
-                    (e, const, inAttributes)
+                    (e, constType, inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, _, _) where (isSome(inIteratorConst))  => begin
                        #=  a constant with some for iterator constness -> don't constant evaluate
                        =#
                       expTy = Types.simplifyType(inType)
                     (Expression.makeCrefExp(inCref, expTy), DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, DAE.EQBOUND(constant_ = DAE.C_CONST(__)), InstTypes.SPLICEDEXPDATA(sexp, idTy))  => begin
                        #=  a constant with a binding
                        =#
@@ -10407,7 +10407,7 @@
                       e = ValuesUtil.valueExp(v)
                     (e, DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (SCode.PARAM(__), _, _, InstTypes.SPLICEDEXPDATA(sexp, idTy)) where (DAEUtil.isBound(inBinding))  => begin
                        #=  evaluate parameters only if \"evalparam\" or Config.getEvaluateParametersInAnnotations() is set
                        =#
@@ -10427,7 +10427,7 @@
                       e = ValuesUtil.valueExp(v)
                     (e, DAE.C_PARAM(), attr)
                   end
-                  
+
                   (SCode.CONST(__), _, DAE.EQBOUND(evaluatedExp = SOME(v), constant_ = DAE.C_CONST(__)), InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(componentRef = cr)), _))  => begin
                        #=  a constant array indexed by a for iterator -> transform into an array of values. HACK! HACK! UGLY! TODO! FIXME!
                        =#
@@ -10443,7 +10443,7 @@
                       e = DAE.ASUB(e, list(index))
                     (e, DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (SCode.CONST(__), _, DAE.UNBOUND(__), _) where (isNone(inIteratorConst))  => begin
                        #=  constants without value should not produce error if they are not in a simulation model!
                        =#
@@ -10459,7 +10459,7 @@
                       e = Expression.makeCrefExp(cr, expTy)
                     (e, DAE.C_CONST(), inAttributes)
                   end
-                  
+
                   (_, _, _, InstTypes.SPLICEDEXPDATA(sexp, idTy))  => begin
                        #=  Everything else, vectorize the cref.
                        =#
@@ -10467,10 +10467,10 @@
                       expIdTy = Types.simplifyType(idTy)
                       cr = fillCrefSubscripts(inCref, inType)
                       e = crefVectorize(inVectorize, Expression.makeCrefExp(cr, expTy), inType, sexp, expIdTy)
-                      const = Types.variabilityToConst(var)
-                    (e, const, inAttributes)
+                      constType = Types.variabilityToConst(var)
+                    (e, constType, inAttributes)
                   end
-                  
+
                   _  => begin
                          #=  failure!
                          =#
@@ -10492,7 +10492,7 @@
           This is needed since the DAE does not know what the variable 'x' is,
           it only knows the variables 'x[1]', 'x[2]' and 'x[3]'.
           NOTE: Currently only works for one and two dimensions. =#
-        function crefVectorize(performVectorization::Bool #= if false, return input =#, inExp::DAE.Exp, inType::DAE.Type, splicedExp::Option{<:DAE.Exp}, crefIdType::DAE.Type #= the type of the last cref ident, without considering subscripts. picked up from splicedExpData and used for crefs in vectorized exp =#) ::DAE.Exp 
+        function crefVectorize(performVectorization::Bool #= if false, return input =#, inExp::DAE.Exp, inType::DAE.Type, splicedExp::Option{<:DAE.Exp}, crefIdType::DAE.Type #= the type of the last cref ident, without considering subscripts. picked up from splicedExpData and used for crefs in vectorized exp =#) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10512,12 +10512,12 @@
                   (false, e, _, _, _)  => begin
                     e
                   end
-                  
+
                   (_, e, DAE.T_SUBTYPE_BASIC(complexType = t), _, _)  => begin
                       e = crefVectorize(true, e, t, NONE(), crefIdType)
                     e
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = d1 <|  nil(), ty = DAE.T_ARRAY(dims = d2 <|  nil())), SOME(DAE.CREF(componentRef = cr)), _)  => begin
                       b1 = Expression.dimensionSize(d1) < Config.vectorizationLimit()
                       b2 = Expression.dimensionSize(d2) < Config.vectorizationLimit()
@@ -10526,14 +10526,14 @@
                       e = elabMatrixToMatrixExp(e)
                     e
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = d1 <|  nil(), ty = t), SOME(DAE.CREF(componentRef = cr)), _)  => begin
                       @match false = Types.isArray(t)
                       @match true = Expression.dimensionSize(d1) < Config.vectorizationLimit() || Config.vectorizationLimit() == 0
                       e = elabCrefSlice(cr, crefIdType)
                     e
                   end
-                  
+
                   (_, DAE.CREF(componentRef = cr, ty = exptp), DAE.T_ARRAY(dims = d1 <|  nil(), ty = t && DAE.T_ARRAY(dims = d2 <|  nil())), _, _)  => begin
                       ds = Expression.dimensionSize(d1)
                       ds2 = Expression.dimensionSize(d2)
@@ -10544,7 +10544,7 @@
                       e = createCrefArray2d(cr, 1, ds, ds2, exptp, t, crefIdType)
                     e
                   end
-                  
+
                   (_, DAE.CREF(componentRef = cr, ty = exptp), DAE.T_ARRAY(dims = d1 <|  nil(), ty = t), _, _)  => begin
                       @match false = Types.isArray(t)
                       ds = Expression.dimensionSize(d1)
@@ -10552,7 +10552,7 @@
                       e = createCrefArray(cr, 1, ds, exptp, t, crefIdType)
                     e
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -10571,7 +10571,7 @@
 
          #= A function for extracting the type-dimension of the child to *me* to dimension *my* array-size.
           Also returns wheter the array is a scalar or not. =#
-        function extractDimensionOfChild(inExp::DAE.Exp) ::Tuple{DAE.Dimensions, Bool} 
+        function extractDimensionOfChild(inExp::DAE.Exp) ::Tuple{DAE.Dimensions, Bool}
               local isScalar::Bool
               local outExp::DAE.Dimensions
 
@@ -10589,18 +10589,18 @@
                   DAE.ARRAY(ty = DAE.T_ARRAY(dims = tl), scalar = sc)  => begin
                     (tl, sc)
                   end
-                  
+
                   DAE.ARRAY(array = expl1 && exp2 && DAE.ARRAY(_, _, _) <| _)  => begin
                       (tl, _) = extractDimensionOfChild(exp2)
                       x = listLength(expl1)
                     (_cons(DAE.DIM_INTEGER(x), tl), false)
                   end
-                  
+
                   DAE.ARRAY(array = expl1)  => begin
                       x = listLength(expl1)
                     (list(DAE.DIM_INTEGER(x)), true)
                   end
-                  
+
                   DAE.CREF(_, _)  => begin
                     (nil, true)
                   end
@@ -10620,7 +10620,7 @@
         CREF_IDENT('a',{DAE.SLICE(DAE.ARRAY(_,_,{DAE.INDEX(1),DAE.INDEX(2)})),
                         DAE.SLICE(DAE.ARRAY(_,_,{DAE.INDEX(1),DAE.INDEX(3)}))})
            ==> {{a[1,1],a[1,3]},{a[2,1],a[2,3]}} =#
-        function elabCrefSlice(inCref::DAE.ComponentRef, inType::DAE.Type) ::DAE.Exp 
+        function elabCrefSlice(inCref::DAE.ComponentRef, inType::DAE.Type) ::DAE.Exp
               local outCref::DAE.Exp
 
               outCref = begin
@@ -10636,7 +10636,7 @@
                       exp1 = flattenSubscript(ssl, id, ety)
                     exp1
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, identType = prety, subscriptLst = ssl, componentRef = child), ety)  => begin
                       childExp = elabCrefSlice(child, ety)
                       exp1 = flattenSubscript(ssl, id, prety)
@@ -10651,7 +10651,7 @@
          #= Incase we have a qual with child references, this function merges them.
           The input should be an array, or just one CREF_QUAL, of arrays...of arrays
           of CREF_QUALS and the same goes for 'rest'. Also the flat type as input. =#
-        function mergeQualWithRest(qual::DAE.Exp, rest::DAE.Exp, inType::DAE.Type) ::DAE.Exp 
+        function mergeQualWithRest(qual::DAE.Exp, rest::DAE.Exp, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10667,7 +10667,7 @@
                   (exp1 && DAE.CREF(_, _), exp2, _)  => begin
                     mergeQualWithRest2(exp2, exp1)
                   end
-                  
+
                   (DAE.ARRAY(_, _, expl1), exp2, ety)  => begin
                       expl1 = ListUtil.map2(expl1, mergeQualWithRest, exp2, ety)
                       exp2 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
@@ -10685,7 +10685,7 @@
 
          #= Helper to mergeQualWithRest, handles the case
           when the child-qual is arrays of arrays. =#
-        function mergeQualWithRest2(rest::DAE.Exp, qual::DAE.Exp) ::DAE.Exp 
+        function mergeQualWithRest2(rest::DAE.Exp, qual::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10707,7 +10707,7 @@
                       cref_2 = ComponentReference.makeCrefQual(id, ty2, ssl, cref)
                     Expression.makeCrefExp(cref_2, ety)
                   end
-                  
+
                   (exp1 && DAE.ARRAY(ety, _, expl1), exp2 && DAE.CREF(DAE.CREF_IDENT(_, _, _), _))  => begin
                       expl1 = ListUtil.map1(expl1, mergeQualWithRest2, exp2)
                       exp1 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
@@ -10722,7 +10722,7 @@
         end
 
          #= to catch subscript free CREF's. =#
-        function flattenSubscript(inSubs::List{<:DAE.Subscript}, name::String, inType::DAE.Type) ::DAE.Exp 
+        function flattenSubscript(inSubs::List{<:DAE.Subscript}, name::String, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10740,7 +10740,7 @@
                       exp1 = Expression.makeCrefExp(cref_, ety)
                     exp1
                   end
-                  
+
                   (subs1, id, ety)  => begin
                       exp2 = flattenSubscript2(subs1, id, ety)
                     exp2
@@ -10764,7 +10764,7 @@
           This is done in several function calls, this specific
           function extracts the numbers ( 1,2 and 1 ).
            =#
-        function flattenSubscript2(inSubs::List{<:DAE.Subscript}, name::String, inType::DAE.Type) ::DAE.Exp 
+        function flattenSubscript2(inSubs::List{<:DAE.Subscript}, name::String, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10785,25 +10785,25 @@
                   ( nil(), _, _)  => begin
                     DAE.ARRAY(DAE.T_UNKNOWN_DEFAULT, false, nil)
                   end
-                  
+
                   (DAE.INDEX(exp = exp1 && DAE.ICONST(_)) <| subs1, id, ety)  => begin
                       exp2 = flattenSubscript2(subs1, id, ety)
                       exp2 = applySubscript(exp1, exp2, id, Expression.unliftArray(ety))
                     exp2
                   end
-                  
+
                   (DAE.SLICE(DAE.ARRAY(_, _, expl1 && DAE.ICONST(0) <|  nil())) <| subs1, id, ety)  => begin
                       exp2 = flattenSubscript2(subs1, id, ety)
                       expl2 = ListUtil.map3(expl1, applySubscript, exp2, id, ety)
                       exp3 = listHead(expl2)
                     exp3
                   end
-                  
+
                   (DAE.SLICE(DAE.ARRAY(_, _, expl1)) <| subs1, id, ety)  => begin
                       exp2 = flattenSubscript2(subs1, id, ety)
                     flattenSubscript3(expl1, id, ety, exp2)
                   end
-                  
+
                   (sub1 && DAE.SLICE(exp = DAE.RANGE(__)) <| subs1, id, ety)  => begin
                        #=  first subscript integer, ety
                        =#
@@ -10830,7 +10830,7 @@
           outExp
         end
 
-        function flattenSubscript3(inSubscripts::List{<:DAE.Exp}, inName::String, inType::DAE.Type, inExp::DAE.Exp) ::DAE.Exp 
+        function flattenSubscript3(inSubscripts::List{<:DAE.Exp}, inName::String, inType::DAE.Type, inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               local expl::List{DAE.Exp}
@@ -10847,7 +10847,7 @@
         end
 
          #=  A help function, to prevent the {{}} look of empty arrays. =#
-        function removeDoubleEmptyArrays(inArr::DAE.Exp) ::DAE.Exp 
+        function removeDoubleEmptyArrays(inArr::DAE.Exp) ::DAE.Exp
               local outArr::DAE.Exp
 
               outArr = begin
@@ -10863,17 +10863,17 @@
                   DAE.ARRAY(array = exp2 && DAE.ARRAY(array =  nil()) <|  nil())  => begin
                     exp2
                   end
-                  
+
                   DAE.ARRAY(ty = ty1, scalar = sc, array = expl1 && DAE.ARRAY(__) <| expl3)  => begin
                       expl3 = ListUtil.map(expl1, removeDoubleEmptyArrays)
                       exp1 = DAE.ARRAY(ty1, sc, expl3)
                     exp1
                   end
-                  
+
                   exp1  => begin
                     exp1
                   end
-                  
+
                   exp1  => begin
                       print("- Static.removeDoubleEmptyArrays failure for: " + ExpressionDump.printExpStr(exp1) + "\\n")
                     fail()
@@ -10886,7 +10886,7 @@
          #= here we apply the subscripts to the IDENTS of the CREF's.
           Special case for adressing INDEX[0], make an empty array.
           If we have an array of subscript, we call applySubscript2 =#
-        function applySubscript(inSub::DAE.Exp #= dim n  =#, inSubs::DAE.Exp #= dim >n =#, name::String, inType::DAE.Type) ::DAE.Exp 
+        function applySubscript(inSub::DAE.Exp #= dim n  =#, inSubs::DAE.Exp #= dim >n =#, name::String, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10902,24 +10902,24 @@
                       @match true = Expression.arrayContainZeroDimension(arrDim)
                     exp1
                   end
-                  
+
                   (DAE.ICONST(integer = 0), DAE.ARRAY(DAE.T_ARRAY(dims = arrDim), _, _), _, ety)  => begin
                       ety = Expression.arrayEltType(ety)
                     DAE.ARRAY(DAE.T_ARRAY(ety, _cons(DAE.DIM_INTEGER(0), arrDim)), true, nil)
                   end
-                  
+
                   (DAE.ICONST(integer = 0), _, _, ety)  => begin
                       ety = Expression.arrayEltType(ety)
                     DAE.ARRAY(DAE.T_ARRAY(ety, list(DAE.DIM_INTEGER(0))), true, nil)
                   end
-                  
+
                   (exp1, DAE.ARRAY(_, _,  nil()), id, ety)  => begin
                       @match true = Expression.isValidSubscript(exp1)
                       crty = Expression.unliftArray(ety) #= only subscripting one dimension, unlifting once  =#
                       cref_ = ComponentReference.makeCrefIdent(id, ety, list(DAE.INDEX(exp1)))
                     Expression.makeCrefExp(cref_, crty)
                   end
-                  
+
                   (exp1, exp2, _, ety)  => begin
                       @match true = Expression.isValidSubscript(exp1)
                     applySubscript2(exp1, exp2, ety)
@@ -10932,7 +10932,7 @@
 
          #= Handles multiple subscripts for the expression.
           If it is an array, we listmap applySubscript3 =#
-        function applySubscript2(inSub::DAE.Exp #= The subs to add =#, inSubs::DAE.Exp #= The already created subs =#, inType::DAE.Type) ::DAE.Exp 
+        function applySubscript2(inSub::DAE.Exp #= The subs to add =#, inSubs::DAE.Exp #= The already created subs =#, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10954,7 +10954,7 @@
                       exp2 = Expression.makeCrefExp(cref_, crty)
                     exp2
                   end
-                  
+
                   (exp1, DAE.ARRAY(_, _, expl1), ety)  => begin
                       expl1 = ListUtil.map2(expl1, applySubscript3, exp1, ety)
                       exp2 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
@@ -10970,7 +10970,7 @@
 
          #= Final applySubscript function, here we call ourself
           recursive until we have the CREFS we are looking for. =#
-        function applySubscript3(inSubs::DAE.Exp #= The already created subs =#, inSub::DAE.Exp #= The subs to add =#, inType::DAE.Type) ::DAE.Exp 
+        function applySubscript3(inSubs::DAE.Exp #= The already created subs =#, inSub::DAE.Exp #= The subs to add =#, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10992,7 +10992,7 @@
                       exp2 = Expression.makeCrefExp(cref_, crty)
                     exp2
                   end
-                  
+
                   (DAE.ARRAY(_, _, expl1), exp1, ety)  => begin
                       expl1 = ListUtil.map2(expl1, applySubscript3, exp1, ety)
                       exp2 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
@@ -11015,7 +11015,7 @@
           NOTE: the vectorized expression is inserted first in the argument list
          of the call, so if extra arguments should be passed these can be given as
          input to the call expression. =#
-        function callVectorize(inExp::DAE.Exp, inExpExpLst::List{<:DAE.Exp}) ::List{DAE.Exp} 
+        function callVectorize(inExp::DAE.Exp, inExpExpLst::List{<:DAE.Exp}) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = begin
@@ -11036,12 +11036,12 @@
                   (_,  nil())  => begin
                     nil
                   end
-                  
+
                   (callexp && DAE.CALL(fn, args, attr), e <| es)  => begin
                       es_1 = callVectorize(callexp, es)
                     _cons(DAE.CALL(fn, _cons(e, args), attr), es_1)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Static.callVectorize failed\\n")
@@ -11056,7 +11056,7 @@
 
          #= helper function to crefVectorize, creates each individual cref,
           e.g. {x{1},x{2}, ...} from x. =#
-        function createCrefArray(inComponentRef1::DAE.ComponentRef, inInteger2::ModelicaInteger, inInteger3::ModelicaInteger, inType4::DAE.Type, inType5::DAE.Type, crefIdType::DAE.Type) ::DAE.Exp 
+        function createCrefArray(inComponentRef1::DAE.ComponentRef, inInteger2::ModelicaInteger, inInteger3::ModelicaInteger, inType4::DAE.Type, inType5::DAE.Type, crefIdType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -11079,7 +11079,7 @@
                       end
                     DAE.ARRAY(et, true, nil)
                   end
-                  
+
                   (cr, indx, ds, et, t, _)  => begin
                       indx_1 = indx + 1
                       cr_1 = ComponentReference.replaceWholeDimSubscript(cr, indx)
@@ -11088,7 +11088,7 @@
                       e_1 = crefVectorize(true, Expression.makeCrefExp(cr_1, elt_tp), t, NONE(), crefIdType)
                     DAE.ARRAY(et, true, _cons(e_1, expl))
                   end
-                  
+
                   (cr, indx, ds, et, t, _)  => begin
                       indx_1 = indx + 1
                       @match DAE.ARRAY(_, _, expl) = createCrefArray(cr, indx_1, ds, et, t, crefIdType)
@@ -11097,7 +11097,7 @@
                       e_1 = crefVectorize(true, e_1, t, NONE(), crefIdType)
                     DAE.ARRAY(et, true, _cons(e_1, expl))
                   end
-                  
+
                   (cr, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("createCrefArray failed on:" + ComponentReference.printComponentRefStr(cr))
@@ -11131,7 +11131,7 @@
 
          #= helper function to cref_vectorize, creates each
           individual cref, e.g. {x{1,1},x{2,1}, ...} from x. =#
-        function createCrefArray2d(inCref::DAE.ComponentRef, inIndex::ModelicaInteger, inDim1::ModelicaInteger, inDim2::ModelicaInteger, inType5::DAE.Type, inType6::DAE.Type, crefIdType::DAE.Type) ::DAE.Exp 
+        function createCrefArray2d(inCref::DAE.ComponentRef, inIndex::ModelicaInteger, inDim1::ModelicaInteger, inDim2::ModelicaInteger, inType5::DAE.Type, inType6::DAE.Type, crefIdType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -11156,7 +11156,7 @@
                       end
                     DAE.MATRIX(et, 0, nil)
                   end
-                  
+
                   (cr, indx, ds, ds2, et, t, _)  => begin
                       indx_1 = indx + 1
                       @match DAE.MATRIX(matrix = ms) = createCrefArray2d(cr, indx_1, ds, ds2, et, t, crefIdType)
@@ -11165,7 +11165,7 @@
                       @match DAE.ARRAY(_, true, expl) = crefVectorize(true, Expression.makeCrefExp(cr_1, elt_tp), t, NONE(), crefIdType)
                     DAE.MATRIX(et, ds, _cons(expl, ms))
                   end
-                  
+
                   (cr, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Static.createCrefArray2d failed on: " + ComponentReference.printComponentRefStr(cr))
@@ -11175,13 +11175,13 @@
               end
                #=  increase the index dimension
                =#
-               #= 
+               #=
                =#
           outExp
         end
 
          #= This function converts an absyn cref to a component reference =#
-        function absynCrefToComponentReference(inComponentRef::Absyn.ComponentRef) ::DAE.ComponentRef 
+        function absynCrefToComponentReference(inComponentRef::Absyn.ComponentRef) ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               outComponentRef = begin
@@ -11194,13 +11194,13 @@
                       cref = ComponentReference.makeCrefIdent(i, DAE.T_UNKNOWN_DEFAULT, nil)
                     cref
                   end
-                  
+
                   Absyn.CREF_QUAL(name = i, subscripts =  nil(), componentRef = c)  => begin
                       cref = absynCrefToComponentReference(c)
                       cref = ComponentReference.makeCrefQual(i, DAE.T_UNKNOWN_DEFAULT, nil, cref)
                     cref
                   end
-                  
+
                   Absyn.CREF_FULLYQUALIFIED(componentRef = c)  => begin
                       cref = absynCrefToComponentReference(c)
                     cref
@@ -11211,7 +11211,7 @@
         end
 
          #= This function elaborates on all subscripts in a component reference. =#
-        function elabCrefSubs(inCache::FCore.Cache, inCrefEnv::FCore.Graph #= search for the cref in this environment =#, inSubsEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inTopPrefix::Prefix.Prefix #= the top prefix, i.e. the one send down by elabCref1, needed to prefix expressions in subscript types! =#, inCrefPrefix::Prefix.Prefix #= the accumulated cref, required for lookup =#, inBoolean::Bool, inHasZeroSizeDim::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Const, Bool} 
+        function elabCrefSubs(inCache::FCore.Cache, inCrefEnv::FCore.Graph #= search for the cref in this environment =#, inSubsEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inTopPrefix::Prefix.Prefix #= the top prefix, i.e. the one send down by elabCref1, needed to prefix expressions in subscript types! =#, inCrefPrefix::Prefix.Prefix #= the accumulated cref, required for lookup =#, inBoolean::Bool, inHasZeroSizeDim::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Const, Bool}
               local outHasZeroSizeDim::Bool
               local outConst::DAE.Const #= The constness of the subscripts. Note: This is not the same as
                 the constness of a cref with subscripts! (just becase x[1,2] has a constant subscript list does
@@ -11222,7 +11222,7 @@
               (outCache, outComponentRef, outConst, outHasZeroSizeDim) = begin
                   local t::DAE.Type
                   local sl::DAE.Dimensions
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local const1::DAE.Const
                   local const2::DAE.Const
                   local crefEnv::FCore.Graph
@@ -11251,26 +11251,26 @@
                       id_ty = Types.simplifyType(id_ty)
                       hasZeroSizeDim = Types.isZeroLengthArray(id_ty)
                       sl = Types.getDimensions(id_ty)
-                      (cache, ss_1, const) = elabSubscriptsDims(cache, crefSubs, ss, sl, impl, topPrefix, inComponentRef, info)
-                    (cache, ComponentReference.makeCrefIdent(id, id_ty, ss_1), const, hasZeroSizeDim)
+                      (cache, ss_1, constType) = elabSubscriptsDims(cache, crefSubs, ss, sl, impl, topPrefix, inComponentRef, info)
+                    (cache, ComponentReference.makeCrefIdent(id, id_ty, ss_1), constType, hasZeroSizeDim)
                   end
-                  
+
                   (cache, crefEnv, crefSubs, Absyn.CREF_QUAL(name = id, subscripts =  nil(), componentRef = restCref), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
                       (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuter.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       (cache, _, t, _, _, _, _, _, _) = Lookup.lookupVar(cache, crefEnv, cr)
                       ty = Types.simplifyType(t)
                       sl = Types.getDimensions(ty)
                       crefPrefix = PrefixUtil.prefixAdd(id, sl, nil, crefPrefix, SCode.VAR(), ClassInf.UNKNOWN(Absyn.IDENT("")), info)
-                      (cache, cr, const, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, restCref, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
-                    (cache, ComponentReference.makeCrefQual(id, ty, nil, cr), const, hasZeroSizeDim)
+                      (cache, cr, constType, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, restCref, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
+                    (cache, ComponentReference.makeCrefQual(id, ty, nil, cr), constType, hasZeroSizeDim)
                   end
-                  
+
                   (cache, crefEnv, crefSubs, Absyn.CREF_QUAL(name = id, subscripts =  nil(), componentRef = restCref), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
                       crefPrefix = PrefixUtil.prefixAdd(id, nil, nil, crefPrefix, SCode.VAR(), ClassInf.UNKNOWN(Absyn.IDENT("")), info)
-                      (cache, cr, const, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, restCref, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
-                    (cache, ComponentReference.makeCrefQual(id, DAE.T_COMPLEX_DEFAULT, nil, cr), const, hasZeroSizeDim)
+                      (cache, cr, constType, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, restCref, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
+                    (cache, ComponentReference.makeCrefQual(id, DAE.T_COMPLEX_DEFAULT, nil, cr), constType, hasZeroSizeDim)
                   end
-                  
+
                   (cache, crefEnv, crefSubs, Absyn.CREF_QUAL(name = id, subscripts = ss && _ <| _, componentRef = restCref), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
                       (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuter.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       @match (cache, DAE.ATTR(variability = vt), t, _, _, InstTypes.SPLICEDEXPDATA(identType = id_ty), _, _, _) = Lookup.lookupVar(cache, crefEnv, cr)
@@ -11280,16 +11280,16 @@
                       (cache, ss_1, const1) = elabSubscriptsDims(cache, crefSubs, ss, sl, impl, topPrefix, inComponentRef, info)
                       crefPrefix = PrefixUtil.prefixAdd(id, sl, ss_1, crefPrefix, vt, ClassInf.UNKNOWN(Absyn.IDENT("")), info)
                       (cache, cr, const2, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, restCref, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
-                      const = Types.constAnd(const1, const2)
-                    (cache, ComponentReference.makeCrefQual(id, ty, ss_1, cr), const, hasZeroSizeDim)
+                      constType = Types.constAnd(const1, const2)
+                    (cache, ComponentReference.makeCrefQual(id, ty, ss_1, cr), constType, hasZeroSizeDim)
                   end
-                  
+
                   (cache, crefEnv, crefSubs, Absyn.CREF_FULLYQUALIFIED(componentRef = absynCr), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
                       crefEnv = FGraph.topScope(crefEnv)
                       (cache, cr, const1, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, absynCr, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
                     (cache, cr, const1, hasZeroSizeDim)
                   end
-                  
+
                   (_, crefEnv, _, absynCref, topPrefix, crefPrefix, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Static.elabCrefSubs failed on: " + "[top:" + PrefixUtil.printPrefixStr(topPrefix) + "]." + PrefixUtil.printPrefixStr(crefPrefix) + "." + Dump.printComponentRefStr(absynCref) + " env: " + FGraph.printGraphPathStr(crefEnv))
@@ -11333,7 +11333,7 @@
          #= This function converts a list of Absyn.Subscript to a list of
           DAE.Subscript, and checks if all subscripts are constant.
           HJ: not checking for constant, returning if constant or not =#
-        function elabSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynSubscriptLst::List{<:Absyn.Subscript}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const} 
+        function elabSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynSubscriptLst::List{<:Absyn.Subscript}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
               local outConst::DAE.Const
               local outExpSubscriptLst::List{DAE.Subscript}
               local outCache::FCore.Cache
@@ -11342,7 +11342,7 @@
                   local sub_1::DAE.Subscript
                   local const1::DAE.Const
                   local const2::DAE.Const
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local subs_1::List{DAE.Subscript}
                   local env::FCore.Graph
                   local sub::Absyn.Subscript
@@ -11356,12 +11356,12 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil, DAE.C_CONST())
                   end
-                  
+
                   (cache, env, sub <| subs, impl, pre, _)  => begin
                       (cache, sub_1, const1, _) = elabSubscript(cache, env, sub, impl, pre, info)
                       (cache, subs_1, const2) = elabSubscripts(cache, env, subs, impl, pre, info)
-                      const = Types.constAnd(const1, const2)
-                    (cache, _cons(sub_1, subs_1), const)
+                      constType = Types.constAnd(const1, const2)
+                    (cache, _cons(sub_1, subs_1), constType)
                   end
                 end
               end
@@ -11371,7 +11371,7 @@
         end
 
          #= Elaborates a list of subscripts and checks that they are valid for the given dimensions. =#
-        function elabSubscriptsDims(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscripts::List{<:Absyn.Subscript}, inDimensions::List{<:DAE.Dimension}, inImpl::Bool, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const} 
+        function elabSubscriptsDims(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscripts::List{<:Absyn.Subscript}, inDimensions::List{<:DAE.Dimension}, inImpl::Bool, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
               local outConst::DAE.Const = DAE.C_CONST()
               local outSubs::List{DAE.Subscript} = nil
               local outCache::FCore.Cache = inCache
@@ -11379,7 +11379,7 @@
               local rest_dims::List{DAE.Dimension} = inDimensions
               local dim::DAE.Dimension
               local dsub::DAE.Subscript
-              local const::DAE.Const
+              local constType::DAE.Const
               local prop::Option{DAE.Properties}
               local subl_str::String
               local diml_str::String
@@ -11396,8 +11396,8 @@
                 else
                   @match _cons(dim, rest_dims) = rest_dims
                 end
-                (outCache, dsub, const, prop) = elabSubscript(outCache, inEnv, asub, inImpl, inPrefix, inInfo)
-                outConst = Types.constAnd(const, outConst)
+                (outCache, dsub, constType, prop) = elabSubscript(outCache, inEnv, asub, inImpl, inPrefix, inInfo)
+                outConst = Types.constAnd(constType, outConst)
                 (outCache, dsub) = elabSubscriptsDims2(outCache, inEnv, dsub, dim, outConst, prop, inImpl, inCref, inInfo)
                 outSubs = _cons(dsub, outSubs)
               end
@@ -11422,7 +11422,7 @@
         end
 
          #= Helper function to elabSubscriptsDims. =#
-        function elabSubscriptsDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::DAE.Subscript, inDimension::DAE.Dimension, inConst::DAE.Const, inProperties::Option{<:DAE.Properties}, inImpl::Bool, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript} 
+        function elabSubscriptsDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::DAE.Subscript, inDimension::DAE.Dimension, inConst::DAE.Const, inProperties::Option{<:DAE.Properties}, inImpl::Bool, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript}
               local outSubscript::DAE.Subscript
               local outCache::FCore.Cache
 
@@ -11452,48 +11452,48 @@
                       @match true = Expression.dimensionKnown(inDimension)
                     (inCache, inSubscript)
                   end
-                  
+
                   (_, SOME(prop))  => begin
                       @match true = Types.isParameter(inConst)
                       ty = Types.getPropType(prop)
                       @match false = Types.getFixedVarAttributeParameterOrConstant(ty)
                     (inCache, inSubscript)
                   end
-                  
+
                   (_, _)  => begin
                       int_dim = Expression.dimensionSize(inDimension)
                       @match true = Types.isParameterOrConstant(inConst)
                       (cache, sub) = Ceval.cevalSubscript(inCache, inEnv, inSubscript, int_dim, inImpl, Absyn.MSG(inInfo), 0)
                     (cache, sub)
                   end
-                  
+
                   (DAE.DIM_EXP(exp = e), _)  => begin
                       @match true = Types.isParameterOrConstant(inConst)
                       @match (_, Values.INTEGER(integer = int_dim)) = Ceval.ceval(inCache, inEnv, e, true, Absyn.MSG(inInfo), 0)
                       (cache, sub) = Ceval.cevalSubscript(inCache, inEnv, inSubscript, int_dim, inImpl, Absyn.MSG(inInfo), 0)
                     (cache, sub)
                   end
-                  
+
                   (_, _)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                       @match true = Types.isParameterOrConstant(inConst)
                     (inCache, inSubscript)
                   end
-                  
+
                   (_, _)  => begin
                       @match true = Expression.dimensionKnown(inDimension)
                       @match false = Types.isConstant(inConst) || Types.isParameter(inConst) && ! FGraph.inForLoopScope(inEnv)
                     (inCache, inSubscript)
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     (inCache, inSubscript)
                   end
-                  
+
                   (DAE.DIM_EXP(_), _)  => begin
                     (inCache, inSubscript)
                   end
-                  
+
                   _  => begin
                         sub_str = ExpressionDump.printSubscriptStr(inSubscript)
                         dim_str = ExpressionDump.dimensionString(inDimension)
@@ -11530,7 +11530,7 @@
 
          #= This function converts an Absyn.Subscript to an
           DAE.Subscript. =#
-        function elabSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::Absyn.Subscript, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript, DAE.Const, Option{DAE.Properties}} 
+        function elabSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::Absyn.Subscript, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript, DAE.Const, Option{DAE.Properties}}
               local outProperties::Option{DAE.Properties}
               local outConst::DAE.Const
               local outSubscript::DAE.Subscript
@@ -11540,7 +11540,7 @@
                   local impl::Bool
                   local sub_1::DAE.Exp
                   local ty::DAE.Type
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local sub_2::DAE.Subscript
                   local env::FCore.Graph
                   local sub::Absyn.Exp
@@ -11553,14 +11553,14 @@
                   (cache, _, Absyn.NOSUB(__), _, _)  => begin
                     (cache, DAE.WHOLEDIM(), DAE.C_CONST(), NONE())
                   end
-                  
+
                   (cache, env, Absyn.SUBSCRIPT(subscript = sub), impl, pre)  => begin
-                      @match (cache, sub_1, (@match DAE.PROP(constFlag = const) = prop)) = elabExpInExpression(cache, env, sub, impl, true, pre, info)
+                      @match (cache, sub_1, (@match DAE.PROP(constFlag = constType) = prop)) = elabExpInExpression(cache, env, sub, impl, true, pre, info)
                       @match (cache, sub_1, (@match DAE.PROP(type_ = ty) = prop)) = Ceval.cevalIfConstant(cache, env, sub_1, prop, impl, info)
                       sub_2 = elabSubscriptType(ty, sub, sub_1, info)
-                    (cache, sub_2, const, SOME(prop))
+                    (cache, sub_2, constType, SOME(prop))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Static.elabSubscript failed on " + Dump.printSubscriptStr(inSubscript) + " in env: " + FGraph.printGraphPathStr(inEnv))
@@ -11578,7 +11578,7 @@
          #= This function is used to find the correct constructor for DAE.Subscript to
            use for an indexing expression.  If a scalar is given as index, DAE.INDEX()
            is used, and if an array is given, DAE.SLICE() is used. =#
-        function elabSubscriptType(inType::DAE.Type, inAbsynExp::Absyn.Exp, inDaeExp::DAE.Exp, inInfo::SourceInfo) ::DAE.Subscript 
+        function elabSubscriptType(inType::DAE.Type, inAbsynExp::Absyn.Exp, inDaeExp::DAE.Exp, inInfo::SourceInfo) ::DAE.Subscript
               local outSubscript::DAE.Subscript
 
               outSubscript = begin
@@ -11590,31 +11590,31 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.INDEX(inDaeExp)
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     DAE.INDEX(inDaeExp)
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     DAE.INDEX(inDaeExp)
                   end
-                  
+
                   DAE.T_ARRAY(ty = DAE.T_INTEGER(__))  => begin
                     DAE.SLICE(inDaeExp)
                   end
-                  
+
                   DAE.T_ARRAY(ty = DAE.T_ENUMERATION(__))  => begin
                     DAE.SLICE(inDaeExp)
                   end
-                  
+
                   DAE.T_ARRAY(ty = DAE.T_BOOL(__))  => begin
                     DAE.SLICE(inDaeExp)
                   end
-                  
+
                   DAE.T_METABOXED(__)  => begin
                     elabSubscriptType(inType.ty, inAbsynExp, inDaeExp, inInfo)
                   end
-                  
+
                   _  => begin
                         e_str = Dump.printExpStr(inAbsynExp)
                         t_str = Types.unparseType(inType)
@@ -11633,7 +11633,7 @@
 
           This function might actually not be needed.
          =#
-        function subscriptCrefType(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Type 
+        function subscriptCrefType(inExp::DAE.Exp, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -11646,7 +11646,7 @@
                       t_1 = subscriptCrefType2(c, t)
                     t_1
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -11655,7 +11655,7 @@
           outType
         end
 
-        function subscriptCrefType2(inComponentRef::DAE.ComponentRef, inType::DAE.Type) ::DAE.Type 
+        function subscriptCrefType2(inComponentRef::DAE.ComponentRef, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -11667,12 +11667,12 @@
                   (DAE.CREF_IDENT(subscriptLst =  nil()), t)  => begin
                     t
                   end
-                  
+
                   (DAE.CREF_IDENT(subscriptLst = subs), t)  => begin
                       t_1 = subscriptType(t, subs)
                     t_1
                   end
-                  
+
                   (DAE.CREF_QUAL(componentRef = c), t)  => begin
                       t_1 = subscriptCrefType2(c, t)
                     t_1
@@ -11686,7 +11686,7 @@
           function reduces the dimensionality.
           This does not handle slices or check that subscripts are not out
           of bounds. =#
-        function subscriptType(inType::DAE.Type, inExpSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type 
+        function subscriptType(inType::DAE.Type, inExpSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -11698,22 +11698,22 @@
                   (t,  nil())  => begin
                     t
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_INTEGER(__) <|  nil(), ty = t), DAE.INDEX(__) <| subs)  => begin
                       t_1 = subscriptType(t, subs)
                     t_1
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.SLICE(__) <| subs)  => begin
                       t_1 = subscriptType(t, subs)
                     DAE.T_ARRAY(t_1, list(dim))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.WHOLEDIM(__) <| subs)  => begin
                       t_1 = subscriptType(t, subs)
                     DAE.T_ARRAY(t_1, list(dim))
                   end
-                  
+
                   (t, _)  => begin
                       Print.printBuf("- subscript_type failed (")
                       Print.printBuf(Types.printTypeStr(t))
@@ -11725,7 +11725,7 @@
           outType
         end
 
-        function makeIfExp(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::DAE.Exp, inCondProp::DAE.Properties, inTrueBranch::DAE.Exp, inTrueProp::DAE.Properties, inFalseBranch::DAE.Exp, inFalseProp::DAE.Properties, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function makeIfExp(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::DAE.Exp, inCondProp::DAE.Properties, inTrueBranch::DAE.Exp, inTrueProp::DAE.Properties, inFalseBranch::DAE.Exp, inFalseProp::DAE.Properties, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -11824,7 +11824,7 @@
           which is when all subscripts are evaluated to constant values.
           If Such an evaluation is not possible, there is no canonical
           form and this function fails. =#
-        function canonCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrefixCref::DAE.ComponentRef, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function canonCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrefixCref::DAE.ComponentRef, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outComponentRef::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -11856,7 +11856,7 @@
 
          #= Transform expression to canonical form
           by constant evaluating all subscripts. =#
-        function canonCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function canonCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outComponentRef::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -11881,7 +11881,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                     (cache, DAE.WILD())
                   end
-                  
+
                   (cache, env, DAE.CREF_IDENT(ident = n, subscriptLst = ss), impl)  => begin
                       (cache, _, t, _, _, _, _, _, _) = Lookup.lookupVarIdent(cache, env, n)
                       sl = Types.getDimensionSizes(t)
@@ -11889,7 +11889,7 @@
                       ty2 = Types.simplifyType(t)
                     (cache, ComponentReference.makeCrefIdent(n, ty2, ss_1))
                   end
-                  
+
                   (cache, env, DAE.CREF_QUAL(ident = n, subscriptLst = ss, componentRef = c), impl)  => begin
                       (cache, _, t, _, _, _, _, componentEnv, _) = Lookup.lookupVarIdent(cache, env, n)
                       ty2 = Types.simplifyType(t)
@@ -11898,7 +11898,7 @@
                       (cache, c_1) = canonCref(cache, componentEnv, c, impl)
                     (cache, ComponentReference.makeCrefQual(n, ty2, ss_1, c_1))
                   end
-                  
+
                   (_, _, cr, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Static.canonCref failed, cr: ")
@@ -11930,7 +11930,7 @@
           bindings with higher variability than the component, and we can't set it to
           constant because that would cause the compiler to try and constant evaluate
           the call. So we set it to DAE.C_UNKNOWN() instead. =#
-        function unevaluatedFunctionVariability(inEnv::FCore.Graph) ::DAE.Const 
+        function unevaluatedFunctionVariability(inEnv::FCore.Graph) ::DAE.Const
               local outConst::DAE.Const
 
               if FGraph.inFunctionScope(inEnv)
@@ -11950,7 +11950,7 @@
         end
 
          #= Use with listFold to check if all slots have been filled =#
-        function slotAnd(s::Slot, b::Bool) ::Bool 
+        function slotAnd(s::Slot, b::Bool) ::Bool
               local res::Bool
 
               @match SLOT(slotFilled = res) = s
@@ -11958,7 +11958,7 @@
           res
         end
 
-        function elabCodeExp(exp::Absyn.Exp, cache::FCore.Cache, env::FCore.Graph, ct::DAE.CodeType, info::SourceInfo) ::DAE.Exp 
+        function elabCodeExp(exp::Absyn.Exp, cache::FCore.Cache, env::FCore.Graph, ct::DAE.CodeType, info::SourceInfo) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -11982,49 +11982,49 @@
                       dexp = elabCodeExp_dispatch(exp, cache, env, ct, info)
                     dexp
                   end
-                  
+
                   (Absyn.CODE(code = Absyn.C_MODIFICATION(__)), DAE.C_EXPRESSION_OR_MODIFICATION(__))  => begin
                     DAE.CODE(exp.code, DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (Absyn.CODE(code = Absyn.C_EXPRESSION(__)), DAE.C_EXPRESSION(__))  => begin
                     DAE.CODE(exp.code, DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (_, DAE.C_EXPRESSION(__))  => begin
                     DAE.CODE(Absyn.C_EXPRESSION(exp), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (_, DAE.C_EXPRESSION_OR_MODIFICATION(__))  => begin
                     DAE.CODE(Absyn.C_EXPRESSION(exp), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (Absyn.CREF(componentRef = cr), DAE.C_TYPENAME(__))  => begin
                       path = AbsynUtil.crefToPath(cr)
                     DAE.CODE(Absyn.C_TYPENAME(path), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (Absyn.ARRAY(es), DAE.C_VARIABLENAMES(__))  => begin
                       es_1 = ListUtil.map4(es, elabCodeExp, cache, env, DAE.C_VARIABLENAME(), info)
                       i = listLength(es)
                       et = DAE.T_ARRAY(DAE.T_UNKNOWN_DEFAULT, list(DAE.DIM_INTEGER(i)))
                     DAE.ARRAY(et, false, es_1)
                   end
-                  
+
                   (_, DAE.C_VARIABLENAMES(__))  => begin
                       et = DAE.T_ARRAY(DAE.T_UNKNOWN_DEFAULT, list(DAE.DIM_INTEGER(1)))
                       dexp = elabCodeExp(exp, cache, env, DAE.C_VARIABLENAME(), info)
                     DAE.ARRAY(et, false, list(dexp))
                   end
-                  
+
                   (Absyn.CREF(componentRef = cr), DAE.C_VARIABLENAME(__))  => begin
                     DAE.CODE(Absyn.C_VARIABLENAME(cr), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (Absyn.CALL(Absyn.CREF_IDENT("der",  nil()), Absyn.FUNCTIONARGS(args = Absyn.CREF(__) <|  nil(), argNames =  nil())), DAE.C_VARIABLENAME(__))  => begin
                     DAE.CODE(Absyn.C_EXPRESSION(exp), DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   _  => begin
                         @shouldFail @match DAE.C_VARIABLENAMES() = ct
                         s1 = Dump.printExpStr(exp)
@@ -12058,7 +12058,7 @@
          #= @author: adrpo
          evaluate a code expression.
          be careful how much you lookup =#
-        function elabCodeExp_dispatch(exp::Absyn.Exp, cache::FCore.Cache, env::FCore.Graph, ct::DAE.CodeType, info::Absyn.Info) ::DAE.Exp 
+        function elabCodeExp_dispatch(exp::Absyn.Exp, cache::FCore.Cache, env::FCore.Graph, ct::DAE.CodeType, info::Absyn.Info) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -12088,13 +12088,13 @@
                               (_, dexp, prop) = elabExpInExpression(cache, env, exp, false, false, Prefix.NOPRE(), info)
                             ()
                           end
-                          
+
                           ()  => begin
                               @shouldFail (_, _, _) = Lookup.lookupClassIdent(cache, env, id)
                               (_, dexp, prop) = elabExpInExpression(cache, env, exp, false, false, Prefix.NOPRE(), info)
                             ()
                           end
-                          
+
                           _  => begin
                               fail()
                           end
@@ -12105,12 +12105,12 @@
                       ErrorExt.delCheckpoint("elabCodeExp_dispatch1")
                     dexp
                   end
-                  
+
                   Absyn.CREF(__)  => begin
                       ErrorExt.rollBack("elabCodeExp_dispatch1")
                     fail()
                   end
-                  
+
                   _  => begin
                       @match false = AbsynUtil.isCref(exp)
                       ErrorExt.setCheckpoint("elabCodeExp_dispatch")
@@ -12120,7 +12120,7 @@
                       ErrorExt.delCheckpoint("elabCodeExp_dispatch")
                     dexp
                   end
-                  
+
                   _  => begin
                         @match false = AbsynUtil.isCref(exp)
                         ErrorExt.rollBack("elabCodeExp_dispatch")
@@ -12142,7 +12142,7 @@
         end
 
          #= Elaborates a list of array dimensions. =#
-        function elabArrayDims(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArrayDims(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensions::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -12151,7 +12151,7 @@
         end
 
          #= Helper function to elabArrayDims. Needed because of tail recursion. =#
-        function elabArrayDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inElaboratedDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArrayDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inElaboratedDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensions::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -12165,7 +12165,7 @@
                    nil()  => begin
                     (inCache, listReverse(inElaboratedDims))
                   end
-                  
+
                   dim <| rest_dims  => begin
                       (cache, elab_dim) = elabArrayDim(inCache, inEnv, inCref, dim, inImplicit, inDoVect, inPrefix, inInfo)
                       elab_dims = _cons(elab_dim, inElaboratedDims)
@@ -12178,7 +12178,7 @@
         end
 
          #= Elaborates a single array dimension. =#
-        function elabArrayDim(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimension::Absyn.Subscript, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimension} 
+        function elabArrayDim(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimension::Absyn.Subscript, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimension}
               local outDimension::DAE.Dimension
               local outCache::FCore.Cache
 
@@ -12208,7 +12208,7 @@
                   (_, _, _, Absyn.NOSUB(__), _)  => begin
                     (inCache, DAE.DIM_UNKNOWN())
                   end
-                  
+
                   (_, _, _, Absyn.SUBSCRIPT(subscript = Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "size"), functionArgs = Absyn.FUNCTIONARGS(args = cr_exp && Absyn.CREF(componentRef = cr) <| size_arg <|  nil()))), _)  => begin
                       @match true = AbsynUtil.crefEqual(inCref, cr)
                       (cache, e, _) = elabExpInExpression(inCache, inEnv, cr_exp, inImpl, inDoVect, inPrefix, inInfo)
@@ -12216,11 +12216,11 @@
                       dim = DAE.DIM_EXP(DAE.SIZE(e, SOME(dim_exp)))
                     (inCache, dim)
                   end
-                  
+
                   (_, _, _, Absyn.SUBSCRIPT(subscript = Absyn.CREF(componentRef = Absyn.CREF_IDENT(name = "Boolean"))), _)  => begin
                     (inCache, DAE.DIM_BOOLEAN())
                   end
-                  
+
                   (cache, _, _, Absyn.SUBSCRIPT(subscript = Absyn.CREF(cr)), _)  => begin
                       type_path = AbsynUtil.crefToPath(cr)
                       cache = Lookup.lookupClass(cache, inEnv, type_path)
@@ -12230,7 +12230,7 @@
                           DAE.T_ENUMERATION(index = NONE())  => begin
                             DAE.DIM_ENUM(t.path, t.names, listLength(t.names))
                           end
-                          
+
                           DAE.T_BOOL(__)  => begin
                             DAE.DIM_BOOLEAN()
                           end
@@ -12238,13 +12238,13 @@
                       end
                     (cache, dim)
                   end
-                  
+
                   (_, _, _, Absyn.SUBSCRIPT(subscript = sub), _)  => begin
                       (cache, e, prop) = elabExpInExpression(inCache, inEnv, sub, inImpl, inDoVect, inPrefix, inInfo)
                       @match (cache, SOME(dim)) = elabArrayDim2(cache, inEnv, inCref, e, prop, inImpl, inDoVect, inPrefix, inInfo)
                     (cache, dim)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Static.elabArrayDim failed on: " + AbsynUtil.printComponentRefStr(inCref) + Dump.printArraydimStr(list(inDimension)))
@@ -12271,7 +12271,7 @@
 
          #= Helper function to elabArrayDim. Continues the work from the last case in
           elabArrayDim to avoid unnecessary elaboration. =#
-        function elabArrayDim2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExp::DAE.Exp, inProperties::DAE.Properties, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Dimension}} 
+        function elabArrayDim2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExp::DAE.Exp, inProperties::DAE.Properties, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Dimension}}
               local outDimension::Option{DAE.Dimension}
               local outCache::FCore.Cache
 
@@ -12292,33 +12292,33 @@
                       @match (cache, Values.INTEGER(i)) = Ceval.ceval(inCache, inEnv, inExp, inImpl)
                     (cache, SOME(DAE.DIM_INTEGER(i)))
                   end
-                  
+
                   (_, _, _, _, DAE.PROP(DAE.T_INTEGER(__), DAE.C_PARAM(__)), _)  => begin
                       @match false = Config.splitArrays()
                     (inCache, SOME(DAE.DIM_EXP(inExp)))
                   end
-                  
+
                   (_, _, _, _, DAE.PROP(DAE.T_INTEGER(__), DAE.C_VAR(__)), false)  => begin
                       e_str = ExpressionDump.printExpStr(inExp)
                       Error.addSourceMessage(Error.DIMENSION_NOT_KNOWN, list(e_str), inInfo)
                     (inCache, NONE())
                   end
-                  
+
                   (_, _, _, _, DAE.PROP(DAE.T_INTEGER(__), _), true)  => begin
                       (cache, e, _) = Ceval.cevalIfConstant(inCache, inEnv, inExp, inProperties, inImpl, inInfo)
                     (cache, SOME(DAE.DIM_EXP(e)))
                   end
-                  
+
                   (_, _, _, _, _, _)  => begin
                       @match (cache, (@match DAE.SIZE(_, _) = e), _) = Ceval.cevalIfConstant(inCache, inEnv, inExp, inProperties, inImpl, inInfo)
                     (cache, SOME(DAE.DIM_EXP(e)))
                   end
-                  
+
                   (_, _, _, _, _, _)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                     (inCache, SOME(DAE.DIM_UNKNOWN()))
                   end
-                  
+
                   (_, _, _, _, DAE.PROP(DAE.T_INTEGER(__), cnst), _)  => begin
                       @match true = Types.isParameterOrConstant(cnst)
                       e_str = ExpressionDump.printExpStr(inExp)
@@ -12326,7 +12326,7 @@
                       Error.addSourceMessage(Error.STRUCTURAL_PARAMETER_OR_CONSTANT_WITH_NO_BINDING, list(e_str, a_str), inInfo)
                     (inCache, NONE())
                   end
-                  
+
                   (_, _, _, _, DAE.PROP(ty, _), _)  => begin
                       e_str = ExpressionDump.printExpStr(inExp)
                       t_str = Types.unparseType(ty)
@@ -12349,7 +12349,7 @@
           (outCache, outDimension)
         end
 
-        function consStrippedCref(e::Absyn.Exp, es::List{<:Absyn.Exp}) ::List{Absyn.Exp} 
+        function consStrippedCref(e::Absyn.Exp, es::List{<:Absyn.Exp}) ::List{Absyn.Exp}
               local oes::List{Absyn.Exp}
 
               oes = begin
@@ -12359,7 +12359,7 @@
                       cr = AbsynUtil.crefStripLastSubs(cr)
                     _cons(Absyn.CREF(cr), es)
                   end
-                  
+
                   _  => begin
                       es
                   end
@@ -12369,7 +12369,7 @@
         end
 
          #= Replaces end-expressions in a cref with the appropriate size-expressions. =#
-        function replaceEnd(inCref::Absyn.ComponentRef) ::Absyn.ComponentRef 
+        function replaceEnd(inCref::Absyn.ComponentRef) ::Absyn.ComponentRef
               local outCref::Absyn.ComponentRef
 
               local cr_parts::List{Absyn.ComponentRef}
@@ -12397,7 +12397,7 @@
           outCref
         end
 
-        function replaceEndInSubs(inCref::Absyn.ComponentRef, inSubscripts::List{<:Absyn.Subscript}) ::Absyn.ComponentRef 
+        function replaceEndInSubs(inCref::Absyn.ComponentRef, inSubscripts::List{<:Absyn.Subscript}) ::Absyn.ComponentRef
               local outCref::Absyn.ComponentRef = inCref
 
               local subs::List{Absyn.Subscript} = nil
@@ -12416,7 +12416,7 @@
           outCref
         end
 
-        function replaceEndInSub(inSubscript::Absyn.Subscript, inDimIndex::ModelicaInteger, inCref::Absyn.ComponentRef) ::Absyn.Subscript 
+        function replaceEndInSub(inSubscript::Absyn.Subscript, inDimIndex::ModelicaInteger, inCref::Absyn.ComponentRef) ::Absyn.Subscript
               local outSubscript::Absyn.Subscript
 
               outSubscript = begin
@@ -12424,7 +12424,7 @@
                   Absyn.SUBSCRIPT(__)  => begin
                     Absyn.SUBSCRIPT(replaceEndTraverser(inSubscript.subscript, (inCref, inDimIndex)))
                   end
-                  
+
                   _  => begin
                       inSubscript
                   end
@@ -12433,7 +12433,7 @@
           outSubscript
         end
 
-        function replaceEndTraverser(inExp::Absyn.Exp, inTuple::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Absyn.Exp 
+        function replaceEndTraverser(inExp::Absyn.Exp, inTuple::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -12444,11 +12444,11 @@
                       (cr, i) = inTuple
                     Absyn.CALL(Absyn.CREF_IDENT("size", nil), Absyn.FUNCTIONARGS(list(Absyn.CREF(cr), Absyn.INTEGER(i)), nil))
                   end
-                  
+
                   Absyn.CREF(__)  => begin
                     Absyn.CREF(replaceEnd(inExp.componentRef))
                   end
-                  
+
                   _  => begin
                       AbsynUtil.traverseExpShallow(inExp, inTuple, replaceEndTraverser)
                   end
@@ -12457,7 +12457,7 @@
           outExp
         end
 
-        function fixTupleMetaModelica(exps::List{<:DAE.Exp}, types::List{<:DAE.Type}, consts::List{<:DAE.TupleConst}) ::Tuple{DAE.Exp, DAE.Properties} 
+        function fixTupleMetaModelica(exps::List{<:DAE.Exp}, types::List{<:DAE.Type}, consts::List{<:DAE.TupleConst}) ::Tuple{DAE.Exp, DAE.Properties}
               local prop::DAE.Properties
               local exp::DAE.Exp
 
@@ -12478,7 +12478,7 @@
           (exp, prop)
         end
 
-        function checkBuiltinCallArgs(inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inExpectedArgs::ModelicaInteger, inFnName::String, inInfo::Absyn.Info)  
+        function checkBuiltinCallArgs(inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inExpectedArgs::ModelicaInteger, inFnName::String, inInfo::Absyn.Info)
               local args_str::String
               local msg_str::String
               local pos_args::List{String}
