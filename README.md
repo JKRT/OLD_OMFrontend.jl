@@ -20,5 +20,6 @@ WIP!
 * DoubleEnded.jl
 
 * The standard library. That is available here: https://github.com/JKRT/Modelica-Standard-Library-AST
+(Currently just a constant which represents the Modelica Compilers internal representation (Absyn.jl) of the Standard Library)
 
 * Parser currently defined in OMCompiler
