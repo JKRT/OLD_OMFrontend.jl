@@ -3,6 +3,8 @@ A translation of the OpenModelica Compiler frontend into Julia. Stay tuned peopl
 
 WIP!
 
+This package is currently work in progress and may or may not be functioning until there is an official release.
+
 # Requirements 
 
 * Julia 1.1.1 
