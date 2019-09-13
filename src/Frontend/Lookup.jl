@@ -1,4 +1,4 @@
-  module Lookup 
+  module Lookup
 
 
     using MetaModelica
@@ -127,7 +127,7 @@
           If it finds a function instead, this will be implicitly instantiated
           and lookup will start over.
          =#
-        function lookupType(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inPath::Absyn.Path #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupType(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inPath::Absyn.Path #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local env::FCore.Graph #= The environment the type was found in =#
               local t::DAE.Type #= the found type =#
               local cache::FCore.Cache
@@ -138,7 +138,7 @@
                       (cache, t, env) = lookupTypeIdent(inCache, inEnv, inPath.name, msg)
                     (cache, t, env)
                   end
-                  
+
                   _  => begin
                         (cache, t, env) = lookupTypeQual(inCache, inEnv, inPath, msg)
                       (cache, t, env)
@@ -152,7 +152,7 @@
           If it finds a function instead, this will be implicitly instantiated
           and lookup will start over.
          =#
-        function lookupTypeQual(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inPath::Absyn.Path #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupTypeQual(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inPath::Absyn.Path #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph #= The environment the type was found in =#
               local outType::DAE.Type #= the found type =#
               local outCache::FCore.Cache
@@ -175,18 +175,18 @@
                       t = DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_BOOL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_DEFAULT, inPath)
                     (cache, t, env)
                   end
-                  
+
                   (cache, env, Absyn.QUALIFIED("Connections", Absyn.IDENT("uniqueRootIndices")), _)  => begin
                       t = DAE.T_FUNCTION(list(DAE.FUNCARG("roots", DAE.T_ARRAY(DAE.T_ANYTYPE_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("nodes", DAE.T_ARRAY(DAE.T_ANYTYPE_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("message", DAE.T_STRING_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.FUNCTION_ATTRIBUTES_DEFAULT, inPath)
                     (cache, t, env)
                   end
-                  
+
                   (cache, env, path, _)  => begin
                       (cache, c, env_1) = lookupClass(cache, env, path)
                       (cache, t, env_2) = lookupType2(cache, env_1, c)
                     (cache, t, env_2)
                   end
-                  
+
                   (_, env, path, SOME(info))  => begin
                       classname = AbsynUtil.pathString(path)
                       classname = stringAppend(classname, " (its type) ")
@@ -209,7 +209,7 @@
           If it finds a function instead, this will be implicitly instantiated
           and lookup will start over.
          =#
-        function lookupTypeIdent(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, ident::String #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupTypeIdent(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, ident::String #= type to look for =#, msg::Option{<:SourceInfo} #= Messaage flag, SOME() outputs lookup error messages =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph #= The environment the type was found in =#
               local outType::DAE.Type #= the found type =#
               local outCache::FCore.Cache
@@ -232,18 +232,18 @@
                       t = DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_BOOL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_DEFAULT, Absyn.IDENT("rooted"))
                     (cache, t, env)
                   end
-                  
+
                   (cache, env, _, _)  => begin
                       (cache, t, env_1) = lookupTypeInEnv(cache, env, ident)
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env, _, _)  => begin
                       (cache, c, env_1) = lookupClassIdent(cache, env, ident)
                       (cache, t, env_2) = lookupType2(cache, env_1, c)
                     (cache, t, env_2)
                   end
-                  
+
                   (_, env, _, SOME(info))  => begin
                       classname = stringAppend(ident, " (its type) ")
                       scope = FGraph.printGraphPathStr(env)
@@ -264,7 +264,7 @@
          #=  This function handles the case when we looked up a class, but need to
         check if it is function, record, metarecord, etc.
          =#
-        function lookupType2(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inClass::SCode.Element #= the class lookupType found =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupType2(inCache::FCore.Cache, inEnv::FCore.Graph #= environment to search in =#, inClass::SCode.Element #= the class lookupType found =#) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph #= The environment the type was found in =#
               local outType::DAE.Type #= the found type =#
               local outCache::FCore.Cache
@@ -291,7 +291,7 @@
                       (cache, env_1, t) = buildRecordType(cache, env_1, c)
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env_1, c && SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = r && SCode.R_ENUMERATION(__)))  => begin
                       env_2 = FGraph.openScope(env_1, encflag, id, SOME(FCore.CLASS_SCOPE()))
                       ci_state = ClassInf.start(r, FGraph.getGraphName(env_2))
@@ -304,32 +304,32 @@
                       env_3 = FGraph.mkTypeNode(env_3, id, t)
                     (cache, t, env_3)
                   end
-                  
+
                   (cache, env_1, SCode.CLASS(restriction = SCode.R_TYPE(__), classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = Absyn.IDENT(name = "Real")))))  => begin
                       t = DAE.T_REAL_DEFAULT
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env_1, SCode.CLASS(restriction = SCode.R_TYPE(__), classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = Absyn.IDENT(name = "Integer")))))  => begin
                       t = DAE.T_INTEGER_DEFAULT
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env_1, SCode.CLASS(restriction = SCode.R_TYPE(__), classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = Absyn.IDENT(name = "Boolean")))))  => begin
                       t = DAE.T_BOOL_DEFAULT
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env_1, SCode.CLASS(restriction = SCode.R_TYPE(__), classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = Absyn.IDENT(name = "String")))))  => begin
                       t = DAE.T_STRING_DEFAULT
                     (cache, t, env_1)
                   end
-                  
+
                   (cache, env_1, c && SCode.CLASS(restriction = SCode.R_METARECORD(__)))  => begin
                       (cache, env_2, t) = buildMetaRecordType(cache, env_1, c)
                     (cache, t, env_2)
                   end
-                  
+
                   (cache, env_1, c)  => begin
                       @match true = SCodeUtil.classIsExternalObject(c)
                       (cache, env_1, _, _, _, _, _, _, _, _) = Inst.instClass(cache, env_1, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
@@ -338,7 +338,7 @@
                       (cache, t, env_2) = lookupTypeInEnv(cache, env_1, id)
                     (cache, t, env_2)
                   end
-                  
+
                   (cache, env_1, c && SCode.CLASS(name = id, restriction = SCode.R_FUNCTION(_)))  => begin
                       (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuter.emptyInstHierarchy, c)
                       (cache, t, env_3) = lookupTypeInEnv(cache, env_2, id)
@@ -382,7 +382,7 @@
          #= Takes a list of paths to Uniontypes. Use this list to create a list of T_METARECORD.
         The function is guarded against recursive definitions by accumulating all paths it
         starts to traverse. =#
-        function lookupMetarecordsRecursive(inCache::FCore.Cache, inEnv::FCore.Graph, inUniontypePaths::List{<:Absyn.Path}) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupMetarecordsRecursive(inCache::FCore.Cache, inEnv::FCore.Graph, inUniontypePaths::List{<:Absyn.Path}) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outMetarecordTypes::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -393,7 +393,7 @@
          #= Takes a list of paths to Uniontypes. Use this list to create a list of T_METARECORD.
         The function is guarded against recursive definitions by accumulating all paths it
         starts to traverse. =#
-        function lookupMetarecordsRecursive2(inCache::FCore.Cache, inEnv::FCore.Graph, inUniontypePaths::List{<:Absyn.Path}, inHt::HashTableStringToPath.HashTable, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, HashTableStringToPath.HashTable, List{DAE.Type}} 
+        function lookupMetarecordsRecursive2(inCache::FCore.Cache, inEnv::FCore.Graph, inUniontypePaths::List{<:Absyn.Path}, inHt::HashTableStringToPath.HashTable, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, HashTableStringToPath.HashTable, List{DAE.Type}}
               local outMetarecordTypes::List{DAE.Type}
               local outHt::HashTableStringToPath.HashTable
               local outCache::FCore.Cache
@@ -409,7 +409,7 @@
                   (cache, _,  nil(), ht, acc)  => begin
                     (cache, ht, acc)
                   end
-                  
+
                   (cache, env, first <| rest, ht, acc)  => begin
                       (cache, ht, acc) = lookupMetarecordsRecursive3(cache, env, first, AbsynUtil.pathString(first), ht, acc)
                       (cache, ht, acc) = lookupMetarecordsRecursive2(cache, env, rest, ht, acc)
@@ -423,7 +423,7 @@
          #= Takes a list of paths to Uniontypes. Use this list to create a list of T_METARECORD.
         The function is guarded against recursive definitions by accumulating all paths it
         starts to traverse. =#
-        function lookupMetarecordsRecursive3(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, str::String, inHt::HashTableStringToPath.HashTable, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, HashTableStringToPath.HashTable, List{DAE.Type}} 
+        function lookupMetarecordsRecursive3(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, str::String, inHt::HashTableStringToPath.HashTable, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, HashTableStringToPath.HashTable, List{DAE.Type}}
               local outMetarecordTypes::List{DAE.Type}
               local outHt::HashTableStringToPath.HashTable
               local outCache::FCore.Cache
@@ -440,7 +440,7 @@
                   (cache, _, _, _, ht, acc) where (BaseHashTable.hasKey(str, ht))  => begin
                     (cache, ht, acc)
                   end
-                  
+
                   (cache, env, _, _, ht, acc)  => begin
                       ht = BaseHashTable.add((str, path), ht)
                       (cache, ty, _) = lookupType(cache, env, path, SOME(AbsynUtil.dummyInfo))
@@ -456,7 +456,7 @@
         end
 
          #= Tries to find a specified class in an environment =#
-        function lookupClass(inCache::FCore.Cache, inEnv::FCore.Graph #= Where to look =#, inPath::Absyn.Path #= Path of the class to look for =#, inInfo::Option{<:SourceInfo} = NONE()) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph} 
+        function lookupClass(inCache::FCore.Cache, inEnv::FCore.Graph #= Where to look =#, inPath::Absyn.Path #= Path of the class to look for =#, inInfo::Option{<:SourceInfo} = NONE()) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph}
               local outEnv::FCore.Graph
               local outClass::SCode.Element
               local outCache::FCore.Cache
@@ -485,12 +485,12 @@
                       ErrorExt.rollBack("functionViaComponentRef2")
                     (outCache, outClass, outEnv)
                   end
-                  
+
                   (_, _, Absyn.QUALIFIED(_, _))  => begin
                       ErrorExt.rollBack("functionViaComponentRef2")
                     fail()
                   end
-                  
+
                   (_, _, _)  => begin
                       (outCache, outClass, outEnv, _) = lookupClass1(inCache, inEnv, inPath, nil, Mutable.create(false), inInfo)
                     (outCache, outClass, outEnv)
@@ -507,7 +507,7 @@
         end
 
          #= Like lookupClass, but takes a String as ident for input (avoids Absyn.IDENT() creation) =#
-        function lookupClassIdent(inCache::FCore.Cache, inEnv::FCore.Graph #= Where to look =#, ident::String, inInfo::Option{<:SourceInfo} = NONE()) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph} 
+        function lookupClassIdent(inCache::FCore.Cache, inEnv::FCore.Graph #= Where to look =#, ident::String, inInfo::Option{<:SourceInfo} = NONE()) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph}
               local outEnv::FCore.Graph
               local outClass::SCode.Element
               local outCache::FCore.Cache
@@ -517,7 +517,7 @@
         end
 
          #= help function to lookupClass, does all the work. =#
-        function lookupClass1(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClass1(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -538,7 +538,7 @@
         end
 
          #= help function to lookupClass, does all the work. =#
-        function lookupClass2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClass2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -570,13 +570,13 @@
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, env, Absyn.QUALIFIED(name = pack, path = path), prevFrames)  => begin
                       (optFrame, prevFrames) = lookupPrevFrames(pack, prevFrames)
                       (cache, c, env_2, prevFrames) = lookupClassQualified(cache, env, pack, path, optFrame, prevFrames, inState, inInfo)
                     (cache, c, env_2, prevFrames)
                   end
-                  
+
                   (cache, env, Absyn.IDENT(name = id), prevFrames)  => begin
                       (cache, c, env_1, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, inState, inInfo)
                     (cache, c, env_1, prevFrames)
@@ -596,7 +596,7 @@
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
 
-        function lookupClassQualified(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, path::Absyn.Path, inOptFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClassQualified(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, path::Absyn.Path, inOptFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -619,7 +619,7 @@
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
-                  
+
                   (cache, env, _, _, NONE(), _)  => begin
                       (cache, c, env, prevFrames) = lookupClassInEnv(cache, env, id, nil, inState, inInfo)
                       (optFrame, prevFrames) = lookupPrevFrames(id, prevFrames)
@@ -633,7 +633,7 @@
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
 
-        function lookupClassQualified2(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, inC::SCode.Element, optFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClassQualified2(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, inC::SCode.Element, optFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -657,7 +657,7 @@
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
-                  
+
                   (cache, env, _, SCode.CLASS(name = id), NONE(), _)  => begin
                       r = FNode.child(FGraph.lastScopeRef(env), id)
                       @match FCore.CL(status = FCore.CLS_INSTANCE(_)) = FNode.refData(r)
@@ -665,7 +665,7 @@
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, nil, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
-                  
+
                   (cache, env, _, SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr), NONE(), _)  => begin
                       env = FGraph.openScope(env, encflag, id, FGraph.restrictionToScopeType(restr))
                       ci_state = ClassInf.start(restr, FGraph.getGraphName(env))
@@ -688,7 +688,7 @@
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
 
-        function checkPartialScope(inEnv::FCore.Graph, inParentEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Option{<:SourceInfo})  
+        function checkPartialScope(inEnv::FCore.Graph, inParentEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Option{<:SourceInfo})
               local el::SCode.Element
               local pre::Prefix.Prefix
               local name::String
@@ -698,7 +698,7 @@
               local pre_info::SourceInfo
               local info::SourceInfo
 
-              if isSome(inInfo) && FGraph.isPartialScope(inEnv) && Config.languageStandardAtLeast(Config.LanguageStandard.'3.2')
+              if isSome(inInfo) && FGraph.isPartialScope(inEnv) && Config.languageStandardAtLeast(Config.LanguageStandard.S3_2)
                 @match FCore.N(data = FCore.CL(e = el, pre = pre)) = FNode.fromRef(FGraph.lastScopeRef(inEnv))
                 name = SCodeUtil.elementName(el)
                 if FGraph.graphPrefixOf(inParentEnv, inEnv) && ! PrefixUtil.isNoPrefix(pre)
@@ -721,7 +721,7 @@
                =#
         end
 
-        function getConstrainingClass(inClass::SCode.Element, inEnv::FCore.Graph, inCache::FCore.Cache) ::String 
+        function getConstrainingClass(inClass::SCode.Element, inEnv::FCore.Graph, inCache::FCore.Cache) ::String
               local outPath::String
 
               outPath = begin
@@ -733,12 +733,12 @@
                   SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(cc = SOME(SCode.CONSTRAINCLASS(constrainingClass = cc_path)))))  => begin
                     AbsynUtil.pathString(cc_path)
                   end
-                  
+
                   SCode.CLASS(classDef = SCode.DERIVED(typeSpec = ts))  => begin
                       (_, el, env) = lookupClass(inCache, inEnv, AbsynUtil.typeSpecPath(ts))
                     getConstrainingClass(el, env, inCache)
                   end
-                  
+
                   _  => begin
                       FGraph.printGraphPathStr(inEnv) + "." + SCodeUtil.elementName(inClass)
                   end
@@ -747,7 +747,7 @@
           outPath
         end
 
-        function lookupPrevFrames(id::String, inPrevFrames::FCore.Scope) ::Tuple{Option{FCore.Ref}, FCore.Scope} 
+        function lookupPrevFrames(id::String, inPrevFrames::FCore.Scope) ::Tuple{Option{FCore.Ref}, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outFrame::Option{FCore.Ref}
 
@@ -762,7 +762,7 @@
                       @match true = id == sid
                     (SOME(ref), prevFrames)
                   end
-                  
+
                   _  => begin
                       (NONE(), nil)
                   end
@@ -774,7 +774,7 @@
          #= author: PA
           Looking up variables (constants) imported using qualified imports,
           i.e. import Modelica.Constants.PI; =#
-        function lookupQualifiedImportedVarInFrame(inImports::List{<:Absyn.Import}, ident::SCode.Ident) ::DAE.ComponentRef 
+        function lookupQualifiedImportedVarInFrame(inImports::List{<:Absyn.Import}, ident::SCode.Ident) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -789,12 +789,12 @@
                       @match true = id == ident
                     ComponentReference.pathToCref(path)
                   end
-                  
+
                   (Absyn.NAMED_IMPORT(name = id, path = path) <| _, _)  => begin
                       @match true = id == ident
                     ComponentReference.pathToCref(path)
                   end
-                  
+
                   (_ <| rest, _)  => begin
                     lookupQualifiedImportedVarInFrame(rest, ident)
                   end
@@ -809,7 +809,7 @@
 
          #= Helper function for lookup_unqualified_imported_var_in_frame. Returns
           true if there are unqualified imports that matches a sought constant. =#
-        function moreLookupUnqualifiedImportedVarInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, Bool} 
+        function moreLookupUnqualifiedImportedVarInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, Bool}
               local outBoolean::Bool
               local outCache::FCore.Cache
 
@@ -832,12 +832,12 @@
                       (cache, _, _, _, _, _, _, _, _) = lookupVarInPackages(cache, env, cref, prevFrames, Mutable.create(false))
                     (cache, true)
                   end
-                  
+
                   (cache, _ <| rest, env, ident)  => begin
                       (cache, res) = moreLookupUnqualifiedImportedVarInFrame(cache, rest, env, ident)
                     (cache, res)
                   end
-                  
+
                   (cache,  nil(), _, _)  => begin
                     (cache, false)
                   end
@@ -851,7 +851,7 @@
         end
 
          #= Find a variable from an unqualified import locally in a frame =#
-        function lookupUnqualifiedImportedVarInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, Bool, InstTypes.SplicedExpData, FCore.Graph, String} 
+        function lookupUnqualifiedImportedVarInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, Bool, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData
@@ -894,7 +894,7 @@
                       unique = boolNot(more)
                     (cache, classEnv, attr, ty, bind, cnstForRange, unique, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, _ <| rest, env, ident)  => begin
                       (cache, classEnv, attr, ty, bind, cnstForRange, unique, splicedExpData, componentEnv, name) = lookupUnqualifiedImportedVarInFrame(cache, rest, env, ident)
                     (cache, classEnv, attr, ty, bind, cnstForRange, unique, splicedExpData, componentEnv, name)
@@ -907,7 +907,7 @@
         end
 
          #= Helper function to lookupQualifiedImportedClassInEnv. =#
-        function lookupQualifiedImportedClassInFrame(inCache::FCore.Cache, inImport::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupQualifiedImportedClassInFrame(inCache::FCore.Cache, inImport::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -934,7 +934,7 @@
                       (cache, c, env_1, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, Absyn.QUAL_IMPORT(path = path) <| _, env, ident, _)  => begin
                       id = AbsynUtil.pathLastIdent(path) #= For imported path A.B.C, assert A.B is package =#
                       @match true = id == ident
@@ -944,7 +944,7 @@
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, Absyn.NAMED_IMPORT(name = id, path = path) <| _, env, ident, _)  => begin
                       @match true = id == ident #= Named imports =#
                       Mutable.update(inState, true)
@@ -953,7 +953,7 @@
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, _ <| rest, env, ident, _)  => begin
                       (cache, c, env_1, prevFrames) = lookupQualifiedImportedClassInFrame(cache, rest, env, ident, inState, inInfo)
                     (cache, c, env_1, prevFrames)
@@ -974,7 +974,7 @@
         end
 
          #= Helper function for lookupUnqualifiedImportedClassInFrame =#
-        function moreLookupUnqualifiedImportedClassInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, Bool} 
+        function moreLookupUnqualifiedImportedClassInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, Bool}
               local outBoolean::Bool
               local outCache::FCore.Cache
 
@@ -1012,12 +1012,12 @@
                       (cache, _, _) = lookupClass(cache, env, Absyn.IDENT(ident))
                     (cache, true)
                   end
-                  
+
                   (cache, _ <| rest, env, ident)  => begin
                       (cache, res) = moreLookupUnqualifiedImportedClassInFrame(cache, rest, env, ident)
                     (cache, res)
                   end
-                  
+
                   (cache,  nil(), _, _)  => begin
                     (cache, false)
                   end
@@ -1031,7 +1031,7 @@
         end
 
          #= Finds a class from an unqualified import locally in a frame =#
-        function lookupUnqualifiedImportedClassInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope, Bool} 
+        function lookupUnqualifiedImportedClassInFrame(inCache::FCore.Cache, inImports::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope, Bool}
               local outBoolean::Bool
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
@@ -1077,7 +1077,7 @@
                       unique = boolNot(more)
                     (cache, c_1, env2, prevFrames, unique)
                   end
-                  
+
                   (cache, _ <| rest, env, ident)  => begin
                       (cache, c, env_1, prevFrames, unique) = lookupUnqualifiedImportedClassInFrame(cache, rest, env, ident, inInfo)
                     (cache, c, env_1, prevFrames, unique)
@@ -1094,7 +1094,7 @@
         end
 
          #= Searches for a record constructor implicitly defined by a record class. =#
-        function lookupRecordConstructorClass(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph} 
+        function lookupRecordConstructorClass(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph}
               local outEnv::FCore.Graph
               local outClass::SCode.Element
               local outCache::FCore.Cache
@@ -1121,7 +1121,7 @@
          #= Simplified lookup of connector references. The lookup will stop if it finds a
            deleted component, so if status is VAR_DELETED() then attr and ty will belong
            to the deleted component instead of the looked for component. =#
-        function lookupConnectorVar(env::FCore.Graph, cr::DAE.ComponentRef, firstId::Bool = true) ::Tuple{DAE.Attributes, DAE.Type, FCore.Status, Bool} 
+        function lookupConnectorVar(env::FCore.Graph, cr::DAE.ComponentRef, firstId::Bool = true) ::Tuple{DAE.Attributes, DAE.Type, FCore.Status, Bool}
               local isExpandable::Bool = false
               local status::FCore.Status
               local ty::DAE.Type
@@ -1137,7 +1137,7 @@
                       ty = checkSubscripts(ty, cr.subscriptLst)
                     (attr, ty, status)
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                       @match (DAE.TYPES_VAR(attributes = parent_attr, ty = ty), status, comp_env) = lookupConnectorVar2(env, cr.ident)
                       if FCore.isDeletedComp(status)
@@ -1172,7 +1172,7 @@
         end
 
          #= Helper function to lookupConnectorVar. =#
-        function lookupConnectorVar2(env::FCore.Graph, name::String) ::Tuple{DAE.Var, FCore.Status, FCore.Graph} 
+        function lookupConnectorVar2(env::FCore.Graph, name::String) ::Tuple{DAE.Var, FCore.Status, FCore.Graph}
               local compEnv::FCore.Graph
               local status::FCore.Status
               local var::DAE.Var
@@ -1225,7 +1225,7 @@
 
            Arg1: The environment to search in
            Arg2: The variable to search for. =#
-        function lookupVar(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String} 
+        function lookupVar(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String}
               local name::String #= so the FQ path can be constructed =#
               local outComponentEnv::FCore.Graph #= only used for package constants =#
               local outClassEnv::FCore.Graph #= only used for package constants =#
@@ -1260,13 +1260,13 @@
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name) = lookupVarInternal(cache, env, cref, InstTypes.SEARCH_ALSO_BUILTIN())
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name)
                   end
-                  
+
                   (cache, env, cref)  => begin
                       (cache, classEnv, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cref, nil, Mutable.create(false))
                       checkPackageVariableConstant(env, classEnv, componentEnv, attr, ty, cref)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name)
                   end
-                  
+
                   (cache, env, _) where (Config.getGraphicsExpMode())  => begin
                     (cache, DAE.dummyAttrConst, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE(), InstTypes.SPLICEDEXPDATA(NONE(), DAE.T_UNKNOWN_DEFAULT), env, env, "#varNotFound#")
                   end
@@ -1287,7 +1287,7 @@
         end
 
          #= Like lookupVar, but takes only an ident+subscript. =#
-        function lookupVarIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, ss::List{<:DAE.Subscript} = nil) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String} 
+        function lookupVarIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, ss::List{<:DAE.Subscript} = nil) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String}
               local name::String #= so the FQ path can be constructed =#
               local outComponentEnv::FCore.Graph #= only used for package constants =#
               local outClassEnv::FCore.Graph #= only used for package constants =#
@@ -1316,7 +1316,7 @@
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name) = lookupVarInternalIdent(cache, env, ident, ss, InstTypes.SEARCH_ALSO_BUILTIN())
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name)
                   end
-                  
+
                   (cache, env)  => begin
                       cref = ComponentReference.makeCrefIdent(ident, DAE.T_UNKNOWN_DEFAULT, ss)
                       (cache, classEnv, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cref, nil, Mutable.create(false))
@@ -1334,10 +1334,10 @@
           (outCache, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, outSplicedExpData, outClassEnv #= only used for package constants =#, outComponentEnv #= only used for package constants =#, name #= so the FQ path can be constructed =#)
         end
 
-         #= 
+         #=
         Variables in packages must be constant. This function produces an error message and fails
         if variable is not constant. =#
-        function checkPackageVariableConstant(parentEnv::FCore.Graph, classEnv::FCore.Graph, componentEnv::FCore.Graph, attr::DAE.Attributes, tp::DAE.Type, cref::DAE.ComponentRef)  
+        function checkPackageVariableConstant(parentEnv::FCore.Graph, classEnv::FCore.Graph, componentEnv::FCore.Graph, attr::DAE.Attributes, tp::DAE.Type, cref::DAE.ComponentRef)
               _ = begin
                   local s1::String
                   local s2::String
@@ -1348,7 +1348,7 @@
                   (_, _, _, DAE.ATTR(variability = SCode.CONST(__)), _, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         s1 = ComponentReference.printComponentRefStr(cref)
                         s2 = FGraph.printGraphPathStr(classEnv)
@@ -1372,7 +1372,7 @@
         end
 
          #= Helper function to lookupVar. Searches the frames for variables. =#
-        function lookupVarInternal(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, searchStrategy::InstTypes.SearchStrategy #= if SEARCH_LOCAL_ONLY it won't search in the builtin scope =#) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String} 
+        function lookupVarInternal(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, searchStrategy::InstTypes.SearchStrategy #= if SEARCH_LOCAL_ONLY it won't search in the builtin scope =#) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String}
               local name::String
               local outComponentEnv::FCore.Graph #= the component environment of the variable =#
               local outClassEnv::FCore.Graph #= the environment of the variable, typically the same as input, but e.g. for loop scopes can be 'stripped' =#
@@ -1404,14 +1404,14 @@
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarF(cache, ht, ref, inEnv)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, inEnv, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), ref, _)  => begin
                       @match true = FNode.isImplicitRefName(r)
                       (env, _) = FGraph.stripLastScopeRef(inEnv)
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name) = lookupVarInternal(cache, env, ref, searchStrategy)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = _ <| _ <| _), ref, InstTypes.SEARCH_ALSO_BUILTIN(__))  => begin
                       @match true = Builtin.variableIsBuiltin(ref)
                       env = FGraph.topScope(inEnv)
@@ -1429,7 +1429,7 @@
         end
 
          #= Helper function to lookupVar. Searches the frames for variables. =#
-        function lookupVarInternalIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, ss::List{<:DAE.Subscript} = nil, searchStrategy::InstTypes.SearchStrategy = InstTypes.SEARCH_LOCAL_ONLY() #= if SEARCH_LOCAL_ONLY it won't search in the builtin scope =#) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String} 
+        function lookupVarInternalIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, ss::List{<:DAE.Subscript} = nil, searchStrategy::InstTypes.SearchStrategy = InstTypes.SEARCH_LOCAL_ONLY() #= if SEARCH_LOCAL_ONLY it won't search in the builtin scope =#) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String}
               local name::String
               local outComponentEnv::FCore.Graph #= the component environment of the variable =#
               local outClassEnv::FCore.Graph #= the environment of the variable, typically the same as input, but e.g. for loop scopes can be 'stripped' =#
@@ -1461,14 +1461,14 @@
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarFIdent(cache, ht, ident, ss, inEnv)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, inEnv, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), _)  => begin
                       @match true = FNode.isImplicitRefName(r)
                       (env, _) = FGraph.stripLastScopeRef(inEnv)
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name) = lookupVarInternalIdent(cache, env, ident, ss, searchStrategy)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = _ <| _ <| _), InstTypes.SEARCH_ALSO_BUILTIN(__))  => begin
                       @match true = Builtin.variableNameIsBuiltin(ident)
                       env = FGraph.topScope(inEnv)
@@ -1487,7 +1487,7 @@
 
          #= returns true if the frame is a for-loop scope or a valueblock scope.
         This is indicated by the name of the frame. =#
-        function frameIsImplAddedScope(f::FCore.Node) ::Bool 
+        function frameIsImplAddedScope(f::FCore.Node) ::Bool
               local b::Bool
 
               b = begin
@@ -1496,7 +1496,7 @@
                   FCore.N(name = oname)  => begin
                     FCore.isImplicitScope(oname)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1515,7 +1515,7 @@
           Note: the splicedExpData is currently not relevant, since constants are always evaluated to a value.
                 However, this might change in the future since it makes more sense to calculate the constants
                 during setup in runtime (to gain precision and postpone choice of precision to runtime). =#
-        function lookupVarInPackages(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String} 
+        function lookupVarInPackages(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String #= We only return the environment the component was found in; not its FQ name. =#
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData #= currently not relevant for constants, but might be used in the future =#
@@ -1576,7 +1576,7 @@
                               env5 = FGraph.pushScopeRef(env, f)
                             ()
                           end
-                          
+
                           NONE()  => begin
                               @match (cache, (@match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c), env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
                               Mutable.update(inState, true)
@@ -1597,25 +1597,25 @@
                       splicedExpData = prefixSplicedExp(ComponentReference.crefFirstCref(inComponentRef), splicedExpData)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, env, cr && DAE.CREF_IDENT(__), _, _)  => begin
                       (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackagesIdent(cache, env, cr.ident, cr.subscriptLst, inPrevFrames, inState)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, env, cr && DAE.CREF_QUAL(__), _, _)  => begin
                       ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
                       (cache, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarF(cache, ht, cr, env)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = f <| fs), cr && DAE.CREF_QUAL(__), prevFrames, _)  => begin
                       @match false = Mutable.access(inState)
                       env = FGraph.setScope(inEnv, fs)
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cr, _cons(f, prevFrames), inState)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -1648,7 +1648,7 @@
           Note: the splicedExpData is currently not relevant, since constants are always evaluated to a value.
                 However, this might change in the future since it makes more sense to calculate the constants
                 during setup in runtime (to gain precision and postpone choice of precision to runtime). =#
-        function lookupVarInPackagesIdent(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ss::List{<:DAE.Subscript}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String} 
+        function lookupVarInPackagesIdent(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ss::List{<:DAE.Subscript}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String #= We only return the environment the component was found in; not its FQ name. =#
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData #= currently not relevant for constants, but might be used in the future =#
@@ -1704,13 +1704,13 @@
                       Mutable.update(inState, true)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, env, _, _)  => begin
                       ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
                       (cache, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarFIdent(cache, ht, id, ss, env)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, env, prevFrames, _)  => begin
                       node = FNode.fromRef(FGraph.lastScopeRef(env))
                       (qimports, uqimports) = FNode.imports(node)
@@ -1729,7 +1729,7 @@
                               (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cr, prevFrames, inState)
                             ()
                           end
-                          
+
                           (_, _ <| _)  => begin
                               (cache, p_env, attr, ty, bind, cnstForRange, unique, splicedExpData, componentEnv, name) = lookupUnqualifiedImportedVarInFrame(cache, uqimports, env, id)
                               reportSeveralNamesError(unique, id)
@@ -1740,14 +1740,14 @@
                       end
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   (cache, FCore.G(scope = f <| fs), prevFrames, _)  => begin
                       @match false = Mutable.access(inState)
                       env = FGraph.setScope(inEnv, fs)
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackagesIdent(cache, env, id, ss, _cons(f, prevFrames), inState)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -1780,7 +1780,7 @@
           also be found even if inside a for scope.
           Arg1: The environment to search in
           Arg2: The variable to search for. =#
-        function lookupVarLocal(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String} 
+        function lookupVarLocal(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, FCore.Graph, String}
               local name::String
               local outComponentEnv::FCore.Graph
               local outClassEnv::FCore.Graph
@@ -1798,7 +1798,7 @@
         end
 
          #= Searches for a variable in the local scope. =#
-        function lookupIdentLocal(inCache::FCore.Cache, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph} 
+        function lookupIdentLocal(inCache::FCore.Cache, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph}
               local outComponentEnv::FCore.Graph
               local instStatus::FCore.Status
               local outMod::DAE.Mod
@@ -1827,7 +1827,7 @@
                       (fv, c, m, i, componentEnv) = lookupVar2(ht, id, inEnv)
                     (cache, fv, c, m, i, componentEnv)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), id)  => begin
                       @match true = FNode.isImplicitRefName(r)
                       (env, _) = FGraph.stripLastScopeRef(inEnv)
@@ -1842,7 +1842,7 @@
         end
 
          #= Searches for a class definition in the local scope. =#
-        function lookupClassLocal(inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{SCode.Element, FCore.Graph} 
+        function lookupClassLocal(inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{SCode.Element, FCore.Graph}
               local outEnv::FCore.Graph
               local outClass::SCode.Element
 
@@ -1866,7 +1866,7 @@
         end
 
          #= Same as lookupIdentLocal, except check all frames =#
-        function lookupIdent(inCache::FCore.Cache, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph} 
+        function lookupIdent(inCache::FCore.Cache, inEnv::FCore.Graph, inIdent::SCode.Ident) ::Tuple{FCore.Cache, DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph}
               local outEnv::FCore.Graph #= the env where we found the ident =#
               local instStatus::FCore.Status
               local outMod::DAE.Mod
@@ -1892,7 +1892,7 @@
                       (fv, c, m, i, _) = lookupVar2(ht, id, inEnv)
                     (cache, fv, c, m, i, inEnv)
                   end
-                  
+
                   (cache, FCore.G(scope = _ <| _), id)  => begin
                       (e, _) = FGraph.stripLastScopeRef(inEnv)
                       (cache, fv, c, m, i, e) = lookupIdent(cache, e, id)
@@ -1907,7 +1907,7 @@
          =#
 
          #= Returns a list of types that the function has. =#
-        function lookupFunctionsInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inId::Absyn.Path, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupFunctionsInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inId::Absyn.Path, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outTypesTypeLst::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -1950,19 +1950,19 @@
                       ErrorExt.rollBack("functionViaComponentRef")
                     (cache, res)
                   end
-                  
+
                   (_, _, Absyn.QUALIFIED(_, _), _)  => begin
                       ErrorExt.rollBack("functionViaComponentRef")
                     fail()
                   end
-                  
+
                   (cache, env, id, _)  => begin
                       env = FGraph.selectScope(env, id)
                       name = AbsynUtil.pathLastIdent(id)
                       (cache, res) = lookupFunctionsInEnv(cache, env, Absyn.IDENT(name), inInfo)
                     (cache, res)
                   end
-                  
+
                   (cache, env, Absyn.IDENT(name = str), info)  => begin
                       _ = Static.elabBuiltinHandler(str) #= Check for builtin operators =#
                       env = FGraph.topScope(env)
@@ -1971,32 +1971,32 @@
                       (cache, res) = lookupFunctionsInFrame(cache, ht, httypes, env, str, info)
                     (cache, res)
                   end
-                  
+
                   (cache, env, Absyn.IDENT(name = str && "cardinality"), _)  => begin
                       env = FGraph.topScope(env)
                       res = createGenericBuiltinFunctions(env, str)
                     (cache, res)
                   end
-                  
+
                   (cache, env, id, info)  => begin
                       @shouldFail @match Absyn.FULLYQUALIFIED(_) = id
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, false, info)
                     (cache, res)
                   end
-                  
+
                   (cache, env, Absyn.FULLYQUALIFIED(id), info)  => begin
                       env = FGraph.topScope(env)
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, true, info)
                     (cache, res)
                   end
-                  
+
                   (cache, env, id, _)  => begin
                       id = begin
                         @match id begin
                           Absyn.IDENT("Clock")  => begin
                             Absyn.QUALIFIED("OpenModelica", Absyn.QUALIFIED("Internal", Absyn.IDENT("ClockConstructor")))
                           end
-                          
+
                           _  => begin
                               id
                           end
@@ -2006,11 +2006,11 @@
                       (cache, res) = lookupFunctionsListInEnv(cache, env_1, names, info, nil)
                     (cache, res)
                   end
-                  
+
                   (cache, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (_, _, id, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("lookupFunctionsInEnv failed on: " + AbsynUtil.pathString(id))
@@ -2035,7 +2035,7 @@
           (outCache, outTypesTypeLst)
         end
 
-        function lookupFunctionsListInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIds::List{<:Absyn.Path}, info::SourceInfo, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupFunctionsListInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIds::List{<:Absyn.Path}, info::SourceInfo, inAcc::List{<:DAE.Type}) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outTypesTypeLst::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -2051,13 +2051,13 @@
                   (cache, _,  nil(), _, acc)  => begin
                     (cache, listReverse(acc))
                   end
-                  
+
                   (cache, env, id <| ids, _, acc)  => begin
                       @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInEnv(cache, env, id, info)
                       (cache, acc) = lookupFunctionsListInEnv(cache, env, ids, info, listAppend(res, acc))
                     (cache, acc)
                   end
-                  
+
                   (_, env, id <| _, _, _)  => begin
                       str = AbsynUtil.pathString(id) + " not found in scope: " + FGraph.printGraphPathStr(env)
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
@@ -2069,7 +2069,7 @@
         end
 
          #= Returns a list of types that the function has. =#
-        function lookupFunctionsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, followedQual::Bool #= cannot pop frames if we followed a qualified path at any point =#, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupFunctionsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, followedQual::Bool #= cannot pop frames if we followed a qualified path at any point =#, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outTypesTypeLst::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -2105,7 +2105,7 @@
                       @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInFrame(cache, ht, httypes, inEnv, str, info)
                     (cache, res)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), id && Absyn.IDENT(__), _, _)  => begin
                       @match (cache, (@match SCode.CLASS(name = str, restriction = restr) = c), env_1) = lookupClass(cache, inEnv, id)
                       @match true = SCodeUtil.isFunctionRestriction(restr)
@@ -2115,7 +2115,7 @@
                       @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInFrame(cache, ht, httypes, env_2, str, info)
                     (cache, res)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), Absyn.QUALIFIED(name = pack, path = path), _, _)  => begin
                       @match (cache, (@match SCode.CLASS(name = str, encapsulatedPrefix = encflag, restriction = restr) = c), env_1) = lookupClass(cache, inEnv, Absyn.IDENT(pack))
                       r = FNode.child(FGraph.lastScopeRef(env_1), str)
@@ -2130,14 +2130,14 @@
                       (cache, res) = lookupFunctionsInEnv2(cache, env2, path, true, info)
                     (cache, res)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), id, false, _)  => begin
                       @match false = FNode.isEncapsulated(FNode.fromRef(r))
                       (env, _) = FGraph.stripLastScopeRef(inEnv)
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, false, info)
                     (cache, res)
                   end
-                  
+
                   (cache, FCore.G(scope = r <| _), id && Absyn.IDENT(__), false, _)  => begin
                       @match true = FNode.isEncapsulated(FNode.fromRef(r))
                       env = FGraph.topScope(inEnv)
@@ -2157,7 +2157,7 @@
           This function creates function types on-the-fly for special builtin
           operators/functions which can not be represented in the builtin
           environment. =#
-        function createGenericBuiltinFunctions(inEnv::FCore.Graph, inString::String) ::List{DAE.Type} 
+        function createGenericBuiltinFunctions(inEnv::FCore.Graph, inString::String) ::List{DAE.Type}
               local outTypesTypeLst::List{DAE.Type}
 
               outTypesTypeLst = begin
@@ -2179,7 +2179,7 @@
          =#
 
          #= function: lookupTypeInEnv =#
-        function lookupTypeInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupTypeInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph
               local outType::DAE.Type
               local outCache::FCore.Cache
@@ -2202,7 +2202,7 @@
                       (cache, c, env_1) = lookupTypeInFrame(cache, ht, httypes, env, id)
                     (cache, c, env_1)
                   end
-                  
+
                   (cache, env && FCore.G(scope = r <| _))  => begin
                       (env, _) = FGraph.stripLastScopeRef(env)
                       (cache, c, env_1) = lookupTypeInEnv(cache, env, id)
@@ -2214,7 +2214,7 @@
           (outCache, outType, outEnv)
         end
 
-        function getHtTypes(inParentRef::FCore.Ref) ::FCore.Children 
+        function getHtTypes(inParentRef::FCore.Ref) ::FCore.Children
               local ht::FCore.Children
 
               ht = begin
@@ -2227,7 +2227,7 @@
                       ht = FNode.children(FNode.fromRef(r))
                     ht
                   end
-                  
+
                   _  => begin
                       FCore.RefTree.new()
                   end
@@ -2239,7 +2239,7 @@
         end
 
          #= Searches a frame for a type. =#
-        function lookupTypeInFrame(inCache::FCore.Cache, inBinTree1::FCore.Children, inBinTree2::FCore.Children, inEnv3::FCore.Graph, inIdent4::SCode.Ident) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupTypeInFrame(inCache::FCore.Cache, inBinTree1::FCore.Children, inBinTree2::FCore.Children, inEnv3::FCore.Graph, inIdent4::SCode.Ident) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph
               local outType::DAE.Type
               local outCache::FCore.Cache
@@ -2264,7 +2264,7 @@
         end
 
          #= Searches a frame for a type. =#
-        function lookupTypeInFrame2(inCache::FCore.Cache, item::FCore.Node, inEnv3::FCore.Graph, inIdent4::SCode.Ident) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph} 
+        function lookupTypeInFrame2(inCache::FCore.Cache, item::FCore.Node, inEnv3::FCore.Graph, inIdent4::SCode.Ident) ::Tuple{FCore.Cache, DAE.Type, FCore.Graph}
               local outEnv::FCore.Graph
               local outType::DAE.Type
               local outCache::FCore.Cache
@@ -2286,23 +2286,23 @@
                   (cache, FCore.N(data = FCore.FT(t <| _)), env, _)  => begin
                     (cache, t, env)
                   end
-                  
+
                   (_, FCore.N(data = FCore.CO(e = comp)), _, id)  => begin
                       info = SCodeUtil.elementInfo(comp)
                       Error.addSourceMessage(Error.LOOKUP_TYPE_FOUND_COMP, list(id), info)
                     fail()
                   end
-                  
+
                   (cache, FCore.N(data = FCore.CL(e = cdef && SCode.CLASS(restriction = SCode.R_RECORD(_)))), env, _)  => begin
                       (cache, env_3, ty) = buildRecordType(cache, env, cdef)
                     (cache, ty, env_3)
                   end
-                  
+
                   (cache, FCore.N(data = FCore.CL(e = cdef && SCode.CLASS(restriction = SCode.R_METARECORD(__)))), env, _)  => begin
                       (cache, env_3, ty) = buildMetaRecordType(cache, env, cdef)
                     (cache, ty, env_3)
                   end
-                  
+
                   (cache, FCore.N(data = FCore.CL(e = cdef && SCode.CLASS(restriction = SCode.R_FUNCTION(_)))), env, id)  => begin
                       cenv = env
                       (cache, env_1, _) = InstFunction.implicitFunctionInstantiation(cache, cenv, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil)
@@ -2326,7 +2326,7 @@
 
          #= This actually only looks up the function name and find all
            corresponding types that have this function name. =#
-        function lookupFunctionsInFrame(inCache::FCore.Cache, inClasses::FCore.Children, inFuncTypes::FCore.Children, inEnv::FCore.Graph, inFuncName::SCode.Ident, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}} 
+        function lookupFunctionsInFrame(inCache::FCore.Cache, inClasses::FCore.Children, inFuncTypes::FCore.Children, inEnv::FCore.Graph, inFuncName::SCode.Ident, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}}
               local outFuncTypes::List{DAE.Type}
               local outCache::FCore.Cache
 
@@ -2365,21 +2365,21 @@
                         end
                       (inCache, list(ty))
                     end
-                    
+
                     FCore.CO(__)  => begin
                          #=  Found a component, print an error.
                          =#
                         Error.addSourceMessage(Error.LOOKUP_TYPE_FOUND_COMP, list(inFuncName), inInfo)
                       fail()
                     end
-                    
+
                     FCore.CL(e = cl && SCode.CLASS(restriction = SCode.R_RECORD(__)))  => begin
                          #=  A record, create a record constructor.
                          =#
                         (cache, _, ty) = buildRecordType(inCache, inEnv, cl)
                       (cache, list(ty))
                     end
-                    
+
                     FCore.CL(e = cl) where (SCodeUtil.isFunction(cl))  => begin
                          #=  A function, instantiate to get the type.
                          =#
@@ -2387,7 +2387,7 @@
                         (cache, tps) = lookupFunctionsInEnv2(cache, env, Absyn.IDENT(inFuncName), true, inInfo)
                       (cache, tps)
                     end
-                    
+
                     FCore.CL(e = cl) where (SCodeUtil.classIsExternalObject(cl))  => begin
                          #=  An external object.
                          =#
@@ -2401,7 +2401,7 @@
           (outCache, outFuncTypes)
         end
 
-        function selectUpdatedEnv(inNewEnv::FCore.Graph, inOldEnv::FCore.Graph) ::FCore.Graph 
+        function selectUpdatedEnv(inNewEnv::FCore.Graph, inOldEnv::FCore.Graph) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -2410,12 +2410,12 @@
                       @match true = FGraph.isTopScope(inNewEnv)
                     inOldEnv
                   end
-                  
+
                   (_, _)  => begin
                       @match true = stringEq(FGraph.getGraphNameStr(inNewEnv), FGraph.getGraphNameStr(inOldEnv))
                     inNewEnv
                   end
-                  
+
                   _  => begin
                       inOldEnv
                   end
@@ -2429,7 +2429,7 @@
         end
 
          #=  =#
-        function buildRecordType(cache::FCore.Cache, env::FCore.Graph, icdef::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, DAE.Type} 
+        function buildRecordType(cache::FCore.Cache, env::FCore.Graph, icdef::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, DAE.Type}
               local ftype::DAE.Type
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2447,10 +2447,10 @@
           (outCache, outEnv, ftype)
         end
 
-         #= 
+         #=
           Creates the record constructor class, i.e. a function, from the record
           class given as argument. =#
-        function buildRecordConstructorClass(inCache::FCore.Cache, inEnv::FCore.Graph, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, SCode.Element} 
+        function buildRecordConstructorClass(inCache::FCore.Cache, inEnv::FCore.Graph, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, SCode.Element}
               local outClass::SCode.Element
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2471,7 +2471,7 @@
                       cl = SCode.CLASS(id, SCode.defaultPrefixes, SCode.NOT_ENCAPSULATED(), SCode.NOT_PARTIAL(), SCode.R_FUNCTION(SCode.FR_RECORD_CONSTRUCTOR()), SCode.PARTS(_cons(reselt, funcelts), nil, nil, nil, nil, nil, nil, NONE()), SCode.noComment, info)
                     (cache, env, cl)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("buildRecordConstructorClass failed\\n")
@@ -2482,7 +2482,7 @@
           (outCache, outEnv, outClass)
         end
 
-        function buildRecordConstructorClass2(inCache::FCore.Cache, inEnv::FCore.Graph, cl::SCode.Element, mods::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, List{SCode.Element}, List{SCode.Element}} 
+        function buildRecordConstructorClass2(inCache::FCore.Cache, inEnv::FCore.Graph, cl::SCode.Element, mods::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, List{SCode.Element}, List{SCode.Element}}
               local elts::List{SCode.Element}
               local funcelts::List{SCode.Element}
               local outEnv::FCore.Graph
@@ -2515,7 +2515,7 @@
                       (cache, env1, funcelts) = buildRecordConstructorElts(cache, env1, eltsMods, mods)
                     (cache, env1, funcelts, elts)
                   end
-                  
+
                   _  => begin
                         Debug.traceln("buildRecordConstructorClass2 failed, cl:" + SCodeDump.unparseElementStr(cl, SCodeDump.defaultOptions) + "\\n")
                       fail()
@@ -2544,7 +2544,7 @@
 
          #= @author: adrpo
          if the first modifier is empty (NOMOD) use the second one! =#
-        function selectModifier(inModID::DAE.Mod, inModNoID::DAE.Mod) ::DAE.Mod 
+        function selectModifier(inModID::DAE.Mod, inModNoID::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -2552,7 +2552,7 @@
                   (DAE.NOMOD(__), _)  => begin
                     inModNoID
                   end
-                  
+
                   _  => begin
                       inModID
                   end
@@ -2567,7 +2567,7 @@
           TODO: This function should be replaced by a proper instantiation using instClassIn instead, followed by a
           traversal of the DAE.Var changing direction to input.
           Reason for not doing that now: records can contain arrays with unknown dimensions. =#
-        function buildRecordConstructorElts(inCache::FCore.Cache, inEnv::FCore.Graph, inSCodeElementLst::List{<:Tuple{<:SCode.Element, DAE.Mod}}, mods::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, List{SCode.Element}} 
+        function buildRecordConstructorElts(inCache::FCore.Cache, inEnv::FCore.Graph, inSCodeElementLst::List{<:Tuple{<:SCode.Element, DAE.Mod}}, mods::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, List{SCode.Element}}
               local outSCodeElementLst::List{SCode.Element}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2605,7 +2605,7 @@
                   (cache, env,  nil(), _)  => begin
                     (cache, env, nil)
                   end
-                  
+
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f && SCode.FINAL(__), io, repl), SCode.ATTR(d, ct, prl, var, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.merge(mods, mod_1)
@@ -2620,7 +2620,7 @@
                       vis = SCode.PROTECTED()
                     (cache, env, _cons(SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var, dir, isf), tp, umod, comment, cond, info), res))
                   end
-                  
+
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, _, io, repl), SCode.ATTR(d, ct, prl, SCode.CONST(__), _, isf), tp, mod && SCode.NOMOD(__), comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.merge(mods, mod_1)
@@ -2637,7 +2637,7 @@
                       f = SCode.NOT_FINAL()
                     (cache, env, _cons(SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var, dir, isf), tp, umod, comment, cond, info), res))
                   end
-                  
+
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var && SCode.CONST(__), _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.merge(mods, mod_1)
@@ -2652,7 +2652,7 @@
                       vis = SCode.PROTECTED()
                     (cache, env, _cons(SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var, dir, isf), tp, umod, comment, cond, info), res))
                   end
-                  
+
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, _, io, repl), SCode.ATTR(d, ct, prl, _, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.merge(mods, mod_1)
@@ -2669,7 +2669,7 @@
                       dir = Absyn.INPUT()
                     (cache, env, _cons(SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var, dir, isf), tp, umod, comment, cond, info), res))
                   end
-                  
+
                   (_, _, (comp, cmod) <| _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Lookup.buildRecordConstructorElts failed " + SCodeDump.unparseElementStr(comp, SCodeDump.defaultOptions) + " with mod: " + Mod.printModStr(cmod) + " and: " + Mod.printModStr(mods))
@@ -2746,7 +2746,7 @@
 
          #= This function builds the result element of a
           record constructor function, i.e. the returned variable =#
-        function buildRecordConstructorResultElt(elts::List{<:SCode.Element}, id::SCode.Ident, env::FCore.Graph, info::SourceInfo) ::SCode.Element 
+        function buildRecordConstructorResultElt(elts::List{<:SCode.Element}, id::SCode.Ident, env::FCore.Graph, info::SourceInfo) ::SCode.Element
               local outElement::SCode.Element
 
                #= print(\" creating element of type: \" + id + \"\\n\");
@@ -2765,7 +2765,7 @@
           It first checks the current scope, and then base classes. The specification
           says that we first search elements in the current scope (+ the ones inherited
           from base classes) =#
-        function lookupClassInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClassInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -2792,7 +2792,7 @@
                       Mutable.update(inState, true)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, env && FCore.G(scope = r <| _), _, prevFrames, _, _)  => begin
                       @match false = FNode.isRefTop(r)
                       frame = FNode.fromRef(r)
@@ -2804,7 +2804,7 @@
                       Mutable.update(inState, true)
                     (cache, c, env, prevFrames)
                   end
-                  
+
                   (cache, env && FCore.G(scope = r <| _), _, _, _, SOME(info))  => begin
                       @match false = FNode.isRefTop(r)
                       frame = FNode.fromRef(r)
@@ -2815,7 +2815,7 @@
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(id, scope), info)
                     fail()
                   end
-                  
+
                   (cache, env && FCore.G(scope = r <| _), _, prevFrames, _, _)  => begin
                       frame = FNode.fromRef(r)
                       @match true = FNode.isEncapsulated(frame)
@@ -2824,7 +2824,7 @@
                       Mutable.update(inState, true)
                     (cache, c, env_1, prevFrames)
                   end
-                  
+
                   (cache, env && FCore.G(scope = r <| _), _, prevFrames, _, _)  => begin
                       @match false = FNode.isRefTop(r)
                       frame = FNode.fromRef(r)
@@ -2849,7 +2849,7 @@
         end
 
          #= Search for a class within one frame. =#
-        function lookupClassInFrame(inCache::FCore.Cache, inFrame::FCore.Node, inEnv::FCore.Graph, inIdent::SCode.Ident, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope} 
+        function lookupClassInFrame(inCache::FCore.Cache, inFrame::FCore.Node, inEnv::FCore.Graph, inIdent::SCode.Ident, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -2876,7 +2876,7 @@
                       @match FCore.N(data = FCore.CL(e = c)) = FNode.fromRef(r)
                     (cache, c, totenv, prevFrames)
                   end
-                  
+
                   (cache, _, totenv, name, _, _)  => begin
                       (qimports, uqimports) = FNode.imports(inFrame)
                       _ = begin
@@ -2885,7 +2885,7 @@
                               (cache, c, env_1, prevFrames) = lookupQualifiedImportedClassInFrame(cache, qimports, totenv, name, inState, inInfo)
                             ()
                           end
-                          
+
                           (_, _ <| _)  => begin
                               (cache, c, env_1, prevFrames, unique) = lookupUnqualifiedImportedClassInFrame(cache, uqimports, totenv, name, inInfo)
                               Mutable.update(inState, true)
@@ -2909,13 +2909,13 @@
 
          #= given a boolean, report error message of importing several names
         if boolean flag is false and fail. If flag is true succeed and do nothing. =#
-        function reportSeveralNamesError(unique::Bool, name::String)  
+        function reportSeveralNamesError(unique::Bool, name::String)
               _ = begin
                 @match (unique, name) begin
                   (true, _)  => begin
                     ()
                   end
-                  
+
                   (false, _)  => begin
                       Error.addMessage(Error.IMPORT_SEVERAL_NAMES, list(name))
                     ()
@@ -2925,7 +2925,7 @@
         end
 
          #= Helper function to lookupVarF and lookupIdent. =#
-        function lookupVar2(inBinTree::FCore.Children, inIdent::SCode.Ident, inGraph::FCore.Graph) ::Tuple{DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph} 
+        function lookupVar2(inBinTree::FCore.Children, inIdent::SCode.Ident, inGraph::FCore.Graph) ::Tuple{DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph}
               local outEnv::FCore.Graph
               local instStatus::FCore.Status
               local outMod::DAE.Mod
@@ -2957,7 +2957,7 @@
 
          #= This function checks a list of subscripts agains type, and removes
           dimensions from the type according to the subscripting. =#
-        function checkSubscripts(inType::DAE.Type, inExpSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type 
+        function checkSubscripts(inType::DAE.Type, inExpSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2979,31 +2979,31 @@
                   (t,  nil())  => begin
                     t
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.WHOLEDIM(__) <| ys)  => begin
                       t_1 = checkSubscripts(t, ys)
                     DAE.T_ARRAY(t_1, list(dim))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = t), DAE.SLICE(exp = e && DAE.RANGE(__)) <| ys)  => begin
                       t_1 = checkSubscripts(t, ys)
                       dim_int = Expression.rangeSize(e)
                     DAE.T_ARRAY(t_1, list(DAE.DIM_INTEGER(dim_int)))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.SLICE(exp = DAE.ARRAY(array = se)) <| ys)  => begin
                       _ = Expression.dimensionSize(dim)
                       t_1 = checkSubscripts(t, ys)
                       dim_int = listLength(se) #= FIXME: Check range IMPLEMENTED 2007-05-18 BZ =#
                     DAE.T_ARRAY(t_1, list(DAE.DIM_INTEGER(dim_int)))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = t), DAE.SLICE(exp = e) <| ys)  => begin
                       @match DAE.T_ARRAY(dims = list(dim)) = Expression.typeof(e)
                       t_1 = checkSubscripts(t, ys)
                     DAE.T_ARRAY(t_1, list(dim))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.INDEX(exp = DAE.ICONST(integer = ind)) <| ys)  => begin
                       sz = Expression.dimensionSize(dim)
                       if ! ind > 0
@@ -3015,44 +3015,44 @@
                       t_1 = checkSubscripts(t, ys)
                     t_1
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = t), DAE.INDEX(__) <| ys)  => begin
                       @match true = Expression.dimensionKnown(dim)
                       t_1 = checkSubscripts(t, ys)
                     t_1
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = t), DAE.INDEX(__) <| ys)  => begin
                       t_1 = checkSubscripts(t, ys)
                     t_1
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil(), ty = t), DAE.INDEX(__) <| ys)  => begin
                       t_1 = checkSubscripts(t, ys)
                     t_1
                   end
-                  
+
                   (DAE.T_ARRAY(ty = t), DAE.WHOLEDIM(__) <| ys)  => begin
                       t_1 = checkSubscripts(t, ys)
                     t_1
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexType = t), ys)  => begin
                     checkSubscripts(t, ys)
                   end
-                  
+
                   (t && DAE.T_UNKNOWN(__), _)  => begin
                     t
                   end
-                  
+
                   (DAE.T_METAARRAY(__), DAE.INDEX(__) <|  nil())  => begin
                     inType.ty
                   end
-                  
+
                   (DAE.T_METAARRAY(__), _ <|  nil())  => begin
                     inType
                   end
-                  
+
                   (t, s)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Lookup.checkSubscripts failed (tp: ")
@@ -3075,7 +3075,7 @@
           the result of that lookup.
           2007-05-29 If we can construct a expression, we do after expanding the
           subscript with dimensions to fill the Cref. =#
-        function lookupVarF(inCache::FCore.Cache, inBinTree::FCore.Children, inComponentRef::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String} 
+        function lookupVarF(inCache::FCore.Cache, inBinTree::FCore.Children, inComponentRef::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData
@@ -3131,7 +3131,7 @@
                       (outCache, outAttributes, outType, outBinding, constOfForIteratorRange, splicedExpData, outComponentEnv, name) = lookupVarFIdent(inCache, inBinTree, id, ss, inEnv)
                     (outCache, outAttributes, outType, outBinding, constOfForIteratorRange, splicedExpData, outComponentEnv, name)
                   end
-                  
+
                   (cache, ht, DAE.CREF_QUAL(ident = id, subscriptLst = ss, componentRef = ids), _)  => begin
                        #=  Qualified variables looked up through component environment with or without spliced exp
                        =#
@@ -3148,14 +3148,14 @@
                               splicedExpData = InstTypes.SPLICEDEXPDATA(NONE(), ty)
                             (attr, ty, binding, cnstForRange, componentEnv, name)
                           end
-                          
+
                           _ where (Types.isBoxedType(tyParent) && ! Types.isUnknownType(tyParent))  => begin
                               @match nil = ss
                               (cache, attr, ty, binding, cnstForRange, name) = lookupVarFMetaModelica(cache, componentEnv, ids, tyParent)
                               splicedExpData = InstTypes.SPLICEDEXPDATA(NONE(), ty)
                             (attr, ty, binding, cnstForRange, componentEnv, name)
                           end
-                          
+
                           _  => begin
                                 @match (cache, DAE.ATTR(ct, prl, vt, di, io, vis), tyChild, binding, cnstForRange, InstTypes.SPLICEDEXPDATA(texp, idTp), _, componentEnv, name) = lookupVar(cache, componentEnv, ids)
                                 ltCref = elabComponentRecursive(texp)
@@ -3176,7 +3176,7 @@
                                         splicedExp = Expression.makeCrefExp(xCref, eType)
                                       SOME(splicedExp)
                                     end
-                                    
+
                                      nil()  => begin
                                       NONE()
                                     end
@@ -3204,7 +3204,7 @@
           the result of that lookup.
           2007-05-29 If we can construct a expression, we do after expanding the
           subscript with dimensions to fill the Cref. =#
-        function lookupVarFIdent(cache::FCore.Cache, ht::FCore.Children, ident::String, ss::List{<:DAE.Subscript}, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String} 
+        function lookupVarFIdent(cache::FCore.Cache, ht::FCore.Children, ident::String, ss::List{<:DAE.Subscript}, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String
               local componentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData
@@ -3226,7 +3226,7 @@
           (cache, attr, ty_1, bind, cnstForRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData, componentEnv, name)
         end
 
-        function lookupVarFMetaModelica(inCache::FCore.Cache, inEnv::FCore.Graph, cr::DAE.ComponentRef, inType::DAE.Type) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, String} 
+        function lookupVarFMetaModelica(inCache::FCore.Cache, inEnv::FCore.Graph, cr::DAE.ComponentRef, inType::DAE.Type) ::Tuple{FCore.Cache, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, String}
               local name::String
               local cnstForRange::Option{DAE.Const}
               local binding::DAE.Binding
@@ -3254,7 +3254,7 @@
                       ty = Types.getMetaRecordIfSingleton(ty)
                     (attr, ty, binding, cnstForRange, name)
                   end
-                  
+
                   DAE.CREF_QUAL(__)  => begin
                       fields = Types.getMetaRecordFields(inType)
                       @match DAE.TYPES_VAR(name, attr, ty, binding, cnstForRange) = listGet(fields, Types.findVarIndex(cr.ident, fields) + 1)
@@ -3279,7 +3279,7 @@
          #= @author: adrpo
          this function uses the binding of the parent
          if the parent is an array of records =#
-        function lookupBinding(inCref::DAE.ComponentRef, inParentType::DAE.Type, inChildType::DAE.Type, inParentBinding::DAE.Binding, inChildBinding::DAE.Binding) ::DAE.Binding 
+        function lookupBinding(inCref::DAE.ComponentRef, inParentType::DAE.Type, inChildType::DAE.Type, inParentBinding::DAE.Binding, inChildBinding::DAE.Binding) ::DAE.Binding
               local outBinding::DAE.Binding
 
               outBinding = begin
@@ -3306,7 +3306,7 @@
                       b = DAE.EQBOUND(e, NONE(), c, s)
                     b
                   end
-                  
+
                   (DAE.CREF_QUAL(_, _, ss, DAE.CREF_IDENT(cId, _,  nil())), _, _, DAE.VALBOUND(v, s), _)  => begin
                       @match true = Types.isArray(inParentType)
                       tyElement = Types.arrayElementType(inParentType)
@@ -3317,7 +3317,7 @@
                       b = DAE.EQBOUND(e, NONE(), DAE.C_CONST(), s)
                     b
                   end
-                  
+
                   _  => begin
                       inChildBinding
                   end
@@ -3354,9 +3354,9 @@
           outBinding
         end
 
-         #= 
+         #=
         Helper function for lookupvarF, to return an ComponentRef if there is one. =#
-        function elabComponentRecursive(oCref::Option{<:DAE.Exp}) ::List{DAE.ComponentRef} 
+        function elabComponentRecursive(oCref::Option{<:DAE.Exp}) ::List{DAE.ComponentRef}
               local lref::List{DAE.ComponentRef}
 
               lref = begin
@@ -3368,11 +3368,11 @@
                   SOME(DAE.CREF(ecpr && DAE.CREF_IDENT(_, _, _), _))  => begin
                     _cons(ecpr, nil)
                   end
-                  
+
                   SOME(DAE.CREF(ecpr && DAE.CREF_QUAL(_, _, _, _), _))  => begin
                     _cons(ecpr, nil)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -3385,7 +3385,7 @@
 
          #= This is the function where we add arrays representing the dimension of the type.
         In type {array 2[array 3 ]] Will generate 2 arrays. {1,2} and {1,2,3} =#
-        function addArrayDimensions(tySub::DAE.Type, ss::List{<:DAE.Subscript}) ::List{DAE.Subscript} 
+        function addArrayDimensions(tySub::DAE.Type, ss::List{<:DAE.Subscript}) ::List{DAE.Subscript}
               local outType::List{DAE.Subscript}
 
               outType = begin
@@ -3399,7 +3399,7 @@
                       subs = expandWholeDimSubScript(ss, subs)
                     subs
                   end
-                  
+
                   _  => begin
                       ss
                   end
@@ -3411,7 +3411,7 @@
         end
 
          #= Creates a slice with all indices of the dimension. =#
-        function makeDimensionSubscript(inDim::DAE.Dimension) ::DAE.Subscript 
+        function makeDimensionSubscript(inDim::DAE.Dimension) ::DAE.Subscript
               local outSub::DAE.Subscript
 
               outSub = begin
@@ -3425,16 +3425,16 @@
                   DAE.DIM_INTEGER(integer = 0)  => begin
                     DAE.SLICE(DAE.ARRAY(DAE.T_INTEGER_DEFAULT, true, list(DAE.ICONST(0))))
                   end
-                  
+
                   DAE.DIM_INTEGER(__)  => begin
                     DAE.SLICE(DAE.RANGE(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_INTEGER(inDim.integer))), DAE.ICONST(1), NONE(), DAE.ICONST(inDim.integer)))
                   end
-                  
+
                   DAE.DIM_BOOLEAN(__)  => begin
                       expl = list(DAE.BCONST(false), DAE.BCONST(true))
                     DAE.SLICE(DAE.ARRAY(DAE.T_BOOL_DEFAULT, true, expl))
                   end
-                  
+
                   DAE.DIM_ENUM(enumTypeName = enum_name, literals = l)  => begin
                       expl = makeEnumLiteralIndices(enum_name, l, 1)
                     DAE.SLICE(DAE.ARRAY(DAE.T_ENUMERATION(NONE(), enum_name, l, nil, nil), true, expl))
@@ -3451,7 +3451,7 @@
         end
 
          #= Creates a list of enumeration literal expressions from an enumeration. =#
-        function makeEnumLiteralIndices(enumTypeName::Absyn.Path, enumLiterals::List{<:String}, enumIndex::ModelicaInteger) ::List{DAE.Exp} 
+        function makeEnumLiteralIndices(enumTypeName::Absyn.Path, enumLiterals::List{<:String}, enumIndex::ModelicaInteger) ::List{DAE.Exp}
               local enumIndices::List{DAE.Exp}
 
               enumIndices = begin
@@ -3464,7 +3464,7 @@
                   (_,  nil(), _)  => begin
                     nil
                   end
-                  
+
                   (_, l <| ls, _)  => begin
                       enum_type_name = AbsynUtil.joinPaths(enumTypeName, Absyn.IDENT(l))
                       e = DAE.ENUM_LITERAL(enum_type_name, enumIndex)
@@ -3480,7 +3480,7 @@
         This function replaces Wholedim(if possible) with the expanded dimension.
         If there exist a subscript, the subscript is used instead of the expanded dimension.
          =#
-        function expandWholeDimSubScript(inSubs::List{<:DAE.Subscript}, inSlice::List{<:DAE.Subscript}) ::List{DAE.Subscript} 
+        function expandWholeDimSubScript(inSubs::List{<:DAE.Subscript}, inSlice::List{<:DAE.Subscript}) ::List{DAE.Subscript}
               local outSubs::List{DAE.Subscript}
 
               outSubs = begin
@@ -3501,20 +3501,20 @@
                       subs2 = expandWholeDimSubScript(subs1, subs2)
                     _cons(sub1, subs2)
                   end
-                  
+
                   (_,  nil())  => begin
                     nil
                   end
-                  
+
                   ( nil(), subs2)  => begin
                     subs2
                   end
-                  
+
                   (DAE.WHOLEDIM(__) <| subs1, sub2 <| subs2)  => begin
                       subs2 = expandWholeDimSubScript(subs1, subs2)
                     _cons(sub2, subs2)
                   end
-                  
+
                   (sub1 <| subs1, _ <| subs2)  => begin
                       subs2 = expandWholeDimSubScript(subs1, subs2)
                     _cons(sub1, subs2)
@@ -3526,7 +3526,7 @@
 
          #= Lifts an type to spcified dimension by type2
          =#
-        function sliceDimensionType(inTypeD::DAE.Type, inTypeL::DAE.Type) ::DAE.Type 
+        function sliceDimensionType(inTypeD::DAE.Type, inTypeL::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3548,7 +3548,7 @@
         end
 
          #= common function when looking up the type of a metarecord =#
-        function buildMetaRecordType(inCache::FCore.Cache, inEnv::FCore.Graph, cdef::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, DAE.Type} 
+        function buildMetaRecordType(inCache::FCore.Cache, inEnv::FCore.Graph, cdef::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, DAE.Type}
               local ftype::DAE.Type
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -3586,7 +3586,7 @@
          #= Looks up a cref and returns SOME(true) if it references an iterator,
            SOME(false) if it references an element in the current scope, and NONE() if
            the name couldn't be found in the current scope at all. =#
-        function isIterator(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef) ::Tuple{Option{Bool}, FCore.Cache} 
+        function isIterator(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef) ::Tuple{Option{Bool}, FCore.Cache}
               local outCache::FCore.Cache
               local outIsIterator::Option{Bool}
 
@@ -3613,7 +3613,7 @@
                       b = isSome(ic)
                     (SOME(b), cache)
                   end
-                  
+
                   (cache, FCore.G(scope = ref <| _), _)  => begin
                        #=  If not found, look in the next scope only if the current scope is implicit.
                        =#
@@ -3622,7 +3622,7 @@
                       (res, cache) = isIterator(cache, env, inCref)
                     (res, cache)
                   end
-                  
+
                   _  => begin
                       (NONE(), inCache)
                   end
@@ -3631,7 +3631,7 @@
           (outIsIterator, outCache)
         end
 
-        function isFunctionCallViaComponent(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Bool 
+        function isFunctionCallViaComponent(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Bool
               local yes::Bool
 
               yes = begin
@@ -3647,12 +3647,12 @@
                       ErrorExt.rollBack("functionViaComponentRef10")
                     true
                   end
-                  
+
                   (_, _, Absyn.QUALIFIED(_, _))  => begin
                       ErrorExt.rollBack("functionViaComponentRef10")
                     fail()
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3662,7 +3662,7 @@
         end
 
          #= Prefixes a spliced exp that contains a cref with another cref. =#
-        function prefixSplicedExp(inCref::DAE.ComponentRef, inSplicedExp::InstTypes.SplicedExpData) ::InstTypes.SplicedExpData 
+        function prefixSplicedExp(inCref::DAE.ComponentRef, inSplicedExp::InstTypes.SplicedExpData) ::InstTypes.SplicedExpData
               local outSplicedExp::InstTypes.SplicedExpData
 
               outSplicedExp = begin
@@ -3674,7 +3674,7 @@
                       cref = ComponentReference.joinCrefs(inCref, cref)
                     InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(cref, ety)), ty)
                   end
-                  
+
                   _  => begin
                       inSplicedExp
                   end
@@ -3683,7 +3683,7 @@
           outSplicedExp
         end
 
-        function isArrayType(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, Bool} 
+        function isArrayType(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, Bool}
               local outIsArray::Bool
               local outCache::FCore.Cache
 
@@ -3698,16 +3698,16 @@
                     SCode.CLASS(classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(arrayDim = SOME(_))))  => begin
                       true
                     end
-                    
+
                     SCode.CLASS(classDef = SCode.DERIVED(attributes = SCode.ATTR(arrayDims = _ <| _)))  => begin
                       true
                     end
-                    
+
                     SCode.CLASS(classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = p)))  => begin
                         (outCache, outIsArray) = isArrayType(outCache, env, p)
                       outIsArray
                     end
-                    
+
                     _  => begin
                         false
                     end

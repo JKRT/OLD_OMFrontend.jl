@@ -7937,7 +7937,7 @@
           (outCache, outIsExt)
         end
 
-         constType vectorizeArg = "vectorizeArg"::String
+         const vectorizeArg = "vectorizeArg"::String
 
          #= author: PA
           Takes an expression and a list of array dimensions and the Slot list.
@@ -9719,12 +9719,12 @@
               local slot::Slot
               local rest_slots::List{Slot} = inSlotLst
 
-              @match DAE.FUNCARG(name = fa1, ty = ty1, const = c1) = inFuncArg
+              @match DAE.FUNCARG(name = fa1, ty = ty1, constType = c1) = inFuncArg
               while ! listEmpty(rest_slots)
                 @match _cons(slot, rest_slots) = rest_slots
                 @match SLOT(defaultArg = DAE.FUNCARG(name = fa2)) = slot
                 if stringEq(fa1, fa2) || stringEq("in_" + fa1, fa2)
-                  @match SLOT(defaultArg = DAE.FUNCARG(const = c2, par = prl, defaultBinding = binding), slotFilled = filled, idx = idx, evalStatus = ses) = slot
+                  @match SLOT(defaultArg = DAE.FUNCARG(constType = c2, par = prl, defaultBinding = binding), slotFilled = filled, idx = idx, evalStatus = ses) = slot
                   if filled
                     pre_str = PrefixUtil.printPrefixStr3(inPrefix)
                     Error.addSourceMessageAndFail(Error.FUNCTION_SLOT_ALREADY_FILLED, list(fa2, pre_str), inInfo)
@@ -9791,7 +9791,7 @@
 
               (outCache, res) = begin
                   local c_1::DAE.ComponentRef
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local const1::DAE.Const
                   local const2::DAE.Const
                   local constCref::DAE.Const

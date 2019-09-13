@@ -1,4 +1,4 @@
-  module FGraphBuild 
+  module FGraphBuild
 
 
     using MetaModelica
@@ -52,23 +52,23 @@
 
         import Prefix
 
-        Name = FCore.Name 
-        Id = FCore.Id 
-        Seq = FCore.Seq 
-        Next = FCore.Next 
-        Node = FCore.Node 
-        Data = FCore.Data 
-        Kind = FCore.Kind 
-        Ref = FCore.Ref 
-        Refs = FCore.Refs 
-        Children = FCore.Children 
-        Parents = FCore.Parents 
-        ImportTable = FCore.ImportTable 
-        Extra = FCore.Extra 
-        Visited = FCore.Visited 
-        Import = FCore.Import 
-        Graph = FCore.Graph 
-        Scope = FCore.Scope 
+        Name = FCore.Name
+        Id = FCore.Id
+        Seq = FCore.Seq
+        Next = FCore.Next
+        Node = FCore.Node
+        Data = FCore.Data
+        Kind = FCore.Kind
+        Ref = FCore.Ref
+        Refs = FCore.Refs
+        Children = FCore.Children
+        Parents = FCore.Parents
+        ImportTable = FCore.ImportTable
+        Extra = FCore.Extra
+        Visited = FCore.Visited
+        Import = FCore.Import
+        Graph = FCore.Graph
+        Scope = FCore.Scope
 
         import ListUtil
         import AbsynToSCode
@@ -79,7 +79,7 @@
         import FMod
 
          #= builds nodes out of classes =#
-        function mkProgramGraph(inProgram::SCode.Program, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkProgramGraph(inProgram::SCode.Program, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local topRef::Ref
@@ -90,7 +90,7 @@
         end
 
          #= Extends the graph with a class. =#
-        function mkClassGraph(inClass::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkClassGraph(inClass::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -110,7 +110,7 @@
           outGraph
         end
 
-        function mkClassNode(inClass::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkClassNode(inClass::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -139,7 +139,7 @@
           outGraph
         end
 
-        function mkConstrainClass(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkConstrainClass(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -157,7 +157,7 @@
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_CONSTRAINEDBY(p), nr, inKind, g)
                     g
                   end
-                  
+
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(SOME(cc && SCode.CONSTRAINCLASS(constrainingClass = p, modifier = m))))), _, _, g)  => begin
                       (g, n) = FGraph.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
                       nr = FNode.toRef(n)
@@ -165,7 +165,7 @@
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_CONSTRAINEDBY(p), nr, inKind, g)
                     g
                   end
-                  
+
                   _  => begin
                       inGraph
                   end
@@ -176,7 +176,7 @@
           outGraph
         end
 
-        function mkModNode(inName::Name #= a name for this mod so we can call it from sub-mods =#, inMod::SCode.Mod, inModScope::FCore.ModScope, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkModNode(inName::Name #= a name for this mod so we can call it from sub-mods =#, inMod::SCode.Mod, inModScope::FCore.ModScope, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -194,11 +194,11 @@
                   (_, SCode.NOMOD(__), _, _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, SCode.MOD(subModLst =  nil(), binding = NONE()), _, _, _, g)  => begin
                     g
                   end
-                  
+
                   (name, SCode.MOD(subModLst =  nil(), binding = b && SOME(_)), _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
@@ -206,7 +206,7 @@
                       g = mkBindingNode(b, nr, inKind, g)
                     g
                   end
-                  
+
                   (name, SCode.MOD(subModLst = sm, binding = b), _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
@@ -216,7 +216,7 @@
                       g = mkBindingNode(b, nr, inKind, g)
                     g
                   end
-                  
+
                   (name, SCode.REDECL(element = e), _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
@@ -224,7 +224,7 @@
                       g = mkElementNode(e, nr, inKind, g)
                     g
                   end
-                  
+
                   (name, _, _, _, _, g)  => begin
                       print("FGraphBuild.mkModNode failed with: " + name + " mod: " + SCodeDump.printModStr(inMod, SCodeDump.defaultOptions) + "\\n")
                     g
@@ -246,7 +246,7 @@
           outGraph
         end
 
-        function mkSubMods(inSubMod::List{<:SCode.SubMod}, inModScope::FCore.ModScope, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkSubMods(inSubMod::List{<:SCode.SubMod}, inModScope::FCore.ModScope, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -261,7 +261,7 @@
                   ( nil(), _, _, _, g)  => begin
                     g
                   end
-                  
+
                   (SCode.NAMEMOD(id, m) <| rest, _, _, _, g)  => begin
                       g = mkModNode(id, m, inModScope, inParentRef, inKind, g)
                       g = mkSubMods(rest, inModScope, inParentRef, inKind, g)
@@ -274,7 +274,7 @@
           outGraph
         end
 
-        function mkBindingNode(inBinding::Option{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkBindingNode(inBinding::Option{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -289,7 +289,7 @@
                   (NONE(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (SOME(e), _, _, g)  => begin
                       g = mkExpressionNode(FNode.bndNodeName, e, inParentRef, inKind, g)
                     g
@@ -302,7 +302,7 @@
         end
 
          #= Extends the graph with a class's components. =#
-        function mkClassChildren(name::String, inClassDef::SCode.ClassDef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkClassChildren(name::String, inClassDef::SCode.ClassDef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -335,13 +335,13 @@
                       g = mkExternalNode(FNode.edNodeName, externalDecl, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (SCode.CLASS_EXTENDS(composition = cdef, modifications = m), _, _, g)  => begin
                       g = mkClassChildren(name, cdef, inParentRef, inKind, g)
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_CLASS_EXTENDS(name), inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (SCode.DERIVED(typeSpec = ts, modifications = m), _, _, g)  => begin
                       p = AbsynUtil.typeSpecPath(ts)
                       nr = inParentRef
@@ -350,15 +350,15 @@
                       g = mkDimsNode(FNode.tydimsNodeName, SOME(ad), nr, inKind, g)
                     g
                   end
-                  
+
                   (SCode.OVERLOAD(_), _, _, g)  => begin
                     g
                   end
-                  
+
                   (SCode.PDER(_, _), _, _, g)  => begin
                     g
                   end
-                  
+
                   _  => begin
                       inGraph
                   end
@@ -368,7 +368,7 @@
         end
 
          #= Extends the graph with an element. =#
-        function mkElementNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkElementNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -386,12 +386,12 @@
                       g = mkCompNode(inElement, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (SCode.CLASS(__), _, _, g)  => begin
                       g = mkClassNode(inElement, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (SCode.EXTENDS(baseClassPath = p, modifications = m), _, _, g)  => begin
                       name = FNode.mkExtendsName(p)
                       (g, n) = FGraph.node(g, name, list(inParentRef), FCore.EX(inElement, DAE.NOMOD()))
@@ -400,12 +400,12 @@
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_EXTENDS(p), nr, inKind, g)
                     g
                   end
-                  
+
                   (SCode.IMPORT(__), _, _, g)  => begin
                       g = mkImportNode(inElement, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (SCode.DEFINEUNIT(__), _, _, g)  => begin
                       g = mkUnitsNode(inElement, inParentRef, inKind, g)
                     g
@@ -422,7 +422,7 @@
          #= @author: adrpo
          create FNode.duNodeName if it doesn't
          exist and add the given element to it =#
-        function mkUnitsNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkUnitsNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -438,7 +438,7 @@
                       FNode.addDefinedUnitToRef(r, inElement)
                     g
                   end
-                  
+
                   (_, _, _, g)  => begin
                       (g, n) = FGraph.node(g, FNode.duNodeName, list(inParentRef), FCore.DU(list(inElement)))
                       r = FNode.toRef(n)
@@ -455,7 +455,7 @@
          #= @author: adrpo
          create FNode.imNodeName if it doesn't
          exist and add the given element to it =#
-        function mkImportNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkImportNode(inElement::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -471,7 +471,7 @@
                       FNode.addImportToRef(r, inElement)
                     g
                   end
-                  
+
                   (_, _, _, g)  => begin
                       (g, n) = FGraph.node(g, FNode.imNodeName, list(inParentRef), FCore.IM(FCore.emptyImportTable))
                       r = FNode.toRef(n)
@@ -486,7 +486,7 @@
           outGraph
         end
 
-        function mkDimsNode(inName::Name #= name to use for the array dims node: $dims (FNode.dimsNodeName) or $tydims (FNode.tydimsNodeName) =#, inArrayDims::Option{<:Absyn.ArrayDim}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkDimsNode(inName::Name #= name to use for the array dims node: $dims (FNode.dimsNodeName) or $tydims (FNode.tydimsNodeName) =#, inArrayDims::Option{<:Absyn.ArrayDim}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -499,11 +499,11 @@
                   (_, NONE(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, SOME( nil()), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, SOME(a && _ <| _), _, _, g)  => begin
                       (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.DIMS(inName, a))
                       nr = FNode.toRef(n)
@@ -518,7 +518,7 @@
           outGraph
         end
 
-        function mkDimsNode_helper(inStartWith::ModelicaInteger, inArrayDims::Absyn.ArrayDim, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkDimsNode_helper(inStartWith::ModelicaInteger, inArrayDims::Absyn.ArrayDim, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -536,14 +536,14 @@
                   (_,  nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (i, Absyn.NOSUB(__) <| rest, _, _, g)  => begin
                       name = intString(i)
                       g = mkExpressionNode(name, Absyn.END(), inParentRef, inKind, g)
                       g = mkDimsNode_helper(i + 1, rest, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (i, Absyn.SUBSCRIPT(e) <| rest, _, _, g)  => begin
                       name = intString(i)
                       g = mkExpressionNode(name, e, inParentRef, inKind, g)
@@ -560,7 +560,7 @@
         end
 
          #= Extends the graph with a component =#
-        function mkCompNode(inComp::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkCompNode(inComp::SCode.Element, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local name::String
@@ -572,7 +572,6 @@
               local ad::Absyn.ArrayDim
               local ts::Absyn.TypeSpec
               local tad::Absyn.ArrayDim
-              local ad::Absyn.ArrayDim
               local nd::Data
               local i::DAE.Var
 
@@ -608,7 +607,7 @@
         end
 
          #= Extends the graph with an inst node =#
-        function mkInstNode(inVar::DAE.Var, inParentRef::Ref, inGraph::Graph) ::Graph 
+        function mkInstNode(inVar::DAE.Var, inParentRef::Ref, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local nr::Ref
@@ -622,7 +621,7 @@
           outGraph
         end
 
-        function mkConditionNode(inCondition::Option{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkConditionNode(inCondition::Option{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -636,7 +635,7 @@
                   (NONE(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (SOME(e), _, _, g)  => begin
                       g = mkExpressionNode(FNode.cndNodeName, e, inParentRef, inKind, g)
                     g
@@ -648,7 +647,7 @@
           outGraph
         end
 
-        function mkExpressionNode(inName::Name, inExp::Absyn.Exp, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkExpressionNode(inName::Name, inExp::Absyn.Exp, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -670,7 +669,7 @@
           outGraph
         end
 
-        function mkCrefsNodes(inCrefs::List{<:Absyn.ComponentRef}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkCrefsNodes(inCrefs::List{<:Absyn.ComponentRef}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -689,7 +688,7 @@
                   ( nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (cr <| rest, _, _, g)  => begin
                       g = mkCrefNode(cr, inParentRef, inKind, g)
                       g = mkCrefsNodes(rest, inParentRef, inKind, g)
@@ -702,7 +701,7 @@
           outGraph
         end
 
-        function mkCrefNode(inCref::Absyn.ComponentRef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkCrefNode(inCref::Absyn.ComponentRef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -725,7 +724,7 @@
           outGraph
         end
 
-        function mkTypeNode(inTypes::List{<:DAE.Type} #= the types to add =#, inParentRef::Ref, inName::Name #= name to search for =#, inGraph::Graph) ::Graph 
+        function mkTypeNode(inTypes::List{<:DAE.Type} #= the types to add =#, inParentRef::Ref, inName::Name #= name to search for =#, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -746,7 +745,7 @@
                       FNode.addTypesToRef(nr, inTypes)
                     inGraph
                   end
-                  
+
                   (_, _, _, g)  => begin
                       @shouldFail _ = FNode.child(inParentRef, FNode.tyNodeName)
                       (g, n) = FGraph.node(g, FNode.tyNodeName, list(inParentRef), FCore.ND(NONE()))
@@ -757,7 +756,7 @@
                       FNode.addChildRef(pr, inName, nr)
                     g
                   end
-                  
+
                   (_, _, _, g)  => begin
                       pr = FNode.child(inParentRef, FNode.tyNodeName)
                       @shouldFail _ = FNode.child(pr, inName)
@@ -766,7 +765,7 @@
                       FNode.addChildRef(pr, inName, nr)
                     g
                   end
-                  
+
                   _  => begin
                         pr = FGraph.top(inGraph)
                         print("FGraphBuild.mkTypeNode: Error making type node: " + inName + " in parent: " + FNode.name(FNode.fromRef(pr)) + "\\n")
@@ -794,7 +793,7 @@
         end
 
          #= equation node =#
-        function mkEqNode(inName::Name, inEqs::List{<:SCode.Equation}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkEqNode(inName::Name, inEqs::List{<:SCode.Equation}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -805,7 +804,7 @@
                   (_,  nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.EQ(inName, inEqs))
                       nr = FNode.toRef(n)
@@ -819,7 +818,7 @@
         end
 
          #= algorithm node =#
-        function mkAlNode(inName::Name, inAlgs::List{<:SCode.AlgorithmSection}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkAlNode(inName::Name, inAlgs::List{<:SCode.AlgorithmSection}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -830,7 +829,7 @@
                   (_,  nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.AL(inName, inAlgs))
                       nr = FNode.toRef(n)
@@ -844,7 +843,7 @@
         end
 
          #= optimization node =#
-        function mkOptNode(inName::Name, inConstraintLst::List{<:SCode.ConstraintSection}, inClsAttrs::List{<:Absyn.NamedArg}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkOptNode(inName::Name, inConstraintLst::List{<:SCode.ConstraintSection}, inClsAttrs::List{<:Absyn.NamedArg}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -855,7 +854,7 @@
                   (_,  nil(),  nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, _, _, _, _, g)  => begin
                       (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.OT(inConstraintLst, inClsAttrs))
                       nr = FNode.toRef(n)
@@ -868,7 +867,7 @@
         end
 
          #= optimization node =#
-        function mkExternalNode(inName::Name, inExternalDeclOpt::Option{<:SCode.ExternalDecl}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkExternalNode(inName::Name, inExternalDeclOpt::Option{<:SCode.ExternalDecl}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -883,7 +882,7 @@
                   (_, NONE(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, SOME(ed && SCode.EXTERNALDECL(output_ = ocr, args = exps)), _, _, g)  => begin
                       (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.ED(ed))
                       nr = FNode.toRef(n)
@@ -897,7 +896,7 @@
           outGraph
         end
 
-        function mkCrefsFromExps(inExps::List{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function mkCrefsFromExps(inExps::List{<:Absyn.Exp}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -911,7 +910,7 @@
                   ( nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (e <| rest, _, _, g)  => begin
                       crefs = AbsynUtil.getCrefFromExp(e, true, true)
                       g = mkCrefsNodes(crefs, inParentRef, inKind, g)
@@ -924,7 +923,7 @@
         end
 
          #= Recursively analyses an expression. =#
-        function analyseExp(inExp::Absyn.Exp, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseExp(inExp::Absyn.Exp, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               (_, (_, _, outGraph)) = AbsynUtil.traverseExpBidir(inExp, analyseExpTraverserEnter, analyseExpTraverserExit, (inRef, inKind, inGraph))
@@ -932,7 +931,7 @@
         end
 
          #= Recursively analyses an optional expression. =#
-        function analyseOptExp(inExp::Option{<:Absyn.Exp}, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseOptExp(inExp::Option{<:Absyn.Exp}, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -942,7 +941,7 @@
                   (NONE(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (SOME(exp), _, _, g)  => begin
                       g = analyseExp(exp, inRef, inKind, g)
                     g
@@ -953,7 +952,7 @@
         end
 
          #= Traversal enter function for use in analyseExp. =#
-        function analyseExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}} 
+        function analyseExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}}
               local outTuple::Tuple{Ref, Kind, Graph}
               local exp::Absyn.Exp
 
@@ -969,7 +968,7 @@
         end
 
          #= Helper function to analyseExp, does the actual work. =#
-        function analyseExp2(inExp::Absyn.Exp, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseExp2(inExp::Absyn.Exp, inRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -983,27 +982,27 @@
                       g = analyseCref(cref, inRef, inKind, g)
                     g
                   end
-                  
+
                   (Absyn.CALL(functionArgs = Absyn.FOR_ITER_FARG(iterators = iters)), _, _, g)  => begin
                       g = addIterators(iters, inRef, inKind, g)
                     g
                   end
-                  
+
                   (Absyn.CALL(function_ = cref), _, _, g)  => begin
                       g = analyseCref(cref, inRef, inKind, g)
                     g
                   end
-                  
+
                   (Absyn.PARTEVALFUNCTION(function_ = cref), _, _, g)  => begin
                       g = analyseCref(cref, inRef, inKind, g)
                     g
                   end
-                  
+
                   (Absyn.MATCHEXP(__), _, _, g)  => begin
                       g = addMatchScope(inExp, inRef, inKind, g)
                     g
                   end
-                  
+
                   _  => begin
                       inGraph
                   end
@@ -1013,7 +1012,7 @@
         end
 
          #= Analyses a component reference. =#
-        function analyseCref(inCref::Absyn.ComponentRef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseCref(inCref::Absyn.ComponentRef, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1024,7 +1023,7 @@
                   (Absyn.WILD(__), _, _, g)  => begin
                     g
                   end
-                  
+
                   (_, _, _, g)  => begin
                       g = mkCrefNode(inCref, inParentRef, inKind, g)
                     g
@@ -1035,7 +1034,7 @@
         end
 
          #= Traversal exit function for use in analyseExp. =#
-        function analyseExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}} 
+        function analyseExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}}
               local outTuple::Tuple{Ref, Kind, Graph}
               local outExp::Absyn.Exp
 
@@ -1047,7 +1046,7 @@
         end
 
          #= Analyses an equation. =#
-        function analyseEquation(inEquation::SCode.Equation, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseEquation(inEquation::SCode.Equation, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local equ::SCode.EEquation
@@ -1058,7 +1057,7 @@
         end
 
          #= Traversal function for use in analyseEquation. =#
-        function analyseEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Tuple{<:Ref, Kind, Graph}}) ::Tuple{SCode.EEquation, Tuple{Ref, Kind, Graph}} 
+        function analyseEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Tuple{<:Ref, Kind, Graph}}) ::Tuple{SCode.EEquation, Tuple{Ref, Kind, Graph}}
               local outTuple::Tuple{SCode.EEquation, Tuple{Ref, Kind, Graph}}
 
               outTuple = begin
@@ -1077,13 +1076,13 @@
                       (equ, (_, _, g)) = SCodeUtil.traverseEEquationExps(equf, traverseExp, (ref, k, g))
                     (equ, (ref, k, g))
                   end
-                  
+
                   (equr && SCode.EQ_REINIT(cref = Absyn.CREF(componentRef = cref1)), (ref, k, g))  => begin
                       g = analyseCref(cref1, ref, k, g)
                       (equ, (_, _, g)) = SCodeUtil.traverseEEquationExps(equr, traverseExp, (ref, k, g))
                     (equ, (ref, k, g))
                   end
-                  
+
                   (equ, (ref, k, g))  => begin
                       _ = SCodeUtil.getEEquationInfo(equ)
                       (equ, (_, _, g)) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (ref, k, g))
@@ -1096,7 +1095,7 @@
 
          #= Traversal function used by analyseEEquationTraverser and
           analyseStatementTraverser. =#
-        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}} 
+        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Ref, Kind, Graph}) ::Tuple{Absyn.Exp, Tuple{Ref, Kind, Graph}}
               local outTuple::Tuple{Ref, Kind, Graph}
               local outExp::Absyn.Exp
 
@@ -1105,7 +1104,7 @@
         end
 
          #= Analyses an algorithm. =#
-        function analyseAlgorithm(inAlgorithm::SCode.AlgorithmSection, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseAlgorithm(inAlgorithm::SCode.AlgorithmSection, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local stmts::List{SCode.Statement}
@@ -1116,7 +1115,7 @@
         end
 
          #= Analyses a statement in an algorithm. =#
-        function analyseStatement(inStatement::SCode.Statement, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function analyseStatement(inStatement::SCode.Statement, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               (_, (_, (_, _, outGraph))) = SCodeUtil.traverseStatements(inStatement, (analyseStatementTraverser, (inParentRef, inKind, inGraph)))
@@ -1124,7 +1123,7 @@
         end
 
          #= Traversal function used by analyseStatement. =#
-        function analyseStatementTraverser(inTuple::Tuple{<:SCode.Statement, Tuple{<:Ref, Kind, Graph}}) ::Tuple{SCode.Statement, Tuple{Ref, Kind, Graph}} 
+        function analyseStatementTraverser(inTuple::Tuple{<:SCode.Statement, Tuple{<:Ref, Kind, Graph}}) ::Tuple{SCode.Statement, Tuple{Ref, Kind, Graph}}
               local outTuple::Tuple{SCode.Statement, Tuple{Ref, Kind, Graph}}
 
               outTuple = begin
@@ -1141,13 +1140,13 @@
                       (_, (_, _, g)) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (ref, k, g))
                     (stmt, (ref, k, g))
                   end
-                  
+
                   (stmt && SCode.ALG_PARFOR(index = iter_name), (ref, k, g))  => begin
                       g = addIterators(list(Absyn.ITERATOR(iter_name, NONE(), NONE())), ref, k, g)
                       (_, (_, _, g)) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (ref, k, g))
                     (stmt, (ref, k, g))
                   end
-                  
+
                   (stmt, (ref, k, g))  => begin
                       _ = SCodeUtil.getStatementInfo(stmt)
                       (_, (_, _, g)) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (ref, k, g))
@@ -1159,7 +1158,7 @@
         end
 
          #= adds iterators nodes =#
-        function addIterators(inIterators::Absyn.ForIterators, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function addIterators(inIterators::Absyn.ForIterators, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1176,7 +1175,7 @@
                       g = addIterators_helper(inIterators, nr, inKind, g)
                     g
                   end
-                  
+
                   (_, _, _, g)  => begin
                       (g, n) = FGraph.node(g, FNode.forNodeName, list(inParentRef), FCore.FS(inIterators))
                       nr = FNode.toRef(n)
@@ -1191,7 +1190,7 @@
           outGraph
         end
 
-        function addIterators_helper(inIterators::Absyn.ForIterators, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function addIterators_helper(inIterators::Absyn.ForIterators, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1209,7 +1208,7 @@
                   ( nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (i && Absyn.ITERATOR(name = name) <| rest, _, _, g)  => begin
                       (g, n) = FGraph.node(g, name, list(inParentRef), FCore.FI(i))
                       nr = FNode.toRef(n)
@@ -1226,7 +1225,7 @@
 
          #= Extends the node with a match-expression, i.e. opens a new scope and
          adds the local declarations in the match to it. =#
-        function addMatchScope(inMatchExp::Absyn.Exp, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function addMatchScope(inMatchExp::Absyn.Exp, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local n::Node
@@ -1242,7 +1241,7 @@
           outGraph
         end
 
-        function addMatchScope_helper(inElements::List{<:Absyn.ElementItem}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph 
+        function addMatchScope_helper(inElements::List{<:Absyn.ElementItem}, inParentRef::Ref, inKind::Kind, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1262,14 +1261,14 @@
                   ( nil(), _, _, g)  => begin
                     g
                   end
-                  
+
                   (Absyn.ELEMENTITEM(element = element) <| rest, _, _, g)  => begin
                       el = AbsynToSCode.translateElement(element, SCode.PROTECTED())
                       g = ListUtil.fold2(el, mkElementNode, inParentRef, inKind, g)
                       g = addMatchScope_helper(rest, inParentRef, inKind, g)
                     g
                   end
-                  
+
                   (_ <| rest, _, _, g)  => begin
                       g = addMatchScope_helper(rest, inParentRef, inKind, g)
                     g
@@ -1285,7 +1284,7 @@
           outGraph
         end
 
-        function mkRefNode(inName::Name, inTargetScope::Scope, inParentRef::Ref, inGraph::Graph) ::Graph 
+        function mkRefNode(inName::Name, inTargetScope::Scope, inParentRef::Ref, inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1309,7 +1308,7 @@
           outGraph
         end
 
-        function mkAssertNode(inName::Name, inMessage::String, inParentRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref} 
+        function mkAssertNode(inName::Name, inMessage::String, inParentRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
               local outRef::Ref
               local outGraph::Graph
 

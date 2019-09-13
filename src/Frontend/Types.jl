@@ -1,4 +1,4 @@
-  module Types 
+  module Types
 
 
     using MetaModelica
@@ -64,23 +64,23 @@
 
         import SCode
 
-        Binding = DAE.Binding 
+        Binding = DAE.Binding
 
-        Const = DAE.Const 
+        Const = DAE.Const
 
-        EqualityConstraint = DAE.EqualityConstraint 
+        EqualityConstraint = DAE.EqualityConstraint
 
-        FuncArg = DAE.FuncArg 
+        FuncArg = DAE.FuncArg
 
-        Properties = DAE.Properties 
+        Properties = DAE.Properties
 
-        TupleConst = DAE.TupleConst 
+        TupleConst = DAE.TupleConst
 
-        Type = DAE.Type 
+        Type = DAE.Type
 
-        Var = DAE.Var 
+        Var = DAE.Var
 
-        EqMod = DAE.EqMod 
+        EqMod = DAE.EqMod
 
         import ComponentReference
 
@@ -119,11 +119,11 @@
         import MetaModelica.Dangerous.listReverseInPlace
 
          #= Succeeds for all the discrete types, Integer, String, Boolean and enumeration. =#
-        function discreteType(inType::DAE.Type)  
+        function discreteType(inType::DAE.Type)
               @match true = isDiscreteType(inType)
         end
 
-        function isDiscreteType(inType::DAE.Type) ::Bool 
+        function isDiscreteType(inType::DAE.Type) ::Bool
               local outIsDiscrete::Bool
 
               outIsDiscrete = begin
@@ -131,27 +131,27 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     isDiscreteType(inType.complexType)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -161,7 +161,7 @@
         end
 
          #= Function for merging a list of properties, currently only working on DAE.PROP() and not TUPLE_DAE.PROP(). =#
-        function propsAnd(inProps::List{<:DAE.Properties}) ::DAE.Properties 
+        function propsAnd(inProps::List{<:DAE.Properties}) ::DAE.Properties
               local outProp::DAE.Properties
 
               outProp = begin
@@ -176,7 +176,7 @@
                   prop <|  nil()  => begin
                     prop
                   end
-                  
+
                   DAE.PROP(ty, c) <| props  => begin
                       @match DAE.PROP(ty2, c2) = propsAnd(props)
                       c = constAnd(c, c2)
@@ -189,7 +189,7 @@
         end
 
          #= returns the same Properties but with the const flag set to Var =#
-        function makePropsNotConst(inProperties::DAE.Properties) ::DAE.Properties 
+        function makePropsNotConst(inProperties::DAE.Properties) ::DAE.Properties
               local outProperties::DAE.Properties
 
               outProperties = begin
@@ -207,7 +207,7 @@
          =#
 
          #= retrieves a list of Consts from a list of Properties =#
-        function getConstList(inPropertiesList::List{<:DAE.Properties}) ::List{DAE.Const} 
+        function getConstList(inPropertiesList::List{<:DAE.Properties}) ::List{DAE.Const}
               local outConstList::List{DAE.Const}
 
               outConstList = begin
@@ -219,12 +219,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.PROP(constFlag = c) <| pcdr  => begin
                       ccdr = getConstList(pcdr)
                     _cons(c, ccdr)
                   end
-                  
+
                   DAE.PROP_TUPLE(tupleConst = tc) <| pcdr  => begin
                       c = propertiesListToConst2(tc)
                       ccdr = getConstList(pcdr)
@@ -236,7 +236,7 @@
         end
 
          #= this function elaborates on a DAE.Properties and return the DAE.Const value. =#
-        function propertiesListToConst(p::List{<:DAE.Properties}) ::DAE.Const 
+        function propertiesListToConst(p::List{<:DAE.Properties}) ::DAE.Const
               local c::DAE.Const
 
               c = begin
@@ -249,13 +249,13 @@
                    nil()  => begin
                     DAE.C_CONST()
                   end
-                  
+
                   DAE.PROP(_, c1) <| pps  => begin
                       c2 = propertiesListToConst(pps)
                       c1 = constAnd(c1, c2)
                     c1
                   end
-                  
+
                   DAE.PROP_TUPLE(_, tc1) <| pps  => begin
                       c1 = propertiesListToConst2(tc1)
                       c2 = propertiesListToConst(pps)
@@ -268,7 +268,7 @@
         end
 
          #=  =#
-        function propertiesListToConst2(t::DAE.TupleConst) ::DAE.Const 
+        function propertiesListToConst2(t::DAE.TupleConst) ::DAE.Const
               local c::DAE.Const
 
               c = begin
@@ -281,7 +281,7 @@
                   DAE.SINGLE_CONST(c1)  => begin
                     c1
                   end
-                  
+
                   DAE.TUPLE_CONST(tc1 <| tcxl)  => begin
                       c1 = propertiesListToConst2(tc1)
                       c2 = tupleConstListToConst(tcxl)
@@ -294,7 +294,7 @@
         end
 
          #=  =#
-        function tupleConstListToConst(t::List{<:DAE.TupleConst}) ::DAE.Const 
+        function tupleConstListToConst(t::List{<:DAE.TupleConst}) ::DAE.Const
               local c::DAE.Const
 
               c = begin
@@ -306,13 +306,13 @@
                    nil()  => begin
                     DAE.C_CONST()
                   end
-                  
+
                   DAE.SINGLE_CONST(c1) <| tcxl  => begin
                       c2 = tupleConstListToConst(tcxl)
                       c1 = constAnd(c1, c2)
                     c1
                   end
-                  
+
                   p1 && DAE.TUPLE_CONST(_) <| tcxl  => begin
                       c1 = propertiesListToConst2(p1)
                       c2 = tupleConstListToConst(tcxl)
@@ -326,7 +326,7 @@
 
          #= author: PA
          Succeeds if type is ExternalObject =#
-        function externalObjectType(inType::DAE.Type)  
+        function externalObjectType(inType::DAE.Type)
               _ = begin
                 @match inType begin
                   DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(_))  => begin
@@ -336,24 +336,24 @@
               end
         end
 
-         #= 
+         #=
         Author BZ, 2009-09
         Function for getting the name of a DAE.Var =#
-        function varName(v::DAE.Var) ::String 
+        function varName(v::DAE.Var) ::String
               local s::String
 
               @match DAE.TYPES_VAR(name = s) = v
           s
         end
 
-        function varBinding(inVar::DAE.Var) ::DAE.Binding 
+        function varBinding(inVar::DAE.Var) ::DAE.Binding
               local outBinding::DAE.Binding
 
               @match DAE.TYPES_VAR(binding = outBinding) = inVar
           outBinding
         end
 
-        function varEqualName(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool 
+        function varEqualName(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool
               local outEqual::Bool
 
               local name1::String
@@ -367,7 +367,7 @@
 
          #= author: PA
           Succeeds if type is ExternalObject constructor function =#
-        function externalObjectConstructorType(inType::DAE.Type)  
+        function externalObjectConstructorType(inType::DAE.Type)
               _ = begin
                   local tp::Type
                 @match inType begin
@@ -381,12 +381,12 @@
 
          #= author: PA
           Succeeds for all the builtin types, Integer, String, Real, Boolean =#
-        function simpleType(inType::DAE.Type)  
+        function simpleType(inType::DAE.Type)
               @match true = isSimpleType(inType)
         end
 
          #= Returns true for all the builtin types, Integer, String, Real, Boolean =#
-        function isSimpleType(inType::DAE.Type) ::Bool 
+        function isSimpleType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -395,35 +395,35 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                     isSimpleType(t)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = t)  => begin
                     isSimpleType(t)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -435,7 +435,7 @@
         end
 
          #= Returns true for simple numeric builtin types, Integer and Real =#
-        function isSimpleNumericType(inType::DAE.Type) ::Bool 
+        function isSimpleNumericType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -444,19 +444,19 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                     isSimpleNumericType(t)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = t)  => begin
                     isSimpleNumericType(t)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -466,7 +466,7 @@
         end
 
          #= This function checks if the element type is Numeric type or array of Numeric type. =#
-        function isNumericType(inType::DAE.Type) ::Bool 
+        function isNumericType(inType::DAE.Type) ::Bool
               local outBool::Bool
 
               outBool = begin
@@ -475,15 +475,15 @@
                   DAE.T_ARRAY(ty = ty)  => begin
                     isNumericType(ty)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isNumericType(ty)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     isNumericType(ty)
                   end
-                  
+
                   _  => begin
                       isSimpleNumericType(inType)
                   end
@@ -493,7 +493,7 @@
         end
 
          #= Returns true if the given type is a connector type, otherwise false. =#
-        function isConnector(inType::DAE.Type) ::Bool 
+        function isConnector(inType::DAE.Type) ::Bool
               local outIsConnector::Bool
 
               outIsConnector = begin
@@ -501,11 +501,11 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(__))  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ClassInf.CONNECTOR(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -516,7 +516,7 @@
 
          #= Returns true if the given type is a complex connector type, i.e. a connector
            with components, otherwise false. =#
-        function isComplexConnector(inType::DAE.Type) ::Bool 
+        function isComplexConnector(inType::DAE.Type) ::Bool
               local outIsComplexConnector::Bool
 
               outIsComplexConnector = begin
@@ -524,7 +524,7 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -534,7 +534,7 @@
         end
 
          #= Returns true if the given type is an expandable connector, otherwise false. =#
-        function isComplexExpandableConnector(inType::DAE.Type) ::Bool 
+        function isComplexExpandableConnector(inType::DAE.Type) ::Bool
               local outResult::Bool
 
               outResult = begin
@@ -542,11 +542,11 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(isExpandable = true))  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ClassInf.CONNECTOR(isExpandable = true))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -555,10 +555,10 @@
           outResult
         end
 
-         #= 
+         #=
         Author: BZ, 2008-11
         This function checks wheter a type is complex AND not extending a base type. =#
-        function isComplexType(ity::DAE.Type) ::Bool 
+        function isComplexType(ity::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -567,15 +567,15 @@
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isComplexType(ty)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     isComplexType(ty)
                   end
-                  
+
                   DAE.T_COMPLEX(varLst = _ <| _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -587,7 +587,7 @@
         end
 
          #= Returns true if type is COMPLEX and external object (ClassInf) =#
-        function isExternalObject(tp::DAE.Type) ::Bool 
+        function isExternalObject(tp::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -595,7 +595,7 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(_))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -606,7 +606,7 @@
 
          #=  Converts a DAE.Type to a DAE.Type
          NOTE: This function should not be used in general, since it is not recommended to translate DAE.Type into DAE.Type. =#
-        function expTypetoTypesType(inType::DAE.Type) ::DAE.Type 
+        function expTypetoTypesType(inType::DAE.Type) ::DAE.Type
               local oType::DAE.Type
 
               oType = begin
@@ -626,29 +626,29 @@
                       tty = DAE.T_ARRAY(ty, list(dim))
                     tty
                   end
-                  
+
                   DAE.T_ARRAY(at, dim <| ad)  => begin
                       ty = expTypetoTypesType(DAE.T_ARRAY(at, ad))
                       tty = DAE.T_ARRAY(ty, list(dim))
                     tty
                   end
-                  
+
                   DAE.T_COMPLEX(CIS, vars, ec)  => begin
                       vars = ListUtil.map(vars, convertFromExpToTypesVar)
                     DAE.T_COMPLEX(CIS, vars, ec)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(CIS, vars, ty, ec)  => begin
                       vars = ListUtil.map(vars, convertFromExpToTypesVar)
                       ty = expTypetoTypesType(ty)
                     DAE.T_SUBTYPE_BASIC(CIS, vars, ty, ec)
                   end
-                  
+
                   DAE.T_METABOXED(ty)  => begin
                       ty = expTypetoTypesType(ty)
                     DAE.T_METABOXED(ty)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -660,7 +660,7 @@
         end
 
          #=  =#
-        function convertFromExpToTypesVar(inVar::DAE.Var) ::DAE.Var 
+        function convertFromExpToTypesVar(inVar::DAE.Var) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -674,7 +674,7 @@
                       ty = expTypetoTypesType(ty)
                     DAE.TYPES_VAR(name, attributes, ty, binding, constOfForIteratorRange)
                   end
-                  
+
                   _  => begin
                         print("error in Types.convertFromExpToTypesVar\\n")
                       fail()
@@ -685,7 +685,7 @@
         end
 
          #= Returns true if type is TUPLE =#
-        function isTuple(tp::DAE.Type) ::Bool 
+        function isTuple(tp::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -693,7 +693,7 @@
                   DAE.T_TUPLE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -703,7 +703,7 @@
         end
 
          #= Returns true if type is TUPLE =#
-        function isMetaTuple(tp::DAE.Type) ::Bool 
+        function isMetaTuple(tp::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -711,7 +711,7 @@
                   DAE.T_METATUPLE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -721,7 +721,7 @@
         end
 
          #= Returns true if type is COMPLEX and a record (ClassInf) =#
-        function isRecord(tp::DAE.Type) ::Bool 
+        function isRecord(tp::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -729,7 +729,7 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -739,7 +739,7 @@
         end
 
          #= gets the record path =#
-        function getRecordPath(tp::DAE.Type) ::Absyn.Path 
+        function getRecordPath(tp::DAE.Type) ::Absyn.Path
               local p::Absyn.Path
 
               p = begin
@@ -753,7 +753,7 @@
         end
 
          #= Returns true if type is a record only containing Reals =#
-        function isRecordWithOnlyReals(tp::DAE.Type) ::Bool 
+        function isRecordWithOnlyReals(tp::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -762,7 +762,7 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_), varLst = varLst)  => begin
                     ListUtil.mapAllValueBool(ListUtil.map(varLst, getVarType), isReal, true)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -774,7 +774,7 @@
         end
 
          #= Return the Type of a Var =#
-        function getVarType(v::DAE.Var) ::DAE.Type 
+        function getVarType(v::DAE.Var) ::DAE.Type
               local tp::DAE.Type
 
               tp = begin
@@ -782,7 +782,7 @@
                   DAE.TYPES_VAR(ty = tp)  => begin
                     tp
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Types.getVarType failed"))
                       fail()
@@ -792,7 +792,7 @@
           tp
         end
 
-        function varIsVariable(v::DAE.Var) ::Bool 
+        function varIsVariable(v::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -800,11 +800,11 @@
                   DAE.TYPES_VAR(attributes = DAE.ATTR(variability = SCode.VAR(__)))  => begin
                     true
                   end
-                  
+
                   DAE.TYPES_VAR(attributes = DAE.ATTR(variability = SCode.DISCRETE(__)))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -814,7 +814,7 @@
         end
 
          #= Return the name of a Var =#
-        function getVarName(v::DAE.Var) ::String 
+        function getVarName(v::DAE.Var) ::String
               local name::String
 
               name = begin
@@ -828,14 +828,14 @@
         end
 
          #= Returns true if type is Real =#
-        function isReal(tp::DAE.Type) ::Bool 
+        function isReal(tp::DAE.Type) ::Bool
               local res::Bool
 
               res = isScalarReal(arrayElementType(tp))
           res
         end
 
-        function isScalarReal(inType::DAE.Type) ::Bool 
+        function isScalarReal(inType::DAE.Type) ::Bool
               local outIsScalarReal::Bool
 
               outIsScalarReal = begin
@@ -844,11 +844,11 @@
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isScalarReal(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -857,10 +857,10 @@
           outIsScalarReal
         end
 
-         #= 
+         #=
         Author BZ 2008-05
         This function verifies if it is some kind of a Real type we are working with. =#
-        function isRealOrSubTypeReal(inType::DAE.Type) ::Bool 
+        function isRealOrSubTypeReal(inType::DAE.Type) ::Bool
               local b::Bool
 
               local lb1::Bool
@@ -872,10 +872,10 @@
           b
         end
 
-         #= 
+         #=
         Author BZ 2009-02
         This function verifies if it is some kind of a Integer type we are working with. =#
-        function isIntegerOrSubTypeInteger(inType::DAE.Type) ::Bool 
+        function isIntegerOrSubTypeInteger(inType::DAE.Type) ::Bool
               local b::Bool
 
               local lb1::Bool
@@ -887,7 +887,7 @@
           b
         end
 
-        function isClockOrSubTypeClock1(inType::DAE.Type) ::Bool 
+        function isClockOrSubTypeClock1(inType::DAE.Type) ::Bool
               local b::Bool
 
               local lb1::Bool
@@ -901,7 +901,7 @@
           b
         end
 
-        function isClockOrSubTypeClock(inType::DAE.Type) ::Bool 
+        function isClockOrSubTypeClock(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -910,7 +910,7 @@
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     isClockOrSubTypeClock1(ty)
                   end
-                  
+
                   _  => begin
                       isClockOrSubTypeClock1(inType)
                   end
@@ -921,7 +921,7 @@
 
          #= @author: adrpo
          This function verifies if it is some kind of a Boolean type we are working with. =#
-        function isBooleanOrSubTypeBoolean(inType::DAE.Type) ::Bool 
+        function isBooleanOrSubTypeBoolean(inType::DAE.Type) ::Bool
               local b::Bool
 
               local lb1::Bool
@@ -935,7 +935,7 @@
 
          #= @author: adrpo
          This function verifies if it is some kind of a String type we are working with. =#
-        function isStringOrSubTypeString(inType::DAE.Type) ::Bool 
+        function isStringOrSubTypeString(inType::DAE.Type) ::Bool
               local b::Bool
 
               local lb1::Bool
@@ -948,7 +948,7 @@
         end
 
          #= Checks if a type is either some Integer or Real type. =#
-        function isIntegerOrRealOrSubTypeOfEither(t::DAE.Type) ::Bool 
+        function isIntegerOrRealOrSubTypeOfEither(t::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -956,11 +956,11 @@
                   _ where (isRealOrSubTypeReal(t))  => begin
                     true
                   end
-                  
+
                   _ where (isIntegerOrSubTypeInteger(t))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -970,7 +970,7 @@
         end
 
          #= Checks if a type is either some Integer or Real type. =#
-        function isIntegerOrRealOrBooleanOrSubTypeOfEither(t::DAE.Type) ::Bool 
+        function isIntegerOrRealOrBooleanOrSubTypeOfEither(t::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -978,15 +978,15 @@
                   _ where (isRealOrSubTypeReal(t))  => begin
                     true
                   end
-                  
+
                   _ where (isIntegerOrSubTypeInteger(t))  => begin
                     true
                   end
-                  
+
                   _ where (isBooleanOrSubTypeBoolean(t))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -995,14 +995,14 @@
           b
         end
 
-        function isClock(tp::DAE.Type) ::Bool 
+        function isClock(tp::DAE.Type) ::Bool
               local res::Bool
 
               res = isScalarClock(arrayElementType(tp))
           res
         end
 
-        function isScalarClock(inType::DAE.Type) ::Bool 
+        function isScalarClock(inType::DAE.Type) ::Bool
               local res::Bool
 
               res = begin
@@ -1011,11 +1011,11 @@
                   DAE.T_CLOCK(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isScalarClock(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1025,14 +1025,14 @@
         end
 
          #= Returns true if type is Integer =#
-        function isInteger(tp::DAE.Type) ::Bool 
+        function isInteger(tp::DAE.Type) ::Bool
               local res::Bool
 
               res = isScalarInteger(arrayElementType(tp))
           res
         end
 
-        function isScalarInteger(inType::DAE.Type) ::Bool 
+        function isScalarInteger(inType::DAE.Type) ::Bool
               local outIsScalarInteger::Bool
 
               outIsScalarInteger = begin
@@ -1041,11 +1041,11 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isScalarInteger(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1055,14 +1055,14 @@
         end
 
          #= Returns true if type is Boolean =#
-        function isBoolean(tp::DAE.Type) ::Bool 
+        function isBoolean(tp::DAE.Type) ::Bool
               local res::Bool
 
               res = isScalarBoolean(arrayElementType(tp))
           res
         end
 
-        function isScalarBoolean(inType::DAE.Type) ::Bool 
+        function isScalarBoolean(inType::DAE.Type) ::Bool
               local outIsScalarBoolean::Bool
 
               outIsScalarBoolean = begin
@@ -1071,11 +1071,11 @@
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isScalarBoolean(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1087,18 +1087,18 @@
          #= author: PA
           Succeeds for the builtin types Integer and Real
           (including classes extending the basetype Integer or Real). =#
-        function integerOrReal(inType::DAE.Type)  
+        function integerOrReal(inType::DAE.Type)
               _ = begin
                   local tp::Type
                 @match inType begin
                   DAE.T_REAL(__)  => begin
                     ()
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     ()
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = tp)  => begin
                       integerOrReal(tp)
                     ()
@@ -1108,7 +1108,7 @@
         end
 
          #= Returns true if Type is an nonscalar array (array of arrays). =#
-        function isNonscalarArray(inType::DAE.Type, inDims::DAE.Dimensions) ::Bool 
+        function isNonscalarArray(inType::DAE.Type, inDims::DAE.Dimensions) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1121,20 +1121,20 @@
                   (_, _ <| _ <| _)  => begin
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(__), _)  => begin
                     true
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexType = t), _)  => begin
                     isNonscalarArray(t, nil)
                   end
-                  
+
                   (DAE.T_TUPLE(types = tys), _)  => begin
                       b = ListUtil.applyAndFold1(tys, boolOr, isNonscalarArray, nil, false)
                     b
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1148,7 +1148,7 @@
         end
 
          #= Returns true if the given type is an array type. =#
-        function isArray(inType::DAE.Type) ::Bool 
+        function isArray(inType::DAE.Type) ::Bool
               local outIsArray::Bool
 
               outIsArray = begin
@@ -1156,15 +1156,15 @@
                   DAE.T_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     isArray(inType.complexType)
                   end
-                  
+
                   DAE.T_FUNCTION(__)  => begin
                     isArray(inType.funcResultType)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1173,7 +1173,7 @@
           outIsArray
         end
 
-        function isEmptyArray(inType::DAE.Type) ::Bool 
+        function isEmptyArray(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1181,7 +1181,7 @@
                   DAE.T_ARRAY(dims = DAE.DIM_INTEGER(0) <|  nil())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1191,7 +1191,7 @@
         end
 
          #= Return true if Type is the builtin String type. =#
-        function isString(inType::DAE.Type) ::Bool 
+        function isString(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1199,7 +1199,7 @@
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1209,7 +1209,7 @@
         end
 
          #= Return true if Type is the builtin String type. =#
-        function isEnumeration(inType::DAE.Type) ::Bool 
+        function isEnumeration(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1217,7 +1217,7 @@
                   DAE.T_ENUMERATION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1227,7 +1227,7 @@
         end
 
          #= Return true if Type is array or the builtin String type. =#
-        function isArrayOrString(inType::DAE.Type) ::Bool 
+        function isArrayOrString(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1236,11 +1236,11 @@
                   ty where (isArray(ty))  => begin
                     true
                   end
-                  
+
                   ty where (isString(ty))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1250,7 +1250,7 @@
         end
 
          #= Return the number of dimensions of a Type. =#
-        function numberOfDimensions(inType::DAE.Type) ::ModelicaInteger 
+        function numberOfDimensions(inType::DAE.Type) ::ModelicaInteger
               local outInteger::ModelicaInteger
 
               outInteger = begin
@@ -1263,12 +1263,12 @@
                       n = n + listLength(dims)
                     n
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                       n = numberOfDimensions(t)
                     n
                   end
-                  
+
                   _  => begin
                       0
                   end
@@ -1278,7 +1278,7 @@
         end
 
          #= Returns true if the dimensions of the type is known. =#
-        function dimensionsKnown(inType::DAE.Type) ::Bool 
+        function dimensionsKnown(inType::DAE.Type) ::Bool
               local outRes::Bool
 
               outRes = begin
@@ -1291,20 +1291,20 @@
                       @match true = dimensionsKnown(DAE.T_ARRAY(tp, dims))
                     true
                   end
-                  
+
                   DAE.T_ARRAY(dims =  nil(), ty = tp)  => begin
                       @match true = dimensionsKnown(tp)
                     true
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                     false
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = tp)  => begin
                     dimensionsKnown(tp)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -1314,7 +1314,7 @@
         end
 
          #= Return the dimension sizes of a Type. =#
-        function getDimensionSizes(inType::DAE.Type) ::List{ModelicaInteger} 
+        function getDimensionSizes(inType::DAE.Type) ::List{ModelicaInteger}
               local outIntegerLst::List{ModelicaInteger}
 
               outIntegerLst = begin
@@ -1329,21 +1329,21 @@
                       res = getDimensionSizes(DAE.T_ARRAY(tp, dims))
                     _cons(i, res)
                   end
-                  
+
                   DAE.T_ARRAY(dims = _ <| dims, ty = tp)  => begin
                       res = getDimensionSizes(DAE.T_ARRAY(tp, dims))
                     _cons(0, res)
                   end
-                  
+
                   DAE.T_ARRAY(dims =  nil(), ty = tp)  => begin
                       res = getDimensionSizes(tp)
                     res
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = tp)  => begin
                     getDimensionSizes(tp)
                   end
-                  
+
                   _  => begin
                         @match false = arrayType(inType)
                       nil
@@ -1354,7 +1354,7 @@
         end
 
          #= Return the dimension sizes of a Type. =#
-        function getDimensionProduct(inType::DAE.Type) ::ModelicaInteger 
+        function getDimensionProduct(inType::DAE.Type) ::ModelicaInteger
               local sz::ModelicaInteger
 
               sz = begin
@@ -1366,11 +1366,11 @@
                   DAE.T_ARRAY(dims = dims, ty = tp)  => begin
                     product(Expression.dimensionSize(d) for d in dims) * getDimensionProduct(tp)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = tp)  => begin
                     getDimensionProduct(tp)
                   end
-                  
+
                   _  => begin
                         @match false = arrayType(inType)
                       1
@@ -1381,7 +1381,7 @@
         end
 
          #= Returns the dimensions of a Type. =#
-        function getDimensions(inType::DAE.Type) ::DAE.Dimensions 
+        function getDimensions(inType::DAE.Type) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               outDimensions = begin
@@ -1389,19 +1389,19 @@
                   DAE.T_ARRAY(__)  => begin
                     listAppend(inType.dims, getDimensions(inType.ty))
                   end
-                  
+
                   DAE.T_METAARRAY(__)  => begin
                     _cons(DAE.DIM_UNKNOWN(), getDimensions(inType.ty))
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     getDimensions(inType.complexType)
                   end
-                  
+
                   DAE.T_METATYPE(__)  => begin
                     getDimensions(inType.ty)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -1410,7 +1410,7 @@
           outDimensions
         end
 
-        function getDimensionNth(inType::DAE.Type, inDim::ModelicaInteger) ::DAE.Dimension 
+        function getDimensionNth(inType::DAE.Type, inDim::ModelicaInteger) ::DAE.Dimension
               local outDimension::DAE.Dimension
 
               outDimension = begin
@@ -1424,13 +1424,13 @@
                       dim = listGet(dims, d)
                     dim
                   end
-                  
+
                   (DAE.T_ARRAY(ty = t, dims = dims), d)  => begin
                       dc = listLength(dims)
                       @match true = d > dc
                     getDimensionNth(t, d - dc)
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexType = t), d)  => begin
                     getDimensionNth(t, d)
                   end
@@ -1440,7 +1440,7 @@
         end
 
          #= Sets the nth dimension of an array type to the given dimension. =#
-        function setDimensionNth(inType::DAE.Type, inDim::DAE.Dimension, inDimNth::ModelicaInteger) ::DAE.Type 
+        function setDimensionNth(inType::DAE.Type, inDim::DAE.Dimension, inDimNth::ModelicaInteger) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1450,7 +1450,7 @@
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = ty), _, 1)  => begin
                     DAE.T_ARRAY(ty, list(inDim))
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = ty), _, _)  => begin
                       @match true = inDimNth > 1
                       ty = setDimensionNth(ty, inDim, inDimNth - 1)
@@ -1462,7 +1462,7 @@
         end
 
          #= Prints dimensions to a string =#
-        function printDimensionsStr(dims::DAE.Dimensions) ::String 
+        function printDimensionsStr(dims::DAE.Dimensions) ::String
               local res::String
 
               res = stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ")
@@ -1472,7 +1472,7 @@
          #= Translates a list of Values.Value to a Var list, using a list
           of identifiers as component names.
           Used e.g. when retrieving the type of a record value. =#
-        function valuesToVars(inValuesValueLst::List{<:Values.Value}, inExpIdentLst::List{<:DAE.Ident}) ::List{DAE.Var} 
+        function valuesToVars(inValuesValueLst::List{<:Values.Value}, inExpIdentLst::List{<:DAE.Ident}) ::List{DAE.Var}
               local outVarLst::List{DAE.Var}
 
               outVarLst = begin
@@ -1486,13 +1486,13 @@
                   ( nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (v <| vs, id <| ids)  => begin
                       tp = typeOfValue(v)
                       rest = valuesToVars(vs, ids)
                     _cons(DAE.TYPES_VAR(id, DAE.dummyAttrVar, tp, DAE.UNBOUND(), NONE()), rest)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-values_to_vars failed\\n")
@@ -1507,7 +1507,7 @@
           Returns the type of a Values.Value.
           Some information is lost in the translation, like attributes
           of the builtin type. =#
-        function typeOfValue(inValue::Values.Value) ::DAE.Type 
+        function typeOfValue(inValue::Values.Value) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1531,55 +1531,55 @@
                   Values.EMPTY(ty = valType)  => begin
                     typeOfValue(valType)
                   end
-                  
+
                   Values.INTEGER(__)  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   Values.REAL(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   Values.STRING(__)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   Values.BOOL(__)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   Values.ENUM_LITERAL(name = path, index = index)  => begin
                       path = AbsynUtil.pathPrefix(path)
                     DAE.T_ENUMERATION(SOME(index), path, nil, nil, nil)
                   end
-                  
+
                   Values.ARRAY(valueLst = v <| vs)  => begin
                       tp = typeOfValue(v)
                       dim1 = listLength(_cons(v, vs))
                     DAE.T_ARRAY(tp, list(DAE.DIM_INTEGER(dim1)))
                   end
-                  
+
                   Values.ARRAY(valueLst =  nil())  => begin
                     DAE.T_ARRAY(DAE.T_UNKNOWN_DEFAULT, list(DAE.DIM_INTEGER(0)))
                   end
-                  
+
                   Values.TUPLE(valueLst = vs)  => begin
                       ts = ListUtil.map(vs, typeOfValue)
                     DAE.T_TUPLE(ts, NONE())
                   end
-                  
-                  Values.RECORD(record_ = cname, orderd = vl, comp = ids, index = #= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#)  => begin
+
+                  Values.RECORD(record_ = cname, orderd = vl, comp = ids, index = -1)  => begin
                       vars = valuesToVars(vl, ids)
                     DAE.T_COMPLEX(ClassInf.RECORD(cname), vars, NONE())
                   end
-                  
+
                   Values.RECORD(record_ = cname, orderd = vl, comp = ids, index = index)  => begin
                       @match true = index >= 0
                       vars = valuesToVars(vl, ids)
                       utPath = AbsynUtil.stripLast(cname)
                     DAE.T_METARECORD(cname, utPath, nil, index, vars, false)
                   end
-                  
+
                   Values.LIST(vl)  => begin
                       explist = ListUtil.map(vl, ValuesUtil.valueExp)
                       ts = ListUtil.map(vl, typeOfValue)
@@ -1587,59 +1587,59 @@
                       tp = boxIfUnboxedType(tp)
                     DAE.T_METALIST(tp)
                   end
-                  
+
                   Values.OPTION(NONE())  => begin
                       tp = DAE.T_METAOPTION(DAE.T_UNKNOWN_DEFAULT)
                     tp
                   end
-                  
+
                   Values.OPTION(SOME(v))  => begin
                       tp = boxIfUnboxedType(typeOfValue(v))
                       tp = DAE.T_METAOPTION(tp)
                     tp
                   end
-                  
+
                   Values.META_TUPLE(valueLst = vs)  => begin
                       ts = ListUtil.mapMap(vs, typeOfValue, boxIfUnboxedType)
                     DAE.T_METATUPLE(ts)
                   end
-                  
+
                   Values.META_ARRAY(valueLst = v <| vs)  => begin
                       tp = boxIfUnboxedType(typeOfValue(v))
                       tp = DAE.T_METAARRAY(tp)
                     tp
                   end
-                  
+
                   Values.META_ARRAY(valueLst =  nil())  => begin
                       tp = DAE.T_METAARRAY(DAE.T_UNKNOWN_DEFAULT)
                     tp
                   end
-                  
+
                   Values.META_BOX(v)  => begin
                       tp = typeOfValue(v)
                     boxIfUnboxedType(tp)
                   end
-                  
+
                   Values.NORETCALL(__)  => begin
                     DAE.T_NORETCALL_DEFAULT
                   end
-                  
+
                   Values.CODE(A = Absyn.C_TYPENAME(__))  => begin
                     DAE.T_CODE(DAE.C_TYPENAME())
                   end
-                  
+
                   Values.CODE(A = Absyn.C_VARIABLENAME(__))  => begin
                     DAE.T_CODE(DAE.C_VARIABLENAME())
                   end
-                  
+
                   Values.CODE(A = Absyn.C_EXPRESSION(__))  => begin
                     DAE.T_CODE(DAE.C_EXPRESSION())
                   end
-                  
+
                   Values.CODE(A = Absyn.C_MODIFICATION(__))  => begin
                     DAE.T_CODE(DAE.C_MODIFICATION())
                   end
-                  
+
                   v  => begin
                       str = "- Types.typeOfValue failed: " + ValuesUtil.valString(v)
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -1657,7 +1657,7 @@
         end
 
          #= Test whether a type is one of the builtin types. =#
-        function basicType(inType::DAE.Type) ::Bool 
+        function basicType(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1665,27 +1665,27 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1697,7 +1697,7 @@
         end
 
          #= Test whether a type extends one of the builtin types. =#
-        function extendsBasicType(inType::DAE.Type) ::Bool 
+        function extendsBasicType(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1705,7 +1705,7 @@
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1715,7 +1715,7 @@
         end
 
          #= Returns the actual type of a type extending one of the builtin types. =#
-        function derivedBasicType(inType::DAE.Type) ::DAE.Type 
+        function derivedBasicType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1723,7 +1723,7 @@
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     derivedBasicType(inType.complexType)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -1733,7 +1733,7 @@
         end
 
          #= Test whether a type is an array type. =#
-        function arrayType(inType::DAE.Type) ::Bool 
+        function arrayType(inType::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1741,7 +1741,7 @@
                   DAE.T_ARRAY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1751,7 +1751,7 @@
         end
 
          #= Sets a DAE.Var to input =#
-        function setVarInput(var::DAE.Var) ::DAE.Var 
+        function setVarInput(var::DAE.Var) ::DAE.Var
               local outV::DAE.Var
 
               outV = begin
@@ -1774,7 +1774,7 @@
         end
 
          #= Sets a DAE.Var to input =#
-        function setVarDefaultInput(var::DAE.Var) ::DAE.Var 
+        function setVarDefaultInput(var::DAE.Var) ::DAE.Var
               local outV::DAE.Var
 
               outV = begin
@@ -1797,7 +1797,7 @@
         end
 
          #= Sets a DAE.Var to input =#
-        function setVarProtected(var::DAE.Var) ::DAE.Var 
+        function setVarProtected(var::DAE.Var) ::DAE.Var
               local outV::DAE.Var
 
               outV = begin
@@ -1820,7 +1820,7 @@
         end
 
          #= Sets a DAE.Var's type =#
-        function setVarType(var::DAE.Var, ty::DAE.Type) ::DAE.Var 
+        function setVarType(var::DAE.Var, ty::DAE.Type) ::DAE.Var
               local outV::DAE.Var = var
 
               outV = begin
@@ -1837,7 +1837,7 @@
          #= This function checks whether two types are semi-equal...
            With 'semi' we mean that they have the same base type, and if both are arrays
            the numbers of dimensions are equal, not necessarily equal dimension-sizes. =#
-        function semiEquivTypes(inType1::DAE.Type, inType2::DAE.Type) ::Bool 
+        function semiEquivTypes(inType1::DAE.Type, inType2::DAE.Type) ::Bool
               local outEquiv::Bool
 
               local ty1::DAE.Type
@@ -1860,7 +1860,7 @@
          #= This is the type equivalence function.  It is defined in terms of
           the subtype function.  Two types are considered equivalent if they
           are subtypes of each other. =#
-        function equivtypes(t1::DAE.Type, t2::DAE.Type) ::Bool 
+        function equivtypes(t1::DAE.Type, t2::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = subtype(t1, t2) && subtype(t2, t1)
@@ -1868,7 +1868,7 @@
         end
 
          #= Like equivtypes but accepts non-typeconverted records as well (for connections). =#
-        function equivtypesOrRecordSubtypeOf(t1::DAE.Type, t2::DAE.Type) ::Bool 
+        function equivtypesOrRecordSubtypeOf(t1::DAE.Type, t2::DAE.Type) ::Bool
               local outBoolean::Bool
 
               outBoolean = subtype(t1, t2, false) && subtype(t2, t1, false)
@@ -1878,7 +1878,7 @@
 
          #= Is the first type a subtype of the second type?
           This function specifies the rules for subtyping in Modelica. =#
-        function subtype(inType1::DAE.Type, inType2::DAE.Type, requireRecordNamesEqual::Bool = true) ::Bool 
+        function subtype(inType1::DAE.Type, inType2::DAE.Type, requireRecordNamesEqual::Bool = true) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1917,166 +1917,166 @@
                   (DAE.T_ANYTYPE(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.T_ANYTYPE(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_INTEGER(__), DAE.T_INTEGER(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_REAL(__), DAE.T_REAL(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_STRING(__), DAE.T_STRING(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_BOOL(__), DAE.T_BOOL(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_CLOCK(__), DAE.T_CLOCK(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_ENUMERATION(names =  nil()), DAE.T_ENUMERATION(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_ENUMERATION(__), DAE.T_ENUMERATION(names =  nil()))  => begin
                     true
                   end
-                  
+
                   (DAE.T_ENUMERATION(names = names1), DAE.T_ENUMERATION(names = names2))  => begin
                       res = ListUtil.isEqualOnTrue(names1, names2, stringEq)
                     res
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dlst1 && _ <| _ <| _, ty = t1), DAE.T_ARRAY(dims = dlst2 && _ <| _ <| _, ty = t2))  => begin
                       @match true = Expression.dimsEqual(dlst1, dlst2)
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim1 <|  nil(), ty = t1), DAE.T_ARRAY(dims = dim2 <| dlst2 && _ <| _, ty = t2))  => begin
                       @match true = Expression.dimensionsEqual(dim1, dim2)
                       @match true = subtype(t1, DAE.T_ARRAY(t2, dlst2), requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim1 <| dlst1 && _ <| _, ty = t1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = t2))  => begin
                       @match true = Expression.dimensionsEqual(dim1, dim2)
                       @match true = subtype(DAE.T_ARRAY(t1, dlst1), t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(ty = t1), DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = t2))  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = t1), DAE.T_ARRAY(ty = t2))  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil(), ty = t1), DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil(), ty = t2))  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(ty = t1), DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil(), ty = t2))  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil(), ty = t1), DAE.T_ARRAY(ty = t2))  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim1 <|  nil(), ty = t1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = t2))  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(p1)), DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(p2)))  => begin
                     AbsynUtil.pathEqual(p1, p2)
                   end
-                  
+
                   (DAE.T_COMPLEX(complexClassType = st1, varLst = els1), DAE.T_COMPLEX(complexClassType = st2, varLst = els2))  => begin
                       @match true = classTypeEqualIfRecord(st1, st2) || ! requireRecordNamesEqual #= We need to add a cast from one record to another =#
                       @match true = listLength(els1) == listLength(els2)
                       @match true = subtypeVarlist(els1, els2)
                     true
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexType = tp1), tp2)  => begin
                       res = subtype(tp1, tp2, requireRecordNamesEqual)
                     res
                   end
-                  
+
                   (tp1, DAE.T_SUBTYPE_BASIC(complexType = tp2))  => begin
                       res = subtype(tp1, tp2, requireRecordNamesEqual)
                     res
                   end
-                  
+
                   (DAE.T_TUPLE(types = type_list1), DAE.T_TUPLE(types = type_list2))  => begin
                       @match true = subtypeTypelist(type_list1, type_list2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_METALIST(ty = t1), DAE.T_METALIST(ty = t2))  => begin
                     subtype(t1, t2)
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = t1), DAE.T_METAARRAY(ty = t2))  => begin
                     subtype(t1, t2)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = tList1), DAE.T_METATUPLE(types = tList2))  => begin
                       res = subtypeTypelist(tList1, tList2, requireRecordNamesEqual)
                     res
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = t1), DAE.T_METAOPTION(ty = t2))  => begin
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (DAE.T_METABOXED(ty = t1), DAE.T_METABOXED(ty = t2))  => begin
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (DAE.T_METABOXED(ty = t1), t2)  => begin
                       @match true = isBoxedType(t2)
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (t1, DAE.T_METABOXED(ty = t2))  => begin
                       @match true = isBoxedType(t1)
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (DAE.T_METAPOLYMORPHIC(name = l1), DAE.T_METAPOLYMORPHIC(name = l2))  => begin
                     l1 == l2
                   end
-                  
+
                   (DAE.T_UNKNOWN(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.T_UNKNOWN(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_NORETCALL(__), DAE.T_NORETCALL(__))  => begin
                     true
                   end
-                  
+
                   (DAE.T_FUNCTION(funcArg = farg1, funcResultType = t1), DAE.T_FUNCTION(funcArg = farg2, funcResultType = t2))  => begin
                       tList1 = list(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper) for t in farg1)
                       tList2 = list(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper) for t in farg2)
@@ -2086,15 +2086,15 @@
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
                   end
-                  
+
                   (DAE.T_FUNCTION_REFERENCE_VAR(functionType = t1), DAE.T_FUNCTION_REFERENCE_VAR(functionType = t2))  => begin
                     subtype(t1, t2)
                   end
-                  
+
                   (DAE.T_METARECORD(path = p1), DAE.T_METARECORD(path = p2))  => begin
                     AbsynUtil.pathEqual(p1, p2)
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(path = p1), DAE.T_METARECORD(utPath = p2))  => begin
                     if AbsynUtil.pathEqual(p1, p2)
                           subtypeTypelist(inType1.typeVars, inType2.typeVars, requireRecordNamesEqual)
@@ -2102,7 +2102,7 @@
                           false
                         end
                   end
-                  
+
                   (DAE.T_METARECORD(knownSingleton = b1, utPath = p1), DAE.T_METAUNIONTYPE(knownSingleton = b2, path = p2))  => begin
                     if AbsynUtil.pathEqual(p1, p2) && (b1 || b2)
                           subtypeTypelist(inType1.typeVars, inType2.typeVars, requireRecordNamesEqual)
@@ -2110,7 +2110,7 @@
                           false
                         end
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(path = p1), DAE.T_METAUNIONTYPE(path = p2))  => begin
                     if AbsynUtil.pathEqual(p1, p2)
                           subtypeTypelist(inType1.typeVars, inType2.typeVars, requireRecordNamesEqual)
@@ -2118,23 +2118,23 @@
                           false
                         end
                   end
-                  
+
                   (DAE.T_CODE(ty = c1), DAE.T_CODE(ty = c2))  => begin
                     valueEq(c1, c2)
                   end
-                  
+
                   (DAE.T_METATYPE(ty = t1), DAE.T_METATYPE(ty = t2))  => begin
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (t1, DAE.T_METATYPE(ty = t2))  => begin
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   (DAE.T_METATYPE(ty = t1), t2)  => begin
                     subtype(t1, t2, requireRecordNamesEqual)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2191,7 +2191,7 @@
 
          #= PR. function: subtypeTypelist
           This function checks if the both Type lists matches types, element by element. =#
-        function subtypeTypelist(inTypeLst1::List{<:DAE.Type}, inTypeLst2::List{<:DAE.Type}, requireRecordNamesEqual::Bool) ::Bool 
+        function subtypeTypelist(inTypeLst1::List{<:DAE.Type}, inTypeLst2::List{<:DAE.Type}, requireRecordNamesEqual::Bool) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -2203,12 +2203,12 @@
                   ( nil(),  nil(), _)  => begin
                     true
                   end
-                  
+
                   (t1 <| rest1, t2 <| rest2, _)  => begin
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     subtypeTypelist(rest1, rest2, requireRecordNamesEqual)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2223,7 +2223,7 @@
           checks if, for each Var in the second list there is a Var in
           the first list with a type that is a subtype of the Var in the
           second list. =#
-        function subtypeVarlist(inVarLst1::List{<:DAE.Var}, inVarLst2::List{<:DAE.Var}) ::Bool 
+        function subtypeVarlist(inVarLst1::List{<:DAE.Var}, inVarLst2::List{<:DAE.Var}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -2236,13 +2236,13 @@
                   (_,  nil())  => begin
                     true
                   end
-                  
+
                   (l, DAE.TYPES_VAR(name = n, ty = t2) <| vs)  => begin
                       @match DAE.TYPES_VAR(ty = t1) = varlistLookup(l, n)
                       @match true = subtype(t1, t2, false)
                     subtypeVarlist(l, vs)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2253,7 +2253,7 @@
         end
 
          #= Given a list of Var and a name, this function finds any Var with the given name. =#
-        function varlistLookup(inVarLst::List{<:DAE.Var}, inIdent::String) ::DAE.Var 
+        function varlistLookup(inVarLst::List{<:DAE.Var}, inIdent::String) ::DAE.Var
               local outVar::DAE.Var
 
               local name::String
@@ -2270,7 +2270,7 @@
         end
 
          #= This function finds a subcomponent by name. =#
-        function lookupComponent(inType::DAE.Type, inIdent::String) ::DAE.Var 
+        function lookupComponent(inType::DAE.Type, inIdent::String) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -2293,29 +2293,29 @@
                       v = lookupInBuiltin(t, n)
                     v
                   end
-                  
+
                   (DAE.T_COMPLEX(varLst = cs), id)  => begin
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(varLst = cs), id)  => begin
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = DAE.T_COMPLEX(varLst = cs)), id)  => begin
                       @match DAE.TYPES_VAR(n, attr, ty, bnd, cnstForRange) = lookupComponent2(cs, id)
                       ty_1 = DAE.T_ARRAY(ty, list(dim))
                     DAE.TYPES_VAR(n, attr, ty_1, bnd, cnstForRange)
                   end
-                  
+
                   (DAE.T_ARRAY(dims = dim <|  nil(), ty = DAE.T_SUBTYPE_BASIC(varLst = cs)), id)  => begin
                       @match DAE.TYPES_VAR(n, attr, ty, bnd, cnstForRange) = lookupComponent2(cs, id)
                       ty_1 = DAE.T_ARRAY(ty, list(dim))
                     DAE.TYPES_VAR(n, attr, ty_1, bnd, cnstForRange)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -2335,7 +2335,7 @@
           DAE.T_REAL is a bit problematic, since it does not make a
           difference between Real and RealType, which makes the
           translator accept things like x.start.start.start. =#
-        function lookupInBuiltin(inType::DAE.Type, inIdent::String) ::DAE.Var 
+        function lookupInBuiltin(inType::DAE.Type, inIdent::String) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -2347,42 +2347,42 @@
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_INTEGER(varLst = cs), id)  => begin
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_STRING(varLst = cs), id)  => begin
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_BOOL(varLst = cs), id)  => begin
                       v = lookupComponent2(cs, id)
                     v
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "quantity")  => begin
                     DAE.TYPES_VAR("quantity", DAE.dummyAttrParam, DAE.T_STRING_DEFAULT, DAE.VALBOUND(Values.STRING(""), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "min")  => begin
                     DAE.TYPES_VAR("min", DAE.dummyAttrParam, DAE.T_ENUMERATION(SOME(1), Absyn.IDENT(""), list("min,max"), nil, nil), DAE.UNBOUND(), NONE())
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "max")  => begin
                     DAE.TYPES_VAR("max", DAE.dummyAttrParam, DAE.T_ENUMERATION(SOME(2), Absyn.IDENT(""), list("min,max"), nil, nil), DAE.UNBOUND(), NONE())
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "start")  => begin
                     DAE.TYPES_VAR("start", DAE.dummyAttrParam, DAE.T_BOOL_DEFAULT, DAE.UNBOUND(), NONE())
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "fixed")  => begin
                     DAE.TYPES_VAR("fixed", DAE.dummyAttrParam, DAE.T_BOOL_DEFAULT, DAE.UNBOUND(), NONE())
                   end
-                  
+
                   (DAE.T_ENUMERATION(index = SOME(_)), "enable")  => begin
                     DAE.TYPES_VAR("enable", DAE.dummyAttrParam, DAE.T_BOOL_DEFAULT, DAE.VALBOUND(Values.BOOL(true), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
@@ -2402,7 +2402,7 @@
 
          #= This function finds a named Var in a list of Vars, comparing
           the name against the second argument to this function. =#
-        function lookupComponent2(inVarLst::List{<:DAE.Var}, inIdent::String) ::DAE.Var 
+        function lookupComponent2(inVarLst::List{<:DAE.Var}, inIdent::String) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -2415,7 +2415,7 @@
                       @match true = stringEq(n, m)
                     v
                   end
-                  
+
                   (_ <| vs, n)  => begin
                       v = lookupComponent2(vs, n)
                     v
@@ -2426,7 +2426,7 @@
         end
 
          #= This function makes an array type given a Type and an Absyn.ArrayDim =#
-        function makeArray(inType::DAE.Type, inArrayDim::Absyn.ArrayDim) ::DAE.Type 
+        function makeArray(inType::DAE.Type, inArrayDim::Absyn.ArrayDim) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2437,7 +2437,7 @@
                   (t,  nil())  => begin
                     t
                   end
-                  
+
                   (t, l)  => begin
                       len = listLength(l)
                     DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(len)))
@@ -2448,7 +2448,7 @@
         end
 
          #=  This function makes an array type given a Type and a list of DAE.Subscript =#
-        function makeArraySubscripts(inType::DAE.Type, lst::List{<:DAE.Subscript}) ::DAE.Type 
+        function makeArraySubscripts(inType::DAE.Type, lst::List{<:DAE.Subscript}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2460,27 +2460,27 @@
                   (t,  nil())  => begin
                     t
                   end
-                  
+
                   (t, DAE.WHOLEDIM(__) <| rest)  => begin
                       t = makeArraySubscripts(DAE.T_ARRAY(t, list(DAE.DIM_UNKNOWN())), rest)
                     t
                   end
-                  
+
                   (t, DAE.SLICE(_) <| rest)  => begin
                       t = makeArraySubscripts(DAE.T_ARRAY(t, list(DAE.DIM_UNKNOWN())), rest)
                     t
                   end
-                  
+
                   (t, DAE.WHOLE_NONEXP(_) <| rest)  => begin
                       t = makeArraySubscripts(DAE.T_ARRAY(t, list(DAE.DIM_UNKNOWN())), rest)
                     t
                   end
-                  
+
                   (t, DAE.INDEX(DAE.ICONST(i)) <| rest)  => begin
                       t = makeArraySubscripts(DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(i))), rest)
                     t
                   end
-                  
+
                   (t, DAE.INDEX(_) <| rest)  => begin
                       t = makeArraySubscripts(DAE.T_ARRAY(t, list(DAE.DIM_UNKNOWN())), rest)
                     t
@@ -2492,7 +2492,7 @@
 
          #= This function turns a type into an array of that type.
           If the type already is an array, another dimension is simply added. =#
-        function liftArray(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type 
+        function liftArray(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type
               local outType::DAE.Type
 
               outType = DAE.T_ARRAY(inType, list(inDimension))
@@ -2501,16 +2501,16 @@
 
          #= This function turns a type into a list of that type.
           If the type already is a list, another dimension is simply added. =#
-        function liftList(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type 
+        function liftList(inType::DAE.Type, inDimension::DAE.Dimension) ::DAE.Type
               local outType::DAE.Type
 
               outType = DAE.T_METALIST(inType)
           outType
         end
 
-         #= 
+         #=
           This function turns a type into an array of that type. =#
-        function liftArrayListDims(inType::DAE.Type, inDimensions::DAE.Dimensions) ::DAE.Type 
+        function liftArrayListDims(inType::DAE.Type, inDimensions::DAE.Dimensions) ::DAE.Type
               local outType::DAE.Type = inType
 
               for dim in listReverse(inDimensions)
@@ -2520,7 +2520,7 @@
         end
 
          #= Turns a type into an array of that type, with the dimensions in the reverse order. =#
-        function liftArrayListDimsReverse(inType::DAE.Type, dims::DAE.Dimensions) ::DAE.Type 
+        function liftArrayListDimsReverse(inType::DAE.Type, dims::DAE.Dimensions) ::DAE.Type
               local ty::DAE.Type = inType
 
               for dim in dims
@@ -2529,10 +2529,10 @@
           ty
         end
 
-         #= 
+         #=
           mahge: This function turns a type into an array of that type
           by appening the new dimension at the end.  =#
-        function liftTypeWithDims(inType::DAE.Type, inDims::DAE.Dimensions) ::DAE.Type 
+        function liftTypeWithDims(inType::DAE.Type, inDims::DAE.Dimensions) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2544,7 +2544,7 @@
                       print("Can not handle this yet!!")
                     fail()
                   end
-                  
+
                   DAE.T_ARRAY(ty, dims)  => begin
                       dims_ = listAppend(dims, inDims)
                     if referenceEq(dims, dims_)
@@ -2553,7 +2553,7 @@
                           DAE.T_ARRAY(ty, dims_)
                         end
                   end
-                  
+
                   _  => begin
                       DAE.T_ARRAY(inType, inDims)
                   end
@@ -2562,9 +2562,9 @@
           outType
         end
 
-         #= 
+         #=
           This function turns a type into an array of that type. =#
-        function liftArrayListExp(inType::DAE.Type, inDimensionLst::List{<:DAE.Exp}) ::DAE.Type 
+        function liftArrayListExp(inType::DAE.Type, inDimensionLst::List{<:DAE.Exp}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2575,7 +2575,7 @@
                   (ty,  nil())  => begin
                     ty
                   end
-                  
+
                   (ty, d <| rest)  => begin
                     liftArray(liftArrayListExp(ty, rest), DAE.DIM_EXP(d))
                   end
@@ -2585,7 +2585,7 @@
         end
 
          #= This function adds an array dimension to *the right* of the passed type. =#
-        function liftArrayRight(inType::DAE.Type, inIntegerOption::DAE.Dimension) ::DAE.Type 
+        function liftArrayRight(inType::DAE.Type, inIntegerOption::DAE.Dimension) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2602,13 +2602,13 @@
                       ty_1 = liftArrayRight(ty, d)
                     DAE.T_ARRAY(ty_1, list(dim))
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(ci, varlst, ty, ec), d)  => begin
                       @match false = listEmpty(getDimensions(ty))
                       ty_1 = liftArrayRight(ty, d)
                     DAE.T_SUBTYPE_BASIC(ci, varlst, ty_1, ec)
                   end
-                  
+
                   (tty, d)  => begin
                     DAE.T_ARRAY(tty, list(d))
                   end
@@ -2618,7 +2618,7 @@
         end
 
          #= This function turns an array of a type into that type. =#
-        function unliftArray(inType::DAE.Type) ::DAE.Type 
+        function unliftArray(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2627,11 +2627,11 @@
                   DAE.T_ARRAY(ty = ty)  => begin
                     ty
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     unliftArray(ty)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     unliftArray(ty)
                   end
@@ -2642,7 +2642,7 @@
           outType
         end
 
-        function unliftArrayOrList(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimension} 
+        function unliftArrayOrList(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimension}
               local dim::DAE.Dimension
               local outType::DAE.Type
 
@@ -2652,20 +2652,20 @@
                   DAE.T_METALIST(ty = ty)  => begin
                     (boxIfUnboxedType(ty), DAE.DIM_UNKNOWN())
                   end
-                  
+
                   DAE.T_METAARRAY(ty = ty)  => begin
                     (boxIfUnboxedType(ty), DAE.DIM_UNKNOWN())
                   end
-                  
+
                   DAE.T_ARRAY(dims = dim <|  nil(), ty = ty)  => begin
                     (ty, dim)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                       (ty, dim) = unliftArrayOrList(ty)
                     (ty, dim)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     unliftArrayOrList(ty)
                   end
@@ -2675,7 +2675,7 @@
         end
 
          #= This function turns an array into the element type of the array. =#
-        function arrayElementType(inType::DAE.Type) ::DAE.Type 
+        function arrayElementType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2683,7 +2683,7 @@
                   DAE.T_ARRAY(__)  => begin
                     arrayElementType(inType.ty)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     if listEmpty(getDimensions(inType.complexType))
                           inType
@@ -2691,11 +2691,11 @@
                           arrayElementType(inType.complexType)
                         end
                   end
-                  
+
                   DAE.T_FUNCTION(__)  => begin
                     arrayElementType(inType.funcResultType)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -2704,7 +2704,7 @@
           outType
         end
 
-        function setArrayElementType(inType::DAE.Type, inBaseType::DAE.Type) ::DAE.Type 
+        function setArrayElementType(inType::DAE.Type, inBaseType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2715,7 +2715,7 @@
                       ty = setArrayElementType(ty, inBaseType)
                     DAE.T_ARRAY(ty, dims)
                   end
-                  
+
                   _  => begin
                       inBaseType
                   end
@@ -2725,7 +2725,7 @@
         end
 
          #= prints eqmod to a string =#
-        function unparseEqMod(eq::DAE.EqMod) ::String 
+        function unparseEqMod(eq::DAE.EqMod) ::String
               local str::String
 
               str = begin
@@ -2736,7 +2736,7 @@
                       str = ExpressionDump.printExpStr(e)
                     str
                   end
-                  
+
                   DAE.UNTYPED(exp = e2)  => begin
                       str = Dump.printExpStr(e2)
                     str
@@ -2747,7 +2747,7 @@
         end
 
          #= prints eqmod to a string =#
-        function unparseOptionEqMod(eq::Option{<:DAE.EqMod}) ::String 
+        function unparseOptionEqMod(eq::Option{<:DAE.EqMod}) ::String
               local str::String
 
               str = begin
@@ -2756,7 +2756,7 @@
                   NONE()  => begin
                     "NONE()"
                   end
-                  
+
                   SOME(e)  => begin
                     unparseEqMod(e)
                   end
@@ -2766,7 +2766,7 @@
         end
 
          #= This function prints a Modelica type as a piece of Modelica code. =#
-        function unparseType(inType::DAE.Type) ::String 
+        function unparseType(inType::DAE.Type) ::String
               local outString::String
 
               outString = begin
@@ -2803,47 +2803,47 @@
                   DAE.T_INTEGER(varLst =  nil())  => begin
                     "Integer"
                   end
-                  
+
                   DAE.T_REAL(varLst =  nil())  => begin
                     "Real"
                   end
-                  
+
                   DAE.T_STRING(varLst =  nil())  => begin
                     "String"
                   end
-                  
+
                   DAE.T_BOOL(varLst =  nil())  => begin
                     "Boolean"
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     "Clock"
                   end
-                  
+
                   DAE.T_INTEGER(varLst = vs)  => begin
                       s1 = stringDelimitList(ListUtil.map(vs, unparseVarAttr), ", ")
                       s2 = "Integer(" + s1 + ")"
                     s2
                   end
-                  
+
                   DAE.T_REAL(varLst = vs)  => begin
                       s1 = stringDelimitList(ListUtil.map(vs, unparseVarAttr), ", ")
                       s2 = "Real(" + s1 + ")"
                     s2
                   end
-                  
+
                   DAE.T_STRING(varLst = vs)  => begin
                       s1 = stringDelimitList(ListUtil.map(vs, unparseVarAttr), ", ")
                       s2 = "String(" + s1 + ")"
                     s2
                   end
-                  
+
                   DAE.T_BOOL(varLst = vs)  => begin
                       s1 = stringDelimitList(ListUtil.map(vs, unparseVarAttr), ", ")
                       s2 = "Boolean(" + s1 + ")"
                     s2
                   end
-                  
+
                   DAE.T_ENUMERATION(path = path, names = l)  => begin
                       s1 = if Config.typeinfo()
                             " /*" + AbsynUtil.pathString(path) + "*/ ("
@@ -2854,7 +2854,7 @@
                       str = stringAppendList(list("enumeration", s1, s2, ")"))
                     str
                   end
-                  
+
                   ty && DAE.T_ARRAY(__)  => begin
                       (ty, dimlst) = flattenArrayType(ty)
                       tystr = unparseType(ty)
@@ -2862,7 +2862,7 @@
                       res = stringAppendList(list(tystr, "[", dims, "]"))
                     res
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path), varLst = vs)  => begin
                       name = AbsynUtil.pathStringNoQual(path)
                       vars = ListUtil.map(vs, unparseVar)
@@ -2870,7 +2870,7 @@
                       res = stringAppendList(list("record ", name, "\\n", vstr, "end ", name, ";"))
                     res
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(path, b), varLst = vs)  => begin
                       name = AbsynUtil.pathStringNoQual(path)
                       vars = ListUtil.map(vs, unparseVar)
@@ -2883,7 +2883,7 @@
                       res = stringAppendList(list(str, "connector ", name, "\\n", vstr, "end ", name, ";"))
                     res
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ci_state, complexType = bc_tp)  => begin
                       st_str = AbsynUtil.pathString(ClassInf.getStateName(ci_state))
                       res = ClassInf.printStateStr(ci_state)
@@ -2891,14 +2891,14 @@
                       res = stringAppendList(list("(", res, " ", st_str, " bc:", bc_tp_str, ")"))
                     res
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ci_state)  => begin
                       st_str = AbsynUtil.pathString(ClassInf.getStateName(ci_state))
                       res = ClassInf.printStateStr(ci_state)
                       res = stringAppendList(list(res, " ", st_str))
                     res
                   end
-                  
+
                   DAE.T_FUNCTION(funcArg = params, funcResultType = restype, path = path)  => begin
                       funcstr = AbsynUtil.pathString(path)
                       paramstrs = ListUtil.map(params, unparseParam)
@@ -2907,7 +2907,7 @@
                       res = stringAppendList(list(funcstr, "<function>(", paramstr, ") => ", restypestr))
                     res
                   end
-                  
+
                   DAE.T_TUPLE(types = tys)  => begin
                       tystrs = begin
                            #=  BTH
@@ -2919,7 +2919,7 @@
                           SOME(names)  => begin
                             list(@do_threaded_for unparseType(t) + " " + n (t, n) (tys, names))
                           end
-                          
+
                           _  => begin
                               list(unparseType(t) for t in tys)
                           end
@@ -2929,31 +2929,31 @@
                       res = stringAppendList(list("(", tystr, ")"))
                     res
                   end
-                  
+
                   DAE.T_METATUPLE(types = tys)  => begin
                       tystrs = ListUtil.map(tys, unparseType)
                       tystr = stringDelimitList(tystrs, ", ")
                       res = stringAppendList(list("tuple<", tystr, ">"))
                     res
                   end
-                  
+
                   DAE.T_METALIST(ty = ty)  => begin
                       tystr = unparseType(ty)
                       res = stringAppendList(list("list<", tystr, ">"))
                     res
                   end
-                  
+
                   DAE.T_METAARRAY(ty = ty)  => begin
                       tystr = unparseType(ty)
                       res = stringAppendList(list("array<", tystr, ">"))
                     res
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(name = tystr)  => begin
                       res = stringAppendList(list("polymorphic<", tystr, ">"))
                     res
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(__)  => begin
                       res = AbsynUtil.pathStringNoQual(inType.path)
                     if listEmpty(inType.typeVars)
@@ -2962,7 +2962,7 @@
                           res + "<" + stringDelimitList(list(unparseType(tv) for tv in inType.typeVars), ",") + ">"
                         end
                   end
-                  
+
                   DAE.T_METARECORD(__)  => begin
                       res = AbsynUtil.pathStringNoQual(inType.path)
                     if listEmpty(inType.typeVars)
@@ -2971,51 +2971,51 @@
                           res + "<" + stringDelimitList(list(unparseType(tv) for tv in inType.typeVars), ",") + ">"
                         end
                   end
-                  
+
                   DAE.T_METABOXED(ty = ty)  => begin
                       res = unparseType(ty)
                       res = "#" + res
                     res
                   end
-                  
+
                   DAE.T_METAOPTION(ty = DAE.T_UNKNOWN(__))  => begin
                     "Option<Any>"
                   end
-                  
+
                   DAE.T_METAOPTION(ty = ty)  => begin
                       tystr = unparseType(ty)
                       res = stringAppendList(list("Option<", tystr, ">"))
                     res
                   end
-                  
+
                   DAE.T_METATYPE(ty = ty)  => begin
                     unparseType(ty)
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     "#NORETCALL#"
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     "#T_UNKNOWN#"
                   end
-                  
+
                   DAE.T_ANYTYPE(__)  => begin
                     "#ANYTYPE#"
                   end
-                  
+
                   DAE.T_CODE(ty = codeType)  => begin
                     printCodeTypeStr(codeType)
                   end
-                  
+
                   DAE.T_FUNCTION_REFERENCE_VAR(functionType = ty)  => begin
                     "#FUNCTION_REFERENCE_VAR#" + unparseType(ty)
                   end
-                  
+
                   DAE.T_FUNCTION_REFERENCE_FUNC(functionType = ty)  => begin
                     "#FUNCTION_REFERENCE_FUNC#" + unparseType(ty)
                   end
-                  
+
                   _  => begin
                       "Internal error Types.unparseType: not implemented yet\\n"
                   end
@@ -3049,7 +3049,7 @@
         end
 
          #= Like unparseType, but doesn't print out builtin attributes. =#
-        function unparseTypeNoAttr(inType::DAE.Type) ::String 
+        function unparseTypeNoAttr(inType::DAE.Type) ::String
               local outString::String
 
               local ty::DAE.Type
@@ -3059,7 +3059,7 @@
           outString
         end
 
-        function unparsePropTypeNoAttr(inProps::DAE.Properties) ::String 
+        function unparsePropTypeNoAttr(inProps::DAE.Properties) ::String
               local outString::String
 
               outString = begin
@@ -3068,7 +3068,7 @@
                   DAE.PROP(type_ = ty)  => begin
                     unparseTypeNoAttr(ty)
                   end
-                  
+
                   DAE.PROP_TUPLE(type_ = ty)  => begin
                     unparseTypeNoAttr(ty)
                   end
@@ -3077,7 +3077,7 @@
           outString
         end
 
-        function unparseConst(inConst::DAE.Const) ::String 
+        function unparseConst(inConst::DAE.Const) ::String
               local outString::String
 
               outString = begin
@@ -3085,15 +3085,15 @@
                   DAE.C_CONST(__)  => begin
                     "constant"
                   end
-                  
+
                   DAE.C_PARAM(__)  => begin
                     "parameter"
                   end
-                  
+
                   DAE.C_VAR(__)  => begin
                     "continuous"
                   end
-                  
+
                   DAE.C_UNKNOWN(__)  => begin
                     "unknown"
                   end
@@ -3103,7 +3103,7 @@
         end
 
          #= This function prints a Const as a string. =#
-        function printConstStr(inConst::DAE.Const) ::String 
+        function printConstStr(inConst::DAE.Const) ::String
               local outString::String
 
               outString = begin
@@ -3111,11 +3111,11 @@
                   DAE.C_CONST(__)  => begin
                     "C_CONST"
                   end
-                  
+
                   DAE.C_PARAM(__)  => begin
                     "C_PARAM"
                   end
-                  
+
                   DAE.C_VAR(__)  => begin
                     "C_VAR"
                   end
@@ -3125,7 +3125,7 @@
         end
 
          #= This function prints a Modelica TupleConst as a string. =#
-        function printTupleConstStr(inTupleConst::DAE.TupleConst) ::String 
+        function printTupleConstStr(inTupleConst::DAE.TupleConst) ::String
               local outString::String
 
               outString = begin
@@ -3136,11 +3136,11 @@
                   local strlist::List{String}
                   local constlist::List{DAE.TupleConst}
                 @match inTupleConst begin
-                  DAE.SINGLE_CONST(const = c)  => begin
+                  DAE.SINGLE_CONST(constType = c)  => begin
                       cstr = printConstStr(c)
                     cstr
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = constlist)  => begin
                       strlist = ListUtil.map(constlist, printTupleConstStr)
                       res = stringDelimitList(strlist, ", ")
@@ -3154,7 +3154,7 @@
 
          #= This function prints a textual description of a Modelica type to a string.
           If the type is not one of the primitive types, it simply prints composite. =#
-        function printTypeStr(inType::DAE.Type) ::String 
+        function printTypeStr(inType::DAE.Type) ::String
               local str::String
 
               str = begin
@@ -3175,27 +3175,27 @@
                   DAE.T_INTEGER(varLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "Integer", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_REAL(varLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "Real", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_STRING(varLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "String", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_BOOL(varLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "Boolean", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_CLOCK(varLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "Clock", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_ENUMERATION(literalVarLst = vars)  => begin
                     ListUtil.toString(vars, printVarStr, "Enumeration", "(", ", ", ")", false)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = st, complexType = t, varLst = vars)  => begin
                       compType = printTypeStr(t)
                       s1 = ClassInf.printStateStr(st)
@@ -3203,21 +3203,21 @@
                       str = stringAppendList(list("composite(", s1, "{", s2, "}, derived from ", compType, ")"))
                     str
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = st, varLst = vars)  => begin
                       s1 = ClassInf.printStateStr(st)
                       s2 = stringDelimitList(ListUtil.map(vars, printVarStr), ", ")
                       str = stringAppendList(list("composite(", s1, "{", s2, "})"))
                     str
                   end
-                  
+
                   DAE.T_ARRAY(dims = dims, ty = t)  => begin
                       s1 = stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ")
                       s2 = printTypeStr(t)
                       str = stringAppendList(list("array(", s2, ")[", s1, "]"))
                     str
                   end
-                  
+
                   DAE.T_FUNCTION(funcArg = params, funcResultType = restype)  => begin
                       s1 = printParamsStr(params)
                       s2 = printTypeStr(restype)
@@ -3225,105 +3225,105 @@
                       str = str + AbsynUtil.pathString(inType.path)
                     str
                   end
-                  
+
                   DAE.T_TUPLE(types = tys)  => begin
                       s1 = stringDelimitList(ListUtil.map(tys, printTypeStr), ", ")
                       str = stringAppendList(list("(", s1, ")"))
                     str
                   end
-                  
+
                   DAE.T_METATUPLE(types = tys)  => begin
                       str = printTypeStr(DAE.T_TUPLE(tys, NONE()))
                     str
                   end
-                  
+
                   DAE.T_METALIST(ty = ty)  => begin
                       s1 = printTypeStr(ty)
                       str = stringAppendList(list("list<", s1, ">"))
                     str
                   end
-                  
+
                   DAE.T_METAOPTION(ty = ty)  => begin
                       s1 = printTypeStr(ty)
                       str = stringAppendList(list("Option<", s1, ">"))
                     str
                   end
-                  
+
                   DAE.T_METAARRAY(ty = ty)  => begin
                       s1 = printTypeStr(ty)
                       str = stringAppendList(list("array<", s1, ">"))
                     str
                   end
-                  
+
                   DAE.T_METABOXED(ty = ty)  => begin
                       s1 = printTypeStr(ty)
                       str = stringAppendList(list("boxed<", s1, ">"))
                     str
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(name = s1)  => begin
                       str = stringAppendList(list("polymorphic<", s1, ">"))
                     str
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                       str = "T_UNKNOWN"
                     str
                   end
-                  
+
                   DAE.T_ANYTYPE(anyClassType = NONE())  => begin
                       str = "ANYTYPE()"
                     str
                   end
-                  
+
                   DAE.T_ANYTYPE(anyClassType = SOME(st))  => begin
                       s1 = ClassInf.printStateStr(st)
                       str = "ANYTYPE(" + s1 + ")"
                     str
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     "()"
                   end
-                  
+
                   DAE.T_METATYPE(ty = t)  => begin
                       s1 = printTypeStr(t)
                       str = stringAppendList(list("METATYPE(", s1, ")"))
                     str
                   end
-                  
+
                   t && DAE.T_METARECORD(__)  => begin
                       s1 = AbsynUtil.pathStringNoQual(t.path)
                       str = "#" + s1 + "#"
                     str
                   end
-                  
+
                   t && DAE.T_METAUNIONTYPE(__)  => begin
                       s1 = AbsynUtil.pathStringNoQual(t.path)
                       str = "#" + s1 + "#"
                     str
                   end
-                  
+
                   DAE.T_CODE(DAE.C_EXPRESSION(__))  => begin
                     "Code(Expression)"
                   end
-                  
+
                   DAE.T_CODE(DAE.C_EXPRESSION_OR_MODIFICATION(__))  => begin
                     "Code(ExpressionOrModification)"
                   end
-                  
+
                   DAE.T_CODE(DAE.C_TYPENAME(__))  => begin
                     "Code(TypeName)"
                   end
-                  
+
                   DAE.T_CODE(DAE.C_VARIABLENAME(__))  => begin
                     "Code(VariableName)"
                   end
-                  
+
                   DAE.T_CODE(DAE.C_VARIABLENAMES(__))  => begin
                     "Code(VariableName[:])"
                   end
-                  
+
                   _  => begin
                         str = "Types.printTypeStr failed"
                       str
@@ -3361,7 +3361,7 @@
 
          #= Author BZ, 2009-09
          Print the connector-type-name =#
-        function printConnectorTypeStr(it::DAE.Type) ::Tuple{String, String} 
+        function printConnectorTypeStr(it::DAE.Type) ::Tuple{String, String}
               local s2::String #= Components of connector =#
               local s::String #= Connector type =#
 
@@ -3385,7 +3385,7 @@
                       s2 = "{" + stringDelimitList(varNames, ", ") + "}"
                     (s, s2)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ClassInf.CONNECTOR(connectorName, isExpandable), varLst = vars, complexType = t)  => begin
                       varNames = ListUtil.map(vars, varName)
                       isExpandableStr = if isExpandable
@@ -3397,7 +3397,7 @@
                       s2 = "{" + stringDelimitList(varNames, ", ") + "}" + " subtype of: " + printTypeStr(t)
                     (s, s2)
                   end
-                  
+
                   _  => begin
                       ("", unparseType(it))
                   end
@@ -3409,7 +3409,7 @@
         end
 
          #= Prints function arguments to a string. =#
-        function printParamsStr(inFuncArgLst::List{<:DAE.FuncArg}) ::String 
+        function printParamsStr(inFuncArgLst::List{<:DAE.FuncArg}) ::String
               local str::String
 
               str = begin
@@ -3422,13 +3422,13 @@
                    nil()  => begin
                     ""
                   end
-                  
+
                   DAE.FUNCARG(name = n, ty = t) <|  nil()  => begin
                       s1 = printTypeStr(t)
                       str = stringAppendList(list(n, " :: ", s1))
                     str
                   end
-                  
+
                   DAE.FUNCARG(name = n, ty = t) <| params  => begin
                       s1 = printTypeStr(t)
                       s2 = printParamsStr(params)
@@ -3440,9 +3440,9 @@
           str
         end
 
-         #= 
+         #=
           Prints a variable which is attribute of builtin type to a string, e.g. on the form 'max = 10.0' =#
-        function unparseVarAttr(inVar::DAE.Var) ::String 
+        function unparseVarAttr(inVar::DAE.Var) ::String
               local outString::String
 
               outString = begin
@@ -3458,13 +3458,13 @@
                       res = stringAppendList(list(n, " = ", bindStr))
                     res
                   end
-                  
+
                   DAE.TYPES_VAR(name = n, binding = DAE.VALBOUND(valBound = value))  => begin
                       valStr = ValuesUtil.valString(value)
                       res = stringAppendList(list(n, " = ", valStr))
                     res
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -3474,7 +3474,7 @@
         end
 
          #= Prints a variable to a string. =#
-        function unparseVar(inVar::DAE.Var) ::String 
+        function unparseVar(inVar::DAE.Var) ::String
               local outString::String
 
               outString = begin
@@ -3496,7 +3496,7 @@
           outString
         end
 
-        function connectorTypeStr(ct::DAE.ConnectorType) ::String 
+        function connectorTypeStr(ct::DAE.ConnectorType) ::String
               local str::String
 
               str = begin
@@ -3505,15 +3505,15 @@
                   DAE.POTENTIAL(__)  => begin
                     ""
                   end
-                  
+
                   DAE.FLOW(__)  => begin
                     "flow "
                   end
-                  
+
                   DAE.STREAM(_)  => begin
                     "stream "
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -3523,7 +3523,7 @@
         end
 
          #= Prints a function argument to a string. =#
-        function unparseParam(inFuncArg::DAE.FuncArg) ::String 
+        function unparseParam(inFuncArg::DAE.FuncArg) ::String
               local outString::String
 
               outString = begin
@@ -3545,7 +3545,7 @@
                       res = stringAppendList(list(tstr, " ", cstr, pstr, id))
                     res
                   end
-                  
+
                   DAE.FUNCARG(id, ty, c, p, SOME(exp))  => begin
                       tstr = unparseType(ty)
                       cstr = DAEUtil.constStrFriendly(c)
@@ -3561,7 +3561,7 @@
 
          #= author: LS
           Prints a Var to the a string. =#
-        function printVarStr(inVar::DAE.Var) ::String 
+        function printVarStr(inVar::DAE.Var) ::String
               local str::String
 
               str = begin
@@ -3580,7 +3580,7 @@
                       str = stringAppendList(list(s1, " ", n, " ", vs, " ", s2))
                     str
                   end
-                  
+
                   DAE.TYPES_VAR(name = n)  => begin
                       str = stringAppendList(list(n))
                     str
@@ -3591,7 +3591,7 @@
         end
 
          #= Print a variable binding to a string. =#
-        function printBindingStr(inBinding::DAE.Binding) ::String 
+        function printBindingStr(inBinding::DAE.Binding) ::String
               local outString::String
 
               outString = begin
@@ -3609,7 +3609,7 @@
                   DAE.UNBOUND(__)  => begin
                     "UNBOUND"
                   end
-                  
+
                   DAE.EQBOUND(exp = exp, evaluatedExp = NONE(), constant_ = f, source = source)  => begin
                       str = ExpressionDump.printExpStr(exp)
                       str2 = printConstStr(f)
@@ -3617,7 +3617,7 @@
                       res = stringAppendList(list("DAE.EQBOUND(", str, ", NONE(), ", str2, ", ", str3, ")"))
                     res
                   end
-                  
+
                   DAE.EQBOUND(exp = exp, evaluatedExp = SOME(v), constant_ = f, source = source)  => begin
                       str = ExpressionDump.printExpStr(exp)
                       str2 = printConstStr(f)
@@ -3626,14 +3626,14 @@
                       res = stringAppendList(list("DAE.EQBOUND(", str, ", SOME(", v_str, "), ", str2, ", ", str3, ")"))
                     res
                   end
-                  
+
                   DAE.VALBOUND(valBound = v, source = source)  => begin
                       s = ValuesUtil.unparseValues(list(v))
                       str3 = DAEUtil.printBindingSourceStr(source)
                       res = stringAppendList(list("DAE.VALBOUND(", s, ", ", str3, ")"))
                     res
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -3645,7 +3645,7 @@
          #= author: LS
           Creates a function type from a function name an a list of input and
           output variables. =#
-        function makeFunctionType(p::Absyn.Path, vl::List{<:DAE.Var}, functionAttributes::DAE.FunctionAttributes) ::DAE.Type 
+        function makeFunctionType(p::Absyn.Path, vl::List{<:DAE.Var}, functionAttributes::DAE.FunctionAttributes) ::DAE.Type
               local outType::DAE.Type
 
               local invl::List{DAE.Var}
@@ -3663,7 +3663,7 @@
 
          #= function: extandFunctionType
           Extends function argument list adding var for element list. =#
-        function extendsFunctionTypeArgs(inType::DAE.Type, inElementLst::List{<:DAE.Element}, inOutputElementLst::List{<:DAE.Element}, inBooltLst::List{<:Bool}) ::DAE.Type 
+        function extendsFunctionTypeArgs(inType::DAE.Type, inElementLst::List{<:DAE.Element}, inOutputElementLst::List{<:DAE.Element}, inBooltLst::List{<:Bool}) ::DAE.Type
               local outType::DAE.Type
 
               local tysrc::Absyn.Path
@@ -3687,11 +3687,11 @@
           outType
         end
 
-         #= 
+         #=
           Create a return type from a list of Element output variables.
           Depending on the length of the output variable list, different
           kinds of return types are created. =#
-        function makeElementReturnType(inElementLst::List{<:DAE.Element}) ::DAE.Type 
+        function makeElementReturnType(inElementLst::List{<:DAE.Element}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3705,12 +3705,12 @@
                    nil()  => begin
                     DAE.T_NORETCALL()
                   end
-                  
+
                   element <|  nil()  => begin
                       ty = makeElementReturnTypeSingle(element)
                     ty
                   end
-                  
+
                   elements  => begin
                       types = nil
                       names = nil
@@ -3731,7 +3731,7 @@
         end
 
          #= Create the return type from an Element for a single return value. =#
-        function makeElementReturnTypeSingle(inElement::DAE.Element) ::DAE.Type 
+        function makeElementReturnTypeSingle(inElement::DAE.Element) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3747,7 +3747,7 @@
 
          #= Creates an enumeration type from a name and an enumeration type containing
           the literal variables. =#
-        function makeEnumerationType(inPath::Absyn.Path, inType::DAE.Type) ::DAE.Type 
+        function makeEnumerationType(inPath::Absyn.Path, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3764,11 +3764,11 @@
                       attrs = makeEnumerationType1(p, attrs, attr_names, 1)
                     DAE.T_ENUMERATION(NONE(), p, names, vars, attrs)
                   end
-                  
+
                   (_, DAE.T_ARRAY(ty = ty))  => begin
                     makeEnumerationType(inPath, ty)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Types.makeEnumerationType failed on " + printTypeStr(inType))
@@ -3781,7 +3781,7 @@
 
          #= Helper function to makeEnumerationType. Updates a list of enumeration
           literals with the correct index and type. =#
-        function makeEnumerationType1(inPath::Absyn.Path, inVarLst::List{<:DAE.Var}, inNames::List{<:String}, inIdx::ModelicaInteger) ::List{DAE.Var} 
+        function makeEnumerationType1(inPath::Absyn.Path, inVarLst::List{<:DAE.Var}, inNames::List{<:String}, inIdx::ModelicaInteger) ::List{DAE.Var}
               local outVarLst::List{DAE.Var}
 
               outVarLst = begin
@@ -3803,7 +3803,7 @@
                       var = DAE.TYPES_VAR(name, attributes, t, binding, cnstForRange)
                     _cons(var, vars)
                   end
-                  
+
                   (_,  nil(), _, _)  => begin
                     nil
                   end
@@ -3813,7 +3813,7 @@
         end
 
          #= Prints a function argument to the Print buffer. =#
-        function printFarg(inFuncArg::DAE.FuncArg)  
+        function printFarg(inFuncArg::DAE.FuncArg)
               _ = begin
                   local n::String
                   local ty::DAE.Type
@@ -3829,7 +3829,7 @@
         end
 
          #= Prints a function argument to a string =#
-        function printFargStr(inFuncArg::DAE.FuncArg) ::String 
+        function printFargStr(inFuncArg::DAE.FuncArg) ::String
               local outString::String
 
               outString = begin
@@ -3857,7 +3857,7 @@
 
          #= author: LS
           Retrieve all the input variables from a list of variables. =#
-        function getInputVars(vl::List{<:DAE.Var}) ::List{DAE.Var} 
+        function getInputVars(vl::List{<:DAE.Var}) ::List{DAE.Var}
               local vl_1::List{DAE.Var}
 
               vl_1 = ListUtil.select(vl, isInputVar)
@@ -3865,7 +3865,7 @@
         end
 
          #= Retrieve all output variables from a list of variables. =#
-        function getOutputVars(vl::List{<:DAE.Var}) ::List{DAE.Var} 
+        function getOutputVars(vl::List{<:DAE.Var}) ::List{DAE.Var}
               local vl_1::List{DAE.Var}
 
               vl_1 = ListUtil.select(vl, isOutputVar)
@@ -3874,7 +3874,7 @@
 
          #= Returns the value of the fixed attribute of a builtin type.
          If there is no fixed in the tyep it returns true =#
-        function getFixedVarAttributeParameterOrConstant(tp::DAE.Type) ::Bool 
+        function getFixedVarAttributeParameterOrConstant(tp::DAE.Type) ::Bool
               local fix::Bool
 
               try
@@ -3890,7 +3890,7 @@
         end
 
          #= Returns the value of the fixed attribute of a builtin type =#
-        function getFixedVarAttribute(tp::DAE.Type) ::Bool 
+        function getFixedVarAttribute(tp::DAE.Type) ::Bool
               local fixed::Bool
 
               fixed = begin
@@ -3901,54 +3901,54 @@
                   DAE.T_REAL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.VALBOUND(valBound = Values.BOOL(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_REAL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(evaluatedExp = SOME(Values.BOOL(fixed)))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_REAL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(exp = DAE.BCONST(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_REAL(varLst = _ <| vars)  => begin
                       fixed = getFixedVarAttribute(DAE.T_REAL(vars))
                     fixed
                   end
-                  
+
                   DAE.T_INTEGER(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.VALBOUND(valBound = Values.BOOL(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_INTEGER(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(evaluatedExp = SOME(Values.BOOL(fixed)))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_INTEGER(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(exp = DAE.BCONST(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_INTEGER(varLst = _ <| vars)  => begin
                       fixed = getFixedVarAttribute(DAE.T_INTEGER(vars))
                     fixed
                   end
-                  
+
                   DAE.T_BOOL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.VALBOUND(valBound = Values.BOOL(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_BOOL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(evaluatedExp = SOME(Values.BOOL(fixed)))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_BOOL(varLst = DAE.TYPES_VAR(name = "fixed", binding = DAE.EQBOUND(exp = DAE.BCONST(fixed))) <| _)  => begin
                     fixed
                   end
-                  
+
                   DAE.T_BOOL(varLst = _ <| vars)  => begin
                       fixed = getFixedVarAttribute(DAE.T_BOOL(vars))
                     fixed
                   end
-                  
+
                   DAE.T_ARRAY(ty = ty)  => begin
                       result = getFixedVarAttribute(ty)
                     result
@@ -3960,7 +3960,7 @@
 
          #= Returns the list of variables in a connector, or fails if the type is not a
           connector. =#
-        function getConnectorVars(inType::DAE.Type) ::List{DAE.Var} 
+        function getConnectorVars(inType::DAE.Type) ::List{DAE.Var}
               local outVars::List{DAE.Var}
 
               outVars = begin
@@ -3975,7 +3975,7 @@
         end
 
          #= Succeds if variable is an input variable. =#
-        function isInputVar(inVar::DAE.Var) ::Bool 
+        function isInputVar(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -3990,7 +3990,7 @@
         end
 
          #= Succeds if variable is an output variable. =#
-        function isOutputVar(inVar::DAE.Var) ::Bool 
+        function isOutputVar(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -4006,7 +4006,7 @@
 
          #= Returns true if the Attributes of a variable indicates
           that the variable is input. =#
-        function isInputAttr(inAttributes::DAE.Attributes) ::Bool 
+        function isInputAttr(inAttributes::DAE.Attributes) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -4014,7 +4014,7 @@
                   DAE.ATTR(direction = Absyn.INPUT(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4025,7 +4025,7 @@
 
          #= Returns true if the Attributes of a variable indicates
           that the variable is output. =#
-        function isOutputAttr(inAttributes::DAE.Attributes) ::Bool 
+        function isOutputAttr(inAttributes::DAE.Attributes) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -4033,7 +4033,7 @@
                   DAE.ATTR(direction = Absyn.OUTPUT(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4044,7 +4044,7 @@
 
          #= Returns true if the Attributes of a variable indicates that the variable
           is bidirectional, i.e. neither input nor output. =#
-        function isBidirAttr(inAttributes::DAE.Attributes) ::Bool 
+        function isBidirAttr(inAttributes::DAE.Attributes) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -4052,7 +4052,7 @@
                   DAE.ATTR(direction = Absyn.BIDIR(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4061,7 +4061,7 @@
           outBoolean
         end
 
-        function isPublicAttr(inAttributes::DAE.Attributes) ::Bool 
+        function isPublicAttr(inAttributes::DAE.Attributes) ::Bool
               local outIsPublic::Bool
 
               outIsPublic = begin
@@ -4069,7 +4069,7 @@
                   DAE.ATTR(visibility = SCode.PUBLIC(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4079,7 +4079,7 @@
         end
 
          #= true if variable is a public variable. =#
-        function isPublicVar(inVar::DAE.Var) ::Bool 
+        function isPublicVar(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -4094,7 +4094,7 @@
         end
 
          #= true if variable is a protected variable. =#
-        function isProtectedVar(inVar::DAE.Var) ::Bool 
+        function isProtectedVar(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -4108,7 +4108,7 @@
           b
         end
 
-        function isModifiableTypesVar(inVar::DAE.Var) ::Bool 
+        function isModifiableTypesVar(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -4118,17 +4118,17 @@
                       @match false = isPublicAttr(attrs)
                     false
                   end
-                  
+
                   DAE.TYPES_VAR(attributes = attrs, binding = DAE.UNBOUND(__))  => begin
                       @match true = isConstAttr(attrs)
                     true
                   end
-                  
+
                   DAE.TYPES_VAR(attributes = attrs)  => begin
                       @match true = isConstAttr(attrs)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -4137,7 +4137,7 @@
           b
         end
 
-        function getBindingExp(inVar::DAE.Var, inPath::Absyn.Path) ::DAE.Exp 
+        function getBindingExp(inVar::DAE.Var, inPath::Absyn.Path) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -4148,7 +4148,7 @@
                   (DAE.TYPES_VAR(binding = DAE.EQBOUND(exp = exp)), _)  => begin
                     exp
                   end
-                  
+
                   (DAE.TYPES_VAR(name = name, binding = DAE.UNBOUND(__)), _)  => begin
                       str = "Record '" + AbsynUtil.pathString(inPath) + "' member '" + name + "' has no default value and is not modifiable by a constructor function.\\n"
                       Error.addCompilerWarning(str)
@@ -4159,7 +4159,7 @@
           outExp
         end
 
-        function isConstAttr(inAttributes::DAE.Attributes) ::Bool 
+        function isConstAttr(inAttributes::DAE.Attributes) ::Bool
               local outIsPublic::Bool
 
               outIsPublic = begin
@@ -4167,7 +4167,7 @@
                   DAE.ATTR(variability = SCode.CONST(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4177,7 +4177,7 @@
         end
 
          #= Makes a function argument list from a list of variables. =#
-        function makeFargsList(vars::List{<:DAE.Var}) ::List{DAE.FuncArg} 
+        function makeFargsList(vars::List{<:DAE.Var}) ::List{DAE.FuncArg}
               local fargs::List{DAE.FuncArg}
 
               fargs = ListUtil.map(vars, makeFarg)
@@ -4185,7 +4185,7 @@
         end
 
          #= Makes a function argument list from a variable. =#
-        function makeFarg(variable::DAE.Var) ::DAE.FuncArg 
+        function makeFarg(variable::DAE.Var) ::DAE.FuncArg
               local farg::DAE.FuncArg
 
               farg = begin
@@ -4212,7 +4212,7 @@
         end
 
          #= Makes a function argument list from a variable. =#
-        function makeElementFarg(inElement::DAE.Element, inFarg::DAE.FuncArg) ::DAE.FuncArg 
+        function makeElementFarg(inElement::DAE.Element, inFarg::DAE.FuncArg) ::DAE.FuncArg
               local farg::DAE.FuncArg
 
               farg = begin
@@ -4237,7 +4237,7 @@
           Create a return type from a list of output variables.
           Depending on the length of the output variable list, different
           kinds of return types are created. =#
-        function makeReturnType(inVarLst::List{<:DAE.Var}) ::DAE.Type 
+        function makeReturnType(inVarLst::List{<:DAE.Var}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -4249,12 +4249,12 @@
                    nil()  => begin
                     DAE.T_NORETCALL()
                   end
-                  
+
                   var <|  nil()  => begin
                       ty = makeReturnTypeSingle(var)
                     ty
                   end
-                  
+
                   vl  => begin
                     DAE.T_TUPLE(list(makeReturnTypeSingle(v) for v in vl), SOME(list(varName(v) for v in vl)))
                   end
@@ -4265,7 +4265,7 @@
 
          #= author: LS
           Create the return type for a single return value. =#
-        function makeReturnTypeSingle(inVar::DAE.Var) ::DAE.Type 
+        function makeReturnTypeSingle(inVar::DAE.Var) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -4281,12 +4281,12 @@
 
          #= author: LS
           Succeds if a variable is a parameter. =#
-        function isParameterVar(inVar::DAE.Var)  
+        function isParameterVar(inVar::DAE.Var)
               @match DAE.TYPES_VAR(attributes = DAE.ATTR(variability = SCode.PARAM(), visibility = SCode.PUBLIC())) = inVar
         end
 
          #= Returns true of c is C_CONST. =#
-        function isConstant(c::DAE.Const) ::Bool 
+        function isConstant(c::DAE.Const) ::Bool
               local b::Bool
 
               b = begin
@@ -4294,7 +4294,7 @@
                   DAE.C_CONST(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4304,7 +4304,7 @@
         end
 
          #= Returns true if c is C_PARAM. =#
-        function isParameter(c::DAE.Const) ::Bool 
+        function isParameter(c::DAE.Const) ::Bool
               local b::Bool
 
               b = begin
@@ -4312,7 +4312,7 @@
                   DAE.C_PARAM(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4322,7 +4322,7 @@
         end
 
          #= returns true if Const is PARAM or CONST =#
-        function isParameterOrConstant(c::DAE.Const) ::Bool 
+        function isParameterOrConstant(c::DAE.Const) ::Bool
               local b::Bool
 
               b = begin
@@ -4330,11 +4330,11 @@
                   DAE.C_CONST(__)  => begin
                     true
                   end
-                  
+
                   DAE.C_PARAM(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4343,7 +4343,7 @@
           b
         end
 
-        function isVar(inConst::DAE.Const) ::Bool 
+        function isVar(inConst::DAE.Const) ::Bool
               local outIsVar::Bool
 
               outIsVar = begin
@@ -4351,7 +4351,7 @@
                   DAE.C_VAR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4361,7 +4361,7 @@
         end
 
          #= Returns true if any of the given properties contains a Real type. =#
-        function propsContainReal(inProperties::List{<:DAE.Properties}) ::Bool 
+        function propsContainReal(inProperties::List{<:DAE.Properties}) ::Bool
               local outHasReal::Bool = false
 
               for prop in inProperties
@@ -4374,7 +4374,7 @@
         end
 
          #= Returns true if a builtin type, or array-type is Real. =#
-        function containReal(inTypes::List{<:DAE.Type}) ::Bool 
+        function containReal(inTypes::List{<:DAE.Type}) ::Bool
               local outHasReal::Bool
 
               for ty in inTypes
@@ -4388,7 +4388,7 @@
         end
 
          #= Returns the element type of a Type and the dimensions of the type. =#
-        function flattenArrayType(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimensions} 
+        function flattenArrayType(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimensions}
               local outDimensions::DAE.Dimensions
               local outType::DAE.Type
 
@@ -4404,15 +4404,15 @@
                       dims = listAppend(inType.dims, dims)
                     (ty, dims)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
                     (inType, nil)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     flattenArrayType(inType.complexType)
                   end
-                  
+
                   _  => begin
                       (inType, nil)
                   end
@@ -4428,7 +4428,7 @@
         end
 
          #= Return the type name of a Type. =#
-        function getTypeName(inType::DAE.Type) ::String 
+        function getTypeName(inType::DAE.Type) ::String
               local outString::String
 
               outString = begin
@@ -4444,33 +4444,33 @@
                   DAE.T_INTEGER(__)  => begin
                     "Integer"
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     "Real"
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     "String"
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     "Boolean"
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     "Clock"
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = st)  => begin
                       n = AbsynUtil.pathString(ClassInf.getStateName(st))
                     n
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = st)  => begin
                       n = AbsynUtil.pathString(ClassInf.getStateName(st))
                     n
                   end
-                  
+
                   arrayty && DAE.T_ARRAY(__)  => begin
                       (ty, dims) = flattenArrayType(arrayty)
                       dimstr = ExpressionDump.dimensionsString(dims)
@@ -4478,12 +4478,12 @@
                       str = stringAppendList(list(tystr, "[", dimstr, "]"))
                     str
                   end
-                  
+
                   DAE.T_METALIST(ty = ty)  => begin
                       n = getTypeName(ty)
                     n
                   end
-                  
+
                   _  => begin
                       "Not nameable type or no type"
                   end
@@ -4498,7 +4498,7 @@
 
          #= author: LS
           If PROP_TUPLE, returns true if all of the flags are constant. =#
-        function propAllConst(inProperties::DAE.Properties) ::DAE.Const 
+        function propAllConst(inProperties::DAE.Properties) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -4511,12 +4511,12 @@
                   DAE.PROP(constFlag = c)  => begin
                     c
                   end
-                  
+
                   DAE.PROP_TUPLE(tupleConst = constant_)  => begin
                       res = propTupleAllConst(constant_)
                     res
                   end
-                  
+
                   prop  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- prop_all_const failed: ")
@@ -4531,7 +4531,7 @@
 
          #= author: LS
           If PROP_TUPLE, returns true if any of the flags are true =#
-        function propAnyConst(inProperties::DAE.Properties) ::DAE.Const 
+        function propAnyConst(inProperties::DAE.Properties) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -4544,12 +4544,12 @@
                   DAE.PROP(constFlag = constant_)  => begin
                     constant_
                   end
-                  
+
                   DAE.PROP_TUPLE(tupleConst = tconstant_)  => begin
                       res = propTupleAnyConst(tconstant_)
                     res
                   end
-                  
+
                   prop  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- prop_any_const failed: ")
@@ -4564,52 +4564,52 @@
 
          #= author: LS
           Helper function to prop_any_const. =#
-        function propTupleAnyConst(inTupleConst::DAE.TupleConst) ::DAE.Const 
+        function propTupleAnyConst(inTupleConst::DAE.TupleConst) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
                   local c::DAE.Const
                   local res::DAE.Const
                   local first::DAE.TupleConst
-                  local const::DAE.TupleConst
+                  local constType::DAE.TupleConst
                   local rest::List{DAE.TupleConst}
                   local str::String
                 @matchcontinue inTupleConst begin
-                  DAE.SINGLE_CONST(const = c)  => begin
+                  DAE.SINGLE_CONST(constType = c)  => begin
                     c
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| _)  => begin
                       @match DAE.C_CONST() = propTupleAnyConst(first)
                     DAE.C_CONST()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <|  nil())  => begin
                       @match DAE.C_PARAM() = propTupleAnyConst(first)
                     DAE.C_PARAM()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <|  nil())  => begin
                       @match DAE.C_VAR() = propTupleAnyConst(first)
                     DAE.C_VAR()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| rest)  => begin
                       @match DAE.C_PARAM() = propTupleAnyConst(first)
                       res = propTupleAnyConst(DAE.TUPLE_CONST(rest))
                     res
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| rest)  => begin
                       @match DAE.C_VAR() = propTupleAnyConst(first)
                       res = propTupleAnyConst(DAE.TUPLE_CONST(rest))
                     res
                   end
-                  
-                  const  => begin
+
+                  constType  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- prop_tuple_any_const failed: ")
-                      str = printTupleConstStr(const)
+                      str = printTupleConstStr(constType)
                       Debug.traceln(str)
                     fail()
                   end
@@ -4620,46 +4620,46 @@
 
          #= author: LS
           Helper function to propAllConst. =#
-        function propTupleAllConst(inTupleConst::DAE.TupleConst) ::DAE.Const 
+        function propTupleAllConst(inTupleConst::DAE.TupleConst) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
                   local c::DAE.Const
                   local res::DAE.Const
                   local first::DAE.TupleConst
-                  local const::DAE.TupleConst
+                  local constType::DAE.TupleConst
                   local rest::List{DAE.TupleConst}
                   local str::String
                 @matchcontinue inTupleConst begin
-                  DAE.SINGLE_CONST(const = c)  => begin
+                  DAE.SINGLE_CONST(constType = c)  => begin
                     c
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| _)  => begin
                       @match DAE.C_PARAM() = propTupleAllConst(first)
                     DAE.C_PARAM()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| _)  => begin
                       @match DAE.C_VAR() = propTupleAllConst(first)
                     DAE.C_VAR()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <|  nil())  => begin
                       @match DAE.C_CONST() = propTupleAllConst(first)
                     DAE.C_CONST()
                   end
-                  
+
                   DAE.TUPLE_CONST(tupleConstLst = first <| rest)  => begin
                       @match DAE.C_CONST() = propTupleAllConst(first)
                       res = propTupleAllConst(DAE.TUPLE_CONST(rest))
                     res
                   end
-                  
-                  const  => begin
+
+                  constType  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- prop_tuple_all_const failed: ")
-                      str = printTupleConstStr(const)
+                      str = printTupleConstStr(constType)
                       Debug.traceln(str)
                     fail()
                   end
@@ -4670,7 +4670,7 @@
 
          #= This function will check all elements in the tuple if anyone is an array, return true.
         As for now it will not check tuple of tuples ie. no recursion. =#
-        function isPropTupleArray(p::DAE.Properties) ::Bool 
+        function isPropTupleArray(p::DAE.Properties) ::Bool
               local ob::Bool
 
               local b1::Bool
@@ -4683,7 +4683,7 @@
         end
 
          #= Checks if Properties is a tuple or not. =#
-        function isPropTuple(p::DAE.Properties) ::Bool 
+        function isPropTuple(p::DAE.Properties) ::Bool
               local b::Bool
 
               b = begin
@@ -4692,7 +4692,7 @@
                       @match DAE.T_TUPLE() = getPropType(p)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4702,7 +4702,7 @@
         end
 
          #= Return true if properties contain an array type. =#
-        function isPropArray(p::DAE.Properties) ::Bool 
+        function isPropArray(p::DAE.Properties) ::Bool
               local b::Bool
 
               local t::Type
@@ -4713,19 +4713,19 @@
         end
 
          #= Returns the first property from a tuple's properties or fails. =#
-        function propTupleFirstProp(inTupleProp::DAE.Properties) ::DAE.Properties 
+        function propTupleFirstProp(inTupleProp::DAE.Properties) ::DAE.Properties
               local outFirstProp::DAE.Properties
 
               local ty::Type
               local c::DAE.Const
 
-              @match DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(types = _cons(ty, _)), tupleConst = DAE.TUPLE_CONST(tupleConstLst = _cons(DAE.SINGLE_CONST(const = c), _))) = inTupleProp
+              @match DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(types = _cons(ty, _)), tupleConst = DAE.TUPLE_CONST(tupleConstLst = _cons(DAE.SINGLE_CONST(constType = c), _))) = inTupleProp
               outFirstProp = DAE.PROP(ty, c)
           outFirstProp
         end
 
          #= Splits a PROP_TUPLE into a list of PROPs. =#
-        function propTuplePropList(prop_tuple::DAE.Properties) ::List{DAE.Properties} 
+        function propTuplePropList(prop_tuple::DAE.Properties) ::List{DAE.Properties}
               local prop_list::List{DAE.Properties}
 
               prop_list = begin
@@ -4743,7 +4743,7 @@
         end
 
          #= Helper function to propTuplePropList =#
-        function propTuplePropList2(tl::List{<:DAE.Type}, cl::List{<:TupleConst}) ::List{DAE.Properties} 
+        function propTuplePropList2(tl::List{<:DAE.Type}, cl::List{<:TupleConst}) ::List{DAE.Properties}
               local pl::List{DAE.Properties}
 
               pl = begin
@@ -4756,7 +4756,7 @@
                   ( nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (t <| t_rest, DAE.SINGLE_CONST(c) <| c_rest)  => begin
                       p_rest = propTuplePropList2(t_rest, c_rest)
                     _cons(DAE.PROP(t, c), p_rest)
@@ -4768,7 +4768,7 @@
 
          #= author: adrpo
           Return the const from Properties (no tuples!). =#
-        function getPropConst(inProperties::DAE.Properties) ::DAE.Const 
+        function getPropConst(inProperties::DAE.Properties) ::DAE.Const
               local outConst::DAE.Const
 
               @match DAE.PROP(constFlag = outConst) = inProperties
@@ -4777,7 +4777,7 @@
 
          #= author: LS
           Return the Type from Properties. =#
-        function getPropType(inProperties::DAE.Properties) ::DAE.Type 
+        function getPropType(inProperties::DAE.Properties) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -4785,7 +4785,7 @@
                   DAE.PROP(__)  => begin
                     inProperties.type_
                   end
-                  
+
                   DAE.PROP_TUPLE(__)  => begin
                     inProperties.type_
                   end
@@ -4795,7 +4795,7 @@
         end
 
          #= Set the Type from Properties. =#
-        function setPropType(inProperties::DAE.Properties, ty::DAE.Type) ::DAE.Properties 
+        function setPropType(inProperties::DAE.Properties, ty::DAE.Type) ::DAE.Properties
               local outProperties::DAE.Properties
 
               outProperties = begin
@@ -4803,7 +4803,7 @@
                   DAE.PROP(__)  => begin
                     DAE.PROP(ty, inProperties.constFlag)
                   end
-                  
+
                   DAE.PROP_TUPLE(__)  => begin
                     DAE.PROP_TUPLE(ty, inProperties.tupleConst)
                   end
@@ -4816,7 +4816,7 @@
           creates an array, with one element for each record in TType!
           Note: This has to be at least 4 larger than the number of records in DAE.Type,
           due to the way bootstrapping indexes records. =#
-        function createEmptyTypeMemory() ::InstTypes.TypeMemoryEntryListArray 
+        function createEmptyTypeMemory() ::InstTypes.TypeMemoryEntryListArray
               local tyMemory::InstTypes.TypeMemoryEntryListArray
 
               tyMemory = arrayCreate(30, nil)
@@ -4825,7 +4825,7 @@
 
          #= @author: adrpo
           simplifies the given type, to be used in an expression or component reference =#
-        function simplifyType(inType::DAE.Type) ::DAE.Type 
+        function simplifyType(inType::DAE.Type) ::DAE.Type
               local outExpType::DAE.Type
 
               outExpType = begin
@@ -4841,114 +4841,114 @@
                   DAE.T_FUNCTION(__)  => begin
                     DAE.T_FUNCTION_REFERENCE_VAR(inType)
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METARECORD(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METALIST(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METAARRAY(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METAOPTION(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_METATUPLE(__)  => begin
                     DAE.T_METATYPE(inType)
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     DAE.T_UNKNOWN_DEFAULT
                   end
-                  
+
                   DAE.T_ANYTYPE(__)  => begin
                     DAE.T_UNKNOWN_DEFAULT
                   end
-                  
+
                   t && DAE.T_ARRAY(__)  => begin
                       (t, dims) = flattenArrayType(t)
                       t_1 = simplifyType(t)
                     DAE.T_ARRAY(t_1, dims)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
                     inType
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                     simplifyType(t)
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     DAE.T_CLOCK_DEFAULT
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     DAE.T_NORETCALL_DEFAULT
                   end
-                  
+
                   DAE.T_TUPLE(types = tys)  => begin
                       tys = ListUtil.map(tys, simplifyType)
                     DAE.T_TUPLE(tys, inType.names)
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     inType
                   end
-                  
+
                   DAE.T_COMPLEX(CIS, varLst, ec)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       varLst = list(simplifyVar(v) for v in varLst)
                     DAE.T_COMPLEX(CIS, varLst, ec)
                   end
-                  
+
                   DAE.T_COMPLEX(CIS && ClassInf.RECORD(__), varLst, ec)  => begin
                       varLst = list(simplifyVar(v) for v in varLst)
                     DAE.T_COMPLEX(CIS, varLst, ec)
                   end
-                  
+
                   DAE.T_COMPLEX(__)  => begin
                     inType
                   end
-                  
+
                   DAE.T_METABOXED(ty = t)  => begin
                       t_1 = simplifyType(t)
                     DAE.T_METABOXED(t_1)
                   end
-                  
+
                   _  => begin
                     DAE.T_UNKNOWN_DEFAULT
                   end
-                  
+
                   _  => begin
                         str = "Types.simplifyType failed for: " + unparseType(inType)
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -4980,7 +4980,7 @@
           outExpType
         end
 
-        function simplifyVar(inVar::DAE.Var) ::DAE.Var 
+        function simplifyVar(inVar::DAE.Var) ::DAE.Var
               local outVar::DAE.Var = inVar
 
               outVar = begin
@@ -4995,7 +4995,7 @@
         end
 
          #= Does the opposite of simplifyType, as far as it's possible. =#
-        function complicateType(inType::DAE.Type) ::DAE.Type 
+        function complicateType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type = inType
 
               outType = begin
@@ -5006,32 +5006,32 @@
                       (ty, dims) = flattenArrayType(outType)
                     liftArrayListDims(ty, dims)
                   end
-                  
+
                   DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                     outType.functionType
                   end
-                  
+
                   DAE.T_METATYPE(__)  => begin
                     outType.ty
                   end
-                  
+
                   DAE.T_TUPLE(__)  => begin
                       outType.types = list(complicateType(t) for t in outType.types)
                     outType
                   end
-                  
+
                   DAE.T_COMPLEX(__)  => begin
                       if isRecord(inType) || Config.acceptMetaModelicaGrammar()
                         outType.varLst = list(complicateVar(v) for v in outType.varLst)
                       end
                     outType
                   end
-                  
+
                   DAE.T_METABOXED(__)  => begin
                       outType.ty = complicateType(outType.ty)
                     outType
                   end
-                  
+
                   _  => begin
                       outType
                   end
@@ -5040,7 +5040,7 @@
           outType
         end
 
-        function complicateVar(inVar::DAE.Var) ::DAE.Var 
+        function complicateVar(inVar::DAE.Var) ::DAE.Var
               local outVar::DAE.Var = inVar
 
               outVar = begin
@@ -5054,7 +5054,7 @@
           outVar
         end
 
-        function typeMemoryEntryEq(inType1::DAE.Type, inType2::Tuple{<:DAE.Type, DAE.Type}) ::Bool 
+        function typeMemoryEntryEq(inType1::DAE.Type, inType2::Tuple{<:DAE.Type, DAE.Type}) ::Bool
               local outEq::Bool
 
               local ty2::DAE.Type
@@ -5066,7 +5066,7 @@
 
          #= This function checks if two types will result in the same elaborated type.
           Used by simplifyType to check if a matching elaborated type already exists. =#
-        function typesElabEquivalent(inType1::DAE.Type, inType2::DAE.Type) ::Bool 
+        function typesElabEquivalent(inType1::DAE.Type, inType2::DAE.Type) ::Bool
               local isEqual::Bool
 
               try
@@ -5079,7 +5079,7 @@
 
          #= Helper function to typesElabEquivalent. Checks if two TType will result in
           the same elaborated type. =#
-        function ttypesElabEquivalent(inType1::DAE.Type, inType2::DAE.Type) ::Bool 
+        function ttypesElabEquivalent(inType1::DAE.Type, inType2::DAE.Type) ::Bool
               local isEqual::Bool
 
               isEqual = begin
@@ -5103,27 +5103,27 @@
                       @match true = ListUtil.isEqualOnTrue(vars1, vars2, varsElabEquivalent)
                     true
                   end
-                  
+
                   (DAE.T_ARRAY(dims = ad1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = ad2 <|  nil(), ty = ty2))  => begin
                       @match true = valueEq(ad1, ad2)
                       @match true = typesElabEquivalent(ty1, ty2)
                     true
                   end
-                  
+
                   (DAE.T_ENUMERATION(path = p1, names = names1), DAE.T_ENUMERATION(path = p2, names = names2))  => begin
                       @match true = AbsynUtil.pathEqual(p1, p2)
                       @match true = ListUtil.isEqualOnTrue(names1, names2, stringEqual)
                     true
                   end
-                  
+
                   (DAE.T_TUPLE(types = types1), DAE.T_TUPLE(types = types2))  => begin
                     ListUtil.isEqualOnTrue(types1, types2, typesElabEquivalent)
                   end
-                  
+
                   (DAE.T_METABOXED(ty = ty1), DAE.T_METABOXED(ty = ty2))  => begin
                     typesElabEquivalent(ty1, ty2)
                   end
-                  
+
                   _  => begin
                       valueEq(inType1, inType2)
                   end
@@ -5134,7 +5134,7 @@
 
          #= Helper function to ttypesElabEquivalent. Check if two DAE.Var will result in
           the same DAE.Var after elaboration. =#
-        function varsElabEquivalent(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool 
+        function varsElabEquivalent(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool
               local isEqual::Bool
 
               isEqual = begin
@@ -5148,7 +5148,7 @@
                       @match true = typesElabEquivalent(ty1, ty2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5161,7 +5161,7 @@
           It matches an expression with properties with another set of properties.
           If necessary, the expression is modified to match.
           The only relevant property is the type. =#
-        function matchProp(inExp::DAE.Exp, inActualType::DAE.Properties, inExpectedType::DAE.Properties, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Properties} 
+        function matchProp(inExp::DAE.Exp, inActualType::DAE.Properties, inExpectedType::DAE.Properties, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -5185,13 +5185,13 @@
                       c = constAnd(c1, c2)
                     (e_1, DAE.PROP(t_1, c))
                   end
-                  
+
                   (e, DAE.PROP_TUPLE(type_ = gt, tupleConst = tc1), DAE.PROP_TUPLE(type_ = et, tupleConst = tc2), _)  => begin
                       (e_1, t_1) = matchType(e, gt, et, printFailtrace)
                       tc = constTupleAnd(tc1, tc2)
                     (e_1, DAE.PROP_TUPLE(t_1, tc))
                   end
-                  
+
                   (e, DAE.PROP_TUPLE(type_ = gt && DAE.T_TUPLE(__), tupleConst = tc1), DAE.PROP(type_ = et && DAE.T_METATUPLE(__), constFlag = c2), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (e_1, t_1) = matchType(e, gt, et, printFailtrace)
@@ -5199,7 +5199,7 @@
                       c = constAnd(c_1, c2)
                     (e_1, DAE.PROP(t_1, c))
                   end
-                  
+
                   (e, DAE.PROP_TUPLE(type_ = gt && DAE.T_TUPLE(__), tupleConst = tc1), DAE.PROP(type_ = et && DAE.T_METABOXED(__), constFlag = c2), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (e_1, t_1) = matchType(e, gt, et, printFailtrace)
@@ -5207,7 +5207,7 @@
                       c = constAnd(c_1, c2)
                     (e_1, DAE.PROP(t_1, c))
                   end
-                  
+
                   (e, DAE.PROP(type_ = gt), DAE.PROP_TUPLE(__), _)  => begin
                       prop = propTupleFirstProp(inExpectedType)
                       (e_1, prop) = matchProp(e, inActualType, prop, printFailtrace)
@@ -5215,7 +5215,7 @@
                       e_1 = DAE.TSUB(e_1, 1, gt)
                     (e_1, prop)
                   end
-                  
+
                   (e, DAE.PROP_TUPLE(__), DAE.PROP(__), _)  => begin
                       @match (@match DAE.PROP(type_ = gt) = prop) = propTupleFirstProp(inActualType)
                       (e_1, prop) = matchProp(e, prop, inExpectedType, printFailtrace)
@@ -5223,7 +5223,7 @@
                       e_1 = DAE.TSUB(e_1, 1, gt)
                     (e_1, prop)
                   end
-                  
+
                   (e, _, _, true)  => begin
                       @match true = Flags.isSet(Flags.TYPES)
                       Debug.traceln("- Types.matchProp failed on exp: " + ExpressionDump.printExpStr(e))
@@ -5242,7 +5242,7 @@
           (outExp, outProperties)
         end
 
-        function matchTypeList(exps::List{<:DAE.Exp}, expType::DAE.Type, expectedType::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function matchTypeList(exps::List{<:DAE.Exp}, expType::DAE.Type, expectedType::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTypeLst::List{DAE.Type} = nil
               local outExp::List{DAE.Exp} = nil
 
@@ -5264,7 +5264,7 @@
 
          #= Transforms a list of expressions and types into a list of expressions
         of the expected types. =#
-        function matchTypeTuple(inExp1::List{<:DAE.Exp}, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function matchTypeTuple(inExp1::List{<:DAE.Exp}, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTypeLst::List{DAE.Type}
               local outExp::List{DAE.Exp}
 
@@ -5283,13 +5283,13 @@
                   ( nil(),  nil(),  nil(), _)  => begin
                     (nil, nil)
                   end
-                  
+
                   (e <| rest, t1 <| ts1, t2 <| ts2, _)  => begin
                       (e_1, tp) = matchType(e, t1, t2, printFailtrace)
                       (e_2, res) = matchTypeTuple(rest, ts1, ts2, printFailtrace)
                     (_cons(e_1, e_2), _cons(tp, res))
                   end
-                  
+
                   (_, t1 <| _, t2 <| _, true)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Types.matchTypeTuple failed:" + Types.unparseType(t1) + " " + Types.unparseType(t2) + "\\n")
@@ -5300,7 +5300,7 @@
           (outExp, outTypeLst)
         end
 
-        function matchTypeTupleCall(inExp1::DAE.Exp, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type})  
+        function matchTypeTupleCall(inExp1::DAE.Exp, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type})
               _ = begin
                   local e::DAE.Exp
                   local t1::Type
@@ -5311,13 +5311,13 @@
                   (_, _,  nil())  => begin
                     ()
                   end
-                  
+
                   (e, t1 <| ts1, t2 <| ts2)  => begin
                       @match true = subtype(t1, t2)
                       matchTypeTupleCall(e, ts1, ts2)
                     ()
                   end
-                  
+
                   (_, _ <| _, _ <| _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- matchTypeTupleCall failed\\n")
@@ -5336,7 +5336,7 @@
           a expected type.
           For instance and argument of type Integer{:} can be vectorized to an
           argument type Real, using type coersion and vectorization of one dimension. =#
-        function vectorizableType(inExp::DAE.Exp, inExpType::DAE.Type, inExpectedType::DAE.Type, fnPath::Option{<:Absyn.Path}) ::Tuple{DAE.Exp, DAE.Type, DAE.Dimensions, InstTypes.PolymorphicBindings} 
+        function vectorizableType(inExp::DAE.Exp, inExpType::DAE.Type, inExpectedType::DAE.Type, fnPath::Option{<:Absyn.Path}) ::Tuple{DAE.Exp, DAE.Type, DAE.Dimensions, InstTypes.PolymorphicBindings}
               local outBindings::InstTypes.PolymorphicBindings
               local outArrayDimLst::DAE.Dimensions
               local outType::DAE.Type
@@ -5346,7 +5346,7 @@
           (outExp, outType, outArrayDimLst, outBindings)
         end
 
-        function vectorizableType2(inExp::DAE.Exp, inExpType::DAE.Type, inCurrentType::DAE.Type, inDims::DAE.Dimensions, inExpectedType::DAE.Type, fnPath::Option{<:Absyn.Path}) ::Tuple{DAE.Exp, DAE.Type, DAE.Dimensions, InstTypes.PolymorphicBindings} 
+        function vectorizableType2(inExp::DAE.Exp, inExpType::DAE.Type, inCurrentType::DAE.Type, inDims::DAE.Dimensions, inExpectedType::DAE.Type, fnPath::Option{<:Absyn.Path}) ::Tuple{DAE.Exp, DAE.Type, DAE.Dimensions, InstTypes.PolymorphicBindings}
               local outBindings::InstTypes.PolymorphicBindings
               local outDims::DAE.Dimensions
               local outType::DAE.Type
@@ -5369,7 +5369,7 @@
 
          #= transforms T_ARRAY(a::b::c) to T_ARRAY(a, T_ARRAY(b, T_ARRAY(c)))
          Always call it with  =#
-        function unflattenArrayType(inTy::DAE.Type) ::DAE.Type 
+        function unflattenArrayType(inTy::DAE.Type) ::DAE.Type
               local outTy::DAE.Type
 
               outTy = unflattenArrayType2(inTy, false)
@@ -5378,7 +5378,7 @@
 
          #= transforms T_ARRAY(a::b::c) to T_ARRAY(a, T_ARRAY(b, T_ARRAY(c)))
          Always call it with  =#
-        function unflattenArrayType2(inTy::DAE.Type, last::Bool) ::DAE.Type 
+        function unflattenArrayType2(inTy::DAE.Type, last::Bool) ::DAE.Type
               local outTy::DAE.Type
 
               outTy = begin
@@ -5396,22 +5396,22 @@
                       ty = unflattenArrayType(ty)
                     DAE.T_SUBTYPE_BASIC(ci, vl, ty, eqc)
                   end
-                  
+
                   (DAE.T_ARRAY(t, dim <|  nil()), _)  => begin
                       t = unflattenArrayType(t)
                     DAE.T_ARRAY(t, list(dim))
                   end
-                  
+
                   (DAE.T_ARRAY(t,  nil()), true)  => begin
                     unflattenArrayType(t)
                   end
-                  
+
                   (DAE.T_ARRAY(t, dim <| dims), _)  => begin
                       ty = unflattenArrayType2(DAE.T_ARRAY(t, dims), true)
                       ty = DAE.T_ARRAY(ty, list(dim))
                     ty
                   end
-                  
+
                   (ty, false)  => begin
                     ty
                   end
@@ -5430,7 +5430,7 @@
           the type specified in the third argument.  The current type of the
           expression is given in the second argument.
           If no type conversion is possible, this function fails. =#
-        function typeConvert(inExp1::DAE.Exp, actual::DAE.Type, expected::DAE.Type, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type} 
+        function typeConvert(inExp1::DAE.Exp, actual::DAE.Type, expected::DAE.Type, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -5460,7 +5460,7 @@
                   local begin_1::DAE.Exp
                   local step_1::DAE.Exp
                   local stop_1::DAE.Exp
-                  local begin::DAE.Exp
+                  local begin_0::DAE.Exp
                   local step::DAE.Exp
                   local stop::DAE.Exp
                   local e_1::DAE.Exp
@@ -5500,7 +5500,7 @@
                       @match true = subtype(ty1, ty2)
                     (e, ty2)
                   end
-                  
+
                   (e, DAE.T_TUPLE(types = ty1 <| _), ty2, _)  => begin
                       @match false = Config.acceptMetaModelicaGrammar()
                       @match false = isTuple(ty2)
@@ -5509,21 +5509,21 @@
                       ty = ty2
                     (e, ty)
                   end
-                  
+
                   (e, DAE.T_ARRAY(dims = _ <| _ <| _), ty2, _)  => begin
                       ty1 = unflattenArrayType(actual)
                       ty2 = unflattenArrayType(ty2)
                       (e, ty) = typeConvert(e, ty1, ty2, printFailtrace)
                     (e, ty)
                   end
-                  
+
                   (e, ty1, DAE.T_ARRAY(dims = _ <| _ <| _), _)  => begin
                       ty1 = unflattenArrayType(ty1)
                       ty2 = unflattenArrayType(expected)
                       (e, ty) = typeConvert(e, ty1, ty2, printFailtrace)
                     (e, ty)
                   end
-                  
+
                   (DAE.ARRAY(array = elist), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), ty0 && DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
                       elist_1 = typeConvertArray(elist, ty1, ty2, printFailtrace)
@@ -5532,7 +5532,7 @@
                       sc = boolNot(a)
                     (DAE.ARRAY(at, sc, elist_1), DAE.T_ARRAY(ty2, list(dim1)))
                   end
-                  
+
                   (DAE.ARRAY(array = elist), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = ty2), _)  => begin
                       @match true = Expression.dimensionKnown(dim1)
                       elist_1 = typeConvertArray(elist, ty1, ty2, printFailtrace)
@@ -5545,24 +5545,24 @@
                       ty2 = liftArrayListDims(ty2, dims)
                     (DAE.ARRAY(DAE.T_ARRAY(ety1, dims), sc, elist_1), ty2)
                   end
-                  
-                  (DAE.RANGE(start = begin, step = SOME(step), stop = stop), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
+
+                  (DAE.RANGE(start = begin_0, step = SOME(step), stop = stop), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
-                      (begin_1, _) = typeConvert(begin, ty1, ty2, printFailtrace)
+                      (begin_1, _) = typeConvert(begin_0, ty1, ty2, printFailtrace)
                       (step_1, _) = typeConvert(step, ty1, ty2, printFailtrace)
                       (stop_1, _) = typeConvert(stop, ty1, ty2, printFailtrace)
                       at = simplifyType(ty2)
                     (DAE.RANGE(at, begin_1, SOME(step_1), stop_1), DAE.T_ARRAY(ty2, list(dim1)))
                   end
-                  
-                  (DAE.RANGE(start = begin, step = NONE(), stop = stop), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
+
+                  (DAE.RANGE(start = begin_0, step = NONE(), stop = stop), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
-                      (begin_1, _) = typeConvert(begin, ty1, ty2, printFailtrace)
+                      (begin_1, _) = typeConvert(begin_0, ty1, ty2, printFailtrace)
                       (stop_1, _) = typeConvert(stop, ty1, ty2, printFailtrace)
                       at = simplifyType(ty2)
                     (DAE.RANGE(at, begin_1, NONE(), stop_1), DAE.T_ARRAY(ty2, list(dim1)))
                   end
-                  
+
                   (DAE.MATRIX(integer = nmax, matrix = ell), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = DAE.T_ARRAY(dims = dim11 <|  nil(), ty = t1)), ty0 && DAE.T_ARRAY(dims = dim2 <|  nil(), ty = DAE.T_ARRAY(dims = dim22 <|  nil(), ty = t2)), _)  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
                       @match true = Expression.dimensionsKnownAndEqual(dim11, dim22)
@@ -5570,7 +5570,7 @@
                       at = simplifyType(ty0)
                     (DAE.MATRIX(at, nmax, ell_1), DAE.T_ARRAY(DAE.T_ARRAY(t2, list(dim11)), list(dim1)))
                   end
-                  
+
                   (DAE.MATRIX(integer = nmax, matrix = ell), DAE.T_ARRAY(dims = dim1 <|  nil(), ty = DAE.T_ARRAY(dims = dim11 <|  nil(), ty = t1)), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = DAE.T_ARRAY(dims = dim22 <|  nil(), ty = t2)), _) where (! Expression.dimensionKnown(dim2))  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim11, dim22)
                       ell_1 = typeConvertMatrix(ell, t1, t2, printFailtrace)
@@ -5578,7 +5578,7 @@
                       at = simplifyType(ty)
                     (DAE.MATRIX(at, nmax, ell_1), ty)
                   end
-                  
+
                   (e, DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
                       @match true = Expression.dimensionsKnownAndEqual(dim1, dim2)
                       (e_1, t_1) = typeConvert(e, ty1, ty2, printFailtrace)
@@ -5586,19 +5586,19 @@
                       t_2 = DAE.T_ARRAY(t_1, list(dim2))
                     (e_1, t_2)
                   end
-                  
+
                   (e, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = ty1), DAE.T_ARRAY(dims = _ <|  nil(), ty = ty2), _)  => begin
                       (e_1, t_1) = typeConvert(e, ty1, ty2, printFailtrace)
                       e_1 = liftExpType(e_1, DAE.DIM_UNKNOWN())
                     (e_1, DAE.T_ARRAY(t_1, list(DAE.DIM_UNKNOWN())))
                   end
-                  
+
                   (e, DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil(), ty = ty2), _)  => begin
                       (e_1, t_1) = typeConvert(e, ty1, ty2, printFailtrace)
                       e_1 = liftExpType(e_1, dim1)
                     (e_1, DAE.T_ARRAY(t_1, list(dim1)))
                   end
-                  
+
                   (e, DAE.T_ARRAY(dims = dim1 <|  nil(), ty = ty1), DAE.T_ARRAY(dims = dim2 <|  nil(), ty = ty2), _)  => begin
                       @match false = Expression.dimensionKnown(dim1)
                       @match false = Expression.dimensionKnown(dim2)
@@ -5606,12 +5606,12 @@
                       e_1 = liftExpType(e_1, DAE.DIM_UNKNOWN())
                     (e_1, DAE.T_ARRAY(t_1, list(DAE.DIM_UNKNOWN())))
                   end
-                  
+
                   (DAE.TUPLE(PR = elist), DAE.T_TUPLE(types = tys1), DAE.T_TUPLE(types = tys2), _)  => begin
                       (elist_1, tys_1) = typeConvertList(elist, tys1, tys2, printFailtrace)
                     (DAE.TUPLE(elist_1), DAE.T_TUPLE(tys_1, expected.names))
                   end
-                  
+
                   (exp && DAE.ICONST(oi), DAE.T_INTEGER(__), t2 && DAE.T_ENUMERATION(path = tp, names = l), _)  => begin
                       @match true = Config.intEnumConversion()
                       @match true = typeConvertIntToEnumCheck(exp, t2)
@@ -5619,21 +5619,21 @@
                       tp = AbsynUtil.joinPaths(tp, Absyn.IDENT(name))
                     (DAE.ENUM_LITERAL(tp, oi), expected)
                   end
-                  
+
                   (e, DAE.T_INTEGER(__), DAE.T_REAL(__), _)  => begin
                     (DAE.CAST(DAE.T_REAL_DEFAULT, e), expected)
                   end
-                  
+
                   (e, DAE.T_SUBTYPE_BASIC(complexType = t1), t2, _)  => begin
                       (e_1, t_1) = typeConvert(e, t1, t2, printFailtrace)
                     (e_1, t_1)
                   end
-                  
+
                   (e, t1, DAE.T_SUBTYPE_BASIC(complexType = t2), _)  => begin
                       (e_1, t_1) = typeConvert(e, t1, t2, printFailtrace)
                     (e_1, t_1)
                   end
-                  
+
                   (e, DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(p1), varLst = els1), t2 && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(p2), varLst = els2), _)  => begin
                       @match false = AbsynUtil.pathEqual(p1, p2) #= We need to add a cast from one record to another =#
                       @match true = Flags.isSet(Flags.ALLOW_RECORD_TOO_MANY_FIELDS) || listLength(els1) == listLength(els2)
@@ -5641,22 +5641,22 @@
                       e = DAE.CAST(t2, e)
                     (e, t2)
                   end
-                  
+
                   (DAE.META_OPTION(SOME(e)), DAE.T_METAOPTION(ty = t1), DAE.T_METAOPTION(t2), _) where (Config.acceptMetaModelicaGrammar())  => begin
                       (e_1, t_1) = matchType(e, t1, t2, printFailtrace)
                     (DAE.META_OPTION(SOME(e_1)), DAE.T_METAOPTION(t_1))
                   end
-                  
+
                   (DAE.META_OPTION(NONE()), _, DAE.T_METAOPTION(t2), _) where (Config.acceptMetaModelicaGrammar())  => begin
                     (DAE.META_OPTION(NONE()), DAE.T_METAOPTION(t2))
                   end
-                  
+
                   (DAE.TUPLE(elist), DAE.T_TUPLE(types = tys1), DAE.T_METATUPLE(tys2), _) where (Config.acceptMetaModelicaGrammar())  => begin
                       tys2 = ListUtil.map(tys2, boxIfUnboxedType)
                       (elist_1, tys_1) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                     (DAE.META_TUPLE(elist_1), DAE.T_METATUPLE(tys_1))
                   end
-                  
+
                   (DAE.MATCHEXPRESSION(matchTy, inputs, aliases, localDecls, cases, et), _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       elist = Patternm.resultExps(cases)
@@ -5665,20 +5665,20 @@
                       et = simplifyType(expected)
                     (DAE.MATCHEXPRESSION(matchTy, inputs, aliases, localDecls, cases, et), expected)
                   end
-                  
+
                   (DAE.META_TUPLE(elist), DAE.T_METATUPLE(types = tys1), DAE.T_METATUPLE(tys2), _)  => begin
                       tys2 = ListUtil.map(tys2, boxIfUnboxedType)
                       (elist_1, tys_1) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                     (DAE.META_TUPLE(elist_1), DAE.T_METATUPLE(tys_1))
                   end
-                  
+
                   (DAE.TUPLE(elist), DAE.T_TUPLE(types = tys1), ty2 && DAE.T_METABOXED(ty = DAE.T_UNKNOWN(__)), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       tys2 = ListUtil.fill(ty2, listLength(tys1))
                       (elist_1, tys_1) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                     (DAE.META_TUPLE(elist_1), DAE.T_METATUPLE(tys_1))
                   end
-                  
+
                   (DAE.ARRAY(DAE.T_ARRAY(__), _, elist), DAE.T_ARRAY(ty = t1), DAE.T_METALIST(t2), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       t2 = boxIfUnboxedType(t2)
@@ -5687,7 +5687,7 @@
                       t2 = DAE.T_METALIST(t2)
                     (e_1, t2)
                   end
-                  
+
                   (DAE.ARRAY(DAE.T_ARRAY(__), _, elist), DAE.T_ARRAY(ty = t1), DAE.T_METABOXED(t2), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (elist_1, tys1) = matchTypeList(elist, t1, t2, printFailtrace)
@@ -5698,14 +5698,14 @@
                       t2 = DAE.T_METALIST(t2)
                     (e_1, t2)
                   end
-                  
+
                   (DAE.MATRIX(DAE.T_ARRAY(__), _, elist_big), t1, t2, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (elist, ty2) = typeConvertMatrixToList(elist_big, t1, t2, printFailtrace)
                       e_1 = DAE.LIST(elist)
                     (e_1, ty2)
                   end
-                  
+
                   (DAE.LIST(elist), DAE.T_METALIST(ty = t1), DAE.T_METALIST(t2), _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       (elist_1, tys1) = matchTypeList(elist, t1, t2, printFailtrace)
@@ -5714,42 +5714,42 @@
                       t2 = DAE.T_METALIST(t2)
                     (e_1, t2)
                   end
-                  
+
                   (e, t1 && DAE.T_INTEGER(__), DAE.T_METABOXED(ty = t2), _)  => begin
                       (e, t1) = matchType(e, t1, unboxedType(t2), printFailtrace)
                       t2 = DAE.T_METABOXED(t1)
                       e = Expression.boxExp(e)
                     (e, t2)
                   end
-                  
+
                   (e, t1 && DAE.T_BOOL(__), DAE.T_METABOXED(ty = t2), _)  => begin
                       (e, t1) = matchType(e, t1, unboxedType(t2), printFailtrace)
                       t2 = DAE.T_METABOXED(t1)
                       e = Expression.boxExp(e)
                     (e, t2)
                   end
-                  
+
                   (e, t1 && DAE.T_REAL(__), DAE.T_METABOXED(ty = t2), _)  => begin
                       (e, t1) = matchType(e, t1, unboxedType(t2), printFailtrace)
                       t2 = DAE.T_METABOXED(t1)
                       e = Expression.boxExp(e)
                     (e, t2)
                   end
-                  
+
                   (e, t1 && DAE.T_ENUMERATION(__), DAE.T_METABOXED(ty = t2), _)  => begin
                       (e, t1) = matchType(e, t1, unboxedType(t2), printFailtrace)
                       t2 = DAE.T_METABOXED(t1)
                       e = Expression.boxExp(e)
                     (e, t2)
                   end
-                  
+
                   (e, t1 && DAE.T_ARRAY(__), DAE.T_METABOXED(ty = t2), _)  => begin
                       (e, t1) = matchType(e, t1, unboxedType(t2), printFailtrace)
                       t2 = DAE.T_METABOXED(t1)
                       e = Expression.boxExp(e)
                     (e, t2)
                   end
-                  
+
                   (DAE.CALL(path = path1, expLst = elist), t1 && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path2), varLst = v), DAE.T_METABOXED(ty = t2), _)  => begin
                       @match true = subtype(t1, t2)
                       @match true = AbsynUtil.pathEqual(path1, path2)
@@ -5761,7 +5761,7 @@
                       e_1 = DAE.METARECORDCALL(path1, elist, l, -1, nil)
                     (e_1, t2)
                   end
-                  
+
                   (DAE.RECORD(path = path1, exps = elist), t1 && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path2), varLst = v), DAE.T_METABOXED(ty = t2), _)  => begin
                       @match true = subtype(t1, t2)
                       @match true = AbsynUtil.pathEqual(path1, path2)
@@ -5773,7 +5773,7 @@
                       e_1 = DAE.METARECORDCALL(path1, elist, l, -1, nil)
                     (e_1, t2)
                   end
-                  
+
                   (DAE.CREF(cref, _), t1 && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path), varLst = v), DAE.T_METABOXED(ty = t2), _)  => begin
                       @match true = subtype(t1, t2)
                       t2 = DAE.T_METABOXED(t1)
@@ -5789,47 +5789,47 @@
                       e_1 = DAE.METARECORDCALL(path, elist, l, -1, nil)
                     (e_1, t2)
                   end
-                  
+
                   (e, DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.T_METABOXED(__), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Not yet implemented: Converting record into boxed records: " + ExpressionDump.printExpStr(e) + "\\n")
                     fail()
                   end
-                  
+
                   (DAE.BOX(e), DAE.T_METABOXED(ty = t1), t2, _)  => begin
                       @match true = subtype(t1, t2)
                       (e_1, t2) = matchType(e, t1, t2, printFailtrace)
                     (e_1, t2)
                   end
-                  
+
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_INTEGER(__), _)  => begin
                       @match true = subtype(t1, t2)
                       (_, _) = matchType(e, t1, t2, printFailtrace)
                       t = simplifyType(t2)
                     (DAE.UNBOX(e, t), t2)
                   end
-                  
+
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_REAL(__), _)  => begin
                       @match true = subtype(t1, t2)
                       (_, _) = matchType(e, t1, t2, printFailtrace)
                       t = simplifyType(t2)
                     (DAE.UNBOX(e, t), t2)
                   end
-                  
+
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_BOOL(__), _)  => begin
                       @match true = subtype(t1, t2)
                       (_, _) = matchType(e, t1, t2, printFailtrace)
                       t = simplifyType(t2)
                     (DAE.UNBOX(e, t), t2)
                   end
-                  
+
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_ENUMERATION(__), _)  => begin
                       @match true = subtype(t1, t2)
                       matchType(e, t1, t2, printFailtrace)
                       t = simplifyType(t2)
                     (DAE.UNBOX(e, t), t2)
                   end
-                  
+
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), _)  => begin
                       @match true = subtype(t1, t2)
                       (e_1, _) = matchType(e, t1, t2, printFailtrace)
@@ -5838,103 +5838,13 @@
                   end
                 end
               end
-               #=  if we expect notTuple and we get Tuple do DAE.TSUB(e, 1)
-               =#
-               #=  we try subtype of the first tuple element with the other type!
-               =#
-               #=  try dims as list T_ARRAY(a::b::c)
-               =#
-               #=  try dims as list T_ARRAY(a::b::c)
-               =#
-               #=  Array expressions: expression dimension [dim1], expected dimension [dim2]
-               =#
-               #=  Array expressions: expression dimension [:], expected dimension [dim2]
-               =#
-               #= /* ARRAYS HAVE KNOWN DIMENSIONS. WHO WROTE THIS :(
-                  case (DAE.ARRAY(array = elist),
-                        (DAE.T_ARRAY(dims = {DAE.DIM_UNKNOWN()},ty = ty1),_),
-                        ty0 as (DAE.T_ARRAY(dims = {dim2},ty = ty2),p2),
-                        printFailtrace)
-                    equation
-                      true = Expression.dimensionKnown(dim2);
-                      elist_1 = typeConvertArray(elist,ty1,ty2,printFailtrace);
-                      at = simplifyType(ty0);
-                      a = isArray(ty2);
-                      sc = boolNot(a);
-                    then
-                      (DAE.ARRAY(at,sc,elist_1),(DAE.T_ARRAY(DAE.DIM_UNKNOWN(),ty2),p2));
-                      */ =#
-               #=  Array expressions: expression dimension [dim1], expected dimension [:]
-               =#
-               #= TODO: Verify correctness of return value.
-               =#
-               #=  Full range expressions, e.g. 1:2:10
-               =#
-               #=  Range expressions, e.g. 1:10
-               =#
-               #=  Matrix expressions: expression dimension [dim1,dim11], expected dimension [dim2,dim22]
-               =#
-               #=  Matrix expressions: expression dimension [dim1,dim11] expected dimension [:,dim22]
-               =#
-               #=  Arbitrary expressions, expression dimension [dim1], expected dimension [dim2]
-               =#
-               #=  Arbitrary expressions,  expression dimension [:],  expected dimension [dim2]
-               =#
-               #=  Arbitrary expression, expression dimension [dim1] expected dimension [:]
-               =#
-               #=  Arbitrary expressions, expression dimension [:] expected dimension [:]
-               =#
-               #=  Tuple
-               =#
-               #=  Implicit conversion from Integer literal to an enumeration
-               =#
-               #=  This is not a valid Modelica conversion, but was widely used in the past,
-               =#
-               #=  by, for instance, Modelica.Electrical.Digital.
-               =#
-               #=  Enable with --intEnumConversion.
-               =#
-               #=  It would be good to have the source location of exp here, so that we could pass it to typeConvertIntToEnumCheck.
-               =#
-               #=  Will warn or report error depending on whether oi is out of range.
-               =#
-               #=  select from enum list:
-               =#
-               #=  Implicit conversion from Integer to Real
-               =#
-               #=  Complex type inheriting primitive type
-               =#
-               #=  Complex types (records) that need a cast
-               =#
-               #=  MetaModelica Option
-               =#
-               #=  MetaModelica Tuple
-               =#
-               #=  The automatic type conversion will convert any array that can be
-               =#
-               #=  const-eval'ed to an DAE.ARRAY or DAE.MATRIX into a list of the same
-               =#
-               #=  type. The reason is that the syntax for the array and list constructor
-               =#
-               #=  is the same. However, the compiler can't distinguish between the two
-               =#
-               #=  cases below because a is expanded earlier in the compilation process:
-               =#
-               #=    Integer[3] a;
-               =#
-               #=    someListFunction(a);  Is expanded to the line below
-               =#
-               #=    someListFunction({a[1],a[2],a[3]});
-               =#
-               #=    / sjoelund 2009-08-13
-               =#
           (outExp, outType)
         end
 
          #= help function to typeConvert. Changes the DAE.Type stored
         in expression (which is typically a CAST) by adding a dimension to it, making it into an array
         type. =#
-        function liftExpType(ie::DAE.Exp, dim::DAE.Dimension) ::DAE.Exp 
+        function liftExpType(ie::DAE.Exp, dim::DAE.Dimension) ::DAE.Exp
               local res::DAE.Exp
 
               res = begin
@@ -5946,7 +5856,7 @@
                       ty1 = Expression.liftArrayR(ty, dim)
                     DAE.CAST(ty1, e)
                   end
-                  
+
                   (e, _)  => begin
                     e
                   end
@@ -5956,7 +5866,7 @@
         end
 
          #= Calls typeConvert on a list of expressions. =#
-        function typeConvertArray(inArray::List{<:DAE.Exp}, inActualType::DAE.Type, inExpectedType::DAE.Type, inPrintFailtrace::Bool) ::List{DAE.Exp} 
+        function typeConvertArray(inArray::List{<:DAE.Exp}, inActualType::DAE.Type, inExpectedType::DAE.Type, inPrintFailtrace::Bool) ::List{DAE.Exp}
               local outArray::List{DAE.Exp}
 
               outArray = begin
@@ -5972,7 +5882,7 @@
                       (_, _) = typeConvert(e, inActualType, inExpectedType, inPrintFailtrace)
                     nil
                   end
-                  
+
                   _  => begin
                         (expl, _) = ListUtil.map3_2(inArray, typeConvert, inActualType, inExpectedType, inPrintFailtrace)
                       expl
@@ -5982,20 +5892,20 @@
           outArray
         end
 
-         #= 
+         #=
           Helper function to type_convert. Handles matrix expressions.
          =#
-        function typeConvertMatrix(inMatrix::List{<:List{<:DAE.Exp}}, inActualType::DAE.Type, inExpectedType::DAE.Type, printFailtrace::Bool) ::List{List{DAE.Exp}} 
+        function typeConvertMatrix(inMatrix::List{<:List{<:DAE.Exp}}, inActualType::DAE.Type, inExpectedType::DAE.Type, printFailtrace::Bool) ::List{List{DAE.Exp}}
               local outMatrix::List{List{DAE.Exp}}
 
               outMatrix = ListUtil.map3(inMatrix, typeConvertArray, inActualType, inExpectedType, printFailtrace)
           outMatrix
         end
 
-         #= 
+         #=
           Helper function to type_convert.
          =#
-        function typeConvertList(inExpExpLst1::List{<:DAE.Exp}, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function typeConvertList(inExpExpLst1::List{<:DAE.Exp}, inTypeLst2::List{<:DAE.Type}, inTypeLst3::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTypeLst::List{DAE.Type}
               local outExpExpLst::List{DAE.Exp}
 
@@ -6014,7 +5924,7 @@
                   ( nil(), _, _, _)  => begin
                     (nil, nil)
                   end
-                  
+
                   (first <| rest, ty1 <| ty1rest, ty2 <| ty2rest, _)  => begin
                       (rest_1, tyrest_1) = typeConvertList(rest, ty1rest, ty2rest, printFailtrace)
                       (first_1, ty_1) = typeConvert(first, ty1, ty2, printFailtrace)
@@ -6025,7 +5935,7 @@
           (outExpExpLst, outTypeLst)
         end
 
-        function typeConvertMatrixToList(melist::List{<:List{<:DAE.Exp}}, inType::DAE.Type, outType::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, DAE.Type} 
+        function typeConvertMatrixToList(melist::List{<:List{<:DAE.Exp}}, inType::DAE.Type, outType::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, DAE.Type}
               local actualOutType::DAE.Type
               local outExp::List{DAE.Exp}
 
@@ -6040,13 +5950,13 @@
                   ( nil(), _, _, _)  => begin
                     (nil, DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (expl <| rest, DAE.T_ARRAY(ty = DAE.T_ARRAY(ty = t1)), DAE.T_METALIST(ty = DAE.T_METALIST(ty = t2)), _)  => begin
                       (e, t1) = typeConvertMatrixRowToList(expl, t1, t2, printFailtrace)
                       (expl, _) = typeConvertMatrixToList(rest, inType, outType, printFailtrace)
                     (_cons(e, expl), DAE.T_METALIST(t1))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.TYPES)
                         Debug.trace("- typeConvertMatrixToList failed\\n")
@@ -6057,7 +5967,7 @@
           (outExp, actualOutType)
         end
 
-        function typeConvertMatrixRowToList(elist::List{<:DAE.Exp}, inType::DAE.Type, outType::DAE.Type, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type} 
+        function typeConvertMatrixRowToList(elist::List{<:DAE.Exp}, inType::DAE.Type, outType::DAE.Type, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type}
               local t1::DAE.Type
               local out::DAE.Exp
 
@@ -6078,7 +5988,7 @@
           For instance, {1,{2}} becomes {1,2}.
           The function also has a flag indicating that Integer to Real
           conversion can be used. =#
-        function matchWithPromote(inProperties1::DAE.Properties, inProperties2::DAE.Properties, inBoolean3::Bool) ::DAE.Properties 
+        function matchWithPromote(inProperties1::DAE.Properties, inProperties2::DAE.Properties, inBoolean3::Bool) ::DAE.Properties
               local outProperties::DAE.Properties
 
               outProperties = begin
@@ -6098,53 +6008,53 @@
                   (DAE.PROP(DAE.T_SUBTYPE_BASIC(complexType = t1), c1), DAE.PROP(t2, c2), havereal)  => begin
                     matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                   end
-                  
+
                   (DAE.PROP(t1, c1), DAE.PROP(DAE.T_SUBTYPE_BASIC(complexType = t2), c2), havereal)  => begin
                     matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_ARRAY(dims = dim1 <|  nil(), ty = t1), constFlag = c1), DAE.PROP(type_ = DAE.T_ARRAY(dims = _ <|  nil(), ty = t2), constFlag = c2), havereal)  => begin
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                       dim = dim1
                     DAE.PROP(DAE.T_ARRAY(t, list(dim)), c)
                   end
-                  
+
                   (DAE.PROP(type_ = t1, constFlag = c1), DAE.PROP(type_ = DAE.T_ARRAY(dims = DAE.DIM_INTEGER(1) <|  nil(), ty = t2), constFlag = c2), havereal)  => begin
                       @match false = isArray(t1)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(1))), c)
                   end
-                  
+
                   (DAE.PROP(type_ = t1, constFlag = c1), DAE.PROP(type_ = DAE.T_ARRAY(dims = dim && DAE.DIM_ENUM(size = 1) <|  nil(), ty = t2), constFlag = c2), havereal)  => begin
                       @match false = isArray(t1)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(dim)), c)
                   end
-                  
+
                   (DAE.PROP(type_ = t1, constFlag = c1), DAE.PROP(type_ = DAE.T_ARRAY(dims = dim && DAE.DIM_BOOLEAN(__) <|  nil(), ty = t2), constFlag = c2), havereal)  => begin
                       @match false = isArray(t1)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(dim)), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_ARRAY(dims = DAE.DIM_INTEGER(1) <|  nil(), ty = t1), constFlag = c1), DAE.PROP(type_ = t2, constFlag = c2), havereal)  => begin
                       @match false = isArray(t2)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(DAE.DIM_INTEGER(1))), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_ARRAY(dims = dim && DAE.DIM_ENUM(size = 1) <|  nil(), ty = t1), constFlag = c1), DAE.PROP(type_ = t2, constFlag = c2), havereal)  => begin
                       @match false = isArray(t2)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(dim)), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_ARRAY(dims = dim && DAE.DIM_BOOLEAN(__) <|  nil(), ty = t1), constFlag = c1), DAE.PROP(type_ = t2, constFlag = c2), havereal)  => begin
                       @match false = isArray(t2)
                       @match DAE.PROP(t, c) = matchWithPromote(DAE.PROP(t1, c1), DAE.PROP(t2, c2), havereal)
                     DAE.PROP(DAE.T_ARRAY(t, list(dim)), c)
                   end
-                  
+
                   (DAE.PROP(type_ = t1, constFlag = c1), DAE.PROP(type_ = t2, constFlag = c2), false)  => begin
                       @match false = isArray(t1)
                       @match false = isArray(t2)
@@ -6152,32 +6062,32 @@
                       c = constAnd(c1, c2)
                     DAE.PROP(t1, c)
                   end
-                  
+
                   (DAE.PROP(type_ = t && DAE.T_ENUMERATION(__), constFlag = c1), DAE.PROP(type_ = DAE.T_ENUMERATION(__), constFlag = c2), false)  => begin
                       c = constAnd(c1, c2) #= Have enum and both Enum =#
                     DAE.PROP(t, c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_REAL(varLst = v), constFlag = c1), DAE.PROP(type_ = DAE.T_REAL(__), constFlag = c2), true)  => begin
                       c = constAnd(c1, c2) #= Have real and both Real =#
                     DAE.PROP(DAE.T_REAL(v), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_INTEGER(__), constFlag = c1), DAE.PROP(type_ = DAE.T_REAL(varLst = v), constFlag = c2), true)  => begin
                       c = constAnd(c1, c2) #= Have real and first Integer =#
                     DAE.PROP(DAE.T_REAL(v), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_REAL(varLst = v), constFlag = c1), DAE.PROP(type_ = DAE.T_INTEGER(__), constFlag = c2), true)  => begin
                       c = constAnd(c1, c2) #= Have real and second Integer =#
                     DAE.PROP(DAE.T_REAL(v), c)
                   end
-                  
+
                   (DAE.PROP(type_ = DAE.T_INTEGER(__), constFlag = c1), DAE.PROP(type_ = DAE.T_INTEGER(__), constFlag = c2), true)  => begin
                       c = constAnd(c1, c2) #= Have real and both Integer =#
                     DAE.PROP(DAE.T_REAL_DEFAULT, c)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Types.matchWithPromote failed on: " + "\\nprop1: " + printPropStr(inProperties1) + "\\nprop2: " + printPropStr(inProperties2) + "\\nhaveReal: " + boolString(inBoolean3))
@@ -6218,7 +6128,7 @@
           I.e. C_CONST iff. both are C_CONST,
                C_PARAM iff both are C_PARAM (or one of them C_CONST),
                V_VAR otherwise. =#
-        function constAnd(inConst1::DAE.Const, inConst2::DAE.Const) ::DAE.Const 
+        function constAnd(inConst1::DAE.Const, inConst2::DAE.Const) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -6226,27 +6136,27 @@
                   (DAE.C_CONST(__), DAE.C_CONST(__))  => begin
                     DAE.C_CONST()
                   end
-                  
+
                   (DAE.C_CONST(__), DAE.C_PARAM(__))  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   (DAE.C_PARAM(__), DAE.C_CONST(__))  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   (DAE.C_PARAM(__), DAE.C_PARAM(__))  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   (DAE.C_UNKNOWN(__), _)  => begin
                     DAE.C_UNKNOWN()
                   end
-                  
+
                   (_, DAE.C_UNKNOWN(__))  => begin
                     DAE.C_UNKNOWN()
                   end
-                  
+
                   _  => begin
                       DAE.C_VAR()
                   end
@@ -6257,7 +6167,7 @@
 
          #= Returns the *and* operator of two TupleConsts
           For now, returns first tuple. =#
-        function constTupleAnd(inTupleConst1::DAE.TupleConst, inTupleConst2::DAE.TupleConst) ::DAE.TupleConst 
+        function constTupleAnd(inTupleConst1::DAE.TupleConst, inTupleConst2::DAE.TupleConst) ::DAE.TupleConst
               local outTupleConst::DAE.TupleConst
 
               outTupleConst = begin
@@ -6276,7 +6186,7 @@
           I.e. C_CONST if some is C_CONST,
                C_PARAM if none is C_CONST but some is C_PARAM and
                V_VAR otherwise. =#
-        function constOr(inConst1::DAE.Const, inConst2::DAE.Const) ::DAE.Const 
+        function constOr(inConst1::DAE.Const, inConst2::DAE.Const) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -6284,27 +6194,27 @@
                   (DAE.C_CONST(__), _)  => begin
                     DAE.C_CONST()
                   end
-                  
+
                   (_, DAE.C_CONST(__))  => begin
                     DAE.C_CONST()
                   end
-                  
+
                   (DAE.C_PARAM(__), _)  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   (_, DAE.C_PARAM(__))  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   (DAE.C_UNKNOWN(__), _)  => begin
                     DAE.C_UNKNOWN()
                   end
-                  
+
                   (_, DAE.C_UNKNOWN(__))  => begin
                     DAE.C_UNKNOWN()
                   end
-                  
+
                   _  => begin
                       DAE.C_VAR()
                   end
@@ -6318,7 +6228,7 @@
           if true, C_CONST,
           if false C_VAR
           There is no way to create a C_PARAM using this function. =#
-        function boolConst(inBoolean::Bool) ::DAE.Const 
+        function boolConst(inBoolean::Bool) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -6326,7 +6236,7 @@
                   false  => begin
                     DAE.C_VAR()
                   end
-                  
+
                   true  => begin
                     DAE.C_CONST()
                   end
@@ -6338,7 +6248,7 @@
          #= author: alleb
           A version of boolConst supposed to be used by Static.elabBuiltinSize.
           Creates a Const value from a bool. If true, C_CONST, if false C_PARAM. =#
-        function boolConstSize(inBoolean::Bool) ::DAE.Const 
+        function boolConstSize(inBoolean::Bool) ::DAE.Const
               local outConst::DAE.Const
 
               outConst = begin
@@ -6346,7 +6256,7 @@
                   false  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   true  => begin
                     DAE.C_CONST()
                   end
@@ -6355,7 +6265,7 @@
           outConst
         end
 
-        function constEqualOrHigher(c1::DAE.Const, c2::DAE.Const) ::Bool 
+        function constEqualOrHigher(c1::DAE.Const, c2::DAE.Const) ::Bool
               local b::Bool
 
               b = begin
@@ -6363,19 +6273,19 @@
                   (DAE.C_CONST(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.C_CONST(__))  => begin
                     false
                   end
-                  
+
                   (DAE.C_PARAM(__), _)  => begin
                     true
                   end
-                  
+
                   (_, DAE.C_PARAM(__))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -6384,7 +6294,7 @@
           b
         end
 
-        function constEqual(c1::DAE.Const, c2::DAE.Const) ::Bool 
+        function constEqual(c1::DAE.Const, c2::DAE.Const) ::Bool
               local b::Bool
 
               b = begin
@@ -6393,7 +6303,7 @@
                       equality(c1, c2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6403,7 +6313,7 @@
         end
 
          #= Returns true if Const is C_VAR. =#
-        function constIsVariable(c::DAE.Const) ::Bool 
+        function constIsVariable(c::DAE.Const) ::Bool
               local b::Bool
 
               b = constEqual(c, DAE.C_VAR())
@@ -6411,7 +6321,7 @@
         end
 
          #= Returns true if Const is C_PARAM. =#
-        function constIsParameter(c::DAE.Const) ::Bool 
+        function constIsParameter(c::DAE.Const) ::Bool
               local b::Bool
 
               b = constEqual(c, DAE.C_PARAM())
@@ -6419,7 +6329,7 @@
         end
 
          #= Returns true if Const is C_CONST. =#
-        function constIsConst(c::DAE.Const) ::Bool 
+        function constIsConst(c::DAE.Const) ::Bool
               local b::Bool
 
               b = constEqual(c, DAE.C_CONST())
@@ -6427,7 +6337,7 @@
         end
 
          #= Print the properties to a string. =#
-        function printPropStr(inProperties::DAE.Properties) ::String 
+        function printPropStr(inProperties::DAE.Properties) ::String
               local outString::String
 
               outString = begin
@@ -6435,16 +6345,16 @@
                   local const_str::String
                   local res::String
                   local ty::DAE.Type
-                  local const::DAE.Const
+                  local constType::DAE.Const
                   local tconst::DAE.TupleConst
                 @match inProperties begin
-                  DAE.PROP(type_ = ty, constFlag = const)  => begin
+                  DAE.PROP(type_ = ty, constFlag = constType)  => begin
                       ty_str = unparseType(ty)
-                      const_str = printConstStr(const)
+                      const_str = printConstStr(constType)
                       res = stringAppendList(list("DAE.PROP(", ty_str, ", ", const_str, ")"))
                     res
                   end
-                  
+
                   DAE.PROP_TUPLE(type_ = ty, tupleConst = tconst)  => begin
                       ty_str = unparseType(ty)
                       const_str = printTupleConstStr(tconst)
@@ -6457,7 +6367,7 @@
         end
 
          #= Print the Properties to the Print buffer. =#
-        function printProp(p::DAE.Properties)  
+        function printProp(p::DAE.Properties)
               local str::String
 
               str = printPropStr(p)
@@ -6466,7 +6376,7 @@
 
          #= This function retrieves all variables names that are flow variables, and
           prepends the prefix given as an DAE.ComponentRef =#
-        function flowVariables(inVarLst::List{<:DAE.Var}, inComponentRef::DAE.ComponentRef) ::List{DAE.ComponentRef} 
+        function flowVariables(inVarLst::List{<:DAE.Var}, inComponentRef::DAE.ComponentRef) ::List{DAE.ComponentRef}
               local outExpComponentRefLst::List{DAE.ComponentRef}
 
               outExpComponentRefLst = begin
@@ -6484,14 +6394,14 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.TYPES_VAR(name = id, attributes = DAE.ATTR(connectorType = DAE.FLOW(__)), ty = ty) <| vs, cr)  => begin
                       ty2 = simplifyType(ty)
                       cr_1 = ComponentReference.crefPrependIdent(cr, id, nil, ty2)
                       res = flowVariables(vs, cr)
                     _cons(cr_1, res)
                   end
-                  
+
                   (_ <| vs, cr)  => begin
                       res = flowVariables(vs, cr)
                     res
@@ -6509,7 +6419,7 @@
 
          #= This function retrieves all variables names that are stream variables,
           and prepends the prefix given as an DAE.ComponentRef =#
-        function streamVariables(inVarLst::List{<:DAE.Var}, inComponentRef::DAE.ComponentRef) ::List{DAE.ComponentRef} 
+        function streamVariables(inVarLst::List{<:DAE.Var}, inComponentRef::DAE.ComponentRef) ::List{DAE.ComponentRef}
               local outExpComponentRefLst::List{DAE.ComponentRef}
 
               outExpComponentRefLst = begin
@@ -6525,14 +6435,14 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.TYPES_VAR(name = id, attributes = DAE.ATTR(connectorType = DAE.STREAM(__)), ty = ty) <| vs, cr)  => begin
                       ty2 = simplifyType(ty)
                       cr_1 = ComponentReference.crefPrependIdent(cr, id, nil, ty2)
                       res = streamVariables(vs, cr)
                     _cons(cr_1, res)
                   end
-                  
+
                   (_ <| vs, cr)  => begin
                       res = streamVariables(vs, cr)
                     res
@@ -6544,7 +6454,7 @@
 
          #= This function goes through the Type structure and finds all the
           expressions and returns them in a list =#
-        function getAllExps(inType::DAE.Type) ::List{DAE.Exp} 
+        function getAllExps(inType::DAE.Type) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = getAllExpsTt(inType)
@@ -6553,7 +6463,7 @@
 
          #= This function goes through the TType structure and finds all the
           expressions and returns them in a list =#
-        function getAllExpsTt(inType::DAE.Type) ::List{DAE.Exp} 
+        function getAllExpsTt(inType::DAE.Type) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = begin
@@ -6576,92 +6486,92 @@
                   DAE.T_INTEGER(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_REAL(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_STRING(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_BOOL(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_ENUMERATION(literalVarLst = vars, attributeLst = attrs)  => begin
                       exps = getAllExpsVars(vars)
                       tyexps = getAllExpsVars(attrs)
                       exps = listAppend(tyexps, exps)
                     exps
                   end
-                  
+
                   DAE.T_ARRAY(ty = ty)  => begin
                     getAllExps(ty)
                   end
-                  
+
                   DAE.T_COMPLEX(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(varLst = vars)  => begin
                     getAllExpsVars(vars)
                   end
-                  
+
                   DAE.T_FUNCTION(funcArg = fargs, funcResultType = ty)  => begin
                       explists = ListUtil.mapMap(fargs, funcArgType, getAllExps)
                       tyexps = getAllExps(ty)
                       exps = ListUtil.flatten(_cons(tyexps, explists))
                     exps
                   end
-                  
+
                   DAE.T_TUPLE(types = tys)  => begin
                       explist = ListUtil.map(tys, getAllExps)
                       exps = ListUtil.flatten(explist)
                     exps
                   end
-                  
+
                   DAE.T_METATUPLE(types = tys)  => begin
                       exps = getAllExpsTt(DAE.T_TUPLE(tys, NONE()))
                     exps
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_METAOPTION(ty = ty)  => begin
                     getAllExps(ty)
                   end
-                  
+
                   DAE.T_METALIST(ty = ty)  => begin
                     getAllExps(ty)
                   end
-                  
+
                   DAE.T_METAARRAY(ty = ty)  => begin
                     getAllExps(ty)
                   end
-                  
+
                   DAE.T_METABOXED(ty = ty)  => begin
                     getAllExps(ty)
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     nil
                   end
-                  
+
                   tty  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       str = unparseType(tty)
@@ -6676,7 +6586,7 @@
         end
 
          #= Helper function to getAllExpsTt. =#
-        function getAllExpsVars(vars::List{<:DAE.Var}) ::List{DAE.Exp} 
+        function getAllExpsVars(vars::List{<:DAE.Var}) ::List{DAE.Exp}
               local exps::List{DAE.Exp}
 
               local explist::List{List{DAE.Exp}}
@@ -6687,7 +6597,7 @@
         end
 
          #= Helper function to getAllExpsVars. =#
-        function getAllExpsVar(inVar::DAE.Var) ::List{DAE.Exp} 
+        function getAllExpsVar(inVar::DAE.Var) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = begin
@@ -6710,7 +6620,7 @@
         end
 
          #= Helper function to get_all_exps_var. =#
-        function getAllExpsBinding(inBinding::DAE.Binding) ::List{DAE.Exp} 
+        function getAllExpsBinding(inBinding::DAE.Binding) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = begin
@@ -6721,15 +6631,15 @@
                   DAE.EQBOUND(exp = exp)  => begin
                     list(exp)
                   end
-                  
+
                   DAE.UNBOUND(__)  => begin
                     nil
                   end
-                  
+
                   DAE.VALBOUND(__)  => begin
                     nil
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("-- Types.getAllExpsBinding failed\\n")
@@ -6740,7 +6650,7 @@
           outExpExpLst
         end
 
-        function isBoxedType(ty::DAE.Type) ::Bool 
+        function isBoxedType(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -6748,67 +6658,67 @@
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METAOPTION(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METALIST(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METATUPLE(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METARECORD(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METAARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_FUNCTION(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METABOXED(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ANYTYPE(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METATYPE(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_CODE(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6817,7 +6727,7 @@
           b
         end
 
-        function isMetaBoxedType(inType::DAE.Type) ::Bool 
+        function isMetaBoxedType(inType::DAE.Type) ::Bool
               local outIsMetaBoxed::Bool
 
               outIsMetaBoxed = begin
@@ -6825,7 +6735,7 @@
                   DAE.T_METABOXED(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6834,7 +6744,7 @@
           outIsMetaBoxed
         end
 
-        function boxIfUnboxedType(ty::DAE.Type) ::DAE.Type 
+        function boxIfUnboxedType(ty::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -6844,7 +6754,7 @@
                       tys = ListUtil.map(ty.types, boxIfUnboxedType)
                     DAE.T_METATUPLE(tys)
                   end
-                  
+
                   _  => begin
                       if isBoxedType(ty)
                             ty
@@ -6859,7 +6769,7 @@
           outType
         end
 
-        function unboxedType(ity::DAE.Type) ::DAE.Type 
+        function unboxedType(ity::DAE.Type) ::DAE.Type
               local out::DAE.Type
 
               out = begin
@@ -6870,35 +6780,35 @@
                   DAE.T_METABOXED(__)  => begin
                     unboxedType(ity.ty)
                   end
-                  
+
                   DAE.T_METAOPTION(__)  => begin
                       ty = unboxedType(ity.ty)
                       ty = boxIfUnboxedType(ty)
                     DAE.T_METAOPTION(ty)
                   end
-                  
+
                   DAE.T_METALIST(__)  => begin
                       ty = unboxedType(ity.ty)
                       ty = boxIfUnboxedType(ty)
                     DAE.T_METALIST(ty)
                   end
-                  
+
                   DAE.T_METATUPLE(__)  => begin
                       tys = ListUtil.mapMap(ity.types, unboxedType, boxIfUnboxedType)
                     DAE.T_METATUPLE(tys)
                   end
-                  
+
                   DAE.T_METAARRAY(__)  => begin
                       ty = unboxedType(ity.ty)
                       ty = boxIfUnboxedType(ty)
                     DAE.T_METAARRAY(ty)
                   end
-                  
+
                   t && DAE.T_ARRAY(__)  => begin
                       t.ty = unboxedType(t.ty)
                     t
                   end
-                  
+
                   _  => begin
                       ity
                   end
@@ -6910,7 +6820,7 @@
          #= Takes lists of Exp,Type and calculates the
         supertype of the list, then converts the expressions to this type.
          =#
-        function listMatchSuperType(ielist::List{<:DAE.Exp}, typeList::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, DAE.Type} 
+        function listMatchSuperType(ielist::List{<:DAE.Exp}, typeList::List{<:DAE.Type}, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, DAE.Type}
               local t::DAE.Type
               local out::List{DAE.Exp}
 
@@ -6923,7 +6833,7 @@
                   ( nil(),  nil(), _)  => begin
                     (nil, DAE.T_UNKNOWN_DEFAULT)
                   end
-                  
+
                   (_ <| _, _ <| _, _)  => begin
                       st = ListUtil.reduce(typeList, superType)
                       st = superType(st, st)
@@ -6931,7 +6841,7 @@
                       elist = listMatchSuperType2(ielist, typeList, st, printFailtrace)
                     (elist, st)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Types.listMatchSuperType failed\\n")
@@ -6942,7 +6852,7 @@
           (out, t)
         end
 
-        function listMatchSuperType2(elist::List{<:DAE.Exp}, typeList::List{<:DAE.Type}, st::DAE.Type, printFailtrace::Bool) ::List{DAE.Exp} 
+        function listMatchSuperType2(elist::List{<:DAE.Exp}, typeList::List{<:DAE.Type}, st::DAE.Type, printFailtrace::Bool) ::List{DAE.Exp}
               local out::List{DAE.Exp}
 
               out = begin
@@ -6955,13 +6865,13 @@
                   ( nil(),  nil(), _, _)  => begin
                     nil
                   end
-                  
+
                   (e <| erest, t <| trest, _, _)  => begin
                       (e, t) = matchType(e, t, st, printFailtrace)
                       erest = listMatchSuperType2(erest, trest, st, printFailtrace)
                     _cons(e, erest)
                   end
-                  
+
                   (e <| _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       str = ExpressionDump.printExpStr(e)
@@ -6974,7 +6884,7 @@
         end
 
          #= find the supertype of the two types =#
-        function superType(inType1::DAE.Type, inType2::DAE.Type) ::DAE.Type 
+        function superType(inType1::DAE.Type, inType2::DAE.Type) ::DAE.Type
               local out::DAE.Type
 
               out = begin
@@ -6989,95 +6899,95 @@
                   (DAE.T_ANYTYPE(__), t2)  => begin
                     t2
                   end
-                  
+
                   (t1, DAE.T_ANYTYPE(__))  => begin
                     t1
                   end
-                  
+
                   (DAE.T_UNKNOWN(__), t2)  => begin
                     t2
                   end
-                  
+
                   (t1, DAE.T_UNKNOWN(__))  => begin
                     t1
                   end
-                  
+
                   (_, t2 && DAE.T_METAPOLYMORPHIC(__))  => begin
                     t2
                   end
-                  
+
                   (DAE.T_TUPLE(types = type_list1), DAE.T_TUPLE(types = type_list2))  => begin
                       type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
                       type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
                       type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
                     DAE.T_METATUPLE(type_list1)
                   end
-                  
+
                   (DAE.T_TUPLE(types = type_list1), DAE.T_METATUPLE(types = type_list2))  => begin
                       type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
                       type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
                       type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
                     DAE.T_METATUPLE(type_list1)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = type_list1), DAE.T_TUPLE(types = type_list2))  => begin
                       type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
                       type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
                       type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
                     DAE.T_METATUPLE(type_list1)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = type_list1), DAE.T_METATUPLE(types = type_list2))  => begin
                       type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
                       type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
                       type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
                     DAE.T_METATUPLE(type_list1)
                   end
-                  
+
                   (DAE.T_METALIST(ty = t1), DAE.T_METALIST(ty = t2))  => begin
                       t1 = boxIfUnboxedType(t1)
                       t2 = boxIfUnboxedType(t2)
                       tp = superType(t1, t2)
                     DAE.T_METALIST(tp)
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = t1), DAE.T_METAOPTION(ty = t2))  => begin
                       t1 = boxIfUnboxedType(t1)
                       t2 = boxIfUnboxedType(t2)
                       tp = superType(t1, t2)
                     DAE.T_METAOPTION(tp)
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = t1), DAE.T_METAARRAY(ty = t2))  => begin
                       t1 = boxIfUnboxedType(t1)
                       t2 = boxIfUnboxedType(t2)
                       tp = superType(t1, t2)
                     DAE.T_METAARRAY(tp)
                   end
-                  
+
                   (t1 && DAE.T_METAUNIONTYPE(path = path1), DAE.T_METARECORD(utPath = path2))  => begin
                       @match true = AbsynUtil.pathEqual(path1, path2)
                     t1
                   end
-                  
+
                   (DAE.T_METARECORD(knownSingleton = false, utPath = path1), DAE.T_METARECORD(knownSingleton = false, utPath = path2))  => begin
                       @match true = AbsynUtil.pathEqual(path1, path2)
                     DAE.T_METAUNIONTYPE(nil, inType1.typeVars, false, DAE.NOT_SINGLETON(), path1)
                   end
-                  
+
                   (DAE.T_INTEGER(__), DAE.T_REAL(__))  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   (DAE.T_REAL(__), DAE.T_INTEGER(__))  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   (t1, t2)  => begin
                       @match true = subtype(t1, t2)
                     t2
                   end
-                  
+
                   (t1, t2)  => begin
                       @match true = subtype(t2, t1)
                     t1
@@ -7089,7 +6999,7 @@
 
          #= Like matchType, except we also
         bind polymorphic variabled. Used when elaborating calls. =#
-        function matchTypePolymorphic(iexp::DAE.Exp, iactual::DAE.Type, expected::DAE.Type, envPath::Option{<:Absyn.Path} #= to detect which polymorphic types are recursive =#, ipolymorphicBindings::InstTypes.PolymorphicBindings, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type, InstTypes.PolymorphicBindings} 
+        function matchTypePolymorphic(iexp::DAE.Exp, iactual::DAE.Type, expected::DAE.Type, envPath::Option{<:Absyn.Path} #= to detect which polymorphic types are recursive =#, ipolymorphicBindings::InstTypes.PolymorphicBindings, printFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type, InstTypes.PolymorphicBindings}
               local polymorphicBindings::InstTypes.PolymorphicBindings = ipolymorphicBindings
               local actual::DAE.Type = iactual
               local exp::DAE.Exp = iexp
@@ -7117,7 +7027,7 @@
 
          #= Like matchType, except we also
         bind polymorphic variabled. Used when elaborating calls. =#
-        function matchTypePolymorphicWithError(iexp::DAE.Exp, iactual::DAE.Type, iexpected::DAE.Type, envPath::Option{<:Absyn.Path} #= to detect which polymorphic types are recursive =#, ipolymorphicBindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Type, InstTypes.PolymorphicBindings} 
+        function matchTypePolymorphicWithError(iexp::DAE.Exp, iactual::DAE.Type, iexpected::DAE.Type, envPath::Option{<:Absyn.Path} #= to detect which polymorphic types are recursive =#, ipolymorphicBindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::Tuple{DAE.Exp, DAE.Type, InstTypes.PolymorphicBindings}
               local outBindings::InstTypes.PolymorphicBindings
               local outType::DAE.Type
               local outExp::DAE.Exp
@@ -7140,7 +7050,7 @@
                       (exp, actual, polymorphicBindings) = matchTypePolymorphic(exp, actual, expected, envPath, polymorphicBindings, false)
                     (exp, actual, polymorphicBindings)
                   end
-                  
+
                   _  => begin
                         str1 = ExpressionDump.printExpStr(iexp)
                         str2 = unparseType(iactual)
@@ -7155,7 +7065,7 @@
 
          #= This function matches an expression with an expected type, and converts the
             expression to the expected type if necessary. =#
-        function matchType(inExp::DAE.Exp, inActualType::DAE.Type, inExpectedType::DAE.Type, inPrintFailtrace::Bool = false) ::Tuple{DAE.Exp, DAE.Type} 
+        function matchType(inExp::DAE.Exp, inActualType::DAE.Type, inExpectedType::DAE.Type, inPrintFailtrace::Bool = false) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -7176,7 +7086,7 @@
           (outExp, outType)
         end
 
-        function matchTypeNoFail(inExp::DAE.Exp, inActualType::DAE.Type, inExpectedType::DAE.Type) ::Tuple{DAE.Exp, DAE.Type, Bool} 
+        function matchTypeNoFail(inExp::DAE.Exp, inActualType::DAE.Type, inExpectedType::DAE.Type) ::Tuple{DAE.Exp, DAE.Type, Bool}
               local outMatch::Bool
               local outType::DAE.Type
               local outExp::DAE.Exp
@@ -7200,7 +7110,7 @@
         end
 
          #= matchType, list of actual types, one expected type. =#
-        function matchTypes(iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, expected::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function matchTypes(iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, expected::DAE.Type, printFailtrace::Bool) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTys::List{DAE.Type}
               local outExps::List{DAE.Exp}
 
@@ -7208,7 +7118,7 @@
           (outExps, outTys)
         end
 
-        function matchTypes_tail(iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, expected::DAE.Type, printFailtrace::Bool, inAccumExps::List{<:DAE.Exp}, inAccumTypes::List{<:DAE.Type}) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function matchTypes_tail(iexps::List{<:DAE.Exp}, itys::List{<:DAE.Type}, expected::DAE.Type, printFailtrace::Bool, inAccumExps::List{<:DAE.Exp}, inAccumTypes::List{<:DAE.Type}) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTys::List{DAE.Type}
               local outExps::List{DAE.Exp}
 
@@ -7223,7 +7133,7 @@
                       (exps, tys) = matchTypes_tail(exps, tys, expected, printFailtrace, _cons(e, inAccumExps), _cons(ty, inAccumTypes))
                     (exps, tys)
                   end
-                  
+
                   ( nil(),  nil(), _, _, _, _)  => begin
                     (listReverse(inAccumExps), listReverse(inAccumTypes))
                   end
@@ -7232,7 +7142,7 @@
           (outExps, outTys)
         end
 
-        function matchTypes2(inExp::DAE.Exp, inType::DAE.Type, inExpected::DAE.Type, inPrintFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type} 
+        function matchTypes2(inExp::DAE.Exp, inType::DAE.Type, inExpected::DAE.Type, inPrintFailtrace::Bool) ::Tuple{DAE.Exp, DAE.Type}
               local outType::DAE.Type
               local outExp::DAE.Exp
 
@@ -7248,7 +7158,7 @@
                       (e, ty) = matchType(inExp, ty, expected_ty, inPrintFailtrace)
                     (e, ty)
                   end
-                  
+
                   _  => begin
                         str = "- Types.matchTypes failed for " + ExpressionDump.printExpStr(inExp) + " from " + unparseType(inType) + " to " + unparseType(inExpected) + "\\n"
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -7263,14 +7173,14 @@
          print the message only when flag is on.
          this is to speed up the flattening as we don't
          generate the strings at all. =#
-        function printFailure(flag::Flags.DebugFlag, source::String, e::DAE.Exp, e_type::DAE.Type, expected_type::DAE.Type)  
+        function printFailure(flag::Flags.DebugFlag, source::String, e::DAE.Exp, e_type::DAE.Type, expected_type::DAE.Type)
               if Flags.isSet(flag)
                 Debug.traceln("- Types." + source + " failed on:" + ExpressionDump.printExpStr(e))
                 Debug.traceln("  type:" + unparseType(e_type) + " differs from expected\\n  type:" + unparseType(expected_type))
               end
         end
 
-        function polymorphicBindingStr(binding::Tuple{<:String, List{<:DAE.Type}}) ::String 
+        function polymorphicBindingStr(binding::Tuple{<:String, List{<:DAE.Type}}) ::String
               local str::String
 
               local tys::List{DAE.Type}
@@ -7282,7 +7192,7 @@
           str
         end
 
-        function polymorphicBindingsStr(bindings::InstTypes.PolymorphicBindings) ::String 
+        function polymorphicBindingsStr(bindings::InstTypes.PolymorphicBindings) ::String
               local str::String
 
               str = stringDelimitList(ListUtil.map(bindings, polymorphicBindingStr), "\\n")
@@ -7290,7 +7200,7 @@
         end
 
          #= Uses the polymorphic bindings to determine the result type of the function. =#
-        function fixPolymorphicRestype(ty::DAE.Type, bindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::DAE.Type 
+        function fixPolymorphicRestype(ty::DAE.Type, bindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::DAE.Type
               local resType::DAE.Type
 
                #= print(\"Trying to fix restype: \" + unparseType(ty) + \"\\n\");
@@ -7301,7 +7211,7 @@
           resType
         end
 
-        function fixPolymorphicRestype2(ty::DAE.Type, prefix::String, bindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::DAE.Type 
+        function fixPolymorphicRestype2(ty::DAE.Type, prefix::String, bindings::InstTypes.PolymorphicBindings, info::SourceInfo) ::DAE.Type
               local resType::DAE.Type
 
               resType = begin
@@ -7329,51 +7239,51 @@
                       t1 = fixPolymorphicRestype2(t1, "", bindings, info)
                     t1
                   end
-                  
+
                   (DAE.T_METALIST(ty = t1), _, _, _)  => begin
                       t2 = fixPolymorphicRestype2(t1, prefix, bindings, info)
                       t2 = boxIfUnboxedType(t2)
                     DAE.T_METALIST(t2)
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = t1), _, _, _)  => begin
                       t2 = fixPolymorphicRestype2(t1, prefix, bindings, info)
                       t2 = boxIfUnboxedType(t2)
                     DAE.T_METAARRAY(t2)
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = t1), _, _, _)  => begin
                       t2 = fixPolymorphicRestype2(t1, prefix, bindings, info)
                       t2 = boxIfUnboxedType(t2)
                     DAE.T_METAOPTION(t2)
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(typeVars =  nil()), _, _, _)  => begin
                     ty
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(typeVars = tys), _, _, _)  => begin
                       tys = ListUtil.map3(tys, fixPolymorphicRestype2, prefix, bindings, info)
                       tys = ListUtil.map(tys, boxIfUnboxedType)
                     DAE.T_METAUNIONTYPE(ty.paths, tys, ty.knownSingleton, ty.singletonType, ty.path)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = tys), _, _, _)  => begin
                       tys = ListUtil.map3(tys, fixPolymorphicRestype2, prefix, bindings, info)
                       tys = ListUtil.map(tys, boxIfUnboxedType)
                     DAE.T_METATUPLE(tys)
                   end
-                  
+
                   (t1 && DAE.T_ARRAY(__), _, _, _)  => begin
                       t1.ty = fixPolymorphicRestype2(t1.ty, prefix, bindings, info)
                     t1
                   end
-                  
+
                   (t1 && DAE.T_TUPLE(__), _, _, _)  => begin
                       t1.types = ListUtil.map3(t1.types, fixPolymorphicRestype2, prefix, bindings, info)
                     t1
                   end
-                  
+
                   (DAE.T_FUNCTION(args1, ty1, functionAttributes, path), _, _, _)  => begin
                       tys1 = ListUtil.map(args1, funcArgType)
                       tys1 = ListUtil.map3(tys1, fixPolymorphicRestype2, prefix, bindings, info)
@@ -7382,11 +7292,11 @@
                       ty1 = DAE.T_FUNCTION(args1, ty1, functionAttributes, path)
                     ty1
                   end
-                  
+
                   (_, _, _, _)  => begin
                     ty
                   end
-                  
+
                   _  => begin
                         tstr = unparseType(ty)
                         bstr = polymorphicBindingsStr(bindings)
@@ -7403,7 +7313,7 @@
           resType
         end
 
-        function polymorphicBindingsLookup(id::String, bindings::InstTypes.PolymorphicBindings) ::List{DAE.Type} 
+        function polymorphicBindingsLookup(id::String, bindings::InstTypes.PolymorphicBindings) ::List{DAE.Type}
               local resType::List{DAE.Type}
 
               resType = begin
@@ -7415,7 +7325,7 @@
                       @match true = id == id2
                     ListUtil.map(tys, boxIfUnboxedType)
                   end
-                  
+
                   (_, _ <| rest)  => begin
                       tys = polymorphicBindingsLookup(id, rest)
                     tys
@@ -7428,7 +7338,7 @@
          #= Traverses all the types the input DAE.Type contains, checks if
         they are of the type the given function specifies, then returns
         a list of all those types. =#
-        function getAllInnerTypesOfType(inType::DAE.Type, inFn::TypeFn) ::List{DAE.Type} 
+        function getAllInnerTypesOfType(inType::DAE.Type, inFn::TypeFn) ::List{DAE.Type}
               local outTypes::List{DAE.Type}
 
               outTypes = getAllInnerTypes(list(inType), nil, inFn)
@@ -7437,7 +7347,7 @@
 
          #= Traverses all the types that the input DAE.Type contains, and returns all
            types for which the given function returns true. =#
-        function getAllInnerTypes(inTypes::List{<:DAE.Type}, inAccum::List{<:DAE.Type} = nil, inFunc::MatchFunc) ::List{DAE.Type} 
+        function getAllInnerTypes(inTypes::List{<:DAE.Type}, inAccum::List{<:DAE.Type} = nil, inFunc::MatchFunc = nothing)::List{DAE.Type}
               local outTypes::List{DAE.Type} = inAccum
 
               local ty::DAE.Type
@@ -7458,51 +7368,51 @@
                     DAE.T_ARRAY(ty = ty)  => begin
                       list(ty)
                     end
-                    
+
                     DAE.T_METALIST(ty = ty)  => begin
                       list(ty)
                     end
-                    
+
                     DAE.T_METAARRAY(ty = ty)  => begin
                       list(ty)
                     end
-                    
+
                     DAE.T_METABOXED(ty = ty)  => begin
                       list(ty)
                     end
-                    
+
                     DAE.T_METAOPTION(ty = ty)  => begin
                       list(ty)
                     end
-                    
+
                     DAE.T_TUPLE(types = tys)  => begin
                       tys
                     end
-                    
+
                     DAE.T_METATUPLE(types = tys)  => begin
                       tys
                     end
-                    
+
                     DAE.T_METAUNIONTYPE(typeVars = tys)  => begin
                       tys
                     end
-                    
+
                     DAE.T_METARECORD(typeVars = tys, fields = fields)  => begin
                       listAppend(tys, ListUtil.map(fields, getVarType))
                     end
-                    
+
                     DAE.T_COMPLEX(varLst = fields)  => begin
                       ListUtil.map(fields, getVarType)
                     end
-                    
+
                     DAE.T_SUBTYPE_BASIC(varLst = fields)  => begin
                       ListUtil.map(fields, getVarType)
                     end
-                    
+
                     DAE.T_FUNCTION(funcArg = funcArgs, funcResultType = ty)  => begin
                       _cons(ty, ListUtil.map(funcArgs, funcArgType))
                     end
-                    
+
                     _  => begin
                         nil
                     end
@@ -7517,7 +7427,7 @@
           outTypes
         end
 
-        function uniontypeFilter(ty::DAE.Type) ::Bool 
+        function uniontypeFilter(ty::DAE.Type) ::Bool
               local outMatch::Bool
 
               outMatch = begin
@@ -7525,7 +7435,7 @@
                   DAE.T_METAUNIONTYPE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -7534,7 +7444,7 @@
           outMatch
         end
 
-        function metarecordFilter(ty::DAE.Type) ::Bool 
+        function metarecordFilter(ty::DAE.Type) ::Bool
               local outMatch::Bool
 
               outMatch = begin
@@ -7542,7 +7452,7 @@
                   DAE.T_METARECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -7551,7 +7461,7 @@
           outMatch
         end
 
-        function getUniontypePaths(ty::DAE.Type) ::List{Absyn.Path} 
+        function getUniontypePaths(ty::DAE.Type) ::List{Absyn.Path}
               local outPaths::List{Absyn.Path}
 
               outPaths = begin
@@ -7568,7 +7478,7 @@
          #= Takes a function reference. If it contains any types that are not boxed, we
         return a reference to the function that does take boxed types. Else, we
         return a reference to the regular function. =#
-        function makeFunctionPolymorphicReference(inType::DAE.Type) ::DAE.Type 
+        function makeFunctionPolymorphicReference(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -7598,7 +7508,7 @@
                       ty2 = DAE.T_FUNCTION(funcArgs2, resType2, functionAttributes, path)
                     ty2
                   end
-                  
+
                   _  => begin
                     fail()
                   end
@@ -7618,7 +7528,7 @@
           outType
         end
 
-        function makeFunctionPolymorphicReferenceResType(inType::DAE.Type) ::DAE.Type 
+        function makeFunctionPolymorphicReferenceResType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -7636,11 +7546,11 @@
                       ty.types = tys
                     ty
                   end
-                  
+
                   ty && DAE.T_NORETCALL(__)  => begin
                     ty
                   end
-                  
+
                   ty1  => begin
                       @match (list(e), list(ty2)) = makeDummyExpAndTypeLists(list(ty1))
                       (_, ty) = matchType(e, ty1, ty2, false)
@@ -7651,7 +7561,7 @@
           outType
         end
 
-        function makeDummyExpAndTypeLists(lst::List{<:DAE.Type}) ::Tuple{List{DAE.Exp}, List{DAE.Type}} 
+        function makeDummyExpAndTypeLists(lst::List{<:DAE.Type}) ::Tuple{List{DAE.Exp}, List{DAE.Type}}
               local outTypes::List{DAE.Type}
               local outExps::List{DAE.Exp}
 
@@ -7665,7 +7575,7 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   _ <| rest  => begin
                       (restExp, restType) = makeDummyExpAndTypeLists(rest)
                       cref_ = ComponentReference.makeCrefIdent("#DummyExp#", DAE.T_UNKNOWN_DEFAULT, nil)
@@ -7678,7 +7588,7 @@
         end
 
          #= Transforms a DAE.T_TUPLE to a list of types. Other types return the same type (as a list) =#
-        function resTypeToListTypes(inType::DAE.Type) ::List{DAE.Type} 
+        function resTypeToListTypes(inType::DAE.Type) ::List{DAE.Type}
               local outType::List{DAE.Type}
 
               outType = begin
@@ -7688,11 +7598,11 @@
                   DAE.T_TUPLE(types = tys)  => begin
                     tys
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     nil
                   end
-                  
+
                   ty  => begin
                     list(ty)
                   end
@@ -7703,7 +7613,7 @@
 
          #= If the type is a Real, Integer or an array of Real or Integer, the function returns
         list of dimensions; otherwise, it fails. =#
-        function getRealOrIntegerDimensions(inType::DAE.Type) ::DAE.Dimensions 
+        function getRealOrIntegerDimensions(inType::DAE.Type) ::DAE.Dimensions
               local outDims::DAE.Dimensions
 
               outDims = begin
@@ -7714,15 +7624,15 @@
                   DAE.T_REAL(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     nil
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     getRealOrIntegerDimensions(ty)
                   end
-                  
+
                   DAE.T_ARRAY(dims = d && DAE.DIM_INTEGER(_) <|  nil(), ty = ty)  => begin
                       dims = getRealOrIntegerDimensions(ty)
                     _cons(d, dims)
@@ -7732,7 +7642,7 @@
           outDims
         end
 
-        function isPolymorphic(ty::DAE.Type) ::Bool 
+        function isPolymorphic(ty::DAE.Type) ::Bool
               local outMatch::Bool
 
               outMatch = begin
@@ -7740,7 +7650,7 @@
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -7749,14 +7659,14 @@
           outMatch
         end
 
-        function polymorphicTypeName(ty::DAE.Type) ::String 
+        function polymorphicTypeName(ty::DAE.Type) ::String
               local name::String
 
               @match DAE.T_METAPOLYMORPHIC(name = name) = ty
           name
         end
 
-        function addPolymorphicBinding(id::String, ity::DAE.Type, bindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings 
+        function addPolymorphicBinding(id::String, ity::DAE.Type, bindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings
               local outBindings::InstTypes.PolymorphicBindings
 
               outBindings = begin
@@ -7772,14 +7682,14 @@
                       ty = boxIfUnboxedType(ty)
                     list((id, list(ty)))
                   end
-                  
+
                   (id1, ty, (id2, tys) <| rest)  => begin
                       @match true = id1 == id2
                       ty = unboxedType(ty)
                       ty = boxIfUnboxedType(ty)
                     _cons((id2, _cons(ty, tys)), rest)
                   end
-                  
+
                   (_, ty, first <| rest)  => begin
                       rest = addPolymorphicBinding(id, ty, rest)
                     _cons(first, rest)
@@ -7793,7 +7703,7 @@
         such that each name is bound to a non-polymorphic type.
         Solves by doing iterations until a valid state is found (or no change is
         possible). =#
-        function solvePolymorphicBindings(bindings::InstTypes.PolymorphicBindings, info::SourceInfo, path::Absyn.Path) ::InstTypes.PolymorphicBindings 
+        function solvePolymorphicBindings(bindings::InstTypes.PolymorphicBindings, info::SourceInfo, path::Absyn.Path) ::InstTypes.PolymorphicBindings
               local solvedBindings::InstTypes.PolymorphicBindings
 
               local unsolvedBindings::InstTypes.PolymorphicBindings
@@ -7808,7 +7718,7 @@
         end
 
          #= Emits an error message if we could not solve the polymorphic types to actual types. =#
-        function checkValidBindings(bindings::InstTypes.PolymorphicBindings, solvedBindings::InstTypes.PolymorphicBindings, unsolvedBindings::InstTypes.PolymorphicBindings, info::SourceInfo, path::Absyn.Path)  
+        function checkValidBindings(bindings::InstTypes.PolymorphicBindings, solvedBindings::InstTypes.PolymorphicBindings, unsolvedBindings::InstTypes.PolymorphicBindings, info::SourceInfo, path::Absyn.Path)
               local bindingsStr::String
               local solvedBindingsStr::String
               local unsolvedBindingsStr::String
@@ -7825,7 +7735,7 @@
               end
         end
 
-        function solvePolymorphicBindingsLoop(ibindings::InstTypes.PolymorphicBindings, isolvedBindings::InstTypes.PolymorphicBindings, iunsolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{InstTypes.PolymorphicBindings, InstTypes.PolymorphicBindings} 
+        function solvePolymorphicBindingsLoop(ibindings::InstTypes.PolymorphicBindings, isolvedBindings::InstTypes.PolymorphicBindings, iunsolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{InstTypes.PolymorphicBindings, InstTypes.PolymorphicBindings}
               local outUnsolvedBindings::InstTypes.PolymorphicBindings
               local outSolvedBindings::InstTypes.PolymorphicBindings
 
@@ -7844,13 +7754,13 @@
                   ( nil(), solvedBindings, unsolvedBindings)  => begin
                     (solvedBindings, unsolvedBindings)
                   end
-                  
+
                   ((id, ty <|  nil()) <| rest, solvedBindings, unsolvedBindings)  => begin
                       ty = Types.boxIfUnboxedType(ty)
                       (solvedBindings, unsolvedBindings) = solvePolymorphicBindingsLoop(listAppend(unsolvedBindings, rest), _cons((id, list(ty)), solvedBindings), nil)
                     (solvedBindings, unsolvedBindings)
                   end
-                  
+
                   ((id, tys) <| rest, solvedBindings, unsolvedBindings)  => begin
                        #=  Replace solved bindings
                        =#
@@ -7859,14 +7769,14 @@
                       (solvedBindings, unsolvedBindings) = solvePolymorphicBindingsLoop(listAppend(_cons((id, tys), unsolvedBindings), rest), solvedBindings, nil)
                     (solvedBindings, unsolvedBindings)
                   end
-                  
+
                   ((id, tys) <| rest, solvedBindings, unsolvedBindings)  => begin
                       (tys, solvedBindings) = solveBindings(tys, tys, solvedBindings)
                       tys = ListUtil.unionOnTrue(tys, nil, equivtypes)
                       (solvedBindings, unsolvedBindings) = solvePolymorphicBindingsLoop(listAppend(_cons((id, tys), unsolvedBindings), rest), solvedBindings, nil)
                     (solvedBindings, unsolvedBindings)
                   end
-                  
+
                   ((id, tys) <| rest, solvedBindings, unsolvedBindings)  => begin
                        #=  Duplicate types need to be removed
                        =#
@@ -7880,7 +7790,7 @@
                       (solvedBindings, unsolvedBindings) = solvePolymorphicBindingsLoop(listAppend(_cons((id, tys), unsolvedBindings), rest), solvedBindings, nil)
                     (solvedBindings, unsolvedBindings)
                   end
-                  
+
                   (first <| rest, solvedBindings, unsolvedBindings)  => begin
                       (solvedBindings, unsolvedBindings) = solvePolymorphicBindingsLoop(rest, solvedBindings, _cons(first, unsolvedBindings))
                     (solvedBindings, unsolvedBindings)
@@ -7894,7 +7804,7 @@
         Uses unification to solve the system, but the algorithm is slow (possibly quadratic).
         The good news is we don't have functions with many unknown types in the compiler.
         Horribly complicated function to keep track of what happens... =#
-        function solveBindings(itys1::List{<:DAE.Type}, itys2::List{<:DAE.Type}, isolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{List{DAE.Type}, InstTypes.PolymorphicBindings} 
+        function solveBindings(itys1::List{<:DAE.Type}, itys2::List{<:DAE.Type}, isolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{List{DAE.Type}, InstTypes.PolymorphicBindings}
               local outSolvedBindings::InstTypes.PolymorphicBindings
               local outTys::List{DAE.Type}
 
@@ -7937,45 +7847,45 @@
                       solvedBindings = addPolymorphicBinding(id, ty, solvedBindings)
                     (_cons(ty, tys2), solvedBindings)
                   end
-                  
+
                   (DAE.T_METAPOLYMORPHIC(name = id) <| _, ty2 <| tys2, solvedBindings)  => begin
                       @match false = isPolymorphic(ty2)
                       @shouldFail _ = polymorphicBindingsLookup(id, solvedBindings)
                       solvedBindings = addPolymorphicBinding(id, ty2, solvedBindings)
                     (_cons(ty2, tys2), solvedBindings)
                   end
-                  
+
                   (ty1 <| _, DAE.T_METAPOLYMORPHIC(name = id) <| tys2, solvedBindings)  => begin
                       @match false = isPolymorphic(ty1)
                       @shouldFail _ = polymorphicBindingsLookup(id, solvedBindings)
                       solvedBindings = addPolymorphicBinding(id, ty1, solvedBindings)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = ty1) <| _, DAE.T_METAOPTION(ty = ty2) <| tys2, solvedBindings)  => begin
                       @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METAOPTION(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   (DAE.T_METALIST(ty = ty1) <| _, DAE.T_METALIST(ty = ty2) <| tys2, solvedBindings)  => begin
                       @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METALIST(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = ty1) <| _, DAE.T_METAARRAY(ty = ty2) <| tys2, solvedBindings)  => begin
                       @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METAARRAY(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = tys1) <| _, DAE.T_METATUPLE(types = tys2) <| rest, solvedBindings)  => begin
                       (tys1, solvedBindings) = solveBindingsThread(tys1, tys2, false, solvedBindings)
                       ty1 = DAE.T_METATUPLE(tys1)
                     (_cons(ty1, rest), solvedBindings)
                   end
-                  
+
                   (DAE.T_FUNCTION(args1, ty1, functionAttributes1, path) <| _, DAE.T_FUNCTION(args2, ty2, _, _) <| rest, solvedBindings)  => begin
                       tys1 = ListUtil.map(args1, funcArgType)
                       tys2 = ListUtil.map(args2, funcArgType)
@@ -7986,7 +7896,7 @@
                       ty1 = DAE.T_FUNCTION(args1, ty1, functionAttributes1, path)
                     (_cons(ty1, rest), solvedBindings)
                   end
-                  
+
                   (tys1, ty <| tys2, solvedBindings)  => begin
                       (tys, solvedBindings) = solveBindings(tys1, tys2, solvedBindings)
                     (_cons(ty, tys), solvedBindings)
@@ -8005,7 +7915,7 @@
         The good news is we don't have functions with many unknown types in the compiler.
 
         Horribly complicated function to keep track of what happens... =#
-        function solveBindingsThread(itys1::List{<:DAE.Type}, itys2::List{<:DAE.Type}, changed::Bool #= if true, something changed and the function will succeed =#, isolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{List{DAE.Type}, InstTypes.PolymorphicBindings} 
+        function solveBindingsThread(itys1::List{<:DAE.Type}, itys2::List{<:DAE.Type}, changed::Bool #= if true, something changed and the function will succeed =#, isolvedBindings::InstTypes.PolymorphicBindings) ::Tuple{List{DAE.Type}, InstTypes.PolymorphicBindings}
               local outSolvedBindings::InstTypes.PolymorphicBindings
               local outTys::List{DAE.Type}
 
@@ -8021,12 +7931,12 @@
                       (tys2, solvedBindings) = solveBindingsThread(tys1, tys2, true, solvedBindings)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   (ty1 <| tys1, _ <| tys2, _, solvedBindings)  => begin
                       (tys2, solvedBindings) = solveBindingsThread(tys1, tys2, changed, solvedBindings)
                     (_cons(ty1, tys2), solvedBindings)
                   end
-                  
+
                   ( nil(),  nil(), true, solvedBindings)  => begin
                     (nil, solvedBindings)
                   end
@@ -8035,7 +7945,7 @@
           (outTys, outSolvedBindings)
         end
 
-        function replaceSolvedBindings(itys::List{<:DAE.Type}, isolvedBindings::InstTypes.PolymorphicBindings, changed::Bool #= if true, something changed and the function will succeed =#) ::List{DAE.Type} 
+        function replaceSolvedBindings(itys::List{<:DAE.Type}, isolvedBindings::InstTypes.PolymorphicBindings, changed::Bool #= if true, something changed and the function will succeed =#) ::List{DAE.Type}
               local outTys::List{DAE.Type}
 
               outTys = begin
@@ -8046,13 +7956,13 @@
                   ( nil(), _, true)  => begin
                     nil
                   end
-                  
+
                   (ty <| tys, solvedBindings, _)  => begin
                       ty = replaceSolvedBinding(ty, solvedBindings)
                       tys = replaceSolvedBindings(tys, solvedBindings, true)
                     _cons(ty, tys)
                   end
-                  
+
                   (ty <| tys, solvedBindings, _)  => begin
                       tys = replaceSolvedBindings(tys, solvedBindings, changed)
                     _cons(ty, tys)
@@ -8062,7 +7972,7 @@
           outTys
         end
 
-        function replaceSolvedBinding(ity::DAE.Type, isolvedBindings::InstTypes.PolymorphicBindings) ::DAE.Type 
+        function replaceSolvedBinding(ity::DAE.Type, isolvedBindings::InstTypes.PolymorphicBindings) ::DAE.Type
               local outTy::DAE.Type
 
               outTy = begin
@@ -8084,31 +7994,31 @@
                       ty = DAE.T_METALIST(ty)
                     ty
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = ty), solvedBindings)  => begin
                       ty = replaceSolvedBinding(ty, solvedBindings)
                       ty = DAE.T_METAARRAY(ty)
                     ty
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = ty), solvedBindings)  => begin
                       ty = replaceSolvedBinding(ty, solvedBindings)
                       ty = DAE.T_METAOPTION(ty)
                     ty
                   end
-                  
+
                   (DAE.T_METATUPLE(types = tys), solvedBindings)  => begin
                       tys = replaceSolvedBindings(tys, solvedBindings, false)
                       ty = DAE.T_METATUPLE(tys)
                     ty
                   end
-                  
+
                   (DAE.T_TUPLE(types = tys), solvedBindings)  => begin
                       tys = replaceSolvedBindings(tys, solvedBindings, false)
                       ty = DAE.T_TUPLE(tys, ity.names)
                     ty
                   end
-                  
+
                   (DAE.T_FUNCTION(args, resType, functionAttributes, path), solvedBindings)  => begin
                       tys = ListUtil.map(args, funcArgType)
                       tys = replaceSolvedBindings(_cons(resType, tys), solvedBindings, false)
@@ -8119,7 +8029,7 @@
                       ty = DAE.T_FUNCTION(args, ty, functionAttributes, path)
                     ty
                   end
-                  
+
                   (DAE.T_METAPOLYMORPHIC(name = id), solvedBindings)  => begin
                       @match list(ty) = polymorphicBindingsLookup(id, solvedBindings)
                     ty
@@ -8132,7 +8042,7 @@
          #= A simple subtype() that also binds polymorphic variables.
         Only works on the MetaModelica datatypes; the input is assumed to be boxed.
          =#
-        function subtypePolymorphic(actual::DAE.Type, expected::DAE.Type, envPath::Option{<:Absyn.Path}, inBindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings 
+        function subtypePolymorphic(actual::DAE.Type, expected::DAE.Type, envPath::Option{<:Absyn.Path}, inBindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings
               local bindings::InstTypes.PolymorphicBindings
 
               bindings = begin
@@ -8155,7 +8065,7 @@
                   (_, DAE.T_METAPOLYMORPHIC(name = id))  => begin
                     addPolymorphicBinding("" + id, actual, inBindings)
                   end
-                  
+
                   (DAE.T_METAPOLYMORPHIC(name = id), _)  => begin
                       if stringGet(id, 1) != stringCharInt("")
                         fail()
@@ -8168,76 +8078,76 @@
                        =#
                     addPolymorphicBinding("" + id, expected, inBindings)
                   end
-                  
+
                   (DAE.T_METABOXED(ty = ty1), ty2)  => begin
                       ty1 = unboxedType(ty1)
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (ty1, DAE.T_METABOXED(ty = ty2))  => begin
                       ty2 = unboxedType(ty2)
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_NORETCALL(__), DAE.T_NORETCALL(__))  => begin
                     inBindings
                   end
-                  
+
                   (DAE.T_INTEGER(__), DAE.T_INTEGER(__))  => begin
                     inBindings
                   end
-                  
+
                   (DAE.T_REAL(__), DAE.T_INTEGER(__))  => begin
                     inBindings
                   end
-                  
+
                   (DAE.T_STRING(__), DAE.T_STRING(__))  => begin
                     inBindings
                   end
-                  
+
                   (DAE.T_BOOL(__), DAE.T_BOOL(__))  => begin
                     inBindings
                   end
-                  
+
                   (DAE.T_ENUMERATION(names = names1), DAE.T_ENUMERATION(names = names2))  => begin
                       @match true = ListUtil.isEqualOnTrue(names1, names2, stringEq)
                     inBindings
                   end
-                  
+
                   (DAE.T_ARRAY(ty = ty1), DAE.T_ARRAY(ty = ty2))  => begin
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_METAARRAY(ty = ty1), DAE.T_METAARRAY(ty = ty2))  => begin
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_METALIST(ty = ty1), DAE.T_METALIST(ty = ty2))  => begin
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_METAOPTION(ty = ty1), DAE.T_METAOPTION(ty = ty2))  => begin
                     subtypePolymorphic(ty1, ty2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_METATUPLE(types = tList1), DAE.T_METATUPLE(types = tList2))  => begin
                     subtypePolymorphicList(tList1, tList2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_TUPLE(types = tList1), DAE.T_TUPLE(types = tList2))  => begin
                     subtypePolymorphicList(tList1, tList2, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(__), DAE.T_METAUNIONTYPE(__))  => begin
                       @match true = AbsynUtil.pathEqual(actual.path, expected.path)
                     subtypePolymorphicList(actual.typeVars, expected.typeVars, envPath, inBindings)
                   end
-                  
+
                   (DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(path1)), DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(path2)))  => begin
                       @match true = AbsynUtil.pathEqual(path1, path2)
                     inBindings
                   end
-                  
+
                   (DAE.T_FUNCTION(farg1, ty1, _, path1), DAE.T_FUNCTION(farg2, ty2, _, _))  => begin
                        #=  MM Function Reference. sjoelund
                        =#
@@ -8258,21 +8168,21 @@
                        =#
                     bindings
                   end
-                  
+
                   (DAE.T_UNKNOWN(__), ty2)  => begin
                       tys = getAllInnerTypesOfType(ty2, isPolymorphic)
                       ids = ListUtil.map(tys, polymorphicTypeName)
                       bindings = ListUtil.fold1(ids, addPolymorphicBinding, actual, inBindings)
                     bindings
                   end
-                  
+
                   (DAE.T_ANYTYPE(__), ty2)  => begin
                       tys = getAllInnerTypesOfType(ty2, isPolymorphic)
                       ids = ListUtil.map(tys, polymorphicTypeName)
                       bindings = ListUtil.fold1(ids, addPolymorphicBinding, actual, inBindings)
                     bindings
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -8285,7 +8195,7 @@
 
          #= A simple subtype() that also binds polymorphic variables.
          Only works on the MetaModelica datatypes; the input is assumed to be boxed. =#
-        function subtypePolymorphicList(actual::List{<:DAE.Type}, expected::List{<:DAE.Type}, envPath::Option{<:Absyn.Path}, ibindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings 
+        function subtypePolymorphicList(actual::List{<:DAE.Type}, expected::List{<:DAE.Type}, envPath::Option{<:Absyn.Path}, ibindings::InstTypes.PolymorphicBindings) ::InstTypes.PolymorphicBindings
               local outBindings::InstTypes.PolymorphicBindings
 
               outBindings = begin
@@ -8298,7 +8208,7 @@
                   ( nil(),  nil(), _, bindings)  => begin
                     bindings
                   end
-                  
+
                   (ty1 <| tList1, ty2 <| tList2, _, bindings)  => begin
                       bindings = subtypePolymorphic(ty1, ty2, envPath, bindings)
                       bindings = subtypePolymorphicList(tList1, tList2, envPath, bindings)
@@ -8309,7 +8219,7 @@
           outBindings
         end
 
-        function boxVarLst(vars::List{<:DAE.Var}) ::List{DAE.Var} 
+        function boxVarLst(vars::List{<:DAE.Var}) ::List{DAE.Var}
               local ovars::List{DAE.Var}
 
               ovars = begin
@@ -8323,7 +8233,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.TYPES_VAR(name, attributes, type_, binding, constOfForIteratorRange) <| rest  => begin
                       type_ = boxIfUnboxedType(type_)
                       rest = boxVarLst(rest)
@@ -8335,7 +8245,7 @@
         end
 
          #= Lifts a type to an array using DAE.Subscript for dimension in the case of non-expanded arrays =#
-        function liftArraySubscript(inType::DAE.Type, inSubscript::DAE.Subscript) ::DAE.Type 
+        function liftArraySubscript(inType::DAE.Type, inSubscript::DAE.Subscript) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -8348,11 +8258,11 @@
                   (ty, DAE.WHOLE_NONEXP(exp = DAE.ICONST(i)))  => begin
                     DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(i)))
                   end
-                  
+
                   (ty, DAE.WHOLE_NONEXP(exp = e))  => begin
                     DAE.T_ARRAY(ty, list(DAE.DIM_EXP(e)))
                   end
-                  
+
                   (ty, _)  => begin
                     ty
                   end
@@ -8365,9 +8275,9 @@
           outType
         end
 
-         #= 
+         #=
           Lifts a type using list<DAE.Subscript> to determine dimensions in the case of non-expanded arrays =#
-        function liftArraySubscriptList(inType::DAE.Type, inSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type 
+        function liftArraySubscriptList(inType::DAE.Type, inSubscriptLst::List{<:DAE.Subscript}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -8378,7 +8288,7 @@
                   (ty,  nil())  => begin
                     ty
                   end
-                  
+
                   (ty, sub <| rest)  => begin
                     liftArraySubscript(liftArraySubscriptList(ty, rest), sub)
                   end
@@ -8388,7 +8298,7 @@
         end
 
          #= Needed when pattern-matching =#
-        function convertTupleToMetaTuple(exp::DAE.Exp, ty::DAE.Type) ::Tuple{DAE.Exp, DAE.Type} 
+        function convertTupleToMetaTuple(exp::DAE.Exp, ty::DAE.Type) ::Tuple{DAE.Exp, DAE.Type}
               local oty::DAE.Type
               local oexp::DAE.Exp
 
@@ -8398,7 +8308,7 @@
                       (oexp, oty) = matchType(exp, ty, DAE.T_METABOXED_DEFAULT, false)
                     (oexp, oty)
                   end
-                  
+
                   _  => begin
                       (exp, ty)
                   end
@@ -8408,7 +8318,7 @@
           (oexp, oty)
         end
 
-        function isFunctionType(ty::DAE.Type) ::Bool 
+        function isFunctionType(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -8416,7 +8326,7 @@
                   DAE.T_FUNCTION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -8425,7 +8335,7 @@
           b
         end
 
-        function prefixTraversedPolymorphicType(ty::Type, prefix::String) ::Tuple{Type, String} 
+        function prefixTraversedPolymorphicType(ty::Type, prefix::String) ::Tuple{Type, String}
               local str::String
               local oty::Type = ty
 
@@ -8435,7 +8345,7 @@
                       oty.name = prefix + oty.name
                     (oty, prefix)
                   end
-                  
+
                   _  => begin
                       (ty, prefix)
                   end
@@ -8444,7 +8354,7 @@
           (oty, str)
         end
 
-        function makeExpDimensionsUnknown(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger} 
+        function makeExpDimensionsUnknown(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger}
               local odummy::ModelicaInteger = dummy
               local oty::DAE.Type = ty
 
@@ -8454,7 +8364,7 @@
                       oty.dims = list(DAE.DIM_UNKNOWN())
                     oty
                   end
-                  
+
                   _  => begin
                       oty
                   end
@@ -8464,7 +8374,7 @@
         end
 
          #= In binding equations, [Boolean] and [2] match, so we need to convert them =#
-        function makeKnownDimensionsInteger(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger} 
+        function makeKnownDimensionsInteger(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger}
               local odummy::ModelicaInteger = dummy
               local oty::DAE.Type = ty
 
@@ -8475,17 +8385,17 @@
                       oty.dims = list(DAE.DIM_INTEGER(2))
                     oty
                   end
-                  
+
                   DAE.T_ARRAY(dims = DAE.DIM_ENUM(size = size) <|  nil())  => begin
                       oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
-                  
+
                   DAE.T_ARRAY(dims = DAE.DIM_EXP(exp = DAE.ICONST(size)) <|  nil())  => begin
                       oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
-                  
+
                   _  => begin
                       oty
                   end
@@ -8493,8 +8403,8 @@
               end
           (oty, odummy)
         end
-
-        function traverseType(ty::DAE.Type, arg::A, fn::Func) ::Tuple{DAE.Type, A} 
+        A = Any
+        function traverseType(ty::DAE.Type, arg::A, fn::Func) ::Tuple{DAE.Type, A}
               local a::A = arg
               local oty::DAE.Type
 
@@ -8516,119 +8426,119 @@
                   DAE.T_INTEGER(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                     (ty, a)
                   end
-                  
+
                   DAE.T_CODE(__)  => begin
                     (ty, a)
                   end
-                  
+
                   oty && DAE.T_METABOXED(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_ARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METATYPE(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METALIST(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METAOPTION(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METAARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
                       oty.ty = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
                       oty.functionType = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_FUNCTION_REFERENCE_FUNC(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
                       oty.functionType = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METATUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
                       oty.types = tys
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_TUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
                       oty.types = tys
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_METARECORD(__)  => begin
                       (vars, a) = traverseVarTypes(oty.fields, a, fn)
                       oty.fields = vars
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_COMPLEX(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
                       oty.varLst = vars
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_SUBTYPE_BASIC(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
                       (tyInner, a) = traverseType(oty.complexType, a, fn)
@@ -8636,7 +8546,7 @@
                       oty.complexType = tyInner
                     (oty, a)
                   end
-                  
+
                   oty && DAE.T_FUNCTION(__)  => begin
                       (farg, a) = traverseFuncArg(oty.funcArg, a, fn)
                       (tyInner, a) = traverseType(oty.funcResultType, a, fn)
@@ -8644,7 +8554,7 @@
                       oty.funcResultType = tyInner
                     (oty, a)
                   end
-                  
+
                   _  => begin
                         str = "Types.traverseType not implemented correctly: " + unparseType(ty)
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -8656,7 +8566,7 @@
           (oty, a)
         end
 
-        function traverseTupleType(itys::List{<:DAE.Type}, ia::A, fn::Func) ::Tuple{List{DAE.Type}, A} 
+        function traverseTupleType(itys::List{<:DAE.Type}, ia::A, fn::Func) ::Tuple{List{DAE.Type}, A}
               local oa::A
               local otys::List{DAE.Type}
 
@@ -8668,7 +8578,7 @@
                   ( nil(), a, _)  => begin
                     (nil, a)
                   end
-                  
+
                   (ty <| tys, a, _)  => begin
                       (ty, a) = traverseType(ty, a, fn)
                       (tys, a) = traverseTupleType(tys, a, fn)
@@ -8679,7 +8589,7 @@
           (otys, oa)
         end
 
-        function traverseVarTypes(ivars::List{<:DAE.Var}, ia::A, fn::Func) ::Tuple{List{DAE.Var}, A} 
+        function traverseVarTypes(ivars::List{<:DAE.Var}, ia::A, fn::Func) ::Tuple{List{DAE.Var}, A}
               local oa::A
               local ovars::List{DAE.Var}
 
@@ -8692,7 +8602,7 @@
                   ( nil(), a, _)  => begin
                     (nil, a)
                   end
-                  
+
                   (var <| vars, a, _)  => begin
                       ty = getVarType(var)
                       (ty, a) = traverseType(ty, a, fn)
@@ -8705,7 +8615,7 @@
           (ovars, oa)
         end
 
-        function traverseFuncArg(iargs::List{<:DAE.FuncArg}, ia::A, fn::Func) ::Tuple{List{DAE.FuncArg}, A} 
+        function traverseFuncArg(iargs::List{<:DAE.FuncArg}, ia::A, fn::Func) ::Tuple{List{DAE.FuncArg}, A}
               local oa::A
               local oargs::List{DAE.FuncArg}
 
@@ -8722,7 +8632,7 @@
                   ( nil(), a)  => begin
                     (nil, a)
                   end
-                  
+
                   (arg && DAE.FUNCARG(__) <| args, a)  => begin
                       (ty, a) = traverseType(arg.ty, a, fn)
                       arg.ty = ty
@@ -8734,7 +8644,7 @@
           (oargs, oa)
         end
 
-        function makeRegularTupleFromMetaTupleOnTrue(b::Bool, ty::DAE.Type) ::DAE.Type 
+        function makeRegularTupleFromMetaTupleOnTrue(b::Bool, ty::DAE.Type) ::DAE.Type
               local out::DAE.Type
 
               out = begin
@@ -8745,7 +8655,7 @@
                       tys = ListUtil.map(tys, unboxedType)
                     DAE.T_TUPLE(tys, NONE())
                   end
-                  
+
                   (false, _)  => begin
                     ty
                   end
@@ -8756,7 +8666,7 @@
           out
         end
 
-        function allTuple(itys::List{<:DAE.Type}) ::Bool 
+        function allTuple(itys::List{<:DAE.Type}) ::Bool
               local b::Bool
 
               b = begin
@@ -8765,11 +8675,11 @@
                    nil()  => begin
                     true
                   end
-                  
+
                   DAE.T_TUPLE(__) <| tys  => begin
                     allTuple(tys)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -8779,7 +8689,7 @@
         end
 
          #= For DAE.PARTEVALFUNC =#
-        function unboxedFunctionType(inType::DAE.Type) ::DAE.Type 
+        function unboxedFunctionType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -8804,7 +8714,7 @@
           outType
         end
 
-        function printCodeTypeStr(ct::DAE.CodeType) ::String 
+        function printCodeTypeStr(ct::DAE.CodeType) ::String
               local str::String
 
               str = begin
@@ -8812,27 +8722,27 @@
                   DAE.C_EXPRESSION(__)  => begin
                     "OpenModelica.Code.Expression"
                   end
-                  
+
                   DAE.C_EXPRESSION_OR_MODIFICATION(__)  => begin
                     "OpenModelica.Code.ExpressionOrModification"
                   end
-                  
+
                   DAE.C_MODIFICATION(__)  => begin
                     "OpenModelica.Code.Modification"
                   end
-                  
+
                   DAE.C_TYPENAME(__)  => begin
                     "OpenModelica.Code.TypeName"
                   end
-                  
+
                   DAE.C_VARIABLENAME(__)  => begin
                     "OpenModelica.Code.VariableName"
                   end
-                  
+
                   DAE.C_VARIABLENAMES(__)  => begin
                     "OpenModelica.Code.VariableNames"
                   end
-                  
+
                   _  => begin
                       "Types.printCodeTypeStr failed"
                   end
@@ -8841,7 +8751,7 @@
           str
         end
 
-        function varHasMetaRecordType(var::DAE.Var) ::Bool 
+        function varHasMetaRecordType(var::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -8849,15 +8759,15 @@
                   DAE.TYPES_VAR(ty = DAE.T_METABOXED(ty = DAE.T_METARECORD(__)))  => begin
                     true
                   end
-                  
+
                   DAE.TYPES_VAR(ty = DAE.T_METARECORD(__))  => begin
                     true
                   end
-                  
+
                   DAE.TYPES_VAR(ty = DAE.T_METABOXED(ty = DAE.T_COMPLEX(complexClassType = ClassInf.META_RECORD(_))))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -8866,7 +8776,7 @@
           b
         end
 
-        function optInteger(inInt::Option{<:ModelicaInteger}) ::ModelicaInteger 
+        function optInteger(inInt::Option{<:ModelicaInteger}) ::ModelicaInteger
               local outInt::ModelicaInteger
 
               outInt = begin
@@ -8875,7 +8785,7 @@
                   SOME(i)  => begin
                     i
                   end
-                  
+
                   _  => begin
                       -1
                   end
@@ -8885,7 +8795,7 @@
         end
 
          #= This function builds Values.Value out of a type using generated bindings. =#
-        function typeToValue(inType::DAE.Type) ::Values.Value 
+        function typeToValue(inType::DAE.Type) ::Values.Value
               local defaultValue::Values.Value
 
               defaultValue = begin
@@ -8905,51 +8815,51 @@
                   DAE.T_INTEGER(__)  => begin
                     Values.INTEGER(0)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     Values.REAL(0.0)
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     Values.STRING("<EMPTY>")
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     Values.BOOL(false)
                   end
-                  
+
                   DAE.T_ENUMERATION(index = iOpt, path = path)  => begin
                       i = optInteger(iOpt)
                     Values.ENUM_LITERAL(path, i)
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = st, varLst = vars)  => begin
                       (ordered, comp) = varsToValues(vars)
                       path = ClassInf.getStateName(st)
                     Values.RECORD(path, ordered, comp, -1)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
                       v = typeToValue(t)
                     v
                   end
-                  
+
                   DAE.T_ARRAY(dims = DAE.DIM_INTEGER(i) <|  nil(), ty = t)  => begin
                       v = typeToValue(t)
                       valueLst = ListUtil.fill(v, i)
                     Values.ARRAY(valueLst, list(i))
                   end
-                  
+
                   DAE.T_TUPLE(types = tys)  => begin
                       valueLst = ListUtil.map(tys, typeToValue)
                       v = Values.TUPLE(valueLst)
                     v
                   end
-                  
+
                   DAE.T_UNKNOWN(__)  => begin
                     Values.META_FAIL()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Types.typeToValue failed on unhandled Type ")
@@ -8967,7 +8877,7 @@
          #= Translates a list of Var list to Values.Value, the
           names of the variables as component names.
           Used e.g. when retrieving the type of a record value. =#
-        function varsToValues(inVarLst::List{<:DAE.Var}) ::Tuple{List{Values.Value}, List{String}} 
+        function varsToValues(inVarLst::List{<:DAE.Var}) ::Tuple{List{Values.Value}, List{String}}
               local outExpIdentLst::List{String}
               local outValuesValueLst::List{Values.Value}
 
@@ -8982,13 +8892,13 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   DAE.TYPES_VAR(name = id, ty = tp) <| rest  => begin
                       v = typeToValue(tp)
                       (restVals, restIds) = varsToValues(rest)
                     (_cons(v, restVals), _cons(id, restIds))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Types.varsToValues failed\\n")
@@ -9000,7 +8910,7 @@
         end
 
          #= Real [3,2,1],3 => Real [3,2,:] =#
-        function makeNthDimUnknown(ty::DAE.Type, dim::ModelicaInteger) ::DAE.Type 
+        function makeNthDimUnknown(ty::DAE.Type, dim::ModelicaInteger) ::DAE.Type
               local oty::DAE.Type
 
               oty = begin
@@ -9010,7 +8920,7 @@
                   (DAE.T_ARRAY(ty1, _ <|  nil()), 1)  => begin
                     DAE.T_ARRAY(ty1, list(DAE.DIM_UNKNOWN()))
                   end
-                  
+
                   (DAE.T_ARRAY(ty1, ad <|  nil()), _)  => begin
                       ty1 = makeNthDimUnknown(ty1, dim - 1)
                     DAE.T_ARRAY(ty1, list(ad))
@@ -9021,7 +8931,7 @@
         end
 
          #= Selects the supertype out of two array-types. Integer may be promoted to Real. =#
-        function arraySuperType(ity1::DAE.Type, info::SourceInfo, ity2::DAE.Type) ::DAE.Type 
+        function arraySuperType(ity1::DAE.Type, info::SourceInfo, ity2::DAE.Type) ::DAE.Type
               local ty::DAE.Type
 
               ty = begin
@@ -9037,7 +8947,7 @@
                       @match true = subtype(ty1, ty2)
                     ty1
                   end
-                  
+
                   (ty1, _, ty2)  => begin
                       @match true = isInteger(arrayElementType(ty2))
                       @match true = isReal(arrayElementType(ty1))
@@ -9045,12 +8955,12 @@
                       @match true = subtype(ty1, ty2)
                     ty1
                   end
-                  
+
                   (ty1, _, ty2)  => begin
                       @match true = subtype(ty1, ty2)
                     ty1
                   end
-                  
+
                   (ty1, _, ty2)  => begin
                       str1 = unparseType(ty1)
                       str2 = unparseType(ty2)
@@ -9063,7 +8973,7 @@
           ty
         end
 
-        function replaceIntegerTypeWithReal(ty::Type, dummy::ModelicaInteger) ::Tuple{Type, ModelicaInteger} 
+        function replaceIntegerTypeWithReal(ty::Type, dummy::ModelicaInteger) ::Tuple{Type, ModelicaInteger}
               local odummy::ModelicaInteger = dummy
               local oty::Type
 
@@ -9072,7 +8982,7 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   _  => begin
                       ty
                   end
@@ -9081,7 +8991,7 @@
           (oty, odummy)
         end
 
-        function isZeroLengthArray(ty::DAE.Type) ::Bool 
+        function isZeroLengthArray(ty::DAE.Type) ::Bool
               local res::Bool
 
               res = begin
@@ -9091,7 +9001,7 @@
                       res = ListUtil.fold(dims, isZeroDim, false)
                     res
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9101,7 +9011,7 @@
         end
 
          #= Check dimensions by folding and checking for zeroes =#
-        function isZeroDim(dim::DAE.Dimension, acc::Bool) ::Bool 
+        function isZeroDim(dim::DAE.Dimension, acc::Bool) ::Bool
               local res::Bool
 
               res = begin
@@ -9109,11 +9019,11 @@
                   (DAE.DIM_INTEGER(integer = 0), _)  => begin
                     true
                   end
-                  
+
                   (DAE.DIM_ENUM(size = 0), _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       acc
                   end
@@ -9123,58 +9033,58 @@
         end
 
          #= translates an SCode.Variability to a DAE.Const =#
-        function variabilityToConst(variability::SCode.Variability) ::DAE.Const 
-              local const::DAE.Const
+        function variabilityToConst(variability::SCode.Variability) ::DAE.Const
+              local constType::DAE.Const
 
-              const = begin
+              constType = begin
                 @match variability begin
                   SCode.VAR(__)  => begin
                     DAE.C_VAR()
                   end
-                  
+
                   SCode.DISCRETE(__)  => begin
                     DAE.C_VAR()
                   end
-                  
+
                   SCode.PARAM(__)  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   SCode.CONST(__)  => begin
                     DAE.C_CONST()
                   end
                 end
               end
-          const
+          constType
         end
 
          #= translates an DAE.varKind to a DAE.Const =#
-        function varKindToConst(varKind::DAE.VarKind) ::DAE.Const 
-              local const::DAE.Const
+        function varKindToConst(varKind::DAE.VarKind) ::DAE.Const
+              local constType::DAE.Const
 
-              const = begin
+              constType = begin
                 @match varKind begin
                   DAE.VARIABLE(__)  => begin
                     DAE.C_VAR()
                   end
-                  
+
                   DAE.DISCRETE(__)  => begin
                     DAE.C_VAR()
                   end
-                  
+
                   DAE.PARAM(__)  => begin
                     DAE.C_PARAM()
                   end
-                  
+
                   DAE.CONST(__)  => begin
                     DAE.C_CONST()
                   end
                 end
               end
-          const
+          constType
         end
 
-        function isValidFunctionVarType(inType::DAE.Type) ::Bool 
+        function isValidFunctionVarType(inType::DAE.Type) ::Bool
               local outIsValid::Bool
 
               outIsValid = begin
@@ -9184,11 +9094,11 @@
                   DAE.T_COMPLEX(complexClassType = state)  => begin
                     isValidFunctionVarState(state)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty)  => begin
                     isValidFunctionVarType(ty)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9197,7 +9107,7 @@
           outIsValid
         end
 
-        function isValidFunctionVarState(inState::ClassInf.State) ::Bool 
+        function isValidFunctionVarState(inState::ClassInf.State) ::Bool
               local outIsValid::Bool
 
               outIsValid = begin
@@ -9205,23 +9115,23 @@
                   ClassInf.MODEL(__)  => begin
                     false
                   end
-                  
+
                   ClassInf.BLOCK(__)  => begin
                     false
                   end
-                  
+
                   ClassInf.CONNECTOR(__)  => begin
                     false
                   end
-                  
+
                   ClassInf.OPTIMIZATION(__)  => begin
                     false
                   end
-                  
+
                   ClassInf.PACKAGE(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9232,7 +9142,7 @@
 
          #= Creates a dummy expression from a type. Used by typeConvertArray to handle
           empty arrays. =#
-        function makeDummyExpFromType(inType::DAE.Type) ::DAE.Exp 
+        function makeDummyExpFromType(inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -9247,23 +9157,23 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.ICONST(0)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     DAE.RCONST(0.0)
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     DAE.SCONST("")
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     DAE.BCONST(false)
                   end
-                  
+
                   DAE.T_ENUMERATION(path = p)  => begin
                     DAE.ENUM_LITERAL(p, 1)
                   end
-                  
+
                   DAE.T_ARRAY(ty = ty, dims = dim <|  nil())  => begin
                       idim = Expression.dimensionSize(dim)
                       exp = makeDummyExpFromType(ty)
@@ -9277,7 +9187,7 @@
           outExp
         end
 
-        function printExpTypeStr(iet::DAE.Type) ::String 
+        function printExpTypeStr(iet::DAE.Type) ::String
               local str::String
 
               str = printTypeStr(expTypetoTypesType(iet))
@@ -9285,7 +9195,7 @@
         end
 
          #= Return true if the type is DAE.T_UNKNOWN or DAE.T_ANYTYPE =#
-        function isUnknownType(inType::DAE.Type) ::Bool 
+        function isUnknownType(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9293,11 +9203,11 @@
                   DAE.T_UNKNOWN(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ANYTYPE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9308,7 +9218,7 @@
 
          #= Returns true if the given type is overdetermined, i.e. a type or record with
            an equalityConstraint function, otherwise false. =#
-        function isOverdeterminedType(inType::DAE.Type) ::Bool 
+        function isOverdeterminedType(inType::DAE.Type) ::Bool
               local outIsOverdetermined::Bool
 
               outIsOverdetermined = begin
@@ -9317,7 +9227,7 @@
                   DAE.T_COMPLEX(complexClassType = cct, equalityConstraint = SOME(_))  => begin
                     ClassInf.isTypeOrRecord(cct)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
                     true
                   end
@@ -9326,14 +9236,14 @@
           outIsOverdetermined
         end
 
-        function hasMetaArray(ty::DAE.Type) ::Bool 
+        function hasMetaArray(ty::DAE.Type) ::Bool
               local b::Bool
 
               (_, b) = traverseType(ty, false, hasMetaArrayWork)
           b
         end
 
-        function hasMetaArrayWork(ty::Type, b::Bool) ::Tuple{Type, Bool} 
+        function hasMetaArrayWork(ty::Type, b::Bool) ::Tuple{Type, Bool}
               local ob::Bool = b
               local oty::Type = ty
 
@@ -9343,7 +9253,7 @@
                     DAE.T_METAARRAY(__)  => begin
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -9353,7 +9263,7 @@
           (oty, ob)
         end
 
-        function classTypeEqualIfRecord(st1::ClassInf.State, st2::ClassInf.State) ::Bool 
+        function classTypeEqualIfRecord(st1::ClassInf.State, st2::ClassInf.State) ::Bool
               local b::Bool
 
               b = begin
@@ -9363,7 +9273,7 @@
                   (ClassInf.RECORD(p1), ClassInf.RECORD(p2))  => begin
                     AbsynUtil.pathEqual(p1, p2)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9373,7 +9283,7 @@
         end
 
          #= If one branch of an if-expression has truly unknown dimensions they both will need to return unknown dimensions for type-checking to work =#
-        function ifExpMakeDimsUnknown(ty1::DAE.Type, ty2::DAE.Type) ::Tuple{DAE.Type, DAE.Type} 
+        function ifExpMakeDimsUnknown(ty1::DAE.Type, ty2::DAE.Type) ::Tuple{DAE.Type, DAE.Type}
               local oty2::DAE.Type
               local oty1::DAE.Type
 
@@ -9387,17 +9297,17 @@
                       (oty1, oty2) = ifExpMakeDimsUnknown(inner1, inner2)
                     (DAE.T_ARRAY(inner1, _cons(DAE.DIM_UNKNOWN(), nil)), DAE.T_ARRAY(inner2, _cons(DAE.DIM_UNKNOWN(), nil)))
                   end
-                  
+
                   (DAE.T_ARRAY(ty = inner1, dims = _ <|  nil()), DAE.T_ARRAY(ty = inner2, dims = DAE.DIM_UNKNOWN(__) <|  nil()))  => begin
                       (oty1, oty2) = ifExpMakeDimsUnknown(inner1, inner2)
                     (DAE.T_ARRAY(inner1, _cons(DAE.DIM_UNKNOWN(), nil)), DAE.T_ARRAY(inner2, _cons(DAE.DIM_UNKNOWN(), nil)))
                   end
-                  
+
                   (DAE.T_ARRAY(ty = inner1, dims = d1 <|  nil()), DAE.T_ARRAY(ty = inner2, dims = d2 <|  nil()))  => begin
                       (oty1, oty2) = ifExpMakeDimsUnknown(inner1, inner2)
                     (DAE.T_ARRAY(inner1, list(d1)), DAE.T_ARRAY(inner2, list(d2)))
                   end
-                  
+
                   _  => begin
                       (ty1, ty2)
                   end
@@ -9409,7 +9319,7 @@
          #= check if the type has bindings for everything
          if is parameter or constant without fixed = false
          specified otherwise =#
-        function isFixedWithNoBinding(inTy::DAE.Type, inVariability::SCode.Variability) ::Bool 
+        function isFixedWithNoBinding(inTy::DAE.Type, inVariability::SCode.Variability) ::Bool
               local outFixed::Bool
 
               outFixed = begin
@@ -9420,12 +9330,12 @@
                       b = getFixedVarAttribute(inTy)
                     b
                   end
-                  
+
                   (DAE.T_COMPLEX(varLst = vl), _)  => begin
                       @match true = allHaveBindings(vl)
                     false
                   end
-                  
+
                   _  => begin
                         b = listMember(inVariability, list(SCode.PARAM(), SCode.CONST()))
                       b
@@ -9443,7 +9353,7 @@
           outFixed
         end
 
-        function allHaveBindings(inVars::List{<:DAE.Var}) ::Bool 
+        function allHaveBindings(inVars::List{<:DAE.Var}) ::Bool
               local b::Bool
 
               b = begin
@@ -9453,12 +9363,12 @@
                    nil()  => begin
                     true
                   end
-                  
+
                   v <| _  => begin
                       @match false = hasBinding(v)
                     false
                   end
-                  
+
                   v <| rest  => begin
                       @match true = hasBinding(v)
                       @match true = allHaveBindings(rest)
@@ -9469,7 +9379,7 @@
           b
         end
 
-        function hasBinding(inVar::DAE.Var) ::Bool 
+        function hasBinding(inVar::DAE.Var) ::Bool
               local b::Bool
 
               b = begin
@@ -9477,7 +9387,7 @@
                   DAE.TYPES_VAR(binding = DAE.UNBOUND(__))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9486,14 +9396,14 @@
           b
         end
 
-        function typeErrorSanityCheck(inType1::String, inType2::String, inInfo::SourceInfo)  
+        function typeErrorSanityCheck(inType1::String, inType2::String, inInfo::SourceInfo)
               _ = begin
                 @matchcontinue (inType1, inType2, inInfo) begin
                   (_, _, _)  => begin
                       @match false = stringEq(inType1, inType2)
                     ()
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.ERRONEOUS_TYPE_ERROR, list(inType1), inInfo)
                       fail()
@@ -9502,7 +9412,7 @@
               end
         end
 
-        function dimNotFixed(dim::DAE.Dimension) ::Bool 
+        function dimNotFixed(dim::DAE.Dimension) ::Bool
               local b::Bool
 
               b = begin
@@ -9510,11 +9420,11 @@
                   DAE.DIM_UNKNOWN(__)  => begin
                     true
                   end
-                  
+
                   DAE.DIM_EXP(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9523,7 +9433,7 @@
           b
         end
 
-        function isArrayWithUnknownDimension(ty::DAE.Type) ::Bool 
+        function isArrayWithUnknownDimension(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9534,14 +9444,14 @@
                         DAE.DIM_UNKNOWN(__)  => begin
                           true
                         end
-                        
+
                         _  => begin
                             false
                         end
                       end
                     end for d in getDimensions(ty))
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9552,7 +9462,7 @@
 
          #= Strips the attribute variables from a type, and returns both the stripped
            type and the attribute variables. =#
-        function stripTypeVars(inType::DAE.Type) ::Tuple{DAE.Type, List{DAE.Var}} 
+        function stripTypeVars(inType::DAE.Type) ::Tuple{DAE.Type, List{DAE.Var}}
               local outVars::List{DAE.Var}
               local outType::DAE.Type
 
@@ -9568,33 +9478,33 @@
                   DAE.T_INTEGER(varLst = vars)  => begin
                     (DAE.T_INTEGER_DEFAULT, vars)
                   end
-                  
+
                   DAE.T_REAL(varLst = vars)  => begin
                     (DAE.T_REAL_DEFAULT, vars)
                   end
-                  
+
                   DAE.T_STRING(varLst = vars)  => begin
                     (DAE.T_STRING_DEFAULT, vars)
                   end
-                  
+
                   DAE.T_BOOL(varLst = vars)  => begin
                     (DAE.T_BOOL_DEFAULT, vars)
                   end
-                  
+
                   DAE.T_TUPLE(tys, _)  => begin
                     (DAE.T_TUPLE(tys, NONE()), nil)
                   end
-                  
+
                   DAE.T_ARRAY(ty, dims)  => begin
                       (ty, vars) = stripTypeVars(ty)
                     (DAE.T_ARRAY(ty, dims), vars)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(state, sub_vars, ty, ec)  => begin
                       (ty, vars) = stripTypeVars(ty)
                     (DAE.T_SUBTYPE_BASIC(state, sub_vars, ty, ec), vars)
                   end
-                  
+
                   _  => begin
                       (inType, nil)
                   end
@@ -9603,7 +9513,7 @@
           (outType, outVars)
         end
 
-        function setTypeVars(ty::DAE.Type, inVars::List{<:DAE.Var}) ::DAE.Type 
+        function setTypeVars(ty::DAE.Type, inVars::List{<:DAE.Var}) ::DAE.Type
 
 
               ty = begin
@@ -9612,37 +9522,37 @@
                       ty.varLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                       ty.varLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                       ty.varLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                       ty.varLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                       ty.varLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                       ty.attributeLst = inVars
                     ty
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                       ty.ty = setTypeVars(ty.ty, inVars)
                     ty
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                       ty.complexType = setTypeVars(ty.complexType, inVars)
                     ty
@@ -9652,7 +9562,7 @@
           ty
         end
 
-        function isEmptyOrNoRetcall(ty::DAE.Type) ::Bool 
+        function isEmptyOrNoRetcall(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9660,15 +9570,15 @@
                   DAE.T_TUPLE(types =  nil())  => begin
                     true
                   end
-                  
+
                   DAE.T_METATUPLE(types =  nil())  => begin
                     true
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9677,13 +9587,13 @@
           b
         end
 
-         #= 
+         #=
           Deal with the invalid conversions from Integer to enumeration.
           If the Integer corresponds to the Integer(ENUM) value of some enumeration constant ENUM,
           just give a warning, otherwise report an error.
           Returns false if an error was reported, otherwise true.
          =#
-        function typeConvertIntToEnumCheck(exp::DAE.Exp, expected::DAE.Type) ::Bool 
+        function typeConvertIntToEnumCheck(exp::DAE.Exp, expected::DAE.Type) ::Bool
               local conversionOK::Bool
 
               conversionOK = begin
@@ -9703,7 +9613,7 @@
                       Error.addMessage(Error.INTEGER_ENUMERATION_CONVERSION_WARNING, list(intStr, pathStr, enumConst))
                     true
                   end
-                  
+
                   (DAE.ICONST(oi), DAE.T_ENUMERATION(path = tp, names = l))  => begin
                       pathStr = AbsynUtil.pathString(tp)
                       @match false = stringEq(pathStr, "")
@@ -9712,7 +9622,7 @@
                       Error.addMessage(Error.INTEGER_ENUMERATION_OUT_OF_RANGE, list(pathStr, intStr, lengthStr))
                     false
                   end
-                  
+
                   (DAE.ICONST(oi), DAE.T_ENUMERATION(path = tp))  => begin
                       pathStr = AbsynUtil.pathString(tp)
                       @match true = stringEq(pathStr, "")
@@ -9725,14 +9635,14 @@
           conversionOK
         end
 
-        function findVarIndex(id::String, vars::List{<:DAE.Var}) ::ModelicaInteger 
+        function findVarIndex(id::String, vars::List{<:DAE.Var}) ::ModelicaInteger
               local index::ModelicaInteger
 
               index = ListUtil.position1OnTrue(vars, selectVar, id) - 1 #= shift to zero-based index =#
           index
         end
 
-        function selectVar(var::DAE.Var, id::String) ::Bool 
+        function selectVar(var::DAE.Var, id::String) ::Bool
               local b::Bool
 
               b = begin
@@ -9741,7 +9651,7 @@
                   DAE.TYPES_VAR(name = id1)  => begin
                     stringEq(id, id1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9750,7 +9660,7 @@
           b
         end
 
-        function getUniontypeIfMetarecord(inTy::DAE.Type) ::DAE.Type 
+        function getUniontypeIfMetarecord(inTy::DAE.Type) ::DAE.Type
               local ty::DAE.Type
 
               ty = begin
@@ -9764,7 +9674,7 @@
                           DAE.NOT_SINGLETON()
                         end, p)
                   end
-                  
+
                   _  => begin
                       inTy
                   end
@@ -9773,14 +9683,14 @@
           ty
         end
 
-        function getUniontypeIfMetarecordReplaceAllSubtypes(inTy::DAE.Type) ::DAE.Type 
+        function getUniontypeIfMetarecordReplaceAllSubtypes(inTy::DAE.Type) ::DAE.Type
               local ty::DAE.Type
 
               (ty, _) = traverseType(inTy, 1, getUniontypeIfMetarecordTraverse)
           ty
         end
 
-        function getUniontypeIfMetarecordTraverse(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger} 
+        function getUniontypeIfMetarecordTraverse(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger}
               local odummy::ModelicaInteger = dummy
               local oty::DAE.Type
 
@@ -9793,7 +9703,7 @@
                           DAE.NOT_SINGLETON()
                         end, ty.utPath)
                   end
-                  
+
                   _  => begin
                       ty
                   end
@@ -9802,7 +9712,7 @@
           (oty, odummy)
         end
 
-        function isBuiltin(a::DAE.FunctionBuiltin) ::Bool 
+        function isBuiltin(a::DAE.FunctionBuiltin) ::Bool
               local b::Bool
 
               b = begin
@@ -9810,7 +9720,7 @@
                   DAE.FUNCTION_NOT_BUILTIN(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9819,7 +9729,7 @@
           b
         end
 
-        function makeCallAttr(ty::DAE.Type, attr::DAE.FunctionAttributes) ::DAE.CallAttributes 
+        function makeCallAttr(ty::DAE.Type, attr::DAE.FunctionAttributes) ::DAE.CallAttributes
               local callAttr::DAE.CallAttributes
 
               local isImpure::Bool
@@ -9836,7 +9746,7 @@
           callAttr
         end
 
-        function builtinName(isbuiltin::DAE.FunctionBuiltin) ::Option{String} 
+        function builtinName(isbuiltin::DAE.FunctionBuiltin) ::Option{String}
               local name::Option{String}
 
               name = begin
@@ -9844,7 +9754,7 @@
                   DAE.FUNCTION_BUILTIN(__)  => begin
                     isbuiltin.name
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -9853,14 +9763,14 @@
           name
         end
 
-        function getFuncArg(ty::DAE.Type) ::List{DAE.FuncArg} 
+        function getFuncArg(ty::DAE.Type) ::List{DAE.FuncArg}
               local args::List{DAE.FuncArg}
 
               @match DAE.T_FUNCTION(funcArg = args) = ty
           args
         end
 
-        function isArray1D(inType::DAE.Type) ::Bool 
+        function isArray1D(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9869,7 +9779,7 @@
                   DAE.T_ARRAY(ty = ty)  => begin
                     ! arrayType(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9878,7 +9788,7 @@
           b
         end
 
-        function isArray2D(inType::DAE.Type) ::Bool 
+        function isArray2D(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9887,7 +9797,7 @@
                   DAE.T_ARRAY(ty = DAE.T_ARRAY(ty = ty))  => begin
                     ! arrayType(ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9896,74 +9806,74 @@
           b
         end
 
-        function funcArgName(arg::DAE.FuncArg) ::String 
+        function funcArgName(arg::DAE.FuncArg) ::String
               local name::String
 
               @match DAE.FUNCARG(name = name) = arg
           name
         end
 
-        function funcArgType(arg::DAE.FuncArg) ::DAE.Type 
+        function funcArgType(arg::DAE.FuncArg) ::DAE.Type
               local ty::DAE.Type
 
               @match DAE.FUNCARG(ty = ty) = arg
           ty
         end
 
-        function funcArgDefaultBinding(arg::DAE.FuncArg) ::Option{DAE.Exp} 
+        function funcArgDefaultBinding(arg::DAE.FuncArg) ::Option{DAE.Exp}
               local defaultBinding::Option{DAE.Exp}
 
               @match DAE.FUNCARG(defaultBinding = defaultBinding) = arg
           defaultBinding
         end
 
-        function setFuncArgType(arg::DAE.FuncArg, ty::DAE.Type) ::DAE.FuncArg 
+        function setFuncArgType(arg::DAE.FuncArg, ty::DAE.Type) ::DAE.FuncArg
               local outArg::DAE.FuncArg
 
               local name::String
-              local const::DAE.Const
+              local constType::DAE.Const
               local par::DAE.VarParallelism
               local defaultBinding::Option{DAE.Exp}
 
-              @match DAE.FUNCARG(name, _, const, par, defaultBinding) = arg
-              outArg = DAE.FUNCARG(name, ty, const, par, defaultBinding)
+              @match DAE.FUNCARG(name, _, constType, par, defaultBinding) = arg
+              outArg = DAE.FUNCARG(name, ty, constType, par, defaultBinding)
           outArg
         end
 
-        function setFuncArgName(arg::DAE.FuncArg, name::String) ::DAE.FuncArg 
+        function setFuncArgName(arg::DAE.FuncArg, name::String) ::DAE.FuncArg
               local outArg::DAE.FuncArg
 
               local ty::DAE.Type
-              local const::DAE.Const
+              local constType::DAE.Const
               local par::DAE.VarParallelism
               local defaultBinding::Option{DAE.Exp}
 
-              @match DAE.FUNCARG(_, ty, const, par, defaultBinding) = arg
-              outArg = DAE.FUNCARG(name, ty, const, par, defaultBinding)
+              @match DAE.FUNCARG(_, ty, constType, par, defaultBinding) = arg
+              outArg = DAE.FUNCARG(name, ty, constType, par, defaultBinding)
           outArg
         end
 
-        function clearDefaultBinding(arg::DAE.FuncArg) ::DAE.FuncArg 
+        function clearDefaultBinding(arg::DAE.FuncArg) ::DAE.FuncArg
               local outArg::DAE.FuncArg
 
               local name::String
               local ty::DAE.Type
-              local const::DAE.Const
+              local constType::DAE.Const
               local par::DAE.VarParallelism
 
-              @match DAE.FUNCARG(name, ty, const, par, _) = arg
-              outArg = DAE.FUNCARG(name, ty, const, par, NONE())
+              @match DAE.FUNCARG(name, ty, constType, par, _) = arg
+              outArg = DAE.FUNCARG(name, ty, constType, par, NONE())
           outArg
         end
 
-        function makeDefaultFuncArg(name::String, ty::DAE.Type) ::DAE.FuncArg 
+        function makeDefaultFuncArg(name::String, ty::DAE.Type) ::DAE.FuncArg
               local arg::DAE.FuncArg
 
               arg = DAE.FUNCARG(name, ty, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())
           arg
         end
 
-        function setIsFunctionPointer(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger} 
+        function setIsFunctionPointer(ty::DAE.Type, dummy::ModelicaInteger) ::Tuple{DAE.Type, ModelicaInteger}
               local odummy::ModelicaInteger = dummy
               local oty::DAE.Type = ty
 
@@ -9975,7 +9885,7 @@
                       oty.functionAttributes = attr
                     oty
                   end
-                  
+
                   _  => begin
                       oty
                   end
@@ -9984,7 +9894,7 @@
           (oty, odummy)
         end
 
-        function isFunctionReferenceVar(ty::DAE.Type) ::Bool 
+        function isFunctionReferenceVar(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -9992,7 +9902,7 @@
                   DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10001,7 +9911,7 @@
           b
         end
 
-        function isFunctionPointer(inType::DAE.Type) ::Bool 
+        function isFunctionPointer(inType::DAE.Type) ::Bool
               local outIsFunPtr::Bool
 
               outIsFunPtr = begin
@@ -10009,7 +9919,7 @@
                   DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isFunctionPointer = true))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10018,7 +9928,7 @@
           outIsFunPtr
         end
 
-        function filterRecordComponents(inRecordVars::List{<:DAE.Var}, inInfo::SourceInfo) ::List{DAE.Var} 
+        function filterRecordComponents(inRecordVars::List{<:DAE.Var}, inInfo::SourceInfo) ::List{DAE.Var}
               local outRecordVars::List{DAE.Var}
 
               outRecordVars = list(begin
@@ -10035,7 +9945,7 @@
           outRecordVars
         end
 
-        function allowedInRecord(ty::DAE.Type) ::Bool 
+        function allowedInRecord(ty::DAE.Type) ::Bool
               local yes::Bool
 
               yes = begin
@@ -10048,7 +9958,7 @@
                       @match true = basicType(t) || isRecord(t) || extendsBasicType(t)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10059,14 +9969,14 @@
           yes
         end
 
-        function lookupIndexInMetaRecord(vars::List{<:DAE.Var}, name::String) ::ModelicaInteger 
+        function lookupIndexInMetaRecord(vars::List{<:DAE.Var}, name::String) ::ModelicaInteger
               local index::ModelicaInteger
 
               index = ListUtil.position1OnTrue(vars, DAEUtil.typeVarIdentEqual, name)
           index
         end
 
-        function checkEnumDuplicateLiterals(names::List{<:String}, info::Absyn.Info)  
+        function checkEnumDuplicateLiterals(names::List{<:String}, info::Absyn.Info)
               local sortedNames::List{String}
 
                #=  Sort+uniq = O(n*log(n)); naive way to check duplicates is O(n*n) but might be faster...
@@ -10082,7 +9992,7 @@
            type compatible expressions in the specification. If needed it also does type
            casting to make the expressions compatible. If the types are compatible it
            returns the compatible type, otherwise the type returned is undefined. =#
-        function checkTypeCompat(inExp1::DAE.Exp, inType1::DAE.Type, inExp2::DAE.Exp, inType2::DAE.Type, inAllowUnknown::Bool = false) ::Tuple{DAE.Exp, DAE.Exp, DAE.Type, Bool} 
+        function checkTypeCompat(inExp1::DAE.Exp, inType1::DAE.Type, inExp2::DAE.Exp, inType2::DAE.Type, inAllowUnknown::Bool = false) ::Tuple{DAE.Exp, DAE.Exp, DAE.Type, Bool}
               local outCompatible::Bool = true
               local outCompatType::DAE.Type
               local outExp2::DAE.Exp = inExp2
@@ -10141,29 +10051,29 @@
                   DAE.T_INTEGER(__)  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     DAE.T_CLOCK_DEFAULT
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                       @match DAE.T_SUBTYPE_BASIC(complexType = ty) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.complexType, inExp2, ty)
                     outCompatType
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                        #=  Enumerations, check that they have same literals.
                        =#
@@ -10171,7 +10081,7 @@
                       outCompatible = ListUtil.isEqualOnTrue(inType1.names, names, stringEq)
                     inType1
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                        #=  Arrays, must have compatible element types and dimensions.
                        =#
@@ -10200,7 +10110,7 @@
                        =#
                     outCompatType
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__))  => begin
                        #=  Records, must have the same components.
                        =#
@@ -10212,7 +10122,7 @@
                       outCompatible = ListUtil.isEqualOnTrue(inType1.varLst, vars, varEqualName)
                     inType1
                   end
-                  
+
                   DAE.T_FUNCTION(__)  => begin
                       @match DAE.T_FUNCTION(funcResultType = ty, funcArg = args) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.funcResultType, inExp2, ty)
@@ -10223,13 +10133,13 @@
                       end
                     inType1
                   end
-                  
+
                   DAE.T_TUPLE(__)  => begin
                       @match DAE.T_TUPLE(types = tys) = inType2
                       (tys, outCompatible) = checkTypeCompatList(inExp1, inType1.types, inExp2, tys)
                     DAE.T_TUPLE(tys, inType1.names)
                   end
-                  
+
                   DAE.T_METALIST(__)  => begin
                        #=  MetaModelica types.
                        =#
@@ -10239,55 +10149,55 @@
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.ty, inExp2, ty, true)
                     DAE.T_METALIST(outCompatType)
                   end
-                  
+
                   DAE.T_METAARRAY(__)  => begin
                       @match DAE.T_METAARRAY(ty = ty) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.ty, inExp2, ty, true)
                     DAE.T_METAARRAY(outCompatType)
                   end
-                  
+
                   DAE.T_METAOPTION(__)  => begin
                       @match DAE.T_METAOPTION(ty = ty) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.ty, inExp2, ty, true)
                     DAE.T_METAOPTION(outCompatType)
                   end
-                  
+
                   DAE.T_METATUPLE(__)  => begin
                       @match DAE.T_METATUPLE(types = tys) = inType2
                       (tys, outCompatible) = checkTypeCompatList(inExp1, inType1.types, inExp2, tys)
                     DAE.T_METATUPLE(tys)
                   end
-                  
+
                   DAE.T_METABOXED(__)  => begin
                       @match DAE.T_METABOXED(ty = ty) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.ty, inExp2, ty)
                     DAE.T_METABOXED(outCompatType)
                   end
-                  
+
                   DAE.T_METAPOLYMORPHIC(__)  => begin
                       @match DAE.T_METAPOLYMORPHIC(name = name) = inType2
                       outCompatible = inType1.name == name
                     inType1
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(path = p1)  => begin
                       @match DAE.T_METAUNIONTYPE(path = p2) = inType2
                       outCompatible = AbsynUtil.pathEqual(p1, p2)
                     inType1
                   end
-                  
+
                   DAE.T_METARECORD(utPath = p1)  => begin
                       @match DAE.T_METARECORD(utPath = p2) = inType2
                       outCompatible = AbsynUtil.pathEqual(p1, p2)
                     inType1
                   end
-                  
+
                   DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                       @match DAE.T_FUNCTION_REFERENCE_VAR(functionType = ty) = inType2
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, inType1.functionType, inExp2, ty)
                     DAE.T_FUNCTION_REFERENCE_VAR(outCompatType)
                   end
-                  
+
                   _  => begin
                         outCompatible = false
                       DAE.T_UNKNOWN_DEFAULT
@@ -10298,7 +10208,7 @@
         end
 
          #= Checks that two lists of types are compatible using checkTypeCompat. =#
-        function checkTypeCompatList(inExp1::DAE.Exp, inTypes1::List{<:DAE.Type}, inExp2::DAE.Exp, inTypes2::List{<:DAE.Type}) ::Tuple{List{DAE.Type}, Bool} 
+        function checkTypeCompatList(inExp1::DAE.Exp, inTypes1::List{<:DAE.Type}, inExp2::DAE.Exp, inTypes2::List{<:DAE.Type}) ::Tuple{List{DAE.Type}, Bool}
               local outCompatible::Bool = true
               local outCompatibleTypes::List{DAE.Type} = nil
 
@@ -10331,7 +10241,7 @@
 
          #= Helper function to checkTypeCompat. Tries to type cast one of the given
            expressions so that they become type compatible. =#
-        function checkTypeCompat_cast(inExp1::DAE.Exp, inType1::DAE.Type, inExp2::DAE.Exp, inType2::DAE.Type, inAllowUnknown::Bool) ::Tuple{DAE.Exp, DAE.Exp, DAE.Type, Bool} 
+        function checkTypeCompat_cast(inExp1::DAE.Exp, inType1::DAE.Type, inExp2::DAE.Exp, inType2::DAE.Type, inAllowUnknown::Bool) ::Tuple{DAE.Exp, DAE.Exp, DAE.Type, Bool}
               local outCompatible::Bool = true
               local outCompatType::DAE.Type
               local outExp2::DAE.Exp = inExp2
@@ -10351,12 +10261,12 @@
                       outExp2 = Expression.typeCastElements(inExp2, DAE.T_REAL_DEFAULT)
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   (DAE.T_INTEGER(__), DAE.T_REAL(__))  => begin
                       outExp1 = Expression.typeCastElements(inExp1, DAE.T_REAL_DEFAULT)
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   (DAE.T_METABOXED(__), _)  => begin
                        #=  If one of the expressions is boxed, unbox it.
                        =#
@@ -10368,7 +10278,7 @@
                           end
                     ty2
                   end
-                  
+
                   (_, DAE.T_METABOXED(__))  => begin
                       (outExp1, outExp2, outCompatType, outCompatible) = checkTypeCompat(inExp1, ty1, inExp2, ty2.ty, inAllowUnknown)
                       outExp2 = if isBoxedType(ty1)
@@ -10378,7 +10288,7 @@
                           end
                     ty1
                   end
-                  
+
                   (DAE.T_METARECORD(__), DAE.T_METAUNIONTYPE(__))  => begin
                        #=  Expressions such as Absyn.IDENT gets the type T_METARECORD(Absyn.Path.IDENT)
                        =#
@@ -10391,26 +10301,26 @@
                       outCompatible = AbsynUtil.pathEqual(ty1.utPath, ty2.path)
                     ty2
                   end
-                  
+
                   (DAE.T_METAUNIONTYPE(__), DAE.T_METARECORD(__))  => begin
                       outCompatible = AbsynUtil.pathEqual(ty1.path, ty2.utPath)
                     ty1
                   end
-                  
+
                   (DAE.T_UNKNOWN(__), _)  => begin
                        #=  Allow unknown types in some cases, e.g. () has type T_METALIST(T_UNKNOWN)
                        =#
                       outCompatible = inAllowUnknown
                     ty2
                   end
-                  
+
                   (_, DAE.T_UNKNOWN(__))  => begin
                        #= print(\"Unknown(\" + boolString(inAllowUnknown) + \")\\n\");
                        =#
                       outCompatible = inAllowUnknown
                     ty1
                   end
-                  
+
                   _  => begin
                          #=  Anything else is not compatible.
                          =#
@@ -10423,7 +10333,7 @@
         end
 
          #= Checks if an array type has dimensions which are unknown. =#
-        function arrayHasUnknownDims(inType::DAE.Type) ::Bool 
+        function arrayHasUnknownDims(inType::DAE.Type) ::Bool
               local outUnknownDims::Bool
 
               outUnknownDims = begin
@@ -10431,7 +10341,7 @@
                   DAE.T_ARRAY(__)  => begin
                     ListUtil.exist(inType.dims, Expression.dimensionUnknown) || arrayHasUnknownDims(inType.ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10440,7 +10350,7 @@
           outUnknownDims
         end
 
-        function metaArrayElementType(inType::DAE.Type) ::DAE.Type 
+        function metaArrayElementType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -10448,7 +10358,7 @@
                   DAE.T_METAARRAY(__)  => begin
                     inType.ty
                   end
-                  
+
                   DAE.T_METATYPE(__)  => begin
                     metaArrayElementType(inType.ty)
                   end
@@ -10457,7 +10367,7 @@
           outType
         end
 
-        function isMetaArray(inType::DAE.Type) ::Bool 
+        function isMetaArray(inType::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -10465,11 +10375,11 @@
                   DAE.T_METAARRAY(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_METATYPE(__)  => begin
                     isMetaArray(inType.ty)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -10478,7 +10388,7 @@
           b
         end
 
-        function getAttributes(inType::DAE.Type) ::List{DAE.Var} 
+        function getAttributes(inType::DAE.Type) ::List{DAE.Var}
               local outAttributes::List{DAE.Var}
 
               outAttributes = begin
@@ -10486,27 +10396,27 @@
                   DAE.T_REAL(__)  => begin
                     inType.varLst
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     inType.varLst
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     inType.varLst
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     inType.varLst
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     inType.attributeLst
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(__)  => begin
                     getAttributes(inType.complexType)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -10515,7 +10425,7 @@
           outAttributes
         end
 
-        function lookupAttributeValue(inAttributes::List{<:DAE.Var}, inName::String) ::Option{Values.Value} 
+        function lookupAttributeValue(inAttributes::List{<:DAE.Var}, inName::String) ::Option{Values.Value}
               local outValue::Option{Values.Value} = NONE()
 
               for attr in inAttributes
@@ -10527,7 +10437,7 @@
           outValue
         end
 
-        function lookupAttributeExp(inAttributes::List{<:DAE.Var}, inName::String) ::Option{DAE.Exp} 
+        function lookupAttributeExp(inAttributes::List{<:DAE.Var}, inName::String) ::Option{DAE.Exp}
               local outExp::Option{DAE.Exp} = NONE()
 
               for attr in inAttributes
@@ -10545,7 +10455,7 @@
           (oty, odummy)
         end
 
-        function getMetaRecordFields(ty::DAE.Type) ::List{DAE.Var} 
+        function getMetaRecordFields(ty::DAE.Type) ::List{DAE.Var}
               local fields::List{DAE.Var}
 
               fields = begin
@@ -10554,21 +10464,21 @@
                   DAE.T_METARECORD(fields = fields)  => begin
                     fields
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(knownSingleton = false)  => begin
                       Error.addInternalError(getInstanceName() + " called on a non-singleton uniontype: " + unparseType(ty), sourceInfo())
                     fail()
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(singletonType = DAE.EVAL_SINGLETON_KNOWN_TYPE(ty = DAE.T_METARECORD(fields = fields)))  => begin
                     fields
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(singletonType = DAE.EVAL_SINGLETON_TYPE_FUNCTION(fun = fun))  => begin
                       @match DAE.T_METARECORD(fields = fields) = fun()
                     fields
                   end
-                  
+
                   _  => begin
                         Error.addInternalError(getInstanceName() + " called on a non-singleton uniontype: " + unparseType(ty), sourceInfo())
                       fail()
@@ -10578,7 +10488,7 @@
           fields
         end
 
-        function getMetaRecordIfSingleton(ty::DAE.Type) ::DAE.Type 
+        function getMetaRecordIfSingleton(ty::DAE.Type) ::DAE.Type
               local oty::DAE.Type
 
               oty = begin
@@ -10587,16 +10497,16 @@
                   DAE.T_METAUNIONTYPE(knownSingleton = false)  => begin
                     ty
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(singletonType = DAE.EVAL_SINGLETON_KNOWN_TYPE(ty = oty))  => begin
                     setTypeVariables(oty, ty.typeVars)
                   end
-                  
+
                   DAE.T_METAUNIONTYPE(singletonType = DAE.EVAL_SINGLETON_TYPE_FUNCTION(fun = fun))  => begin
                       oty = fun()
                     setTypeVariables(oty, ty.typeVars)
                   end
-                  
+
                   _  => begin
                       ty
                   end
@@ -10605,7 +10515,7 @@
           oty
         end
 
-        function setTypeVariables(ty::DAE.Type, typeVars::List{<:DAE.Type}) ::DAE.Type 
+        function setTypeVariables(ty::DAE.Type, typeVars::List{<:DAE.Type}) ::DAE.Type
               local oty::DAE.Type
 
               oty = begin
@@ -10614,12 +10524,12 @@
                       oty.typeVars = typeVars
                     oty
                   end
-                  
+
                   oty && DAE.T_METARECORD(__)  => begin
                       oty.typeVars = typeVars
                     oty
                   end
-                  
+
                   _  => begin
                       ty
                   end
@@ -10630,7 +10540,7 @@
 
          #= @author: adrpo
           this function checks if the given type is an expandable connector =#
-        function isExpandableConnector(ty::DAE.Type) ::Bool 
+        function isExpandableConnector(ty::DAE.Type) ::Bool
               local isExpandable::Bool
 
               isExpandable = begin
@@ -10638,11 +10548,11 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, true))  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ClassInf.CONNECTOR(_, true))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
