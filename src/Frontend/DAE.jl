@@ -1440,7 +1440,7 @@ Variables declared as \\'parameter\\' will get C_PARAM constantness and
 all other variables are not constant and will get C_VAR constantness.
 
 - Variable properties =#
-@Uniontype isConst begin
+@Uniontype Const begin
   @Record C_CONST begin
 
   end

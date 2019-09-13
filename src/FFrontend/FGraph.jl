@@ -1,93 +1,92 @@
-  module FGraph 
+
+#= /*
+* This file is part of OpenModelica.
+*
+* Copyright (c) 1998-CurrentYear, Open Source Modelica Consortium (OSMC),
+* c/o Linköpings universitet, Department of Computer and Information Science,
+* SE-58183 Linköping, Sweden.
+*
+* All rights reserved.
+*
+* THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
+* THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+* ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
+* RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+* ACCORDING TO RECIPIENTS CHOICE.
+*
+* The OpenModelica software and the Open Source Modelica
+* Consortium (OSMC) Public License (OSMC-PL) are obtained
+* from OSMC, either from the above address,
+* from the URLs: http:www.ida.liu.se/projects/OpenModelica or
+* http:www.openmodelica.org, and in the OpenModelica distribution.
+* GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+*
+* This program is distributed WITHOUT ANY WARRANTY; without
+* even the implied warranty of  MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
+* IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
+*
+* See the full OSMC Public License conditions for more details.
+*
+*/ =#
+
+module FGraph
 
 
-    using MetaModelica
-    #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-    using ExportAll
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
 
-         #= /*
-         * This file is part of OpenModelica.
-         *
-         * Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
-         * c/o Linköpings universitet, Department of Computer and Information Science,
-         * SE-58183 Linköping, Sweden.
-         *
-         * All rights reserved.
-         *
-         * THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
-         * THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
-         * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
-         * RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
-         * ACCORDING TO RECIPIENTS CHOICE.
-         *
-         * The OpenModelica software and the Open Source Modelica
-         * Consortium (OSMC) Public License (OSMC-PL) are obtained
-         * from OSMC, either from the above address,
-         * from the URLs: http:www.ida.liu.se/projects/OpenModelica or
-         * http:www.openmodelica.org, and in the OpenModelica distribution.
-         * GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
-         *
-         * This program is distributed WITHOUT ANY WARRANTY; without
-         * even the implied warranty of  MERCHANTABILITY or FITNESS
-         * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
-         * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
-         *
-         * See the full OSMC Public License conditions for more details.
-         *
-         */ =#
-         #=  public imports
-         =#
+import Absyn
+import AbsynUtil
+import SCode
+import DAE
+import Prefix
+import ClassInf
+import FCore
+import FNode
+import InnerOuter
 
-        import Absyn
-        import AbsynUtil
-        import SCode
-        import DAE
-        import Prefix
-        import ClassInf
-        import FCore
-        import FNode
-        import InnerOuter
+import ListUtil
+import Util
+import System
+import Debug
+import FGraphStream
+import FGraphBuildEnv
+import Global
+import Config
+import PrefixUtil
+import Flags
+import SCodeDump
+import MetaModelica.Dangerous
+import Mod
+import Error
+import ComponentReference
+import Types
+import SCodeUtil
 
-        import ListUtil
-        import Util
-        import System
-        import Debug
-        import FGraphStream
-        import FGraphBuildEnv
-        import Global
-        import Config
-        import PrefixUtil
-        import Flags
-        import SCodeDump
-        import MetaModelica.Dangerous
-        import Mod
-        import Error
-        import ComponentReference
-        import Types
-        import SCodeUtil
-
-        Name = FCore.Name 
-        Id = FCore.Id 
-        Seq = FCore.Seq 
-        Next = FCore.Next 
-        Node = FCore.Node 
-        Data = FCore.Data 
-        Kind = FCore.Kind 
-        Ref = FCore.Ref 
-        Refs = FCore.Refs 
-        RefTree = FCore.RefTree 
-        Children = FCore.Children 
-        Parents = FCore.Parents 
-        Scope = FCore.Scope 
-        Top = FCore.Top 
-        Graph = FCore.Graph 
-        Extra = FCore.Extra 
-        Visited = FCore.Visited 
-        Status = FCore.Status 
-         const emptyGraph = FCore.EG("empty")::FCore.Graph
+const Name = FCore.Name
+const Id = FCore.Id
+const Seq = FCore.Seq
+const Next = FCore.Next
+const Node = FCore.Node
+const Data = FCore.Data
+const Kind = FCore.Kind
+const Ref = FCore.Ref
+const Refs = FCore.Refs
+const RefTree = FCore.RefTree
+const Children = FCore.Children
+const Parents = FCore.Parents
+const Scope = FCore.Scope
+const Top = FCore.Top
+const Graph = FCore.Graph
+const Extra = FCore.Extra
+const Visited = FCore.Visited
+const Status = FCore.Status
+const emptyGraph = FCore.EG("empty")::FCore.Graph
 
          #= get the top node ref from the graph =#
-        function top(inGraph::Graph) ::Ref 
+        function top(inGraph::Graph) ::Ref
               local outRef::Ref
 
               outRef = begin
@@ -101,7 +100,7 @@
         end
 
          #= get the extra from the graph =#
-        function extra(inGraph::Graph) ::Extra 
+        function extra(inGraph::Graph) ::Extra
               local outExtra::Extra
 
               outExtra = begin
@@ -115,7 +114,7 @@
         end
 
          #= get the top current scope from the graph =#
-        function currentScope(inGraph::Graph) ::Scope 
+        function currentScope(inGraph::Graph) ::Scope
               local outScope::Scope
 
               outScope = begin
@@ -123,7 +122,7 @@
                   FCore.G(scope = outScope)  => begin
                     outScope
                   end
-                  
+
                   FCore.EG(_)  => begin
                     nil
                   end
@@ -133,14 +132,14 @@
         end
 
          #= get the last ref from the current scope the graph =#
-        function lastScopeRef(inGraph::Graph) ::Ref 
+        function lastScopeRef(inGraph::Graph) ::Ref
               local outRef::Ref
 
               outRef = listHead(currentScope(inGraph))
           outRef
         end
 
-        function setLastScopeRef(inRef::Ref, inGraph::Graph) ::Graph 
+        function setLastScopeRef(inRef::Ref, inGraph::Graph) ::Graph
               local outGraph::Graph = inGraph
 
               outGraph = begin
@@ -149,7 +148,7 @@
                       outGraph.scope = _cons(inRef, listRest(outGraph.scope))
                     outGraph
                   end
-                  
+
                   _  => begin
                       outGraph
                   end
@@ -159,7 +158,7 @@
         end
 
          #= remove the last ref from the current scope the graph =#
-        function stripLastScopeRef(inGraph::Graph) ::Tuple{Graph, Ref} 
+        function stripLastScopeRef(inGraph::Graph) ::Tuple{Graph, Ref}
               local outRef::Ref
               local outGraph::Graph
 
@@ -174,7 +173,7 @@
         end
 
          #= remove all the scopes, leave just the top one from the graph scopes =#
-        function topScope(inGraph::Graph) ::Graph 
+        function topScope(inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local t::Ref
@@ -198,7 +197,7 @@
         end
 
          #= make an empty graph =#
-        function empty() ::Graph 
+        function empty() ::Graph
               local outGraph::Graph
 
               outGraph = emptyGraph
@@ -206,7 +205,7 @@
         end
 
          #= make a new graph =#
-        function new(inGraphName::Name, inPath::Absyn.Path) ::Graph 
+        function new(inGraphName::Name, inPath::Absyn.Path) ::Graph
               local outGraph::Graph
 
               local n::Node
@@ -233,7 +232,7 @@
         end
 
          #= make a new node in the graph =#
-        function node(inGraph::Graph, inName::Name, inParents::Parents, inData::Data) ::Tuple{Graph, Node} 
+        function node(inGraph::Graph, inName::Name, inParents::Parents, inData::Data) ::Tuple{Graph, Node}
               local outNode::Node
               local outGraph::Graph
 
@@ -264,7 +263,7 @@
 
          #= @author: adrpo
          clone a graph. everything is copied except visited information and refs (which will be new) =#
-        function clone(inGraph::Graph) ::Graph 
+        function clone(inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -306,7 +305,7 @@
          #= This function updates a component already added to the graph, but
          that prior to the update did not have any binding. I.e this function is
          called in the second stage of instantiation with declare before use. =#
-        function updateComp(inGraph::Graph, inVar::DAE.Var, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph 
+        function updateComp(inGraph::Graph, inVar::DAE.Var, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -336,7 +335,7 @@
                       r = updateInstance(r, v)
                     g
                   end
-                  
+
                   (g, v, _, _)  => begin
                       pr = lastScopeRef(g)
                       @match true = FNode.isImplicitRefName(pr)
@@ -344,7 +343,7 @@
                       g = updateComp(g, v, instStatus, inTargetGraph)
                     g
                   end
-                  
+
                   _  => begin
                       inGraph
                   end
@@ -360,7 +359,7 @@
         end
 
          #= update the class scope in the source =#
-        function updateSourceTargetScope(inRef::Ref, inTargetScope::Scope) ::Ref 
+        function updateSourceTargetScope(inRef::Ref, inTargetScope::Scope) ::Ref
               local outRef::Ref
 
               outRef = begin
@@ -376,7 +375,7 @@
                       r = FNode.updateRef(r, FNode.setData(FNode.fromRef(r), FCore.REF(inTargetScope)))
                     inRef
                   end
-                  
+
                   (r, _)  => begin
                       Error.addCompilerWarning("FNode.updateSourceTargetScope: node does not yet have a reference child: " + FNode.toPathStr(FNode.fromRef(r)) + " target scope: " + FNode.scopeStr(inTargetScope) + "\\n")
                     inRef
@@ -389,7 +388,7 @@
         end
 
          #= update the class scope in the source =#
-        function updateInstance(inRef::Ref, inVar::DAE.Var) ::Ref 
+        function updateInstance(inRef::Ref, inVar::DAE.Var) ::Ref
               local outRef::Ref
 
               outRef = begin
@@ -405,7 +404,7 @@
                       r = FNode.updateRef(r, FNode.setData(FNode.fromRef(r), FCore.IT(inVar)))
                     inRef
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("FGraph.updateInstance failed for node: " + FNode.toPathStr(FNode.fromRef(inRef)) + " variable:" + Types.printVarStr(inVar))
                       fail()
@@ -416,7 +415,7 @@
         end
 
          #= update the component data =#
-        function updateVarAndMod(inGraph::Graph, inVar::DAE.Var, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph 
+        function updateVarAndMod(inGraph::Graph, inVar::DAE.Var, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -446,7 +445,7 @@
                       r = updateInstance(r, v)
                     g
                   end
-                  
+
                   (g, v, _, _, _)  => begin
                       pr = lastScopeRef(g)
                       @match true = FNode.isImplicitRefName(pr)
@@ -454,7 +453,7 @@
                       g = updateVarAndMod(g, v, inMod, instStatus, inTargetGraph)
                     g
                   end
-                  
+
                   _  => begin
                       inGraph
                   end
@@ -468,7 +467,7 @@
         end
 
          #= This function updates a class element in the graph =#
-        function updateClass(inGraph::Graph, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph 
+        function updateClass(inGraph::Graph, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -495,7 +494,7 @@
                       r = FNode.updateRef(r, FCore.N(n, id, p, c, FCore.CL(e, inPrefix, inMod, k, instStatus)))
                     g
                   end
-                  
+
                   (g, e, _, _, _, _)  => begin
                       pr = lastScopeRef(g)
                       @match true = FNode.isImplicitRefName(pr)
@@ -513,7 +512,7 @@
         end
 
          #= This function updates a class element in the given parent ref =#
-        function updateClassElement(inRef::Ref, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Ref 
+        function updateClassElement(inRef::Ref, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Ref
               local outRef::Ref
 
               outRef = begin
@@ -542,7 +541,7 @@
         end
 
          #= Adds a for loop iterator to the graph. =#
-        function addForIterator(inGraph::Graph, name::String, ty::DAE.Type, binding::DAE.Binding, variability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::Graph 
+        function addForIterator(inGraph::Graph, name::String, ty::DAE.Type, binding::DAE.Binding, variability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -567,7 +566,7 @@
         end
 
          #= Retrive the graph current scope path as a string =#
-        function printGraphPathStr(inGraph::Graph) ::String 
+        function printGraphPathStr(inGraph::Graph) ::String
               local outString::String
 
               outString = begin
@@ -579,7 +578,7 @@
                       str = stringDelimitList(ListUtil.map(s, FNode.refName), ".")
                     str
                   end
-                  
+
                   _  => begin
                       "<global scope>"
                   end
@@ -591,7 +590,7 @@
         end
 
          #= Opening a new scope in the graph means adding a new node in the current scope. =#
-        function openNewScope(inGraph::Graph, encapsulatedPrefix::SCode.Encapsulated, inName::Option{<:Name}, inScopeType::Option{<:FCore.ScopeType}) ::Graph 
+        function openNewScope(inGraph::Graph, encapsulatedPrefix::SCode.Encapsulated, inName::Option{<:Name}, inScopeType::Option{<:FCore.ScopeType}) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -610,7 +609,7 @@
                       g = pushScopeRef(g, r)
                     g
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("FGraph.openNewScope: failed to open new scope in scope: " + getGraphNameStr(inGraph) + " name: " + Util.stringOption(inName) + "\\n")
                       fail()
@@ -623,7 +622,7 @@
         end
 
          #= Opening a new scope in the graph means adding a new node in the current scope. =#
-        function openScope(inGraph::Graph, encapsulatedPrefix::SCode.Encapsulated, inName::Name, inScopeType::Option{<:FCore.ScopeType}) ::Graph 
+        function openScope(inGraph::Graph, encapsulatedPrefix::SCode.Encapsulated, inName::Name, inScopeType::Option{<:FCore.ScopeType}) ::Graph
               local outGraph::Graph
 
               local p::Ref
@@ -646,21 +645,21 @@
                       g = pushScopeRef(g, r)
                     g
                   end
-                  
+
                   (g, _, n, _)  => begin
                       r = FNode.child(p, n)
                       r = FNode.copyRefNoUpdate(r)
                       g = pushScopeRef(g, r)
                     g
                   end
-                  
+
                   (g, _, n, _)  => begin
                       (g, no) = node(g, n, list(p), FCore.ND(inScopeType))
                       r = FNode.toRef(no)
                       g = pushScopeRef(g, r)
                     g
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("FGraph.openScope: failed to open new scope in scope: " + getGraphNameStr(inGraph) + " name: " + inName + "\\n")
                       fail()
@@ -679,7 +678,7 @@
         end
 
          #= returns true if environment has a frame that is a for loop =#
-        function inForLoopScope(inGraph::Graph) ::Bool 
+        function inForLoopScope(inGraph::Graph) ::Bool
               local res::Bool
 
               res = begin
@@ -690,7 +689,7 @@
                       @match true = stringEq(name, FCore.forScopeName)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -700,7 +699,7 @@
         end
 
          #= returns true if environment has a frame that is a for iterator 'loop' =#
-        function inForOrParforIterLoopScope(inGraph::Graph) ::Bool 
+        function inForOrParforIterLoopScope(inGraph::Graph) ::Bool
               local res::Bool
 
               res = begin
@@ -711,7 +710,7 @@
                       @match true = stringEq(name, FCore.forIterScopeName) || stringEq(name, FCore.parForIterScopeName)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -721,7 +720,7 @@
         end
 
          #= get the current scope as a path from the graph =#
-        function getScopePath(inGraph::Graph) ::Option{Absyn.Path} 
+        function getScopePath(inGraph::Graph) ::Option{Absyn.Path}
               local outPath::Option{Absyn.Path}
 
               outPath = begin
@@ -733,7 +732,7 @@
                       @match true = FNode.isRefTop(r)
                     NONE()
                   end
-                  
+
                   _  => begin
                       p = getGraphName(inGraph)
                     SOME(p)
@@ -744,7 +743,7 @@
         end
 
          #= Returns the FQ name of the environment. =#
-        function getGraphNameStr(inGraph::Graph) ::String 
+        function getGraphNameStr(inGraph::Graph) ::String
               local outString::String
 
               outString = begin
@@ -752,7 +751,7 @@
                   _  => begin
                     AbsynUtil.pathString(getGraphName(inGraph))
                   end
-                  
+
                   _  => begin
                       "."
                   end
@@ -762,7 +761,7 @@
         end
 
          #= Returns the FQ name of the environment. =#
-        function getGraphName(inGraph::Graph) ::Absyn.Path 
+        function getGraphName(inGraph::Graph) ::Absyn.Path
               local outPath::Absyn.Path
 
               local p::Absyn.Path
@@ -779,7 +778,7 @@
         end
 
          #= Returns the FQ name of the environment. =#
-        function getGraphNameNoImplicitScopes(inGraph::Graph) ::Absyn.Path 
+        function getGraphNameNoImplicitScopes(inGraph::Graph) ::Absyn.Path
               local outPath::Absyn.Path
 
               local p::Absyn.Path
@@ -793,7 +792,7 @@
 
          #= @author:adrpo
          push the given ref as first element in the graph scope list =#
-        function pushScopeRef(graph::Graph, inRef::Ref) ::Graph 
+        function pushScopeRef(graph::Graph, inRef::Ref) ::Graph
 
 
               _ = begin
@@ -809,7 +808,7 @@
 
          #= @author:adrpo
          put the given scope in the graph scope at the begining (listAppend(inScope, currentScope(graph))) =#
-        function pushScope(graph::Graph, inScope::Scope) ::Graph 
+        function pushScope(graph::Graph, inScope::Scope) ::Graph
 
 
               _ = begin
@@ -825,7 +824,7 @@
 
          #= @author:adrpo
          replaces the graph scope with the given scope =#
-        function setScope(graph::Graph, inScope::Scope) ::Graph 
+        function setScope(graph::Graph, inScope::Scope) ::Graph
 
 
               _ = begin
@@ -839,7 +838,7 @@
           graph
         end
 
-        function restrictionToScopeType(inRestriction::SCode.Restriction) ::Option{FCore.ScopeType} 
+        function restrictionToScopeType(inRestriction::SCode.Restriction) ::Option{FCore.ScopeType}
               local outType::Option{FCore.ScopeType}
 
               outType = begin
@@ -847,15 +846,15 @@
                   SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__))  => begin
                     SOME(FCore.PARALLEL_SCOPE())
                   end
-                  
+
                   SCode.R_FUNCTION(SCode.FR_KERNEL_FUNCTION(__))  => begin
                     SOME(FCore.PARALLEL_SCOPE())
                   end
-                  
+
                   SCode.R_FUNCTION(_)  => begin
                     SOME(FCore.FUNCTION_SCOPE())
                   end
-                  
+
                   _  => begin
                       SOME(FCore.CLASS_SCOPE())
                   end
@@ -867,7 +866,7 @@
          #= Converts a ScopeType to a Restriction. Restriction is much more expressive
            than ScopeType, so the returned Restriction is more of a rough indication of
            what the original Restriction was. =#
-        function scopeTypeToRestriction(inScopeType::FCore.ScopeType) ::SCode.Restriction 
+        function scopeTypeToRestriction(inScopeType::FCore.ScopeType) ::SCode.Restriction
               local outRestriction::SCode.Restriction
 
               outRestriction = begin
@@ -875,11 +874,11 @@
                   FCore.PARALLEL_SCOPE(__)  => begin
                     SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION())
                   end
-                  
+
                   FCore.FUNCTION_SCOPE(__)  => begin
                     SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(false))
                   end
-                  
+
                   _  => begin
                       SCode.R_CLASS()
                   end
@@ -889,7 +888,7 @@
         end
 
          #= Returns true if we are in the top-most scope =#
-        function isTopScope(graph::Graph) ::Bool 
+        function isTopScope(graph::Graph) ::Bool
               local isTop::Bool
 
               isTop = begin
@@ -898,7 +897,7 @@
                       @match true = FNode.isRefTop(lastScopeRef(graph))
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -934,7 +933,7 @@
           when InsideP.f is looked up in P, so that it resolves to InsideP.f and not
           P.InsideP.f. This allows P2 to find it in the local scope instead, since the
           InsideP package has been inherited from P. =#
-        function crefStripGraphScopePrefix(inCref::Absyn.ComponentRef, inEnv::Graph, stripPartial::Bool) ::Absyn.ComponentRef 
+        function crefStripGraphScopePrefix(inCref::Absyn.ComponentRef, inEnv::Graph, stripPartial::Bool) ::Absyn.ComponentRef
               local outCref::Absyn.ComponentRef
 
               outCref = begin
@@ -946,7 +945,7 @@
                       @match false = Flags.isSet(Flags.STRIP_PREFIX)
                     inCref
                   end
-                  
+
                   (_, _, _)  => begin
                       @match SOME(env_path) = getScopePath(inEnv)
                       cref1 = AbsynUtil.unqualifyCref(inCref)
@@ -955,7 +954,7 @@
                       @match false = AbsynUtil.crefEqual(cref1, cref2)
                     cref2
                   end
-                  
+
                   _  => begin
                       inCref
                   end
@@ -968,7 +967,7 @@
           outCref
         end
 
-        function crefStripGraphScopePrefix2(inCref::Absyn.ComponentRef, inEnvPath::Absyn.Path, stripPartial::Bool) ::Absyn.ComponentRef 
+        function crefStripGraphScopePrefix2(inCref::Absyn.ComponentRef, inEnvPath::Absyn.Path, stripPartial::Bool) ::Absyn.ComponentRef
               local outCref::Absyn.ComponentRef
 
               outCref = begin
@@ -981,12 +980,12 @@
                       @match true = stringEqual(id1, id2)
                     crefStripGraphScopePrefix2(cref, env_path, stripPartial)
                   end
-                  
+
                   (Absyn.CREF_QUAL(name = id1, subscripts =  nil(), componentRef = cref), Absyn.IDENT(name = id2), _)  => begin
                       @match true = stringEqual(id1, id2)
                     cref
                   end
-                  
+
                   (Absyn.CREF_QUAL(name = id1, subscripts =  nil()), env_path, true)  => begin
                       @match false = stringEqual(id1, AbsynUtil.pathFirstIdent(env_path))
                     inCref
@@ -999,7 +998,7 @@
         end
 
          #= same as pathStripGraphScopePrefix =#
-        function pathStripGraphScopePrefix(inPath::Absyn.Path, inEnv::Graph, stripPartial::Bool) ::Absyn.Path 
+        function pathStripGraphScopePrefix(inPath::Absyn.Path, inEnv::Graph, stripPartial::Bool) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -1011,7 +1010,7 @@
                       @match false = Flags.isSet(Flags.STRIP_PREFIX)
                     inPath
                   end
-                  
+
                   (_, _, _)  => begin
                       @match SOME(env_path) = getScopePath(inEnv)
                       path1 = AbsynUtil.makeNotFullyQualified(inPath)
@@ -1020,7 +1019,7 @@
                       @match false = AbsynUtil.pathEqual(path1, path2)
                     path2
                   end
-                  
+
                   _  => begin
                       inPath
                   end
@@ -1033,7 +1032,7 @@
           outPath
         end
 
-        function pathStripGraphScopePrefix2(inPath::Absyn.Path, inEnvPath::Absyn.Path, stripPartial::Bool) ::Absyn.Path 
+        function pathStripGraphScopePrefix2(inPath::Absyn.Path, inEnvPath::Absyn.Path, stripPartial::Bool) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -1045,11 +1044,11 @@
                   (Absyn.QUALIFIED(name = id1, path = path), Absyn.QUALIFIED(name = id2, path = env_path), _) where (stringEqual(id1, id2))  => begin
                     pathStripGraphScopePrefix2(path, env_path, stripPartial)
                   end
-                  
+
                   (Absyn.QUALIFIED(name = id1, path = path), Absyn.IDENT(name = id2), _) where (stringEqual(id1, id2))  => begin
                     path
                   end
-                  
+
                   (Absyn.QUALIFIED(name = id1), env_path, true) where (! stringEqual(id1, AbsynUtil.pathFirstIdent(env_path)))  => begin
                     inPath
                   end
@@ -1061,7 +1060,7 @@
         end
 
          #= This function adds a component to the graph. =#
-        function mkComponentNode(inGraph::Graph, inVar::DAE.Var, inVarEl::SCode.Element, inMod::DAE.Mod, instStatus::Status, inCompGraph::Graph) ::Graph 
+        function mkComponentNode(inGraph::Graph, inVar::DAE.Var, inVarEl::SCode.Element, inMod::DAE.Mod, instStatus::Status, inCompGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1084,7 +1083,7 @@
                       Error.addCompilerError("FGraph.mkComponentNode: The component name: " + SCodeUtil.elementName(c) + " is not the same as its DAE.TYPES_VAR: " + n + "\\n")
                     fail()
                   end
-                  
+
                   (g, v && DAE.TYPES_VAR(name = n), c, m, i, cg)  => begin
                       @match true = stringEq(n, SCodeUtil.elementName(c))
                       r = lastScopeRef(g)
@@ -1107,7 +1106,7 @@
 
          #= This function adds a class definition to the environment.
          Enumeration are expanded from a list into a class with components =#
-        function mkClassNode(inGraph::Graph, inClass::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, checkDuplicate::Bool = false) ::Graph 
+        function mkClassNode(inGraph::Graph, inClass::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, checkDuplicate::Bool = false) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1123,7 +1122,7 @@
                       @match FCore.CL(status = FCore.CLS_INSTANCE(_)) = FNode.refData(r)
                     g
                   end
-                  
+
                   (g, SCode.CLASS(__), _, _)  => begin
                       r = lastScopeRef(g)
                       g = FGraphBuildEnv.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
@@ -1136,7 +1135,7 @@
 
          #= This function adds a class definition to the environment.
          Enumeration are expanded from a list into a class with components =#
-        function mkTypeNode(inGraph::Graph, inName::Name, inType::DAE.Type) ::Graph 
+        function mkTypeNode(inGraph::Graph, inName::Name, inType::DAE.Type) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1156,7 +1155,7 @@
 
          #= This function adds a class definition to the environment.
          Enumeration are expanded from a list into a class with components =#
-        function mkImportNode(inGraph::Graph, inImport::SCode.Element) ::Graph 
+        function mkImportNode(inGraph::Graph, inImport::SCode.Element) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1176,7 +1175,7 @@
 
          #= This function adds a class definition to the environment.
          Enumeration are expanded from a list into a class with components =#
-        function mkDefunitNode(inGraph::Graph, inDu::SCode.Element) ::Graph 
+        function mkDefunitNode(inGraph::Graph, inDu::SCode.Element) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1194,7 +1193,7 @@
           outGraph
         end
 
-        function classInfToScopeType(inState::ClassInf.State) ::Option{FCore.ScopeType} 
+        function classInfToScopeType(inState::ClassInf.State) ::Option{FCore.ScopeType}
               local outType::Option{FCore.ScopeType}
 
               outType = begin
@@ -1202,7 +1201,7 @@
                   ClassInf.FUNCTION(__)  => begin
                     SOME(FCore.FUNCTION_SCOPE())
                   end
-                  
+
                   _  => begin
                       SOME(FCore.CLASS_SCOPE())
                   end
@@ -1212,7 +1211,7 @@
         end
 
          #= returns true if empty graph =#
-        function isEmpty(inGraph::Graph) ::Bool 
+        function isEmpty(inGraph::Graph) ::Bool
               local b::Bool
 
               b = begin
@@ -1220,7 +1219,7 @@
                   FCore.EG(_)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1230,14 +1229,14 @@
         end
 
          #= returns true if not empty graph =#
-        function isNotEmpty(inGraph::Graph) ::Bool 
+        function isNotEmpty(inGraph::Graph) ::Bool
               local b::Bool
 
               b = ! isEmpty(inGraph)
           b
         end
 
-        function isEmptyScope(graph::Graph) ::Bool 
+        function isEmptyScope(graph::Graph) ::Bool
               local isEmpty::Bool
 
               try
@@ -1249,14 +1248,14 @@
         end
 
          #= prints the graph =#
-        function printGraphStr(inGraph::Graph) ::String 
+        function printGraphStr(inGraph::Graph) ::String
               local s::String
 
               s = "NOT IMPLEMENTED YET"
           s
         end
 
-        function inFunctionScope(inGraph::Graph) ::Bool 
+        function inFunctionScope(inGraph::Graph) ::Bool
               local inFunction::Bool
 
               inFunction = begin
@@ -1266,7 +1265,7 @@
                   FCore.G(scope = s) where (checkScopeType(s, SOME(FCore.FUNCTION_SCOPE())) || checkScopeType(s, SOME(FCore.PARALLEL_SCOPE())))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1276,7 +1275,7 @@
         end
 
          #=  Returns the name of a scope, if no name exist, the function fails. =#
-        function getScopeName(inGraph::Graph) ::Name 
+        function getScopeName(inGraph::Graph) ::Name
               local name::Name
 
               name = begin
@@ -1295,7 +1294,7 @@
           name
         end
 
-        function checkScopeType(inScope::Scope, inScopeType::Option{<:FCore.ScopeType}) ::Bool 
+        function checkScopeType(inScope::Scope, inScopeType::Option{<:FCore.ScopeType}) ::Bool
               local yes::Bool
 
               yes = begin
@@ -1307,20 +1306,20 @@
                   ( nil(), _)  => begin
                     false
                   end
-                  
+
                   (r <| _, _)  => begin
                       @match true = FNode.isRefClass(r)
                       restr = SCodeUtil.getClassRestriction(FNode.getElement(FNode.fromRef(r)))
                       @match true = valueEq(restrictionToScopeType(restr), inScopeType)
                     true
                   end
-                  
+
                   (r <| _, _)  => begin
                       @match FCore.N(data = FCore.ND(st)) = FNode.fromRef(r)
                       @match true = valueEq(st, inScopeType)
                     true
                   end
-                  
+
                   (_ <| rest, _)  => begin
                     checkScopeType(rest, inScopeType)
                   end
@@ -1333,7 +1332,7 @@
           yes
         end
 
-        function lastScopeRestriction(inGraph::Graph) ::SCode.Restriction 
+        function lastScopeRestriction(inGraph::Graph) ::SCode.Restriction
               local outRestriction::SCode.Restriction
 
               local s::Scope
@@ -1343,7 +1342,7 @@
           outRestriction
         end
 
-        function getScopeRestriction(inScope::Scope) ::SCode.Restriction 
+        function getScopeRestriction(inScope::Scope) ::SCode.Restriction
               local outRestriction::SCode.Restriction
 
               outRestriction = begin
@@ -1353,12 +1352,12 @@
                   r <| _ where (FNode.isRefClass(r))  => begin
                     SCodeUtil.getClassRestriction(FNode.getElement(FNode.fromRef(r)))
                   end
-                  
+
                   r <| _  => begin
                       @match FCore.N(data = FCore.ND(SOME(st))) = FNode.fromRef(r)
                     scopeTypeToRestriction(st)
                   end
-                  
+
                   _  => begin
                       getScopeRestriction(listRest(inScope))
                   end
@@ -1371,7 +1370,7 @@
          option I.e. it collects all identifiers of each frame until it reaches
          the topmost unnamed frame. If the environment is only the topmost frame,
          NONE() is returned. =#
-        function getGraphPathNoImplicitScope(inGraph::Graph) ::Option{Absyn.Path} 
+        function getGraphPathNoImplicitScope(inGraph::Graph) ::Option{Absyn.Path}
               local outAbsynPathOption::Option{Absyn.Path}
 
               outAbsynPathOption = getGraphPathNoImplicitScope_dispatch(currentScope(inGraph))
@@ -1382,7 +1381,7 @@
          option I.e. it collects all identifiers of each frame until it reaches
          the topmost unnamed frame. If the environment is only the topmost frame,
          NONE() is returned. =#
-        function getGraphPathNoImplicitScope_dispatch(inScope::Scope) ::Option{Absyn.Path} 
+        function getGraphPathNoImplicitScope_dispatch(inScope::Scope) ::Option{Absyn.Path}
               local outAbsynPathOption::Option{Absyn.Path}
 
               local opath::Option{Absyn.Path}
@@ -1410,7 +1409,7 @@
                       end
                     opath
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -1419,7 +1418,7 @@
           outAbsynPathOption
         end
 
-        function isImplicitScope(inName::Name) ::Bool 
+        function isImplicitScope(inName::Name) ::Bool
               local isImplicit::Bool
 
               isImplicit = FCore.isImplicitScope(inName)
@@ -1427,7 +1426,7 @@
         end
 
          #= Used to join an Graph scope with an Absyn.Path (probably an IDENT) =#
-        function joinScopePath(inGraph::Graph, inPath::Absyn.Path) ::Absyn.Path 
+        function joinScopePath(inGraph::Graph, inPath::Absyn.Path) ::Absyn.Path
               local outPath::Absyn.Path
 
               local opath::Option{Absyn.Path}
@@ -1444,7 +1443,7 @@
         end
 
          #= splits out the for loop scope from the graph scope =#
-        function splitGraphScope(inGraph::Graph) ::Tuple{Graph, Scope} 
+        function splitGraphScope(inGraph::Graph) ::Tuple{Graph, Scope}
               local outForScope::Scope
               local outRealGraph::Graph
 
@@ -1453,7 +1452,7 @@
         end
 
          #= splits out the for loop scope from the graph scope =#
-        function splitGraphScope_dispatch(inGraph::Graph, inAcc::Scope) ::Tuple{Graph, Scope} 
+        function splitGraphScope_dispatch(inGraph::Graph, inAcc::Scope) ::Tuple{Graph, Scope}
               local outForScope::Scope
               local outRealGraph::Graph
 
@@ -1465,7 +1464,7 @@
                   (FCore.EG(_), _)  => begin
                     (inGraph, listReverse(inAcc))
                   end
-                  
+
                   (FCore.G(scope = r <| _), _)  => begin
                       if FNode.isImplicitRefName(r)
                         (g, _) = stripLastScopeRef(inGraph)
@@ -1483,7 +1482,7 @@
 
          #= @author: adrpo
           returns the a list with all the variables names in the given graph from the last graph scope =#
-        function getVariablesFromGraphScope(inGraph::Graph) ::List{Name} 
+        function getVariablesFromGraphScope(inGraph::Graph) ::List{Name}
               local variables::List{Name}
 
               variables = begin
@@ -1495,11 +1494,11 @@
                   FCore.EG(_)  => begin
                     nil
                   end
-                  
+
                   FCore.G(scope =  nil())  => begin
                     nil
                   end
-                  
+
                   FCore.G(scope = r <| _)  => begin
                       lst = ListUtil.map(FNode.filter(r, FNode.isRefComponent), FNode.refName)
                     lst
@@ -1515,7 +1514,7 @@
 
          #= @author:adrpo
          remove the children of the last ref =#
-        function removeComponentsFromScope(inGraph::Graph) ::Graph 
+        function removeComponentsFromScope(inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local r::Ref
@@ -1531,7 +1530,7 @@
           outGraph
         end
 
-        function cloneLastScopeRef(inGraph::Graph) ::Graph 
+        function cloneLastScopeRef(inGraph::Graph) ::Graph
               local outGraph::Graph
 
               local r::Ref
@@ -1542,7 +1541,7 @@
           outGraph
         end
 
-        function updateScope(inGraph::Graph) ::Graph 
+        function updateScope(inGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1569,7 +1568,7 @@
          the source scope, the element name, prefix and modifiers.
          The newVersion scope is only created if there are non emtpy
          modifiers given to this functions =#
-        function mkVersionNode(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy} 
+        function mkVersionNode(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outVersionedTargetClass::SCode.Element
               local outVersionedTargetClassEnv::Graph
@@ -1622,7 +1621,7 @@
                       ih = inIH
                     (gclass, c, ih)
                   end
-                  
+
                   _  => begin
                         c = inTargetClass
                         targetClassName = SCodeUtil.elementName(c)
@@ -1663,7 +1662,7 @@
           (outVersionedTargetClassEnv, outVersionedTargetClass, outIH)
         end
 
-        function createVersionScope(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy} 
+        function createVersionScope(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outVersionedTargetClass::SCode.Element
               local outVersionedTargetClassEnv::Graph
@@ -1687,21 +1686,21 @@
                   (_, _, _, DAE.NOMOD(__), _, _, _)  => begin
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
-                  
+
                   (_, _, _, DAE.MOD(subModLst =  nil()), _, _, _)  => begin
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
-                  
+
                   (_, _, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar() || isTargetClassBuiltin(inTargetClassEnv, inTargetClass) || inFunctionScope(inSourceEnv) || SCodeUtil.isOperatorRecord(inTargetClass)
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
-                  
+
                   (_, _, _, _, _, _, _)  => begin
                       @match true = stringEq(AbsynUtil.pathFirstIdent(getGraphName(inTargetClassEnv)), "OpenModelica")
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
-                  
+
                   (_, _, _, _, _, _, _)  => begin
                       (gclass, c, outIH) = mkVersionNode(inSourceEnv, inSourceName, inPrefix, inMod, inTargetClassEnv, inTargetClass, inIH)
                     (gclass, c, outIH)
@@ -1717,7 +1716,7 @@
           (outVersionedTargetClassEnv, outVersionedTargetClass, outIH)
         end
 
-        function isTargetClassBuiltin(inGraph::Graph, inClass::SCode.Element) ::Bool 
+        function isTargetClassBuiltin(inGraph::Graph, inClass::SCode.Element) ::Bool
               local yes::Bool
 
               yes = begin
@@ -1728,7 +1727,7 @@
                       yes = FNode.isRefBasicType(r) || FNode.isRefBuiltin(r)
                     yes
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1737,7 +1736,7 @@
           yes
         end
 
-        function mkVersionName(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClassName::Name) ::Tuple{Name, Prefix.Prefix} 
+        function mkVersionName(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClassName::Name) ::Tuple{Name, Prefix.Prefix}
               local outCrefPrefix::Prefix.Prefix
               local outName::Name
 
@@ -1777,7 +1776,7 @@
           (outName, outCrefPrefix)
         end
 
-        function getClassPrefix(inEnv::FCore.Graph, inClassName::Name) ::Prefix.Prefix 
+        function getClassPrefix(inEnv::FCore.Graph, inClassName::Name) ::Prefix.Prefix
               local outPrefix::Prefix.Prefix
 
               outPrefix = begin
@@ -1789,7 +1788,7 @@
                       @match FCore.CL(pre = p) = FNode.refData(r)
                     p
                   end
-                  
+
                   _  => begin
                       Prefix.NOPRE()
                   end
@@ -1798,7 +1797,7 @@
           outPrefix
         end
 
-        function isInstance(inEnv::FCore.Graph, inName::FCore.Name) ::Bool 
+        function isInstance(inEnv::FCore.Graph, inName::FCore.Name) ::Bool
               local yes::Bool
 
               yes = begin
@@ -1807,7 +1806,7 @@
                       @match FCore.CL(status = FCore.CLS_INSTANCE(_)) = FNode.refData(FNode.child(lastScopeRef(inEnv), inName))
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1816,7 +1815,7 @@
           yes
         end
 
-        function getInstanceOriginalName(inEnv::FCore.Graph, inName::FCore.Name) ::FCore.Name 
+        function getInstanceOriginalName(inEnv::FCore.Graph, inName::FCore.Name) ::FCore.Name
               local outName::FCore.Name
 
               outName = begin
@@ -1825,7 +1824,7 @@
                       @match FCore.CL(status = FCore.CLS_INSTANCE(outName)) = FNode.refData(FNode.child(lastScopeRef(inEnv), inName))
                     outName
                   end
-                  
+
                   _  => begin
                       inName
                   end
@@ -1836,7 +1835,7 @@
 
          #= note that A.B.C is not prefix of A.B.C,
          only A.B is a prefix of A.B.C =#
-        function graphPrefixOf(inPrefixEnv::Graph, inEnv::Graph) ::Bool 
+        function graphPrefixOf(inPrefixEnv::Graph, inEnv::Graph) ::Bool
               local outIsPrefix::Bool
 
               outIsPrefix = graphPrefixOf2(listReverse(currentScope(inPrefixEnv)), listReverse(currentScope(inEnv)))
@@ -1846,7 +1845,7 @@
          #= Checks if one environment is a prefix of another.
          note that A.B.C is not prefix of A.B.C,
          only A.B is a prefix of A.B.C =#
-        function graphPrefixOf2(inPrefixEnv::Scope, inEnv::Scope) ::Bool 
+        function graphPrefixOf2(inPrefixEnv::Scope, inEnv::Scope) ::Bool
               local outIsPrefix::Bool
 
               outIsPrefix = begin
@@ -1860,11 +1859,11 @@
                   ( nil(), _ <| _)  => begin
                     true
                   end
-                  
+
                   (r1 <| rest1, r2 <| rest2) where (stringEq(FNode.refName(r1), FNode.refName(r2)))  => begin
                     graphPrefixOf2(rest1, rest2)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1873,7 +1872,7 @@
           outIsPrefix
         end
 
-        function setStatus(inEnv::Graph, inName::Name, inStatus::FCore.Data) ::Graph 
+        function setStatus(inEnv::Graph, inName::Name, inStatus::FCore.Data) ::Graph
               local outEnv::Graph
 
               outEnv = begin
@@ -1897,7 +1896,7 @@
                       end
                     g
                   end
-                  
+
                   (g, _, _)  => begin
                       print("FGraph.setStatus failed on: " + getGraphNameStr(g) + " element: " + inName + "\\n")
                     g
@@ -1909,7 +1908,7 @@
           outEnv
         end
 
-        function getStatus(inEnv::Graph, inName::Name) ::FCore.Data 
+        function getStatus(inEnv::Graph, inName::Name) ::FCore.Data
               local outStatus::FCore.Data
 
               outStatus = begin
@@ -1930,7 +1929,7 @@
                       s = FNode.refData(ref)
                     s
                   end
-                  
+
                   (_, _)  => begin
                     fail()
                   end
@@ -1944,7 +1943,7 @@
         end
 
          #= return the environment pointed by the path if it exists, else fails =#
-        function selectScope(inEnv::Graph, inPath::Absyn.Path) ::Graph 
+        function selectScope(inEnv::Graph, inPath::Absyn.Path) ::Graph
               local outEnv::Graph
 
               outEnv = begin
@@ -1976,7 +1975,7 @@
           outEnv
         end
 
-        function makeScopePartial(inEnv::Graph) ::Graph 
+        function makeScopePartial(inEnv::Graph) ::Graph
               local outEnv::Graph = inEnv
 
               local node::Node
@@ -1993,7 +1992,7 @@
                         node.data = data
                       node
                     end
-                    
+
                     _  => begin
                         node
                     end
@@ -2005,7 +2004,7 @@
           outEnv
         end
 
-        function isPartialScope(inEnv::Graph) ::Bool 
+        function isPartialScope(inEnv::Graph) ::Bool
               local outIsPartial::Bool
 
               local el::SCode.Element
