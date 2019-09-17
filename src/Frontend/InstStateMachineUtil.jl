@@ -1190,7 +1190,7 @@
          #= 
         Author: BTH
         Return list of states defined in current context (by checking 'transtion' and 'initialState' operators) =#
-        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.Prefix) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
+        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.PrefixType) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
               local initialStates::List{DAE.ComponentRef} #= Only initial states =#
               local states::List{DAE.ComponentRef} #= Initial and non-initial states =#
 
@@ -1225,7 +1225,7 @@
          #= 
         Helper function to getSMStatesInContext.
         Swapped order of inputs of PrefixUtil.prefixCrefNoContext(..) in order to use it with map1 =#
-        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.Prefix) ::DAE.ComponentRef 
+        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.PrefixType) ::DAE.ComponentRef 
               local outCref::DAE.ComponentRef
 
               outCref = PrefixUtil.prefixCrefNoContext(inPre, inCref)

@@ -332,7 +332,7 @@
               local outStore::UnitAbsyn.InstStore
 
               outStore = begin
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local res::Option{UnitAbsyn.UnitCheckResult}
                 @match (store, st) begin
                   (UnitAbsyn.INSTSTORE(_, ht, res), _)  => begin
@@ -448,7 +448,7 @@
 
               st = begin
                   local s::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @match wantInstStore begin
                   true  => begin
                       s = emptyStore()
@@ -544,7 +544,7 @@
         function printInstStore(st::UnitAbsyn.InstStore)  
               _ = begin
                   local s::UnitAbsyn.Store
-                  local h::HashTable.HashTable
+                  local h::HashTable.HashTableType
                 @match st begin
                   UnitAbsyn.INSTSTORE(s, h, _)  => begin
                       print("instStore, s:")
@@ -801,7 +801,7 @@
 
               (outStore, terms) = begin
                   local st::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local terms2::UnitAbsyn.UnitTerms
                   local res::Option{UnitAbsyn.UnitCheckResult}
                 @matchcontinue (env, dae, compDae, store) begin
@@ -835,8 +835,8 @@
 
          #= builds unit terms and stores for a DAE. It also returns a hashtable that maps
         variable names to store locations. =#
-        function buildUnitTerms(env::FCore.Graph, dae::DAE.DAElist) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store, HashTable.HashTable} 
-              local ht::HashTable.HashTable
+        function buildUnitTerms(env::FCore.Graph, dae::DAE.DAElist) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store, HashTable.HashTableType} 
+              local ht::HashTable.HashTableType
               local store::UnitAbsyn.Store
               local terms::UnitAbsyn.UnitTerms
 
@@ -852,7 +852,7 @@
 
               outStore = begin
                   local st::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local unitStr::String
                   local unit::UnitAbsyn.Unit
                   local indx::ModelicaInteger
@@ -963,9 +963,9 @@
         end
 
          #= help function =#
-        function createTypeParameterLocations2(istore::UnitAbsyn.Store, iht::HashTable.HashTable, i::ModelicaInteger #= iterated =#, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Store, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations2(istore::UnitAbsyn.Store, iht::HashTable.HashTableType, i::ModelicaInteger #= iterated =#, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType, ModelicaInteger} 
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt, outNextElt) = begin
@@ -973,7 +973,7 @@
                   local vect::Array{Option{UnitAbsyn.Unit}}
                   local unit::UnitAbsyn.Unit
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                 @matchcontinue (istore, iht, i, inextElt) begin
                   (store && UnitAbsyn.STORE(_, numElts), ht, _, nextElt)  => begin
@@ -999,15 +999,15 @@
         end
 
          #= help function to createTypeParameterLocations2 =#
-        function createTypeParameterLocations3(unit::UnitAbsyn.Unit, iht::HashTable.HashTable, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Unit, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations3(unit::UnitAbsyn.Unit, iht::HashTable.HashTableType, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Unit, HashTable.HashTableType, ModelicaInteger} 
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outUnit::UnitAbsyn.Unit
 
               (outUnit, outHt, outNextElt) = begin
                   local params::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
                   local units::List{MMath.Rational}
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                    #=  Only succeeds for units with type parameters
                    =#
@@ -1022,9 +1022,9 @@
         end
 
          #= help function to createTypeParameterLocations3 =#
-        function createTypeParameterLocations4(iparams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}, iht::HashTable.HashTable, inextElt::ModelicaInteger) ::Tuple{List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations4(iparams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}, iht::HashTable.HashTableType, inextElt::ModelicaInteger) ::Tuple{List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}, HashTable.HashTableType, ModelicaInteger} 
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outParams::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
 
               (outParams, outHt, outNextElt) = begin
@@ -1034,7 +1034,7 @@
                   local param::Tuple{MMath.Rational, UnitAbsyn.TypeParameter}
                   local cref_::DAE.ComponentRef
                   local params::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                 @matchcontinue (iparams, iht, inextElt) begin
                   ( nil(), ht, nextElt)  => begin
@@ -1070,8 +1070,8 @@
         end
 
          #= builds the stores and creates a hashtable from variable names to store locations =#
-        function buildStores(dae::DAE.DAElist) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local ht::HashTable.HashTable
+        function buildStores(dae::DAE.DAElist) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType} 
+              local ht::HashTable.HashTableType
               local store::UnitAbsyn.Store
 
               (store, ht) = buildStores2(dae, emptyStore(), HashTable.emptyHashTable()) #= Build stores from variables =#
@@ -1080,7 +1080,7 @@
         end
 
          #= builds the unit terms from DAE elements (equations) =#
-        function buildTerms(env::FCore.Graph, dae::DAE.DAElist, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store} 
+        function buildTerms(env::FCore.Graph, dae::DAE.DAElist, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store} 
               local outStore::UnitAbsyn.Store
               local terms::UnitAbsyn.UnitTerms
 
@@ -1151,7 +1151,7 @@
          #= help function to buildTerms, handles expressions =#
         function buildTermExp(env::FCore.Graph, exp::DAE.Exp, idivOrMul::Bool #= is true if surrounding expression is division or multiplication. In that case
            the constant will be treated as dimensionless, otherwise it will be treated as unspecified
-           =#, iht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+           =#, iht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm} #= additional terms from e.g. function calls =#
               local ut::UnitAbsyn.UnitTerm
@@ -1176,7 +1176,7 @@
                   local uts::List{UnitAbsyn.UnitTerm}
                   local expl::List{DAE.Exp}
                   local u::UnitAbsyn.Unit
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local store::UnitAbsyn.Store
                   local divOrMul::Bool
                    #= /*case(env,e as DAE.RCONST(r),ht,store) equation
@@ -1335,7 +1335,7 @@
         end
 
          #= builds a term and additional terms from a function call =#
-        function buildTermCall(env::FCore.Graph, path::Absyn.Path, funcCallExp::DAE.Exp, expl::List{<:DAE.Exp}, divOrMul::Bool, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildTermCall(env::FCore.Graph, path::Absyn.Path, funcCallExp::DAE.Exp, expl::List{<:DAE.Exp}, divOrMul::Bool, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm} #= additional terms from e.g. function calls =#
               local ut::UnitAbsyn.UnitTerm
@@ -1448,7 +1448,7 @@
         end
 
          #= build terms from list of expressions =#
-        function buildTermExpList(env::FCore.Graph, iexpl::List{<:DAE.Exp}, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildTermExpList(env::FCore.Graph, iexpl::List{<:DAE.Exp}, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm}
               local terms::List{UnitAbsyn.UnitTerm}
@@ -1679,8 +1679,8 @@
         end
 
          #= help function =#
-        function buildStores2(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStores2(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType} 
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1696,7 +1696,7 @@
                   local funcs::DAE.FunctionTree
                   local elts::List{DAE.Element}
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
                   (DAE.DAE(elementLst =  nil()), _, _)  => begin
                     (inStore, inHt)
@@ -1729,8 +1729,8 @@
         end
 
          #= help function =#
-        function buildStores3(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStores3(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType} 
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1746,7 +1746,7 @@
                   local funcs::DAE.FunctionTree
                   local elts::List{DAE.Element}
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
                   (DAE.DAE( nil()), store, ht)  => begin
                     (store, ht)
@@ -1769,8 +1769,8 @@
         end
 
          #=  build stores from constants in expressions and from function calls =#
-        function buildStoreExp(exp::DAE.Exp, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable, parentOp::Option{<:DAE.Operator}) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStoreExp(exp::DAE.Exp, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType, parentOp::Option{<:DAE.Operator}) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType} 
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1784,7 +1784,7 @@
                   local op::DAE.Operator
                   local cref_::DAE.ComponentRef
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                    #= /* Constant on top level, e.g. x = 1 => unspecified type */ =#
                 @matchcontinue (exp, inStore, inHt, parentOp) begin
                   (DAE.RCONST(r), store, ht, _)  => begin

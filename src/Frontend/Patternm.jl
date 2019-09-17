@@ -802,7 +802,7 @@
           str
         end
 
-        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -816,7 +816,7 @@
                   local decls::List{Absyn.ElementItem}
                   local cases::List{Absyn.Case}
                   local matchDecls::List{DAE.Element}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local elabExps::List{DAE.Exp}
                   local elabCases::List{DAE.MatchCase}
                   local tys::List{DAE.Type}
@@ -2258,7 +2258,7 @@
           b
         end
 
-        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type}
+        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type}
               local resType::DAE.Type
               local elabCases::List{DAE.MatchCase}
               local outCache::FCore.Cache
@@ -2273,7 +2273,7 @@
           (outCache, elabCases, resType)
         end
 
-        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}}
+        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}}
               local resTypes::List{DAE.Type}
               local resExps::List{DAE.Exp}
               local elabCases::List{DAE.MatchCase}
@@ -2304,7 +2304,7 @@
           (outCache, elabCases, resExps, resTypes)
         end
 
-        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}}
+        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resExp::Option{DAE.Exp}
               local elabCase::DAE.MatchCase
@@ -2396,7 +2396,7 @@
           (outCache, elabCase, resExp, resType)
         end
 
-        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}}
+        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resultInfo::SourceInfo
               local resExp::Option{DAE.Exp}
@@ -2428,7 +2428,7 @@
           (outCache, outBody, resExp, resultInfo, resType)
         end
 
-        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}}
+        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}}
               local outPatternGuard::Option{DAE.Exp}
               local outCache::FCore.Cache
 

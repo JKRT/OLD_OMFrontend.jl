@@ -35,11 +35,8 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        import BaseAvlSet
-        extends BaseAvlSet
+        using BaseAvlSet
         Key = String 
-
-
 
 
 

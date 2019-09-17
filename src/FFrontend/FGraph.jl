@@ -470,7 +470,7 @@ import SCodeUtil
         end
 
          #= This function updates a class element in the graph =#
-        function updateClass(inGraph::Graph, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph
+        function updateClass(inGraph::Graph, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -486,7 +486,7 @@ import SCodeUtil
                   local g::Graph
                   local s::Status
                   local m::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  update in the current frame
                    =#
                 @matchcontinue (inGraph, inElement, inPrefix, inMod, instStatus, inTargetGraph) begin
@@ -515,7 +515,7 @@ import SCodeUtil
         end
 
          #= This function updates a class element in the given parent ref =#
-        function updateClassElement(inRef::Ref, inElement::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Ref
+        function updateClassElement(inRef::Ref, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Ref
               local outRef::Ref
 
               outRef = begin
@@ -531,7 +531,7 @@ import SCodeUtil
                   local g::Graph
                   local s::Status
                   local m::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                 @match (inRef, inElement, inPrefix, inMod, instStatus, inTargetGraph) begin
                   (r, e && SCode.CLASS(name = n), _, _, _, _)  => begin
                       @match FCore.N(_, id, p, c, FCore.CL(_, _, _, k, _)) = FNode.fromRef(r)
@@ -1109,7 +1109,7 @@ import SCodeUtil
 
          #= This function adds a class definition to the environment.
          Enumeration are expanded from a list into a class with components =#
-        function mkClassNode(inGraph::Graph, inClass::SCode.Element, inPrefix::Prefix.Prefix, inMod::DAE.Mod, checkDuplicate::Bool = false) ::Graph
+        function mkClassNode(inGraph::Graph, inClass::SCode.Element, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, checkDuplicate::Bool = false) ::Graph
               local outGraph::Graph
 
               outGraph = begin
@@ -1571,7 +1571,7 @@ import SCodeUtil
          the source scope, the element name, prefix and modifiers.
          The newVersion scope is only created if there are non emtpy
          modifiers given to this functions =#
-        function mkVersionNode(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
+        function mkVersionNode(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outVersionedTargetClass::SCode.Element
               local outVersionedTargetClassEnv::Graph
@@ -1584,7 +1584,7 @@ import SCodeUtil
                   local versionRef::Ref
                   local n::Node
                   local r::Ref
-                  local crefPrefix::Prefix.Prefix
+                  local crefPrefix::Prefix.PrefixType
                   local sourceScope::Scope
                   local c::SCode.Element
                   local targetClassName::Name
@@ -1665,7 +1665,7 @@ import SCodeUtil
           (outVersionedTargetClassEnv, outVersionedTargetClass, outIH)
         end
 
-        function createVersionScope(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
+        function createVersionScope(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuter.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outVersionedTargetClass::SCode.Element
               local outVersionedTargetClassEnv::Graph
@@ -1739,8 +1739,8 @@ import SCodeUtil
           yes
         end
 
-        function mkVersionName(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClassName::Name) ::Tuple{Name, Prefix.Prefix}
-              local outCrefPrefix::Prefix.Prefix
+        function mkVersionName(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClassName::Name) ::Tuple{Name, Prefix.PrefixType}
+              local outCrefPrefix::Prefix.PrefixType
               local outName::Name
 
               (outName, outCrefPrefix) = begin
@@ -1750,7 +1750,7 @@ import SCodeUtil
                   local compRef::Ref
                   local n::Node
                   local r::Ref
-                  local crefPrefix::Prefix.Prefix
+                  local crefPrefix::Prefix.PrefixType
                   local name::Name
                 @match (inSourceEnv, inSourceName, inPrefix, inMod, inTargetClassEnv, inTargetClassName) begin
                   (_, _, _, _, _, _)  => begin
@@ -1779,11 +1779,11 @@ import SCodeUtil
           (outName, outCrefPrefix)
         end
 
-        function getClassPrefix(inEnv::FCore.Graph, inClassName::Name) ::Prefix.Prefix
-              local outPrefix::Prefix.Prefix
+        function getClassPrefix(inEnv::FCore.Graph, inClassName::Name) ::Prefix.PrefixType
+              local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                   local r::Ref
                 @matchcontinue (inEnv, inClassName) begin
                   (_, _)  => begin

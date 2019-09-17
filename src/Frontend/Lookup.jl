@@ -690,7 +690,7 @@
 
         function checkPartialScope(inEnv::FCore.Graph, inParentEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Option{<:SourceInfo})
               local el::SCode.Element
-              local pre::Prefix.Prefix
+              local pre::Prefix.PrefixType
               local name::String
               local pre_str::String
               local cc_str::String

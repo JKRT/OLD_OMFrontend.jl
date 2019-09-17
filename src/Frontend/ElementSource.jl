@@ -93,7 +93,7 @@
 
          #= @author: adrpo
          set the various sources of the element =#
-        function createElementSource(fileInfo::SourceInfo, partOf::Option{<:Absyn.Path} = NONE() #= the model(s) this element came from =#, prefix::Prefix.Prefix = Prefix.NOPRE() #= the instance(s) this element is part of =#, connectEquation::Tuple{<:DAE.ComponentRef, DAE.ComponentRef} = (DAE.emptyCref, DAE.emptyCref) #= this element came from this connect(s) =#) ::DAE.ElementSource 
+        function createElementSource(fileInfo::SourceInfo, partOf::Option{<:Absyn.Path} = NONE() #= the model(s) this element came from =#, prefix::Prefix.PrefixType = Prefix.NOPRE() #= the instance(s) this element is part of =#, connectEquation::Tuple{<:DAE.ComponentRef, DAE.ComponentRef} = (DAE.emptyCref, DAE.emptyCref) #= this element came from this connect(s) =#) ::DAE.ElementSource 
               local source::DAE.ElementSource
 
               local path::Absyn.Path

@@ -54,11 +54,9 @@
 
         import SCode
 
-        import InnerOuter
+        # import InnerOuter
 
         import ComponentReference
-
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
         import Ceval
 
@@ -107,6 +105,8 @@
         import SCodeDump
 
         import Lookup
+        
+        InstanceHierarchy = List # List #= InnerOuter.InstHierarchy =#  #= an instance hierarchy =#
 
           #= Used to know where a modifier came from, for error reporting. =#
          @Uniontype ModScope begin
@@ -150,7 +150,7 @@
           turns them into global expressions.  This is done because the
           expressions in modifications must be elaborated on in the context
           they are provided in, and not the context they are used in. =#
-        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -162,7 +162,7 @@
                   local finalPrefix::SCode.Final
                   local subs_1::List{DAE.SubMod}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local m::SCode.Mod
                   local each_::SCode.Each
                   local subs::List{SCode.SubMod}
@@ -360,7 +360,7 @@
 
          #= 
           Same as elabMod, but if a named Mod is not part of a basic type, fail instead. =#
-        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -410,14 +410,14 @@
               end
         end
 
-        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod} 
+        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod} 
               local outMod::DAE.Mod
               local outElement::SCode.Element
 
               (outElement, outMod) = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local f::SCode.Final
                   local fi::SCode.Final
                   local repl::SCode.Replaceable
@@ -520,7 +520,7 @@
          #= Help function to elabModRedeclareElements.
          This function makes sure that type specifiers, i.e. class names, in redeclarations are looked up in the correct environment.
          This is achieved by making them fully qualified. =#
-        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec} 
+        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec} 
               local outTp::Absyn.TypeSpec
               local outCache::FCore.Cache
 
@@ -532,8 +532,8 @@
                   local p1::Absyn.Path
                   local cref::Absyn.ComponentRef
                   local edims::DAE.Dimensions
-                  local ih::InnerOuter.InstHierarchy
-                  local pre::Prefix.Prefix
+                  local ih::List #= InnerOuter.InstHierarchy =#
+                  local pre::Prefix.PrefixType
                    #=  no array dimensions
                    =#
                 @match (inCache, inEnv, inIH, inPrefix, impl, info, name, tp) begin
@@ -703,7 +703,7 @@
 
          #= This function updates an untyped modification to a typed one, by looking
           up the type of the modifier in the environment and update it. =#
-        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -719,7 +719,7 @@
                   local p::DAE.Properties
                   local e_val::Option{Values.Value}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local each_::SCode.Each
                   local e::Absyn.Exp
                   local eOpt::Option{Absyn.Exp}
@@ -771,7 +771,7 @@
         end
 
          #=  =#
-        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
               local outTypesSubModLst::List{DAE.SubMod}
               local outCache::FCore.Cache = inCache
 
@@ -808,7 +808,7 @@
                   local each_::SCode.Each
                   local subs::List{SCode.SubMod}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local e::Absyn.Exp
                   local elem::SCode.Element
                   local s::String
@@ -845,7 +845,7 @@
         end
 
          #= This function helps elabMod by recursively elaborating on a list of submodifications. =#
-        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
               local outTypesSubModLst::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -857,7 +857,7 @@
         end
 
          #= This function elaborates a list of submodifications. =#
-        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
               local outSubMods::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -1010,7 +1010,7 @@
 
          #= This function elaborates on a submodification, turning an
            SCode.SubMod into a DAE.SubMod. =#
-        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod} 
+        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPrefix::Prefix.PrefixType, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod} 
               local outSubMod::DAE.SubMod
               local outCache::FCore.Cache
 

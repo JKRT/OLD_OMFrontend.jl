@@ -50,7 +50,7 @@
 
         import FCore
 
-        import InnerOuter
+        #import InnerOuter
 
         import InstTypes
 
@@ -99,17 +99,17 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = List # InnerOuter.InstHierarchy #= an instance hierarchy =#
 
         InstDims = List 
 
          #= instantiate an external object.
          This is done by instantiating the destructor and constructor
          functions and create a DAE element containing these two. =#
-        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.State} 
+        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::List #= InnerOuter.InstHierarchy =#, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, DAE.DAElist, ClassInf.State} 
               local ciState::ClassInf.State
               local dae::DAE.DAElist #= resulting dae =#
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -209,8 +209,8 @@
         end
 
          #= instantiates the destructor function of an external object =#
-        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy} 
-              local outIH::InnerOuter.InstHierarchy
+        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, cl::SCode.Element) ::Tuple{FCore.Cache, List #= InnerOuter.InstHierarchy =#} 
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outCache::FCore.Cache
 
               (outCache, outIH) = begin
@@ -234,9 +234,9 @@
         end
 
          #= instantiates the constructor function of an external object =#
-        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.Type} 
+        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, cl::SCode.Element) ::Tuple{FCore.Cache, List #= InnerOuter.InstHierarchy =#, DAE.Type} 
               local outType::DAE.Type
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outCache::FCore.Cache
 
               (outCache, outIH, outType) = begin
@@ -264,8 +264,8 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
-              local outIH::InnerOuter.InstHierarchy
+        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#} 
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -275,7 +275,7 @@
                   local cenv::FCore.Graph
                   local fpath::Absyn.Path
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c::SCode.Element
                   local n::String
                   local inst_dims::InstDims
@@ -320,9 +320,9 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}} 
+        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, List{DAE.Function}} 
               local funcs::List{DAE.Function}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -336,7 +336,7 @@
                   local cenv::FCore.Graph
                   local fpath::Absyn.Path
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c::SCode.Element
                   local n::String
                   local inst_dims::InstDims
@@ -454,7 +454,7 @@
 
          #= instantiates all functions found in derivative annotations so they are also added to the
         dae and can be generated code for in case they are required =#
-        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
+        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::List #= InnerOuter.InstHierarchy =#, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
               local outCache::FCore.Cache
 
                #=  print(\"instantiate deriative functions for \"+AbsynUtil.pathString(path)+\"\\n\");
@@ -466,7 +466,7 @@
         end
 
          #= help function =#
-        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
+        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
               local outCache::FCore.Cache
 
               outCache = begin
@@ -531,8 +531,8 @@
 
           Extended 2007-06-29, BZ
           Now this function also handles Derived function. =#
-        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
-              local outIH::InnerOuter.InstHierarchy
+        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#} 
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -633,9 +633,9 @@
          #= This function instantiates the functions in the overload list of a
           overloading function definition and register the function types using
           the overloaded name. It also creates dae elements for the functions. =#
-        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}} 
+        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, pre::Prefix.PrefixType, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, List{DAE.Function}} 
               local outFns::List{DAE.Function}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -692,7 +692,7 @@
           that type. If no explicit call and only one output parameter exists, then
           this will be the return type of the function, otherwise the return type
           will be void. =#
-        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::InnerOuter.InstHierarchy, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.ExternalDecl} 
+        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::List #= InnerOuter.InstHierarchy =#, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List #= InnerOuter.InstHierarchy =#, DAE.ExternalDecl} 
               local daeextdecl::DAE.ExternalDecl
 
 

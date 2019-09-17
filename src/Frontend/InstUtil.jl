@@ -628,7 +628,7 @@
          #= Checks if two prefixes are equal, unless the class is a
          basic type, i.e. all reals, integers, enumerations with
          the same name, etc. are equal. =#
-        function prefixEqualUnlessBasicType(pre1::Prefix.Prefix, pre2::Prefix.Prefix, cls::SCode.Element)  
+        function prefixEqualUnlessBasicType(pre1::Prefix.PrefixType, pre2::Prefix.PrefixType, cls::SCode.Element)  
               _ = begin
                   local idn::String
                    #=  adrpo: TODO! FIXME!, I think here we should have pre1 = Prefix.CLASSPRE(variability1) == pre2 = Prefix.CLASSPRE(variability2)
@@ -792,7 +792,7 @@
 
          #= @author: adrpo
          do this unit checking ONLY if we have the flag! =#
-        function handleUnitChecking(cache::FCore.Cache, env::FCore.Graph, inStore::UnitAbsyn.InstStore, pre::Prefix.Prefix, compDAE::DAE.DAElist, daes::List{<:DAE.DAElist}, className::String #= for debugging =#) ::Tuple{FCore.Cache, FCore.Graph, UnitAbsyn.InstStore} 
+        function handleUnitChecking(cache::FCore.Cache, env::FCore.Graph, inStore::UnitAbsyn.InstStore, pre::Prefix.PrefixType, compDAE::DAE.DAElist, daes::List{<:DAE.DAElist}, className::String #= for debugging =#) ::Tuple{FCore.Cache, FCore.Graph, UnitAbsyn.InstStore} 
               local outStore::UnitAbsyn.InstStore
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2451,7 +2451,7 @@
         end
 
          #= This function adds class definitions and import statements to the environment. =#
-        function addClassdefsToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClasses::List{<:SCode.Element}, inImpl::Bool, inRedeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addClassdefsToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClasses::List{<:SCode.Element}, inImpl::Bool, inRedeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
@@ -2464,7 +2464,7 @@
 
          #= author: PA
           Helper relation to addClassdefsToEnv =#
-        function addClassdefToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSCodeElement::SCode.Element, inBoolean::Bool, redeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addClassdefToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSCodeElement::SCode.Element, inBoolean::Bool, redeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2482,7 +2482,7 @@
                   local impl::Bool
                   local ih::InstanceHierarchy
                   local info::SourceInfo
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local s::String
                   local cmt::SCode.Comment
                   local rpp::SCode.Replaceable
@@ -2582,7 +2582,7 @@
           sizes of components and by investigating if-equations. If an if-equation
           has a boolean expression controlled by parameter(s), these are structural
           parameters. =#
-        function addComponentsToEnv(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.Prefix, state::ClassInf.State, components::List{<:Tuple{<:SCode.Element, DAE.Mod}}, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addComponentsToEnv(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.State, components::List{<:Tuple{<:SCode.Element, DAE.Mod}}, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
 
 
 
@@ -2802,7 +2802,7 @@
          #= @author: adrpo
          add the record constructor to the cache if we have
          it as the type of an input component to a function =#
-        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.State, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2842,7 +2842,7 @@
 
          #= Check if variable is multiply declared and
          that all declarations are identical if so. =#
-        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.Prefix, ciState::ClassInf.State, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool 
+        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.PrefixType, ciState::ClassInf.State, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool 
               local alreadyDeclared::Bool
 
               alreadyDeclared = begin
@@ -3253,7 +3253,7 @@
          #= Author: BZ, 2009-07
          This function examines a optional Absyn.ConstrainClass argument.
          If there is a constraining class, lookup the class and return its elements. =#
-        function extractConstrainingComps(cc::Option{<:SCode.ConstrainClass}, env::FCore.Graph, pre::Prefix.Prefix) ::List{SCode.Element} 
+        function extractConstrainingComps(cc::Option{<:SCode.ConstrainClass}, env::FCore.Graph, pre::Prefix.PrefixType) ::List{SCode.Element} 
               local elems::List{SCode.Element}
 
               elems = begin
@@ -3366,7 +3366,7 @@
           outBinding
         end
 
-        function checkModificationOnOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inName::String, inCref::DAE.ComponentRef, inMod::DAE.Mod, inVariability::SCode.Variability, inInnerOuter::Absyn.InnerOuter, inImpl::Bool, inInfo::SourceInfo)  
+        function checkModificationOnOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inName::String, inCref::DAE.ComponentRef, inMod::DAE.Mod, inVariability::SCode.Variability, inInnerOuter::Absyn.InnerOuter, inImpl::Bool, inInfo::SourceInfo)  
               _ = begin
                   local sm::HashSet.HashSet
                   local cref::DAE.ComponentRef
@@ -3494,7 +3494,7 @@
 
          #= If the binding expression has higher variability that the component, generates an error.
         Helper to makeVariableBinding. Author -- alleb =#
-        function checkHigherVariability(compConst::DAE.Const, bindConst::DAE.Const, pre::Prefix.Prefix, name::String, binding::DAE.Exp, info::SourceInfo)  
+        function checkHigherVariability(compConst::DAE.Const, bindConst::DAE.Const, pre::Prefix.PrefixType, name::String, binding::DAE.Exp, info::SourceInfo)  
               _ = begin
                   local c::DAE.Const
                   local c1::DAE.Const
@@ -3572,7 +3572,7 @@
           The builtin types have no dimension, whereas a user defined type might
           have dimensions. For instance, type Point = Real[3];
           has one dimension of size 3 and the class to instantiate is Real =#
-        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod} 
+        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod} 
               local outMods::DAE.Mod #= modifications from base classes =#
               local classToInstantiate::SCode.Element
               local outDimensionLst::DAE.Dimensions
@@ -3590,7 +3590,7 @@
                   local dim1::DAE.Dimensions
                   local dim2::DAE.Dimensions
                   local res::DAE.Dimensions
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local id::String
                   local cn::Absyn.Path
                   local ad::Option{List{Absyn.Subscript}}
@@ -4347,7 +4347,7 @@
 
          #= Same functionality as elabArraydim, but takes an optional arraydim.
           In case of NONE(), empty DAE.Dimension list is returned. =#
-        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4360,7 +4360,7 @@
                   local impl::Bool
                   local cache::FCore.Cache
                   local doVect::Bool
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local inst_dims::InstDims
                 @match (inCache, inEnv, inComponentRef, path, inAbsynArrayDimOption, inTypesEqModOption, inBoolean, performVectorization, inPrefix, info, inInstDims) begin
                   (cache, env, owncref, _, SOME(ad), eq, impl, doVect, pre, _, inst_dims)  => begin
@@ -4387,7 +4387,7 @@
           All this is accomplished by examining the two arguments separately
           and then using `complete_arraydime\\' or `compatible_arraydim\\' to
           check that that the dimension sizes are compatible and complete. =#
-        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4409,7 +4409,7 @@
                   local cache::FCore.Cache
                   local doVect::Bool
                   local prop::DAE.Properties
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local aexp::Absyn.Exp
                   local eq::Option{DAE.EqMod}
                   local inst_dims::InstDims
@@ -4553,7 +4553,7 @@
 
          #= Find out the dimension sizes of a type. The second argument is used to know
            how many dimensions should be extracted from the type. =#
-        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions 
+        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions 
               local outDimensions::DAE.Dimensions
 
               local flat_id::List{DAE.Dimension}
@@ -4686,7 +4686,7 @@
          #= 
         Authot BZ
         helper function for InstFunction.implicitFunctionInstantiation, returns derivative of function, if any. =#
-        function getDeriveAnnotation(cd::SCode.ClassDef, cmt::SCode.Comment, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation(cd::SCode.ClassDef, cmt::SCode.Comment, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, info::SourceInfo) ::List{DAE.FunctionDefinition} 
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4711,7 +4711,7 @@
 
          #= 
         helper function for getDeriveAnnotation =#
-        function getDeriveAnnotation2(ann::SCode.Annotation, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation2(ann::SCode.Annotation, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, info::SourceInfo) ::List{DAE.FunctionDefinition} 
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4729,7 +4729,7 @@
          #= 
         Author: bjozac
           helper function to getDeriveAnnotation2 =#
-        function getDeriveAnnotation3(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation3(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, info::SourceInfo) ::List{DAE.FunctionDefinition} 
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4780,7 +4780,7 @@
          #= 
         helper function for getDeriveAnnotation
         Extracts conditions for derivative. =#
-        function getDeriveCondition(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{Tuple{ModelicaInteger, DAE.derivativeCond}} 
+        function getDeriveCondition(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, info::SourceInfo) ::List{Tuple{ModelicaInteger, DAE.derivativeCond}} 
               local outconds::List{Tuple{ModelicaInteger, DAE.derivativeCond}}
 
               outconds = begin
@@ -4897,7 +4897,7 @@
 
          #= 
         helper function for getDeriveAnnotation =#
-        function getDerivativeSubModsOptDefault(inSubs::List{<:SCode.SubMod}, inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix) ::Option{Absyn.Path} 
+        function getDerivativeSubModsOptDefault(inSubs::List{<:SCode.SubMod}, inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType) ::Option{Absyn.Path} 
               local defaultDerivative::Option{Absyn.Path}
 
               defaultDerivative = begin
@@ -5453,7 +5453,7 @@
           This special function calls elabExpExt which handles size builtin
           calls specially, and uses the ordinary Static.elab_exp for other
           expressions. =#
-        function elabExpListExt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}} 
+        function elabExpListExt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}} 
               local outTypesPropertiesLst::List{DAE.Properties}
               local outExpExpLst::List{DAE.Exp}
               local outCache::FCore.Cache
@@ -5468,7 +5468,7 @@
                   local e::Absyn.Exp
                   local rest::List{Absyn.Exp}
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local cr::DAE.ComponentRef
                 @match (inCache, inEnv, inAbsynExpLst, inBoolean, inPrefix, info) begin
                   (cache, _,  nil(), _, _, _)  => begin
@@ -5489,7 +5489,7 @@
           special elabExp for explicit external calls.
           This special function calls elabExpExt which handles size builtin calls
           specially, and uses the ordinary Static.elab_exp for other expressions. =#
-        function elabExpExt(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabExpExt(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5511,7 +5511,7 @@
                   local impl::Bool
                   local cache::FCore.Cache
                   local absynExp::Absyn.Exp
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  special case for  size
                    =#
                 @matchcontinue (inCache, inEnv, inExp, inBoolean, inPrefix, info) begin
@@ -5544,7 +5544,7 @@
 
          #= author: LS
           instantiates function arguments, i.e. actual parameters, in external declaration. =#
-        function instExtGetFargs(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}} 
+        function instExtGetFargs(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}} 
               local outDAEExtArgLst::List{DAE.ExtArg}
               local outCache::FCore.Cache
 
@@ -5559,7 +5559,7 @@
                   local absexps::List{Absyn.Exp}
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                 @matchcontinue (inCache, inEnv, inExternalDecl, inBoolean, inPrefix, info) begin
                   (cache, env, SCode.EXTERNALDECL(lang = lang, args = absexps), impl, pre, _)  => begin
                       (cache, exps, props) = elabExpListExt(cache, env, absexps, impl, pre, info)
@@ -5699,7 +5699,7 @@
 
          #= author: LS
           Instantiates the return type of an external declaration. =#
-        function instExtGetRettype(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ExtArg} 
+        function instExtGetRettype(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ExtArg} 
               local outExtArg::DAE.ExtArg
               local outCache::FCore.Cache
 
@@ -5714,7 +5714,7 @@
                   local args::List{Absyn.Exp}
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local attr::DAE.Attributes
                 @matchcontinue (inCache, inEnv, inExternalDecl, inBoolean, inPrefix, info) begin
                   (cache, _, SCode.EXTERNALDECL(output_ = NONE()), _, _, _)  => begin
@@ -6857,7 +6857,7 @@
         end
 
          #= function: addClassdefsToEnv3  =#
-        function addClassdefsToEnv3(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::Option{<:DAE.Mod}, sele::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element} 
+        function addClassdefsToEnv3(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::Option{<:DAE.Mod}, sele::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element} 
               local osele::SCode.Element
               local outIH::InnerOuter.InstHierarchy
               local oenv::FCore.Graph
@@ -6873,7 +6873,7 @@
                   local ih::InstanceHierarchy
                   local lsm::List{DAE.SubMod}
                   local lsm2::List{DAE.SubMod}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                 @match (inCache, env, inIH, inPrefix, inMod, sele) begin
                   (_, _, _, _, NONE(), _)  => begin
                     fail()
@@ -7038,13 +7038,13 @@
         end
 
          #= The function used to modify modifications for non-expanded arrays =#
-        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod 
+        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod 
               local outMod::SCode.Mod
 
               outMod = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local mod::SCode.Mod
                   local mod2::SCode.Mod
                   local inst_dims::InstDims
@@ -7076,13 +7076,13 @@
         end
 
          #= Helper function  for traverseModAddDims =#
-        function traverseModAddDims4(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inExps::List{<:List{<:Absyn.Exp}}, inIsTop::Bool) ::SCode.Mod 
+        function traverseModAddDims4(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inExps::List{<:List{<:Absyn.Exp}}, inIsTop::Bool) ::SCode.Mod 
               local outMod::SCode.Mod
 
               outMod = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local mod::SCode.Mod
                   local f::SCode.Final
                   local submods::List{SCode.SubMod}
@@ -7113,13 +7113,13 @@
         end
 
          #= Helper function  for traverseModAddDims2 =#
-        function traverseModAddDims5(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMods::List{<:SCode.SubMod}, inExps::List{<:List{<:Absyn.Exp}}) ::List{SCode.SubMod} 
+        function traverseModAddDims5(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMods::List{<:SCode.SubMod}, inExps::List{<:List{<:Absyn.Exp}}) ::List{SCode.SubMod} 
               local outMods::List{SCode.SubMod}
 
               outMods = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local mod::SCode.Mod
                   local mod2::SCode.Mod
                   local smods::List{SCode.SubMod}
@@ -7343,7 +7343,7 @@
           hasCondition
         end
 
-        function instElementCondExp(inCache::FCore.Cache, inEnv::FCore.Graph, component::SCode.Element, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{Option{Bool}, FCore.Cache} 
+        function instElementCondExp(inCache::FCore.Cache, inEnv::FCore.Graph, component::SCode.Element, prefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{Option{Bool}, FCore.Cache} 
               local outCache::FCore.Cache
               local outCondValue::Option{Bool}
 
@@ -7370,7 +7370,7 @@
           (outCondValue, outCache)
         end
 
-        function instConditionalDeclaration(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::Absyn.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{Bool, FCore.Cache} 
+        function instConditionalDeclaration(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::Absyn.Exp, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{Bool, FCore.Cache} 
               local outCache::FCore.Cache
               local outIsConditional::Bool
 
@@ -7427,7 +7427,7 @@
          #= Propagate ClassPrefix, i.e. variability to a component.
          This is needed to make sure that e.g. a parameter does
          not generate an equation but a binding. =#
-        function propagateClassPrefix(attr::SCode.Attributes, pre::Prefix.Prefix) ::SCode.Attributes 
+        function propagateClassPrefix(attr::SCode.Attributes, pre::Prefix.PrefixType) ::SCode.Attributes 
               local outAttr::SCode.Attributes
 
               outAttr = begin
@@ -7983,7 +7983,7 @@
                             DAE.FUNCTION_NOT_BUILTIN()
                           end
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
-                      isImpure = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__ModelicaAssociation_Impure") || SCodeUtil.isRestrictionImpure(restriction, hasOutVars || Config.languageStandardAtLeast(Config.LanguageStandard.'3.3'))
+                      isImpure = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__ModelicaAssociation_Impure") || SCodeUtil.isRestrictionImpure(restriction, hasOutVars || Config.languageStandardAtLeast(Config.LanguageStandard.S3_3))
                     DAE.FUNCTION_ATTRIBUTES(inlineType, isOpenModelicaPure, isImpure, false, isBuiltin, DAE.FP_NON_PARALLEL())
                   end
                 end
@@ -8468,7 +8468,7 @@
         end
 
          #= Cannot be part of Env due to RML issues =#
-        function popStructuralParameters(cache::FCore.Cache, pre::Prefix.Prefix) ::FCore.Cache 
+        function popStructuralParameters(cache::FCore.Cache, pre::Prefix.PrefixType) ::FCore.Cache 
               local ocache::FCore.Cache
 
               ocache = begin
@@ -8498,7 +8498,7 @@
         end
 
          #= Cannot be part of Env due to RML issues =#
-        function prefixAndAddCrefsToHt(cache::FCore.Cache, set::AvlSetCR.Tree, pre::Prefix.Prefix, icrs::List{<:DAE.ComponentRef}) ::AvlSetCR.Tree 
+        function prefixAndAddCrefsToHt(cache::FCore.Cache, set::AvlSetCR.Tree, pre::Prefix.PrefixType, icrs::List{<:DAE.ComponentRef}) ::AvlSetCR.Tree 
 
 
               for cr in icrs

@@ -7,6 +7,9 @@
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
 
+    Type_a = Any
+    Type_b = Any
+
     getIdentFn = Function
 
     FixAFn = Function
@@ -64,7 +67,7 @@
 
         import FCore
 
-        import InnerOuter
+        # import InnerOuter
 
         import SCode
 
@@ -108,12 +111,12 @@
          #= protected import System;
          =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = List #= InnerOuter.InstHierarchy =#  #= an instance hierarchy =#
 
          #= This function flattens out the inheritance structure of a class. It takes an
            SCode.Element list and flattens out the extends nodes of that list. The
            result is a list of components and lists of equations and algorithms. =#
-        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
+        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
               local outComments::List{SCode.Comment} = nil
               local outInitialAlgs::List{SCode.AlgorithmSection} = nil
               local outNormalAlgs::List{SCode.AlgorithmSection} = nil
@@ -121,7 +124,7 @@
               local outNormalEqs::List{SCode.Equation} = nil
               local outElements::List{Tuple{SCode.Element, DAE.Mod, Bool}} = nil
               local outMod::DAE.Mod = inMod
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::List #= InnerOuter.InstHierarchy =# = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -368,7 +371,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
+        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
               local outComments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}
@@ -376,7 +379,7 @@
               local outNormalEqs::List{SCode.Equation}
               local outElements::List{Tuple{SCode.Element, DAE.Mod}}
               local outMod::DAE.Mod
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -409,7 +412,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
+        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}} 
               local comments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}
@@ -417,7 +420,7 @@
               local outNormalEqs::List{SCode.Equation}
               local outElements::List{Tuple{SCode.Element, DAE.Mod, Bool}}
               local outMod::DAE.Mod
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -598,7 +601,7 @@
           elements and equations and algorithms of the class.
           If the class is derived, the class is looked up and the
           derived class parts are fetched. =#
-        function instDerivedClasses(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}} 
+        function instDerivedClasses(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}} 
               local outComments::List{SCode.Comment}
               local outMod::DAE.Mod
               local outSCodeAlgorithmLst6::List{SCode.AlgorithmSection}
@@ -606,7 +609,7 @@
               local outSCodeEquationLst4::List{SCode.Equation}
               local outSCodeEquationLst3::List{SCode.Equation}
               local outSCodeElementLst2::List{SCode.Element}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv1::FCore.Graph
               local outCache::FCore.Cache
 
@@ -619,7 +622,7 @@
           elements and equations and algorithms of the class.
           If the class is derived, the class is looked up and the
           derived class parts are fetched. =#
-        function instDerivedClassesWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#, overflow::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}} 
+        function instDerivedClassesWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::List #= InnerOuter.InstHierarchy =#, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#, overflow::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, List #= InnerOuter.InstHierarchy =#, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}} 
               local outComments::List{SCode.Comment}
               local outMod::DAE.Mod
               local outSCodeAlgorithmLst6::List{SCode.AlgorithmSection}
@@ -627,7 +630,7 @@
               local outSCodeEquationLst4::List{SCode.Equation}
               local outSCodeEquationLst3::List{SCode.Equation}
               local outSCodeElementLst2::List{SCode.Element}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::List #= InnerOuter.InstHierarchy =#
               local outEnv1::FCore.Graph
               local outCache::FCore.Cache
 
@@ -656,7 +659,7 @@
                   local strDepth::String
                   local cn::String
                   local extdecl::Option{SCode.ExternalDecl}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local info::SourceInfo
                   local prefixes::SCode.Prefixes
                    #=  from basic types return nothing
@@ -844,7 +847,7 @@
          #=  Analyzes the elements of a class and fetches a list of components and classdefs,
           as well as aliases from imports to paths.
          =#
-        function getLocalIdentList(ielts::List{<:Type_A}, tree::AvlSetString.Tree, getIdent::getIdentFn) ::AvlSetString.Tree 
+        function getLocalIdentList(ielts::List{<:Type_a}, tree::AvlSetString.Tree, getIdent::getIdentFn) ::AvlSetString.Tree 
 
 
               for elt in ielts
@@ -1900,12 +1903,12 @@
         end
 
          #=  Generic function to fix an optional element. =#
-        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Option{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::Option{Type_A}
+        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Option{Type_a}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_a}
+              local outA::Option{Type_a}
 
               outA = begin
-                  local A1::Type_A
-                  local A2::Type_A
+                  local A1::Type_a
+                  local A2::Type_a
                 @match inA begin
                   NONE()  => begin
                     inA
@@ -1925,8 +1928,8 @@
         end
 
          #=  Generic function to fix a list of elements. =#
-        function fixList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::List{Type_A}
+        function fixList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{Type_a}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_a}
+              local outA::List{Type_a}
 
               if listEmpty(inA)
                 outA = inA
@@ -1937,8 +1940,8 @@
         end
 
          #=  Generic function to fix a list of elements. =#
-        function fixListList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{List{Type_A}}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::List{List{Type_A}} = nil
+        function fixListList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{List{Type_a}}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_a}
+              local outA::List{List{Type_a}} = nil
 
               if listEmpty(inA)
                 outA = nil
@@ -1949,26 +1952,26 @@
         end
 
          #=  Generic function to fix a list of elements. =#
-        function fixListTuple2(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inRest::List{Tuple{Type_A, Type_B}}, tree::AvlSetString.Tree, fixA::FixAFn, fixB::FixBFn)  where {Type_A, Type_B}
-              local outA::List{Tuple{Type_A, Type_B}}
+        function fixListTuple2(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inRest::List{Tuple{Type_a, Type_b}}, tree::AvlSetString.Tree, fixA::FixAFn, fixB::FixBFn)  where {Type_a, Type_b}
+              local outA::List{Tuple{Type_a, Type_b}}
 
-              local a1::Type_A
-              local a2::Type_A
-              local b1::Type_B
-              local b2::Type_B
+              local a1::Type_a
+              local a2::Type_a
+              local b1::Type_b
+              local b2::Type_b
 
               outA = fixList(inCache, inEnv, inRest, tree, (fixA, fixB) -> fixTuple2(fixA = fixA, fixB = fixB))
           outA
         end
 
          #=  Generic function to fix a list of elements. =#
-        function fixTuple2(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, tpl::Tuple{Type_A, Type_B}, tree::AvlSetString.Tree, fixA::FixAFn, fixB::FixBFn)  where {Type_A, Type_B}
+        function fixTuple2(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, tpl::Tuple{Type_a, Type_b}, tree::AvlSetString.Tree, fixA::FixAFn, fixB::FixBFn)  where {Type_a, Type_b}
 
 
-              local a1::Type_A
-              local a2::Type_A
-              local b1::Type_B
-              local b2::Type_B
+              local a1::Type_a
+              local a2::Type_a
+              local b1::Type_b
+              local b2::Type_b
 
               (a1, b1) = tpl
               a2 = fixA(inCache, inEnv, a1, tree)

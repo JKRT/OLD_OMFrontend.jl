@@ -204,7 +204,8 @@
 
               import BaseAvlTree
               import NFSCodeEnv.Item
-              extends BaseAvlTree
+              
+              using BaseAvlTree
               Key = String 
               Value = Item 
 

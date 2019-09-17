@@ -6,6 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    Type_a = Any
 
     EdgeFunc = Function
 
@@ -859,7 +860,6 @@
          =#
         function partialDistance2colorInt(inGraphT::List{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inforbiddenColor::Array{<:ModelicaInteger}, inColors::List{<:ModelicaInteger}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inColored::Array{<:ModelicaInteger})  
               local node::ModelicaInteger
-              local color::ModelicaInteger
               local nodes::List{ModelicaInteger}
               local forbiddenColor::Array{ModelicaInteger}
               local color::ModelicaInteger

@@ -113,7 +113,7 @@
         import VarTransform
 
          #= Expression elaboration of Absyn.Exp list, i.e. lists of expressions. =#
-        function elabExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumeration :) =#) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
+        function elabExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumeration :) =#) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -187,7 +187,7 @@
 
          #= Expression elaboration of lists of lists of expressions.
           Used in for instance matrices, etc. =#
-        function elabExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:List{<:Absyn.Exp}}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumerations :) =#) ::Tuple{FCore.Cache, List{List{DAE.Exp}}, List{List{DAE.Properties}}}
+        function elabExpListList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:List{<:Absyn.Exp}}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumerations :) =#) ::Tuple{FCore.Cache, List{List{DAE.Exp}}, List{List{DAE.Properties}}}
               local outProperties::List{List{DAE.Properties}} = nil
               local outExpl::List{List{DAE.Exp}} = nil
               local outCache::FCore.Cache = inCache
@@ -209,7 +209,7 @@
 
          #=
           elabExp, but for Option<Absyn.Exp>,DAE.Type => Option<DAE.Exp> =#
-        function elabExpOptAndMatchType(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Option{<:Absyn.Exp}, inDefaultType::DAE.Type, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}, DAE.Properties}
+        function elabExpOptAndMatchType(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Option{<:Absyn.Exp}, inDefaultType::DAE.Type, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::Option{DAE.Exp}
               local outCache::FCore.Cache = inCache
@@ -880,7 +880,7 @@
         end
 
          #= Like elabExp but casts PROP_TUPLE to a PROP =#
-        function elabExpInExpression(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabExpInExpression(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -945,7 +945,7 @@
         end
 
          #= elaborates a list of expressions that are only component references. =#
-        function elabExpCrefNoEvalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}, List{DAE.Attributes}}
+        function elabExpCrefNoEvalList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}, List{DAE.Attributes}}
               local outAttributes::List{DAE.Attributes} = nil
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
@@ -998,7 +998,7 @@
          #= Function that elaborates the MetaModelica list type,
         for instance list<Integer>.
         This is used by Inst.mo when handling a var := {...} statement =#
-        function elabListExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpList::List{<:Absyn.Exp}, inProp::DAE.Properties, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabListExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExpList::List{<:Absyn.Exp}, inProp::DAE.Properties, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -1268,7 +1268,7 @@
 
          #= This function elaborates reduction expressions that look like function
           calls. For example an array constructor. =#
-        function elabCallReduction(inCache::FCore.Cache, inEnv::FCore.Graph, inReductionFn::Absyn.ComponentRef, inReductionExp::Absyn.Exp, inIterType::Absyn.ReductionIterType, inIterators::Absyn.ForIterators, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabCallReduction(inCache::FCore.Cache, inEnv::FCore.Graph, inReductionFn::Absyn.ComponentRef, inReductionExp::Absyn.Exp, inIterType::Absyn.ReductionIterType, inIterators::Absyn.ForIterators, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -1356,7 +1356,7 @@
           outDims
         end
 
-        function elabCallReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::Absyn.ForIterators, inReductionExp::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List{DAE.ReductionIterator}, List{DAE.Dimension}, DAE.Const, Bool}
+        function elabCallReductionIterators(inCache::FCore.Cache, inEnv::FCore.Graph, inIterators::Absyn.ForIterators, inReductionExp::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, List{DAE.ReductionIterator}, List{DAE.Dimension}, DAE.Const, Bool}
               local outHasGuard::Bool = false
               local outConst::DAE.Const = DAE.C_CONST()
               local outDims::List{DAE.Dimension} = nil
@@ -2112,7 +2112,7 @@
           These have an array of records representing graphical objects. These
           elements can have different types, therefore elab_graphic_exp will allow
           arrays with elements of varying types.  =#
-        function elabGraphicsExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabGraphicsExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -2185,7 +2185,7 @@
                   local tps::List{List{DAE.Properties}}
                   local tps_1::List{List{DAE.Type}}
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ess::List{List{Absyn.Exp}}
                   local dess::List{List{DAE.Exp}}
                 @matchcontinue (inCache, inEnv, inExp, inBoolean, inPrefix, info) begin
@@ -2550,7 +2550,7 @@
         end
 
          #= This function does elaboration of tuples, i.e. function calls returning several values. =#
-        function elabTuple(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, isLhs::Bool) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
+        function elabTuple(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, isLhs::Bool) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
               local outProperties::List{DAE.Properties} = nil
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -2628,7 +2628,7 @@
            All types of an array should be equivalent. However, mixed Integer and Real
            elements are allowed in an array and in that case the Integer elements are
            converted to Real elements. =#
-        function elabArray(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
+        function elabArray(inExpl::List{<:DAE.Exp}, inProps::List{<:DAE.Properties}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpLst::List{DAE.Exp}
 
@@ -2731,7 +2731,7 @@
         end
 
          #= Helper function to elabArray, checks that all elements are equivalent. =#
-        function elabArray2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Type}
+        function elabArray2(inExpl::List{<:DAE.Exp}, inTypes::List{<:DAE.Type}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Type}
               local outType::DAE.Type
               local outExpl::List{DAE.Exp}
 
@@ -2774,7 +2774,7 @@
         end
 
          #= This function elaborates array expressions for graphics elaboration. =#
-        function elabGraphicsArray(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, DAE.Properties}
+        function elabGraphicsArray(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpl::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
@@ -2986,7 +2986,7 @@
 
          #= This function elaborates Matrix expressions, e.g. {1,0;2,1}
           A row is elaborated with elabMatrixComma. =#
-        function elabMatrixSemi(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}}, inProperties::List{<:List{<:DAE.Properties}}, inImpl::Bool, inHaveReal::Bool, inDims::ModelicaInteger, inDoVectorization::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension}
+        function elabMatrixSemi(inCache::FCore.Cache, inEnv::FCore.Graph, inMatrix::List{<:List{<:DAE.Exp}}, inProperties::List{<:List{<:DAE.Properties}}, inImpl::Bool, inHaveReal::Bool, inDims::ModelicaInteger, inDoVectorization::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Dimension, DAE.Dimension}
               local outDim2::DAE.Dimension
               local outDim1::DAE.Dimension
               local outProperties::DAE.Properties
@@ -3054,7 +3054,7 @@
          Author BZ, 2009-02
           This function validates that arguments to function are of a correct type.
           Then call elabCallArgs to vectorize/type-match. =#
-        function verifyBuiltInHandlerType(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inTypeChecker::extraFunc, inFnName::String, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function verifyBuiltInHandlerType(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inTypeChecker::extraFunc, inFnName::String, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3073,7 +3073,7 @@
 
          #= author: PA
           This function elaborates the cardinality operator. =#
-        function elabBuiltinCardinality(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinCardinality(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3099,7 +3099,7 @@
           The only allowed types for expr in smooth are: real expressions, arrays of
           allowed expressions, and records containing only components of allowed
           expressions. =#
-        function elabBuiltinSmooth(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSmooth(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3132,7 +3132,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function printBuiltinFnArgError(inFnName::String, inMsg::String, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inPrefix::Prefix.Prefix, inInfo::SourceInfo)
+        function printBuiltinFnArgError(inFnName::String, inMsg::String, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo)
               local args_str::String
               local pre_str::String
               local msg_str::String
@@ -3150,7 +3150,7 @@
          #= This function elaborates the size operator.
           Input is the list of arguments to size as Absyn.Exp
           expressions and the environment, FCore.Graph. =#
-        function elabBuiltinSize(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSize(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3166,7 +3166,7 @@
                   local arraycr::Absyn.Exp
                   local dim::Absyn.Exp
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ety::DAE.Type
                   local dims::DAE.Dimensions
                   local dims1::DAE.Dimensions
@@ -3352,7 +3352,7 @@
          #= @author Stefan Vorkoetter <svorkoetter@maplesoft.com>
          ndims(A) : Returns the number of dimensions k of array expression A, with k >= 0.
          =#
-        function elabBuiltinNDims(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinNDims(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3367,7 +3367,7 @@
                   local cache::FCore.Cache
                   local expl::List{Absyn.Exp}
                   local nd::ModelicaInteger
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local sp::String
                 @matchcontinue (inCache, inEnv, inAbsynExpLst, inNamedArg, inBoolean, inPrefix, info) begin
                   (cache, env, arraycr <|  nil(), _, impl, pre, _)  => begin
@@ -3390,7 +3390,7 @@
 
          #= This function elaborates the builtin operator fill.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinFill(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3414,7 +3414,7 @@
                   local expstrs::List{String}
                   local cache::FCore.Cache
                   local c1::DAE.Const
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local exp_type::DAE.Type
                    #=  try to constant evaluate dimensions
                    =#
@@ -3493,7 +3493,7 @@
 
           Public since it is used by ExpressionSimplify.simplifyBuiltinCalls.
          =#
-        function elabBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inType::DAE.Type, inValuesValueLst::List{<:Values.Value}, constVar::DAE.Const, inPrefix::Prefix.Prefix, inDims::List{<:Absyn.Exp}, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inType::DAE.Type, inValuesValueLst::List{<:Values.Value}, constVar::DAE.Const, inPrefix::Prefix.PrefixType, inDims::List{<:Absyn.Exp}, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3513,7 +3513,7 @@
                   local rest::List{Values.Value}
                   local cache::FCore.Cache
                   local c1::DAE.Const
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local str::String
                    #=  we might get here negative integers!
                    =#
@@ -3558,7 +3558,7 @@
         end
 
          #= This function elaborates the builtin operator symmetric =#
-        function elabBuiltinSymmetric(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSymmetric(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3577,7 +3577,7 @@
                   local exp_1::DAE.Exp
                   local exp::DAE.Exp
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                 @match (inCache, inEnv, inAbsynExpLst, inNamedArg, inBoolean, inPrefix, info) begin
                   (cache, env, matexp <|  nil(), _, impl, pre, _)  => begin
                       @match (cache, exp_1, DAE.PROP(DAE.T_ARRAY(dims = list(d1), ty = DAE.T_ARRAY(dims = list(d2), ty = eltp)), c)) = elabExpInExpression(cache, env, matexp, impl, true, pre, info)
@@ -3592,7 +3592,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinClassDirectory(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinClassDirectory(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3611,7 +3611,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinSourceInfo(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSourceInfo(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3630,7 +3630,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinSome(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSome(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3655,7 +3655,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinNone(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinNone(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3676,7 +3676,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinHomotopy(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinHomotopy(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3746,7 +3746,7 @@
          #= Elaborates DynamicSelect statements in annotations for OMEdit.
            Currently only text annotations with one String statement accessing
            one variable are supported. Otherwise the first argument is returned. =#
-        function elabBuiltinDynamicSelect(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinDynamicSelect(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -3816,7 +3816,7 @@
         end
 
          #= Elaborates the builtin operator transpose. =#
-        function elabBuiltinTranspose(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinTranspose(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3846,7 +3846,7 @@
 
          #= This function elaborates the builtin operator sum.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSum(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3862,7 +3862,7 @@
                   local impl::Bool
                   local b::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local estr::String
                   local tstr::String
                   local etp::DAE.Type
@@ -3886,7 +3886,7 @@
 
          #= This function elaborates the builtin operator product.
           The input is the arguments to fill as Absyn.Exp expressions and the environment FCore.Graph =#
-        function elabBuiltinProduct(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinProduct(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -3904,7 +3904,7 @@
                   local ty::DAE.Type
                   local ty2::DAE.Type
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local str_exp::String
                   local str_pre::String
                   local etp::DAE.Type
@@ -3963,7 +3963,7 @@
 
          #= This function elaborates the builtin operator pre.
           Input is the arguments to the pre operator and the environment, FCore.Graph. =#
-        function elabBuiltinPre(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinPre(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4040,7 +4040,7 @@
 
          #= This function elaborates the builtin operator inStream.
           Input is the arguments to the inStream operator and the environment, FCore.Graph. =#
-        function elabBuiltinInStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinInStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4063,7 +4063,7 @@
 
          #= This function elaborates the builtin operator actualStream.
           Input is the arguments to the actualStream operator and the environment, FCore.Graph. =#
-        function elabBuiltinActualStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinActualStream(inCache::FCore.Cache, inEnv::FCore.Graph, inArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4168,7 +4168,7 @@
           array(1,4,6) which is the same as {1,4,6}.
           Input is the list of arguments to the operator, as Absyn.Exp list.
          =#
-        function elabBuiltinArray(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinArray(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4192,7 +4192,7 @@
 
          #= Helper function to elabBuiltinArray.
            Asserts that all types are of same dimensionality and of same builtin types. =#
-        function elabBuiltinArray2(inExpl::List{<:DAE.Exp}, inProperties::List{<:DAE.Properties}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
+        function elabBuiltinArray2(inExpl::List{<:DAE.Exp}, inProperties::List{<:DAE.Properties}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{List{DAE.Exp}, DAE.Properties}
               local outProperties::DAE.Properties
               local outExpl::List{DAE.Exp}
 
@@ -4232,7 +4232,7 @@
         end
 
          #= This function elaborates the builtin operator zeros(n). =#
-        function elabBuiltinZeros(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinZeros(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4317,7 +4317,7 @@
         end
 
          #= This function elaborates on the builtin opeator ones(n). =#
-        function elabBuiltinOnes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinOnes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4327,7 +4327,7 @@
         end
 
          #= This function elaborates on the builtin operator max(a, b). =#
-        function elabBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinMax(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4337,7 +4337,7 @@
         end
 
          #= This function elaborates the builtin operator min(a, b) =#
-        function elabBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinMin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4348,7 +4348,7 @@
 
          #= Helper function to elabBuiltinMin and elabBuiltinMax, containing common
           functionality. =#
-        function elabBuiltinMinMaxCommon(cache::FCore.Cache, env::FCore.Graph, inFnName::String, inFnArgs::List{<:Absyn.Exp}, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinMinMaxCommon(cache::FCore.Cache, env::FCore.Graph, inFnName::String, inFnArgs::List{<:Absyn.Exp}, impl::Bool, prefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
 
@@ -4403,7 +4403,7 @@
 
          #= Author: BTH
            This function elaborates the builtin Clock constructor Clock(..). =#
-        function elabBuiltinClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4423,7 +4423,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop2::DAE.Properties
                   local prop::DAE.Properties = DAE.PROP(DAE.T_CLOCK_DEFAULT, DAE.C_VAR())
@@ -4557,7 +4557,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator hold(u). =#
-        function elabBuiltinHold(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinHold(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4571,7 +4571,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local au::Absyn.Exp
@@ -4591,7 +4591,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator sample(..) variants. =#
-        function elabBuiltinSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4608,7 +4608,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop2::DAE.Properties
                   local prop::DAE.Properties
@@ -4662,7 +4662,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator shiftSample(u,shiftCounter,resolution). =#
-        function elabBuiltinShiftSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinShiftSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4678,7 +4678,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop2::DAE.Properties
                   local prop3::DAE.Properties
@@ -4736,7 +4736,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator backSample(u,backCounter,resolution). =#
-        function elabBuiltinBackSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinBackSample(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4752,7 +4752,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop2::DAE.Properties
                   local prop3::DAE.Properties
@@ -4810,7 +4810,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator noClock(u). =#
-        function elabBuiltinNoClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinNoClock(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4824,7 +4824,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local au::Absyn.Exp
@@ -4843,7 +4843,7 @@
 
          #=
          This function elaborates the builtin operator firstTick(u). =#
-        function elabBuiltinFirstTick(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinFirstTick(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4856,7 +4856,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local au::Absyn.Exp
@@ -4882,7 +4882,7 @@
          #=
         Author: BTH
         This function elaborates the builtin operator interval(u). =#
-        function elabBuiltinInterval(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinInterval(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4895,7 +4895,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local au::Absyn.Exp
@@ -4951,7 +4951,7 @@
         Author: BTH
         This function elaborates the builtin operator
         transition(from, to, condition, immediate=true, reset=true, synchronize=false, priority=1). =#
-        function elabBuiltinTransition(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinTransition(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -4964,7 +4964,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop::DAE.Properties
                   local n::ModelicaInteger
                   local nFrom::ModelicaInteger
@@ -5000,7 +5000,7 @@
         Author: BTH
         Helper function to elabBuiltinTransition.
         Check if the \\\"from\\\" argument or the \\\"to\\\" argument is of complex type. =#
-        function elabBuiltinTransition2(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, argName::Absyn.Ident, n::ModelicaInteger, strMsg0::String, strPre::String) ::DAE.Type
+        function elabBuiltinTransition2(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, argName::Absyn.Ident, n::ModelicaInteger, strMsg0::String, strPre::String) ::DAE.Type
               local ty::DAE.Type
 
               local arg1::Absyn.Exp
@@ -5104,7 +5104,7 @@
         Author: BTH
         This function elaborates the builtin operator
         initialState(state). =#
-        function elabBuiltinInitialState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinInitialState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5117,7 +5117,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local astate::Absyn.Exp
@@ -5143,7 +5143,7 @@
         Author: BTH
         This function elaborates the builtin operator
         activeState(state). =#
-        function elabBuiltinActiveState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinActiveState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5156,7 +5156,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local astate::Absyn.Exp
@@ -5182,7 +5182,7 @@
         Author: BTH
         This function elaborates the builtin operator
         ticksInState(). =#
-        function elabBuiltinTicksInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinTicksInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5193,7 +5193,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop::DAE.Properties
                 @match (inCache, inEnv, args, nargs, inBoolean, inPrefix, info) begin
                   (cache, env,  nil(),  nil(), impl, pre, _)  => begin
@@ -5210,7 +5210,7 @@
         Author: BTH
         This function elaborates the builtin operator
         timeInState(). =#
-        function elabBuiltinTimeInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinTimeInState(inCache::FCore.Cache, inEnv::FCore.Graph, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5221,7 +5221,7 @@
                   local impl::Bool
                   local env::FCore.Graph
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local prop::DAE.Properties
                 @match (inCache, inEnv, args, nargs, inBoolean, inPrefix, info) begin
                   (cache, env,  nil(),  nil(), impl, pre, _)  => begin
@@ -5236,7 +5236,7 @@
 
          #= This function elaborates on the builtin operator boolean, which extracts
            the boolean value of a Real, Integer or Boolean value. =#
-        function elabBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinBoolean(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5247,7 +5247,7 @@
 
          #= This function elaborates on the builtin operator Integer for Enumerations, which extracts
           the Integer value of a Enumeration element. =#
-        function elabBuiltinIntegerEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinIntegerEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5258,7 +5258,7 @@
 
          #= The builtin operator noEvent makes sure that events are not generated for the
            expression. =#
-        function elabBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinNoevent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5273,7 +5273,7 @@
         end
 
          #= This function handles the built in edge operator. =#
-        function elabBuiltinEdge(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinEdge(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5304,7 +5304,7 @@
         end
 
          #= This function handles the built in der operator. =#
-        function elabBuiltinDer(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinDer(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5349,7 +5349,7 @@
         end
 
          #= This function handles the built in change operator. =#
-        function elabBuiltinChange(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinChange(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5415,7 +5415,7 @@
         end
 
          #= This function handles the built in cat operator. =#
-        function elabBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinCat(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5492,7 +5492,7 @@
         end
 
          #= This function handles the built in identity operator. =#
-        function elabBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinIdentity(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5566,7 +5566,7 @@
         end
 
          #= This function elaborates on the builtin operator Connections.isRoot. =#
-        function elabBuiltinIsRoot(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinIsRoot(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5584,7 +5584,7 @@
          #= author: adrpo
           This function handles the built-in rooted operator. (MultiBody).
           See more here: http:trac.modelica.org/Modelica/ticket/95 =#
-        function elabBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinRooted(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5612,7 +5612,7 @@
           and
           http:www.ep.liu.se/ecp/043/041/ecp09430108.pdf
          for a specification of this operator =#
-        function elabBuiltinUniqueRootIndices(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinUniqueRootIndices(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inNamedArg::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5627,7 +5627,7 @@
                   local exp1::DAE.Exp
                   local exp2::DAE.Exp
                   local exp3::DAE.Exp
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local dims::DAE.Dimensions
                   local props::DAE.Properties
                   local lst::List{DAE.Exp}
@@ -5667,7 +5667,7 @@
 
          #= This function handles the built in scalar operator.
            For example, scalar({1}) => 1 or scalar({a}) => a =#
-        function elabBuiltinScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5708,7 +5708,7 @@
          #=
           author: PA
           This function handles the built-in String operator. =#
-        function elabBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5776,7 +5776,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinGetInstanceName(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinGetInstanceName(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -5802,7 +5802,7 @@
           (outCache, outExp, outProperties)
         end
 
-        function elabBuiltinIsPresent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinIsPresent(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -5845,7 +5845,7 @@
         end
 
          #= This function handles the built in vector operator. =#
-        function elabBuiltinVector(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinVector(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5901,7 +5901,7 @@
 
          #= Checks that the argument to vector has at most one dimension which is larger
            than one, otherwise prints an error and fails. =#
-        function checkBuiltinVectorDims(inExp::Absyn.Exp, inEnv::FCore.Graph, inType::DAE.Type, inPrefix::Prefix.Prefix, inInfo::SourceInfo)
+        function checkBuiltinVectorDims(inExp::Absyn.Exp, inEnv::FCore.Graph, inType::DAE.Type, inPrefix::Prefix.PrefixType, inInfo::SourceInfo)
               local found_dim_sz_one::Bool = false
               local dims::List{ModelicaInteger}
               local arg_str::String
@@ -5960,7 +5960,7 @@
         end
 
          #= Elaborates the builtin matrix function. =#
-        function elabBuiltinMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabBuiltinMatrix(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImpl::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -6386,7 +6386,7 @@
 
          #= This function elaborates on builtin operators (such as \\\"pre\\\", \\\"der\\\" etc.),
            by calling the builtin handler to retrieve the correct function to call. =#
-        function elabCallBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnName::Absyn.ComponentRef, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabCallBuiltin(inCache::FCore.Cache, inEnv::FCore.Graph, inFnName::Absyn.ComponentRef, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -6423,7 +6423,7 @@
 
          #= This function elaborates on a function call.  It converts the name to a
            Absyn.Path, and used the Static.elabCallArgs to do the rest of the work. =#
-        function elabCall(cache::FCore.Cache, env::FCore.Graph, fn::Absyn.ComponentRef, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabCall(cache::FCore.Cache, env::FCore.Graph, fn::Absyn.ComponentRef, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local prop::DAE.Properties
               local e::DAE.Exp
 
@@ -6618,7 +6618,7 @@
 
          #= This function is used to 'elaborate' interactive functions' optional parameters,
            e.g. simulate(A.b, startTime=1), startTime is an optional parameter. =#
-        function getOptionalNamedArg(inCache::FCore.Cache, inEnv::FCore.Graph, inImplicit::Bool, inArgName::String, inType::DAE.Type, inArgs::List{<:Absyn.NamedArg}, inDefaultExp::DAE.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
+        function getOptionalNamedArg(inCache::FCore.Cache, inEnv::FCore.Graph, inImplicit::Bool, inArgName::String, inType::DAE.Type, inArgs::List{<:Absyn.NamedArg}, inDefaultExp::DAE.Exp, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
               local outExp::DAE.Exp = inDefaultExp
               local outCache::FCore.Cache = inCache
 
@@ -6656,7 +6656,7 @@
          #= This function elaborates a ComponentRef without adding type information.
            Environment is passed along, such that constant subscripts can be elabed
            using existing functions. =#
-        function elabUntypedCref(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef}
+        function elabUntypedCref(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCref::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -6729,7 +6729,7 @@
           as actual arguments in a function call to that function, this
           function finds the function definition and matches the actual
           arguments to the formal parameters. =#
-        function elabCallArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabCallArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -6744,7 +6744,7 @@
            parameter structural since it decides the dimension of an array.  We fall
            back to not evaluating the parameter if we fail since the dimension may not
            be structural (used in another call or reduction, etc). =#
-        function elabCallArgsEvaluateArrayLength(inCache::FCore.Cache, env::FCore.Graph, inProperties::DAE.Properties, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Properties}
+        function elabCallArgsEvaluateArrayLength(inCache::FCore.Cache, env::FCore.Graph, inProperties::DAE.Properties, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Properties}
               local outProperties::DAE.Properties
               local outCache::FCore.Cache
 
@@ -6855,7 +6855,7 @@
           as actual arguments in a function call to that function, this
           function finds the function definition and matches the actual
           arguments to the formal parameters. =#
-        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
+        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.PrefixType, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -6920,7 +6920,7 @@
                   local stringifiedInstanceFunctionName::String
                   local cache::FCore.Cache
                   local tp::DAE.Type
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local re::SCode.Restriction
                   local index::ModelicaInteger
                   local vars::List{DAE.Var}
@@ -7121,7 +7121,7 @@
         end
 
          #= Elaborates the input given a set of viable function candidates, and vectorizes the arguments+performs type checking =#
-        function elabCallArgs3(inCache::FCore.Cache, inEnv::FCore.Graph, typelist::List{<:DAE.Type}, fn::Absyn.Path, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
+        function elabCallArgs3(inCache::FCore.Cache, inEnv::FCore.Graph, typelist::List{<:DAE.Type}, fn::Absyn.Path, args::List{<:Absyn.Exp}, nargs::List{<:Absyn.NamedArg}, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -7437,7 +7437,7 @@
           isValid
         end
 
-        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
+        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -8218,7 +8218,7 @@
 
          #= Elaborate input parameters to a function and select matching function type
            from a list of types. =#
-        function elabTypes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inTypes::List{<:DAE.Type}, inOnlyOneFunction::Bool #= if true, we can report errors as soon as possible =#, inCheckTypes::Bool #= if true, checks types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Const}, DAE.Type, DAE.Type, DAE.Dimensions, List{Slot}}
+        function elabTypes(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inTypes::List{<:DAE.Type}, inOnlyOneFunction::Bool #= if true, we can report errors as soon as possible =#, inCheckTypes::Bool #= if true, checks types =#, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Const}, DAE.Type, DAE.Type, DAE.Dimensions, List{Slot}}
               local outSlots::List{Slot}
               local outDimensions::DAE.Dimensions
               local outFunctionType::DAE.Type
@@ -9056,7 +9056,7 @@
              1. Positional arguments fill the first slots according to their position.
              2. Named arguments fill slots with the same name as the named argument.
              3. Unfilled slots are checked so that they have default values, otherwise error. =#
-        function elabInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inFuncType::DAE.Type #= Used to determine which arguments are structural. We will evaluate them later to figure if they are used in dimensions. So we evaluate them here to get a more optimised DAE =#, inPath::Absyn.Path, isGraphicsExp::Bool = false) ::Tuple{FCore.Cache, List{DAE.Exp}, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
+        function elabInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inFuncType::DAE.Type #= Used to determine which arguments are structural. We will evaluate them later to figure if they are used in dimensions. So we evaluate them here to get a more optimised DAE =#, inPath::Absyn.Path, isGraphicsExp::Bool = false) ::Tuple{FCore.Cache, List{DAE.Exp}, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = nil
               local outConsts::List{DAE.Const}
               local outSlots::List{Slot} = inSlots
@@ -9160,7 +9160,7 @@
           and fills  default values into slots which have not been filled.
 
           Special case for graphics exps =#
-        function fillGraphicsDefaultSlots(inCache::FCore.Cache, inSlots::List{<:Slot}, inClass::SCode.Element, inEnv::FCore.Graph, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
+        function fillGraphicsDefaultSlots(inCache::FCore.Cache, inSlots::List{<:Slot}, inClass::SCode.Element, inEnv::FCore.Graph, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = nil
               local outConsts::List{DAE.Const} = nil
               local outSlots::List{Slot} = nil
@@ -9368,7 +9368,7 @@
          #= This function elaborates the positional input arguments of a function.
           A list of slots is filled from the beginning with types of each
           positional argument. =#
-        function elabPositionalInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inFuncArgs::List{<:DAE.FuncArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inPath::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
+        function elabPositionalInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inPosArgs::List{<:Absyn.Exp}, inFuncArgs::List{<:DAE.FuncArg}, inSlots::List{<:Slot}, inOnlyOneFunction::Bool, inCheckTypes::Bool #= if true, check types =#, inImplicit::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inPath::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings = inPolymorphicBindings
               local outConsts::List{DAE.Const} = nil
               local outSlots::List{Slot} = inSlots
@@ -9392,7 +9392,7 @@
          #= This function elaborates the positional input arguments of a function.
           A list of slots is filled from the beginning with types of each
           positional argument. =#
-        function elabPositionalInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, farg::DAE.FuncArg, position::ModelicaInteger, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
+        function elabPositionalInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, farg::DAE.FuncArg, position::ModelicaInteger, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.PrefixType, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outConst::DAE.Const
               local outSlotLst::List{Slot}
@@ -9421,7 +9421,7 @@
                   local cache::FCore.Cache
                   local id::String
                   local props::DAE.Properties
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ct::DAE.CodeType
                   local polymorphicBindings::InstTypes.PolymorphicBindings
                   local s1::String
@@ -9497,7 +9497,7 @@
           If a slot is filled twice the function fails. If a slot is not filled at
           all and the
           value is not a parameter or a constant the function also fails. =#
-        function elabNamedInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
+        function elabNamedInputArgs(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.PrefixType, info::SourceInfo, path::Absyn.Path, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, List{DAE.Const}, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outTypesConstLst::List{DAE.Const}
               local outSlotLst::List{Slot}
@@ -9525,7 +9525,7 @@
                   local ct::DAE.CodeType
                   local cache::FCore.Cache
                   local ds::DAE.Dimensions
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local polymorphicBindings::InstTypes.PolymorphicBindings
                    #=  the empty case
                    =#
@@ -9550,7 +9550,7 @@
           If a slot is filled twice the function fails. If a slot is not filled at
           all and the
           value is not a parameter or a constant the function also fails. =#
-        function elabNamedInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inNamedArg::Absyn.NamedArg, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.Prefix, info::SourceInfo, path::Absyn.Path, numErrors::ModelicaInteger, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
+        function elabNamedInputArg(inCache::FCore.Cache, inEnv::FCore.Graph, inNamedArg::Absyn.NamedArg, inTypesFuncArgLst::List{<:DAE.FuncArg}, inSlotLst::List{<:Slot}, onlyOneFunction::Bool, checkTypes::Bool #= if true, check types =#, impl::Bool, inPolymorphicBindings::InstTypes.PolymorphicBindings, inPrefix::Prefix.PrefixType, info::SourceInfo, path::Absyn.Path, numErrors::ModelicaInteger, isGraphicsExp::Bool) ::Tuple{FCore.Cache, List{Slot}, DAE.Const, InstTypes.PolymorphicBindings}
               local outPolymorphicBindings::InstTypes.PolymorphicBindings
               local outTypesConstLst::DAE.Const
               local outSlotLst::List{Slot}
@@ -9578,7 +9578,7 @@
                   local ct::DAE.CodeType
                   local cache::FCore.Cache
                   local ds::DAE.Dimensions
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local polymorphicBindings::InstTypes.PolymorphicBindings
                   local prop::DAE.Properties
                   local s1::String
@@ -9699,7 +9699,7 @@
          #= This function takses a `FuncArg\\' and an DAE.Exp and a Slot list and fills
           the slot holding the FuncArg, by setting the boolean value of the slot
           and setting the expression. The function fails if the slot is allready set. =#
-        function fillSlot(inFuncArg::DAE.FuncArg, inExp::DAE.Exp, inDims::DAE.Dimensions, inSlotLst::List{<:Slot}, inPrefix::Prefix.Prefix, inInfo::SourceInfo, fn::Absyn.Path) ::List{Slot}
+        function fillSlot(inFuncArg::DAE.FuncArg, inExp::DAE.Exp, inDims::DAE.Dimensions, inSlotLst::List{<:Slot}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, fn::Absyn.Path) ::List{Slot}
               local outSlotLst::List{Slot} = nil
 
               local fa1::String
@@ -9759,7 +9759,7 @@
           component referred to, and check if the environment contains
           either a constant binding for that variable, or if it contains an
           equation binding with a constant expression. =#
-        function elabCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
+        function elabCref(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
               local res::Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}
               local outCache::FCore.Cache
 
@@ -9769,7 +9769,7 @@
 
          #=
           Some functions expect a DAE.ComponentRef back and use this instead of elabCref :) =#
-        function elabCrefNoEval(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Attributes}
+        function elabCrefNoEval(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties, DAE.Attributes}
               local outAttributes::DAE.Attributes
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
@@ -9785,7 +9785,7 @@
           component referred to, and check if the environment contains
           either a constant binding for that variable, or if it contains an
           equation binding with a constant expression. =#
-        function elabCref1(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
+        function elabCref1(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inImplicit::Bool #= implicit instantiation =#, performVectorization::Bool #= true => generates vectorized expressions, {v[1],v[2],...} =#, inPrefix::Prefix.PrefixType, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}}
               local res::Option{Tuple{DAE.Exp, DAE.Properties, DAE.Attributes}}
               local outCache::FCore.Cache
 
@@ -9824,7 +9824,7 @@
                   local id::String
                   local expCref::DAE.ComponentRef
                   local forIteratorConstOpt::Option{DAE.Const}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local e::Absyn.Exp
                   local cl::SCode.Element
                   local isBuiltin::DAE.FunctionBuiltin
@@ -10278,7 +10278,7 @@
 
          #= This function does some more processing of crefs, like replacing a constant
            with its value and vectorizing a non-constant. =#
-        function elabCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttributes::DAE.Attributes, constSubs::DAE.Const, inIteratorConst::Option{<:DAE.Const}, inType::DAE.Type, inBinding::DAE.Binding, inVectorize::Bool #= true => vectorized expressions =#, splicedExpData::InstTypes.SplicedExpData, inPrefix::Prefix.Prefix, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Const, DAE.Attributes}
+        function elabCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::DAE.ComponentRef, inAttributes::DAE.Attributes, constSubs::DAE.Const, inIteratorConst::Option{<:DAE.Const}, inType::DAE.Type, inBinding::DAE.Binding, inVectorize::Bool #= true => vectorized expressions =#, splicedExpData::InstTypes.SplicedExpData, inPrefix::Prefix.PrefixType, evalCref::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Const, DAE.Attributes}
               local outAttributes::DAE.Attributes
               local outConst::DAE.Const
               local outExp::DAE.Exp
@@ -11211,7 +11211,7 @@
         end
 
          #= This function elaborates on all subscripts in a component reference. =#
-        function elabCrefSubs(inCache::FCore.Cache, inCrefEnv::FCore.Graph #= search for the cref in this environment =#, inSubsEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inTopPrefix::Prefix.Prefix #= the top prefix, i.e. the one send down by elabCref1, needed to prefix expressions in subscript types! =#, inCrefPrefix::Prefix.Prefix #= the accumulated cref, required for lookup =#, inBoolean::Bool, inHasZeroSizeDim::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Const, Bool}
+        function elabCrefSubs(inCache::FCore.Cache, inCrefEnv::FCore.Graph #= search for the cref in this environment =#, inSubsEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inTopPrefix::Prefix.PrefixType #= the top prefix, i.e. the one send down by elabCref1, needed to prefix expressions in subscript types! =#, inCrefPrefix::Prefix.PrefixType #= the accumulated cref, required for lookup =#, inBoolean::Bool, inHasZeroSizeDim::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Const, Bool}
               local outHasZeroSizeDim::Bool
               local outConst::DAE.Const #= The constness of the subscripts. Note: This is not the same as
                 the constness of a cref with subscripts! (just becase x[1,2] has a constant subscript list does
@@ -11240,8 +11240,8 @@
                   local absynCref::Absyn.ComponentRef
                   local cache::FCore.Cache
                   local vt::SCode.Variability
-                  local crefPrefix::Prefix.Prefix
-                  local topPrefix::Prefix.Prefix
+                  local crefPrefix::Prefix.PrefixType
+                  local topPrefix::Prefix.PrefixType
                    #=  IDENT
                    =#
                 @matchcontinue (inCache, inCrefEnv, inSubsEnv, inComponentRef, inTopPrefix, inCrefPrefix, inBoolean, inHasZeroSizeDim, info) begin
@@ -11333,7 +11333,7 @@
          #= This function converts a list of Absyn.Subscript to a list of
           DAE.Subscript, and checks if all subscripts are constant.
           HJ: not checking for constant, returning if constant or not =#
-        function elabSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynSubscriptLst::List{<:Absyn.Subscript}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
+        function elabSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynSubscriptLst::List{<:Absyn.Subscript}, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
               local outConst::DAE.Const
               local outExpSubscriptLst::List{DAE.Subscript}
               local outCache::FCore.Cache
@@ -11349,7 +11349,7 @@
                   local subs::List{Absyn.Subscript}
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  empty list
                    =#
                 @match (inCache, inEnv, inAbsynSubscriptLst, inBoolean, inPrefix, info) begin
@@ -11371,7 +11371,7 @@
         end
 
          #= Elaborates a list of subscripts and checks that they are valid for the given dimensions. =#
-        function elabSubscriptsDims(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscripts::List{<:Absyn.Subscript}, inDimensions::List{<:DAE.Dimension}, inImpl::Bool, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
+        function elabSubscriptsDims(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscripts::List{<:Absyn.Subscript}, inDimensions::List{<:DAE.Dimension}, inImpl::Bool, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Subscript}, DAE.Const}
               local outConst::DAE.Const = DAE.C_CONST()
               local outSubs::List{DAE.Subscript} = nil
               local outCache::FCore.Cache = inCache
@@ -11530,7 +11530,7 @@
 
          #= This function converts an Absyn.Subscript to an
           DAE.Subscript. =#
-        function elabSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::Absyn.Subscript, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript, DAE.Const, Option{DAE.Properties}}
+        function elabSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inSubscript::Absyn.Subscript, inBoolean::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Subscript, DAE.Const, Option{DAE.Properties}}
               local outProperties::Option{DAE.Properties}
               local outConst::DAE.Const
               local outSubscript::DAE.Subscript
@@ -11546,7 +11546,7 @@
                   local sub::Absyn.Exp
                   local cache::FCore.Cache
                   local prop::DAE.Properties
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  no subscript
                    =#
                 @matchcontinue (inCache, inEnv, inSubscript, inBoolean, inPrefix) begin
@@ -11725,7 +11725,7 @@
           outType
         end
 
-        function makeIfExp(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::DAE.Exp, inCondProp::DAE.Properties, inTrueBranch::DAE.Exp, inTrueProp::DAE.Properties, inFalseBranch::DAE.Exp, inFalseProp::DAE.Properties, inImplicit::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function makeIfExp(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::DAE.Exp, inCondProp::DAE.Properties, inTrueBranch::DAE.Exp, inTrueProp::DAE.Properties, inFalseBranch::DAE.Exp, inFalseProp::DAE.Properties, inImplicit::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache = inCache
@@ -12142,7 +12142,7 @@
         end
 
          #= Elaborates a list of array dimensions. =#
-        function elabArrayDims(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArrayDims(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensions::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -12151,7 +12151,7 @@
         end
 
          #= Helper function to elabArrayDims. Needed because of tail recursion. =#
-        function elabArrayDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inElaboratedDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArrayDims2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimensions::List{<:Absyn.Subscript}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inElaboratedDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensions::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -12178,7 +12178,7 @@
         end
 
          #= Elaborates a single array dimension. =#
-        function elabArrayDim(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimension::Absyn.Subscript, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimension}
+        function elabArrayDim(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inDimension::Absyn.Subscript, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimension}
               local outDimension::DAE.Dimension
               local outCache::FCore.Cache
 
@@ -12271,7 +12271,7 @@
 
          #= Helper function to elabArrayDim. Continues the work from the last case in
           elabArrayDim to avoid unnecessary elaboration. =#
-        function elabArrayDim2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExp::DAE.Exp, inProperties::DAE.Properties, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Dimension}}
+        function elabArrayDim2(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExp::DAE.Exp, inProperties::DAE.Properties, inImpl::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Dimension}}
               local outDimension::Option{DAE.Dimension}
               local outCache::FCore.Cache
 
