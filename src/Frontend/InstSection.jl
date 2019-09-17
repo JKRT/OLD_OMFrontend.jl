@@ -2694,7 +2694,7 @@
                 Error.addSourceMessage(Error.IF_CONDITION_TYPE_ERROR, list(Dump.printExpStr(aexp), Types.unparseType(ty)), info)
                 fail()
               end
-              if Config.languageStandardAtLeast(Config.LanguageStandard.'3.2')
+              if Config.languageStandardAtLeast(Config.LanguageStandard.S3_2)
                 _ = begin
                   @match exp begin
                     DAE.CALL(path = Absyn.IDENT("initial"))  => begin
@@ -2927,7 +2927,7 @@
               _ = begin
                   local cr::Absyn.ComponentRef
                   local prop::DAE.Properties
-                  local const::DAE.Const
+                  local constVar::DAE.Const
                   local pre::Prefix.Prefix
                   local s1::String
                   local refs::List{Absyn.ComponentRef}
@@ -2938,24 +2938,22 @@
 
                   (cr <| refs, _, _, _, pre, _)  => begin
                       @match (_, SOME((_, prop, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
-                      const = Types.propertiesListToConst(list(prop))
-                      @match true = Types.isParameterOrConstant(const)
+                      constVar = Types.propertiesListToConst(list(prop))
+                      @match true = Types.isParameterOrConstant(constVar)
                       checkConstantVariability(refs, cache, env, affectedConnector, pre, info)
                     ()
                   end
 
                   (cr <| _, _, _, _, pre, _)  => begin
                       @match (_, SOME((_, prop, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
-                      const = Types.propertiesListToConst(list(prop))
-                      @match false = Types.isParameterOrConstant(const)
+                      constVar = Types.propertiesListToConst(list(prop))
+                      @match false = Types.isParameterOrConstant(constVar)
                       s1 = Dump.printComponentRefStr(cr)
                       Error.addSourceMessage(Error.CONNECTOR_ARRAY_NONCONSTANT, list(affectedConnector, s1), info)
                     ()
                   end
                 end
               end
-               #= print(\" error for: \" + affectedConnector + \" subscript: \" + Dump.printComponentRefStr(cr) + \" non constant \\n\");
-               =#
         end
 
          #= @author: adrpo
