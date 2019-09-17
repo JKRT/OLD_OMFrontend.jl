@@ -1,4 +1,4 @@
-  module PrefixUtil 
+  module PrefixUtil
 
 
     using MetaModelica
@@ -64,6 +64,7 @@
         import Expression
         import ExpressionDump
         import Flags
+        import File
         import ListUtil
         import Print
          #= import Util;
@@ -73,7 +74,7 @@
         import MetaModelica.Dangerous
 
          #= Prints a Prefix to a string. Rather slow... =#
-        function printComponentPrefixStr(pre::Prefix.ComponentPrefix) ::String 
+        function printComponentPrefixStr(pre::Prefix.ComponentPrefix) ::String
               local outString::String
 
               outString = begin
@@ -89,19 +90,19 @@
                   Prefix.NOCOMPPRE(__)  => begin
                     "<Prefix.NOCOMPPRE()>"
                   end
-                  
+
                   Prefix.PRE(next = Prefix.NOCOMPPRE(__), subscripts =  nil())  => begin
                     pre.prefix
                   end
-                  
+
                   Prefix.PRE(next = Prefix.NOCOMPPRE(__))  => begin
                     pre.prefix + "[" + ExpressionDump.printSubscriptLstStr(pre.subscripts) + "]"
                   end
-                  
+
                   Prefix.PRE(subscripts =  nil())  => begin
                     printComponentPrefixStr(pre.next) + "." + pre.prefix
                   end
-                  
+
                   Prefix.PRE(__)  => begin
                     printComponentPrefixStr(pre.next) + "." + pre.prefix + "[" + ExpressionDump.printSubscriptLstStr(pre.subscripts) + "]"
                   end
@@ -111,7 +112,7 @@
         end
 
          #= Prints a Prefix to a string. =#
-        function printPrefixStr(inPrefix::Prefix.Prefix) ::String 
+        function printPrefixStr(inPrefix::Prefix.PrefixType) ::String
               local outString::String
 
               outString = begin
@@ -127,27 +128,27 @@
                   Prefix.NOPRE(__)  => begin
                     "<Prefix.NOPRE()>"
                   end
-                  
+
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
                     "<Prefix.PREFIX(Prefix.NOCOMPPRE())>"
                   end
-                  
+
                   Prefix.PREFIX(Prefix.PRE(str, _,  nil(), Prefix.NOCOMPPRE(__), _, _), _)  => begin
                     str
                   end
-                  
+
                   Prefix.PREFIX(Prefix.PRE(str, _, ss, Prefix.NOCOMPPRE(__), _, _), _)  => begin
                       s = stringAppend(str, "[" + stringDelimitList(ListUtil.map(ss, ExpressionDump.subscriptString), ", ") + "]")
                     s
                   end
-                  
+
                   Prefix.PREFIX(Prefix.PRE(str, _,  nil(), rest, _, _), cp)  => begin
                       rest_1 = printPrefixStr(Prefix.PREFIX(rest, cp))
                       s = stringAppend(rest_1, ".")
                       s_1 = stringAppend(s, str)
                     s_1
                   end
-                  
+
                   Prefix.PREFIX(Prefix.PRE(str, _, ss, rest, _, _), cp)  => begin
                       rest_1 = printPrefixStr(Prefix.PREFIX(rest, cp))
                       s = stringAppend(rest_1, ".")
@@ -161,20 +162,20 @@
         end
 
          #= Prints a Prefix to a string. Designed to be used in Error messages to produce qualified component names =#
-        function printPrefixStr2(inPrefix::Prefix.Prefix) ::String 
+        function printPrefixStr2(inPrefix::Prefix.PrefixType) ::String
               local outString::String
 
               outString = begin
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                 @match inPrefix begin
                   Prefix.NOPRE(__)  => begin
                     ""
                   end
-                  
+
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
                     ""
                   end
-                  
+
                   p  => begin
                     printPrefixStr(p) + "."
                   end
@@ -184,20 +185,20 @@
         end
 
          #= Prints a Prefix to a string as a component name. Designed to be used in Error messages =#
-        function printPrefixStr3(inPrefix::Prefix.Prefix) ::String 
+        function printPrefixStr3(inPrefix::Prefix.PrefixType) ::String
               local outString::String
 
               outString = begin
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                 @match inPrefix begin
                   Prefix.NOPRE(__)  => begin
                     "<NO COMPONENT>"
                   end
-                  
+
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
                     "<NO COMPONENT>"
                   end
-                  
+
                   p  => begin
                     printPrefixStr(p)
                   end
@@ -207,20 +208,20 @@
         end
 
          #= Prints a Prefix to a string as a component name. Designed to be used in Error messages =#
-        function printPrefixStrIgnoreNoPre(inPrefix::Prefix.Prefix) ::String 
+        function printPrefixStrIgnoreNoPre(inPrefix::Prefix.PrefixType) ::String
               local outString::String
 
               outString = begin
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                 @match inPrefix begin
                   Prefix.NOPRE(__)  => begin
                     ""
                   end
-                  
+
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
                     ""
                   end
-                  
+
                   p  => begin
                     printPrefixStr(p)
                   end
@@ -230,7 +231,7 @@
         end
 
          #= Prints a prefix to the Print buffer. =#
-        function printPrefix(p::Prefix.Prefix)  
+        function printPrefix(p::Prefix.PrefixType)
               local s::String
 
               s = printPrefixStr(p)
@@ -242,8 +243,8 @@
           list, the resulting prefix is `a.b{10}.c.d\\'.  Remember that
           prefixes components are stored in the opposite order from the
           normal order used when displaying them. =#
-        function prefixAdd(inIdent::String, inType::List{<:DAE.Dimension}, inIntegerLst::List{<:DAE.Subscript}, inPrefix::Prefix.Prefix, vt::SCode.Variability, ci_state::ClassInf.State, inInfo::SourceInfo) ::Prefix.Prefix 
-              local outPrefix::Prefix.Prefix
+        function prefixAdd(inIdent::String, inType::List{<:DAE.Dimension}, inIntegerLst::List{<:DAE.Subscript}, inPrefix::Prefix.PrefixType, vt::SCode.Variability, ci_state::ClassInf.State, inInfo::SourceInfo) ::Prefix.PrefixType
+              local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
                   local i::String
@@ -253,7 +254,7 @@
                   (i, _, s, Prefix.PREFIX(p, _), _, _)  => begin
                     Prefix.PREFIX(Prefix.PRE(i, inType, s, p, ci_state, inInfo), Prefix.CLASSPRE(vt))
                   end
-                  
+
                   (i, _, s, Prefix.NOPRE(__), _, _)  => begin
                     Prefix.PREFIX(Prefix.PRE(i, inType, s, Prefix.NOCOMPPRE(), ci_state, inInfo), Prefix.CLASSPRE(vt))
                   end
@@ -262,8 +263,8 @@
           outPrefix
         end
 
-        function prefixFirst(inPrefix::Prefix.Prefix) ::Prefix.Prefix 
-              local outPrefix::Prefix.Prefix
+        function prefixFirst(inPrefix::Prefix.PrefixType) ::Prefix.PrefixType
+              local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
                   local a::String
@@ -283,7 +284,7 @@
         end
 
          #= Returns the first cref in the prefix. =#
-        function prefixFirstCref(inPrefix::Prefix.Prefix) ::DAE.ComponentRef 
+        function prefixFirstCref(inPrefix::Prefix.PrefixType) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               local name::String
@@ -295,18 +296,18 @@
         end
 
          #= Returns the last NONPRE Prefix of a prefix =#
-        function prefixLast(inPrefix::Prefix.Prefix) ::Prefix.Prefix 
-              local outPrefix::Prefix.Prefix
+        function prefixLast(inPrefix::Prefix.PrefixType) ::Prefix.PrefixType
+              local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
                   local p::Prefix.ComponentPrefix
-                  local res::Prefix.Prefix
+                  local res::Prefix.PrefixType
                   local cp::Prefix.ClassPrefix
                 @matchcontinue inPrefix begin
                   res && Prefix.PREFIX(Prefix.PRE(next = Prefix.NOCOMPPRE(__)), _)  => begin
                     res
                   end
-                  
+
                   Prefix.PREFIX(Prefix.PRE(next = p), cp)  => begin
                       res = prefixLast(Prefix.PREFIX(p, cp))
                     res
@@ -318,8 +319,8 @@
 
          #= @author: adrpo
          remove the last prefix from the component prefix =#
-        function prefixStripLast(inPrefix::Prefix.Prefix) ::Prefix.Prefix 
-              local outPrefix::Prefix.Prefix
+        function prefixStripLast(inPrefix::Prefix.PrefixType) ::Prefix.PrefixType
+              local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
                   local cp::Prefix.ClassPrefix
@@ -330,7 +331,7 @@
                   Prefix.NOPRE(__)  => begin
                     Prefix.NOPRE()
                   end
-                  
+
                   Prefix.PREFIX(compPre, cp)  => begin
                       compPre = compPreStripLast(compPre)
                     Prefix.PREFIX(compPre, cp)
@@ -344,7 +345,7 @@
 
          #= @author: adrpo
          remove the last prefix from the component prefix =#
-        function compPreStripLast(inCompPrefix::Prefix.ComponentPrefix) ::Prefix.ComponentPrefix 
+        function compPreStripLast(inCompPrefix::Prefix.ComponentPrefix) ::Prefix.ComponentPrefix
               local outCompPrefix::Prefix.ComponentPrefix
 
               outCompPrefix = begin
@@ -355,7 +356,7 @@
                   Prefix.NOCOMPPRE(__)  => begin
                     Prefix.NOCOMPPRE()
                   end
-                  
+
                   Prefix.PRE(next = next)  => begin
                     next
                   end
@@ -368,7 +369,7 @@
 
          #= Prefix a Path variable by adding the supplied
           prefix to it and returning a new Path. =#
-        function prefixPath(inPath::Absyn.Path, inPrefix::Prefix.Prefix) ::Absyn.Path 
+        function prefixPath(inPath::Absyn.Path, inPrefix::Prefix.PrefixType) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -381,12 +382,12 @@
                   (p, Prefix.NOPRE(__))  => begin
                     p
                   end
-                  
+
                   (p, Prefix.PREFIX(Prefix.PRE(prefix = s, next = Prefix.NOCOMPPRE(__)), _))  => begin
                       p_1 = Absyn.QUALIFIED(s, p)
                     p_1
                   end
-                  
+
                   (p, Prefix.PREFIX(Prefix.PRE(prefix = s, next = ss), cp))  => begin
                       p_1 = prefixPath(Absyn.QUALIFIED(s, p), Prefix.PREFIX(ss, cp))
                     p_1
@@ -397,7 +398,7 @@
         end
 
          #= Convert a Prefix to a Path =#
-        function prefixToPath(inPrefix::Prefix.Prefix) ::Absyn.Path 
+        function prefixToPath(inPrefix::Prefix.PrefixType) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -412,7 +413,7 @@
         end
 
          #= Convert a Ident/Prefix to a String =#
-        function identAndPrefixToPath(ident::String, inPrefix::Prefix.Prefix) ::String 
+        function identAndPrefixToPath(ident::String, inPrefix::Prefix.PrefixType) ::String
               local str::String
 
               str = AbsynUtil.pathString(PrefixUtil.prefixPath(Absyn.IDENT(ident), inPrefix))
@@ -420,7 +421,7 @@
         end
 
          #= Convert a Prefix to a Path =#
-        function componentPrefixToPath(pre::Prefix.ComponentPrefix) ::Absyn.Path 
+        function componentPrefixToPath(pre::Prefix.ComponentPrefix) ::Absyn.Path
               local path::Absyn.Path
 
               path = begin
@@ -430,7 +431,7 @@
                   Prefix.PRE(prefix = s, next = Prefix.NOCOMPPRE(__))  => begin
                     Absyn.IDENT(s)
                   end
-                  
+
                   Prefix.PRE(prefix = s, next = ss)  => begin
                     Absyn.QUALIFIED(s, componentPrefixToPath(ss))
                   end
@@ -442,7 +443,7 @@
          #= Prefix a ComponentRef variable by adding the supplied prefix to
           it and returning a new ComponentRef.
           LS: Changed to call prefixToCref which is more general now =#
-        function prefixCref(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, cref::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function prefixCref(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, cref::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local cref_1::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -453,7 +454,7 @@
          #= Prefix a ComponentRef variable by adding the supplied prefix to
           it and returning a new ComponentRef.
           LS: Changed to call prefixToCref which is more general now =#
-        function prefixCrefNoContext(inPre::Prefix.Prefix, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function prefixCrefNoContext(inPre::Prefix.PrefixType, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               (_, outCref) = prefixToCref2(FCore.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, inPre, SOME(inCref))
@@ -461,7 +462,7 @@
         end
 
          #= Convert a prefix to a component reference. =#
-        function prefixToCref(pre::Prefix.Prefix) ::DAE.ComponentRef 
+        function prefixToCref(pre::Prefix.PrefixType) ::DAE.ComponentRef
               local cref_1::DAE.ComponentRef
 
               (_, cref_1) = prefixToCref2(FCore.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, pre, NONE())
@@ -471,7 +472,7 @@
          #= Convert a prefix to a component reference. Converting Prefix.NOPRE with no
           component reference is an error because a component reference cannot be
           empty =#
-        function prefixToCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inPrefix::Prefix.Prefix, inExpComponentRefOption::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function prefixToCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inPrefix::Prefix.PrefixType, inExpComponentRefOption::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outComponentRef::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -493,26 +494,26 @@
                   (_, _, _, Prefix.NOPRE(__), NONE())  => begin
                     fail()
                   end
-                  
+
                   (_, _, _, Prefix.PREFIX(Prefix.NOCOMPPRE(__), _), NONE())  => begin
                     fail()
                   end
-                  
+
                   (cache, _, _, Prefix.NOPRE(__), SOME(cref))  => begin
                     (cache, cref)
                   end
-                  
+
                   (cache, _, _, Prefix.PREFIX(Prefix.NOCOMPPRE(__), _), SOME(cref))  => begin
                     (cache, cref)
                   end
-                  
+
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), NONE())  => begin
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
                       cref_ = ComponentReference.makeCrefIdent(i, ident_ty, s)
                       (cache, cref_1) = prefixToCref2(cache, env, inIH, Prefix.PREFIX(xs, cp), SOME(cref_))
                     (cache, cref_1)
                   end
-                  
+
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), SOME(cref))  => begin
                       (cache, cref) = prefixSubscriptsInCref(cache, env, inIH, inPrefix, cref)
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
@@ -526,7 +527,7 @@
         end
 
          #= Convert a prefix to an optional component reference. =#
-        function prefixToCrefOpt(pre::Prefix.Prefix) ::Option{DAE.ComponentRef} 
+        function prefixToCrefOpt(pre::Prefix.PrefixType) ::Option{DAE.ComponentRef}
               local cref_1::Option{DAE.ComponentRef}
 
               cref_1 = prefixToCrefOpt2(pre, NONE())
@@ -535,7 +536,7 @@
 
          #= Convert a prefix to a component reference. Converting Prefix.NOPRE with no
           component reference gives a NONE =#
-        function prefixToCrefOpt2(inPrefix::Prefix.Prefix, inExpComponentRefOption::Option{<:DAE.ComponentRef}) ::Option{DAE.ComponentRef} 
+        function prefixToCrefOpt2(inPrefix::Prefix.PrefixType, inExpComponentRefOption::Option{<:DAE.ComponentRef}) ::Option{DAE.ComponentRef}
               local outComponentRefOpt::Option{DAE.ComponentRef}
 
               outComponentRefOpt = begin
@@ -550,21 +551,21 @@
                   (Prefix.NOPRE(__), NONE())  => begin
                     NONE()
                   end
-                  
+
                   (Prefix.NOPRE(__), SOME(cref))  => begin
                     SOME(cref)
                   end
-                  
+
                   (Prefix.PREFIX(Prefix.NOCOMPPRE(__), _), SOME(cref))  => begin
                     SOME(cref)
                   end
-                  
+
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), NONE())  => begin
                       cref_ = ComponentReference.makeCrefIdent(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
                     cref_1
                   end
-                  
+
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), SOME(cref))  => begin
                       cref_ = ComponentReference.makeCrefQual(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s, cref)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
@@ -578,7 +579,7 @@
          #= @author:adrpo
            Similar to prefixToCref but it doesn't fail for NOPRE or NOCOMPPRE,
            it will just create an empty cref in these cases =#
-        function makeCrefFromPrefixNoFail(pre::Prefix.Prefix) ::DAE.ComponentRef 
+        function makeCrefFromPrefixNoFail(pre::Prefix.PrefixType) ::DAE.ComponentRef
               local cref::DAE.ComponentRef
 
               cref = begin
@@ -588,12 +589,12 @@
                       c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
-                  
+
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
                       c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
-                  
+
                   _  => begin
                       c = prefixToCref(pre)
                     c
@@ -604,7 +605,7 @@
         end
 
          #= help function to prefixToCrefOpt2, deals with prefixing expressions in subscripts =#
-        function prefixSubscriptsInCref(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.Prefix, inCr::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function prefixSubscriptsInCref(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.PrefixType, inCr::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCr::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -613,7 +614,7 @@
         end
 
          #= help function to prefixToCrefOpt2, deals with prefixing expressions in subscripts =#
-        function prefixSubscriptsInCrefWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.Prefix, inCr::DAE.ComponentRef, acc::List{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function prefixSubscriptsInCrefWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.PrefixType, inCr::DAE.ComponentRef, acc::List{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCr::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -631,14 +632,14 @@
                       cr = ComponentReference.makeCrefIdent(id, tp, subs)
                     (cache, ComponentReference.implode_reverse(_cons(cr, acc)))
                   end
-                  
+
                   (cache, env, _, _, DAE.CREF_QUAL(id, tp, subs, cr), _)  => begin
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
                       crid = ComponentReference.makeCrefIdent(id, tp, subs)
                       (cache, cr) = prefixSubscriptsInCrefWork(cache, env, inIH, pre, cr, _cons(crid, acc))
                     (cache, cr)
                   end
-                  
+
                   (cache, _, _, _, DAE.WILD(__), _)  => begin
                     (cache, DAE.WILD())
                   end
@@ -648,7 +649,7 @@
         end
 
          #= help function to prefixSubscriptsInCref, adds prefix to subscripts =#
-        function prefixSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.Prefix, inSubs::List{<:DAE.Subscript}) ::Tuple{FCore.Cache, List{DAE.Subscript}} 
+        function prefixSubscripts(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.PrefixType, inSubs::List{<:DAE.Subscript}) ::Tuple{FCore.Cache, List{DAE.Subscript}}
               local outSubs::List{DAE.Subscript}
               local outCache::FCore.Cache
 
@@ -661,7 +662,7 @@
                   (cache, _, _, _,  nil())  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, _, _, sub <| subs)  => begin
                       (cache, sub) = prefixSubscript(cache, env, inIH, pre, sub)
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
@@ -673,7 +674,7 @@
         end
 
          #= help function to prefixSubscripts, adds prefix to one subscript, if it is an expression =#
-        function prefixSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.Prefix, sub::DAE.Subscript) ::Tuple{FCore.Cache, DAE.Subscript} 
+        function prefixSubscript(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, pre::Prefix.PrefixType, sub::DAE.Subscript) ::Tuple{FCore.Cache, DAE.Subscript}
               local outSub::DAE.Subscript
               local outCache::FCore.Cache
 
@@ -685,17 +686,17 @@
                   (cache, _, _, _, DAE.WHOLEDIM(__))  => begin
                     (cache, DAE.WHOLEDIM())
                   end
-                  
+
                   (cache, env, _, _, DAE.SLICE(exp))  => begin
                       (cache, exp) = prefixExpWork(cache, env, inIH, exp, pre)
                     (cache, DAE.SLICE(exp))
                   end
-                  
+
                   (cache, env, _, _, DAE.WHOLE_NONEXP(exp))  => begin
                       (cache, exp) = prefixExpWork(cache, env, inIH, exp, pre)
                     (cache, DAE.WHOLE_NONEXP(exp))
                   end
-                  
+
                   (cache, env, _, _, DAE.INDEX(exp))  => begin
                       (cache, exp) = prefixExpWork(cache, env, inIH, exp, pre)
                     (cache, DAE.INDEX(exp))
@@ -708,7 +709,7 @@
          #= Search for the prefix of the inner when the cref is
           an outer and add that instead of the given prefix!
           If the cref is an inner, prefix it normally. =#
-        function prefixCrefInnerOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inCref::DAE.ComponentRef, inPrefix::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.ComponentRef} 
+        function prefixCrefInnerOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inCref::DAE.ComponentRef, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCref::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -717,8 +718,8 @@
                   local env::FCore.Graph
                   local io::Absyn.InnerOuter
                   local ih::InstanceHierarchy
-                  local innerPrefix::Prefix.Prefix
-                  local pre::Prefix.Prefix
+                  local innerPrefix::Prefix.PrefixType
+                  local pre::Prefix.PrefixType
                   local lastCref::DAE.ComponentRef
                   local cref::DAE.ComponentRef
                   local newCref::DAE.ComponentRef
@@ -783,7 +784,7 @@
         end
 
          #= Add the supplied prefix to all component references in an expression. =#
-        function prefixExp(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, exp::DAE.Exp, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.Exp} 
+        function prefixExp(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, exp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
 
 
 
@@ -797,7 +798,7 @@
         end
 
          #= Add the supplied prefix to all component references in an expression. =#
-        function prefixExpWork(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, inExp::DAE.Exp, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.Exp} 
+        function prefixExpWork(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, inExp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
               local outExp::DAE.Exp
 
 
@@ -836,7 +837,7 @@
                   local xs::List{List{DAE.Exp}}
                   local s::String
                   local expl::List{DAE.Exp}
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                   local b::ModelicaInteger
                   local a::ModelicaInteger
                   local t::DAE.Type
@@ -854,27 +855,27 @@
                   (e, Prefix.NOPRE(__)) where (! System.getHasInnerOuterDefinitions())  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.ICONST(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.RCONST(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.SCONST(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.BCONST(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.ENUM_LITERAL(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   (DAE.CREF(componentRef = cr, ty = t), _)  => begin
                        #=  handle literal constants
                        =#
@@ -885,7 +886,7 @@
                           cr_1 = InnerOuter.prefixOuterCrefWithTheInnerPrefix(ih, cr, pre)
                           (cache, t) = prefixExpressionsInType(cache, env, ih, pre, t)
                           outExp = Expression.makeCrefExp(cr_1, t)
-                          return 
+                          return
                         catch
                         end
                       end
@@ -896,76 +897,76 @@
                       end
                     (cache, crefExp)
                   end
-                  
+
                   (DAE.CLKCONST(clk), _)  => begin
                       (cache, clk) = prefixClockKind(cache, env, ih, clk, pre)
                     (cache, DAE.CLKCONST(clk))
                   end
-                  
+
                   (DAE.ASUB(exp = e1, sub = expl), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, expl, pre)
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                       e2 = Expression.makeASUB(e1, es_1)
                     (cache, e2)
                   end
-                  
+
                   (DAE.TSUB(e1, index_, t), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                       e2 = DAE.TSUB(e1, index_, t)
                     (cache, e2)
                   end
-                  
+
                   (DAE.BINARY(exp1 = e1, operator = o, exp2 = e2), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                       (cache, e2_1) = prefixExpWork(cache, env, ih, e2, pre)
                     (cache, DAE.BINARY(e1_1, o, e2_1))
                   end
-                  
+
                   (DAE.UNARY(operator = o, exp = e1), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                     (cache, DAE.UNARY(o, e1_1))
                   end
-                  
+
                   (DAE.LBINARY(exp1 = e1, operator = o, exp2 = e2), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                       (cache, e2_1) = prefixExpWork(cache, env, ih, e2, pre)
                     (cache, DAE.LBINARY(e1_1, o, e2_1))
                   end
-                  
+
                   (DAE.LUNARY(operator = o, exp = e1), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                     (cache, DAE.LUNARY(o, e1_1))
                   end
-                  
+
                   (DAE.RELATION(exp1 = e1, operator = o, exp2 = e2, index = index_, optionExpisASUB = isExpisASUB), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                       (cache, e2_1) = prefixExpWork(cache, env, ih, e2, pre)
                     (cache, DAE.RELATION(e1_1, o, e2_1, index_, isExpisASUB))
                   end
-                  
+
                   (DAE.IFEXP(expCond = e1, expThen = e2, expElse = e3), _)  => begin
                       (cache, e1_1) = prefixExpWork(cache, env, ih, e1, pre)
                       (cache, e2_1) = prefixExpWork(cache, env, ih, e2, pre)
                       (cache, e3_1) = prefixExpWork(cache, env, ih, e3, pre)
                     (cache, DAE.IFEXP(e1_1, e2_1, e3_1))
                   end
-                  
+
                   (DAE.SIZE(exp = cref, sz = SOME(dim)), _)  => begin
                       (cache, cref_1) = prefixExpWork(cache, env, ih, cref, pre)
                       (cache, dim_1) = prefixExpWork(cache, env, ih, dim, pre)
                     (cache, DAE.SIZE(cref_1, SOME(dim_1)))
                   end
-                  
+
                   (DAE.SIZE(exp = cref, sz = NONE()), _)  => begin
                       (cache, cref_1) = prefixExpWork(cache, env, ih, cref, pre)
                     (cache, DAE.SIZE(cref_1, NONE()))
                   end
-                  
+
                   (DAE.CALL(f, es, attr), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.CALL(f, es_1, attr))
                   end
-                  
+
                   (e && DAE.PARTEVALFUNCTION(__), _)  => begin
                        #=  clocks
                        =#
@@ -973,105 +974,105 @@
                       e.expList = es_1
                     (cache, e)
                   end
-                  
+
                   (DAE.RECORD(f, es, fieldNames, t), _)  => begin
                       (cache, _) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.RECORD(f, es, fieldNames, t))
                   end
-                  
+
                   (DAE.ARRAY(ty = t, scalar = sc, array =  nil()), _)  => begin
                     (cache, inExp)
                   end
-                  
+
                   (DAE.ARRAY(ty = t, scalar = sc, array = es), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.ARRAY(t, sc, es_1))
                   end
-                  
+
                   (DAE.TUPLE(PR = es), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.TUPLE(es_1))
                   end
-                  
+
                   (DAE.MATRIX(ty = t, integer = a, matrix =  nil()), _)  => begin
                     (cache, inExp)
                   end
-                  
+
                   (DAE.MATRIX(ty = t, integer = a, matrix = x <| xs), _)  => begin
                       (cache, x_1) = prefixExpList(cache, env, ih, x, pre)
                       @match (cache, DAE.MATRIX(t, _, xs_1)) = prefixExpWork(cache, env, ih, DAE.MATRIX(t, a, xs), pre)
                     (cache, DAE.MATRIX(t, a, _cons(x_1, xs_1)))
                   end
-                  
+
                   (DAE.RANGE(ty = t, start = start, step = NONE(), stop = stop), _)  => begin
                       (cache, start_1) = prefixExpWork(cache, env, ih, start, pre)
                       (cache, stop_1) = prefixExpWork(cache, env, ih, stop, pre)
                     (cache, DAE.RANGE(t, start_1, NONE(), stop_1))
                   end
-                  
+
                   (DAE.RANGE(ty = t, start = start, step = SOME(step), stop = stop), _)  => begin
                       (cache, start_1) = prefixExpWork(cache, env, ih, start, pre)
                       (cache, step_1) = prefixExpWork(cache, env, ih, step, pre)
                       (cache, stop_1) = prefixExpWork(cache, env, ih, stop, pre)
                     (cache, DAE.RANGE(t, start_1, SOME(step_1), stop_1))
                   end
-                  
+
                   (DAE.CAST(ty = tp, exp = e), _)  => begin
                       (cache, e_1) = prefixExpWork(cache, env, ih, e, pre)
                     (cache, DAE.CAST(tp, e_1))
                   end
-                  
+
                   (DAE.REDUCTION(reductionInfo = reductionInfo, expr = exp, iterators = riters), _)  => begin
                       (cache, exp_1) = prefixExpWork(cache, env, ih, exp, pre)
                       (cache, riters) = prefixIterators(cache, env, ih, riters, pre)
                     (cache, DAE.REDUCTION(reductionInfo, exp_1, riters))
                   end
-                  
+
                   (DAE.LIST(es), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.LIST(es_1))
                   end
-                  
+
                   (DAE.CONS(e1, e2), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                       (cache, e2) = prefixExpWork(cache, env, ih, e2, pre)
                     (cache, DAE.CONS(e1, e2))
                   end
-                  
+
                   (DAE.META_TUPLE(es), _)  => begin
                       (cache, es_1) = prefixExpList(cache, env, ih, es, pre)
                     (cache, DAE.META_TUPLE(es_1))
                   end
-                  
+
                   (DAE.META_OPTION(SOME(e1)), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                     (cache, DAE.META_OPTION(SOME(e1)))
                   end
-                  
+
                   (DAE.META_OPTION(NONE()), _)  => begin
                     (cache, DAE.META_OPTION(NONE()))
                   end
-                  
+
                   (e && DAE.UNBOX(e1), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                       e.exp = e1
                     (cache, e)
                   end
-                  
+
                   (e && DAE.BOX(e1), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
                       e.exp = e1
                     (cache, e)
                   end
-                  
+
                   (e, Prefix.NOPRE(__))  => begin
                     (cache, e)
                   end
-                  
+
                   (e && DAE.EMPTY(__), _)  => begin
                     (cache, e)
                   end
-                  
+
                   _  => begin
                          #=  MetaModelica extension. KS
                          =#
@@ -1088,7 +1089,7 @@
         end
 
          #= Helper function to prefixExp for prefixing a cref expression. =#
-        function prefixExpCref(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inCref::DAE.Exp, inPrefix::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.Exp} 
+        function prefixExpCref(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inCref::DAE.Exp, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
               local outCref::DAE.Exp
               local outCache::FCore.Cache
 
@@ -1102,7 +1103,7 @@
           (outCache, outCref)
         end
 
-        function prefixExpCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inIsIter::Option{<:Bool}, inCref::DAE.Exp, inPrefix::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.Exp} 
+        function prefixExpCref2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstanceHierarchy, inIsIter::Option{<:Bool}, inCref::DAE.Exp, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
               local outCref::DAE.Exp
               local outCache::FCore.Cache
 
@@ -1120,11 +1121,11 @@
                       exp = Expression.makeCrefExp(cr, ty)
                     (cache, exp)
                   end
-                  
+
                   (_, _, _, SOME(true), _, _)  => begin
                     (inCache, inCref)
                   end
-                  
+
                   (cache, _, _, NONE(), DAE.CREF(componentRef = cr, ty = ty), _)  => begin
                       (cache, cr) = prefixSubscriptsInCref(cache, inEnv, inIH, inPrefix, cr)
                       (cache, ty) = prefixExpressionsInType(cache, inEnv, inIH, inPrefix, ty)
@@ -1140,7 +1141,7 @@
           (outCache, outCref)
         end
 
-        function prefixIterators(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InstanceHierarchy, inIters::DAE.ReductionIterators, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.ReductionIterators} 
+        function prefixIterators(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InstanceHierarchy, inIters::DAE.ReductionIterators, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ReductionIterators}
               local outIters::DAE.ReductionIterators
               local outCache::FCore.Cache
 
@@ -1157,7 +1158,7 @@
                   (cache, _, _,  nil(), _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, _, DAE.REDUCTIONITER(id, exp, SOME(gexp), ty) <| iters, _)  => begin
                       (cache, exp) = prefixExpWork(cache, env, ih, exp, pre)
                       (cache, gexp) = prefixExpWork(cache, env, ih, gexp, pre)
@@ -1165,7 +1166,7 @@
                       (cache, iters) = prefixIterators(cache, env, ih, iters, pre)
                     (cache, _cons(iter, iters))
                   end
-                  
+
                   (cache, env, _, DAE.REDUCTIONITER(id, exp, NONE(), ty) <| iters, _)  => begin
                       (cache, exp) = prefixExpWork(cache, env, ih, exp, pre)
                       iter = DAE.REDUCTIONITER(id, exp, NONE(), ty)
@@ -1178,7 +1179,7 @@
         end
 
          #= This function prefixes a list of expressions using the prefixExp function. =#
-        function prefixExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inExpExpLst::List{<:DAE.Exp}, inPrefix::Prefix.Prefix) ::Tuple{FCore.Cache, List{DAE.Exp}} 
+        function prefixExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inExpExpLst::List{<:DAE.Exp}, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, List{DAE.Exp}}
               local outExpExpLst::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
 
@@ -1199,7 +1200,7 @@
 
          #= Prefix statements.
           PART OF THE WORKAROUND FOR VALUEBLOCKS =#
-        function prefixStatements(cache::FCore.Cache, env::FCore.Graph, inIH::InstanceHierarchy, stmts::List{<:DAE.Statement}, p::Prefix.Prefix) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function prefixStatements(cache::FCore.Cache, env::FCore.Graph, inIH::InstanceHierarchy, stmts::List{<:DAE.Statement}, p::Prefix.PrefixType) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStmts::List{DAE.Statement} = nil
               local outCache::FCore.Cache = cache
 
@@ -1214,7 +1215,7 @@
                     local elem::DAE.Statement
                     local localAccList::List{DAE.Statement}
                     local rest::List{DAE.Statement}
-                    local pre::Prefix.Prefix
+                    local pre::Prefix.PrefixType
                     local ih::InstanceHierarchy
                     local elems::List{DAE.Statement}
                     local sList::List{DAE.Statement}
@@ -1234,7 +1235,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_TUPLE_ASSIGN(t, eLst, e, source)  => begin
                         (outCache, e) = prefixExpWork(outCache, env, inIH, e, p)
                         (outCache, eLst) = prefixExpList(outCache, env, inIH, eLst, p)
@@ -1242,7 +1243,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_ASSIGN_ARR(t, e1, e, source)  => begin
                         (outCache, e1) = prefixExpWork(outCache, env, inIH, e1, p)
                         (outCache, e) = prefixExpWork(outCache, env, inIH, e, p)
@@ -1250,7 +1251,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_FOR(t, bool, id, ix, e, sList, source)  => begin
                         (outCache, e) = prefixExpWork(outCache, env, inIH, e, p)
                         (outCache, sList) = prefixStatements(outCache, env, inIH, sList, p)
@@ -1258,7 +1259,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_IF(e1, sList, elseBranch, source)  => begin
                         (outCache, e1) = prefixExpWork(outCache, env, inIH, e1, p)
                         (outCache, sList) = prefixStatements(outCache, env, inIH, sList, p)
@@ -1267,7 +1268,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_WHILE(e1, sList, source)  => begin
                         (outCache, e1) = prefixExpWork(outCache, env, inIH, e1, p)
                         (outCache, sList) = prefixStatements(outCache, env, inIH, sList, p)
@@ -1275,7 +1276,7 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_ASSERT(e1, e2, e3, source)  => begin
                         (outCache, e1) = prefixExpWork(outCache, env, inIH, e1, p)
                         (outCache, e2) = prefixExpWork(outCache, env, inIH, e2, p)
@@ -1284,20 +1285,20 @@
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_FAILURE(b, source)  => begin
                         (outCache, b) = prefixStatements(outCache, env, inIH, b, p)
                         elem = DAE.STMT_FAILURE(b, source)
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_RETURN(source)  => begin
                         elem = DAE.STMT_RETURN(source)
                         outStmts = _cons(elem, outStmts)
                       ()
                     end
-                    
+
                     DAE.STMT_BREAK(source)  => begin
                         elem = DAE.STMT_BREAK(source)
                         outStmts = _cons(elem, outStmts)
@@ -1312,14 +1313,14 @@
 
          #= Prefix else statements.
           PART OF THE WORKAROUND FOR VALUEBLOCKS =#
-        function prefixElse(cache::FCore.Cache, env::FCore.Graph, inIH::InstanceHierarchy, elseBranch::DAE.Else, p::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.Else} 
+        function prefixElse(cache::FCore.Cache, env::FCore.Graph, inIH::InstanceHierarchy, elseBranch::DAE.Else, p::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Else}
               local outElse::DAE.Else
               local outCache::FCore.Cache
 
               (outCache, outElse) = begin
                   local localCache::FCore.Cache
                   local localEnv::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ih::InstanceHierarchy
                   local e::DAE.Exp
                   local lStmt::List{DAE.Statement}
@@ -1329,7 +1330,7 @@
                   (localCache, _, _, DAE.NOELSE(__), _)  => begin
                     (localCache, DAE.NOELSE())
                   end
-                  
+
                   (localCache, localEnv, ih, DAE.ELSEIF(e, lStmt, el), pre)  => begin
                       (localCache, e) = prefixExpWork(localCache, localEnv, ih, e, pre)
                       (localCache, el) = prefixElse(localCache, localEnv, ih, el, pre)
@@ -1337,7 +1338,7 @@
                       stmt = DAE.ELSEIF(e, lStmt, el)
                     (localCache, stmt)
                   end
-                  
+
                   (localCache, localEnv, ih, DAE.ELSE(lStmt), pre)  => begin
                       (localCache, lStmt) = prefixStatements(localCache, localEnv, ih, lStmt, pre)
                       stmt = DAE.ELSE(lStmt)
@@ -1349,7 +1350,7 @@
         end
 
          #= helper function for Mod.verifySingleMod, pretty output =#
-        function makePrefixString(pre::Prefix.Prefix) ::String 
+        function makePrefixString(pre::Prefix.PrefixType) ::String
               local str::String
 
               str = begin
@@ -1357,7 +1358,7 @@
                   Prefix.NOPRE(__)  => begin
                     "from top scope"
                   end
-                  
+
                   _  => begin
                       str = "from calling scope: " + printPrefixStr(pre)
                     str
@@ -1367,7 +1368,7 @@
           str
         end
 
-        function prefixExpressionsInType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, inTy::DAE.Type) ::Tuple{FCore.Cache, DAE.Type} 
+        function prefixExpressionsInType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, inTy::DAE.Type) ::Tuple{FCore.Cache, DAE.Type}
               local outTy::DAE.Type
               local outCache::FCore.Cache
 
@@ -1377,7 +1378,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                     (inCache, inTy)
                   end
-                  
+
                   _  => begin
                         (outTy, (outCache, _, _, _)) = Types.traverseType(inTy, (inCache, inEnv, inIH, inPre), prefixArrayDimensions)
                       (outCache, outTy)
@@ -1391,15 +1392,15 @@
 
          #= @author: adrpo
          this function prefixes all the expressions in types to be found by the back-end or code generation! =#
-        function prefixArrayDimensions(ty::DAE.Type, tpl::Tuple{<:FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.Prefix}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.Prefix}} 
-              local otpl::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.Prefix}
+        function prefixArrayDimensions(ty::DAE.Type, tpl::Tuple{<:FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}}
+              local otpl::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}
               local oty::DAE.Type = ty
 
               (oty, otpl) = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local ih::InnerOuter.InstHierarchy
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local dims::DAE.Dimensions
                 @match (oty, tpl) begin
                   (DAE.T_ARRAY(__), (cache, env, ih, pre))  => begin
@@ -1407,7 +1408,7 @@
                       oty.dims = dims
                     (oty, (cache, env, ih, pre))
                   end
-                  
+
                   _  => begin
                       (oty, tpl)
                   end
@@ -1416,7 +1417,7 @@
           (oty, otpl)
         end
 
-        function prefixDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, inDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function prefixDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, inDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDims::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -1430,13 +1431,13 @@
                   (_, _, _, _,  nil())  => begin
                     (inCache, nil)
                   end
-                  
+
                   (_, _, _, _, DAE.DIM_EXP(exp = e) <| rest)  => begin
                       (cache, e) = prefixExpWork(inCache, inEnv, inIH, e, inPre)
                       (cache, new) = prefixDimensions(cache, inEnv, inIH, inPre, rest)
                     (cache, _cons(DAE.DIM_EXP(e), new))
                   end
-                  
+
                   (_, _, _, _, d <| rest)  => begin
                       (cache, new) = prefixDimensions(inCache, inEnv, inIH, inPre, rest)
                     (cache, _cons(d, new))
@@ -1446,7 +1447,7 @@
           (outCache, outDims)
         end
 
-        function isPrefix(prefix::Prefix.Prefix) ::Bool 
+        function isPrefix(prefix::Prefix.PrefixType) ::Bool
               local isPrefix::Bool
 
               isPrefix = begin
@@ -1454,7 +1455,7 @@
                   Prefix.PREFIX(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1463,7 +1464,7 @@
           isPrefix
         end
 
-        function isNoPrefix(inPrefix::Prefix.Prefix) ::Bool 
+        function isNoPrefix(inPrefix::Prefix.PrefixType) ::Bool
               local outIsEmpty::Bool
 
               outIsEmpty = begin
@@ -1471,7 +1472,7 @@
                   Prefix.NOPRE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1481,7 +1482,7 @@
         end
 
          #= Add the supplied prefix to the clock kind =#
-        function prefixClockKind(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClkKind::DAE.ClockKind, inPrefix::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.ClockKind} 
+        function prefixClockKind(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClkKind::DAE.ClockKind, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ClockKind}
               local outClkKind::DAE.ClockKind
               local outCache::FCore.Cache
 
@@ -1494,34 +1495,34 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local ih::InstanceHierarchy
-                  local p::Prefix.Prefix
+                  local p::Prefix.PrefixType
                    #=  clock kinds
                    =#
                 @match (inCache, inEnv, inIH, inClkKind, inPrefix) begin
                   (cache, _, _, DAE.INFERRED_CLOCK(__), _)  => begin
                     (cache, inClkKind)
                   end
-                  
+
                   (cache, env, ih, DAE.INTEGER_CLOCK(e, resolution), p)  => begin
                       (cache, e) = prefixExpWork(cache, env, ih, e, p)
                       (cache, resolution) = prefixExpWork(cache, env, ih, resolution, p)
                       clkKind = DAE.INTEGER_CLOCK(e, resolution)
                     (cache, clkKind)
                   end
-                  
+
                   (cache, env, ih, DAE.REAL_CLOCK(e), p)  => begin
                       (cache, e) = prefixExpWork(cache, env, ih, e, p)
                       clkKind = DAE.REAL_CLOCK(e)
                     (cache, clkKind)
                   end
-                  
+
                   (cache, env, ih, DAE.BOOLEAN_CLOCK(e, interval), p)  => begin
                       (cache, e) = prefixExpWork(cache, env, ih, e, p)
                       (cache, interval) = prefixExpWork(cache, env, ih, interval, p)
                       clkKind = DAE.BOOLEAN_CLOCK(e, interval)
                     (cache, clkKind)
                   end
-                  
+
                   (cache, env, ih, DAE.SOLVER_CLOCK(e, method), p)  => begin
                       (cache, e) = prefixExpWork(cache, env, ih, e, p)
                       (cache, method) = prefixExpWork(cache, env, ih, method, p)
@@ -1533,7 +1534,7 @@
           (outCache, outClkKind)
         end
 
-        function getPrefixInfo(inPrefix::Prefix.Prefix) ::SourceInfo 
+        function getPrefixInfo(inPrefix::Prefix.PrefixType) ::SourceInfo
               local outInfo::SourceInfo
 
               outInfo = begin
@@ -1541,7 +1542,7 @@
                   Prefix.PREFIX(compPre = Prefix.PRE(info = outInfo))  => begin
                     outInfo
                   end
-                  
+
                   _  => begin
                       AbsynUtil.dummyInfo
                   end
@@ -1550,7 +1551,7 @@
           outInfo
         end
 
-        function prefixHashWork(inPrefix::Prefix.ComponentPrefix, hash::ModelicaInteger) ::ModelicaInteger 
+        function prefixHashWork(inPrefix::Prefix.ComponentPrefix, hash::ModelicaInteger) ::ModelicaInteger
 
 
               hash = begin
@@ -1558,7 +1559,7 @@
                   Prefix.PRE(__)  => begin
                     prefixHashWork(inPrefix.next, 31 * hash + stringHashDjb2(inPrefix.prefix))
                   end
-                  
+
                   _  => begin
                       hash
                   end
@@ -1567,7 +1568,7 @@
           hash
         end
 
-        function componentPrefixPathEqual(pre1::Prefix.ComponentPrefix, pre2::Prefix.ComponentPrefix) ::Bool 
+        function componentPrefixPathEqual(pre1::Prefix.ComponentPrefix, pre2::Prefix.ComponentPrefix) ::Bool
               local eq::Bool
 
               eq = begin
@@ -1579,11 +1580,11 @@
                           false
                         end
                   end
-                  
+
                   (Prefix.NOCOMPPRE(__), Prefix.NOCOMPPRE(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1592,7 +1593,7 @@
           eq
         end
 
-        function componentPrefix(inPrefix::Prefix.Prefix) ::Prefix.ComponentPrefix 
+        function componentPrefix(inPrefix::Prefix.PrefixType) ::Prefix.ComponentPrefix
               local outPrefix::Prefix.ComponentPrefix
 
               outPrefix = begin
@@ -1600,7 +1601,7 @@
                   Prefix.PREFIX(__)  => begin
                     inPrefix.compPre
                   end
-                  
+
                   _  => begin
                       Prefix.NOCOMPPRE()
                   end
@@ -1609,7 +1610,7 @@
           outPrefix
         end
 
-        function writeComponentPrefix(file::File.File, pre::Prefix.ComponentPrefix, escape::File.Escape = File.Escape.None)  
+        function writeComponentPrefix(file::File.FILE, pre::Prefix.ComponentPrefix, escape::File.Escape = File.Escape.None)
               _ = begin
                 @match pre begin
                   Prefix.PRE(next = Prefix.NOCOMPPRE(__))  => begin
@@ -1617,7 +1618,7 @@
                       ComponentReference.writeSubscripts(file, pre.subscripts, escape)
                     ()
                   end
-                  
+
                   Prefix.PRE(__)  => begin
                       writeComponentPrefix(file, pre.next)
                        #=  Stored in reverse order...
@@ -1626,7 +1627,7 @@
                       ComponentReference.writeSubscripts(file, pre.subscripts, escape)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1636,7 +1637,7 @@
 
          #= Function: crefHaveSubs
           Checks whether Prefix has any subscripts, recursive  =#
-        function haveSubs(pre::Prefix.ComponentPrefix) ::Bool 
+        function haveSubs(pre::Prefix.ComponentPrefix) ::Bool
               local ob::Bool
 
               ob = begin
@@ -1644,11 +1645,11 @@
                   Prefix.PRE(subscripts =  nil())  => begin
                     haveSubs(pre.next)
                   end
-                  
+
                   Prefix.PRE(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end

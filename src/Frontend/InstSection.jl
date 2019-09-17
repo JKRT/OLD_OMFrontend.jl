@@ -1,4 +1,4 @@
-  module InstSection 
+  module InstSection
 
 
     using MetaModelica
@@ -138,7 +138,7 @@
           Instantiates an equation by calling
           instEquationCommon with Inital set
           to NON_INITIAL. =#
-        function instEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -155,7 +155,7 @@
         end
 
          #= Instantiation of EEquation, used in for loops and if-equations. =#
-        function instEEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instEEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -171,7 +171,7 @@
          #= author: LS, ELN
           Instantiates initial equation by calling inst_equation_common with Inital
           set to INITIAL. =#
-        function instInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -188,7 +188,7 @@
         end
 
          #= Instantiates initial EEquation used in for loops and if equations  =#
-        function instEInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instEInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -207,7 +207,7 @@
 
           This function takes an equation from the source and generates DAE
           equations and connection sets. =#
-        function instEquationCommon(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instEquationCommon(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -228,14 +228,14 @@
                       outDae = DAEUtil.traverseDAE(outDae, DAE.AvlTreePathFunction.Tree.EMPTY(), Expression.traverseSubexpressionsHelper, (ExpressionSimplify.simplifyWork, ExpressionSimplifyTypes.optionSimplifyOnly))
                     ()
                   end
-                  
+
                   ()  => begin
                       @shouldFail _ = ClassInf.trans(inState, ClassInf.FOUND_EQUATION())
                       s = ClassInf.printStateStr(inState)
                       Error.addSourceMessage(Error.EQUATION_TRANSITION_FAILURE, list(s), SCodeUtil.equationFileInfo(inEEquation))
                     fail()
                   end
-                  
+
                   _  => begin
                          #=  We only want to print a generic error message if no other error message was printed
                          =#
@@ -257,7 +257,7 @@
 
            This function takes an equation from the source and generates DAE equations
            and connection sets. =#
-        function instEquationCommonWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, inFlattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instEquationCommonWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, inFlattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph = inGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets = inSets
@@ -316,7 +316,7 @@
                       outState = instEquationCommonCiTrans(inState, inInitial)
                     (outDae, outState)
                   end
-                  
+
                   SCode.EQ_EQUALS(expLeft = lhs_aexp, expRight = rhs_aexp, info = info, comment = comment)  => begin
                        #=  Equality equations.
                        =#
@@ -340,7 +340,7 @@
                       outState = instEquationCommonCiTrans(inState, inInitial)
                     (outDae, outState)
                   end
-                  
+
                   SCode.EQ_IF(thenBranch = branches, elseBranch = else_branch, info = info)  => begin
                        #=  Elaborate all of the conditions.
                        =#
@@ -404,7 +404,7 @@
                        =#
                     (outDae, outState)
                   end
-                  
+
                   SCode.EQ_WHEN(info = info)  => begin
                       if SCodeUtil.isInitial(inInitial)
                         Error.addSourceMessageAndFail(Error.INITIAL_WHEN, nil, info)
@@ -422,7 +422,7 @@
                       outDae = DAE.DAE(list(DAE.WHEN_EQUATION(cond_exp, el, else_when, source)))
                     (outDae, outState)
                   end
-                  
+
                   SCode.EQ_FOR(info = info)  => begin
                        #=  Check if we have an explicit range, and use it if that's the case.
                        =#
@@ -466,7 +466,7 @@
                       outState = instEquationCommonCiTrans(inState, inInitial)
                     (outDae, outState)
                   end
-                  
+
                   SCode.EQ_ASSERT(info = info)  => begin
                       (outCache, cond_exp) = instOperatorArg(outCache, inEnv, inIH, inPrefix, inEEquation.condition, inImpl, DAE.T_BOOL_DEFAULT, "assert", "condition", 1, info)
                       (outCache, msg_exp) = instOperatorArg(outCache, inEnv, inIH, inPrefix, inEEquation.message, inImpl, DAE.T_STRING_DEFAULT, "assert", "message", 2, info)
@@ -479,7 +479,7 @@
                       end
                     (outDae, inState)
                   end
-                  
+
                   SCode.EQ_TERMINATE(info = info)  => begin
                       (outCache, msg_exp) = instOperatorArg(outCache, inEnv, inIH, inPrefix, inEEquation.message, inImpl, DAE.T_STRING_DEFAULT, "terminate", "message", 1, info)
                       source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
@@ -490,7 +490,7 @@
                       end
                     (outDae, inState)
                   end
-                  
+
                   SCode.EQ_REINIT(cref = Absyn.CREF(componentRef = acr), info = info)  => begin
                        #=  Elaborate the cref.
                        =#
@@ -512,7 +512,7 @@
                       outDae = DAE.DAE(el)
                     (outDae, inState)
                   end
-                  
+
                   SCode.EQ_NORETCALL(info = info)  => begin
                       if isConnectionsOperator(inEEquation.exp)
                         (outCache, outEnv, outIH, outDae, outSets, outState, outGraph) = handleConnectionsOperators(inCache, inEnv, inIH, inPrefix, inSets, inState, inEEquation, inInitial, inImpl, inGraph, inFlattenOp)
@@ -533,7 +533,7 @@
                        =#
                     (outDae, outState)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instEquationCommonWork failed for eqn: ")
@@ -545,7 +545,7 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function makeEqSource(inInfo::Absyn.Info, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inFlattenOp::DAE.SymbolicOperation) ::DAE.ElementSource 
+        function makeEqSource(inInfo::Absyn.Info, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inFlattenOp::DAE.SymbolicOperation) ::DAE.ElementSource
               local outSource::DAE.ElementSource
 
               outSource = ElementSource.createElementSource(inInfo, FGraph.getScopePath(inEnv), inPrefix)
@@ -554,7 +554,7 @@
         end
 
          #= Checks that all conditions in an if-equation are Boolean. =#
-        function checkIfConditionTypes(inAccumProp::DAE.Properties, inConditions::List{<:Absyn.Exp}, inProperties::List{<:DAE.Properties}, inInfo::SourceInfo)  
+        function checkIfConditionTypes(inAccumProp::DAE.Properties, inConditions::List{<:Absyn.Exp}, inProperties::List{<:DAE.Properties}, inInfo::SourceInfo)
               _ = begin
                   local props::List{DAE.Properties}
                   local ty::DAE.Type
@@ -566,7 +566,7 @@
                   DAE.PROP(type_ = DAE.T_BOOL(__))  => begin
                     ()
                   end
-                  
+
                   _  => begin
                          #=  Any other type, find the offending condition and print an error.
                          =#
@@ -587,7 +587,7 @@
         end
 
          #= Checks that the condition of an if-branch has a binding. =#
-        function checkIfConditionBinding(inValues::Values.Value, inInfo::SourceInfo) ::Bool 
+        function checkIfConditionBinding(inValues::Values.Value, inInfo::SourceInfo) ::Bool
               local outHasBindings::Bool
 
               local empty_val::Option{Values.Value}
@@ -607,7 +607,7 @@
 
          #= Helper function to instEquationCommonWork. Elaborates and type checks an
            argument for some builtin operators, like assert and terminate. =#
-        function instOperatorArg(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inArg::Absyn.Exp, inImpl::Bool, inExpectedType::DAE.Type, inOperatorName::String, inArgName::String, inArgIndex::ModelicaInteger, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp} 
+        function instOperatorArg(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inArg::Absyn.Exp, inImpl::Bool, inExpectedType::DAE.Type, inOperatorName::String, inArgName::String, inArgIndex::ModelicaInteger, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
               local outArg::DAE.Exp
               local outCache::FCore.Cache
 
@@ -624,7 +624,7 @@
           (outCache, outArg)
         end
 
-        function isConnectionsOperator(inExp::Absyn.Exp) ::Bool 
+        function isConnectionsOperator(inExp::Absyn.Exp) ::Bool
               local yes::Bool
 
               yes = begin
@@ -633,7 +633,7 @@
                   Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT(id,  nil())))  => begin
                     listMember(id, list("root", "potentialRoot", "branch", "uniqueRoot"))
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -643,7 +643,7 @@
         end
 
          #= This function handles Connections.* no return operators =#
-        function handleConnectionsOperators(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, flattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function handleConnectionsOperators(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, flattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -746,14 +746,14 @@
                       Error.addSourceMessage(Error.OVERCONSTRAINED_OPERATOR_SIZE_ZERO, list(s), info)
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("root",  nil())), functionArgs = Absyn.FUNCTIONARGS(Absyn.CREF(cr) <|  nil(),  nil()))), _, _, graph, _)  => begin
                       @match (cache, SOME((DAE.CREF(cr_, _), _, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
                       (cache, cr_) = PrefixUtil.prefixCref(cache, env, ih, pre, cr_)
                       graph = ConnectionGraph.addDefiniteRoot(graph, cr_)
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("potentialRoot",  nil())), functionArgs = functionArgs)), _, _, graph, _)  => begin
                       (cr, _) = potentialRootArguments(functionArgs, info, pre, inEEquation)
                       @match (cache, SOME((DAE.ARRAY(array = nil), _, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
@@ -761,7 +761,7 @@
                       Error.addSourceMessage(Error.OVERCONSTRAINED_OPERATOR_SIZE_ZERO, list(s), info)
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("potentialRoot",  nil())), functionArgs = functionArgs)), _, _, graph, _)  => begin
                       (cr, ipriority) = potentialRootArguments(functionArgs, info, pre, inEEquation)
                       @match (cache, SOME((DAE.CREF(cr_, _), _, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
@@ -769,7 +769,7 @@
                       graph = ConnectionGraph.addPotentialRoot(graph, cr_, intReal(ipriority))
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("uniqueRoot",  nil())), functionArgs = functionArgs)), _, _, graph, _)  => begin
                       (cr, _) = uniqueRootArguments(functionArgs, info, pre, inEEquation)
                       @match (cache, SOME((DAE.ARRAY(array = nil), _, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
@@ -778,7 +778,7 @@
                       Error.addSourceMessage(Error.NON_STANDARD_OPERATOR, list("Connections.uniqueRoot"), info)
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("uniqueRoot",  nil())), functionArgs = functionArgs)), _, _, graph, _)  => begin
                       (cr, msg) = uniqueRootArguments(functionArgs, info, pre, inEEquation)
                       (cache, exp, _) = Static.elabExp(cache, env, Absyn.CREF(cr), false, true, pre, info)
@@ -789,7 +789,7 @@
                       Error.addSourceMessage(Error.NON_STANDARD_OPERATOR, list("Connections.uniqueRoot"), info)
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("branch",  nil())), functionArgs = Absyn.FUNCTIONARGS(Absyn.CREF(cr1) <| Absyn.CREF(cr2) <|  nil(),  nil()))), _, _, graph, _)  => begin
                       @match (cache, SOME((e_1, _, _))) = Static.elabCref(cache, env, cr1, false, false, pre, info)
                       @match (cache, SOME((e_2, _, _))) = Static.elabCref(cache, env, cr2, false, false, pre, info)
@@ -807,7 +807,7 @@
                       end
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (_, env, _, _, _, _, eqn, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       s = SCodeDump.equationStr(eqn)
@@ -822,7 +822,7 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function potentialRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, ModelicaInteger} 
+        function potentialRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, ModelicaInteger}
               local outPriority::ModelicaInteger
               local outCref::Absyn.ComponentRef
 
@@ -835,15 +835,15 @@
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <|  nil(),  nil())  => begin
                     (cr, 0)
                   end
-                  
+
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <| Absyn.INTEGER(p) <|  nil(),  nil())  => begin
                     (cr, p)
                   end
-                  
+
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <|  nil(), Absyn.NAMEDARG("priority", Absyn.INTEGER(p)) <|  nil())  => begin
                     (cr, p)
                   end
-                  
+
                   _  => begin
                         s1 = SCodeDump.equationStr(inEEquation)
                         s2 = PrefixUtil.printPrefixStr3(inPrefix)
@@ -855,7 +855,7 @@
           (outCref, outPriority)
         end
 
-        function uniqueRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, Absyn.Exp} 
+        function uniqueRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, Absyn.Exp}
               local outMessage::Absyn.Exp
               local outCref::Absyn.ComponentRef
 
@@ -868,15 +868,15 @@
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <|  nil(),  nil())  => begin
                     (cr, Absyn.STRING(""))
                   end
-                  
+
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <| msg <|  nil(),  nil())  => begin
                     (cr, msg)
                   end
-                  
+
                   Absyn.FUNCTIONARGS(Absyn.CREF(cr) <|  nil(), Absyn.NAMEDARG("message", msg) <|  nil())  => begin
                     (cr, msg)
                   end
-                  
+
                   _  => begin
                         s1 = SCodeDump.equationStr(inEEquation)
                         s2 = PrefixUtil.printPrefixStr3(inPrefix)
@@ -890,7 +890,7 @@
 
          #= Checks that the base type of the given type is Real, otherwise it prints an
            error message that the first argument to reinit must be a subtype of Real. =#
-        function checkReinitType(inType::DAE.Type, inProperties::DAE.Properties, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::Bool 
+        function checkReinitType(inType::DAE.Type, inProperties::DAE.Properties, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::Bool
               local outSucceeded::Bool
 
               outSucceeded = begin
@@ -908,7 +908,7 @@
                       Error.addSourceMessage(Error.REINIT_MUST_BE_REAL, list(cref_str, ty_str), inInfo)
                     false
                   end
-                  
+
                   DAE.PROP(constFlag = cnst)  => begin
                       @match false = Types.isVar(cnst)
                       cnst_str = Types.unparseConst(cnst)
@@ -916,7 +916,7 @@
                       Error.addSourceMessage(Error.REINIT_MUST_BE_VAR, list(cref_str, cnst_str), inInfo)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -928,7 +928,7 @@
          #= Checks that if a tuple is used on the left side of an equation, then it
            must consist only of component references and the right side must be a
            function call. =#
-        function checkTupleCallEquationMessage(left::Absyn.Exp, right::Absyn.Exp, info::SourceInfo)  
+        function checkTupleCallEquationMessage(left::Absyn.Exp, right::Absyn.Exp, info::SourceInfo)
               _ = begin
                   local crefs::List{Absyn.Exp}
                   local left_str::String
@@ -942,14 +942,14 @@
                       end
                     ()
                   end
-                  
+
                   (Absyn.TUPLE(__), _)  => begin
                       left_str = Dump.printExpStr(left)
                       right_str = Dump.printExpStr(right)
                       Error.addSourceMessage(Error.TUPLE_ASSIGN_FUNCALL_ONLY, list(left_str + " = " + right_str + ";"), info)
                     fail()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -958,7 +958,7 @@
         end
 
          #= Creates DAE for NORETCALLs and also performs vectorization if needed. =#
-        function instEquationNoRetCallVectorization(exp::DAE.Exp, initial_::SCode.Initial, source::DAE.ElementSource #= the origin of the element =#) ::DAE.DAElist 
+        function instEquationNoRetCallVectorization(exp::DAE.Exp, initial_::SCode.Initial, source::DAE.ElementSource #= the origin of the element =#) ::DAE.DAElist
               local dae::DAE.DAElist
 
               dae = begin
@@ -966,7 +966,7 @@
                   SCode.NON_INITIAL(__)  => begin
                     DAE.DAE(list(DAE.NORETCALL(exp, source)))
                   end
-                  
+
                   SCode.INITIAL(__)  => begin
                     DAE.DAE(list(DAE.INITIAL_NORETCALL(exp, source)))
                   end
@@ -977,7 +977,7 @@
 
          #= Function for transforming DAE equations into DAE.REINIT form,
            used by instEquationCommon. =#
-        function makeDAEArrayEqToReinitForm(inEq::DAE.Element) ::DAE.Element 
+        function makeDAEArrayEqToReinitForm(inEq::DAE.Element) ::DAE.Element
               local outEqn::DAE.Element
 
               outEqn = begin
@@ -991,21 +991,21 @@
                   DAE.EQUATION(DAE.CREF(componentRef = cr1), e, source)  => begin
                     DAE.REINIT(cr1, e, source)
                   end
-                  
+
                   DAE.DEFINE(cr1, e, source)  => begin
                     DAE.REINIT(cr1, e, source)
                   end
-                  
+
                   DAE.EQUEQUATION(cr1, cr2, source)  => begin
                       t = ComponentReference.crefLastType(cr2)
                       e2 = Expression.makeCrefExp(cr2, t)
                     DAE.REINIT(cr1, e2, source)
                   end
-                  
+
                   DAE.ARRAY_EQUATION(exp = DAE.CREF(componentRef = cr1), array = e, source = source)  => begin
                     DAE.REINIT(cr1, e, source)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("Failure in: makeDAEArrayEqToReinitForm")
@@ -1020,7 +1020,7 @@
         into its condensed form. By default, most array variables are vectorized,
         i.e. v becomes {v[1],v[2],..,v[n]}. But for array equations containing function calls this is not wanted.
         This function detect this case and elaborates expressions without vectorization. =#
-        function condenseArrayEquation(inCache::FCore.Cache, inEnv::FCore.Graph, ie1::Absyn.Exp, ie2::Absyn.Exp, elabedE1::DAE.Exp, elabedE2::DAE.Exp, iprop::DAE.Properties #= To determine if array equation =#, iprop2::DAE.Properties #= To determine if array equation =#, impl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Exp, DAE.Properties} 
+        function condenseArrayEquation(inCache::FCore.Cache, inEnv::FCore.Graph, ie1::Absyn.Exp, ie2::Absyn.Exp, elabedE1::DAE.Exp, elabedE2::DAE.Exp, iprop::DAE.Properties #= To determine if array equation =#, iprop2::DAE.Properties #= To determine if array equation =#, impl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Exp, DAE.Properties}
               local oprop::DAE.Properties #= If we have an expandable tuple =#
               local outE2::DAE.Exp
               local outE1::DAE.Exp
@@ -1053,7 +1053,7 @@
                       (cache, elabedE2_2, prop2) = Ceval.cevalIfConstant(cache, env, elabedE2_2, prop2, impl, info)
                     (cache, elabedE1_2, elabedE2_2, prop)
                   end
-                  
+
                   (cache, _, _, _, _, _, prop, _, _, _, _)  => begin
                     (cache, elabedE1, elabedE2, prop)
                   end
@@ -1065,7 +1065,7 @@
          #= Author BZ 2008-06
         The function expands the inExp, Absyn.EXP, to contain as many elements as the, DAE.Properties, propCall does.
         The expand adds the elements at the end and they are containing Absyn.WILD() exps with type Types.ANYTYPE.  =#
-        function expandTupleEquationWithWild(inExp::Absyn.Exp, propCall::DAE.Properties, propTuple::DAE.Properties) ::Tuple{Absyn.Exp, DAE.Properties} 
+        function expandTupleEquationWithWild(inExp::Absyn.Exp, propCall::DAE.Properties, propTuple::DAE.Properties) ::Tuple{Absyn.Exp, DAE.Properties}
               local oprop::DAE.Properties
               local outExp::Absyn.Exp
 
@@ -1092,7 +1092,7 @@
                       tupleConst2 = listAppend(tupleConst, tupleConst2)
                     (Absyn.TUPLE(aexpl2), DAE.PROP_TUPLE(DAE.T_TUPLE(lst2, names), DAE.TUPLE_CONST(tupleConst2)))
                   end
-                  
+
                   (_, DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(typeList, names)), DAE.PROP(propType, tconst))  => begin
                       fillValue = listLength(typeList) - 1
                       aexpl2 = ListUtil.fill(Absyn.CREF(Absyn.WILD()), fillValue) #= epxressions =#
@@ -1103,11 +1103,11 @@
                       tupleConst = _cons(DAE.SINGLE_CONST(tconst), tupleConst2)
                     (Absyn.TUPLE(aexpl), DAE.PROP_TUPLE(DAE.T_TUPLE(lst, names), DAE.TUPLE_CONST(tupleConst)))
                   end
-                  
+
                   (_, _, _) where (! Types.isPropTuple(propCall))  => begin
                     (inExp, propTuple)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- expandTupleEquationWithWild failed")
@@ -1119,7 +1119,7 @@
         end
 
          #= updats The ClassInf state machine when an equation is instantiated. =#
-        function instEquationCommonCiTrans(inState::ClassInf.State, inInitial::SCode.Initial) ::ClassInf.State 
+        function instEquationCommonCiTrans(inState::ClassInf.State, inInitial::SCode.Initial) ::ClassInf.State
               local outState::ClassInf.State
 
               outState = begin
@@ -1127,7 +1127,7 @@
                   SCode.NON_INITIAL(__)  => begin
                     ClassInf.trans(inState, ClassInf.FOUND_EQUATION())
                   end
-                  
+
                   _  => begin
                       inState
                   end
@@ -1138,7 +1138,7 @@
 
          #= Unrolling a loop is a way of removing the non-linear structure of the FOR
            clause by explicitly repeating the body of the loop once for each iteration. =#
-        function unroll(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inIdent::Ident, inIteratorType::DAE.Type, inValue::Values.Value, inEquations::List{<:SCode.EEquation}, inInitial::SCode.Initial, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, DAE.DAElist, Connect.Sets, ConnectionGraph.ConnectionGraph} 
+        function unroll(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inIdent::Ident, inIteratorType::DAE.Type, inValue::Values.Value, inEquations::List{<:SCode.EEquation}, inInitial::SCode.Initial, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, DAE.DAElist, Connect.Sets, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph = inGraph
               local outSets::Connect.Sets = inSets
               local outDae::DAE.DAElist
@@ -1177,7 +1177,7 @@
          adrpo NOTE:
            The variability of the iterator SHOULD
            be determined by the range constantness! =#
-        function addForLoopScope(env::FCore.Graph, iterName::Ident, iterType::DAE.Type, iterVariability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::FCore.Graph 
+        function addForLoopScope(env::FCore.Graph, iterName::Ident, iterType::DAE.Type, iterVariability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::FCore.Graph
               local newEnv::FCore.Graph
 
               newEnv = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
@@ -1189,7 +1189,7 @@
          adrpo NOTE:
            The variability of the iterator SHOULD
            be determined by the range constantness! =#
-        function addParForLoopScope(env::FCore.Graph, iterName::Ident, iterType::DAE.Type, iterVariability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::FCore.Graph 
+        function addParForLoopScope(env::FCore.Graph, iterName::Ident, iterType::DAE.Type, iterVariability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::FCore.Graph
               local newEnv::FCore.Graph
 
               newEnv = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), FCore.parForScopeName, NONE())
@@ -1200,7 +1200,7 @@
          #= author: LS, ELN
           Equations follow the same typing rules as equality expressions.
           This function adds the equation to the DAE. =#
-        function instEqEquation(inExp1::DAE.Exp, inProperties2::DAE.Properties, inExp3::DAE.Exp, inProperties4::DAE.Properties, source::DAE.ElementSource #= the origin of the element =#, inInitial5::SCode.Initial, inImplicit::Bool, extraInfo::SourceInfo = AbsynUtil.dummyInfo #= We have 2 sources? =#) ::DAE.DAElist 
+        function instEqEquation(inExp1::DAE.Exp, inProperties2::DAE.Properties, inExp3::DAE.Exp, inProperties4::DAE.Properties, source::DAE.ElementSource #= the origin of the element =#, inInitial5::SCode.Initial, inImplicit::Bool, extraInfo::SourceInfo = AbsynUtil.dummyInfo #= We have 2 sources? =#) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1235,7 +1235,7 @@
                       dae = instEqEquation2(e1, e2_1, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, p1 && DAE.PROP(__), e2, p2 && DAE.PROP(constFlag = c), _, initial_, _)  => begin
                       @match (e1_1, DAE.PROP(t_1, _)) = Types.matchProp(e1, p1, p2, false)
                       (e1_1, _) = ExpressionSimplify.simplify(e1_1)
@@ -1243,7 +1243,7 @@
                       dae = instEqEquation2(e1_1, e2, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, p1 && DAE.PROP(__), e2, p2 && DAE.PROP(constFlag = c), _, initial_, _)  => begin
                       @match (e2_1, DAE.PROP(t_1, _)) = Types.matchProp(e2, p2, p1, true)
                       (e1, _) = ExpressionSimplify.simplify(e1)
@@ -1251,7 +1251,7 @@
                       dae = instEqEquation2(e1, e2_1, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, p1 && DAE.PROP_TUPLE(__), e2, p2 && DAE.PROP_TUPLE(tupleConst = tp), _, initial_, _)  => begin
                       @match (e1_1, DAE.PROP_TUPLE(t_1, _)) = Types.matchProp(e1, p1, p2, false)
                       (e1_1, _) = ExpressionSimplify.simplify(e1_1)
@@ -1260,7 +1260,7 @@
                       dae = instEqEquation2(e1_1, e2, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, p1 && DAE.PROP_TUPLE(__), e2, p2 && DAE.PROP_TUPLE(tupleConst = tp), _, initial_, _)  => begin
                       @match (e2_1, DAE.PROP_TUPLE(t_1, _)) = Types.matchProp(e2, p2, p1, true)
                       (e1, _) = ExpressionSimplify.simplify(e1)
@@ -1269,14 +1269,14 @@
                       dae = instEqEquation2(e1, e2_1, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1 && DAE.CREF(__), DAE.PROP(type_ = DAE.T_ENUMERATION(__)), e2, DAE.PROP(type_ = t && DAE.T_ENUMERATION(__), constFlag = c), _, initial_, _)  => begin
                       (e1, _) = ExpressionSimplify.simplify(e1)
                       (e2, _) = ExpressionSimplify.simplify(e2)
                       dae = instEqEquation2(e1, e2, t, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, p1 && DAE.PROP(__), e2, DAE.PROP_TUPLE(__), _, initial_, _)  => begin
                       p2 = Types.propTupleFirstProp(inProperties4)
                       @match DAE.PROP(constFlag = c) = p2
@@ -1287,7 +1287,7 @@
                       dae = instEqEquation2(e1, e2, t_1, c, source, initial_)
                     dae
                   end
-                  
+
                   (e1, DAE.PROP(type_ = t1), e2, DAE.PROP(type_ = t2), _, _, _)  => begin
                       e1_str = ExpressionDump.printExpStr(e1)
                       t1_str = Types.unparseTypeNoAttr(t1)
@@ -1325,7 +1325,7 @@
 
          #= author: LS, ELN
           This is the second stage of instEqEquation, when the types are checked. =#
-        function instEqEquation2(inExp1::DAE.Exp, inExp2::DAE.Exp, inType3::DAE.Type, inConst::DAE.Const, source::DAE.ElementSource #= the origin of the element =#, inInitial4::SCode.Initial) ::DAE.DAElist 
+        function instEqEquation2(inExp1::DAE.Exp, inExp2::DAE.Exp, inType3::DAE.Type, inConst::DAE.Const, source::DAE.ElementSource #= the origin of the element =#, inInitial4::SCode.Initial) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1347,45 +1347,45 @@
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_REAL(__), _, _, initial_)  => begin
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_STRING(__), _, _, initial_)  => begin
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_BOOL(__), _, _, initial_)  => begin
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_CLOCK(__), _, _, initial_)  => begin
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (DAE.CREF(componentRef = cr), e2, DAE.T_ENUMERATION(__), _, _, initial_)  => begin
                       dae = makeDaeDefine(cr, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, DAE.CREF(componentRef = cr), DAE.T_ENUMERATION(__), _, _, initial_)  => begin
                     makeDaeDefine(cr, e1, source, initial_)
                   end
-                  
+
                   (e1, e2, DAE.T_ENUMERATION(__), _, _, initial_)  => begin
                     makeDaeEquation(e1, e2, source, initial_)
                   end
-                  
+
                   (e1, e2, tt && DAE.T_ARRAY(__), _, _, initial_)  => begin
                       dae = instArrayEquation(e1, e2, tt, inConst, source, initial_)
                     dae
                   end
-                  
+
                   (DAE.TUPLE(exps1), e2, DAE.T_TUPLE(types = _ <| _), _, _, initial_)  => begin
                       exps1 = ListUtil.map(exps1, Expression.emptyToWild)
                       checkNoDuplicateAssignments(exps1, ElementSource.getElementSourceFileInfo(source))
@@ -1393,41 +1393,41 @@
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_TUPLE(__), _, _, initial_) where (! Expression.isTuple(e1))  => begin
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_METALIST(__), _, _, initial_)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_METATUPLE(__), _, _, initial_)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_METAOPTION(__), _, _, initial_)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_METAUNIONTYPE(__), _, _, initial_)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       dae = makeDaeEquation(e1, e2, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_SUBTYPE_BASIC(complexType = tt), _, _, initial_)  => begin
                       dae = instEqEquation2(e1, e2, tt, inConst, source, initial_)
                     dae
                   end
-                  
+
                   (e1, e2, DAE.T_COMPLEX(varLst = vs), _, _, initial_)  => begin
                       exps1 = Expression.splitRecord(e1, inType3)
                       exps2 = Expression.splitRecord(e2, inType3)
@@ -1435,12 +1435,12 @@
                       dae = instEqEquation2List(exps1, exps2, tys, inConst, source, initial_, nil)
                     dae
                   end
-                  
+
                   (e1, e2, tt && DAE.T_COMPLEX(__), _, _, initial_)  => begin
                       dae = instComplexEquation(e1, e2, tt, source, initial_)
                     dae
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instEqEquation2 failed\\n")
@@ -1466,7 +1466,7 @@
           outDae
         end
 
-        function instEqEquation2List(inExps1::List{<:DAE.Exp}, inExps2::List{<:DAE.Exp}, inTypes3::List{<:DAE.Type}, const::DAE.Const, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial, acc::List{<:DAE.DAElist}) ::DAE.DAElist 
+        function instEqEquation2List(inExps1::List{<:DAE.Exp}, inExps2::List{<:DAE.Exp}, inTypes3::List{<:DAE.Type}, constVar::DAE.Const, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial, acc::List{<:DAE.DAElist}) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1477,14 +1477,14 @@
                   local exp1::DAE.Exp
                   local exp2::DAE.Exp
                   local res::DAE.DAElist
-                @match (inExps1, inExps2, inTypes3, const, source, initial_, acc) begin
+                @match (inExps1, inExps2, inTypes3, constVar, source, initial_, acc) begin
                   ( nil(),  nil(),  nil(), _, _, _, _)  => begin
                     DAEUtil.joinDaeLst(listReverse(acc))
                   end
-                  
+
                   (exp1 <| rest1, exp2 <| rest2, ty <| rest3, _, _, _, _)  => begin
-                      res = instEqEquation2(exp1, exp2, ty, const, source, initial_)
-                    instEqEquation2List(rest1, rest2, rest3, const, source, initial_, _cons(res, acc))
+                      res = instEqEquation2(exp1, exp2, ty, constVar, source, initial_)
+                    instEqEquation2List(rest1, rest2, rest3, constVar, source, initial_, _cons(res, acc))
                   end
                 end
               end
@@ -1494,7 +1494,7 @@
          #= author: LS, ELN
           Constructs an equation in the DAE, they can be
           either an initial equation or an ordinary equation. =#
-        function makeDaeEquation(inExp1::DAE.Exp, inExp2::DAE.Exp, inSource::DAE.ElementSource #= the origin of the element =#, inInitial3::SCode.Initial) ::DAE.DAElist 
+        function makeDaeEquation(inExp1::DAE.Exp, inExp2::DAE.Exp, inSource::DAE.ElementSource #= the origin of the element =#, inInitial3::SCode.Initial) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1508,7 +1508,7 @@
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
                     DAE.DAE(list(DAE.EQUATION(e1, e2, source)))
                   end
-                  
+
                   (e1, e2, source, SCode.INITIAL(__))  => begin
                       elt = DAE.INITIALEQUATION(e1, e2, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
@@ -1520,7 +1520,7 @@
         end
 
          #= author: LS, ELN  =#
-        function makeDaeDefine(inComponentRef::DAE.ComponentRef, inExp::DAE.Exp, source::DAE.ElementSource #= the origin of the element =#, inInitial::SCode.Initial) ::DAE.DAElist 
+        function makeDaeDefine(inComponentRef::DAE.ComponentRef, inExp::DAE.Exp, source::DAE.ElementSource #= the origin of the element =#, inInitial::SCode.Initial) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1530,7 +1530,7 @@
                   (cr, e2, _, SCode.NON_INITIAL(__))  => begin
                     DAE.DAE(list(DAE.DEFINE(cr, e2, source)))
                   end
-                  
+
                   (cr, e2, _, SCode.INITIAL(__))  => begin
                     DAE.DAE(list(DAE.INITIALDEFINE(cr, e2, source)))
                   end
@@ -1540,7 +1540,7 @@
         end
 
          #= Instantiates an array equation, i.e. an equation where both sides are arrays. =#
-        function instArrayEquation(lhs::DAE.Exp, rhs::DAE.Exp, tp::DAE.Type, inConst::DAE.Const, inSource::DAE.ElementSource, initial_::SCode.Initial) ::DAE.DAElist 
+        function instArrayEquation(lhs::DAE.Exp, rhs::DAE.Exp, tp::DAE.Type, inConst::DAE.Const, inSource::DAE.ElementSource, initial_::SCode.Initial) ::DAE.DAElist
               local dae::DAE.DAElist
 
               dae = begin
@@ -1570,7 +1570,7 @@
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
                     DAE.DAE(list(DAE.INITIAL_ARRAY_EQUATION(ds, lhs, rhs, source)))
                   end
-                  
+
                   (_, _, _, _, source, SCode.NON_INITIAL(__))  => begin
                       b1 = Expression.containVectorFunctioncall(lhs)
                       b2 = Expression.containVectorFunctioncall(rhs)
@@ -1580,7 +1580,7 @@
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
                     DAE.DAE(list(DAE.ARRAY_EQUATION(ds, lhs, rhs, source)))
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(ty = t, dims = _ <|  nil()), _, _, _)  => begin
                       @match false = Config.splitArrays()
                       @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeof(lhs)
@@ -1590,7 +1590,7 @@
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
                     dae
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(ty = t, dims = dim <|  nil()), _, _, _)  => begin
                       @match true = Config.splitArrays()
                       @match true = Expression.dimensionKnown(dim)
@@ -1601,7 +1601,7 @@
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
                     dae
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = dim <|  nil()), _, source, _)  => begin
                       @match true = Config.splitArrays()
                       @match true = Expression.dimensionKnown(dim)
@@ -1621,7 +1621,7 @@
                           end
                     DAE.DAE(list(elt))
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(ty = t, dims = dim <|  nil()), _, _, _)  => begin
                       @match true = Config.splitArrays()
                       @match false = Expression.dimensionKnown(dim)
@@ -1633,7 +1633,7 @@
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
                     dae
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, source, SCode.INITIAL(__))  => begin
                       @match true = Config.splitArrays()
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
@@ -1641,7 +1641,7 @@
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
                     DAE.DAE(list(DAE.INITIAL_ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, source, SCode.NON_INITIAL(__))  => begin
                       @match true = Config.splitArrays()
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
@@ -1649,7 +1649,7 @@
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
                     DAE.DAE(list(DAE.ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, _, _)  => begin
                       @match true = Config.splitArrays()
                       @match false = Flags.getConfigBool(Flags.CHECK_MODEL)
@@ -1659,7 +1659,7 @@
                       Error.addSourceMessage(Error.INST_ARRAY_EQ_UNKNOWN_SIZE, list(eq_str), ElementSource.getElementSourceFileInfo(inSource))
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instArrayEquation failed\\n")
@@ -1713,7 +1713,7 @@
 
          #= This function loops recursively through all indices in the two arrays and
           generates an equation for each pair of elements. =#
-        function instArrayElEq(inLhsExp::DAE.Exp, inRhsExp::DAE.Exp, inType::DAE.Type, inConst::DAE.Const, inLhsIndices::List{<:DAE.Exp}, inRhsIndices::List{<:DAE.Exp}, inSource::DAE.ElementSource, inInitial::SCode.Initial) ::DAE.DAElist 
+        function instArrayElEq(inLhsExp::DAE.Exp, inRhsExp::DAE.Exp, inType::DAE.Type, inConst::DAE.Const, inLhsIndices::List{<:DAE.Exp}, inRhsIndices::List{<:DAE.Exp}, inSource::DAE.ElementSource, inInitial::SCode.Initial) ::DAE.DAElist
               local outDAE::DAE.DAElist = DAE.emptyDae
 
               local rhs_idx::DAE.Exp
@@ -1729,7 +1729,7 @@
         end
 
          #= Unrolls a for-loop that contains when-statements. =#
-        function unrollForLoop(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inStatement::SCode.Statement, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function unrollForLoop(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inStatement::SCode.Statement, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache
 
@@ -1755,7 +1755,7 @@
           (outCache, outStatements)
         end
 
-        function instForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= For statements can produce multiple statements due to unrolling. =#
               local outCache::FCore.Cache
 
@@ -1786,7 +1786,7 @@
           (outCache, outStatements #= For statements can produce multiple statements due to unrolling. =#)
         end
 
-        function instForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 
@@ -1819,7 +1819,7 @@
         end
 
          #= instantiate a comlex equation, i.e. c = Complex(1.0,-1.0) when Complex is a record =#
-        function instComplexEquation(lhs::DAE.Exp, rhs::DAE.Exp, tp::DAE.Type, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial) ::DAE.DAElist 
+        function instComplexEquation(lhs::DAE.Exp, rhs::DAE.Exp, tp::DAE.Type, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial) ::DAE.DAElist
               local dae::DAE.DAElist
 
               dae = begin
@@ -1833,18 +1833,18 @@
                       dae = makeComplexDaeEquation(lhs, rhs, source, initial_)
                     dae
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match true = Types.isExternalObject(tp)
                       dae = makeDaeEquation(lhs, rhs, source, initial_)
                     dae
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       dae = makeComplexDaeEquation(lhs, rhs, source, initial_)
                     dae
                   end
-                  
+
                   _  => begin
                         @match false = Types.isRecord(tp)
                         s = ExpressionDump.printExpStr(lhs) + " = " + ExpressionDump.printExpStr(rhs)
@@ -1872,7 +1872,7 @@
         end
 
          #= Creates a DAE.COMPLEX_EQUATION for equations involving records =#
-        function makeComplexDaeEquation(lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial) ::DAE.DAElist 
+        function makeComplexDaeEquation(lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource #= the origin of the element =#, initial_::SCode.Initial) ::DAE.DAElist
               local dae::DAE.DAElist
 
               dae = begin
@@ -1880,7 +1880,7 @@
                   (_, _, _, SCode.NON_INITIAL(__))  => begin
                     DAE.DAE(list(DAE.COMPLEX_EQUATION(lhs, rhs, source)))
                   end
-                  
+
                   (_, _, _, SCode.INITIAL(__))  => begin
                     DAE.DAE(list(DAE.INITIAL_COMPLEX_EQUATION(lhs, rhs, source)))
                   end
@@ -1892,7 +1892,7 @@
          #= Algorithms are converted to the representation defined in
           the module Algorithm, and the added to the DAE result.
           This function converts an algorithm section. =#
-        function instAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -1927,7 +1927,7 @@
                       dae = DAE.DAE(list(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
                     (cache, env, ih, dae, csets, ci_state, graph)
                   end
-                  
+
                   (_, _, _, _, _, ci_state, SCode.ALGORITHM(statements = stmt <| _), _, _, _)  => begin
                       @shouldFail _ = ClassInf.trans(ci_state, ClassInf.FOUND_ALGORITHM())
                       s = ClassInf.printStateStr(ci_state)
@@ -1935,7 +1935,7 @@
                       Error.addSourceMessage(Error.ALGORITHM_TRANSITION_FAILURE, list(s), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- InstSection.instAlgorithm failed")
@@ -1952,7 +1952,7 @@
          #= Algorithms are converted to the representation defined
           in the module Algorithm, and the added to the DAE result.
           This function converts an algorithm section. =#
-        function instInitialAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
+        function instInitialAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outState::ClassInf.State
               local outSets::Connect.Sets
@@ -1982,7 +1982,7 @@
                       dae = DAE.DAE(list(DAE.INITIALALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
                     (cache, env, ih, dae, csets, ci_state, graph)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instInitialAlgorithm failed\\n")
@@ -1996,7 +1996,7 @@
         end
 
          #= Constraints are elaborated and converted to DAE =#
-        function instConstraint(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inState::ClassInf.State, inConstraints::SCode.ConstraintSection, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.State} 
+        function instConstraint(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inState::ClassInf.State, inConstraints::SCode.ConstraintSection, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.State}
               local outState::ClassInf.State
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
@@ -2020,7 +2020,7 @@
                       dae = DAE.DAE(list(DAE.CONSTRAINT(DAE.CONSTRAINT_EXPS(constraints_1), source)))
                     (cache, env, dae, ci_state)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instConstraints failed\\n")
@@ -2028,24 +2028,11 @@
                   end
                 end
               end
-               #=  set the source of this element
-               =#
-               #= /*vect*/ =#
-               #=  (constraints_1,_) = DAEUtil.traverseDAEEquationsStmts(constraints_1,Expression.traverseSubexpressionsHelper,(ExpressionSimplify.simplifyWork,false));
-               =#
-               #= /*
-                  case (_,_,_,_,_,_,ci_state,SCode.ALGORITHM(constraints = exp::_),_,_,_)
-                    equation
-                      failure(_ = ClassInf.trans(ci_state,ClassInf.FOUND_ALGORITHM()));
-                      s = ClassInf.printStateStr(ci_state);
-                      Error.addMessage(Error.ALGORITHM_TRANSITION_FAILURE,{s});
-                    then fail();
-              */ =#
           (outCache, outEnv, outDae, outState)
         end
 
          #= This function instantiates a list of algorithm statements. =#
-        function instStatements(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatements::List{<:SCode.Statement}, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instStatements(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatements::List{<:SCode.Statement}, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 
@@ -2062,7 +2049,7 @@
 
          #= Helper function to instStatement. Elaborates, evalutes if constant, and
            prefixes an expression. =#
-        function instExp(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inExp::Absyn.Exp, inImpl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function instExp(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inExp::Absyn.Exp, inImpl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -2074,7 +2061,7 @@
         end
 
          #= Instantiates an algorithm statement. =#
-        function instStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= More statements due to loop unrolling. =#
               local outCache::FCore.Cache = inCache
 
@@ -2108,7 +2095,7 @@
                         (outCache, outStatements) = instAssignment(outCache, inEnv, inIH, inPrefix, inStatement, inSource, inInitial, inImpl, inUnrollLoops, num_errors)
                       outStatements
                     end
-                    
+
                     SCode.ALG_IF(info = info)  => begin
                          #=  Instantiate the first branch.
                          =#
@@ -2132,24 +2119,24 @@
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       Algorithm.makeIf(cond_exp, cond_prop, if_branch, else_if_branches, else_branch, source)
                     end
-                    
+
                     SCode.ALG_FOR(__)  => begin
                         (outCache, outStatements) = instForStatement(outCache, inEnv, inIH, inPrefix, inState, inStatement, inSource, inInitial, inImpl, inUnrollLoops)
                       outStatements
                     end
-                    
+
                     SCode.ALG_PARFOR(__)  => begin
                         (outCache, outStatements) = instParForStatement(outCache, inEnv, inIH, inPrefix, inState, inStatement, inSource, inInitial, inImpl, inUnrollLoops)
                       outStatements
                     end
-                    
+
                     SCode.ALG_WHILE(info = info)  => begin
                         (outCache, cond_exp, cond_prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.boolExpr, inImpl, info)
                         (outCache, branch) = instStatements(outCache, inEnv, inIH, inPrefix, inState, inStatement.whileBody, inSource, inInitial, inImpl, inUnrollLoops)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       list(Algorithm.makeWhile(cond_exp, cond_prop, branch, source))
                     end
-                    
+
                     SCode.ALG_WHEN_A(info = info)  => begin
                          #=  When may not be used in a function.
                          =#
@@ -2168,7 +2155,7 @@
                         end
                       list(when_stmt)
                     end
-                    
+
                     SCode.ALG_ASSERT(info = info)  => begin
                         (outCache, cond_exp, cond_prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.condition, inImpl, info)
                         (outCache, msg_exp, msg_prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.message, inImpl, info)
@@ -2176,20 +2163,20 @@
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       Algorithm.makeAssert(cond_exp, msg_exp, level_exp, cond_prop, msg_prop, level_prop, source)
                     end
-                    
+
                     SCode.ALG_TERMINATE(info = info)  => begin
                         (outCache, msg_exp, msg_prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.message, inImpl, info)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       Algorithm.makeTerminate(msg_exp, msg_prop, source)
                     end
-                    
+
                     SCode.ALG_REINIT(info = info)  => begin
                         (outCache, cr_exp, cr_prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.cref, inImpl, info)
                         (outCache, exp, prop) = instExp(outCache, inEnv, inIH, inPrefix, inStatement.newValue, inImpl, info)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       Algorithm.makeReinit(cr_exp, exp, cr_prop, prop, source)
                     end
-                    
+
                     SCode.ALG_NORETCALL(info = info)  => begin
                         (outCache, exp) = Static.elabExp(outCache, inEnv, inStatement.exp, inImpl, true, inPrefix, info)
                         checkValidNoRetcall(exp, info)
@@ -2201,17 +2188,17 @@
                             list(DAE.STMT_NORETCALL(exp, source))
                           end
                     end
-                    
+
                     SCode.ALG_BREAK(info = info)  => begin
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       list(DAE.STMT_BREAK(source))
                     end
-                    
+
                     SCode.ALG_CONTINUE(info = info)  => begin
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       list(DAE.STMT_CONTINUE(source))
                     end
-                    
+
                     SCode.ALG_RETURN(info = info)  => begin
                         if ! ClassInf.isFunction(inState)
                           Error.addSourceMessageAndFail(Error.RETURN_OUTSIDE_FUNCTION, nil, info)
@@ -2219,14 +2206,14 @@
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       list(DAE.STMT_RETURN(source))
                     end
-                    
+
                     SCode.ALG_FAILURE(info = info)  => begin
                         @match true = Config.acceptMetaModelicaGrammar()
                         (outCache, branch) = instStatements(outCache, inEnv, inIH, inPrefix, inState, inStatement.stmts, inSource, inInitial, inImpl, inUnrollLoops)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
                       list(DAE.STMT_FAILURE(branch, source))
                     end
-                    
+
                     SCode.ALG_TRY(info = info)  => begin
                          #=  try-else becomes:
                          =#
@@ -2262,7 +2249,7 @@
          #= Wrapper for Algorithm that calls either makeAssignment or makeTupleAssignment
           depending on whether the right side is a tuple or not. This makes it possible
           to do cref := function_that_returns_tuple(...). =#
-        function makeAssignment(inLhs::DAE.Exp, inLhsProps::DAE.Properties, inRhs::DAE.Exp, inRhsProps::DAE.Properties, inAttributes::DAE.Attributes, inInitial::SCode.Initial, inSource::DAE.ElementSource) ::DAE.Statement 
+        function makeAssignment(inLhs::DAE.Exp, inLhsProps::DAE.Properties, inRhs::DAE.Exp, inRhsProps::DAE.Properties, inAttributes::DAE.Attributes, inInitial::SCode.Initial, inSource::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -2285,7 +2272,7 @@
                       wild_props = ListUtil.fill(DAE.PROP(DAE.T_ANYTYPE_DEFAULT, DAE.C_VAR()), wild_count)
                     Algorithm.makeTupleAssignment(_cons(inLhs, wilds), _cons(inLhsProps, wild_props), inRhs, inRhsProps, inInitial, inSource)
                   end
-                  
+
                   _  => begin
                       Algorithm.makeAssignment(inLhs, inLhsProps, inRhs, inRhsProps, inAttributes, inInitial, inSource)
                   end
@@ -2299,7 +2286,7 @@
          #= @author: adrpo
           this functions returns true if the given
           statement list contains when statements =#
-        function containsWhenStatements(statementList::List{<:SCode.Statement}) ::Bool 
+        function containsWhenStatements(statementList::List{<:SCode.Statement}) ::Bool
               local hasWhenStatements::Bool
 
               hasWhenStatements = begin
@@ -2321,11 +2308,11 @@
                    nil()  => begin
                     false
                   end
-                  
+
                   SCode.ALG_WHEN_A(__) <| _  => begin
                     true
                   end
-                  
+
                   SCode.ALG_IF(trueBranch = tb, elseIfBranch = eib, elseBranch = eb) <| rest  => begin
                       b1 = containsWhenStatements(tb)
                       b2 = containsWhenStatements(eb)
@@ -2336,28 +2323,28 @@
                       b = ListUtil.reduce(list(b1, b2, b3, b4), boolOr)
                     b
                   end
-                  
+
                   SCode.ALG_FOR(forBody = lst) <| rest  => begin
                       b1 = containsWhenStatements(lst)
                       b2 = containsWhenStatements(rest)
                       b = boolOr(b1, b2)
                     b
                   end
-                  
+
                   SCode.ALG_PARFOR(parforBody = lst) <| rest  => begin
                       b1 = containsWhenStatements(lst)
                       b2 = containsWhenStatements(rest)
                       b = boolOr(b1, b2)
                     b
                   end
-                  
+
                   SCode.ALG_WHILE(whileBody = lst) <| rest  => begin
                       b1 = containsWhenStatements(lst)
                       b2 = containsWhenStatements(rest)
                       b = boolOr(b1, b2)
                     b
                   end
-                  
+
                   _ <| rest  => begin
                     containsWhenStatements(rest)
                   end
@@ -2383,7 +2370,7 @@
          #= @author: adrpo
           Unrolling a for loop is explicitly repeating
           the body of the loop once for each iteration. =#
-        function loopOverRange(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, ci_state::ClassInf.State, inIdent::Ident, inValue::Values.Value, inAlgItmLst::List{<:SCode.Statement}, source::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function loopOverRange(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, ci_state::ClassInf.State, inIdent::Ident, inValue::Values.Value, inAlgItmLst::List{<:SCode.Statement}, source::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= for statements can produce more statements than one by unrolling =#
               local outCache::FCore.Cache
 
@@ -2412,7 +2399,7 @@
                   (cache, _, _, _, _, _, Values.ARRAY(valueLst =  nil()), _, _, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, ih, pre, _, i, Values.ARRAY(valueLst = fst <| rest, dimLst = dim <| dims), algs, _, initial_, impl, _)  => begin
                       dim = dim - 1
                       dims = _cons(dim, dims)
@@ -2423,7 +2410,7 @@
                       stmts = listAppend(stmts1, stmts2)
                     (cache, stmts)
                   end
-                  
+
                   (_, _, _, _, _, _, v, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- InstSection.loopOverRange failed to loop over range: " + ValuesUtil.valString(v))
@@ -2439,10 +2426,10 @@
           (outCache, outStatements #= for statements can produce more statements than one by unrolling =#)
         end
 
-         #= 
+         #=
         The function takes a tuple of Absyn.ComponentRef (an array variable) and an integer i
         and constructs the range expression (Absyn.Exp) for the ith dimension of the variable =#
-        function rangeExpression(inTuple::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Absyn.Exp 
+        function rangeExpression(inTuple::Tuple{<:Absyn.ComponentRef, ModelicaInteger}) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -2460,7 +2447,7 @@
           outExp
         end
 
-        function instIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}} 
+        function instIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}}
               local outEquations::List{DAE.Element}
               local outState::ClassInf.State
               local outIH::InnerOuter.InstHierarchy
@@ -2472,7 +2459,7 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}} 
+        function instIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}}
               local outEquations::List{List{DAE.Element}}
               local outState::ClassInf.State
               local outIH::InnerOuter.InstHierarchy
@@ -2506,7 +2493,7 @@
                       (cache, env, ih, state, branches) = instIfEqBranches(cache, env, ih, inPrefix, state, rest_seq, inImpl, _cons(deq, inAccumEqs))
                     (cache, env, ih, state, branches)
                   end
-                  
+
                   (_, _, _, _, _,  nil(), _, _)  => begin
                     (inCache, inEnv, inIH, inState, listReverse(inAccumEqs))
                   end
@@ -2515,7 +2502,7 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instInitialIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}} 
+        function instInitialIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}}
               local outEquations::List{DAE.Element}
               local outState::ClassInf.State
               local outIH::InnerOuter.InstHierarchy
@@ -2527,7 +2514,7 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instInitialIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}} 
+        function instInitialIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}}
               local outEquations::List{List{DAE.Element}}
               local outState::ClassInf.State
               local outIH::InnerOuter.InstHierarchy
@@ -2549,7 +2536,7 @@
                       (cache, env, ih, state, branches) = instInitialIfEqBranches(cache, env, ih, inPrefix, state, rest_seq, inImpl, _cons(deq, inAccumEqs))
                     (cache, env, ih, state, branches)
                   end
-                  
+
                   (_, _, _, _, _,  nil(), _, _)  => begin
                     (inCache, inEnv, inIH, inState, listReverse(inAccumEqs))
                   end
@@ -2561,11 +2548,11 @@
          #= Checks if an if-branch (a list of equations) contains any connects, and prints
            an error if it does. This is used to check that there are no connects in
            if-equations with non-parameter conditions. =#
-        function checkForConnectInIfBranch(inEquations::List{<:SCode.EEquation})  
+        function checkForConnectInIfBranch(inEquations::List{<:SCode.EEquation})
               ListUtil.map_0(inEquations, checkForConnectInIfBranch2)
         end
 
-        function checkForConnectInIfBranch2(inEquation::SCode.EEquation)  
+        function checkForConnectInIfBranch2(inEquation::SCode.EEquation)
               _ = begin
                   local cr1::Absyn.ComponentRef
                   local cr2::Absyn.ComponentRef
@@ -2580,12 +2567,12 @@
                       Error.addSourceMessage(Error.CONNECT_IN_IF, list(cr1_str, cr2_str), info)
                     fail()
                   end
-                  
+
                   SCode.EQ_FOR(eEquationLst = eqs)  => begin
                       checkForConnectInIfBranch(eqs)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -2596,7 +2583,7 @@
         end
 
          #= This function helps instStatement to handle elseif parts. =#
-        function instElseIfs(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, ci_state::ClassInf.State, inElseIfBranches::List{<:Tuple{<:Absyn.Exp, List{<:SCode.Statement}}}, source::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}} 
+        function instElseIfs(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, ci_state::ClassInf.State, inElseIfBranches::List{<:Tuple{<:Absyn.Exp, List{<:SCode.Statement}}}, source::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}}
               local outElseIfBranches::List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}
               local outCache::FCore.Cache
 
@@ -2618,7 +2605,7 @@
                   (cache, _, _, _, _,  nil(), _, _, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, ih, pre, _, (e, l) <| tail, _, _, impl, _, _)  => begin
                       (cache, e_1, prop) = Static.elabExp(cache, env, e, impl, true, pre, info)
                       (cache, e_1, prop) = Ceval.cevalIfConstant(cache, env, e_1, prop, impl, info)
@@ -2627,7 +2614,7 @@
                       (cache, tail_1) = instElseIfs(cache, env, ih, pre, ci_state, tail, source, initial_, impl, unrollForLoops, info)
                     (cache, _cons((e_2, prop, stmts), tail_1))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.instElseIfs failed\\n")
@@ -2638,7 +2625,7 @@
           (outCache, outElseIfBranches)
         end
 
-        function instWhenEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inBranch::Tuple{<:Absyn.Exp, List{<:SCode.EEquation}}, inImpl::Bool, inUnrollLoops::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Exp, List{DAE.Element}, ConnectionGraph.ConnectionGraph} 
+        function instWhenEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inBranch::Tuple{<:Absyn.Exp, List{<:SCode.EEquation}}, inImpl::Bool, inUnrollLoops::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Exp, List{DAE.Element}, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outEquations::List{DAE.Element}
               local outCondition::DAE.Exp
@@ -2669,7 +2656,7 @@
                       end
                     Expression.makeArray(listReverse(dexps), DAE.T_BOOL_DEFAULT, true)
                   end
-                  
+
                   _  => begin
                         (outCache, dexp, prop) = instExp(inCache, inEnv, inIH, inPrefix, cond, inImpl, info)
                         ty = Types.getPropType(prop)
@@ -2691,7 +2678,7 @@
           (outCache, outEnv, outIH, outCondition, outEquations, outGraph)
         end
 
-        function checkWhenCondition(exp::DAE.Exp, ty::DAE.Type, aexp::Absyn.Exp, info::SourceInfo) ::DAE.Exp 
+        function checkWhenCondition(exp::DAE.Exp, ty::DAE.Type, aexp::Absyn.Exp, info::SourceInfo) ::DAE.Exp
 
 
               local tyEl::DAE.Type
@@ -2713,11 +2700,11 @@
                     DAE.CALL(path = Absyn.IDENT("initial"))  => begin
                       ()
                     end
-                    
+
                     DAE.CALL(path = Absyn.FULLYQUALIFIED(Absyn.IDENT("initial")))  => begin
                       ()
                     end
-                    
+
                     _  => begin
                           if Expression.expHasInitial(exp)
                             Error.addSourceMessage(Error.INITIAL_CALL_WARNING, list(Dump.printExpStr(aexp)), info)
@@ -2730,11 +2717,11 @@
           exp
         end
 
-         #= 
+         #=
           Generates connectionsets for connections.
           Parameters and constants in connectors should generate appropriate assert statements.
           Hence, a DAE.Element list is returned as well. =#
-        function instConnect(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function instConnect(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -2793,7 +2780,7 @@
                       Error.addSourceMessage(Error.SAME_CONNECT_INSTANCE, list(s1, s2), info)
                     (cache, env, ih, sets, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, c2, impl, graph)  => begin
                        #=  handle normal connectors!
                        =#
@@ -2816,7 +2803,7 @@
                        =#
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, c2, impl, graph)  => begin
                       ErrorExt.setCheckpoint("expandableConnectors")
                       @match true = System.getHasExpandableConnectors()
@@ -2824,7 +2811,7 @@
                       ErrorExt.rollBack("expandableConnectors")
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, _, _, pre, c1, c2, _, _)  => begin
                       ErrorExt.rollBack("expandableConnectors")
                       subs1 = AbsynUtil.getSubsFromCref(c1, true, true)
@@ -2838,11 +2825,11 @@
                       checkConstantVariability(crefs2, cache, env, s1, pre, info)
                     fail()
                   end
-                  
+
                   (cache, env, ih, sets, _, _, _, _, graph) where (Config.getGraphicsExpMode())  => begin
                     (cache, env, ih, sets, DAE.emptyDae, graph)
                   end
-                  
+
                   (_, _, _, _, _, c1, c2, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- InstSection.instConnect failed for: connect(" + Dump.printComponentRefStr(c1) + ", " + Dump.printComponentRefStr(c2) + ")")
@@ -2863,7 +2850,7 @@
           (outCache, outEnv, outIH, outSets, outDae, outGraph)
         end
 
-        function instConnector(inCache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, connectorCref::Absyn.ComponentRef, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Attributes, DAE.ConnectorType, SCode.Variability, Absyn.InnerOuter, Connect.Face, DAE.Type, Bool} 
+        function instConnector(inCache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, connectorCref::Absyn.ComponentRef, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Attributes, DAE.ConnectorType, SCode.Variability, Absyn.InnerOuter, Connect.Face, DAE.Type, Bool}
               local deleted::Bool
               local ty::DAE.Type
               local face::Connect.Face
@@ -2893,7 +2880,7 @@
           (outCache, outCref, outAttr, connectorType, variability, innerOuter, face, ty, deleted)
         end
 
-        function sortConnectorType(inType::DAE.Type) ::DAE.Type 
+        function sortConnectorType(inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -2907,12 +2894,12 @@
                       ty = sortConnectorType(ty)
                     DAE.T_ARRAY(ty, dims)
                   end
-                  
+
                   DAE.T_COMPLEX(ci_state, vars, ec)  => begin
                       vars = ListUtil.sort(vars, connectorCompGt)
                     DAE.T_COMPLEX(ci_state, vars, ec)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -2921,7 +2908,7 @@
           outType
         end
 
-        function connectorCompGt(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool 
+        function connectorCompGt(inVar1::DAE.Var, inVar2::DAE.Var) ::Bool
               local outGt::Bool
 
               local id1::DAE.Ident
@@ -2933,10 +2920,10 @@
           outGt
         end
 
-         #= 
+         #=
         Author BZ, 2009-09
           Helper function for instConnect, prints error message for the case with non constant(or parameter) subscript(/s) =#
-        function checkConstantVariability(inrefs::List{<:Absyn.ComponentRef}, cache::FCore.Cache, env::FCore.Graph, affectedConnector::String, inPrefix::Prefix.Prefix, info::SourceInfo)  
+        function checkConstantVariability(inrefs::List{<:Absyn.ComponentRef}, cache::FCore.Cache, env::FCore.Graph, affectedConnector::String, inPrefix::Prefix.Prefix, info::SourceInfo)
               _ = begin
                   local cr::Absyn.ComponentRef
                   local prop::DAE.Properties
@@ -2948,7 +2935,7 @@
                   ( nil(), _, _, _, _, _)  => begin
                     ()
                   end
-                  
+
                   (cr <| refs, _, _, _, pre, _)  => begin
                       @match (_, SOME((_, prop, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
                       const = Types.propertiesListToConst(list(prop))
@@ -2956,7 +2943,7 @@
                       checkConstantVariability(refs, cache, env, affectedConnector, pre, info)
                     ()
                   end
-                  
+
                   (cr <| _, _, _, _, pre, _)  => begin
                       @match (_, SOME((_, prop, _))) = Static.elabCref(cache, env, cr, false, false, pre, info)
                       const = Types.propertiesListToConst(list(prop))
@@ -2973,7 +2960,7 @@
 
          #= @author: adrpo
           this function handle the connections of expandable connectors =#
-        function connectExpandableConnectors(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function connectExpandableConnectors(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -3061,20 +3048,20 @@
                       (cache, env, ih, sets, dae, graph) = connectExpandableVariables(cache, env, ih, sets, pre, c1, c2, variablesUnion, impl, graph, info)
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, c2, impl, graph, _)  => begin
                       @match (cache, NONE()) = Static.elabCref(cache, env, c2, impl, false, pre, info)
                       @match (cache, SOME((DAE.CREF(_, _), _, _))) = Static.elabCref(cache, env, c1, impl, false, pre, info)
                       (cache, env, ih, sets, dae, graph) = connectExpandableConnectors(cache, env, ih, sets, pre, c2, c1, impl, graph, info)
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, _, _, pre, c1 && Absyn.CREF_IDENT(__), c2, impl, _, _)  => begin
                       @match (cache, NONE()) = Static.elabCref(cache, env, c1, impl, false, pre, info)
                       print("Error: The marked virtual expandable component reference in connect([" + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + "." + AbsynUtil.printComponentRefStr(c1) + "], " + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + "." + AbsynUtil.printComponentRefStr(c2) + "); should be qualified, i.e. expandableConnectorName.virtualName!\\n")
                     fail()
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1 && Absyn.CREF_QUAL(__), c2, impl, graph, _)  => begin
                       @match (cache, NONE()) = Static.elabCref(cache, env, c1, impl, false, pre, info)
                       @match (cache, SOME((DAE.CREF(c2_1, _), _, attr2))) = Static.elabCref(cache, env, c2, impl, false, pre, info)
@@ -3101,7 +3088,7 @@
                       (cache, env, ih, sets, dae, graph) = connectExpandableVariables(cache, env, ih, sets, pre, c1, c2, variablesUnion, impl, graph, info)
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1 && Absyn.CREF_QUAL(__), c2, impl, graph, _)  => begin
                       @match (cache, NONE()) = Static.elabCref(cache, env, c1, impl, false, pre, info)
                       @match (cache, SOME((DAE.CREF(c2_1, _), _, attr2))) = Static.elabCref(cache, env, c2, impl, false, pre, info)
@@ -3140,7 +3127,7 @@
                       dae = DAEUtil.joinDaes(dae, daeExpandable)
                     (cache, env, ih, sets, dae, graph)
                   end
-                  
+
                   (cache, env, _, _, pre, c1, c2, impl, _, _)  => begin
                       @match (cache, SOME((DAE.CREF(c1_1, _), _, _))) = Static.elabCref(cache, env, c1, impl, false, pre, info)
                       @match (cache, SOME((DAE.CREF(c2_1, _), _, _))) = Static.elabCref(cache, env, c2, impl, false, pre, info)
@@ -3367,7 +3354,7 @@
          connect(expandable, non-expandable)
          should generate a DAE for the expandable part.
          Expand the array if needed. =#
-        function generateExpandableDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, cref::DAE.ComponentRef, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource) ::DAE.DAElist 
+        function generateExpandableDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, cref::DAE.ComponentRef, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource) ::DAE.DAElist
               local outDAE::DAE.DAElist
 
               outDAE = begin
@@ -3395,7 +3382,7 @@
         end
 
          #= declare a list of crefs, one for each array element =#
-        function daeDeclareList(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, crefs::List{<:DAE.ComponentRef}, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource, acc::DAE.DAElist) ::DAE.DAElist 
+        function daeDeclareList(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, crefs::List{<:DAE.ComponentRef}, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource, acc::DAE.DAElist) ::DAE.DAElist
               local outDAE::DAE.DAElist
 
               outDAE = begin
@@ -3408,7 +3395,7 @@
                   (_, _, _,  nil(), _, _, _, _, _, _, _)  => begin
                     acc
                   end
-                  
+
                   (_, _, _, cref <| lst, _, _, _, _, _, _, _)  => begin
                       daeExpandable = InstDAE.daeDeclare(inCache, inParentEnv, inClassEnv, cref, state, ty, attrs, vis, NONE(), nil, NONE(), NONE(), SOME(SCode.COMMENT(NONE(), SOME("virtual variable in expandable connector"))), io, SCode.NOT_FINAL(), source, true)
                       daeExpandable = DAEUtil.joinDaes(daeExpandable, acc)
@@ -3429,7 +3416,7 @@
             update env[c] with env[d]
             update env[b] with env[c]
             update env[a] with env[b] =#
-        function updateEnvComponentsOnQualPath(inCache::FCore.Cache #= cache =#, inEnv::FCore.Graph #= the environment we should update! =#, virtualExpandableCref::DAE.ComponentRef, virtualExpandableAttr::DAE.Attributes, virtualExpandableTy::DAE.Type, virtualExpandableBinding::DAE.Binding, virtualExpandableCnstForRange::Option{<:DAE.Const}, virtualExpandableEnv::FCore.Graph #= the virtual component environment! =#) ::FCore.Graph 
+        function updateEnvComponentsOnQualPath(inCache::FCore.Cache #= cache =#, inEnv::FCore.Graph #= the environment we should update! =#, virtualExpandableCref::DAE.ComponentRef, virtualExpandableAttr::DAE.Attributes, virtualExpandableTy::DAE.Type, virtualExpandableBinding::DAE.Binding, virtualExpandableCnstForRange::Option{<:DAE.Const}, virtualExpandableEnv::FCore.Graph #= the virtual component environment! =#) ::FCore.Graph
               local outEnv::FCore.Graph #= the returned updated environment =#
 
               outEnv = begin
@@ -3460,7 +3447,7 @@
                       updatedEnv = FGraph.pushScope(updatedEnv, forLoopScope)
                     updatedEnv
                   end
-                  
+
                   (cache, topEnv, veCref && DAE.CREF_QUAL(__), veAttr, veTy, veBinding, veCnstForRange, veEnv)  => begin
                       currentName = ComponentReference.crefLastIdent(veCref)
                       qualCref = ComponentReference.crefStripLastIdent(veCref)
@@ -3496,7 +3483,7 @@
          #= @author: adrpo
           this function handle the connections of expandable connectors
           that contain components =#
-        function connectExpandableVariables(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inVariablesUnion::List{<:String}, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function connectExpandableVariables(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inVariablesUnion::List{<:String}, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -3527,7 +3514,7 @@
                   (cache, env, ih, sets, _, _, _,  nil(), _, graph, _)  => begin
                     (cache, env, ih, sets, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, c2, name <| names, impl, graph, _)  => begin
                       c1_full = AbsynUtil.joinCrefs(c1, Absyn.CREF_IDENT(name, nil))
                       c2_full = AbsynUtil.joinCrefs(c2, Absyn.CREF_IDENT(name, nil))
@@ -3550,7 +3537,7 @@
          #= @author: adrpo
           this function gets the ClassInf.State from the given type.
           it will fail if the type is not a complex type. =#
-        function getStateFromType(ty::DAE.Type) ::ClassInf.State 
+        function getStateFromType(ty::DAE.Type) ::ClassInf.State
               local outState::ClassInf.State
 
               outState = begin
@@ -3559,11 +3546,11 @@
                   DAE.T_COMPLEX(complexClassType = state)  => begin
                     state
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = state)  => begin
                     state
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -3578,7 +3565,7 @@
 
          #= @author: adrpo
           this function checks if the given type is an expandable connector =#
-        function isConnectorType(ty::DAE.Type) ::Bool 
+        function isConnectorType(ty::DAE.Type) ::Bool
               local isConnector::Bool
 
               isConnector = begin
@@ -3586,11 +3573,11 @@
                   DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, false))  => begin
                     true
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexClassType = ClassInf.CONNECTOR(_, false))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3606,7 +3593,7 @@
           input  -> output
           output -> input
           bidir  -> bidir =#
-        function flipDirection(inDir::Absyn.Direction) ::Absyn.Direction 
+        function flipDirection(inDir::Absyn.Direction) ::Absyn.Direction
               local outDir::Absyn.Direction
 
               outDir = begin
@@ -3614,11 +3601,11 @@
                   Absyn.INPUT(__)  => begin
                     Absyn.OUTPUT()
                   end
-                  
+
                   Absyn.OUTPUT(__)  => begin
                     Absyn.INPUT()
                   end
-                  
+
                   Absyn.BIDIR(__)  => begin
                     Absyn.BIDIR()
                   end
@@ -3628,7 +3615,7 @@
         end
 
          #= This function tests whether a type is a eligible to be used in connections. =#
-        function validConnector(inType::DAE.Type, inCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function validConnector(inType::DAE.Type, inCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local state::ClassInf.State
                   local tp::DAE.Type
@@ -3637,57 +3624,57 @@
                   (DAE.T_REAL(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_INTEGER(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_STRING(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_BOOL(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_ENUMERATION(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_CLOCK(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.T_COMPLEX(complexClassType = state), _, _)  => begin
                       ClassInf.valid(state, SCode.R_CONNECTOR(false))
                     ()
                   end
-                  
+
                   (DAE.T_COMPLEX(complexClassType = state), _, _)  => begin
                       ClassInf.valid(state, SCode.R_CONNECTOR(true))
                     ()
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexClassType = state), _, _)  => begin
                       ClassInf.valid(state, SCode.R_CONNECTOR(false))
                     ()
                   end
-                  
+
                   (DAE.T_SUBTYPE_BASIC(complexClassType = state), _, _)  => begin
                       ClassInf.valid(state, SCode.R_CONNECTOR(true))
                     ()
                   end
-                  
+
                   (DAE.T_ARRAY(ty = tp), _, _)  => begin
                       validConnector(tp, inCref, inInfo)
                     ()
                   end
-                  
+
                   (_, _, _)  => begin
                       @match true = ConnectUtil.isExpandable(inCref)
                     ()
                   end
-                  
+
                   _  => begin
                         str = ComponentReference.printComponentRefStr(inCref)
                         Error.addSourceMessage(Error.INVALID_CONNECTOR_TYPE, list(str), inInfo)
@@ -3705,7 +3692,7 @@
                =#
         end
 
-        function checkConnectTypes(inLhsCref::DAE.ComponentRef, inLhsType::DAE.Type, inLhsFace::Connect.Face, inLhsAttributes::DAE.Attributes, inRhsCref::DAE.ComponentRef, inRhsType::DAE.Type, inRhsFace::Connect.Face, inRhsAttributes::DAE.Attributes, inInfo::SourceInfo)  
+        function checkConnectTypes(inLhsCref::DAE.ComponentRef, inLhsType::DAE.Type, inLhsFace::Connect.Face, inLhsAttributes::DAE.Attributes, inRhsCref::DAE.ComponentRef, inRhsType::DAE.Type, inRhsFace::Connect.Face, inRhsAttributes::DAE.Attributes, inInfo::SourceInfo)
               local lhs_ct::DAE.ConnectorType
               local rhs_ct::DAE.ConnectorType
               local lhs_dir::Absyn.Direction
@@ -3725,7 +3712,7 @@
               checkConnectTypesInnerOuter(lhs_io, rhs_io, inLhsCref, inRhsCref, inInfo)
         end
 
-        function checkConnectTypesType(inLhsType::DAE.Type, inRhsType::DAE.Type, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkConnectTypesType(inLhsType::DAE.Type, inRhsType::DAE.Type, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local t1::DAE.Type
                   local t2::DAE.Type
@@ -3742,7 +3729,7 @@
                       @match true = Types.equivtypesOrRecordSubtypeOf(inLhsType, inRhsType)
                     ()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       t1 = Types.arrayElementType(inLhsType)
                       t2 = Types.arrayElementType(inRhsType)
@@ -3754,7 +3741,7 @@
                       Error.addSourceMessage(Error.CONNECT_INCOMPATIBLE_TYPES, list(cref_str1, cref_str2, cref_str1, cs1, cref_str2, cs2), inInfo)
                     fail()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       dims1 = Types.getDimensions(inLhsType)
                       dims2 = Types.getDimensions(inRhsType)
@@ -3775,7 +3762,7 @@
                =#
         end
 
-        function checkConnectTypesFlowStream(inLhsConnectorType::DAE.ConnectorType, inRhsConnectorType::DAE.ConnectorType, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkConnectTypesFlowStream(inLhsConnectorType::DAE.ConnectorType, inRhsConnectorType::DAE.ConnectorType, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local cref_str1::String
                   local cref_str2::String
@@ -3787,7 +3774,7 @@
                       @match true = DAEUtil.connectorTypeEqual(inLhsConnectorType, inRhsConnectorType)
                     ()
                   end
-                  
+
                   _  => begin
                         cref_str1 = ComponentReference.printComponentRefStr(inLhsCref)
                         cref_str2 = ComponentReference.printComponentRefStr(inRhsCref)
@@ -3805,7 +3792,7 @@
               end
         end
 
-        function checkConnectTypesDirection(inLhsDirection::Absyn.Direction, inLhsFace::Connect.Face, inLhsVisibility::SCode.Visibility, inRhsDirection::Absyn.Direction, inRhsFace::Connect.Face, inRhsVisibility::SCode.Visibility, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkConnectTypesDirection(inLhsDirection::Absyn.Direction, inLhsFace::Connect.Face, inLhsVisibility::SCode.Visibility, inRhsDirection::Absyn.Direction, inRhsFace::Connect.Face, inRhsVisibility::SCode.Visibility, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local cref_str1::String
                   local cref_str2::String
@@ -3818,7 +3805,7 @@
                       @match false = isSignalSource(inLhsDirection, inLhsFace, inLhsVisibility) && isSignalSource(inRhsDirection, inRhsFace, inRhsVisibility)
                     ()
                   end
-                  
+
                   _  => begin
                         cref_str1 = ComponentReference.printComponentRefStr(inLhsCref)
                         cref_str2 = ComponentReference.printComponentRefStr(inRhsCref)
@@ -3829,7 +3816,7 @@
               end
         end
 
-        function isSignalSource(inDirection::Absyn.Direction, inFace::Connect.Face, inVisibility::SCode.Visibility) ::Bool 
+        function isSignalSource(inDirection::Absyn.Direction, inFace::Connect.Face, inVisibility::SCode.Visibility) ::Bool
               local outIsSignal::Bool
 
               outIsSignal = begin
@@ -3837,11 +3824,11 @@
                   (Absyn.OUTPUT(__), Connect.INSIDE(__), _)  => begin
                     true
                   end
-                  
+
                   (Absyn.INPUT(__), Connect.OUTSIDE(__), SCode.PUBLIC(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3850,7 +3837,7 @@
           outIsSignal
         end
 
-        function checkConnectTypesInnerOuter(inLhsIO::Absyn.InnerOuter, inRhsIO::Absyn.InnerOuter, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)  
+        function checkConnectTypesInnerOuter(inLhsIO::Absyn.InnerOuter, inRhsIO::Absyn.InnerOuter, inLhsCref::DAE.ComponentRef, inRhsCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
                   local cref_str1::String
                   local cref_str2::String
@@ -3861,7 +3848,7 @@
                       Error.addSourceMessage(Error.CONNECT_OUTER_OUTER, list(cref_str1, cref_str2), inInfo)
                     fail()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -3869,13 +3856,13 @@
               end
         end
 
-         #= 
+         #=
           This function connects two components and generates connection
           sets along the way.  For simple components (of type Real) it
           adds the components to the set, and for complex types it traverses
           the subcomponents and recursively connects them to each other.
           A DAE.Element list is returned for assert statements. =#
-        function connectComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix3::Prefix.Prefix, cr1::DAE.ComponentRef, inFace5::Connect.Face, inType6::DAE.Type, vt1::SCode.Variability, cr2::DAE.ComponentRef, inFace8::Connect.Face, inType9::DAE.Type, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function connectComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix3::Prefix.Prefix, cr1::DAE.ComponentRef, inFace5::Connect.Face, inType6::DAE.Type, vt1::SCode.Variability, cr2::DAE.ComponentRef, inFace8::Connect.Face, inType9::DAE.Type, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -3949,7 +3936,7 @@
                       sets = ConnectUtil.addOuterConnection(pre, sets, c1_1, c2_1, io1, io2, f1, f2, source)
                     (cache, env, ih, sets, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, _, t1, _, c2, _, t2, _, DAE.POTENTIAL(__), _, _, graph, _)  => begin
                       @match true = SCodeUtil.isParameterOrConst(vt1) && SCodeUtil.isParameterOrConst(vt2)
                       @match true = Types.basicType(Types.arrayElementType(t1))
@@ -3968,7 +3955,7 @@
                       elts = ListUtil.threadMap1(lhsl, rhsl, generateConnectAssert, source)
                     (cache, env, ih, sets, DAE.DAE(elts), graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, t1, _, c2, f2, t2, _, _, _, _, graph, _)  => begin
                       @match true = Types.basicType(t1)
                       @match true = Types.basicType(t2)
@@ -3978,7 +3965,7 @@
                       sets_1 = ConnectUtil.addConnection(sets, c1, f1, c2, f2, inConnectorType, source)
                     (cache, env, ih, sets_1, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_ARRAY(dims = dim1 <|  nil(), ty = t1), _, c2, f2, DAE.T_ARRAY(dims = dim2 <|  nil(), ty = t2), _, ct && DAE.POTENTIAL(__), _, _, graph, _)  => begin
                       @match DAE.T_COMPLEX() = Types.arrayElementType(t1)
                       @match DAE.T_COMPLEX() = Types.arrayElementType(t2)
@@ -3989,7 +3976,7 @@
                       (cache, _, ih, sets_1, dae, graph) = connectArrayComponents(cache, env, ih, sets, pre, crefs1, f1, t1, vt1, io1, crefs2, f2, t2, vt2, io2, ct, graph, info)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_ARRAY(dims = dim1 <|  nil(), ty = t1), _, c2, f2, DAE.T_ARRAY(dims = dim2 <|  nil(), ty = t2), _, ct && DAE.POTENTIAL(__), _, _, graph, _)  => begin
                       @match DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_)) = Types.arrayElementType(t1)
                       @match DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_)) = Types.arrayElementType(t2)
@@ -4000,7 +3987,7 @@
                       (cache, _, ih, sets_1, dae, graph) = connectArrayComponents(cache, env, ih, sets, pre, crefs1, f1, t1, vt1, io1, crefs2, f2, t2, vt2, io2, ct, graph, info)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, t1 && DAE.T_ARRAY(__), _, c2, f2, t2 && DAE.T_ARRAY(__), _, ct, _, _, graph, _)  => begin
                       dims = Types.getDimensions(t1)
                       dims2 = Types.getDimensions(t2)
@@ -4011,7 +3998,7 @@
                       sets_1 = ConnectUtil.addArrayConnection(sets, c1, f1, c2, f2, source, ct)
                     (cache, env, ih, sets_1, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, t1 && DAE.T_COMPLEX(equalityConstraint = SOME((fpath1, idim1, inlineType1))), _, c2, f2, t2 && DAE.T_COMPLEX(equalityConstraint = SOME((_, _, _))), _, ct && DAE.POTENTIAL(__), _, _, graph && ConnectionGraph.GRAPH(updateGraph = true), _)  => begin
                       (cache, c1_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c1)
                       (cache, c2_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c2)
@@ -4030,7 +4017,7 @@
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_SUBTYPE_BASIC(complexType = t1, equalityConstraint = SOME((fpath1, idim1, inlineType1))), _, c2, f2, DAE.T_SUBTYPE_BASIC(complexType = t2, equalityConstraint = SOME((_, _, _))), _, ct && DAE.POTENTIAL(__), _, _, graph && ConnectionGraph.GRAPH(updateGraph = true), _)  => begin
                       (cache, c1_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c1)
                       (cache, c2_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c2)
@@ -4049,17 +4036,17 @@
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_SUBTYPE_BASIC(complexType = bc_tp1), _, c2, f2, t2, _, ct, _, _, graph, _)  => begin
                       (cache, _, ih, sets_1, dae, graph) = connectComponents(cache, env, ih, sets, pre, c1, f1, bc_tp1, vt1, c2, f2, t2, vt2, ct, io1, io2, graph, info)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, t1, _, c2, f2, DAE.T_SUBTYPE_BASIC(complexType = bc_tp2), _, ct, _, _, graph, _)  => begin
                       (cache, _, ih, sets_1, dae, graph) = connectComponents(cache, env, ih, sets, pre, c1, f1, t1, vt1, c2, f2, bc_tp2, vt2, ct, io1, io2, graph, info)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(__), varLst =  nil()), _, c2, f2, DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(__), varLst =  nil()), _, _, _, _, graph, _)  => begin
                       (cache, c1_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c1)
                       (cache, c2_1) = PrefixUtil.prefixCref(cache, env, ih, pre, c2)
@@ -4067,12 +4054,12 @@
                       sets_1 = ConnectUtil.addConnection(sets, c1, f1, c2, f2, inConnectorType, source)
                     (cache, env, ih, sets_1, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, pre, c1, f1, DAE.T_COMPLEX(varLst = l1), _, c2, f2, DAE.T_COMPLEX(varLst = l2), _, ct, _, _, graph, _)  => begin
                       (cache, _, ih, sets_1, dae, graph) = connectVars(cache, env, ih, sets, pre, c1, f1, l1, vt1, c2, f2, l2, vt2, ct, io1, io2, graph, info)
                     (cache, env, ih, sets_1, dae, graph)
                   end
-                  
+
                   (cache, env, ih, _, pre, c1, _, t1, _, c2, _, t2, _, _, _, _, _, _)  => begin
                       (cache, _) = PrefixUtil.prefixCref(cache, env, ih, pre, c1)
                       (cache, _) = PrefixUtil.prefixCref(cache, env, ih, pre, c2)
@@ -4085,7 +4072,7 @@
                       Error.addSourceMessage(Error.INVALID_CONNECTOR_VARIABLE, list(c1_str, c2_str), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstSection.connectComponents failed\\n")
@@ -4204,7 +4191,7 @@
           (outCache, outEnv, outIH, outSets, outDae, outGraph)
         end
 
-        function generateConnectAssert(inLhsExp::DAE.Exp, inRhsExp::DAE.Exp, inSource::DAE.ElementSource) ::DAE.Element 
+        function generateConnectAssert(inLhsExp::DAE.Exp, inRhsExp::DAE.Exp, inSource::DAE.ElementSource) ::DAE.Element
               local outAssert::DAE.Element
 
               local exp::DAE.Exp
@@ -4215,7 +4202,7 @@
           outAssert
         end
 
-        function connectArrayComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inLhsCrefs::List{<:DAE.ComponentRef}, inLhsFace::Connect.Face, inLhsType::DAE.Type, inLhsVar::SCode.Variability, inLhsIO::Absyn.InnerOuter, inRhsCrefs::List{<:DAE.ComponentRef}, inRhsFace::Connect.Face, inRhsType::DAE.Type, inRhsVar::SCode.Variability, inRhsIO::Absyn.InnerOuter, inConnectorType::DAE.ConnectorType, inGraph::ConnectionGraph.ConnectionGraph, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function connectArrayComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inLhsCrefs::List{<:DAE.ComponentRef}, inLhsFace::Connect.Face, inLhsType::DAE.Type, inLhsVar::SCode.Variability, inLhsIO::Absyn.InnerOuter, inRhsCrefs::List{<:DAE.ComponentRef}, inRhsFace::Connect.Face, inRhsType::DAE.Type, inRhsVar::SCode.Variability, inRhsIO::Absyn.InnerOuter, inConnectorType::DAE.ConnectorType, inGraph::ConnectionGraph.ConnectionGraph, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -4242,7 +4229,7 @@
                       dae1 = DAEUtil.joinDaes(dae1, dae2)
                     (cache, env, ih, sets, dae1, graph)
                   end
-                  
+
                   _  => begin
                       (inCache, inEnv, inIH, inSets, DAE.emptyDae, inGraph)
                   end
@@ -4254,7 +4241,7 @@
          #= This function connects two subcomponents by adding the component
           name to the current path and recursively connecting the components
           using the function connectComponents. =#
-        function connectVars(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRef3::DAE.ComponentRef, inFace4::Connect.Face, inTypesVarLst5::List{<:DAE.Var}, vt1::SCode.Variability, inComponentRef6::DAE.ComponentRef, inFace7::Connect.Face, inTypesVarLst8::List{<:DAE.Var}, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph} 
+        function connectVars(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRef3::DAE.ComponentRef, inFace4::Connect.Face, inTypesVarLst5::List{<:DAE.Var}, vt1::SCode.Variability, inComponentRef6::DAE.ComponentRef, inFace7::Connect.Face, inTypesVarLst8::List{<:DAE.Var}, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
@@ -4294,7 +4281,7 @@
                   (cache, env, ih, sets, _, _, _,  nil(), _, _, _,  nil(), _, _, _, _, graph, _)  => begin
                     (cache, env, ih, sets, DAE.emptyDae, graph)
                   end
-                  
+
                   (cache, env, ih, sets, _, c1, f1, DAE.TYPES_VAR(name = n, attributes = attr1 && DAE.ATTR(connectorType = ct, variability = vta), ty = ty1) <| xs1, _, c2, f2, DAE.TYPES_VAR(attributes = attr2 && DAE.ATTR(variability = vtb), ty = ty2) <| xs2, _, _, _, _, graph, _)  => begin
                       ty_2 = Types.simplifyType(ty1)
                       ct = propagateConnectorType(inConnectorType, ct)
@@ -4311,7 +4298,7 @@
           (outCache, outEnv, outIH, outSets, outDae, outGraph)
         end
 
-        function propagateConnectorType(inConnectorType::DAE.ConnectorType, inSubConnectorType::DAE.ConnectorType) ::DAE.ConnectorType 
+        function propagateConnectorType(inConnectorType::DAE.ConnectorType, inSubConnectorType::DAE.ConnectorType) ::DAE.ConnectorType
               local outSubConnectorType::DAE.ConnectorType
 
               outSubConnectorType = begin
@@ -4319,7 +4306,7 @@
                   (DAE.POTENTIAL(__), _)  => begin
                     inSubConnectorType
                   end
-                  
+
                   _  => begin
                       inConnectorType
                   end
@@ -4330,7 +4317,7 @@
 
          #= Expands an array into elements given a dimension, i.e.
             (3, x) => {x[1], x[2], x[3]} =#
-        function expandArrayDimension(inDim::DAE.Dimension, inArray::DAE.Exp) ::List{DAE.Exp} 
+        function expandArrayDimension(inDim::DAE.Dimension, inArray::DAE.Exp) ::List{DAE.Exp}
               local outExpl::List{DAE.Exp}
 
               outExpl = begin
@@ -4343,27 +4330,27 @@
                   (_, DAE.ARRAY(array = outExpl))  => begin
                     outExpl
                   end
-                  
+
                   (DAE.DIM_INTEGER(integer = 0), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.DIM_INTEGER(integer = sz), _)  => begin
                       ints = ListUtil.intRange(sz)
                       expl = ListUtil.map1(ints, makeAsubIndex, inArray)
                     expl
                   end
-                  
+
                   (DAE.DIM_BOOLEAN(__), _)  => begin
                       expl = list(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(false)))), ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(true)))))
                     expl
                   end
-                  
+
                   (DAE.DIM_ENUM(enumTypeName = name, literals = ls), _)  => begin
                       expl = makeEnumLiteralIndices(name, ls, 1, inArray)
                     expl
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                       ints = ListUtil.intRange(1)
@@ -4387,7 +4374,7 @@
         end
 
          #= Creates an ASUB expression given an expression and an integer index. =#
-        function makeAsubIndex(index::ModelicaInteger, expr::DAE.Exp) ::DAE.Exp 
+        function makeAsubIndex(index::ModelicaInteger, expr::DAE.Exp) ::DAE.Exp
               local asub::DAE.Exp
 
               (asub, _) = ExpressionSimplify.simplify1(Expression.makeASUB(expr, list(DAE.ICONST(index))))
@@ -4395,7 +4382,7 @@
         end
 
          #= Creates a list of enumeration literal expressions from an enumeration. =#
-        function makeEnumLiteralIndices(enumTypeName::Absyn.Path, enumLiterals::List{<:String}, enumIndex::ModelicaInteger, expr::DAE.Exp) ::List{DAE.Exp} 
+        function makeEnumLiteralIndices(enumTypeName::Absyn.Path, enumLiterals::List{<:String}, enumIndex::ModelicaInteger, expr::DAE.Exp) ::List{DAE.Exp}
               local enumIndices::List{DAE.Exp}
 
               enumIndices = begin
@@ -4409,7 +4396,7 @@
                   (_,  nil(), _, _)  => begin
                     nil
                   end
-                  
+
                   (_, l <| ls, _, _)  => begin
                       enum_type_name = AbsynUtil.joinPaths(enumTypeName, Absyn.IDENT(l))
                       e = DAE.ENUM_LITERAL(enum_type_name, enumIndex)
@@ -4429,7 +4416,7 @@
         end
 
          #= for a vectorized cref, return the originial cref without vector subscripts =#
-        function getVectorizedCref(crefOrArray::DAE.Exp) ::DAE.Exp 
+        function getVectorizedCref(crefOrArray::DAE.Exp) ::DAE.Exp
               local cref::DAE.Exp
 
               cref = begin
@@ -4440,7 +4427,7 @@
                   cref && DAE.CREF(_, _)  => begin
                     cref
                   end
-                  
+
                   DAE.ARRAY(_, _, DAE.CREF(cr, t) <| _)  => begin
                       cr = ComponentReference.crefStripLastSubs(cr)
                       crefExp = Expression.makeCrefExp(cr, t)
@@ -4459,14 +4446,14 @@
              reinit(x, y);
            end when;
          =#
-        function checkWhenAlgorithm(inWhenAlgorithm::SCode.Statement)  
+        function checkWhenAlgorithm(inWhenAlgorithm::SCode.Statement)
               @match true = checkForReinitInWhenInitialAlg(inWhenAlgorithm)
               checkForNestedWhenInStatements(inWhenAlgorithm)
         end
 
          #= Fails if a when (initial()) alg contains
            reinit which is not allowed in Modelica. =#
-        function checkForReinitInWhenInitialAlg(inWhenAlgorithm::SCode.Statement) ::Bool 
+        function checkForReinitInWhenInitialAlg(inWhenAlgorithm::SCode.Statement) ::Bool
               local outOK::Bool
 
               outOK = begin
@@ -4484,7 +4471,7 @@
                       Error.addSourceMessage(Error.REINIT_IN_WHEN_INITIAL, nil, info)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -4496,7 +4483,7 @@
          #= Fails if a when alg contains nested when
            alg, which are not allowed in Modelica.
            An error message is added when failing. =#
-        function checkForNestedWhenInStatements(inWhenAlgorithm::SCode.Statement)  
+        function checkForNestedWhenInStatements(inWhenAlgorithm::SCode.Statement)
               local branches::List{Tuple{Absyn.Exp, List{SCode.Statement}}}
               local info::SourceInfo
               local body::List{SCode.Statement}
@@ -4517,14 +4504,14 @@
            when (initial()) then
              reinit(x, y);
            end when; =#
-        function checkWhenEquation(inWhenEq::SCode.EEquation)  
+        function checkWhenEquation(inWhenEq::SCode.EEquation)
               @match true = checkForReinitInWhenInitialEq(inWhenEq)
               checkForNestedWhenInEquation(inWhenEq)
         end
 
          #= Fails if a when (initial()) equation contains
            reinit which is not allowed in Modelica. =#
-        function checkForReinitInWhenInitialEq(inWhenEq::SCode.EEquation) ::Bool 
+        function checkForReinitInWhenInitialEq(inWhenEq::SCode.EEquation) ::Bool
               local outOK::Bool
 
               outOK = begin
@@ -4543,7 +4530,7 @@
                       Error.addSourceMessage(Error.REINIT_IN_WHEN_INITIAL, nil, info)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -4555,7 +4542,7 @@
          #= Fails if a when equation contains nested when
            equations, which are not allowed in Modelica.
            An error message is added when failing. =#
-        function checkForNestedWhenInEquation(inWhenEq::SCode.EEquation)  
+        function checkForNestedWhenInEquation(inWhenEq::SCode.EEquation)
               _ = begin
                   local info::SourceInfo
                   local eqs::List{SCode.EEquation}
@@ -4576,13 +4563,13 @@
 
          #= Helper function to checkForNestedWhen. Searches for nested when equations in
           a list of equations. =#
-        function checkForNestedWhenInEqList(inEqs::List{<:SCode.EEquation})  
+        function checkForNestedWhenInEqList(inEqs::List{<:SCode.EEquation})
               ListUtil.map_0(inEqs, checkForNestedWhenInEq)
         end
 
          #= Helper function to checkForNestedWhen. Searches for nested when equations in
           an equation. =#
-        function checkForNestedWhenInEq(inEq::SCode.EEquation)  
+        function checkForNestedWhenInEq(inEq::SCode.EEquation)
               _ = begin
                   local eqs::List{SCode.EEquation}
                   local eqs_lst::List{List{SCode.EEquation}}
@@ -4596,49 +4583,49 @@
                       Error.addSourceMessage(Error.NESTED_WHEN, nil, info)
                     fail()
                   end
-                  
+
                   SCode.EQ_IF(thenBranch = eqs_lst, elseBranch = eqs)  => begin
                       ListUtil.map_0(eqs_lst, checkForNestedWhenInEqList)
                       checkForNestedWhenInEqList(eqs)
                     ()
                   end
-                  
+
                   SCode.EQ_FOR(eEquationLst = eqs)  => begin
                       checkForNestedWhenInEqList(eqs)
                     ()
                   end
-                  
+
                   SCode.EQ_EQUALS(__)  => begin
                     ()
                   end
-                  
+
                   SCode.EQ_PDE(__)  => begin
                     ()
                   end
-                  
+
                   SCode.EQ_CONNECT(crefLeft = cr1, crefRight = cr2, info = info)  => begin
                       cr1_str = Dump.printComponentRefStr(cr1)
                       cr2_str = Dump.printComponentRefStr(cr2)
                       Error.addSourceMessage(Error.CONNECT_IN_WHEN, list(cr1_str, cr2_str), info)
                     fail()
                   end
-                  
+
                   SCode.EQ_ASSERT(__)  => begin
                     ()
                   end
-                  
+
                   SCode.EQ_TERMINATE(__)  => begin
                     ()
                   end
-                  
+
                   SCode.EQ_REINIT(__)  => begin
                     ()
                   end
-                  
+
                   SCode.EQ_NORETCALL(__)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- InstSection.checkForNestedWhenInEq failed.\\n")
@@ -4650,7 +4637,7 @@
                =#
         end
 
-        function instAssignment(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, alg::SCode.Statement, source::DAE.ElementSource, initial_::SCode.Initial, impl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instAssignment(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, alg::SCode.Statement, source::DAE.ElementSource, initial_::SCode.Initial, impl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local stmts::List{DAE.Statement} #= more statements due to loop unrolling =#
               local outCache::FCore.Cache
 
@@ -4671,7 +4658,7 @@
                       (cache, stmts) = instAssignment2(cache, env, ih, pre, var, value, e_1, eprop, info, ElementSource.addAnnotation(source, alg.comment), initial_, impl, unrollForLoops, numError)
                     (cache, stmts)
                   end
-                  
+
                   (cache, env, _, pre, SCode.ALG_ASSIGN(value = value, info = info), _, _, _, _, _)  => begin
                       @match true = numError == Error.getNumErrorMessages()
                       @shouldFail Static.elabExp(cache, env, value, impl, true, pre, info)
@@ -4684,7 +4671,7 @@
           (outCache, stmts #= more statements due to loop unrolling =#)
         end
 
-        function instAssignment2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, var::Absyn.Exp, inRhs::Absyn.Exp, value::DAE.Exp, props::DAE.Properties, info::SourceInfo, inSource::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instAssignment2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, var::Absyn.Exp, inRhs::Absyn.Exp, value::DAE.Exp, props::DAE.Properties, info::SourceInfo, inSource::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local stmts::List{DAE.Statement} #= more statements due to loop unrolling =#
               local outCache::FCore.Cache
 
@@ -4750,7 +4737,7 @@
                       @match nil = expandArrayDimension(rhs_dim, rhs)
                     (cache, nil)
                   end
-                  
+
                   (cache, Absyn.CREF(cr), e_1, eprop)  => begin
                       @match (cache, DAE.CREF(ce, t), cprop, attr) = Static.elabCrefNoEval(cache, inEnv, cr, inImpl, false, inPre, info)
                       Static.checkAssignmentToInput(var, attr, inEnv, false, info)
@@ -4769,7 +4756,7 @@
                       stmt = makeAssignment(Expression.makeCrefExp(ce_1, t), cprop, e_2, eprop, attr, initial_, source)
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, e2 && Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "der"), functionArgs = Absyn.FUNCTIONARGS(args = Absyn.CREF(cr) <|  nil())), e_1, eprop)  => begin
                       (cache, _, cprop, attr) = Static.elabCrefNoEval(cache, inEnv, cr, inImpl, false, inPre, info)
                       @match (cache, (@match DAE.CALL() = e2_2), _) = Static.elabExp(cache, inEnv, e2, inImpl, true, inPre, info)
@@ -4780,7 +4767,7 @@
                       stmt = makeAssignment(e2_2_2, cprop, e_2, eprop, attr, initial_, source)
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, Absyn.CREF(cr), e_1, eprop)  => begin
                       (cache, cre, cprop, attr) = Static.elabCrefNoEval(cache, inEnv, cr, inImpl, false, inPre, info)
                       Static.checkAssignmentToInput(var, attr, inEnv, false, info)
@@ -4791,7 +4778,7 @@
                       stmt = makeAssignment(cre2, cprop, e_2, eprop, attr, initial_, source)
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, Absyn.TUPLE(expressions = expl), e_1, eprop)  => begin
                       @match true = ListUtil.all(expl, AbsynUtil.isCref)
                       @match (cache, (@match DAE.CALL() = e_1), eprop) = Ceval.cevalIfConstant(cache, inEnv, e_1, eprop, inImpl, info)
@@ -4804,7 +4791,7 @@
                       stmt = Algorithm.makeTupleAssignment(expl_2, cprops, e_2, eprop, initial_, source)
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, Absyn.TUPLE(expressions = expl), e_1, eprop)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match true = ListUtil.all(expl, AbsynUtil.isCref)
@@ -4819,7 +4806,7 @@
                       stmt = Algorithm.makeTupleAssignment(expl_2, cprops, e_2, eprop, initial_, source)
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, left, e_1, prop)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       ty = Types.getPropType(prop)
@@ -4833,7 +4820,7 @@
                           end
                     (cache, list(stmt))
                   end
-                  
+
                   (cache, Absyn.TUPLE(expressions = expl), e_1, eprop)  => begin
                       @match (cache, (@match DAE.TUPLE(PR = expl_1) = e_1), eprop) = Ceval.cevalIfConstant(cache, inEnv, e_1, eprop, inImpl, info)
                       (cache, expl_2, cprops, attrs) = Static.elabExpCrefNoEvalList(cache, inEnv, expl, inImpl, false, inPre, info)
@@ -4845,14 +4832,14 @@
                       stmts = Algorithm.makeAssignmentsList(expl_2, cprops, expl_1, eprops, DAE.dummyAttrVar, initial_, source)
                     (cache, stmts)
                   end
-                  
+
                   (_, e && Absyn.TUPLE(expressions = expl), _, _)  => begin
                       @match false = ListUtil.all(expl, AbsynUtil.isCref)
                       s = Dump.printExpStr(e)
                       Error.addSourceMessage(Error.TUPLE_ASSIGN_CREFS_ONLY, list(s), info)
                     fail()
                   end
-                  
+
                   (cache, e1 && Absyn.TUPLE(expressions = expl), _, prop2)  => begin
                       @match Absyn.CALL() = inRhs
                       @match true = ListUtil.all(expl, AbsynUtil.isCref)
@@ -4868,7 +4855,7 @@
                       Error.addSourceMessage(Error.ASSIGN_TYPE_MISMATCH_ERROR, list(lhs_str, rhs_str, lt_str, rt_str), info)
                     fail()
                   end
-                  
+
                   (_, Absyn.TUPLE(expressions = expl), e_1, _)  => begin
                       @match true = ListUtil.all(expl, AbsynUtil.isCref)
                       @shouldFail @match Absyn.CALL() = inRhs
@@ -4876,7 +4863,7 @@
                       Error.addSourceMessage(Error.TUPLE_ASSIGN_FUNCALL_ONLY, list(s), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = numError == Error.getNumErrorMessages()
                         s1 = Dump.printExpStr(var)
@@ -4904,7 +4891,7 @@
           (outCache, stmts #= more statements due to loop unrolling =#)
         end
 
-        function checkNoDuplicateAssignments(inExps::List{<:DAE.Exp}, info::SourceInfo)  
+        function checkNoDuplicateAssignments(inExps::List{<:DAE.Exp}, info::SourceInfo)
               local exp::DAE.Exp
               local exps::List{DAE.Exp} = inExps
 
@@ -4919,7 +4906,7 @@
               end
         end
 
-        function generateNoConstantBindingError(emptyValueOpt::Option{<:Values.Value}, info::SourceInfo)  
+        function generateNoConstantBindingError(emptyValueOpt::Option{<:Values.Value}, info::SourceInfo)
               _ = begin
                   local scope::String #= the scope where we could not find the binding =#
                   local name::String #= the name of the variable =#
@@ -4929,7 +4916,7 @@
                   (NONE(), _)  => begin
                     ()
                   end
-                  
+
                   (SOME(Values.EMPTY(scope, name, _, _)), _)  => begin
                       Error.addSourceMessage(Error.NO_CONSTANT_BINDING, list(name, scope), info)
                     fail()
@@ -4938,7 +4925,7 @@
               end
         end
 
-        function getIteratorType(ty::DAE.Type, id::String, info::SourceInfo) ::DAE.Type 
+        function getIteratorType(ty::DAE.Type, id::String, info::SourceInfo) ::DAE.Type
               local oty::DAE.Type
 
               oty = begin
@@ -4949,23 +4936,23 @@
                       Error.addSourceMessage(Error.ITERATOR_NON_ARRAY, list(id, str), info)
                     fail()
                   end
-                  
+
                   DAE.T_ARRAY(ty = oty)  => begin
                     oty
                   end
-                  
+
                   DAE.T_METALIST(ty = oty)  => begin
                     Types.boxIfUnboxedType(oty)
                   end
-                  
+
                   DAE.T_METAARRAY(ty = oty)  => begin
                     Types.boxIfUnboxedType(oty)
                   end
-                  
+
                   DAE.T_METATYPE(ty = oty)  => begin
                     getIteratorType(ty.ty, id, info)
                   end
-                  
+
                   _  => begin
                         str = Types.unparseType(ty)
                         Error.addSourceMessage(Error.ITERATOR_NON_ARRAY, list(id, str), info)
@@ -4976,7 +4963,7 @@
           oty
         end
 
-        function instParForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instParForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= For statements can produce multiple statements due to unrolling. =#
               local outCache::FCore.Cache
 
@@ -5007,7 +4994,7 @@
           (outCache, outStatements #= For statements can produce multiple statements due to unrolling. =#)
         end
 
-        function instParForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}} 
+        function instParForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 
@@ -5062,7 +5049,7 @@
          #= Checks if a component reference is referencing a parglobal
         variable or the loop iterator(implicitly declared is OK).
         All other references are errors. =#
-        function isCrefParGlobalOrForIterator(inCrefInfo::Tuple{<:DAE.ComponentRef, SourceInfo}, inCache::FCore.Cache, inEnv::FCore.Graph)  
+        function isCrefParGlobalOrForIterator(inCrefInfo::Tuple{<:DAE.ComponentRef, SourceInfo}, inCache::FCore.Cache, inEnv::FCore.Graph)
               _ = begin
                   local errorString::String
                   local cref::DAE.ComponentRef
@@ -5077,7 +5064,7 @@
                       @match true = isParglobal
                     ()
                   end
-                  
+
                   ((cref, info), _, _)  => begin
                       errorString = "\\n" + "- Component '" + AbsynUtil.pathString(ComponentReference.crefToPath(cref)) + "' is used in a parallel for loop." + "\\n" + "- Parallel for loops can only contain references to parglobal variables."
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), info)
@@ -5106,7 +5093,7 @@
         means they are references to the same component).
         The info is
         just for error messages. =#
-        function crefInfoListCrefsEqual(inFoundCref::DAE.ComponentRef, inCrefInfos::Tuple{<:DAE.ComponentRef, SourceInfo}) ::Bool 
+        function crefInfoListCrefsEqual(inFoundCref::DAE.ComponentRef, inCrefInfos::Tuple{<:DAE.ComponentRef, SourceInfo}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -5127,7 +5114,7 @@
         collected.
         We need the list of referenced variables for Code generation in the backend.
         EXPENSIVE operation but needs to be done. =#
-        function collectParallelVariables(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inStatments::List{<:DAE.Statement}) ::List{Tuple{DAE.ComponentRef, SourceInfo}} 
+        function collectParallelVariables(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inStatments::List{<:DAE.Statement}) ::List{Tuple{DAE.ComponentRef, SourceInfo}}
               local outCrefInfos::List{Tuple{DAE.ComponentRef, SourceInfo}}
 
               outCrefInfos = begin
@@ -5145,13 +5132,13 @@
                   (_,  nil())  => begin
                     inCrefInfos
                   end
-                  
+
                   (crefInfoList, DAE.STMT_ASSIGN(_, exp1, exp2, DAE.SOURCE(info = info)) <| restStmts)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1, exp2), info)
                       crefInfoList = collectParallelVariables(crefInfoList, restStmts)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.STMT_FOR(type_ = iterType, iter = iter, range = exp1, statementLst = stmtList, source = DAE.SOURCE(info = info)) <| restStmts)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), info)
                       crefInfoList = collectParallelVariables(crefInfoList, stmtList)
@@ -5160,21 +5147,21 @@
                       crefInfoList = collectParallelVariables(crefInfoList, restStmts)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.STMT_IF(exp1, stmtList, _, DAE.SOURCE(info = info)) <| restStmts)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), info)
                       crefInfoList = collectParallelVariables(crefInfoList, stmtList)
                       crefInfoList = collectParallelVariables(crefInfoList, restStmts)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.STMT_WHILE(exp1, stmtList, DAE.SOURCE(info = info)) <| restStmts)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), info)
                       crefInfoList = collectParallelVariables(crefInfoList, stmtList)
                       crefInfoList = collectParallelVariables(crefInfoList, restStmts)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, _ <| restStmts)  => begin
                     collectParallelVariables(crefInfoList, restStmts)
                   end
@@ -5227,7 +5214,7 @@
           outCrefInfos
         end
 
-        function collectParallelVariablesinExps(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inExps::List{<:DAE.Exp}, inInfo::SourceInfo) ::List{Tuple{DAE.ComponentRef, SourceInfo}} 
+        function collectParallelVariablesinExps(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inExps::List{<:DAE.Exp}, inInfo::SourceInfo) ::List{Tuple{DAE.ComponentRef, SourceInfo}}
               local outCrefInfos::List{Tuple{DAE.ComponentRef, SourceInfo}}
 
               outCrefInfos = begin
@@ -5245,7 +5232,7 @@
                   (_,  nil(), _)  => begin
                     inCrefInfos
                   end
-                  
+
                   (crefInfoList, DAE.CREF(foundCref, _) <| restExps, _)  => begin
                       alreadyInList = ListUtil.isMemberOnTrue(foundCref, crefInfoList, crefInfoListCrefsEqual)
                       crefInfoList = if alreadyInList
@@ -5258,55 +5245,55 @@
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.ASUB(exp1, expLst1) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, _cons(exp1, expLst1), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.BINARY(exp1, _, exp2) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1, exp2), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.UNARY(_, exp1) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.LBINARY(exp1, _, exp2) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1, exp2), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.LUNARY(_, exp1) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.RANGE(_, exp1, SOME(exp2), exp3) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1, exp2, exp3), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.RANGE(_, exp1, NONE(), exp3) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1, exp3), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, DAE.CAST(_, exp1) <| restExps, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), inInfo)
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, _ <| restExps, _)  => begin
                     collectParallelVariablesinExps(crefInfoList, restExps, inInfo)
                   end
@@ -5374,12 +5361,12 @@
                =#
                #=  ICONST, RCONST, SCONST, BCONST, ENUM_LITERAL
                =#
-               #= 
+               #=
                =#
           outCrefInfos
         end
 
-        function collectParallelVariablesInSubscriptList(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inSubscriptLst::List{<:DAE.Subscript}, inInfo::SourceInfo) ::List{Tuple{DAE.ComponentRef, SourceInfo}} 
+        function collectParallelVariablesInSubscriptList(inCrefInfos::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, inSubscriptLst::List{<:DAE.Subscript}, inInfo::SourceInfo) ::List{Tuple{DAE.ComponentRef, SourceInfo}}
               local outCrefInfos::List{Tuple{DAE.ComponentRef, SourceInfo}}
 
               outCrefInfos = begin
@@ -5390,13 +5377,13 @@
                   (_,  nil(), _)  => begin
                     inCrefInfos
                   end
-                  
+
                   (crefInfoList, DAE.INDEX(exp1) <| restSubs, _)  => begin
                       crefInfoList = collectParallelVariablesinExps(crefInfoList, list(exp1), inInfo)
                       crefInfoList = collectParallelVariablesInSubscriptList(crefInfoList, restSubs, inInfo)
                     crefInfoList
                   end
-                  
+
                   (crefInfoList, _ <| restSubs, _)  => begin
                     collectParallelVariablesInSubscriptList(crefInfoList, restSubs, inInfo)
                   end
@@ -5409,22 +5396,22 @@
           outCrefInfos
         end
 
-        function checkValidNoRetcall(exp::DAE.Exp, info::SourceInfo)  
+        function checkValidNoRetcall(exp::DAE.Exp, info::SourceInfo)
               _ = begin
                   local str::String
                 @match (exp, info) begin
                   (DAE.CALL(__), _)  => begin
                     ()
                   end
-                  
+
                   (DAE.REDUCTION(__), _)  => begin
                     ()
                   end
-                  
+
                   (DAE.TUPLE( nil()), _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         str = ExpressionDump.printExpStr(exp)
                         Error.addSourceMessage(Error.NORETCALL_INVALID_EXP, list(str), info)

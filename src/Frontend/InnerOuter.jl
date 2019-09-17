@@ -1,4 +1,35 @@
-  module InnerOuter 
+#= /*
+* This file is part of OpenModelica.
+*
+* Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
+* c/o Linköpings universitet, Department of Computer and Information Science,
+* SE-58183 Linköping, Sweden.
+*
+* All rights reserved.
+*
+* THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
+* THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+* ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
+* RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+* ACCORDING TO RECIPIENTS CHOICE.
+*
+* The OpenModelica software and the Open Source Modelica
+* Consortium (OSMC) Public License (OSMC-PL) are obtained
+* from OSMC, either from the above address,
+* from the URLs: http:www.ida.liu.se/projects/OpenModelica or
+* http:www.openmodelica.org, and in the OpenModelica distribution.
+* GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+*
+* This program is distributed WITHOUT ANY WARRANTY; without
+* even the implied warranty of  MERCHANTABILITY or FITNESS
+* FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
+* IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
+*
+* See the full OSMC Public License conditions for more details.
+*
+*/ =#
+
+module InnerOuter
 
 
     using MetaModelica
@@ -6,43 +37,16 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl InstResult 
-    @UniontypeDecl InstInner 
-    @UniontypeDecl OuterPrefix 
-    @UniontypeDecl TopInstance 
-    @UniontypeDecl InstHierarchyHashTable 
-    @UniontypeDecl ValueArray 
+    @UniontypeDecl InstResult
+    @UniontypeDecl InstInner
+    @UniontypeDecl OuterPrefix
+    @UniontypeDecl TopInstance
+    @UniontypeDecl InstHierarchyHashTable
+    @UniontypeDecl ValueArray
+    const InstHierarchy = List
+    const emptyInstHierarchy = nil #= an empty instance hierarchy =#::InstHierarchy
 
-         #= /*
-         * This file is part of OpenModelica.
-         *
-         * Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
-         * c/o Linköpings universitet, Department of Computer and Information Science,
-         * SE-58183 Linköping, Sweden.
-         *
-         * All rights reserved.
-         *
-         * THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
-         * THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
-         * ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
-         * RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
-         * ACCORDING TO RECIPIENTS CHOICE.
-         *
-         * The OpenModelica software and the Open Source Modelica
-         * Consortium (OSMC) Public License (OSMC-PL) are obtained
-         * from OSMC, either from the above address,
-         * from the URLs: http:www.ida.liu.se/projects/OpenModelica or
-         * http:www.openmodelica.org, and in the OpenModelica distribution.
-         * GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
-         *
-         * This program is distributed WITHOUT ANY WARRANTY; without
-         * even the implied warranty of  MERCHANTABILITY or FITNESS
-         * FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
-         * IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
-         *
-         * See the full OSMC Public License conditions for more details.
-         *
-         */ =#
+
         import Absyn
         import Connect
         import ConnectionGraph
@@ -82,8 +86,6 @@
 
         import Lookup
 
-        import Mod
-
         import PrefixUtil
 
         import System
@@ -96,7 +98,7 @@
 
         import FGraph
 
-        Cache = FCore.Cache 
+        Cache = FCore.Cache
 
          @Uniontype InstResult begin
               @Record INST_RESULT begin
@@ -134,7 +136,7 @@
               end
          end
 
-        OuterPrefixes = List 
+        OuterPrefixes = List
          const emptyOuterPrefixes = nil #= empty outer prefixes =#::OuterPrefixes
 
         Key = DAE.ComponentRef  #= the prefix + '.' + the component name =#
@@ -151,9 +153,6 @@
               end
          end
 
-        InstHierarchy = List 
-         const emptyInstHierarchy = nil #= an empty instance hierarchy =#::InstHierarchy
-
          #= Author: BZ, 2008-12
          Depending on the inner outer declaration we do
          different things for dae declared for a variable.
@@ -162,7 +161,7 @@
          If it is InnerOuter declared, we rename all the crefs
          in this equation to unique vars, while we want to keep
          them with this prefix for the inner part of the innerouter. =#
-        function handleInnerOuterEquations(io::Absyn.InnerOuter, inDae::DAE.DAElist, inIH::InstHierarchy, inGraphNew::ConnectionGraph.ConnectionGraph, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{DAE.DAElist, InstHierarchy, ConnectionGraph.ConnectionGraph} 
+        function handleInnerOuterEquations(io::Absyn.InnerOuter, inDae::DAE.DAElist, inIH::InstHierarchy, inGraphNew::ConnectionGraph.ConnectionGraph, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{DAE.DAElist, InstHierarchy, ConnectionGraph.ConnectionGraph}
               local outGraph::ConnectionGraph.ConnectionGraph
               local outIH::InstHierarchy
               local odae::DAE.DAElist
@@ -183,22 +182,22 @@
                       (odae, _) = DAEUtil.splitDAEIntoVarsAndEquations(dae)
                     (odae, ih, graph)
                   end
-                  
+
                   (Absyn.INNER_OUTER(__), dae, ih, _, graph)  => begin
                       (dae1, dae2) = DAEUtil.splitDAEIntoVarsAndEquations(dae)
                       dae2 = DAEUtil.nameUniqueOuterVars(dae2)
                       dae = DAEUtil.joinDaes(dae1, dae2)
                     (dae, ih, graph)
                   end
-                  
+
                   (Absyn.INNER(__), dae, ih, graphNew, _)  => begin
                     (dae, ih, graphNew)
                   end
-                  
+
                   (Absyn.NOT_INNER_OUTER(__), dae, ih, graphNew, _)  => begin
                     (dae, ih, graphNew)
                   end
-                  
+
                   _  => begin
                         print("- InnerOuter.handleInnerOuterEquations failed!\\n")
                       fail()
@@ -229,7 +228,7 @@
         end
 
          #= changes inner to outer and outer to inner where needed =#
-        function changeInnerOuterInOuterConnect(sets::Connect.Sets) ::Connect.Sets 
+        function changeInnerOuterInOuterConnect(sets::Connect.Sets) ::Connect.Sets
 
 
               sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
@@ -238,7 +237,7 @@
 
          #= @author: adrpo
           changes inner to outer and outer to inner where needed =#
-        function changeInnerOuterInOuterConnect2(inOC::Connect.OuterConnect) ::Connect.OuterConnect 
+        function changeInnerOuterInOuterConnect2(inOC::Connect.OuterConnect) ::Connect.OuterConnect
               local outOC::Connect.OuterConnect
 
               outOC = begin
@@ -261,14 +260,14 @@
                       @match false = ComponentReference.crefFirstCrefLastCrefEqual(ncr1, cr1)
                     Connect.OUTERCONNECT(scope, cr1, Absyn.INNER(), f1, cr2, io2, f2, source)
                   end
-                  
+
                   Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)  => begin
                       @match (_, true) = innerOuterBooleans(io2)
                       ncr2 = PrefixUtil.prefixToCref(scope)
                       @match false = ComponentReference.crefFirstCrefLastCrefEqual(ncr2, cr2)
                     Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, Absyn.INNER(), f2, source)
                   end
-                  
+
                   _  => begin
                       inOC
                   end
@@ -291,7 +290,7 @@
 
          #= Builds replacement rules for changing outer references
          to the inner variable =#
-        function buildInnerOuterRepl(innerVars::List{<:DAE.Element}, outerVars::List{<:DAE.Element}, inRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements 
+        function buildInnerOuterRepl(innerVars::List{<:DAE.Element}, outerVars::List{<:DAE.Element}, inRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements
               local outRepl::VarTransform.VariableReplacements
 
               outRepl = begin
@@ -302,7 +301,7 @@
                   ( nil(), _, repl)  => begin
                     repl
                   end
-                  
+
                   (v <| rest, _, repl)  => begin
                       repl = buildInnerOuterReplVar(v, outerVars, repl)
                       repl = buildInnerOuterRepl(rest, outerVars, repl)
@@ -314,7 +313,7 @@
         end
 
          #= Help function to buildInnerOuterRepl =#
-        function buildInnerOuterReplVar(innerVar::DAE.Element, outerVars::List{<:DAE.Element}, inRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements 
+        function buildInnerOuterReplVar(innerVar::DAE.Element, outerVars::List{<:DAE.Element}, inRepl::VarTransform.VariableReplacements) ::VarTransform.VariableReplacements
               local outRepl::VarTransform.VariableReplacements
 
               outRepl = begin
@@ -330,7 +329,7 @@
                       repl = ListUtil.fold1r(ourOuterCrs, VarTransform.addReplacement, Expression.crefExp(cr), repl)
                     repl
                   end
-                  
+
                   (DAE.VAR(componentRef = cr), _, repl)  => begin
                       outerCrs = ListUtil.map(outerVars, DAEUtil.varCref)
                       ourOuterCrs = ListUtil.select1(outerCrs, isInnerOuterMatch, cr)
@@ -344,7 +343,7 @@
 
          #= Returns true if an inner element matches an outer, i.e.
         the outer reference should be translated to the inner reference =#
-        function isInnerOuterMatch(outerCr::DAE.ComponentRef #=  e.g. a.b.x =#, innerCr::DAE.ComponentRef #=  e.g. x =#) ::Bool 
+        function isInnerOuterMatch(outerCr::DAE.ComponentRef #=  e.g. a.b.x =#, innerCr::DAE.ComponentRef #=  e.g. x =#) ::Bool
               local res::Bool
 
               res = begin
@@ -361,7 +360,7 @@
                       @match false = ComponentReference.crefLastIdentEqual(outerCr, innerCr)
                     false
                   end
-                  
+
                   _  => begin
                         (outerCr1, innerCr1) = stripCommonCrefPart(outerCr, innerCr)
                         res = ComponentReference.crefContainedIn(outerCr1, innerCr1)
@@ -383,7 +382,7 @@
         end
 
          #= Help function to isInnerOuterMatch =#
-        function stripCommonCrefPart(outerCr::DAE.ComponentRef, innerCr::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef} 
+        function stripCommonCrefPart(outerCr::DAE.ComponentRef, innerCr::DAE.ComponentRef) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
               local outInnerCr::DAE.ComponentRef
               local outOuterCr::DAE.ComponentRef
 
@@ -402,7 +401,7 @@
                       (cr11, cr22) = stripCommonCrefPart(cr1, cr2)
                     (cr11, cr22)
                   end
-                  
+
                   (cr1, cr2)  => begin
                     (cr1, cr2)
                   end
@@ -411,12 +410,12 @@
           (outOuterCr, outInnerCr)
         end
 
-         #= 
+         #=
         Author: BZ, 2008-12
         Compares two crefs ex:
         model1.model2.connector vs model2.connector.variable
         would become: model2.connector =#
-        function extractCommonPart(prefixedCref::DAE.ComponentRef, innerCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function extractCommonPart(prefixedCref::DAE.ComponentRef, innerCref::DAE.ComponentRef) ::DAE.ComponentRef
               local cr3::DAE.ComponentRef
 
               cr3 = begin
@@ -433,7 +432,7 @@
                       c3 = ComponentReference.crefSetLastType(innerCref, ComponentReference.crefLastType(prefixedCref))
                     c3
                   end
-                  
+
                   _  => begin
                         c2 = ComponentReference.crefStripLastIdent(innerCref)
                         cr3 = extractCommonPart(prefixedCref, c2)
@@ -448,7 +447,7 @@
          Helper function for instClass.
          If top scope, traverse DAE and change any uniqnamed vars back to original.
          This is a work around for innerouter declarations. =#
-        function renameUniqueVarsInTopScope(isTopScope::Bool, dae::DAE.DAElist) ::DAE.DAElist 
+        function renameUniqueVarsInTopScope(isTopScope::Bool, dae::DAE.DAElist) ::DAE.DAElist
               local odae::DAE.DAElist
 
               odae = begin
@@ -457,11 +456,11 @@
                       @match false = System.getHasInnerOuterDefinitions()
                     dae
                   end
-                  
+
                   (true, _)  => begin
                     DAEUtil.renameUniqueOuterVars(dae)
                   end
-                  
+
                   (false, _)  => begin
                     dae
                   end
@@ -482,7 +481,7 @@
          set, if a corresponding innner component can be found in the environment.
          If not, they are kept in the outerConnects for use higher up in the instance
          hierarchy. =#
-        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph} 
+        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph}
               local outCGraph::ConnectionGraph.ConnectionGraph
               local outInnerOuterConnects::List{Connect.OuterConnect}
               local outSets::Connect.Sets
@@ -497,7 +496,7 @@
 
          #= @author: adrpo
          This function will strip the given prefix from the component references. =#
-        function removeInnerPrefixFromCref(inPrefix::Prefix.Prefix, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function removeInnerPrefixFromCref(inPrefix::Prefix.Prefix, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -509,13 +508,13 @@
                   (Prefix.NOPRE(__), _)  => begin
                     inCref
                   end
-                  
+
                   (_, _)  => begin
                       crefPrefix = PrefixUtil.prefixToCref(inPrefix)
                       crOuter = ComponentReference.crefStripPrefix(inCref, crefPrefix)
                     crOuter
                   end
-                  
+
                   _  => begin
                       inCref
                   end
@@ -539,7 +538,7 @@
         end
 
          #= help function to retrieveOuterConnections =#
-        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inOuterConnects::List{<:Connect.OuterConnect}, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{List{Connect.OuterConnect}, Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph} 
+        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inOuterConnects::List{<:Connect.OuterConnect}, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{List{Connect.OuterConnect}, Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph}
               local outCGraph::ConnectionGraph.ConnectionGraph
               local outInnerOuterConnects::List{Connect.OuterConnect}
               local outSets::Connect.Sets
@@ -571,7 +570,7 @@
                   (_, _, _, _,  nil(), _, _, _)  => begin
                     (inOuterConnects, inSets, nil, inCGraph)
                   end
-                  
+
                   (_, _, _, _, Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source && DAE.SOURCE(info = info)) <| rest_oc, sets, _, graph)  => begin
                       (inner1, outer1) = lookupVarInnerOuterAttr(inCache, inEnv, inIH, cr1, cr2)
                       @match true = inner1
@@ -588,7 +587,7 @@
                           end
                     (rest_oc, sets, ioc, graph)
                   end
-                  
+
                   (_, _, _, _, Connect.OUTERCONNECT(_, cr1, io1, f1, cr2, io2, f2, DAE.SOURCE(info = info)) <| rest_oc, sets, true, graph)  => begin
                       (inner1, outer1) = innerOuterBooleans(io1)
                       (inner2, outer2) = innerOuterBooleans(io2)
@@ -601,7 +600,7 @@
                       (rest_oc, sets, ioc, graph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, rest_oc, sets, true, graph)
                     (rest_oc, sets, ioc, graph)
                   end
-                  
+
                   (_, _, _, _, oc <| rest_oc, sets, _, graph)  => begin
                       (rest_oc, sets, ioc, graph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, rest_oc, sets, inTopCall, graph)
                     (_cons(oc, rest_oc), sets, ioc, graph)
@@ -633,7 +632,7 @@
          Change from Absyn.INNER => Absyn.OUTER,
          this to be able to use normal functions
          for the innerouter declared variables/connections. =#
-        function convertInnerOuterInnerToOuter(io::Absyn.InnerOuter) ::Absyn.InnerOuter 
+        function convertInnerOuterInnerToOuter(io::Absyn.InnerOuter) ::Absyn.InnerOuter
               local oio::Absyn.InnerOuter
 
               oio = begin
@@ -641,7 +640,7 @@
                   Absyn.INNER(__)  => begin
                     Absyn.OUTER()
                   end
-                  
+
                   _  => begin
                       io
                   end
@@ -657,7 +656,7 @@
          inner component. In that is case the outer
          connection (from inside sub-components) forms
          a connection set of their own. =#
-        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, ConnectionGraph.ConnectionGraph} 
+        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, ConnectionGraph.ConnectionGraph}
               local outCGraph::ConnectionGraph.ConnectionGraph
               local outSets::Connect.Sets
 
@@ -684,7 +683,7 @@
                   (_, _, _, _, _, true, _, _, _, _, _, _, _, _)  => begin
                     (inSets, inCGraph)
                   end
-                  
+
                   (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _, graph)  => begin
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt1), t1, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr1)
                       @match (cache, DAE.ATTR(variability = vt2), t2, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr2)
@@ -693,7 +692,7 @@
                       @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, graph) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, graph, info)
                     (Connect.SETS(sets, sc, cl, oc), graph)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -723,7 +722,7 @@
          2008-12: This is an extension of addOuterConnectIfEmpty,
                   with the difference that we only need to find
                   one variable in the enviroment. =#
-        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo) ::Connect.Sets 
+        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo) ::Connect.Sets
               local outSets::Connect.Sets
 
               outSets = begin
@@ -749,7 +748,7 @@
                   (_, _, _, _, _, true, _, _, _, _, _, _, _)  => begin
                     inSets
                   end
-                  
+
                   (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt1), t1, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr1)
                       pre = Prefix.NOPRE()
@@ -760,7 +759,7 @@
                       @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
                     Connect.SETS(sets, sc, cl, oc)
                   end
-                  
+
                   (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
                       pre = Prefix.NOPRE()
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt2), t2, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr2)
@@ -771,7 +770,7 @@
                       @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
                     Connect.SETS(sets, sc, cl, oc)
                   end
-                  
+
                   _  => begin
                         print("failure in: addOuterConnectIfEmptyNOENV\\n")
                       fail()
@@ -792,7 +791,7 @@
         end
 
          #= Removes outer attribute, keeping inner =#
-        function removeOuter(io::Absyn.InnerOuter) ::Absyn.InnerOuter 
+        function removeOuter(io::Absyn.InnerOuter) ::Absyn.InnerOuter
               local outIo::Absyn.InnerOuter
 
               outIo = begin
@@ -800,15 +799,15 @@
                   Absyn.OUTER(__)  => begin
                     Absyn.NOT_INNER_OUTER()
                   end
-                  
+
                   Absyn.INNER(__)  => begin
                     Absyn.INNER()
                   end
-                  
+
                   Absyn.INNER_OUTER(__)  => begin
                     Absyn.INNER()
                   end
-                  
+
                   Absyn.NOT_INNER_OUTER(__)  => begin
                     Absyn.NOT_INNER_OUTER()
                   end
@@ -820,7 +819,7 @@
          #= searches for two variables in env and retrieves
          its inner and outer attributes in form of booleans.
          adrpo: Make sure that there are no error messages displayed! =#
-        function lookupVarInnerOuterAttr(cache::FCore.Cache, env::FCore.Graph, inIH::InstHierarchy, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Tuple{Bool, Bool} 
+        function lookupVarInnerOuterAttr(cache::FCore.Cache, env::FCore.Graph, inIH::InstHierarchy, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::Tuple{Bool, Bool}
               local isOuter::Bool
               local isInner::Bool
 
@@ -847,21 +846,21 @@
                       ErrorExt.rollBack("lookupVarInnerOuterAttr")
                     (isInner, isOuter)
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match (_, DAE.ATTR(innerOuter = io), _, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr1)
                       (isInner, isOuter) = innerOuterBooleans(io)
                       ErrorExt.rollBack("lookupVarInnerOuterAttr")
                     (isInner, isOuter)
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match (_, DAE.ATTR(innerOuter = io), _, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr2)
                       (isInner, isOuter) = innerOuterBooleans(io)
                       ErrorExt.rollBack("lookupVarInnerOuterAttr")
                     (isInner, isOuter)
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("lookupVarInnerOuterAttr")
                       fail()
@@ -880,7 +879,7 @@
          #= Checks that outer declarations has a
          corresponding inner declaration.
          This can only be done at the top scope =#
-        function checkMissingInnerDecl(inDae::DAE.DAElist, callScope::Bool #= only done if true =#)  
+        function checkMissingInnerDecl(inDae::DAE.DAElist, callScope::Bool #= only done if true =#)
               local innerVars::List{DAE.Element}
               local outerVars::List{DAE.Element}
               local allVars::List{DAE.Element}
@@ -894,13 +893,13 @@
                       @match false = System.getHasInnerOuterDefinitions()
                     ()
                   end
-                  
+
                   (_, true)  => begin
                       @match (DAE.DAE(innerVars), DAE.DAE(outerVars)) = DAEUtil.findAllMatchingElements(inDae, DAEUtil.isInnerVar, DAEUtil.isOuterVar)
                       checkMissingInnerDecl1(DAE.DAE(innerVars), DAE.DAE(outerVars))
                     ()
                   end
-                  
+
                   (_, false)  => begin
                     ()
                   end
@@ -919,12 +918,12 @@
          #= checks that the 'inner' prefix is used
          when an corresponding 'outer' variable
          found =#
-        function checkMissingInnerDecl1(innerVarsDae::DAE.DAElist, outerVarsDae::DAE.DAElist)  
+        function checkMissingInnerDecl1(innerVarsDae::DAE.DAElist, outerVarsDae::DAE.DAElist)
               ListUtil.map1_0(DAEUtil.daeElements(outerVarsDae), checkMissingInnerDecl2, DAEUtil.daeElements(innerVarsDae))
         end
 
          #= help function to checkMissingInnerDecl =#
-        function checkMissingInnerDecl2(outerVar::DAE.Element, innerVars::List{<:DAE.Element})  
+        function checkMissingInnerDecl2(outerVar::DAE.Element, innerVars::List{<:DAE.Element})
               _ = begin
                   local str::String
                   local str2::String
@@ -957,14 +956,14 @@
          #= function that fails if checkModel option is not set, otherwise it succeeds.
          It should be used for the cases when normal instantiation should fail but
          a instantiation for performing checkModel call should not fail =#
-        function failExceptForCheck()  
+        function failExceptForCheck()
               _ = begin
                 @match () begin
                   ()  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                     ()
                   end
-                  
+
                   ()  => begin
                     fail()
                   end
@@ -974,7 +973,7 @@
         end
 
          #= Returns inner outer information as two booleans =#
-        function innerOuterBooleans(io::Absyn.InnerOuter) ::Tuple{Bool, Bool} 
+        function innerOuterBooleans(io::Absyn.InnerOuter) ::Tuple{Bool, Bool}
               local outer1::Bool
               local inner1::Bool
 
@@ -983,15 +982,15 @@
                   Absyn.INNER(__)  => begin
                     (true, false)
                   end
-                  
+
                   Absyn.OUTER(__)  => begin
                     (false, true)
                   end
-                  
+
                   Absyn.INNER_OUTER(__)  => begin
                     (true, true)
                   end
-                  
+
                   Absyn.NOT_INNER_OUTER(__)  => begin
                     (false, false)
                   end
@@ -1000,7 +999,7 @@
           (inner1, outer1)
         end
 
-         #= 
+         #=
         Author: BZ, 2008-12
         determin the innerouter attributes for 2 connections.
         Special cases:
@@ -1009,7 +1008,7 @@
           else
             use normal function( innerOuterBooleans)
          =#
-        function referOuter(io1::Absyn.InnerOuter, io2::Absyn.InnerOuter) ::Tuple{Bool, Bool} 
+        function referOuter(io1::Absyn.InnerOuter, io2::Absyn.InnerOuter) ::Tuple{Bool, Bool}
               local prefix2::Bool
               local prefix1::Bool
 
@@ -1020,11 +1019,11 @@
                   (Absyn.INNER_OUTER(__), Absyn.NOT_INNER_OUTER(__))  => begin
                     (true, false)
                   end
-                  
+
                   (Absyn.INNER_OUTER(__), Absyn.OUTER(__))  => begin
                     (false, true)
                   end
-                  
+
                   _  => begin
                         (_, b1) = innerOuterBooleans(io1)
                         (_, b2) = innerOuterBooleans(io2)
@@ -1036,7 +1035,7 @@
         end
 
          #= Returns true if either Absyn.InnerOuter is OUTER. =#
-        function outerConnection(io1::Absyn.InnerOuter, io2::Absyn.InnerOuter) ::Bool 
+        function outerConnection(io1::Absyn.InnerOuter, io2::Absyn.InnerOuter) ::Bool
               local isOuter::Bool
 
               isOuter = begin
@@ -1044,19 +1043,19 @@
                   (Absyn.OUTER(__), _)  => begin
                     true
                   end
-                  
+
                   (_, Absyn.OUTER(__))  => begin
                     true
                   end
-                  
+
                   (Absyn.INNER_OUTER(__), _)  => begin
                     true
                   end
-                  
+
                   (_, Absyn.INNER_OUTER(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1068,7 +1067,7 @@
          #= @author: adrpo
          Given an instance hierarchy and a component name find the
          modification of the inner component with the same name =#
-        function lookupInnerInIH(inTIH::TopInstance, inPrefix::Prefix.Prefix, inComponentIdent::SCode.Ident) ::InstInner 
+        function lookupInnerInIH(inTIH::TopInstance, inPrefix::Prefix.Prefix, inComponentIdent::SCode.Ident) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = begin
@@ -1088,18 +1087,18 @@
                   (TOP_INSTANCE(__), Prefix.PREFIX(compPre = Prefix.NOCOMPPRE(__)), _)  => begin
                     lookupInnerInIH(inTIH, Prefix.NOPRE(), inComponentIdent)
                   end
-                  
+
                   (TOP_INSTANCE(__), Prefix.NOPRE(__), name)  => begin
                     emptyInstInner(Prefix.NOPRE(), name)
                   end
-                  
+
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
                       (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
                       instInner = get(cref, ht)
                     instInner
                   end
-                  
+
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
                       (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
@@ -1107,7 +1106,7 @@
                       instInner = lookupInnerInIH(inTIH, prefix, name)
                     instInner
                   end
-                  
+
                   (TOP_INSTANCE(__), prefix, name)  => begin
                     emptyInstInner(prefix, name)
                   end
@@ -1172,10 +1171,10 @@
           outInstInner
         end
 
-         #= 
+         #=
         Author BZ, 2008-11
         According to specification modifiers on outer elements is not allowed. =#
-        function modificationOnOuter(cache::FCore.Cache, env::FCore.Graph, ih::InstHierarchy, prefix::Prefix.Prefix, componentName::String, cr::DAE.ComponentRef, inMod::DAE.Mod, io::Absyn.InnerOuter, impl::Bool, inInfo::SourceInfo) ::Bool 
+        function modificationOnOuter(cache::FCore.Cache, env::FCore.Graph, ih::InstHierarchy, prefix::Prefix.Prefix, componentName::String, cr::DAE.ComponentRef, inMod::DAE.Mod, io::Absyn.InnerOuter, impl::Bool, inInfo::SourceInfo) ::Bool
               local modd::Bool
 
               modd = begin
@@ -1187,12 +1186,13 @@
                 @matchcontinue (cache, env, ih, prefix, componentName, cr, inMod, io, impl, inInfo) begin
                   (_, _, _, _, _, _, DAE.MOD(__), Absyn.OUTER(__), _, _)  => begin
                       s1 = ComponentReference.printComponentRefStr(cr)
-                      s2 = Mod.prettyPrintMod(inMod, 0)
+                      #TODO: Fix circular dep between Mod and InnerOuter
+                      #s2 = Mod.prettyPrintMod(inMod, 0)
                       s = s1 + " " + s2
                       Error.addSourceMessage(Error.OUTER_MODIFICATION, list(s), inInfo)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1202,7 +1202,7 @@
         end
 
          #= switches the inner to outer attributes of a component in the dae. =#
-        function switchInnerToOuterAndPrefix(inDae::List{<:DAE.Element}, io::Absyn.InnerOuter, pre::Prefix.Prefix) ::List{DAE.Element} 
+        function switchInnerToOuterAndPrefix(inDae::List{<:DAE.Element}, io::Absyn.InnerOuter, pre::Prefix.Prefix) ::List{DAE.Element}
               local outDae::List{DAE.Element}
 
               outDae = begin
@@ -1233,28 +1233,28 @@
                   (lst, Absyn.NOT_INNER_OUTER(__), _)  => begin
                     lst
                   end
-                  
+
                   ( nil(), _, _)  => begin
                     nil
                   end
-                  
+
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = Absyn.INNER(__)) <| r, _, _)  => begin
                       (_, cr) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, pre, cr)
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
-                  
+
                   (v && DAE.VAR(__) <| r, _, _)  => begin
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(v, r_1)
                   end
-                  
+
                   (DAE.COMP(ident = idName, dAElist = lst, source = source, comment = comment) <| r, _, _)  => begin
                       lst_1 = switchInnerToOuterAndPrefix(lst, io, pre)
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(DAE.COMP(idName, lst_1, source, comment), r_1)
                   end
-                  
+
                   (x <| r, _, _)  => begin
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(x, r_1)
@@ -1271,7 +1271,7 @@
         end
 
          #= prefixes all the outer variables in the DAE with the given prefix. =#
-        function prefixOuterDaeVars(inDae::List{<:DAE.Element}, crefPrefix::Prefix.Prefix) ::List{DAE.Element} 
+        function prefixOuterDaeVars(inDae::List{<:DAE.Element}, crefPrefix::Prefix.Prefix) ::List{DAE.Element}
               local outDae::List{DAE.Element}
 
               outDae = begin
@@ -1301,19 +1301,19 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = io) <| r, _)  => begin
                       (_, cr) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, crefPrefix, cr)
                       r_1 = prefixOuterDaeVars(r, crefPrefix)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
-                  
+
                   (DAE.COMP(ident = idName, dAElist = lst, source = source, comment = comment) <| r, _)  => begin
                       lst_1 = prefixOuterDaeVars(lst, crefPrefix)
                       r_1 = prefixOuterDaeVars(r, crefPrefix)
                     _cons(DAE.COMP(idName, lst_1, source, comment), r_1)
                   end
-                  
+
                   (x <| r, _)  => begin
                       r_1 = prefixOuterDaeVars(r, crefPrefix)
                     _cons(x, r_1)
@@ -1327,10 +1327,10 @@
           outDae
         end
 
-         #= 
+         #=
         function switchInnerToOuterInGraph
           switches the inner to outer attributes of a component in the Env. =#
-        function switchInnerToOuterInGraph(inEnv::FCore.Graph, inCr::DAE.ComponentRef) ::FCore.Graph 
+        function switchInnerToOuterInGraph(inEnv::FCore.Graph, inCr::DAE.ComponentRef) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -1345,11 +1345,11 @@
                   (FCore.EG(_), _)  => begin
                     inEnv
                   end
-                  
+
                   (FCore.G(scope =  nil()), _)  => begin
                     inEnv
                   end
-                  
+
                   (_, cr)  => begin
                       r = FGraph.lastScopeRef(inEnv)
                       n = FNode.fromRef(r)
@@ -1364,10 +1364,10 @@
           outEnv
         end
 
-         #= 
+         #=
         function switchInnerToOuterInFrame
           switches the inner to outer attributes of a component in the Frame. =#
-        function switchInnerToOuterInNode(inNode::FCore.Node, inCr::DAE.ComponentRef) ::FCore.Node 
+        function switchInnerToOuterInNode(inNode::FCore.Node, inCr::DAE.ComponentRef) ::FCore.Node
               local outNode::FCore.Node = inNode
 
               _ = begin
@@ -1376,7 +1376,7 @@
                       outNode.children = FNode.RefTree.map(outNode.children, (inCr) -> switchInnerToOuterInChild(cr = inCr))
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1385,7 +1385,7 @@
           outNode
         end
 
-        function switchInnerToOuterInChild(name::FCore.Name, cr::DAE.ComponentRef, inRef::FCore.Ref) ::FCore.Ref 
+        function switchInnerToOuterInChild(name::FCore.Name, cr::DAE.ComponentRef, inRef::FCore.Ref) ::FCore.Ref
               local ref::FCore.Ref
 
               local n::FCore.Node
@@ -1396,10 +1396,10 @@
           ref
         end
 
-         #= 
+         #=
         function switchInnerToOuterInChildrenValue
           switches the inner to outer attributes of a component in the RefTree. =#
-        function switchInnerToOuterInChildrenValue(inNode::FCore.Node, inCr::DAE.ComponentRef) ::FCore.Node 
+        function switchInnerToOuterInChildrenValue(inNode::FCore.Node, inCr::DAE.ComponentRef) ::FCore.Node
               local outNode::FCore.Node
 
               outNode = begin
@@ -1427,7 +1427,7 @@
                       r = FNode.updateRef(r, FNode.setData(FNode.fromRef(r), FCore.IT(DAE.TYPES_VAR(name, attributes, ty, binding, cnstForRange))))
                     node
                   end
-                  
+
                   (node, _)  => begin
                       r = FNode.childFromNode(node, FNode.itNodeName)
                       @match FCore.IT(DAE.TYPES_VAR(name, attributes, ty, binding, cnstForRange)) = FNode.refData(r)
@@ -1436,7 +1436,7 @@
                       r = FNode.updateRef(r, FNode.setData(FNode.fromRef(r), FCore.IT(DAE.TYPES_VAR(name, attributes, ty, binding, cnstForRange))))
                     node
                   end
-                  
+
                   (_, _)  => begin
                     inNode
                   end
@@ -1470,7 +1470,7 @@
          #= /
          =#
 
-        function emptyInstInner(innerPrefix::Prefix.Prefix, name::String) ::InstInner 
+        function emptyInstInner(innerPrefix::Prefix.Prefix, name::String) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = INST_INNER(innerPrefix, name, Absyn.NOT_INNER_OUTER(), "", Absyn.IDENT(""), "", NONE(), nil, NONE())
@@ -1480,7 +1480,7 @@
          #= @author: adrpo
          This function lookups the result of instatiation of the inner
          component given an instance hierarchy a prefix and a component name. =#
-        function lookupInnerVar(inCache::Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inIdent::SCode.Ident, io::Absyn.InnerOuter) ::InstInner 
+        function lookupInnerVar(inCache::Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inIdent::SCode.Ident, io::Absyn.InnerOuter) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = begin
@@ -1501,7 +1501,7 @@
                       instInner = lookupInnerInIH(tih, pre, n)
                     instInner
                   end
-                  
+
                   (_, _, _, pre, n, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("InnerOuter.lookupInnerVar failed on component: " + PrefixUtil.printPrefixStr(pre) + "/" + n)
@@ -1525,7 +1525,7 @@
          #= @author: adrpo
          This function updates the instance hierarchy by adding
          the INNER components to it with the given prefix =#
-        function updateInstHierarchy(inIH::InstHierarchy, inPrefix::Prefix.Prefix, inInnerOuter::Absyn.InnerOuter, inInstInner::InstInner) ::InstHierarchy 
+        function updateInstHierarchy(inIH::InstHierarchy, inPrefix::Prefix.Prefix, inInnerOuter::Absyn.InnerOuter, inInstInner::InstInner) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1559,14 +1559,14 @@
                       ih = updateInstHierarchy(list(tih), inPrefix, inInnerOuter, inInstInner)
                     ih
                   end
-                  
+
                   (TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm) <| restIH, _, _, INST_INNER(name = name))  => begin
                       cref_ = ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil)
                       (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, cref_)
                       ht = add((cref, inInstInner), ht)
                     _cons(TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm), restIH)
                   end
-                  
+
                   (_, _, _, INST_INNER(__))  => begin
                     fail()
                   end
@@ -1597,7 +1597,7 @@
 
          #= @author: BTH
         Add State Machine state to collection of State Machine states in instance hierarchy. =#
-        function updateSMHierarchy(smState::DAE.ComponentRef, inIH::InstHierarchy) ::InstHierarchy 
+        function updateSMHierarchy(smState::DAE.ComponentRef, inIH::InstHierarchy) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1622,12 +1622,12 @@
                       ih = list(tih)
                     ih
                   end
-                  
+
                   (cref, TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm) <| restIH)  => begin
                       sm = BaseHashSet.add(cref, sm)
                     _cons(TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm), restIH)
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = name), _)  => begin
                       @match true = Flags.isSet(Flags.INSTANCE)
                       Debug.traceln("InnerOuter.updateSMHierarchy failure for: " + name)
@@ -1650,7 +1650,7 @@
           outIH
         end
 
-        function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.Prefix, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy 
+        function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.Prefix, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1666,7 +1666,7 @@
                       outIH = updateInstHierarchy(inIH, inPrefix, io, INST_INNER(inPrefix, name, io, name, Absyn.IDENT(name), scopeName, NONE(), nil, SOME(inClass)))
                     outIH
                   end
-                  
+
                   _  => begin
                       inIH
                   end
@@ -1685,7 +1685,7 @@
 
          #= @author: adrpo
          This function remembers the outer prefix with the correct prefix of the inner =#
-        function addOuterPrefixToIH(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inInnerComponentRef::DAE.ComponentRef) ::InstHierarchy 
+        function addOuterPrefixToIH(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inInnerComponentRef::DAE.ComponentRef) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1706,12 +1706,12 @@
                       ih = list(tih)
                     ih
                   end
-                  
+
                   (TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm) <| restIH, _, _)  => begin
                       outerPrefixes = ListUtil.unionElt(OUTER(ComponentReference.crefStripSubs(inOuterComponentRef), inInnerComponentRef), outerPrefixes)
                     _cons(TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm), restIH)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("InnerOuter.addOuterPrefix failed to add: outer cref: " + ComponentReference.printComponentRefStr(inOuterComponentRef) + " refers to inner cref: " + ComponentReference.printComponentRefStr(inInnerComponentRef) + " to IH")
@@ -1736,7 +1736,7 @@
 
          #= @author: adrpo
           This function searches for outer crefs and prefixes them with the inner prefix =#
-        function prefixOuterCrefWithTheInnerPrefix(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inPrefix::Prefix.Prefix) ::DAE.ComponentRef 
+        function prefixOuterCrefWithTheInnerPrefix(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inPrefix::Prefix.Prefix) ::DAE.ComponentRef
               local outInnerComponentRef::DAE.ComponentRef
 
               outInnerComponentRef = begin
@@ -1751,14 +1751,14 @@
                   ( nil(), _, _)  => begin
                     fail()
                   end
-                  
+
                   (TOP_INSTANCE(_, _, outerPrefixes && _ <| _, _) <|  nil(), _, _)  => begin
                       (_, fullCref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, inOuterComponentRef)
                       (outerCrefPrefix, innerCrefPrefix) = searchForInnerPrefix(fullCref, inOuterComponentRef, outerPrefixes)
                       innerCref = changeOuterReferenceToInnerReference(fullCref, outerCrefPrefix, innerCrefPrefix)
                     innerCref
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -1781,7 +1781,7 @@
 
          #= @author: adrpo
           This function replaces the outer prefix with the inner prefix in the full cref =#
-        function changeOuterReferenceToInnerReference(inFullCref::DAE.ComponentRef, inOuterCrefPrefix::DAE.ComponentRef, inInnerCrefPrefix::DAE.ComponentRef) ::DAE.ComponentRef 
+        function changeOuterReferenceToInnerReference(inFullCref::DAE.ComponentRef, inOuterCrefPrefix::DAE.ComponentRef, inInnerCrefPrefix::DAE.ComponentRef) ::DAE.ComponentRef
               local outInnerCref::DAE.ComponentRef
 
               outInnerCref = begin
@@ -1799,7 +1799,7 @@
                    =#
                    #=  the inner and outer prefix to extract the relevant parts of the full cref.
                    =#
-                   #= 
+                   #=
                    =#
                    #=  E.g. if we have a full cref a.b.c.d.e.f.g, an outer prefix a.b.c.d.e and
                    =#
@@ -1843,7 +1843,7 @@
 
          #= @author: adrpo
           search in the outer prefixes and retrieve the outer/inner crefs =#
-        function searchForInnerPrefix(fullCref::DAE.ComponentRef, inOuterCref::DAE.ComponentRef, outerPrefixes::OuterPrefixes) ::Tuple{DAE.ComponentRef, DAE.ComponentRef} 
+        function searchForInnerPrefix(fullCref::DAE.ComponentRef, inOuterCref::DAE.ComponentRef, outerPrefixes::OuterPrefixes) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
               local innerCrefPrefix::DAE.ComponentRef
               local outerCrefPrefix::DAE.ComponentRef
 
@@ -1870,7 +1870,7 @@
           (outerCrefPrefix, innerCrefPrefix)
         end
 
-        function printInnerDefStr(inInstInner::InstInner) ::String 
+        function printInnerDefStr(inInstInner::InstInner) ::String
               local outStr::String
 
               outStr = begin
@@ -1902,7 +1902,7 @@
 
          #= @author: adrpo
          This function retrieves all the existing inner declarations as a string =#
-        function getExistingInnerDeclarations(inIH::InstHierarchy, inEnv::FCore.Graph) ::String 
+        function getExistingInnerDeclarations(inIH::InstHierarchy, inEnv::FCore.Graph) ::String
               local innerDeclarations::String
 
               innerDeclarations = begin
@@ -1919,7 +1919,7 @@
                   ( nil(), _)  => begin
                     "There are no 'inner' components defined in the model in any of the parent scopes of 'outer' component's scope: " + FGraph.printGraphPathStr(inEnv) + "."
                   end
-                  
+
                   (TOP_INSTANCE(_, ht, _, _) <| _, _)  => begin
                       inners = getInnersFromInstHierarchyHashTable(ht)
                       str = stringDelimitList(ListUtil.map(inners, printInnerDefStr), "\\n    ")
@@ -1934,14 +1934,14 @@
 
          #= @author: adrpo
           Returns all the inners defined in the hashtable. =#
-        function getInnersFromInstHierarchyHashTable(t::InstHierarchyHashTable) ::List{InstInner} 
+        function getInnersFromInstHierarchyHashTable(t::InstHierarchyHashTable) ::List{InstInner}
               local inners::List{InstInner}
 
               inners = ListUtil.map(hashTableList(t), getValue)
           inners
         end
 
-        function getValue(tpl::Tuple{<:Key, Value}) ::InstInner 
+        function getValue(tpl::Tuple{<:Key, Value}) ::InstInner
               local v::InstInner
 
               v = begin
@@ -1956,21 +1956,21 @@
 
          #= /
          =#
-         #=  hash table implementation for InnerOuter instance hierarchy 
+         #=  hash table implementation for InnerOuter instance hierarchy
          =#
          #= /
          =#
 
          #= author: PA
           Calculates a hash value for DAE.ComponentRef =#
-        function hashFunc(k::Key) ::ModelicaInteger 
+        function hashFunc(k::Key) ::ModelicaInteger
               local res::ModelicaInteger
 
               res = stringHashDjb2(ComponentReference.printComponentRefStr(k))
           res
         end
 
-        function keyEqual(key1::Key, key2::Key) ::Bool 
+        function keyEqual(key1::Key, key2::Key) ::Bool
               local res::Bool
 
               res = ComponentReference.crefEqualNoStringCompare(key1, key2)
@@ -1978,13 +1978,13 @@
         end
 
          #=  =#
-        function dumpInstHierarchyHashTable(t::InstHierarchyHashTable)  
+        function dumpInstHierarchyHashTable(t::InstHierarchyHashTable)
               print("InstHierarchyHashTable:\\n")
               print(stringDelimitList(ListUtil.map(hashTableList(t), dumpTuple), "\\n"))
               print("\\n")
         end
 
-        function dumpTuple(tpl::Tuple{<:Key, Value}) ::String 
+        function dumpTuple(tpl::Tuple{<:Key, Value}) ::String
               local str::String
 
               str = begin
@@ -2025,7 +2025,7 @@
 
          #= Author BZ 2008-06
          Make a stand-alone-copy of hashtable. =#
-        function cloneInstHierarchyHashTable(inHash::InstHierarchyHashTable) ::InstHierarchyHashTable 
+        function cloneInstHierarchyHashTable(inHash::InstHierarchyHashTable) ::InstHierarchyHashTable
               local outHash::InstHierarchyHashTable
 
               outHash = begin
@@ -2056,7 +2056,7 @@
          #= author: PA
           Returns an empty InstHierarchyHashTable.
           Using the bucketsize 100 and array size 10. =#
-        function emptyInstHierarchyHashTable() ::InstHierarchyHashTable 
+        function emptyInstHierarchyHashTable() ::InstHierarchyHashTable
               local hashTable::InstHierarchyHashTable
 
               local arr::Array{List{Tuple{Key, ModelicaInteger}}}
@@ -2070,7 +2070,7 @@
         end
 
          #= Returns true if hashtable is empty =#
-        function isEmpty(hashTable::InstHierarchyHashTable) ::Bool 
+        function isEmpty(hashTable::InstHierarchyHashTable) ::Bool
               local res::Bool
 
               res = begin
@@ -2078,7 +2078,7 @@
                   HASHTABLE(_, _, _, 0)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2090,7 +2090,7 @@
          #= author: PA
           Add a Key-Value tuple to hashtable.
           If the Key-Value tuple already exists, the function updates the Value. =#
-        function add(entry::Tuple{<:Key, Value}, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable 
+        function add(entry::Tuple{<:Key, Value}, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable
               local outHashTable::InstHierarchyHashTable
 
               outHashTable = begin
@@ -2123,13 +2123,13 @@
                       n_1 = valueArrayLength(varr_1)
                     HASHTABLE(hashvec_1, varr_1, bsize, n_1)
                   end
-                  
+
                   (newv && (key, _), HASHTABLE(hashvec, varr, bsize, n))  => begin
                       (_, indx) = get1(key, hashTable)
                       varr_1 = valueArraySetnth(varr, indx, newv)
                     HASHTABLE(hashvec, varr_1, bsize, n)
                   end
-                  
+
                   _  => begin
                         print("- InnerOuter.add failed\\n")
                       fail()
@@ -2149,7 +2149,7 @@
          #= author: PA
           Add a Key-Value tuple to hashtable.
           If the Key-Value tuple already exists, the function updates the Value. =#
-        function addNoUpdCheck(entry::Tuple{<:Key, Value}, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable 
+        function addNoUpdCheck(entry::Tuple{<:Key, Value}, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable
               local outHashTable::InstHierarchyHashTable
 
               outHashTable = begin
@@ -2183,7 +2183,7 @@
                       n_1 = valueArrayLength(varr_1)
                     HASHTABLE(hashvec_1, varr_1, bsize, n_1)
                   end
-                  
+
                   _  => begin
                         print("- InnerOuter.addNoUpdCheck failed\\n")
                       fail()
@@ -2198,7 +2198,7 @@
           Note: This function does not delete from the index table, only from the ValueArray.
           This means that a lot of deletions will not make the InstHierarchyHashTable more compact, it
           will still contain a lot of incices information. =#
-        function delete(key::Key, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable 
+        function delete(key::Key, hashTable::InstHierarchyHashTable) ::InstHierarchyHashTable
               local outHashTable::InstHierarchyHashTable
 
               outHashTable = begin
@@ -2226,7 +2226,7 @@
                       varr_1 = valueArrayClearnth(varr, indx)
                     HASHTABLE(hashvec, varr_1, bsize, n)
                   end
-                  
+
                   _  => begin
                         print("-InstHierarchyHashTable.delete failed\\n")
                         print("content:")
@@ -2240,7 +2240,7 @@
 
          #= author: PA
           Returns a Value given a Key and a InstHierarchyHashTable. =#
-        function get(key::Key, hashTable::InstHierarchyHashTable) ::Value 
+        function get(key::Key, hashTable::InstHierarchyHashTable) ::Value
               local value::Value
 
               (value, _) = get1(key, hashTable)
@@ -2248,7 +2248,7 @@
         end
 
          #= help function to get =#
-        function get1(key::Key, hashTable::InstHierarchyHashTable) ::Tuple{Value, ModelicaInteger} 
+        function get1(key::Key, hashTable::InstHierarchyHashTable) ::Tuple{Value, ModelicaInteger}
               local indx::ModelicaInteger
               local value::Value
 
@@ -2279,7 +2279,7 @@
 
          #= author: PA
           Helper function to get =#
-        function get2(key::Key, keyIndices::List{<:Tuple{<:Key, ModelicaInteger}}) ::ModelicaInteger 
+        function get2(key::Key, keyIndices::List{<:Tuple{<:Key, ModelicaInteger}}) ::ModelicaInteger
               local index::ModelicaInteger
 
               index = begin
@@ -2290,7 +2290,7 @@
                       @match true = keyEqual(key, key2)
                     index
                   end
-                  
+
                   (_, _ <| xs)  => begin
                       index = get2(key, xs)
                     index
@@ -2301,7 +2301,7 @@
         end
 
          #= return the Value entries as a list of Values =#
-        function hashTableValueList(hashTable::InstHierarchyHashTable) ::List{Value} 
+        function hashTableValueList(hashTable::InstHierarchyHashTable) ::List{Value}
               local valLst::List{Value}
 
               valLst = ListUtil.map(hashTableList(hashTable), Util.tuple22)
@@ -2309,7 +2309,7 @@
         end
 
          #= return the Key entries as a list of Keys =#
-        function hashTableKeyList(hashTable::InstHierarchyHashTable) ::List{Key} 
+        function hashTableKeyList(hashTable::InstHierarchyHashTable) ::List{Key}
               local valLst::List{Key}
 
               valLst = ListUtil.map(hashTableList(hashTable), Util.tuple21)
@@ -2317,7 +2317,7 @@
         end
 
          #= returns the entries in the hashTable as a list of tuple<Key,Value> =#
-        function hashTableList(hashTable::InstHierarchyHashTable) ::List{Tuple{Key, Value}} 
+        function hashTableList(hashTable::InstHierarchyHashTable) ::List{Tuple{Key, Value}}
               local tplLst::List{Tuple{Key, Value}}
 
               tplLst = begin
@@ -2334,7 +2334,7 @@
 
          #= author: PA
           Transforms a ValueArray to a tuple<Key,Value> list =#
-        function valueArrayList(valueArray::ValueArray) ::List{Tuple{Key, Value}} 
+        function valueArrayList(valueArray::ValueArray) ::List{Tuple{Key, Value}}
               local tplLst::List{Tuple{Key, Value}}
 
               tplLst = begin
@@ -2348,12 +2348,12 @@
                   VALUE_ARRAY(numberOfElements = 0)  => begin
                     nil
                   end
-                  
+
                   VALUE_ARRAY(numberOfElements = 1, valueArray = arr)  => begin
                       @match SOME(elt) = arr[0 + 1]
                     list(elt)
                   end
-                  
+
                   VALUE_ARRAY(numberOfElements = n, valueArray = arr)  => begin
                       lastpos = n - 1
                       lst = valueArrayList2(arr, 0, lastpos)
@@ -2365,7 +2365,7 @@
         end
 
          #= Helper function to valueArrayList =#
-        function valueArrayList2(inVarOptionArray1::Array{<:Option{<:Tuple{<:Key, Value}}}, inInteger2::ModelicaInteger, inInteger3::ModelicaInteger) ::List{Tuple{Key, Value}} 
+        function valueArrayList2(inVarOptionArray1::Array{<:Option{<:Tuple{<:Key, Value}}}, inInteger2::ModelicaInteger, inInteger3::ModelicaInteger) ::List{Tuple{Key, Value}}
               local outVarLst::List{Tuple{Key, Value}}
 
               outVarLst = begin
@@ -2383,14 +2383,14 @@
                       @match SOME(v) = arr[pos + 1]
                     list(v)
                   end
-                  
+
                   (arr, pos, lastpos)  => begin
                       pos_1 = pos + 1
                       @match SOME(v) = arr[pos + 1]
                       res = valueArrayList2(arr, pos_1, lastpos)
                     _cons(v, res)
                   end
-                  
+
                   (arr, pos, lastpos)  => begin
                       pos_1 = pos + 1
                       @match NONE() = arr[pos + 1]
@@ -2404,7 +2404,7 @@
 
          #= author: PA
           Returns the number of elements in the ValueArray =#
-        function valueArrayLength(valueArray::ValueArray) ::ModelicaInteger 
+        function valueArrayLength(valueArray::ValueArray) ::ModelicaInteger
               local size::ModelicaInteger
 
               size = begin
@@ -2420,7 +2420,7 @@
          #= author: PA
           Adds an entry last to the ValueArray, increasing
           array size if no space left by factor 1.4 =#
-        function valueArrayAdd(valueArray::ValueArray, entry::Tuple{<:Key, Value}) ::ValueArray 
+        function valueArrayAdd(valueArray::ValueArray, entry::Tuple{<:Key, Value}) ::ValueArray
               local outValueArray::ValueArray
 
               outValueArray = begin
@@ -2444,7 +2444,7 @@
                       arr_1 = arrayUpdate(arr, n + 1, SOME(entry))
                     VALUE_ARRAY(n_1, arr_1)
                   end
-                  
+
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
                       size = arrayLength(arr)
                       if n < size
@@ -2459,7 +2459,7 @@
                       arr_2 = arrayUpdate(arr_1, n + 1, SOME(entry))
                     VALUE_ARRAY(n_1, arr_2)
                   end
-                  
+
                   _  => begin
                         print("-InstHierarchyHashTable.valueArrayAdd failed\\n")
                       fail()
@@ -2471,7 +2471,7 @@
 
          #= author: PA
           Set the n:th variable in the ValueArray to value. =#
-        function valueArraySetnth(valueArray::ValueArray, pos::ModelicaInteger, entry::Tuple{<:Key, Value}) ::ValueArray 
+        function valueArraySetnth(valueArray::ValueArray, pos::ModelicaInteger, entry::Tuple{<:Key, Value}) ::ValueArray
               local outValueArray::ValueArray
 
               outValueArray = begin
@@ -2486,7 +2486,7 @@
                       arrayUpdate(arr, pos + 1, SOME(entry))
                     valueArray
                   end
-                  
+
                   _  => begin
                         print("-InstHierarchyHashTable.valueArraySetnth failed\\n")
                       fail()
@@ -2498,7 +2498,7 @@
 
          #= author: PA
           Clears the n:th variable in the ValueArray (set to NONE()). =#
-        function valueArrayClearnth(valueArray::ValueArray, pos::ModelicaInteger) ::ValueArray 
+        function valueArrayClearnth(valueArray::ValueArray, pos::ModelicaInteger) ::ValueArray
               local outValueArray::ValueArray
 
               outValueArray = begin
@@ -2513,7 +2513,7 @@
                       arrayUpdate(arr, pos + 1, NONE())
                     valueArray
                   end
-                  
+
                   _  => begin
                         print("-InstHierarchyHashTable.valueArrayClearnth failed\\n")
                       fail()
@@ -2525,7 +2525,7 @@
 
          #= author: PA
           Retrieve the n:th Vale from ValueArray, index from 0..n-1. =#
-        function valueArrayNth(valueArray::ValueArray, pos::ModelicaInteger) ::Tuple{Key, Value} 
+        function valueArrayNth(valueArray::ValueArray, pos::ModelicaInteger) ::Tuple{Key, Value}
               local value::Value
               local key::Key
 

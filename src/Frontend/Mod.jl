@@ -1,4 +1,4 @@
-  module Mod 
+  module Mod
 
 
     using MetaModelica
@@ -6,8 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl ModScope 
-    @UniontypeDecl FullMod 
+    @UniontypeDecl ModScope
+    @UniontypeDecl FullMod
 
          #= /*
          * This file is part of OpenModelica.
@@ -57,9 +57,9 @@
         import InnerOuter
 
         import ComponentReference
-
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
-
+        println("MOD:1 before instancehierarchy")
+        const InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        println("MOD:2 after instancehierarchy")
         import Ceval
 
         import ClassInf
@@ -80,9 +80,11 @@
 
         import Flags
 
-        import Inst
+        #TODO: Fixme
+        #import Inst
 
-        import InstUtil
+        #TODO: Fixme
+        #import InstUtil
 
         import ListUtil
 
@@ -141,16 +143,16 @@
               end
          end
 
-        SubMod = DAE.SubMod 
+        SubMod = DAE.SubMod
 
-        EqMod = DAE.EqMod 
+        EqMod = DAE.EqMod
 
-         #= 
+         #=
           This function elaborates on the expressions in a modification and
           turns them into global expressions.  This is done because the
           expressions in modifications must be elaborated on in the context
           they are provided in, and not the context they are used in. =#
-        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -162,7 +164,7 @@
                   local finalPrefix::SCode.Final
                   local subs_1::List{DAE.SubMod}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local m::SCode.Mod
                   local each_::SCode.Each
                   local subs::List{SCode.SubMod}
@@ -183,12 +185,12 @@
                   (cache, _, _, _, SCode.NOMOD(__), _, _, _)  => begin
                     (cache, DAE.NOMOD())
                   end
-                  
+
                   (cache, env, ih, pre, SCode.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = NONE(), info = info), impl, _, _)  => begin
                       (cache, subs_1) = elabSubmods(cache, env, ih, pre, subs, impl, inModScope, info)
                     (cache, DAE.MOD(finalPrefix, each_, subs_1, NONE(), info))
                   end
-                  
+
                   (cache, env, ih, pre, SCode.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(e), info = info), impl, _, _)  => begin
                       (cache, subs_1) = elabSubmods(cache, env, ih, pre, subs, impl, inModScope, info)
                       (cache, e_1, prop) = Static.elabExp(cache, env, e, impl, Config.splitArrays(), pre, info)
@@ -199,53 +201,23 @@
                                But this can be ok, since a modifier is present, giving it a value from outer modifications.. =#
                     (cache, DAE.MOD(finalPrefix, each_, subs_1, SOME(DAE.TYPED(e_2, e_val, prop, e, info)), info))
                   end
-                  
+
                   (cache, env, ih, pre, SCode.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(e), info = info), impl, _, _)  => begin
                       (cache, subs_1) = elabSubmods(cache, env, ih, pre, subs, impl, inModScope, info)
                     (cache, DAE.MOD(finalPrefix, each_, subs_1, SOME(DAE.UNTYPED(e)), info))
                   end
-                  
+
                   (cache, env, ih, pre, SCode.REDECL(finalPrefix = finalPrefix, eachPrefix = each_, element = elem), impl, _, info)  => begin
                       (elem, dm) = elabModRedeclareElement(cache, env, ih, pre, finalPrefix, elem, impl, inModScope, info)
                     (cache, DAE.REDECL(finalPrefix, each_, elem, dm))
                   end
                 end
               end
-               #=  no top binding
-               =#
-               #=  Only elaborate expressions with non-delayed type checking, see SCode.MOD.
-               =#
-               #=  print(\"Mod.elabMod: calling elabExp on mod exp: \" + Dump.printExpStr(e) + \" in env: \" + FGraph.printGraphPathStr(env) + \"\\n\");
-               =#
-               #=  Vectorize only if arrays are expanded
-               =#
-               #=  Modifiers always apply to single components, so if the expression is
-               =#
-               #=  a tuple (i.e. from a function call) select the first tuple element.
-               =#
-               #=  Delayed type checking
-               =#
-               #=  print(\"Mod.elabMod: delayed mod : \" + Dump.printExpStr(e) + \" in env: \" + FGraph.printGraphPathStr(env) + \"\\n\");
-               =#
-               #=  redeclarations
-               =#
-               #= elist_1 = Inst.addNomod(elist);
-               =#
-               #= /*/ failure
-                  case (cache,env,ih,pre,m,impl,info)
-                    equation
-                      str = \"- Mod.elabMod  failed: \" +
-                            SCodeDump.printModStr(m) +
-                            \" in env: \" +
-                            FGraph.printGraphStr(env);
-                      fprintln(Flags.FAILTRACE, str);
-                    then
-                      fail();*/ =#
           (outCache, outMod)
         end
 
          #= Is the modification one that does not depend on the scope it is evaluated in? =#
-        function isInvariantMod(mod::SCode.Mod) ::Bool 
+        function isInvariantMod(mod::SCode.Mod) ::Bool
               local b::Bool
 
               local e::Absyn.Exp
@@ -256,7 +228,7 @@
                   SCode.NOMOD(__)  => begin
                     true
                   end
-                  
+
                   SCode.MOD(binding = NONE())  => begin
                       b = begin
                         @match mod.binding begin
@@ -264,28 +236,28 @@
                               (_, b) = AbsynUtil.traverseExp(e, AbsynUtil.isInvariantExpNoTraverse, true)
                             b
                           end
-                          
+
                           _  => begin
                               true
                           end
                         end
                       end
                       if ! b
-                        return 
+                        return
                       end
                       for sm in mod.subModLst
                         if ! isInvariantMod(sm.mod)
                           b = false
-                          return 
+                          return
                         end
                       end
                     true
                   end
-                  
+
                   SCode.Mod.REDECL(element = SCode.Element.COMPONENT(modifications = mods, typeSpec = Absyn.TypeSpec.TPATH(path = Absyn.Path.FULLYQUALIFIED(__), arrayDim = NONE())))  => begin
                     isInvariantMod(mods)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -299,7 +271,7 @@
         end
 
          #= Is the modification one that does not depend on the scope it is evaluated in? =#
-        function isInvariantDAEMod(mod::DAE.Mod) ::Bool 
+        function isInvariantDAEMod(mod::DAE.Mod) ::Bool
               local b::Bool
 
               local e::DAE.Exp
@@ -311,7 +283,7 @@
                   DAE.NOMOD(__)  => begin
                     true
                   end
-                  
+
                   DAE.MOD(binding = NONE())  => begin
                       b = begin
                         @match mod.binding begin
@@ -319,33 +291,33 @@
                               (_, b) = Expression.traverseExpBottomUp(e, Expression.isInvariantExpNoTraverse, true)
                             b
                           end
-                          
+
                           SOME(DAE.UNTYPED(exp))  => begin
                               (_, b) = AbsynUtil.traverseExp(exp, AbsynUtil.isInvariantExpNoTraverse, true)
                             b
                           end
-                          
+
                           _  => begin
                               true
                           end
                         end
                       end
                       if ! b
-                        return 
+                        return
                       end
                       for sm in mod.subModLst
                         if ! isInvariantDAEMod(sm.mod)
                           b = false
-                          return 
+                          return
                         end
                       end
                     true
                   end
-                  
+
                   DAE.Mod.REDECL(element = SCode.Element.COMPONENT(modifications = mods, typeSpec = Absyn.TypeSpec.TPATH(path = Absyn.Path.FULLYQUALIFIED(__), arrayDim = NONE())))  => begin
                     isInvariantMod(mods)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -358,9 +330,9 @@
           b
         end
 
-         #= 
+         #=
           Same as elabMod, but if a named Mod is not part of a basic type, fail instead. =#
-        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -369,17 +341,17 @@
           (outCache, outMod)
         end
 
-         #= 
+         #=
           Verifies that a list of submods only have named modifications that could be
           used for basic types. =#
-        function checkIfModsAreBasicTypeMods(mod::SCode.Mod)  
+        function checkIfModsAreBasicTypeMods(mod::SCode.Mod)
               _ = begin
                   local subs::List{SCode.SubMod}
                 @match mod begin
                   SCode.NOMOD(__)  => begin
                     ()
                   end
-                  
+
                   SCode.MOD(subModLst = subs)  => begin
                       checkIfSubmodsAreBasicTypeMods(subs)
                     ()
@@ -388,10 +360,10 @@
               end
         end
 
-         #= 
+         #=
           Verifies that a list of submods only have named modifications that could be
           used for basic types. =#
-        function checkIfSubmodsAreBasicTypeMods(inSubs::List{<:SCode.SubMod})  
+        function checkIfSubmodsAreBasicTypeMods(inSubs::List{<:SCode.SubMod})
               _ = begin
                   local mod::SCode.Mod
                   local ident::String
@@ -400,7 +372,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   SCode.NAMEMOD(ident = ident) <| subs  => begin
                       @match true = ClassInf.isBasicTypeComponentName(ident)
                       checkIfSubmodsAreBasicTypeMods(subs)
@@ -410,14 +382,14 @@
               end
         end
 
-        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod} 
+        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod}
               local outMod::DAE.Mod
               local outElement::SCode.Element
 
               (outElement, outMod) = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local f::SCode.Final
                   local fi::SCode.Final
                   local repl::SCode.Replaceable
@@ -477,15 +449,15 @@
                       mod = unelabMod(emod)
                     (SCode.CLASS(cn, SCode.PREFIXES(vis, redecl, fi, io, repl), enc, p, restr, SCode.DERIVED(tp1, mod, attr1), cmt, i), emod)
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_ENUMERATION(__))  => begin
                     (inElt, DAE.NOMOD())
                   end
-                  
+
                   SCode.CLASS(classDef = SCode.ENUMERATION(__))  => begin
                     (inElt, DAE.NOMOD())
                   end
-                  
+
                   SCode.COMPONENT(compname, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), attr, tp, mod, cmt, cond, i)  => begin
                       mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
@@ -493,7 +465,7 @@
                       mod = unelabMod(emod)
                     (SCode.COMPONENT(compname, SCode.PREFIXES(vis, redecl, fi, io, repl), attr, tp1, mod, cmt, cond, i), emod)
                   end
-                  
+
                   element  => begin
                       print("Unhandled element redeclare (we keep it as it is!): " + SCodeDump.unparseElementStr(element, SCodeDump.defaultOptions) + "\\n")
                     (element, DAE.NOMOD())
@@ -520,7 +492,7 @@
          #= Help function to elabModRedeclareElements.
          This function makes sure that type specifiers, i.e. class names, in redeclarations are looked up in the correct environment.
          This is achieved by making them fully qualified. =#
-        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec} 
+        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec}
               local outTp::Absyn.TypeSpec
               local outCache::FCore.Cache
 
@@ -533,21 +505,24 @@
                   local cref::Absyn.ComponentRef
                   local edims::DAE.Dimensions
                   local ih::InnerOuter.InstHierarchy
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  no array dimensions
                    =#
                 @match (inCache, inEnv, inIH, inPrefix, impl, info, name, tp) begin
                   (cache, env, _, _, _, _, _, Absyn.TPATH(p, NONE()))  => begin
-                      (cache, p1) = Inst.makeFullyQualified(cache, env, p)
+                     #TODO. Solve Circ dep between Inst and Mod
+                      #(cache, p1) = Inst.makeFullyQualified(cache, env, p)
                     (cache, Absyn.TPATH(p1, NONE()))
                   end
-                  
+
                   (cache, env, ih, pre, _, _, _, Absyn.TPATH(p, SOME(dims)))  => begin
-                      cref = Absyn.CREF_IDENT(name, nil)
-                      (cache, edims) = InstUtil.elabArraydim(cache, env, cref, p, dims, NONE(), impl, true, false, pre, info, nil)
+                    cref = Absyn.CREF_IDENT(name, nil)
+                      #TODO solve circular dependency between InstUtil and Mod
+                      #(cache, edims) = InstUtil.elabArraydim(cache, env, cref, p, dims, NONE(), impl, true, false, pre, info, nil)
                       (cache, edims) = PrefixUtil.prefixDimensions(cache, env, ih, pre, edims)
                       dims = ListUtil.map(edims, Expression.unelabDimension)
-                      (cache, p1) = Inst.makeFullyQualified(cache, env, p)
+                      #TODO. Solve Circ dep between Inst and Mod
+                      #(cache, p1) = Inst.makeFullyQualified(cache, env, p)
                     (cache, Absyn.TPATH(p1, SOME(dims)))
                   end
                 end
@@ -558,7 +533,7 @@
         end
 
          #= Helper function to elabMod. Tries to constant evaluate a modifier expression. =#
-        function elabModValue(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inProp::DAE.Properties, inImpl::Bool, inInfo::SourceInfo) ::Tuple{Option{Values.Value}, FCore.Cache} 
+        function elabModValue(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inProp::DAE.Properties, inImpl::Bool, inInfo::SourceInfo) ::Tuple{Option{Values.Value}, FCore.Cache}
               local outCache::FCore.Cache = inCache
               local outValue::Option{Values.Value} = NONE()
 
@@ -597,7 +572,7 @@
         end
 
          #= Transforms Mod back to SCode.Mod, loosing type information. =#
-        function unelabMod(inMod::DAE.Mod) ::SCode.Mod 
+        function unelabMod(inMod::DAE.Mod) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -620,33 +595,33 @@
                   DAE.NOMOD(__)  => begin
                     SCode.NOMOD()
                   end
-                  
+
                   DAE.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = NONE(), info = info)  => begin
                       subs_1 = unelabSubmods(subs)
                     SCode.MOD(finalPrefix, each_, subs_1, NONE(), info)
                   end
-                  
+
                   DAE.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(DAE.UNTYPED(e)), info = info)  => begin
                       subs_1 = unelabSubmods(subs)
                     SCode.MOD(finalPrefix, each_, subs_1, SOME(e), info)
                   end
-                  
+
                   DAE.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(DAE.TYPED(modifierAsValue = SOME(v))), info = info)  => begin
                       subs_1 = unelabSubmods(subs)
                       e_1 = Expression.unelabExp(ValuesUtil.valueExp(v))
                     SCode.MOD(finalPrefix, each_, subs_1, SOME(e_1), info)
                   end
-                  
+
                   DAE.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(DAE.TYPED(_, _, _, absynExp)), info = info)  => begin
                       subs_1 = unelabSubmods(subs)
                       e_1 = absynExp
                     SCode.MOD(finalPrefix, each_, subs_1, SOME(e_1), info)
                   end
-                  
+
                   DAE.REDECL(finalPrefix = finalPrefix, eachPrefix = each_, element = elem)  => begin
                     SCode.REDECL(finalPrefix, each_, elem)
                   end
-                  
+
                   mod  => begin
                       str = "Mod.elabUntypedMod failed: " + printModStr(mod) + "\\n"
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -677,7 +652,7 @@
         end
 
          #= Helper function to unelabMod. =#
-        function unelabSubmods(inTypesSubModLst::List{<:DAE.SubMod}) ::List{SCode.SubMod} 
+        function unelabSubmods(inTypesSubModLst::List{<:DAE.SubMod}) ::List{SCode.SubMod}
               local outSCodeSubModLst::List{SCode.SubMod}
 
               outSCodeSubModLst = list(begin
@@ -694,7 +669,7 @@
           outSCodeSubModLst
         end
 
-        function unelabSubscript(inIntegerLst::List{<:ModelicaInteger}) ::List{SCode.Subscript} 
+        function unelabSubscript(inIntegerLst::List{<:ModelicaInteger}) ::List{SCode.Subscript}
               local outSCodeSubscriptLst::List{SCode.Subscript}
 
               outSCodeSubscriptLst = list(Absyn.SUBSCRIPT(Absyn.INTEGER(i)) for i in inIntegerLst)
@@ -703,7 +678,7 @@
 
          #= This function updates an untyped modification to a typed one, by looking
           up the type of the modifier in the environment and update it. =#
-        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -719,7 +694,7 @@
                   local p::DAE.Properties
                   local e_val::Option{Values.Value}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local each_::SCode.Each
                   local e::Absyn.Exp
                   local eOpt::Option{Absyn.Exp}
@@ -731,11 +706,11 @@
                   (cache, _, _, _, DAE.NOMOD(__), _, _)  => begin
                     (cache, DAE.NOMOD())
                   end
-                  
+
                   (cache, _, _, _, m && DAE.REDECL(__), _, _)  => begin
                     (cache, m)
                   end
-                  
+
                   (cache, env, ih, pre, DAE.MOD(finalPrefix = f, eachPrefix = each_, subModLst = subs, binding = SOME(DAE.UNTYPED(e)), info = info), impl, _)  => begin
                       (cache, subs_1) = updateSubmods(cache, env, ih, pre, subs, impl, info)
                       (cache, e_1, prop) = Static.elabExp(cache, env, e, impl, true, pre, info)
@@ -748,17 +723,17 @@
                       end
                     (cache, DAE.MOD(f, each_, subs_1, SOME(DAE.TYPED(e_2, e_val, prop, e, info)), info))
                   end
-                  
+
                   (cache, env, ih, pre, DAE.MOD(finalPrefix = f, eachPrefix = each_, subModLst = subs, binding = SOME(DAE.TYPED(e_1, e_val, p, e)), info = info), impl, _)  => begin
                       (cache, subs_1) = updateSubmods(cache, env, ih, pre, subs, impl, info)
                     (cache, DAE.MOD(f, each_, subs_1, SOME(DAE.TYPED(e_1, e_val, p, e, info)), info))
                   end
-                  
+
                   (cache, env, ih, pre, DAE.MOD(finalPrefix = f, eachPrefix = each_, subModLst = subs, binding = NONE(), info = info), impl, _)  => begin
                       (cache, subs_1) = updateSubmods(cache, env, ih, pre, subs, impl, info)
                     (cache, DAE.MOD(f, each_, subs_1, NONE(), info))
                   end
-                  
+
                   (_, _, _, _, m, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       str = printModStr(m)
@@ -771,7 +746,7 @@
         end
 
          #=  =#
-        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outTypesSubModLst::List{DAE.SubMod}
               local outCache::FCore.Cache = inCache
 
@@ -797,7 +772,7 @@
           The modifier x=y must be merged with outer modifiers, thus it needs
           to be converted to Mod.
           Notice that the correct type information must be updated later on. =#
-        function elabUntypedMod(inMod::SCode.Mod, inModScope::ModScope) ::DAE.Mod 
+        function elabUntypedMod(inMod::SCode.Mod, inModScope::ModScope) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -808,7 +783,7 @@
                   local each_::SCode.Each
                   local subs::List{SCode.SubMod}
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local e::Absyn.Exp
                   local elem::SCode.Element
                   local s::String
@@ -817,21 +792,21 @@
                   SCode.NOMOD(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   SCode.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = NONE(), info = info)  => begin
                       subs_1 = elabUntypedSubmods(subs, inModScope)
                     DAE.MOD(finalPrefix, each_, subs_1, NONE(), info)
                   end
-                  
+
                   SCode.MOD(finalPrefix = finalPrefix, eachPrefix = each_, subModLst = subs, binding = SOME(e), info = info)  => begin
                       subs_1 = elabUntypedSubmods(subs, inModScope)
                     DAE.MOD(finalPrefix, each_, subs_1, SOME(DAE.UNTYPED(e)), info)
                   end
-                  
+
                   SCode.REDECL(finalPrefix = finalPrefix, eachPrefix = each_, element = elem)  => begin
                     DAE.REDECL(finalPrefix, each_, elem, DAE.NOMOD())
                   end
-                  
+
                   _  => begin
                         print("- elab_untyped_mod ")
                         s = SCodeDump.printModStr(inMod, SCodeDump.defaultOptions)
@@ -845,7 +820,7 @@
         end
 
          #= This function helps elabMod by recursively elaborating on a list of submodifications. =#
-        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outTypesSubModLst::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -857,7 +832,7 @@
         end
 
          #= This function elaborates a list of submodifications. =#
-        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}} 
+        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outSubMods::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -873,7 +848,7 @@
                       (cache, accum_mods) = elabSubmods2(cache, inEnv, inIH, inPrefix, rest_smods, inImpl, inInfo, _cons(dmod, inAccumMods))
                     (cache, accum_mods)
                   end
-                  
+
                   _  => begin
                       (inCache, listReverse(inAccumMods))
                   end
@@ -889,7 +864,7 @@
               {x(start = 2.0, min = 1.0, max = 3.0), y = 4.0}
 
            =#
-        function compactSubMods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{SCode.SubMod} 
+        function compactSubMods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{SCode.SubMod}
               local outSubMods::List{SCode.SubMod}
 
               local submods::List{SCode.SubMod}
@@ -902,7 +877,7 @@
          #= Helper function to compactSubMods. Tries to merge the given modifier with an
            existing modifier in the accumulation list. If a matching modifier is not
            found in the list it's added instead. =#
-        function compactSubMod(inSubMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}, inAccumMods::List{<:SCode.SubMod}) ::List{SCode.SubMod} 
+        function compactSubMod(inSubMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}, inAccumMods::List{<:SCode.SubMod}) ::List{SCode.SubMod}
               local outSubMods::List{SCode.SubMod}
 
               local submods::List{SCode.SubMod}
@@ -915,7 +890,7 @@
 
          #= Helper function to compactSubMod. Merges the given modifier with the existing
             modifier if they have the same name, otherwise does nothing. =#
-        function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}) ::Tuple{SCode.SubMod, Bool} 
+        function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}) ::Tuple{SCode.SubMod, Bool}
               local outFound::Bool
               local outMod::SCode.SubMod
 
@@ -927,7 +902,7 @@
                   (SCode.NAMEMOD(ident = name1), SCode.NAMEMOD(ident = name2), _, _) where (! stringEqual(name1, name2))  => begin
                     (inExistingMod, false)
                   end
-                  
+
                   (SCode.NAMEMOD(ident = name1), _, _, _)  => begin
                       submod = mergeSubModsInSameScope(inExistingMod, inNewMod, _cons(name1, inName), inModScope)
                     (submod, true)
@@ -939,7 +914,7 @@
 
          #= Merges two submodifiers in the same scope, i.e. they have the same priority.
            It's thus an error if the modifiers modify the same element. =#
-        function mergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod 
+        function mergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod
               local outMod::SCode.SubMod
 
               outMod = begin
@@ -962,12 +937,12 @@
                       submods1 = ListUtil.fold2(submods1, compactSubMod, inModScope, inElementName, submods2)
                     SCode.NAMEMOD(id, SCode.MOD(fp, ep, submods1, binding, info1))
                   end
-                  
+
                   (SCode.NAMEMOD(mod = SCode.MOD(subModLst = submods1, binding = NONE())), SCode.NAMEMOD(id, SCode.MOD(fp, ep, submods2, binding, info2)), _, _)  => begin
                       submods1 = ListUtil.fold2(submods1, compactSubMod, inModScope, inElementName, submods2)
                     SCode.NAMEMOD(id, SCode.MOD(fp, ep, submods1, binding, info2))
                   end
-                  
+
                   (SCode.NAMEMOD(mod = mod1), SCode.NAMEMOD(mod = mod2), _, _)  => begin
                       info1 = SCodeUtil.getModifierInfo(mod1)
                       info2 = SCodeUtil.getModifierInfo(mod2)
@@ -985,7 +960,7 @@
           outMod
         end
 
-        function printModScope(inModScope::ModScope) ::String 
+        function printModScope(inModScope::ModScope) ::String
               local outString::String
 
               outString = begin
@@ -995,11 +970,11 @@
                   COMPONENT(name = name)  => begin
                     System.gettext("component ") + name
                   end
-                  
+
                   EXTENDS(path = path)  => begin
                     System.gettext("extends ") + AbsynUtil.pathString(path)
                   end
-                  
+
                   DERIVED(path = path)  => begin
                     System.gettext("inherited class ") + AbsynUtil.pathString(path)
                   end
@@ -1010,7 +985,7 @@
 
          #= This function elaborates on a submodification, turning an
            SCode.SubMod into a DAE.SubMod. =#
-        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod} 
+        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod}
               local outSubMod::DAE.SubMod
               local outCache::FCore.Cache
 
@@ -1024,7 +999,7 @@
           (outCache, outSubMod)
         end
 
-        function elabUntypedSubmods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{DAE.SubMod} 
+        function elabUntypedSubmods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod}
 
               local submods::List{SCode.SubMod}
@@ -1034,11 +1009,11 @@
           outSubMods
         end
 
-         #= 
+         #=
           This function elaborates on a submodification, turning an
           `SCode.SubMod\\' into one or more `DAE.SubMod\\'s, wihtout type information.
          =#
-        function elabUntypedSubmod(inSubMod::SCode.SubMod) ::List{DAE.SubMod} 
+        function elabUntypedSubmod(inSubMod::SCode.SubMod) ::List{DAE.SubMod}
               local outTypesSubModLst::List{DAE.SubMod}
 
               outTypesSubModLst = begin
@@ -1060,7 +1035,7 @@
 
          #= This function extracts a modification from inside another
           modification, using a name to look up submodifications. =#
-        function lookupModificationP(inMod::DAE.Mod, inPath::Absyn.Path) ::DAE.Mod 
+        function lookupModificationP(inMod::DAE.Mod, inPath::Absyn.Path) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1074,17 +1049,17 @@
                       mod = lookupCompModification(m, n)
                     mod
                   end
-                  
+
                   (m, Absyn.FULLYQUALIFIED(p))  => begin
                     lookupModificationP(m, p)
                   end
-                  
+
                   (m, Absyn.QUALIFIED(name = n, path = p))  => begin
                       mod = lookupCompModification(m, n)
                       mod_1 = lookupModificationP(mod, p)
                     mod_1
                   end
-                  
+
                   _  => begin
                         Print.printBuf("- Mod.lookupModificationP failed\\n")
                       fail()
@@ -1095,7 +1070,7 @@
         end
 
          #= This function is used to look up an identifier in a modification. =#
-        function lookupCompModification(inMod::DAE.Mod, inIdent::Absyn.Ident) ::DAE.Mod 
+        function lookupCompModification(inMod::DAE.Mod, inIdent::Absyn.Ident) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1114,7 +1089,7 @@
                       mod2 = lookupComplexCompModification(eqMod, n, f, e, info)
                     checkDuplicateModifications(mod1, mod2, n)
                   end
-                  
+
                   _  => begin
                       DAE.NOMOD()
                   end
@@ -1127,7 +1102,7 @@
          which is named inName or which
          is named name if name is inside
          inSMod(xxx = name) =#
-        function getModifs(inMods::DAE.Mod, inName::SCode.Ident, inSMod::SCode.Mod) ::DAE.Mod 
+        function getModifs(inMods::DAE.Mod, inName::SCode.Ident, inSMod::SCode.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1138,7 +1113,7 @@
                       m = mergeModifiers(inMods, m, inSMod)
                     m
                   end
-                  
+
                   _  => begin
                         m = mergeModifiers(inMods, DAE.NOMOD(), inSMod)
                       m
@@ -1148,7 +1123,7 @@
           outMod
         end
 
-        function mergeModifiers(inMods::DAE.Mod, inMod::DAE.Mod, inSMod::SCode.Mod) ::DAE.Mod 
+        function mergeModifiers(inMods::DAE.Mod, inMod::DAE.Mod, inSMod::SCode.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1161,7 +1136,7 @@
                       m = mergeSubMods(inMods, inMod, f, e, sl)
                     m
                   end
-                  
+
                   _  => begin
                       inMod
                   end
@@ -1170,7 +1145,7 @@
           outMod
         end
 
-        function mergeSubMods(inMods::DAE.Mod, inMod::DAE.Mod, f::SCode.Final, e::SCode.Each, inSMods::List{<:SCode.SubMod}) ::DAE.Mod 
+        function mergeSubMods(inMods::DAE.Mod, inMod::DAE.Mod, f::SCode.Final, e::SCode.Each, inSMods::List{<:SCode.SubMod}) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1183,7 +1158,7 @@
                    nil()  => begin
                     inMod
                   end
-                  
+
                   SCode.NAMEMOD(n, SCode.MOD(binding = SOME(Absyn.CREF(Absyn.CREF_IDENT(id, _))), info = info)) <| rest  => begin
                       m = lookupCompModification(inMods, id)
                       m = DAE.MOD(f, e, list(DAE.NAMEMOD(n, m)), NONE(), info)
@@ -1191,7 +1166,7 @@
                       m = mergeSubMods(inMods, m, f, e, rest)
                     m
                   end
-                  
+
                   _ <| rest  => begin
                       m = mergeSubMods(inMods, inMod, f, e, rest)
                     m
@@ -1202,7 +1177,7 @@
         end
 
          #= This function is used to look up an identifier in a modification. =#
-        function lookupCompModificationFromEqu(inMod::DAE.Mod, inIdent::Absyn.Ident) ::DAE.Mod 
+        function lookupCompModificationFromEqu(inMod::DAE.Mod, inIdent::Absyn.Ident) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1219,11 +1194,11 @@
                   (DAE.NOMOD(__), _)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (DAE.REDECL(__), _)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (DAE.MOD(finalPrefix = f, eachPrefix = e, subModLst = subs, binding = eqMod, info = info), n)  => begin
                       mod1 = lookupCompModification2(subs, n)
                       mod2 = lookupComplexCompModification(eqMod, n, f, e, info)
@@ -1238,7 +1213,7 @@
          #= @adrpo:
           This function selects the eqmod modifier if is not DAE.NOMOD! AND IS TYPED!
           Otherwise check for duplicates =#
-        function selectEqMod(subMod::DAE.Mod, eqMod::DAE.Mod, n::String) ::DAE.Mod 
+        function selectEqMod(subMod::DAE.Mod, eqMod::DAE.Mod, n::String) ::DAE.Mod
               local mod::DAE.Mod
 
               mod = begin
@@ -1246,11 +1221,11 @@
                   (_, DAE.NOMOD(__), _)  => begin
                     subMod
                   end
-                  
+
                   (_, DAE.MOD(binding = SOME(DAE.TYPED(__))), _)  => begin
                     eqMod
                   end
-                  
+
                   _  => begin
                         mod = checkDuplicateModifications(subMod, eqMod, n)
                       mod
@@ -1264,7 +1239,7 @@
 
          #= Looks up a component modification from a complex constructor (e.g. record
            constructor) by name. =#
-        function lookupComplexCompModification(inEqMod::Option{<:DAE.EqMod}, inName::Absyn.Ident, inFinal::SCode.Final, inEach::SCode.Each, inInfo::SourceInfo) ::DAE.Mod 
+        function lookupComplexCompModification(inEqMod::Option{<:DAE.EqMod}, inName::Absyn.Ident, inFinal::SCode.Final, inEach::SCode.Each, inInfo::SourceInfo) ::DAE.Mod
               local outMod::DAE.Mod = DAE.NOMOD()
 
               local values::List{Values.Value}
@@ -1297,7 +1272,7 @@
 
          #= Checks if two modifiers are present, and in that case
         print error of duplicate modifications, if not, the one modification having a value is returned =#
-        function checkDuplicateModifications(mod1::DAE.Mod, mod2::DAE.Mod, n::String) ::DAE.Mod 
+        function checkDuplicateModifications(mod1::DAE.Mod, mod2::DAE.Mod, n::String) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1306,29 +1281,29 @@
                   (DAE.NOMOD(__), _)  => begin
                     mod2
                   end
-                  
+
                   (_, DAE.NOMOD(__))  => begin
                     mod1
                   end
-                  
+
                   (DAE.REDECL(__), DAE.MOD(__))  => begin
                     mergeRedeclareWithBinding(mod1, mod2)
                   end
-                  
+
                   (DAE.MOD(__), DAE.REDECL(__))  => begin
                     mergeRedeclareWithBinding(mod2, mod1)
                   end
-                  
+
                   (DAE.MOD(binding = NONE()), DAE.MOD(__))  => begin
                       submods = checkDuplicateModifications2(mod1.subModLst, mod2.subModLst, n)
                     DAE.MOD(mod2.finalPrefix, mod2.eachPrefix, submods, mod2.binding, mod2.info)
                   end
-                  
+
                   (DAE.MOD(__), DAE.MOD(binding = NONE()))  => begin
                       submods = checkDuplicateModifications2(mod1.subModLst, mod2.subModLst, n)
                     DAE.MOD(mod1.finalPrefix, mod1.eachPrefix, submods, mod1.binding, mod1.info)
                   end
-                  
+
                   (DAE.MOD(__), DAE.MOD(__))  => begin
                       Error.addMultiSourceMessage(Error.DUPLICATE_MODIFICATIONS, list(n, ""), list(getModInfo(mod1), getModInfo(mod2)))
                     mod2
@@ -1338,7 +1313,7 @@
           outMod
         end
 
-        function checkDuplicateModifications2(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inName::String) ::List{DAE.SubMod} 
+        function checkDuplicateModifications2(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inName::String) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod}
 
               local submods::List{DAE.SubMod} = inSubMods2
@@ -1367,7 +1342,7 @@
            E.g. record ER = R(redeclare SomeType x);
                 ER er = ER(1.0);
            =#
-        function mergeRedeclareWithBinding(inRedeclare::DAE.Mod, inBinding::DAE.Mod) ::DAE.Mod 
+        function mergeRedeclareWithBinding(inRedeclare::DAE.Mod, inBinding::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod = inRedeclare
 
               outMod = begin
@@ -1381,7 +1356,7 @@
           outMod
         end
 
-        function modEqualNoPrefix(mod1::DAE.Mod, mod2::DAE.Mod) ::Tuple{DAE.Mod, Bool} 
+        function modEqualNoPrefix(mod1::DAE.Mod, mod2::DAE.Mod) ::Tuple{DAE.Mod, Bool}
               local equal::Bool
               local outMod::DAE.Mod
 
@@ -1392,16 +1367,16 @@
                       @match true = eqModEqual(mod1.binding, mod2.binding)
                     (mod2, true)
                   end
-                  
+
                   (DAE.REDECL(__), DAE.REDECL(__))  => begin
                       @match true = SCodeUtil.elementEqual(mod1.element, mod2.element)
                     (mod2, true)
                   end
-                  
+
                   (DAE.NOMOD(__), DAE.NOMOD(__))  => begin
                     (DAE.NOMOD(), true)
                   end
-                  
+
                   _  => begin
                       (mod2, false)
                   end
@@ -1414,14 +1389,14 @@
           (outMod, equal)
         end
 
-        function lookupNamedSubMod(inSubMods::List{<:DAE.SubMod}, inIdent::Absyn.Ident) ::DAE.SubMod 
+        function lookupNamedSubMod(inSubMods::List{<:DAE.SubMod}, inIdent::Absyn.Ident) ::DAE.SubMod
               local outSubMod::DAE.SubMod
 
               outSubMod = ListUtil.getMemberOnTrue(inIdent, inSubMods, isSubModNamed)
           outSubMod
         end
 
-        function isSubModNamed(inIdent::Absyn.Ident, inSubMod::DAE.SubMod) ::Bool 
+        function isSubModNamed(inIdent::Absyn.Ident, inSubMod::DAE.SubMod) ::Bool
               local outIsNamed::Bool
 
               local ident::String
@@ -1433,7 +1408,7 @@
 
          #= @author: adrpo
          Prints sub-mods in a string with format (sub1, sub2, sub3) =#
-        function printSubsStr(inSubMods::List{<:DAE.SubMod}, addParan::Bool) ::String 
+        function printSubsStr(inSubMods::List{<:DAE.SubMod}, addParan::Bool) ::String
               local s::String
 
               s = stringDelimitList(ListUtil.map(inSubMods, prettyPrintSubmod), ", ")
@@ -1449,7 +1424,7 @@
           s
         end
 
-        function lookupCompModification2(inSubModLst::List{<:DAE.SubMod}, inIdent::Absyn.Ident) ::DAE.Mod 
+        function lookupCompModification2(inSubModLst::List{<:DAE.SubMod}, inIdent::Absyn.Ident) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1459,12 +1434,12 @@
                   ( nil(), _)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (_, _)  => begin
                       @match DAE.NAMEMOD(mod = mod) = lookupNamedSubMod(inSubModLst, inIdent)
                     mod
                   end
-                  
+
                   _  => begin
                       DAE.NOMOD()
                   end
@@ -1475,7 +1450,7 @@
 
          #= This function extracts modifications to an array element, using a subscript
            expression to index the modification. =#
-        function lookupIdxModification(inMod::DAE.Mod, inIndex::DAE.Exp) ::DAE.Mod 
+        function lookupIdxModification(inMod::DAE.Mod, inIndex::DAE.Exp) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1487,11 +1462,11 @@
                   DAE.NOMOD(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.MOD(__)  => begin
                       (mod1, subs) = lookupIdxModification2(inMod.subModLst, inIndex)
                       mod2 = DAE.MOD(inMod.finalPrefix, inMod.eachPrefix, subs, NONE(), inMod.info)
@@ -1501,7 +1476,7 @@
                       mod2 = merge(mod2, mod1)
                     mod2
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Mod.lookupIdxModification(")
@@ -1515,7 +1490,7 @@
         end
 
          #= This function does part of the job for lookupIdxModification. =#
-        function lookupIdxModification2(inSubMods::List{<:DAE.SubMod}, inIndex::DAE.Exp) ::Tuple{DAE.Mod, List{DAE.SubMod}} 
+        function lookupIdxModification2(inSubMods::List{<:DAE.SubMod}, inIndex::DAE.Exp) ::Tuple{DAE.Mod, List{DAE.SubMod}}
               local outSubMods::List{DAE.SubMod} = nil
               local outMod::DAE.Mod = DAE.NOMOD()
 
@@ -1540,7 +1515,7 @@
          #= Helper function to lookupIdxModification2.
            When lookup up the index of a named mod, e.g. y = {1, 2, 3}, it should
            subscript the expression {1, 2, 3} to the corresponding index. =#
-        function lookupIdxModification3(inMod::DAE.Mod, inIndex::DAE.Exp) ::DAE.Mod 
+        function lookupIdxModification3(inMod::DAE.Mod, inIndex::DAE.Exp) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1550,17 +1525,17 @@
                   DAE.NOMOD(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     inMod
                   end
-                  
+
                   DAE.MOD(eachPrefix = SCode.NOT_EACH(__))  => begin
                       (_, subs) = lookupIdxModification2(inMod.subModLst, inIndex)
                       eq = indexEqmod(inMod.binding, list(inIndex), inMod.info)
                     DAE.MOD(inMod.finalPrefix, inMod.eachPrefix, subs, eq, inMod.info)
                   end
-                  
+
                   DAE.MOD(eachPrefix = SCode.EACH(__))  => begin
                     inMod
                   end
@@ -1573,7 +1548,7 @@
            the provided indexing expressions. This is used when a modification equates
            an array variable with an array expression. This expression will be expanded
            to produce one equation expression per array component. =#
-        function indexEqmod(inBinding::Option{<:DAE.EqMod}, inIndices::List{<:DAE.Exp}, inInfo::SourceInfo) ::Option{DAE.EqMod} 
+        function indexEqmod(inBinding::Option{<:DAE.EqMod}, inIndices::List{<:DAE.Exp}, inInfo::SourceInfo) ::Option{DAE.EqMod}
               local outBinding::Option{DAE.EqMod} = inBinding
 
               local exp::DAE.Exp
@@ -1594,7 +1569,7 @@
                   DAE.TYPED(modifierAsValue = SOME(Values.ARRAY(valueLst =  nil())))  => begin
                     NONE()
                   end
-                  
+
                   DAE.TYPED(exp, oval, DAE.PROP(ty, c), aexp, info)  => begin
                        #=  Subscripting empty array gives no value. This is needed in e.g. fill(1.0, 0, 2).
                        =#
@@ -1605,7 +1580,7 @@
                       for i in inIndices
                         if ! Types.isArray(ty)
                           Error.addSourceMessage(Error.MODIFIER_NON_ARRAY_TYPE_WARNING, list(ExpressionDump.printExpStr(exp)), inInfo)
-                          return 
+                          return
                         end
                         ty = Types.unliftArray(ty)
                         exp = ExpressionSimplify.simplify1(Expression.makeASUB(exp, list(i)))
@@ -1631,7 +1606,7 @@
                       end
                     SOME(DAE.TYPED(exp, oval, DAE.PROP(ty, c), aexp, info))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Mod.indexEqmod failed for mod:\\n " + Types.unparseEqMod(eq) + "\\n indices: " + ExpressionDump.printExpListStr(inIndices))
@@ -1643,7 +1618,7 @@
         end
 
          #= Merges two modifiers, where the outer modifiers overrides the inner one. =#
-        function merge(inModOuter::DAE.Mod #= The outer mod which should override the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inElementName::String = "", inCheckFinal::Bool = true) ::DAE.Mod 
+        function merge(inModOuter::DAE.Mod #= The outer mod which should override the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inElementName::String = "", inCheckFinal::Bool = true) ::DAE.Mod
               local outMod::DAE.Mod
 
               local mod_str::String
@@ -1662,7 +1637,7 @@
           outMod
         end
 
-        function merge_isEqual(inMod1::DAE.Mod, inMod2::DAE.Mod) ::Bool 
+        function merge_isEqual(inMod1::DAE.Mod, inMod2::DAE.Mod) ::Bool
               local outIsEqual::Bool
 
               local info1::SourceInfo
@@ -1679,7 +1654,7 @@
         end
 
          #= Returns whether a modifier is declared final or not. =#
-        function isFinalMod(inMod1::DAE.Mod) ::Bool 
+        function isFinalMod(inMod1::DAE.Mod) ::Bool
               local outMod::Bool
 
               outMod = begin
@@ -1687,11 +1662,11 @@
                   DAE.MOD(finalPrefix = SCode.FINAL(__))  => begin
                     true
                   end
-                  
+
                   DAE.REDECL(element = SCode.COMPONENT(prefixes = SCode.PREFIXES(finalPrefix = SCode.FINAL(__))))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1702,7 +1677,7 @@
 
          #= Merges two DAE.Mod into one. The first argument is the outer modification
            that should take precedence over the inner modification. =#
-        function doMerge(inModOuter::DAE.Mod #= The outer mod which should overwrite the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inCheckFinal::Bool) ::DAE.Mod 
+        function doMerge(inModOuter::DAE.Mod #= The outer mod which should overwrite the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inCheckFinal::Bool) ::DAE.Mod
               local outMod::DAE.Mod = inModOuter
 
               outMod = begin
@@ -1732,7 +1707,7 @@
                   (DAE.REDECL(element = SCode.COMPONENT(__)), DAE.REDECL(element = SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(cc = NONE())))))  => begin
                     inModOuter
                   end
-                  
+
                   (DAE.REDECL(element = el1 && SCode.COMPONENT(__), mod = emod1), DAE.REDECL(element = el2 && SCode.COMPONENT(__), mod = emod2))  => begin
                        #=  Redeclaration of component with constraining class on the inner modifier.
                        =#
@@ -1753,11 +1728,11 @@
                       outMod.mod = emod
                     outMod
                   end
-                  
+
                   (DAE.REDECL(element = SCode.CLASS(__)), DAE.REDECL(element = SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(cc = NONE())))))  => begin
                     inModOuter
                   end
-                  
+
                   (DAE.REDECL(element = el1 && SCode.CLASS(__), mod = emod1), DAE.REDECL(element = el2 && SCode.CLASS(__), mod = emod2))  => begin
                        #=  Redeclaration of class with no constraining class on the inner modifier.
                        =#
@@ -1778,19 +1753,19 @@
                       outMod.mod = emod
                     outMod
                   end
-                  
+
                   (DAE.REDECL(element = el1, mod = emod), DAE.MOD(__))  => begin
                       emod = merge(emod, inModInner, "", inCheckFinal)
                       outMod.element = el1
                       outMod.mod = emod
                     outMod
                   end
-                  
+
                   (DAE.MOD(__), DAE.REDECL(element = el2, mod = emod))  => begin
                       emod = merge(inModOuter, emod, "", inCheckFinal)
                     DAE.REDECL(inModInner.finalPrefix, inModInner.eachPrefix, el2, emod)
                   end
-                  
+
                   (DAE.MOD(binding = SOME(eqmod && DAE.TYPED(modifierAsValue = SOME(val && Values.RECORD(__)))), subModLst =  nil()), DAE.MOD(binding = NONE(), subModLst = submods && _ <| _))  => begin
                        #=  The outer modifier has a record binding, while the inner consists of submodifiers.
                        =#
@@ -1821,7 +1796,7 @@
                       outMod.subModLst = stripSubModBindings(inModInner.subModLst)
                     outMod
                   end
-                  
+
                   (DAE.MOD(binding = NONE(), subModLst = submods && _ <| _), DAE.MOD(binding = SOME(eqmod && DAE.TYPED(modifierAsValue = SOME(val && Values.RECORD(__)))), subModLst =  nil()))  => begin
                        #=  The outer modifier consists of submodifiers, while the inner has a record binding.
                        =#
@@ -1850,7 +1825,7 @@
                       outMod.subModLst = stripSubModBindings(outMod.subModLst)
                     outMod
                   end
-                  
+
                   (DAE.MOD(__), DAE.MOD(__))  => begin
                       outMod.subModLst = mergeSubs(outMod.subModLst, inModInner.subModLst, inCheckFinal)
                       outMod.binding = mergeEq(outMod.binding, inModInner.binding)
@@ -1861,7 +1836,7 @@
           outMod
         end
 
-        function mergeSubs(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inCheckFinal::Bool) ::List{DAE.SubMod} 
+        function mergeSubs(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inCheckFinal::Bool) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod} = nil
 
               local submods2::List{DAE.SubMod}
@@ -1895,7 +1870,7 @@
 
          #= The outer modification, given in the first argument, takes precedence over
            the inner modifications. =#
-        function mergeEq(inOuterEq::Option{<:DAE.EqMod}, inInnerEq::Option{<:DAE.EqMod}) ::Option{DAE.EqMod} 
+        function mergeEq(inOuterEq::Option{<:DAE.EqMod}, inInnerEq::Option{<:DAE.EqMod}) ::Option{DAE.EqMod}
               local outEqMod::Option{DAE.EqMod} = if isSome(inOuterEq)
                     inOuterEq
                   else
@@ -1905,7 +1880,7 @@
         end
 
          #= This function simply extracts the equation part of a modification. =#
-        function modEquation(inMod::DAE.Mod) ::Option{DAE.EqMod} 
+        function modEquation(inMod::DAE.Mod) ::Option{DAE.EqMod}
               local outEqMod::Option{DAE.EqMod}
 
               outEqMod = begin
@@ -1913,11 +1888,11 @@
                   DAE.NOMOD(__)  => begin
                     NONE()
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     NONE()
                   end
-                  
+
                   DAE.MOD(__)  => begin
                     inMod.binding
                   end
@@ -1926,13 +1901,13 @@
           outEqMod
         end
 
-         #= 
+         #=
         same as modEqual with the difference that we allow:
          outer(input arg1: mod1) - modifier to be a subset of
          inner(input arg2: mod2) - modifier,
          IF the subset is cotained in mod2 and those subset matches are equal
          or if outer(expr=NONE()) with inner(expr=(SOME)) =#
-        function modSubsetOrEqualOrNonOverlap(mod1::DAE.Mod, mod2::DAE.Mod) ::Bool 
+        function modSubsetOrEqualOrNonOverlap(mod1::DAE.Mod, mod2::DAE.Mod) ::Bool
               local equal::Bool
 
               equal = begin
@@ -1955,12 +1930,12 @@
                       @match true = SCodeUtil.finalEqual(f1, f2)
                     true
                   end
-                  
+
                   (DAE.MOD(binding = eqmod1), DAE.MOD(_, SCode.NOT_EACH(__),  nil(), eqmod2, _))  => begin
                       @match true = eqModSubsetOrEqual(eqmod1, eqmod2)
                     true
                   end
-                  
+
                   (DAE.MOD(f1, each1, submods1, eqmod1, _), DAE.MOD(f2, each2, submods2, eqmod2, _))  => begin
                       @match true = SCodeUtil.finalEqual(f1, f2)
                       @match true = SCodeUtil.eachEqual(each1, each2)
@@ -1968,18 +1943,18 @@
                       @match true = eqModSubsetOrEqual(eqmod1, eqmod2)
                     true
                   end
-                  
+
                   (DAE.REDECL(f1, each1), DAE.REDECL(f2, each2))  => begin
                       @match true = SCodeUtil.finalEqual(f1, f2)
                       @match true = SCodeUtil.eachEqual(each1, each2)
                       @match true = SCodeUtil.elementEqual(mod1.element, mod2.element)
                     true
                   end
-                  
+
                   (DAE.NOMOD(__), DAE.NOMOD(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1992,9 +1967,9 @@
           equal
         end
 
-         #= 
+         #=
         Returns true if two EqMods are equal or outer(input arg1) is NONE =#
-        function eqModSubsetOrEqual(eqMod1::Option{<:DAE.EqMod}, eqMod2::Option{<:DAE.EqMod}) ::Bool 
+        function eqModSubsetOrEqual(eqMod1::Option{<:DAE.EqMod}, eqMod2::Option{<:DAE.EqMod}) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2009,31 +1984,31 @@
                   (NONE(), NONE())  => begin
                     true
                   end
-                  
+
                   (NONE(), SOME(_))  => begin
                     true
                   end
-                  
+
                   (SOME(DAE.TYPED(__)), SOME(DAE.TYPED(__)))  => begin
                       @match true = eqModEqual(eqMod1, eqMod2)
                     true
                   end
-                  
+
                   (SOME(DAE.TYPED(modifierAsAbsynExp = aexp1)), SOME(DAE.UNTYPED(exp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   (SOME(DAE.UNTYPED(exp = aexp1)), SOME(DAE.TYPED(modifierAsAbsynExp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   (SOME(DAE.UNTYPED(exp = aexp1)), SOME(DAE.UNTYPED(exp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2054,10 +2029,10 @@
           equal
         end
 
-         #= 
+         #=
         Returns true if two submod lists are equal. Or all of the elements in subModLst1 have equalities in subModLst2.
         if subModLst2 then contain more elements is not a mather. =#
-        function subModsSubsetOrEqual(subModLst1::List{<:DAE.SubMod}, subModLst2::List{<:DAE.SubMod}) ::Bool 
+        function subModsSubsetOrEqual(subModLst1::List{<:DAE.SubMod}, subModLst2::List{<:DAE.SubMod}) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2077,14 +2052,14 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (DAE.NAMEMOD(id1, mod1) <| rest1, DAE.NAMEMOD(id2, mod2) <| rest2)  => begin
                       @match true = stringEq(id1, id2)
                       @match true = modEqual(mod1, mod2)
                       @match true = subModsEqual(rest1, rest2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2095,9 +2070,9 @@
           equal
         end
 
-         #= 
+         #=
         Compares two DAE.Mod, returns true if equal =#
-        function modEqual(mod1::DAE.Mod, mod2::DAE.Mod) ::Bool 
+        function modEqual(mod1::DAE.Mod, mod2::DAE.Mod) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2105,15 +2080,15 @@
                   (DAE.MOD(__), DAE.MOD(__))  => begin
                     SCodeUtil.finalEqual(mod1.finalPrefix, mod2.finalPrefix) && SCodeUtil.eachEqual(mod1.eachPrefix, mod2.eachPrefix) && ListUtil.isEqualOnTrue(mod1.subModLst, mod2.subModLst, subModEqual) && eqModEqual(mod1.binding, mod2.binding)
                   end
-                  
+
                   (DAE.REDECL(__), DAE.REDECL(__))  => begin
                     SCodeUtil.finalEqual(mod1.finalPrefix, mod2.finalPrefix) && SCodeUtil.eachEqual(mod1.eachPrefix, mod2.eachPrefix) && SCodeUtil.elementEqual(mod1.element, mod2.element)
                   end
-                  
+
                   (DAE.NOMOD(__), DAE.NOMOD(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2123,7 +2098,7 @@
         end
 
          #= Returns true if two submod lists are equal. =#
-        function subModsEqual(inSubModLst1::List{<:DAE.SubMod}, inSubModLst2::List{<:DAE.SubMod}) ::Bool 
+        function subModsEqual(inSubModLst1::List{<:DAE.SubMod}, inSubModLst2::List{<:DAE.SubMod}) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2139,14 +2114,14 @@
                   ( nil(),  nil())  => begin
                     true
                   end
-                  
+
                   (DAE.NAMEMOD(id1, mod1) <| subModLst1, DAE.NAMEMOD(id2, mod2) <| subModLst2)  => begin
                       @match true = stringEq(id1, id2)
                       @match true = modEqual(mod1, mod2)
                       @match true = subModsEqual(subModLst1, subModLst2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2158,7 +2133,7 @@
         end
 
          #= Returns true if two submod are equal. =#
-        function subModEqual(subMod1::DAE.SubMod, subMod2::DAE.SubMod) ::Bool 
+        function subModEqual(subMod1::DAE.SubMod, subMod2::DAE.SubMod) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2176,7 +2151,7 @@
                   (DAE.NAMEMOD(id1, mod1), DAE.NAMEMOD(id2, mod2)) where (stringEq(id1, id2) && modEqual(mod1, mod2))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2187,7 +2162,7 @@
           equal
         end
 
-        function valEqual(inV1::Option{<:Values.Value}, inV2::Option{<:Values.Value}, equal::Bool) ::Bool 
+        function valEqual(inV1::Option{<:Values.Value}, inV2::Option{<:Values.Value}, equal::Bool) ::Bool
               local bEq::Bool
 
               bEq = begin
@@ -2197,11 +2172,11 @@
                   (_, _, true)  => begin
                     true
                   end
-                  
+
                   (NONE(), NONE(), _)  => begin
                     equal
                   end
-                  
+
                   (SOME(v1), SOME(v2), false)  => begin
                       bEq = Expression.expEqual(ValuesUtil.valueExp(v1), ValuesUtil.valueExp(v2))
                     bEq
@@ -2212,7 +2187,7 @@
         end
 
          #= Returns true if two EqMods are equal =#
-        function eqModEqual(eqMod1::Option{<:DAE.EqMod}, eqMod2::Option{<:DAE.EqMod}) ::Bool 
+        function eqModEqual(eqMod1::Option{<:DAE.EqMod}, eqMod2::Option{<:DAE.EqMod}) ::Bool
               local equal::Bool
 
               equal = begin
@@ -2228,28 +2203,28 @@
                   (NONE(), NONE())  => begin
                     true
                   end
-                  
+
                   (SOME(DAE.TYPED(modifierAsExp = exp1, modifierAsValue = v1)), SOME(DAE.TYPED(modifierAsExp = exp2, modifierAsValue = v2)))  => begin
                       equal = Expression.expEqual(exp1, exp2)
                       @match true = valEqual(v1, v2, equal)
                     true
                   end
-                  
+
                   (SOME(DAE.TYPED(modifierAsAbsynExp = aexp1)), SOME(DAE.UNTYPED(exp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   (SOME(DAE.UNTYPED(exp = aexp1)), SOME(DAE.TYPED(modifierAsAbsynExp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   (SOME(DAE.UNTYPED(exp = aexp1)), SOME(DAE.UNTYPED(exp = aexp2)))  => begin
                       @match true = AbsynUtil.expEqual(aexp1, aexp2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2272,7 +2247,7 @@
 
          #= This function prints a modification.
          It uses a few other function to do its stuff. =#
-        function printModStr(inMod::DAE.Mod) ::String 
+        function printModStr(inMod::DAE.Mod) ::String
               local outString::String
 
               outString = begin
@@ -2290,14 +2265,14 @@
                   DAE.NOMOD(__)  => begin
                     "()"
                   end
-                  
+
                   DAE.REDECL(finalPrefix = finalPrefix, eachPrefix = eachPrefix)  => begin
                       prefix = SCodeDump.finalStr(finalPrefix) + SCodeDump.eachStr(eachPrefix)
                       str = SCodeDump.unparseElementStr(inMod.element)
                       res = stringAppendList(list("(", prefix, str, ")"))
                     res
                   end
-                  
+
                   DAE.MOD(finalPrefix = finalPrefix, eachPrefix = eachPrefix, subModLst = subs, binding = eq)  => begin
                       prefix = SCodeDump.finalStr(finalPrefix) + SCodeDump.eachStr(eachPrefix)
                       s1 = printSubs1Str(subs)
@@ -2311,7 +2286,7 @@
                       str = stringAppendList(list(prefix, s1_1, s2))
                     str
                   end
-                  
+
                   _  => begin
                         print(" failure in printModStr \\n")
                       fail()
@@ -2322,17 +2297,17 @@
         end
 
          #= Print a modifier on the Print buffer. =#
-        function printMod(m::DAE.Mod)  
+        function printMod(m::DAE.Mod)
               local str::String
 
               str = printModStr(m)
               Print.printBuf(str)
         end
 
-         #= 
+         #=
         Author BZ, 2009-07
         Prints a readable format of a modifier. =#
-        function prettyPrintMod(m::DAE.Mod, depth::ModelicaInteger) ::String 
+        function prettyPrintMod(m::DAE.Mod, depth::ModelicaInteger) ::String
               local str::String
 
               str = begin
@@ -2343,7 +2318,7 @@
                   (DAE.MOD(subModLst = subs, binding = NONE()), _)  => begin
                     prettyPrintSubs(subs, depth)
                   end
-                  
+
                   (DAE.MOD(finalPrefix = fp, binding = SOME(eq)), _)  => begin
                     (if SCodeUtil.finalBool(fp)
                           "final "
@@ -2351,15 +2326,15 @@
                           ""
                         end) + " = " + Types.unparseEqMod(eq)
                   end
-                  
+
                   (DAE.REDECL(__), _)  => begin
                     SCodeDump.unparseElementStr(m.element)
                   end
-                  
+
                   (DAE.NOMOD(__), _)  => begin
                     ""
                   end
-                  
+
                   _  => begin
                         print(" failed prettyPrintMod\\n")
                       fail()
@@ -2369,10 +2344,10 @@
           str
         end
 
-         #= 
+         #=
         Author BZ
         Helper function for prettyPrintMod =#
-        function prettyPrintSubs(inSubs::List{<:DAE.SubMod}, depth::ModelicaInteger) ::String 
+        function prettyPrintSubs(inSubs::List{<:DAE.SubMod}, depth::ModelicaInteger) ::String
               local str::String
 
               str = begin
@@ -2387,12 +2362,12 @@
                   ( nil(), _)  => begin
                     ""
                   end
-                  
+
                   (DAE.NAMEMOD(id, DAE.REDECL(__)) <| _, _)  => begin
                       s2 = " redeclare(" + id + "), class or component " + id
                     s2
                   end
-                  
+
                   (DAE.NAMEMOD(id, m) <| _, _)  => begin
                       s2 = prettyPrintMod(m, depth + 1)
                       s2 = "(" + id + s2 + "), class or component " + id
@@ -2403,9 +2378,9 @@
           str
         end
 
-         #= 
+         #=
         Prints a readable format of a sub-modifier, used in error reporting for built-in classes =#
-        function prettyPrintSubmod(inSub::DAE.SubMod) ::String 
+        function prettyPrintSubmod(inSub::DAE.SubMod) ::String
               local str::String
 
               str = begin
@@ -2431,7 +2406,7 @@
                           end) + s1 + ")"
                     s2
                   end
-                  
+
                   DAE.NAMEMOD(id, m)  => begin
                       s2 = prettyPrintMod(m, 0)
                       s2 = id + s2
@@ -2443,7 +2418,7 @@
         end
 
          #= Helper function to printModStr =#
-        function printSubs1Str(inTypesSubModLst::List{<:DAE.SubMod}) ::List{String} 
+        function printSubs1Str(inTypesSubModLst::List{<:DAE.SubMod}) ::List{String}
               local outStringLst::List{String}
 
               outStringLst = begin
@@ -2455,7 +2430,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   x <| xs  => begin
                       s1 = printSubStr(x)
                       res = printSubs1Str(xs)
@@ -2467,7 +2442,7 @@
         end
 
          #= Helper function to printSubs1Str =#
-        function printSubStr(inSubMod::DAE.SubMod) ::String 
+        function printSubStr(inSubMod::DAE.SubMod) ::String
               local outString::String
 
               outString = begin
@@ -2489,7 +2464,7 @@
         end
 
          #= Helper function to printModStr =#
-        function printEqmodStr(inTypesEqModOption::Option{<:DAE.EqMod}) ::String 
+        function printEqmodStr(inTypesEqModOption::Option{<:DAE.EqMod}) ::String
               local outString::String
 
               outString = begin
@@ -2505,7 +2480,7 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   SOME(DAE.TYPED(e, SOME(e_val), prop, _))  => begin
                       str = ExpressionDump.printExpStr(e)
                       str2 = Types.printPropStr(prop)
@@ -2513,20 +2488,20 @@
                       res = stringAppendList(list(" = (typed)", str, " ", str2, ", value: ", e_val_str))
                     res
                   end
-                  
+
                   SOME(DAE.TYPED(e, NONE(), prop, _))  => begin
                       str = ExpressionDump.printExpStr(e)
                       str2 = Types.printPropStr(prop)
                       res = stringAppendList(list(" = (typed)", str, ", type:\\n", str2))
                     res
                   end
-                  
+
                   SOME(DAE.UNTYPED(exp = ae))  => begin
                       str = Dump.printExpStr(ae)
                       res = stringAppend(" =(untyped) ", str)
                     res
                   end
-                  
+
                   _  => begin
                         res = "---Mod.printEqmodStr FAILED---"
                       res
@@ -2536,7 +2511,7 @@
           outString
         end
 
-        function renameTopLevelNamedSubMod(mod::DAE.Mod, oldIdent::String, newIdent::String) ::DAE.Mod 
+        function renameTopLevelNamedSubMod(mod::DAE.Mod, oldIdent::String, newIdent::String) ::DAE.Mod
               local outMod::DAE.Mod = mod
 
               outMod = begin
@@ -2545,7 +2520,7 @@
                       outMod.subModLst = list(renameNamedSubMod(s, oldIdent, newIdent) for s in outMod.subModLst)
                     outMod
                   end
-                  
+
                   _  => begin
                       mod
                   end
@@ -2554,7 +2529,7 @@
           outMod
         end
 
-        function renameNamedSubMod(submod::DAE.SubMod, oldIdent::String, newIdent::String) ::DAE.SubMod 
+        function renameNamedSubMod(submod::DAE.SubMod, oldIdent::String, newIdent::String) ::DAE.SubMod
               local outMod::DAE.SubMod
 
               outMod = begin
@@ -2564,7 +2539,7 @@
                   (DAE.NAMEMOD(id, mod), _, _) where (stringEq(id, oldIdent))  => begin
                     DAE.NAMEMOD(newIdent, mod)
                   end
-                  
+
                   _  => begin
                       submod
                   end
@@ -2573,7 +2548,7 @@
           outMod
         end
 
-        function emptyModOrEquality(mod::DAE.Mod) ::Bool 
+        function emptyModOrEquality(mod::DAE.Mod) ::Bool
               local b::Bool
 
               b = begin
@@ -2581,11 +2556,11 @@
                   DAE.NOMOD(__)  => begin
                     true
                   end
-                  
+
                   DAE.MOD(subModLst =  nil())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2594,14 +2569,14 @@
           b
         end
 
-        function intStringDot(i::ModelicaInteger) ::String 
+        function intStringDot(i::ModelicaInteger) ::String
               local str::String
 
               str = intString(i) + "."
           str
         end
 
-        function isPrefixOf(indexSubMod::Tuple{<:String, DAE.SubMod}, idx::String) ::Bool 
+        function isPrefixOf(indexSubMod::Tuple{<:String, DAE.SubMod}, idx::String) ::Bool
               local isPrefix::Bool
 
               isPrefix = begin
@@ -2615,7 +2590,7 @@
                       @match true = boolOr(0 == System.strncmp(i, idx, len1), 0 == System.strncmp(idx, i, len2))
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2633,7 +2608,7 @@
           x(start=1, stateSelect=s) => x.start, x.stateSelect
           (x.start=1, x.stateSelect=s) => x.start, x.stateSelect
           x([2] = 1, start = 2) => x[2], x.start =#
-        function getFullModsFromMod(inTopCref::DAE.ComponentRef, inMod::DAE.Mod) ::List{FullMod} 
+        function getFullModsFromMod(inTopCref::DAE.ComponentRef, inMod::DAE.Mod) ::List{FullMod}
               local outFullMods::List{FullMod}
 
               outFullMods = begin
@@ -2641,11 +2616,11 @@
                   DAE.NOMOD(__)  => begin
                     nil
                   end
-                  
+
                   DAE.MOD(__)  => begin
                     getFullModsFromSubMods(inTopCref, inMod.subModLst)
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     list(getFullModFromModRedeclare(inTopCref, inMod))
                   end
@@ -2666,7 +2641,7 @@
           See also getFullModsFromMod, getFullModsFromSubMod
           Examples:
           x(redeclare package P = P, redeclare class C = C) => x.P, x.C =#
-        function getFullModFromModRedeclare(inTopCref::DAE.ComponentRef, inRedeclare::DAE.Mod) ::FullMod 
+        function getFullModFromModRedeclare(inTopCref::DAE.ComponentRef, inRedeclare::DAE.Mod) ::FullMod
               local outFullMod::FullMod
 
               local el::SCode.Element
@@ -2688,7 +2663,7 @@
           x(start=1, stateSelect=s) => x.start, x.stateSelect
           (x.start=1, x.stateSelect=s) => x.start, x.stateSelect
           x([2] = 1, start = 2) => x[2], x.start =#
-        function getFullModsFromSubMods(inTopCref::DAE.ComponentRef, inSubMods::List{<:DAE.SubMod}) ::List{FullMod} 
+        function getFullModsFromSubMods(inTopCref::DAE.ComponentRef, inSubMods::List{<:DAE.SubMod}) ::List{FullMod}
               local outFullMods::List{FullMod}
 
               outFullMods = begin
@@ -2707,7 +2682,7 @@
                   (_,  nil())  => begin
                     nil
                   end
-                  
+
                   (_, subMod && DAE.NAMEMOD(id, mod) <| rest)  => begin
                       cref = ComponentReference.joinCrefs(inTopCref, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       fullMods1 = getFullModsFromMod(cref, mod)
@@ -2730,7 +2705,7 @@
 
          #= @author: adrpo
           This function checks if the crefs of the given full mods are equal =#
-        function fullModCrefsEqual(inFullMod1::FullMod, inFullMod2::FullMod) ::Bool 
+        function fullModCrefsEqual(inFullMod1::FullMod, inFullMod2::FullMod) ::Bool
               local isEqual::Bool
 
               isEqual = begin
@@ -2740,15 +2715,15 @@
                   (MOD(cr1, _), MOD(cr2, _))  => begin
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
-                  
+
                   (SUB_MOD(cr1, _), SUB_MOD(cr2, _))  => begin
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
-                  
+
                   (MOD(cr1, _), SUB_MOD(cr2, _))  => begin
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
-                  
+
                   (SUB_MOD(cr1, _), MOD(cr2, _))  => begin
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
@@ -2759,7 +2734,7 @@
 
          #= @author: adrpo
           This function checks if the crefs of the given full mods are equal =#
-        function prettyPrintFullMod(inFullMod::FullMod, inDepth::ModelicaInteger) ::String 
+        function prettyPrintFullMod(inFullMod::FullMod, inDepth::ModelicaInteger) ::String
               local outStr::String
 
               outStr = begin
@@ -2772,7 +2747,7 @@
                       str = ComponentReference.printComponentRefStr(cr) + ": " + prettyPrintMod(mod, inDepth)
                     str
                   end
-                  
+
                   (SUB_MOD(cr, subMod), _)  => begin
                       str = ComponentReference.printComponentRefStr(cr) + ": " + prettyPrintSubmod(subMod)
                     str
@@ -2782,7 +2757,7 @@
           outStr
         end
 
-        function getUnelabedSubMod(inMod::SCode.Mod, inIdent::SCode.Ident) ::SCode.Mod 
+        function getUnelabedSubMod(inMod::SCode.Mod, inIdent::SCode.Ident) ::SCode.Mod
               local outSubMod::SCode.Mod
 
               local submods::List{SCode.SubMod}
@@ -2792,7 +2767,7 @@
           outSubMod
         end
 
-        function getUnelabedSubMod2(inSubMods::List{<:SCode.SubMod}, inIdent::SCode.Ident) ::SCode.Mod 
+        function getUnelabedSubMod2(inSubMods::List{<:SCode.SubMod}, inIdent::SCode.Ident) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -2804,7 +2779,7 @@
                       @match true = stringEqual(id, inIdent)
                     m
                   end
-                  
+
                   (_ <| rest_mods, _)  => begin
                     getUnelabedSubMod2(rest_mods, inIdent)
                   end
@@ -2814,7 +2789,7 @@
         end
 
          #= Returns true if a modifier contains any untyped parts, otherwise false. =#
-        function isUntypedMod(inMod::DAE.Mod) ::Bool 
+        function isUntypedMod(inMod::DAE.Mod) ::Bool
               local outIsUntyped::Bool
 
               outIsUntyped = begin
@@ -2823,12 +2798,12 @@
                   DAE.MOD(binding = SOME(DAE.UNTYPED(__)))  => begin
                     true
                   end
-                  
+
                   DAE.MOD(subModLst = submods)  => begin
                       _ = ListUtil.find(submods, isUntypedSubMod)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2838,7 +2813,7 @@
         end
 
          #= Returns true if a submodifier contains any untyped parts, otherwise false. =#
-        function isUntypedSubMod(inSubMod::DAE.SubMod) ::Bool 
+        function isUntypedSubMod(inSubMod::DAE.SubMod) ::Bool
               local outIsUntyped::Bool
 
               local mod::DAE.Mod
@@ -2848,7 +2823,7 @@
           outIsUntyped
         end
 
-        function getUntypedCrefs(inMod::DAE.Mod) ::List{Absyn.ComponentRef} 
+        function getUntypedCrefs(inMod::DAE.Mod) ::List{Absyn.ComponentRef}
               local outCrefs::List{Absyn.ComponentRef}
 
               outCrefs = begin
@@ -2860,12 +2835,12 @@
                       crefs = AbsynUtil.getCrefFromExp(exp, true, true)
                     crefs
                   end
-                  
+
                   DAE.MOD(subModLst = submods)  => begin
                       crefs = ListUtil.fold(submods, getUntypedCrefFromSubMod, nil)
                     crefs
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2874,7 +2849,7 @@
           outCrefs
         end
 
-        function getUntypedCrefFromSubMod(inSubMod::DAE.SubMod, inCrefs::List{<:Absyn.ComponentRef}) ::List{Absyn.ComponentRef} 
+        function getUntypedCrefFromSubMod(inSubMod::DAE.SubMod, inCrefs::List{<:Absyn.ComponentRef}) ::List{Absyn.ComponentRef}
               local outCrefs::List{Absyn.ComponentRef}
 
               outCrefs = begin
@@ -2895,7 +2870,7 @@
 
          #= author: PA
           Removes the sub modifiers of a modifier. =#
-        function stripSubmod(inMod::DAE.Mod) ::DAE.Mod 
+        function stripSubmod(inMod::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod = inMod
 
               outMod = begin
@@ -2904,7 +2879,7 @@
                       outMod.subModLst = nil
                     outMod
                   end
-                  
+
                   _  => begin
                       outMod
                   end
@@ -2913,10 +2888,10 @@
           outMod
         end
 
-         #= 
+         #=
         Author: BZ, 2009-08
         Removed REDECLARE() statements at first level of SubMods =#
-        function removeFirstSubsRedecl(inMod::DAE.Mod) ::DAE.Mod 
+        function removeFirstSubsRedecl(inMod::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -2930,17 +2905,17 @@
                   DAE.MOD(finalPrefix = f, eachPrefix = each_, subModLst =  nil(), binding = eq, info = info)  => begin
                     DAE.MOD(f, each_, nil, eq, info)
                   end
-                  
+
                   DAE.MOD(subModLst = subs, binding = NONE())  => begin
                       @match nil = removeRedecl(subs)
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.MOD(finalPrefix = f, eachPrefix = each_, subModLst = subs, binding = eq, info = info)  => begin
                       subs = removeRedecl(subs)
                     DAE.MOD(f, each_, subs, eq, info)
                   end
-                  
+
                   m  => begin
                     m
                   end
@@ -2949,10 +2924,10 @@
           outMod
         end
 
-         #= 
+         #=
         Author BZ
         helper function for removeFirstSubsRedecl =#
-        function removeRedecl(isubs::List{<:SubMod}) ::List{SubMod} 
+        function removeRedecl(isubs::List{<:SubMod}) ::List{SubMod}
               local osubs::List{SubMod}
 
               osubs = begin
@@ -2963,11 +2938,11 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.NAMEMOD(_, DAE.REDECL(__)) <| subs  => begin
                     removeRedecl(subs)
                   end
-                  
+
                   sm <| subs  => begin
                       osubs = removeRedecl(subs)
                     _cons(sm, osubs)
@@ -2977,10 +2952,10 @@
           osubs
         end
 
-         #= 
+         #=
         Author BZ, 2009-07
         Delete a list of named modifiers =#
-        function removeModList(inMod::DAE.Mod, remStrings::List{<:String}) ::DAE.Mod 
+        function removeModList(inMod::DAE.Mod, remStrings::List{<:String}) ::DAE.Mod
               local outMod::DAE.Mod
 
               local s::String
@@ -2991,7 +2966,7 @@
                   (_,  nil())  => begin
                     inMod
                   end
-                  
+
                   (_, s <| _)  => begin
                     removeModList(removeMod(inMod, s), remStrings)
                   end
@@ -3000,10 +2975,10 @@
           outMod
         end
 
-         #= 
+         #=
         Author: BZ, 2009-05
         Remove a modifier(/s) on a specified component. =#
-        function removeMod(inMod::DAE.Mod, componentModified::String) ::DAE.Mod 
+        function removeMod(inMod::DAE.Mod, componentModified::String) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -3016,7 +2991,7 @@
                   DAE.NOMOD(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     if SCodeUtil.elementName(inMod.element) == componentModified
                           DAE.NOMOD()
@@ -3024,7 +2999,7 @@
                           inMod
                         end
                   end
-                  
+
                   DAE.MOD(f, e, subs, oem, info)  => begin
                       subs = removeModInSubs(subs, componentModified)
                       outMod = DAE.MOD(f, e, subs, oem, info)
@@ -3039,11 +3014,11 @@
           outMod
         end
 
-         #= 
+         #=
         Author BZ, 2009-05
         Helper function for removeMod, removes modifiers in submods;
          =#
-        function removeModInSubs(inSubs::List{<:SubMod}, componentName::String) ::List{SubMod} 
+        function removeModInSubs(inSubs::List{<:SubMod}, componentName::String) ::List{SubMod}
               local outsubs::List{SubMod}
 
               outsubs = begin
@@ -3057,7 +3032,7 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.NAMEMOD(s1, m1) <| subs, _)  => begin
                       subs1 = if stringEq(s1, componentName)
                             nil
@@ -3075,7 +3050,7 @@
 
          #= This function adds each to the mods
          if the dimensions are not empty. =#
-        function addEachIfNeeded(inMod::DAE.Mod, inDimensions::DAE.Dimensions) ::DAE.Mod 
+        function addEachIfNeeded(inMod::DAE.Mod, inDimensions::DAE.Dimensions) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -3090,24 +3065,24 @@
                   (_,  nil())  => begin
                     inMod
                   end
-                  
+
                   (DAE.NOMOD(__), _)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (DAE.REDECL(finalPrefix, _, el, mod), _)  => begin
                     DAE.REDECL(finalPrefix, SCode.EACH(), el, mod)
                   end
-                  
+
                   (DAE.MOD(finalPrefix, SCode.EACH(__), subs, eq, info), _)  => begin
                     DAE.MOD(finalPrefix, SCode.EACH(), subs, eq, info)
                   end
-                  
+
                   (DAE.MOD(finalPrefix, eachPrefix, subs, eq, info), _)  => begin
                       subs = addEachToSubsIfNeeded(subs, inDimensions)
                     DAE.MOD(finalPrefix, eachPrefix, subs, eq, info)
                   end
-                  
+
                   _  => begin
                         print("Mod.addEachIfNeeded failed on: " + printModStr(inMod) + "\\n")
                       fail()
@@ -3121,7 +3096,7 @@
 
          #= This function adds each to the mods
          if the dimensions are not empty. =#
-        function addEachOneLevel(inMod::DAE.Mod) ::DAE.Mod 
+        function addEachOneLevel(inMod::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -3136,15 +3111,15 @@
                   DAE.NOMOD(__)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   DAE.REDECL(finalPrefix, _, el, mod)  => begin
                     DAE.REDECL(finalPrefix, SCode.EACH(), el, mod)
                   end
-                  
+
                   DAE.MOD(finalPrefix, _, subs, eq, info)  => begin
                     DAE.MOD(finalPrefix, SCode.EACH(), subs, eq, info)
                   end
-                  
+
                   _  => begin
                         print("Mod.addEachOneLevel failed on: " + printModStr(inMod) + "\\n")
                       fail()
@@ -3154,7 +3129,7 @@
           outMod
         end
 
-        function addEachToSubsIfNeeded(inSubMods::List{<:DAE.SubMod}, inDimensions::DAE.Dimensions) ::List{DAE.SubMod} 
+        function addEachToSubsIfNeeded(inSubMods::List{<:DAE.SubMod}, inDimensions::DAE.Dimensions) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod}
 
               outSubMods = begin
@@ -3166,11 +3141,11 @@
                   (_,  nil())  => begin
                     inSubMods
                   end
-                  
+
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (DAE.NAMEMOD(id, m) <| rest, _)  => begin
                       m = addEachOneLevel(m)
                       rest = addEachToSubsIfNeeded(rest, inDimensions)
@@ -3183,7 +3158,7 @@
 
          #= @author: adrpo
          returns true if this is an empty modifier =#
-        function isEmptyMod(inMod::DAE.Mod) ::Bool 
+        function isEmptyMod(inMod::DAE.Mod) ::Bool
               local isEmpty::Bool
 
               isEmpty = begin
@@ -3191,11 +3166,11 @@
                   DAE.NOMOD(__)  => begin
                     true
                   end
-                  
+
                   DAE.MOD(subModLst =  nil(), binding = NONE())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3206,7 +3181,7 @@
           isEmpty
         end
 
-        function isNoMod(inMod::DAE.Mod) ::Bool 
+        function isNoMod(inMod::DAE.Mod) ::Bool
               local outIsNoMod::Bool
 
               outIsNoMod = begin
@@ -3214,7 +3189,7 @@
                   DAE.NOMOD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3223,7 +3198,7 @@
           outIsNoMod
         end
 
-        function getModInfo(inMod::DAE.Mod) ::SourceInfo 
+        function getModInfo(inMod::DAE.Mod) ::SourceInfo
               local outInfo::SourceInfo
 
               outInfo = begin
@@ -3233,11 +3208,11 @@
                   DAE.MOD(__)  => begin
                     inMod.info
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     SCodeUtil.elementInfo(inMod.element)
                   end
-                  
+
                   _  => begin
                       AbsynUtil.dummyInfo
                   end
@@ -3246,7 +3221,7 @@
           outInfo
         end
 
-        function isRedeclareMod(inMod::DAE.Mod) ::Bool 
+        function isRedeclareMod(inMod::DAE.Mod) ::Bool
               local yes::Bool
 
               yes = begin
@@ -3254,7 +3229,7 @@
                   DAE.REDECL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3264,7 +3239,7 @@
         end
 
          #= return the modifier present in the environment for this class or DAE.NOMOD if ther is none =#
-        function getClassModifier(inEnv::FCore.Graph, inName::FCore.Name) ::DAE.Mod 
+        function getClassModifier(inEnv::FCore.Graph, inName::FCore.Name) ::DAE.Mod
               local outMod::DAE.Mod
 
               local n::FCore.Node
@@ -3282,7 +3257,7 @@
                       end
                     mod
                   end
-                  
+
                   _  => begin
                       DAE.NOMOD()
                   end
@@ -3291,28 +3266,28 @@
           outMod
         end
 
-        function subModValue(inSubMod::DAE.SubMod) ::Values.Value 
+        function subModValue(inSubMod::DAE.SubMod) ::Values.Value
               local outValue::Values.Value
 
               @match DAE.NAMEMOD(mod = DAE.MOD(binding = SOME(DAE.TYPED(modifierAsValue = SOME(outValue))))) = inSubMod
           outValue
         end
 
-        function subModName(inSubMod::DAE.SubMod) ::DAE.Ident 
+        function subModName(inSubMod::DAE.SubMod) ::DAE.Ident
               local outName::DAE.Ident
 
               @match DAE.NAMEMOD(ident = outName) = inSubMod
           outName
         end
 
-        function subModIsNamed(inName::String, inSubMod::DAE.SubMod) ::Bool 
+        function subModIsNamed(inName::String, inSubMod::DAE.SubMod) ::Bool
               local outNameEq::Bool
 
               outNameEq = inName == subModName(inSubMod)
           outNameEq
         end
 
-        function subModInfo(inSubMod::DAE.SubMod) ::SourceInfo 
+        function subModInfo(inSubMod::DAE.SubMod) ::SourceInfo
               local outInfo::SourceInfo
 
               local mod::DAE.Mod
@@ -3322,7 +3297,7 @@
           outInfo
         end
 
-        function setEqMod(inEqMod::Option{<:DAE.EqMod}, inMod::DAE.Mod) ::DAE.Mod 
+        function setEqMod(inEqMod::Option{<:DAE.EqMod}, inMod::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod = inMod
 
               outMod = begin
@@ -3331,7 +3306,7 @@
                       outMod.binding = inEqMod
                     outMod
                   end
-                  
+
                   _  => begin
                       outMod
                   end
@@ -3340,7 +3315,7 @@
           outMod
         end
 
-        function stripSubModBindings(inSubMods::List{<:DAE.SubMod}) ::List{DAE.SubMod} 
+        function stripSubModBindings(inSubMods::List{<:DAE.SubMod}) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod} = nil
 
               local id::DAE.Ident
@@ -3357,7 +3332,7 @@
           outSubMods
         end
 
-        function filterRedeclares(inMod::DAE.Mod) ::DAE.Mod 
+        function filterRedeclares(inMod::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod = inMod
 
               outMod = begin
@@ -3371,7 +3346,7 @@
                           outMod
                         end
                   end
-                  
+
                   _  => begin
                       outMod
                   end
@@ -3380,7 +3355,7 @@
           outMod
         end
 
-        function filterRedeclaresSubMods(inSubMods::List{<:DAE.SubMod}) ::List{DAE.SubMod} 
+        function filterRedeclaresSubMods(inSubMods::List{<:DAE.SubMod}) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod} = nil
 
               local id::DAE.Ident
@@ -3397,7 +3372,7 @@
           outSubMods
         end
 
-        function unparseModStr(inMod::DAE.Mod) ::String 
+        function unparseModStr(inMod::DAE.Mod) ::String
               local outString::String
 
               outString = begin
@@ -3410,7 +3385,7 @@
                   DAE.NOMOD(__)  => begin
                     ""
                   end
-                  
+
                   DAE.MOD(__)  => begin
                       final_str = if SCodeUtil.finalBool(inMod.finalPrefix)
                             "final "
@@ -3426,7 +3401,7 @@
                       binding_str = unparseBindingStr(inMod.binding)
                     final_str + each_str + sub_str + binding_str
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                       final_str = if SCodeUtil.finalBool(inMod.finalPrefix)
                             "final "
@@ -3446,7 +3421,7 @@
           outString
         end
 
-        function unparseSubModStr(inSubMod::DAE.SubMod) ::String 
+        function unparseSubModStr(inSubMod::DAE.SubMod) ::String
               local outString::String
 
               outString = begin
@@ -3459,7 +3434,7 @@
           outString
         end
 
-        function unparseBindingStr(inBinding::Option{<:DAE.EqMod}) ::String 
+        function unparseBindingStr(inBinding::Option{<:DAE.EqMod}) ::String
               local outString::String
 
               outString = begin
@@ -3468,11 +3443,11 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   SOME(DAE.TYPED(modifierAsAbsynExp = exp))  => begin
                     " = " + Dump.printExpStr(exp)
                   end
-                  
+
                   SOME(DAE.UNTYPED(exp = exp))  => begin
                     " = " + Dump.printExpStr(exp)
                   end
