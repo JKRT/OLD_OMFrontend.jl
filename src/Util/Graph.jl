@@ -1,4 +1,4 @@
-  module Graph 
+  module Graph
 
 
     using MetaModelica
@@ -60,7 +60,7 @@
     EqualFunc = Function
 
     EqualFunc = Function
-
+    Type_a = Any
          #= /*
          * This file is part of OpenModelica.
          *
@@ -96,9 +96,9 @@
 
         import ListUtil
 
-        NodeType = Any 
+        NodeType = Any
 
-        ArgType = Any 
+        ArgType = Any
 
          #= This function will build a graph given a list of nodes, an edge function, and
           an extra argument to the edge function. The edge function should generate a
@@ -107,7 +107,7 @@
 
           NOTE: There is no check that there is only unique edges for each node.
           This module assumes that you do not build a graph with duplicate edges! =#
-        function buildGraph(inNodes::List{<:NodeType}, inEdgeFunc::EdgeFunc, inEdgeArg::ArgType) ::List{Tuple{NodeType, List{NodeType}}} 
+        function buildGraph(inNodes::List{<:NodeType}, inEdgeFunc::EdgeFunc, inEdgeArg::ArgType) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = ListUtil.threadTuple(inNodes, ListUtil.map1(inNodes, inEdgeFunc, inEdgeArg))
@@ -115,14 +115,14 @@
         end
 
          #= This function will build an empty graph given a list of nodes. =#
-        function emptyGraph(inNodes::List{<:NodeType}) ::List{Tuple{NodeType, List{NodeType}}} 
+        function emptyGraph(inNodes::List{<:NodeType}) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = ListUtil.map(inNodes, emptyGraphHelper)
           outGraph
         end
 
-        function emptyGraphHelper(nt::NodeType) ::Tuple{NodeType, List{NodeType}} 
+        function emptyGraphHelper(nt::NodeType) ::Tuple{NodeType, List{NodeType}}
               local out::Tuple{NodeType, List{NodeType}}
 
               out = (nt, nil)
@@ -138,7 +138,7 @@
           graph contains cycles this function will return the nodes that it could sort
           as the first return value, and the remaining graph that contains cycles as the
           second value. =#
-        function topologicalSort(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Tuple{List{NodeType}, List{Tuple{NodeType, List{NodeType}}}} 
+        function topologicalSort(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Tuple{List{NodeType}, List{Tuple{NodeType, List{NodeType}}}}
               local outRemainingGraph::List{Tuple{NodeType, List{NodeType}}}
               local outNodes::List{NodeType}
 
@@ -153,7 +153,7 @@
          #= Helper function to topologicalSort, does most of the actual work.
           inStartNodes is a list of start nodes that have no outgoing edges, i.e. no
           dependencies. inRestNodes is the rest of the nodes in the graph. =#
-        function topologicalSort2(inStartNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inRestNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inAccumNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::Tuple{List{NodeType}, List{Tuple{NodeType, List{NodeType}}}} 
+        function topologicalSort2(inStartNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inRestNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inAccumNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::Tuple{List{NodeType}, List{Tuple{NodeType, List{NodeType}}}}
               local outRemainingGraph::List{Tuple{NodeType, List{NodeType}}}
               local outNodes::List{NodeType}
 
@@ -174,7 +174,7 @@
                   ( nil(), _, _, _)  => begin
                     (listReverse(inAccumNodes), inRestNodes)
                   end
-                  
+
                   (rest_start,  nil(), _, _)  => begin
                        #=  If the remaining graph is empty we don't need to do much more, just
                        =#
@@ -188,7 +188,7 @@
                       result = listReverse(result)
                     (result, nil)
                   end
-                  
+
                   ((node1,  nil()) <| rest_start, rest_rest, _, _)  => begin
                       rest_rest = ListUtil.map2(rest_rest, removeEdge, node1, inEqualFunc)
                       (rest_rest, new_start) = ListUtil.splitOnTrue(rest_rest, hasOutgoingEdges)
@@ -212,7 +212,7 @@
         end
 
          #= Returns true if the given node has no outgoing edges, otherwise false. =#
-        function hasOutgoingEdges(inNode::Tuple{<:NodeType, List{<:NodeType}}) ::Bool 
+        function hasOutgoingEdges(inNode::Tuple{<:NodeType, List{<:NodeType}}) ::Bool
               local outHasOutEdges::Bool
 
               outHasOutEdges = begin
@@ -220,7 +220,7 @@
                   (_,  nil())  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -231,7 +231,7 @@
 
          #= Takes a node with it's edges and a node that's been removed from the graph,
           and removes the edge if it exists in the edge list. =#
-        function removeEdge(inNode::Tuple{<:NodeType, List{<:NodeType}}, inRemovedNode::NodeType, inEqualFunc::EqualFunc) ::Tuple{NodeType, List{NodeType}} 
+        function removeEdge(inNode::Tuple{<:NodeType, List{<:NodeType}}, inRemovedNode::NodeType, inEqualFunc::EqualFunc) ::Tuple{NodeType, List{NodeType}}
               local outNode::Tuple{NodeType, List{NodeType}}
 
               local node::NodeType
@@ -251,7 +251,7 @@
           This function is not very efficient, so it shouldn't be used for any
           performance critical tasks.  It's meant to be used together with
           topologicalSort to print an error message if any cycles are detected. =#
-        function findCycles(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{List{NodeType}} 
+        function findCycles(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{List{NodeType}}
               local outCycles::List{List{NodeType}}
 
               outCycles = findCycles2(inGraph, inGraph, inEqualFunc)
@@ -259,7 +259,7 @@
         end
 
          #= Helper function to findCycles. =#
-        function findCycles2(inNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{List{NodeType}} 
+        function findCycles2(inNodes::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{List{NodeType}}
               local outCycles::List{List{NodeType}}
 
               outCycles = begin
@@ -271,14 +271,14 @@
                   ( nil(), _, _)  => begin
                     nil
                   end
-                  
+
                   (node <| rest_nodes, _, _)  => begin
                       @match SOME(cycle) = findCycleForNode(node, inGraph, nil, inEqualFunc)
                       rest_nodes = removeNodesFromGraph(cycle, rest_nodes, inEqualFunc)
                       rest_cycles = findCycles2(rest_nodes, inGraph, inEqualFunc)
                     _cons(cycle, rest_cycles)
                   end
-                  
+
                   (_ <| rest_nodes, _, _)  => begin
                       rest_cycles = findCycles2(rest_nodes, inGraph, inEqualFunc)
                     rest_cycles
@@ -301,7 +301,7 @@
           cycle if one was found, or fail or return NONE() if no cycle could be found. A
           given node might be part of several cycles, but this function will stop as
           soon as it finds one cycle. =#
-        function findCycleForNode(inNode::Tuple{<:NodeType, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inVisitedNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::Option{List{NodeType}} 
+        function findCycleForNode(inNode::Tuple{<:NodeType, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inVisitedNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::Option{List{NodeType}}
               local outCycle::Option{List{NodeType}}
 
               outCycle = begin
@@ -324,7 +324,7 @@
                           end
                     opt_cycle
                   end
-                  
+
                   ((node, edges), _, _, _)  => begin
                       visited_nodes = _cons(node, inVisitedNodes)
                       cycle = findCycleForNode2(edges, inGraph, visited_nodes, inEqualFunc)
@@ -349,7 +349,7 @@
 
          #= Helper function to findCycleForNode. Calls findNodeInGraph on each node in
           the given list. =#
-        function findCycleForNode2(inNodes::List{<:NodeType}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inVisitedNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::List{NodeType} 
+        function findCycleForNode2(inNodes::List{<:NodeType}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inVisitedNodes::List{<:NodeType}, inEqualFunc::EqualFunc) ::List{NodeType}
               local outCycle::List{NodeType}
 
               outCycle = begin
@@ -365,7 +365,7 @@
                       @match SOME(cycle) = findCycleForNode(graph_node, inGraph, inVisitedNodes, inEqualFunc)
                     cycle
                   end
-                  
+
                   (_ <| rest_nodes, _, _, _)  => begin
                       cycle = findCycleForNode2(rest_nodes, inGraph, inVisitedNodes, inEqualFunc)
                     cycle
@@ -379,7 +379,7 @@
 
          #= Returns a node and its edges from a graph given a node to search for, or
           fails if no such node exists in the graph. =#
-        function findNodeInGraph(inNode::NodeType, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Tuple{NodeType, List{NodeType}} 
+        function findNodeInGraph(inNode::NodeType, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Tuple{NodeType, List{NodeType}}
               local outNode::Tuple{NodeType, List{NodeType}}
 
               outNode = begin
@@ -391,7 +391,7 @@
                       @match true = inEqualFunc(inNode, node)
                     graph_node
                   end
-                  
+
                   (_, _ <| rest_graph, _)  => begin
                     findNodeInGraph(inNode, rest_graph, inEqualFunc)
                   end
@@ -402,7 +402,7 @@
 
          #= Returns the index in the list of the node  from a graph given a node to search for, or
           fails if no such node exists in the graph. =#
-        function findIndexofNodeInGraph(inNode::NodeType, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc, inIndex::ModelicaInteger) ::ModelicaInteger 
+        function findIndexofNodeInGraph(inNode::NodeType, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc, inIndex::ModelicaInteger) ::ModelicaInteger
               local outIndex::ModelicaInteger
 
               outIndex = begin
@@ -414,7 +414,7 @@
                       @match true = inEqualFunc(inNode, node)
                     inIndex
                   end
-                  
+
                   (_, _ <| rest_graph, _, _)  => begin
                     findIndexofNodeInGraph(inNode, rest_graph, inEqualFunc, inIndex + 1)
                   end
@@ -425,7 +425,7 @@
 
          #= Removed a list of nodes from the graph. Note that only the nodes are removed
           and not any edges pointing at the nodes. =#
-        function removeNodesFromGraph(inNodes::List{<:NodeType}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{Tuple{NodeType, List{NodeType}}} 
+        function removeNodesFromGraph(inNodes::List{<:NodeType}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = begin
@@ -437,16 +437,16 @@
                   ( nil(), _, _)  => begin
                     inGraph
                   end
-                  
+
                   (_,  nil(), _)  => begin
                     nil
                   end
-                  
+
                   (_, (node, _) <| rest_graph, _)  => begin
                       @match (rest_nodes, SOME(_)) = ListUtil.deleteMemberOnTrue(node, inNodes, inEqualFunc)
                     removeNodesFromGraph(rest_nodes, rest_graph, inEqualFunc)
                   end
-                  
+
                   (_, graph_node <| rest_graph, _)  => begin
                       rest_graph = removeNodesFromGraph(inNodes, rest_graph, inEqualFunc)
                     _cons(graph_node, rest_graph)
@@ -459,7 +459,7 @@
          #= This function transposes a graph by given a graph and vertex list.
         To call this, use transposeGraph(emptyGraphOnlyNodes,graph,eqFunction).
          =#
-        function transposeGraph(intmpGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{Tuple{NodeType, List{NodeType}}} 
+        function transposeGraph(intmpGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = begin
@@ -472,13 +472,13 @@
                   (_,  nil(), _)  => begin
                     intmpGraph
                   end
-                  
+
                   (_, (node, nodeList) <| restGraph, _)  => begin
                       tmpGraph = ListUtil.fold2(nodeList, insertNodetoGraph, node, inEqualFunc, intmpGraph)
                       tmpGraph = transposeGraph(tmpGraph, restGraph, inEqualFunc)
                     tmpGraph
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.transpose failed."), sourceInfo())
                       fail()
@@ -491,7 +491,7 @@
          #=  This function takes nodes and a vertex and inserts
           the vertex to list of nodes of the graph.
          =#
-        function insertNodetoGraph(inNode::NodeType, inVertex::NodeType, inEqualFunc::EqualFunc, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}} 
+        function insertNodetoGraph(inNode::NodeType, inVertex::NodeType, inEqualFunc::EqualFunc, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = begin
@@ -502,14 +502,14 @@
                   (_, _, _,  nil())  => begin
                     nil
                   end
-                  
+
                   (_, _, _, (node, rest) <| restGraph)  => begin
                       @match true = inEqualFunc(node, inNode)
                       rest = ListUtil.unionList(list(rest, list(inVertex)))
                       restGraph = insertNodetoGraph(inNode, inVertex, inEqualFunc, restGraph)
                     _cons((node, rest), restGraph)
                   end
-                  
+
                   (_, _, _, (node, rest) <| restGraph)  => begin
                       @match false = inEqualFunc(node, inNode)
                       restGraph = insertNodetoGraph(inNode, inVertex, inEqualFunc, restGraph)
@@ -522,7 +522,7 @@
 
          #= This function searches for a starting node in M
          all reachable nodes. Call with start node in M: allReachableNodes((start,{}),graph,eqFn). =#
-        function allReachableNodes(intmpstorage::Tuple{<:List{<:NodeType}, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{NodeType} 
+        function allReachableNodes(intmpstorage::Tuple{<:List{<:NodeType}, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::List{NodeType}
               local reachableNodes::List{NodeType} #= Is NONE() on error to prevent recursion =#
 
               @match SOME(reachableNodes) = allReachableNodesWork(intmpstorage, inGraph, inEqualFunc)
@@ -531,7 +531,7 @@
 
          #= This function searches for a starting node in M
          all reachable nodes. Call with start node in M: allReachableNodes((start,{}),graph,eqFn). =#
-        function allReachableNodesWork(intmpstorage::Tuple{<:List{<:NodeType}, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Option{List{NodeType}} 
+        function allReachableNodesWork(intmpstorage::Tuple{<:List{<:NodeType}, List{<:NodeType}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc) ::Option{List{NodeType}}
               local reachableNodes::Option{List{NodeType}} #= Is NONE() on error to prevent recursion =#
 
               reachableNodes = begin
@@ -546,19 +546,19 @@
                       L = listReverse(L)
                     SOME(L)
                   end
-                  
+
                   ((node <| M, L), _, _)  => begin
                       ListUtil.getMemberOnTrue(node, L, inEqualFunc)
                     allReachableNodesWork((M, L), inGraph, inEqualFunc)
                   end
-                  
+
                   ((node <| M, L), _, _)  => begin
                       L = _cons(node, L)
                       (_, edges) = findNodeInGraph(node, inGraph, inEqualFunc)
                       M = listAppend(edges, M)
                     allReachableNodesWork((M, L), inGraph, inEqualFunc)
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.allReachableNodes failed."), sourceInfo())
                       NONE()
@@ -586,7 +586,7 @@
         forbiddenColors[color[x]] <- ui
         color[ui ] <- min{c > 0 : forbiddenColors[c] = ui }
          =#
-        function partialDistance2color(toColorNodes::List{<:NodeType}, inforbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inColors::List{<:ModelicaInteger}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraphT::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inColored::Array{<:ModelicaInteger}, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::Array{ModelicaInteger} 
+        function partialDistance2color(toColorNodes::List{<:NodeType}, inforbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inColors::List{<:ModelicaInteger}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inGraphT::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inColored::Array{<:ModelicaInteger}, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::Array{ModelicaInteger}
               local outColored::Array{ModelicaInteger}
 
               outColored = begin
@@ -601,7 +601,7 @@
                   ( nil(), _, _, _, _, _, _, _)  => begin
                     inColored
                   end
-                  
+
                   (node <| rest, _, _, _, _, _, _, _)  => begin
                       index = arrayLength(inColored) - listLength(rest)
                       (_, nodes) = findNodeInGraph(node, inGraphT, inEqualFunc)
@@ -611,7 +611,7 @@
                       colored = partialDistance2color(rest, forbiddenColor, inColors, inGraph, inGraphT, colored, inEqualFunc, inPrintFunc)
                     colored
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.partialDistance2color failed."), sourceInfo())
                       fail()
@@ -621,7 +621,7 @@
           outColored
         end
 
-        function addForbiddenColors(inNode::NodeType, inNodes::List{<:NodeType}, inColored::Array{<:ModelicaInteger}, inForbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::Array{Option{List{NodeType}}} 
+        function addForbiddenColors(inNode::NodeType, inNodes::List{<:NodeType}, inColored::Array{<:ModelicaInteger}, inForbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::Array{Option{List{NodeType}}}
               local outForbiddenColor::Array{Option{List{NodeType}}}
 
               outForbiddenColor = begin
@@ -639,7 +639,7 @@
                   (_,  nil(), _, _, _, _, _)  => begin
                     inForbiddenColor
                   end
-                  
+
                   (_, node <| rest, _, forbiddenColor, _, _, _)  => begin
                       (_, nodes) = findNodeInGraph(node, inGraph, inEqualFunc)
                       indexes = ListUtil.map3(nodes, findIndexofNodeInGraph, inGraph, inEqualFunc, 1)
@@ -649,7 +649,7 @@
                       forbiddenColor1 = addForbiddenColors(inNode, rest, inColored, forbiddenColor, inGraph, inEqualFunc, inPrintFunc)
                     forbiddenColor1
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.addForbiddenColors failed."), sourceInfo())
                       fail()
@@ -659,14 +659,14 @@
           outForbiddenColor
         end
 
-        function getArrayElem(inIndex::ModelicaInteger, inArray::Array{<:Type_a}) ::Type_a 
+        function getArrayElem(inIndex::ModelicaInteger, inArray::Array{<:Type_a}) ::Type_a
               local outElem::Type_a
 
               outElem = arrayGet(inArray, inIndex)
           outElem
         end
 
-        function arrayUpdateListAppend(inIndex::ModelicaInteger, inArray::Array{<:Option{<:List{<:NodeType}}}, inNode::Option{<:List{<:NodeType}})  
+        function arrayUpdateListAppend(inIndex::ModelicaInteger, inArray::Array{<:Option{<:List{<:NodeType}}}, inNode::Option{<:List{<:NodeType}})
               local arrayElem::List{NodeType}
 
               _ = begin
@@ -676,7 +676,7 @@
                       arrayUpdate(inArray, inIndex, inNode)
                     ()
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.arrayUpdateListAppend failed."), sourceInfo())
                       fail()
@@ -685,14 +685,14 @@
               end
         end
 
-        function arrayElemetGtZero(inIndex::ModelicaInteger, inArray::Array{<:ModelicaInteger}) ::Bool 
+        function arrayElemetGtZero(inIndex::ModelicaInteger, inArray::Array{<:ModelicaInteger}) ::Bool
               local outBoolean::Bool
 
               outBoolean = intGt(arrayGet(inArray, inIndex), 0)
           outBoolean
         end
 
-        function arrayFindMinColorIndex(inForbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inNode::NodeType, inIndex::ModelicaInteger, inmaxIndex::ModelicaInteger, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::ModelicaInteger 
+        function arrayFindMinColorIndex(inForbiddenColor::Array{<:Option{<:List{<:NodeType}}}, inNode::NodeType, inIndex::ModelicaInteger, inmaxIndex::ModelicaInteger, inEqualFunc::EqualFunc, inPrintFunc::PrintFunc) ::ModelicaInteger
               local outColor::ModelicaInteger
 
               outColor = begin
@@ -703,13 +703,13 @@
                       @match NONE() = arrayGet(inForbiddenColor, inIndex)
                     inIndex
                   end
-                  
+
                   (_, _, _, _, _, _)  => begin
                       @match SOME(nodes) = arrayGet(inForbiddenColor, inIndex)
                       @shouldFail _ = ListUtil.getMemberOnTrue(inNode, nodes, inEqualFunc)
                     inIndex
                   end
-                  
+
                   _  => begin
                         @match SOME(nodes) = arrayGet(inForbiddenColor, inIndex)
                         ListUtil.getMemberOnTrue(inNode, nodes, inEqualFunc)
@@ -731,14 +731,14 @@
           outColor
         end
 
-        function printGraph(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inPrintFunc::NodeToString) ::String 
+        function printGraph(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inPrintFunc::NodeToString) ::String
               local outString::String
 
               outString = stringDelimitList(ListUtil.map1(inGraph, printNode, inPrintFunc), "\\n")
           outString
         end
 
-        function printNode(inNode::Tuple{<:NodeType, List{<:NodeType}}, inPrintFunc::NodeToString) ::String 
+        function printNode(inNode::Tuple{<:NodeType, List{<:NodeType}}, inPrintFunc::NodeToString) ::String
               local outString::String
 
               local node::NodeType
@@ -757,7 +757,7 @@
 
          #= This function prints an Integer Graph.
          Useful for debuging. =#
-        function printGraphInt(inGraph::List{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}})  
+        function printGraphInt(inGraph::List{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}})
               _ = begin
                   local node::ModelicaInteger
                   local edges::List{ModelicaInteger}
@@ -767,7 +767,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   (node, edges) <| restGraph  => begin
                       print("Node : " + intString(node) + " Edges: ")
                       strEdges = ListUtil.map(edges, intString)
@@ -783,7 +783,7 @@
 
          #= This function prints an Integer List Nodes.
          Useful for debuging. =#
-        function printNodesInt(inListNodes::List{<:ModelicaInteger}, inName::String)  
+        function printNodesInt(inListNodes::List{<:ModelicaInteger}, inName::String)
               _ = begin
                   local strNodes::List{String}
                 @match (inListNodes, inName) begin
@@ -791,7 +791,7 @@
                       print(inName + "\\n")
                     ()
                   end
-                  
+
                   (_, _)  => begin
                       print(inName + " : ")
                       strNodes = ListUtil.map(inListNodes, intString)
@@ -807,7 +807,7 @@
          #= This function searches for a starting node in M
          all reachabel nodes. Call with start nodes in M. The
          result is collected in L. =#
-        function allReachableNodesInt(intmpstorage::Tuple{<:List{<:ModelicaInteger}, List{<:ModelicaInteger}}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inMaxGraphNode::ModelicaInteger, inMaxNodexIndex::ModelicaInteger) ::List{ModelicaInteger} 
+        function allReachableNodesInt(intmpstorage::Tuple{<:List{<:ModelicaInteger}, List{<:ModelicaInteger}}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inMaxGraphNode::ModelicaInteger, inMaxNodexIndex::ModelicaInteger) ::List{ModelicaInteger}
               local reachableNodes::List{ModelicaInteger}
 
               reachableNodes = begin
@@ -820,7 +820,7 @@
                   (( nil(), L), _, _, _)  => begin
                     L
                   end
-                  
+
                   ((node <| M, L), _, _, _)  => begin
                       L = ListUtil.union(L, list(node))
                       @match false = intGe(node, inMaxGraphNode)
@@ -830,14 +830,14 @@
                       reachableNodes = allReachableNodesInt((M, L), inGraph, inMaxGraphNode, inMaxNodexIndex)
                     reachableNodes
                   end
-                  
+
                   ((node <| M, L), _, _, _)  => begin
                       L = ListUtil.union(L, list(node))
                       @match true = intGe(node, inMaxGraphNode)
                       reachableNodes = allReachableNodesInt((M, L), inGraph, inMaxGraphNode, inMaxNodexIndex)
                     reachableNodes
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("Graph.allReachableNodesInt failed."), sourceInfo())
                       fail()
@@ -857,12 +857,11 @@
         forbiddenColors[color[x]] <- ui
         color[ui ] <- min{c > 0 : forbiddenColors[c] = ui }
          =#
-        function partialDistance2colorInt(inGraphT::List{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inforbiddenColor::Array{<:ModelicaInteger}, inColors::List{<:ModelicaInteger}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inColored::Array{<:ModelicaInteger})  
+        function partialDistance2colorInt(inGraphT::List{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inforbiddenColor::Array{<:ModelicaInteger}, inColors::List{<:ModelicaInteger}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}}, inColored::Array{<:ModelicaInteger})
               local node::ModelicaInteger
               local color::ModelicaInteger
               local nodes::List{ModelicaInteger}
               local forbiddenColor::Array{ModelicaInteger}
-              local color::ModelicaInteger
               local restGraph::List{Tuple{ModelicaInteger, List{ModelicaInteger}}}
 
               try
@@ -877,7 +876,7 @@
               end
         end
 
-        function addForbiddenColorsInt(inNode::ModelicaInteger, nodes::List{<:ModelicaInteger}, inColored::Array{<:ModelicaInteger}, forbiddenColor::Array{<:ModelicaInteger}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}})  
+        function addForbiddenColorsInt(inNode::ModelicaInteger, nodes::List{<:ModelicaInteger}, inColored::Array{<:ModelicaInteger}, forbiddenColor::Array{<:ModelicaInteger}, inGraph::Array{<:Tuple{<:ModelicaInteger, List{<:ModelicaInteger}}})
               local indexes::List{ModelicaInteger}
 
               try
@@ -891,7 +890,7 @@
               end
         end
 
-        function updateForbiddenColorArrayInt(inIndexes::List{<:ModelicaInteger}, inColored::Array{<:ModelicaInteger}, inForbiddenColor::Array{<:ModelicaInteger}, inNode::ModelicaInteger)  
+        function updateForbiddenColorArrayInt(inIndexes::List{<:ModelicaInteger}, inColored::Array{<:ModelicaInteger}, inForbiddenColor::Array{<:ModelicaInteger}, inNode::ModelicaInteger)
               local colorIndex::ModelicaInteger
 
               for index in inIndexes
@@ -902,7 +901,7 @@
               end
         end
 
-        function arrayFindMinColorIndexInt(inForbiddenColor::Array{<:ModelicaInteger}, inNode::ModelicaInteger) ::ModelicaInteger 
+        function arrayFindMinColorIndexInt(inForbiddenColor::Array{<:ModelicaInteger}, inNode::ModelicaInteger) ::ModelicaInteger
               local outColor::ModelicaInteger = 1
 
               while true
@@ -917,7 +916,7 @@
 
          #= Removes any node for which the given function evaluates to false, as well as
            any edge pointing at that node. =#
-        function filterGraph(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inCondFunc::CondFunc) ::List{Tuple{NodeType, List{NodeType}}} 
+        function filterGraph(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, inCondFunc::CondFunc) ::List{Tuple{NodeType, List{NodeType}}}
               local outGraph::List{Tuple{NodeType, List{NodeType}}}
 
               outGraph = ListUtil.accumulateMapAccum1(inGraph, filterGraph2, inCondFunc)
@@ -925,7 +924,7 @@
         end
 
          #= Helper function to filterGraph. =#
-        function filterGraph2(inNode::Tuple{<:NodeType, List{<:NodeType}}, inCondFunc::CondFunc, inAccumGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}} 
+        function filterGraph2(inNode::Tuple{<:NodeType, List{<:NodeType}}, inCondFunc::CondFunc, inAccumGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}}
               local outNode::List{Tuple{NodeType, List{NodeType}}}
 
               outNode = begin
@@ -936,7 +935,7 @@
                       @match false = inCondFunc(node)
                     inAccumGraph
                   end
-                  
+
                   ((node, edges), _, _)  => begin
                       edges = ListUtil.filterOnTrue(edges, inCondFunc)
                     _cons((node, edges), inAccumGraph)
@@ -947,14 +946,14 @@
         end
 
          #= Merges the nodes of two different graphs. Needs an ordering function in order to be efficient. =#
-        function merge(graph1::List{<:Tuple{<:NodeType, List{<:NodeType}}}, graph2::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, compareFunc::CompareFunc) ::List{Tuple{NodeType, List{NodeType}}} 
+        function merge(graph1::List{<:Tuple{<:NodeType, List{<:NodeType}}}, graph2::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, compareFunc::CompareFunc) ::List{Tuple{NodeType, List{NodeType}}}
               local graph::List{Tuple{NodeType, List{NodeType}}}
 
               graph = merge2(ListUtil.sort(listAppend(graph1, graph2), compareFunc), eqFunc, nil)
           graph
         end
 
-        function merge2(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, inAcc::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}} 
+        function merge2(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, inAcc::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}}
               local graph::List{Tuple{NodeType, List{NodeType}}}
 
               graph = begin
@@ -969,11 +968,11 @@
                   ( nil(), _, _)  => begin
                     listReverse(inAcc)
                   end
-                  
+
                   (node <|  nil(), _, _)  => begin
                     listReverse(_cons(node, inAcc))
                   end
-                  
+
                   ((n1, e1) <| (n2, e2) <| rest, _, _)  => begin
                       b = eqFunc(n1, n2)
                       (node, rest) = merge3(b, n1, e1, n2, e2, rest, eqFunc)
@@ -984,7 +983,7 @@
           graph
         end
 
-        function merge3(b::Bool, n1::NodeType, e1::List{<:NodeType}, n2::NodeType, e2::List{<:NodeType}, rest::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc) ::Tuple{Tuple{NodeType, List{NodeType}}, List{Tuple{NodeType, List{NodeType}}}} 
+        function merge3(b::Bool, n1::NodeType, e1::List{<:NodeType}, n2::NodeType, e2::List{<:NodeType}, rest::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc) ::Tuple{Tuple{NodeType, List{NodeType}}, List{Tuple{NodeType, List{NodeType}}}}
               local outRest::List{Tuple{NodeType, List{NodeType}}}
               local elt::Tuple{NodeType, List{NodeType}}
 
@@ -993,7 +992,7 @@
                   (true, _, _, _, _, _, _)  => begin
                     ((n1, ListUtil.unionOnTrue(e1, e2, eqFunc)), rest)
                   end
-                  
+
                   (false, _, _, _, _, _, _)  => begin
                     ((n1, e1), _cons((n2, e2), rest))
                   end

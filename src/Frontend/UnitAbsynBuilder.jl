@@ -1,4 +1,4 @@
-  module UnitAbsynBuilder 
+  module UnitAbsynBuilder
 
 
     using MetaModelica
@@ -84,7 +84,7 @@
 
          #= traverses all dae variables and adjusts weights depending on defineunits defined
         in the scopes of the classLst for each variable =#
-        function registerUnitWeights(cache::FCore.Cache, env::FCore.Graph, dae::DAE.DAElist)  
+        function registerUnitWeights(cache::FCore.Cache, env::FCore.Graph, dae::DAE.DAElist)
               local paths::List{Absyn.Path}
               local du::List{SCode.Element}
 
@@ -95,7 +95,7 @@
                       @match false = Flags.getConfigBool(Flags.UNIT_CHECKING)
                     ()
                   end
-                  
+
                   (_, _, DAE.DAE(elementLst = elts))  => begin
                       paths = ListUtil.unionList(ListUtil.map(elts, DAEUtil.getClassList))
                       du = ListUtil.unionList(ListUtil.map1(paths, retrieveUnitsFromEnv, (cache, env)))
@@ -109,7 +109,7 @@
         end
 
          #= help function to registerUnitWeights =#
-        function retrieveUnitsFromEnv(p::Absyn.Path, tpl::Tuple{<:FCore.Cache, FCore.Graph}) ::List{SCode.Element} 
+        function retrieveUnitsFromEnv(p::Absyn.Path, tpl::Tuple{<:FCore.Cache, FCore.Graph}) ::List{SCode.Element}
               local du::List{SCode.Element}
 
               du = begin
@@ -123,7 +123,7 @@
                       @match FCore.N(data = FCore.DU(du)) = FNode.fromRef(r)
                     du
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -135,14 +135,14 @@
         end
 
          #= help function to registerUnitWeightForClass =#
-        function registerUnitWeightDefineunits(du::List{<:SCode.Element})  
+        function registerUnitWeightDefineunits(du::List{<:SCode.Element})
               _ = begin
                 @matchcontinue du begin
                    nil()  => begin
                       registerUnitWeightDefineunits2(list(SCode.DEFINEUNIT("m", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("kg", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("s", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("A", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("k", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("mol", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("cd", SCode.PUBLIC(), NONE(), NONE()), SCode.DEFINEUNIT("rad", SCode.PUBLIC(), SOME("m/m"), NONE()), SCode.DEFINEUNIT("sr", SCode.PUBLIC(), SOME("m2/m2"), NONE()), SCode.DEFINEUNIT("Hz", SCode.PUBLIC(), SOME("s-1"), SOME(0.8)), SCode.DEFINEUNIT("N", SCode.PUBLIC(), SOME("m.kg.s-2"), NONE()), SCode.DEFINEUNIT("Pa", SCode.PUBLIC(), SOME("N/m2"), NONE()), SCode.DEFINEUNIT("W", SCode.PUBLIC(), SOME("J/s"), NONE()), SCode.DEFINEUNIT("J", SCode.PUBLIC(), SOME("N.m"), NONE()), SCode.DEFINEUNIT("C", SCode.PUBLIC(), SOME("s.A"), NONE()), SCode.DEFINEUNIT("V", SCode.PUBLIC(), SOME("W/A"), NONE()), SCode.DEFINEUNIT("F", SCode.PUBLIC(), SOME("C/V"), NONE()), SCode.DEFINEUNIT("Ohm", SCode.PUBLIC(), SOME("V/A"), NONE()), SCode.DEFINEUNIT("S", SCode.PUBLIC(), SOME("A/V"), NONE()), SCode.DEFINEUNIT("Wb", SCode.PUBLIC(), SOME("V.s"), NONE()), SCode.DEFINEUNIT("T", SCode.PUBLIC(), SOME("Wb/m2"), NONE()), SCode.DEFINEUNIT("H", SCode.PUBLIC(), SOME("Wb/A"), NONE()), SCode.DEFINEUNIT("lm", SCode.PUBLIC(), SOME("cd.sr"), NONE()), SCode.DEFINEUNIT("lx", SCode.PUBLIC(), SOME("lm/m2"), NONE()), SCode.DEFINEUNIT("Bq", SCode.PUBLIC(), SOME("s-1"), SOME(0.8)), SCode.DEFINEUNIT("Gy", SCode.PUBLIC(), SOME("J/kg"), NONE()), SCode.DEFINEUNIT("Sv", SCode.PUBLIC(), SOME("cd.sr"), NONE()), SCode.DEFINEUNIT("kat", SCode.PUBLIC(), SOME("s-1.mol"), NONE())))
                     ()
                   end
-                  
+
                   _  => begin
                         registerUnitWeightDefineunits2(du)
                       ()
@@ -154,7 +154,7 @@
         end
 
          #= help function to registerUnitWeightDefineunits =#
-        function registerUnitWeightDefineunits2(idu::List{<:SCode.Element})  
+        function registerUnitWeightDefineunits2(idu::List{<:SCode.Element})
               _ = begin
                   local n::String
                   local w::ModelicaReal
@@ -165,17 +165,17 @@
                       registerUnitWeightDefineunits2(du)
                     ()
                   end
-                  
+
                   SCode.DEFINEUNIT(weight = NONE()) <| du  => begin
                       registerUnitWeightDefineunits2(du)
                     ()
                   end
-                  
+
                   _ <| du  => begin
                       registerUnitWeightDefineunits2(du)
                     ()
                   end
-                  
+
                    nil()  => begin
                     ()
                   end
@@ -187,7 +187,7 @@
         Note: this requires that instantiation is done on a 'total program', so only defineunits that
         are referenced in the model are picked up
          =#
-        function registerUnits(prg::Absyn.Program)  
+        function registerUnits(prg::Absyn.Program)
               _ = begin
                 @matchcontinue prg begin
                   _  => begin
@@ -195,7 +195,7 @@
                       (_, _, _) = AbsynUtil.traverseClasses(prg, NONE(), registerUnitInClass, 0, false)
                     ()
                   end
-                  
+
                   _  => begin
                         @match false = Flags.getConfigBool(Flags.UNIT_CHECKING)
                       ()
@@ -207,7 +207,7 @@
         end
 
          #=  help function to registerUnits =#
-        function registerUnitInClass(inTpl::Tuple{<:Absyn.Class, Option{<:Absyn.Path}, ModelicaInteger}) ::Tuple{Absyn.Class, Option{Absyn.Path}, ModelicaInteger} 
+        function registerUnitInClass(inTpl::Tuple{<:Absyn.Class, Option{<:Absyn.Path}, ModelicaInteger}) ::Tuple{Absyn.Class, Option{Absyn.Path}, ModelicaInteger}
               local outTpl::Tuple{Absyn.Class, Option{Absyn.Path}, ModelicaInteger}
 
               outTpl = begin
@@ -224,7 +224,7 @@
                       registerDefineunits(defunits)
                     (cl, pa, i)
                   end
-                  
+
                   (cl, pa, i)  => begin
                     (cl, pa, i)
                   end
@@ -234,7 +234,7 @@
         end
 
          #= help function to registerUnitInClass =#
-        function registerDefineunits(elts::List{<:Absyn.Element})  
+        function registerDefineunits(elts::List{<:Absyn.Element})
               _ = begin
                   local name::String
                   local args::List{Absyn.NamedArg}
@@ -246,7 +246,7 @@
                       registerDefineunits2(list(Absyn.DEFINEUNIT("m", nil), Absyn.DEFINEUNIT("kg", nil), Absyn.DEFINEUNIT("s", nil), Absyn.DEFINEUNIT("A", nil), Absyn.DEFINEUNIT("k", nil), Absyn.DEFINEUNIT("mol", nil), Absyn.DEFINEUNIT("cd", nil), Absyn.DEFINEUNIT("rad", list(Absyn.NAMEDARG("exp", Absyn.STRING("m/m")))), Absyn.DEFINEUNIT("sr", list(Absyn.NAMEDARG("exp", Absyn.STRING("m2/m2")))), Absyn.DEFINEUNIT("Hz", list(Absyn.NAMEDARG("exp", Absyn.STRING("s-1")), Absyn.NAMEDARG("weight", Absyn.REAL("0.8")))), Absyn.DEFINEUNIT("N", list(Absyn.NAMEDARG("exp", Absyn.STRING("m.kg.s-2")))), Absyn.DEFINEUNIT("Pa", list(Absyn.NAMEDARG("exp", Absyn.STRING("N/m2")))), Absyn.DEFINEUNIT("W", list(Absyn.NAMEDARG("exp", Absyn.STRING("J/s")))), Absyn.DEFINEUNIT("J", list(Absyn.NAMEDARG("exp", Absyn.STRING("N.m")))), Absyn.DEFINEUNIT("C", list(Absyn.NAMEDARG("exp", Absyn.STRING("s.A")))), Absyn.DEFINEUNIT("V", list(Absyn.NAMEDARG("exp", Absyn.STRING("W/A")))), Absyn.DEFINEUNIT("F", list(Absyn.NAMEDARG("exp", Absyn.STRING("C/V")))), Absyn.DEFINEUNIT("Ohm", list(Absyn.NAMEDARG("exp", Absyn.STRING("V/A")))), Absyn.DEFINEUNIT("S", list(Absyn.NAMEDARG("exp", Absyn.STRING("A/V")))), Absyn.DEFINEUNIT("Wb", list(Absyn.NAMEDARG("exp", Absyn.STRING("V.s")))), Absyn.DEFINEUNIT("T", list(Absyn.NAMEDARG("exp", Absyn.STRING("Wb/m2")))), Absyn.DEFINEUNIT("H", list(Absyn.NAMEDARG("exp", Absyn.STRING("Wb/A")))), Absyn.DEFINEUNIT("lm", list(Absyn.NAMEDARG("exp", Absyn.STRING("cd.sr")))), Absyn.DEFINEUNIT("lx", list(Absyn.NAMEDARG("exp", Absyn.STRING("lm/m2")))), Absyn.DEFINEUNIT("Bq", list(Absyn.NAMEDARG("exp", Absyn.STRING("s-1")), Absyn.NAMEDARG("weight", Absyn.REAL("0.8")))), Absyn.DEFINEUNIT("Gy", list(Absyn.NAMEDARG("exp", Absyn.STRING("J/kg")))), Absyn.DEFINEUNIT("Sv", list(Absyn.NAMEDARG("exp", Absyn.STRING("cd.sr")))), Absyn.DEFINEUNIT("kat", list(Absyn.NAMEDARG("exp", Absyn.STRING("s-1.mol"))))))
                     ()
                   end
-                  
+
                   _  => begin
                         registerDefineunits2(elts)
                       ()
@@ -256,7 +256,7 @@
         end
 
          #= help function to registerUnitInClass =#
-        function registerDefineunits2(elts::List{<:Absyn.Element})  
+        function registerDefineunits2(elts::List{<:Absyn.Element})
               _ = begin
                   local exp::String
                   local name::String
@@ -268,21 +268,21 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   du && Absyn.DEFINEUNIT(__) <| rest  => begin
                       @match list(SCode.DEFINEUNIT(name, _, SOME(exp), _)) = AbsynToSCode.translateElement(du, SCode.PUBLIC())
                       UnitParserExt.addDerived(name, exp)
                       registerDefineunits2(rest)
                     ()
                   end
-                  
+
                   du && Absyn.DEFINEUNIT(__) <| rest  => begin
                       @match list(SCode.DEFINEUNIT(name, _, NONE(), _)) = AbsynToSCode.translateElement(du, SCode.PUBLIC())
                       UnitParserExt.addBase(name)
                       registerDefineunits2(rest)
                     ()
                   end
-                  
+
                   _  => begin
                         print("registerDefineunits failed\\n")
                       fail()
@@ -300,7 +300,7 @@
         end
 
          #= Adds a unit to the UnitAbsyn.Store =#
-        function add(unit::UnitAbsyn.Unit, ist::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, ModelicaInteger} 
+        function add(unit::UnitAbsyn.Unit, ist::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, ModelicaInteger}
               local index::ModelicaInteger
               local outSt::UnitAbsyn.Store
 
@@ -316,7 +316,7 @@
                       (st, index) = add(unit, st)
                     (st, index)
                   end
-                  
+
                   (_, UnitAbsyn.STORE(storeVector = vector, numElts = numElts))  => begin
                       newIndx = numElts + 1
                       vector = arrayUpdate(vector, newIndx, SOME(unit))
@@ -328,17 +328,17 @@
         end
 
          #=    =#
-        function updateInstStore(store::UnitAbsyn.InstStore, st::UnitAbsyn.Store) ::UnitAbsyn.InstStore 
+        function updateInstStore(store::UnitAbsyn.InstStore, st::UnitAbsyn.Store) ::UnitAbsyn.InstStore
               local outStore::UnitAbsyn.InstStore
 
               outStore = begin
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local res::Option{UnitAbsyn.UnitCheckResult}
                 @match (store, st) begin
                   (UnitAbsyn.INSTSTORE(_, ht, res), _)  => begin
                     UnitAbsyn.INSTSTORE(st, ht, res)
                   end
-                  
+
                   (UnitAbsyn.NOSTORE(__), _)  => begin
                     UnitAbsyn.NOSTORE()
                   end
@@ -350,7 +350,7 @@
          #= Expands store to make room for more entries.
         Expansion factor: 1.4
          =#
-        function expandStore(st::UnitAbsyn.Store) ::UnitAbsyn.Store 
+        function expandStore(st::UnitAbsyn.Store) ::UnitAbsyn.Store
               local outSt::UnitAbsyn.Store
 
               outSt = begin
@@ -369,7 +369,7 @@
         end
 
          #= Updates  unit at index in UnitAbsyn.Store =#
-        function update(unit::UnitAbsyn.Unit, index::ModelicaInteger, st::UnitAbsyn.Store) ::UnitAbsyn.Store 
+        function update(unit::UnitAbsyn.Unit, index::ModelicaInteger, st::UnitAbsyn.Store) ::UnitAbsyn.Store
               local outSt::UnitAbsyn.Store
 
               outSt = begin
@@ -380,7 +380,7 @@
                       vector = arrayUpdate(vector, index, SOME(unit)) #= destroys  =#
                     UnitAbsyn.STORE(vector, indx)
                   end
-                  
+
                   _  => begin
                         print("storing unit at index ")
                         print(intString(index))
@@ -393,7 +393,7 @@
         end
 
          #= finds a unit in the UnitAbsyn.Store given an index =#
-        function find(index::ModelicaInteger, st::UnitAbsyn.Store) ::UnitAbsyn.Unit 
+        function find(index::ModelicaInteger, st::UnitAbsyn.Store) ::UnitAbsyn.Unit
               local unit::UnitAbsyn.Unit
 
               unit = begin
@@ -404,7 +404,7 @@
                       @match SOME(unit) = vector[index]
                     unit
                   end
-                  
+
                   _  => begin
                         print(" finding store at index ")
                         print(intString(index))
@@ -417,7 +417,7 @@
         end
 
          #= Retrives the Store from an InstStore =#
-        function instGetStore(store::UnitAbsyn.InstStore) ::UnitAbsyn.Store 
+        function instGetStore(store::UnitAbsyn.InstStore) ::UnitAbsyn.Store
               local st::UnitAbsyn.Store
 
               st = begin
@@ -425,7 +425,7 @@
                   UnitAbsyn.INSTSTORE(st, _, _)  => begin
                     st
                   end
-                  
+
                   UnitAbsyn.NOSTORE(__)  => begin
                     emptyStore()
                   end
@@ -435,7 +435,7 @@
         end
 
          #= returns an empty InstStore =#
-        function emptyInstStore() ::UnitAbsyn.InstStore 
+        function emptyInstStore() ::UnitAbsyn.InstStore
               local st::UnitAbsyn.InstStore
 
               st = emptyInstStore2(Flags.getConfigBool(Flags.UNIT_CHECKING))
@@ -443,19 +443,19 @@
         end
 
          #= returns an empty InstStore =#
-        function emptyInstStore2(wantInstStore::Bool) ::UnitAbsyn.InstStore 
+        function emptyInstStore2(wantInstStore::Bool) ::UnitAbsyn.InstStore
               local st::UnitAbsyn.InstStore
 
               st = begin
                   local s::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @match wantInstStore begin
                   true  => begin
                       s = emptyStore()
                       ht = HashTable.emptyHashTable()
                     UnitAbsyn.INSTSTORE(s, ht, NONE())
                   end
-                  
+
                   _  => begin
                       UnitAbsyn.noStore
                   end
@@ -465,7 +465,7 @@
         end
 
          #= Returns an empty store with 10 empty array elements =#
-        function emptyStore() ::UnitAbsyn.Store 
+        function emptyStore() ::UnitAbsyn.Store
               local st::UnitAbsyn.Store
 
               local vector::Array{Option{UnitAbsyn.Unit}}
@@ -476,12 +476,12 @@
         end
 
          #= print the terms to stdout =#
-        function printTerms(terms::UnitAbsyn.UnitTerms)  
+        function printTerms(terms::UnitAbsyn.UnitTerms)
               print(printTermsStr(terms))
         end
 
          #= print the terms to a string =#
-        function printTermsStr(terms::UnitAbsyn.UnitTerms) ::String 
+        function printTermsStr(terms::UnitAbsyn.UnitTerms) ::String
               local str::String
 
               str = "{" + stringDelimitList(ListUtil.map(terms, printTermStr), ",") + "}"
@@ -489,7 +489,7 @@
         end
 
          #= print one term to a string =#
-        function printTermStr(term::UnitAbsyn.UnitTerm) ::String 
+        function printTermStr(term::UnitAbsyn.UnitTerm) ::String
               local str::String
 
               str = begin
@@ -505,32 +505,32 @@
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.SUB(_, _, e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.MUL(_, _, e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.DIV(_, _, e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.EQN(_, _, e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.LOC(_, e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
                   end
-                  
+
                   UnitAbsyn.POW(_, MMath.RATIONAL(_, _), e)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                     s1
@@ -541,10 +541,10 @@
         end
 
          #= prints the inst store to stdout =#
-        function printInstStore(st::UnitAbsyn.InstStore)  
+        function printInstStore(st::UnitAbsyn.InstStore)
               _ = begin
                   local s::UnitAbsyn.Store
-                  local h::HashTable.HashTable
+                  local h::HashTable.HashTableType
                 @match st begin
                   UnitAbsyn.INSTSTORE(s, h, _)  => begin
                       print("instStore, s:")
@@ -553,7 +553,7 @@
                       BaseHashTable.dumpHashTable(h)
                     ()
                   end
-                  
+
                   UnitAbsyn.NOSTORE(__)  => begin
                     ()
                   end
@@ -562,7 +562,7 @@
         end
 
          #= prints the store to stdout =#
-        function printStore(st::UnitAbsyn.Store)  
+        function printStore(st::UnitAbsyn.Store)
               _ = begin
                   local vector::Array{Option{UnitAbsyn.Unit}}
                   local indx::ModelicaInteger
@@ -578,7 +578,7 @@
         end
 
          #= help function to printStore =#
-        function printStore2(lst::List{<:Option{<:UnitAbsyn.Unit}}, indx::ModelicaInteger)  
+        function printStore2(lst::List{<:Option{<:UnitAbsyn.Unit}}, indx::ModelicaInteger)
               _ = begin
                   local unit::UnitAbsyn.Unit
                   local rest::List{Option{UnitAbsyn.Unit}}
@@ -586,7 +586,7 @@
                   ( nil(), _)  => begin
                     ()
                   end
-                  
+
                   (SOME(unit) <| rest, _)  => begin
                       print(intString(indx))
                       print("->")
@@ -595,7 +595,7 @@
                       printStore2(rest, indx + 1)
                     ()
                   end
-                  
+
                   (NONE() <| _, _)  => begin
                     ()
                   end
@@ -604,7 +604,7 @@
         end
 
          #= prints a unit to stdout (only for debugging) =#
-        function printUnit(unit::UnitAbsyn.Unit)  
+        function printUnit(unit::UnitAbsyn.Unit)
               _ = begin
                   local typeparams::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
                   local baseunits::List{MMath.Rational}
@@ -619,7 +619,7 @@
                       print("]")
                     ()
                   end
-                  
+
                   UnitAbsyn.SPECIFIED(UnitAbsyn.SPECUNIT(typeparams, baseunits))  => begin
                       print(stringDelimitList(ListUtil.map(typeparams, printTypeParameterStr), ","))
                       print(printBaseUnitsStr(baseunits))
@@ -628,7 +628,7 @@
                       print("]")
                     ()
                   end
-                  
+
                   UnitAbsyn.UNSPECIFIED(__)  => begin
                       print("Unspecified")
                     ()
@@ -638,7 +638,7 @@
         end
 
          #= help function to printUnit =#
-        function printBaseUnitsStr(lst::List{<:MMath.Rational}) ::String 
+        function printBaseUnitsStr(lst::List{<:MMath.Rational}) ::String
               local str::String
 
               str = begin
@@ -651,11 +651,11 @@
                       str = "m^(" + intString(i1) + "/" + intString(i2) + ")" + "s^(" + intString(i3) + "/" + intString(i4) + ")"
                     str
                   end
-                  
+
                    nil()  => begin
                     ""
                   end
-                  
+
                   _  => begin
                       "printBaseUnitsStr failed len:" + intString(listLength(lst)) + "\\n"
                   end
@@ -665,7 +665,7 @@
         end
 
          #= help function to printUnit =#
-        function printTypeParameterStr(typeParam::Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}) ::String 
+        function printTypeParameterStr(typeParam::Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}) ::String
               local str::String
 
               str = begin
@@ -679,12 +679,12 @@
                       str = name + "[indx =" + intString(indx) + "]"
                     str
                   end
-                  
+
                   (MMath.RATIONAL(i1, 1), UnitAbsyn.TYPEPARAMETER(name, indx))  => begin
                       str = name + "^" + intString(i1) + "[indx=" + intString(indx) + "]"
                     str
                   end
-                  
+
                   (MMath.RATIONAL(i1, i2), UnitAbsyn.TYPEPARAMETER(name, indx))  => begin
                       str = name + "^(" + intString(i1) + "/" + intString(i2) + ")" + "[indx=" + intString(indx) + "]"
                     str
@@ -695,7 +695,7 @@
         end
 
          #= splits a list of Rationals into a list of numerators and denominators =#
-        function splitRationals(inRationals::List{<:MMath.Rational}) ::Tuple{List{ModelicaInteger}, List{ModelicaInteger}} 
+        function splitRationals(inRationals::List{<:MMath.Rational}) ::Tuple{List{ModelicaInteger}, List{ModelicaInteger}}
               local denoms::List{ModelicaInteger}
               local nums::List{ModelicaInteger}
 
@@ -707,7 +707,7 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   MMath.RATIONAL(i1, i2) <| rationals  => begin
                       (nums, denoms) = splitRationals(rationals)
                     (_cons(i1, nums), _cons(i2, denoms))
@@ -718,7 +718,7 @@
         end
 
          #= joins a lists of numerators and denominators into list of Rationals =#
-        function joinRationals(inums::List{<:ModelicaInteger}, idenoms::List{<:ModelicaInteger}) ::List{MMath.Rational} 
+        function joinRationals(inums::List{<:ModelicaInteger}, idenoms::List{<:ModelicaInteger}) ::List{MMath.Rational}
               local rationals::List{MMath.Rational}
 
               rationals = begin
@@ -730,7 +730,7 @@
                   ( nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (i1 <| nums, i2 <| denoms)  => begin
                       rationals = joinRationals(nums, denoms)
                     _cons(MMath.RATIONAL(i1, i2), rationals)
@@ -741,7 +741,7 @@
         end
 
          #= creates type parameter lists from list of numerators , denominators and typeparameter names =#
-        function joinTypeParams(inums::List{<:ModelicaInteger}, idenoms::List{<:ModelicaInteger}, itpstrs::List{<:String}, funcInstIdOpt::Option{<:ModelicaInteger}) ::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}} 
+        function joinTypeParams(inums::List{<:ModelicaInteger}, idenoms::List{<:ModelicaInteger}, itpstrs::List{<:String}, funcInstIdOpt::Option{<:ModelicaInteger}) ::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
               local typeParams::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
 
               typeParams = begin
@@ -756,7 +756,7 @@
                   ( nil(),  nil(),  nil(), _)  => begin
                     nil
                   end
-                  
+
                   (i1 <| nums, i2 <| denoms, tpParam <| tpstrs, _)  => begin
                       typeParams = joinTypeParams(nums, denoms, tpstrs, funcInstIdOpt)
                       s = Util.stringOption(Util.applyOption(funcInstIdOpt, intString))
@@ -769,7 +769,7 @@
         end
 
          #= splits type parameter lists into numerators, denominators and typeparameter names =#
-        function splitTypeParams(iTypeParams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}) ::Tuple{List{ModelicaInteger}, List{ModelicaInteger}, List{String}} 
+        function splitTypeParams(iTypeParams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}) ::Tuple{List{ModelicaInteger}, List{ModelicaInteger}, List{String}}
               local tpstrs::List{String}
               local denoms::List{ModelicaInteger}
               local nums::List{ModelicaInteger}
@@ -783,7 +783,7 @@
                    nil()  => begin
                     (nil, nil, nil)
                   end
-                  
+
                   (MMath.RATIONAL(i1, i2), UnitAbsyn.TYPEPARAMETER(tpParam, _)) <| typeParams  => begin
                       (nums, denoms, tpstrs) = splitTypeParams(typeParams)
                     (_cons(i1, nums), _cons(i2, denoms), _cons(tpParam, tpstrs))
@@ -795,20 +795,20 @@
 
          #= builds unit terms and stores for a DAE. It also returns a hashtable that maps
         variable names to store locations. =#
-        function instBuildUnitTerms(env::FCore.Graph, dae::DAE.DAElist, compDae::DAE.DAElist #= to collect variable bindings =#, store::UnitAbsyn.InstStore) ::Tuple{UnitAbsyn.InstStore, UnitAbsyn.UnitTerms} 
+        function instBuildUnitTerms(env::FCore.Graph, dae::DAE.DAElist, compDae::DAE.DAElist #= to collect variable bindings =#, store::UnitAbsyn.InstStore) ::Tuple{UnitAbsyn.InstStore, UnitAbsyn.UnitTerms}
               local terms::UnitAbsyn.UnitTerms
               local outStore::UnitAbsyn.InstStore
 
               (outStore, terms) = begin
                   local st::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local terms2::UnitAbsyn.UnitTerms
                   local res::Option{UnitAbsyn.UnitCheckResult}
                 @matchcontinue (env, dae, compDae, store) begin
                   (_, _, _, UnitAbsyn.NOSTORE(__))  => begin
                     (UnitAbsyn.NOSTORE(), nil)
                   end
-                  
+
                   (_, _, _, UnitAbsyn.INSTSTORE(st, ht, res))  => begin
                       (terms, st) = buildTerms(env, dae, ht, st)
                       (terms2, st) = buildTerms(env, compDae, ht, st) #= to get bindings of scalar variables =#
@@ -817,7 +817,7 @@
                       st = createTypeParameterLocations(st)
                     (UnitAbsyn.INSTSTORE(st, ht, res), terms)
                   end
-                  
+
                   _  => begin
                         print("instBuildUnitTerms failed!!\\n")
                       fail()
@@ -835,8 +835,8 @@
 
          #= builds unit terms and stores for a DAE. It also returns a hashtable that maps
         variable names to store locations. =#
-        function buildUnitTerms(env::FCore.Graph, dae::DAE.DAElist) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store, HashTable.HashTable} 
-              local ht::HashTable.HashTable
+        function buildUnitTerms(env::FCore.Graph, dae::DAE.DAElist) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store, HashTable.HashTableType}
+              local ht::HashTable.HashTableType
               local store::UnitAbsyn.Store
               local terms::UnitAbsyn.UnitTerms
 
@@ -847,12 +847,12 @@
         end
 
          #= Called when instantiating a Real class =#
-        function instAddStore(istore::UnitAbsyn.InstStore, itp::DAE.Type, cr::DAE.ComponentRef) ::UnitAbsyn.InstStore 
+        function instAddStore(istore::UnitAbsyn.InstStore, itp::DAE.Type, cr::DAE.ComponentRef) ::UnitAbsyn.InstStore
               local outStore::UnitAbsyn.InstStore
 
               outStore = begin
                   local st::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local unitStr::String
                   local unit::UnitAbsyn.Unit
                   local indx::ModelicaInteger
@@ -864,7 +864,7 @@
                   (UnitAbsyn.NOSTORE(__), _, _)  => begin
                     istore
                   end
-                  
+
                   (UnitAbsyn.INSTSTORE(st, ht, res), DAE.T_REAL(varLst = varLst), _)  => begin
                       for v in varLst
                         _ = begin
@@ -879,10 +879,10 @@
                                 (st, indx) = add(unit, st)
                                 ht = BaseHashTable.add((cr, indx), ht)
                                 outStore = UnitAbsyn.INSTSTORE(st, ht, res)
-                                return 
+                                return
                               ()
                             end
-                            
+
                             _  => begin
                                 ()
                             end
@@ -893,11 +893,11 @@
                       ht = BaseHashTable.add((cr, indx), ht)
                     UnitAbsyn.INSTSTORE(st, ht, res)
                   end
-                  
+
                   (store, DAE.T_SUBTYPE_BASIC(complexType = tp), _)  => begin
                     instAddStore(store, tp, cr)
                   end
-                  
+
                   _  => begin
                       istore
                   end
@@ -907,7 +907,7 @@
         end
 
          #= return the number of elements of the store =#
-        function storeSize(store::UnitAbsyn.Store) ::ModelicaInteger 
+        function storeSize(store::UnitAbsyn.Store) ::ModelicaInteger
               local size::ModelicaInteger
 
               size = begin
@@ -922,7 +922,7 @@
 
          #= for each unique type parameter, create an UNSPECIFIED unit
         and add to the store. =#
-        function createTypeParameterLocations(store::UnitAbsyn.Store) ::UnitAbsyn.Store 
+        function createTypeParameterLocations(store::UnitAbsyn.Store) ::UnitAbsyn.Store
               local outStore::UnitAbsyn.Store
 
               local nextElement::ModelicaInteger
@@ -935,7 +935,7 @@
         end
 
          #=  adds n unspecified =#
-        function addUnspecifiedStores(n::ModelicaInteger, istore::UnitAbsyn.Store) ::UnitAbsyn.Store 
+        function addUnspecifiedStores(n::ModelicaInteger, istore::UnitAbsyn.Store) ::UnitAbsyn.Store
               local outStore::UnitAbsyn.Store
 
               outStore = begin
@@ -944,13 +944,13 @@
                   (0, store)  => begin
                     store
                   end
-                  
+
                   (_, _)  => begin
                       @match true = n < 0
                       print("addUnspecifiedStores n < 0!\\n")
                     fail()
                   end
-                  
+
                   (_, store)  => begin
                       @match true = n > 0
                       (store, _) = add(UnitAbsyn.UNSPECIFIED(), store)
@@ -963,9 +963,9 @@
         end
 
          #= help function =#
-        function createTypeParameterLocations2(istore::UnitAbsyn.Store, iht::HashTable.HashTable, i::ModelicaInteger #= iterated =#, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Store, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations2(istore::UnitAbsyn.Store, iht::HashTable.HashTableType, i::ModelicaInteger #= iterated =#, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType, ModelicaInteger}
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt, outNextElt) = begin
@@ -973,14 +973,14 @@
                   local vect::Array{Option{UnitAbsyn.Unit}}
                   local unit::UnitAbsyn.Unit
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                 @matchcontinue (istore, iht, i, inextElt) begin
                   (store && UnitAbsyn.STORE(_, numElts), ht, _, nextElt)  => begin
                       @match true = i > numElts
                     (store, ht, nextElt)
                   end
-                  
+
                   (UnitAbsyn.STORE(vect, numElts), ht, _, nextElt)  => begin
                       @match SOME(unit) = vect[i]
                       (unit, ht, nextElt) = createTypeParameterLocations3(unit, ht, nextElt)
@@ -988,7 +988,7 @@
                       (store, ht, nextElt) = createTypeParameterLocations2(UnitAbsyn.STORE(vect, numElts), ht, i + 1, nextElt)
                     (store, ht, nextElt)
                   end
-                  
+
                   (UnitAbsyn.STORE(vect, numElts), ht, _, nextElt)  => begin
                       (store, ht, nextElt) = createTypeParameterLocations2(UnitAbsyn.STORE(vect, numElts), ht, i + 1, nextElt)
                     (store, ht, nextElt)
@@ -999,15 +999,15 @@
         end
 
          #= help function to createTypeParameterLocations2 =#
-        function createTypeParameterLocations3(unit::UnitAbsyn.Unit, iht::HashTable.HashTable, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Unit, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations3(unit::UnitAbsyn.Unit, iht::HashTable.HashTableType, inextElt::ModelicaInteger) ::Tuple{UnitAbsyn.Unit, HashTable.HashTableType, ModelicaInteger}
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outUnit::UnitAbsyn.Unit
 
               (outUnit, outHt, outNextElt) = begin
                   local params::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
                   local units::List{MMath.Rational}
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                    #=  Only succeeds for units with type parameters
                    =#
@@ -1022,9 +1022,9 @@
         end
 
          #= help function to createTypeParameterLocations3 =#
-        function createTypeParameterLocations4(iparams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}, iht::HashTable.HashTable, inextElt::ModelicaInteger) ::Tuple{List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}, HashTable.HashTable, ModelicaInteger} 
+        function createTypeParameterLocations4(iparams::List{<:Tuple{<:MMath.Rational, UnitAbsyn.TypeParameter}}, iht::HashTable.HashTableType, inextElt::ModelicaInteger) ::Tuple{List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}, HashTable.HashTableType, ModelicaInteger}
               local outNextElt::ModelicaInteger
-              local outHt::HashTable.HashTable
+              local outHt::HashTable.HashTableType
               local outParams::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
 
               (outParams, outHt, outNextElt) = begin
@@ -1034,32 +1034,32 @@
                   local param::Tuple{MMath.Rational, UnitAbsyn.TypeParameter}
                   local cref_::DAE.ComponentRef
                   local params::List{Tuple{MMath.Rational, UnitAbsyn.TypeParameter}}
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local nextElt::ModelicaInteger
                 @matchcontinue (iparams, iht, inextElt) begin
                   ( nil(), ht, nextElt)  => begin
                     (nil, ht, nextElt)
                   end
-                  
+
                   ((r, UnitAbsyn.TYPEPARAMETER(name, 0)) <| params, ht, nextElt)  => begin
                       cref_ = ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil)
                       indx = BaseHashTable.get(cref_, ht)
                       (params, ht, nextElt) = createTypeParameterLocations4(params, ht, nextElt)
                     (_cons((r, UnitAbsyn.TYPEPARAMETER(name, indx)), params), ht, nextElt)
                   end
-                  
+
                   ((r, UnitAbsyn.TYPEPARAMETER(name, 0)) <| params, ht, nextElt)  => begin
                       cref_ = ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil)
                       ht = BaseHashTable.add((cref_, nextElt), ht)
                       (params, ht, nextElt) = createTypeParameterLocations4(params, ht, nextElt)
                     (_cons((r, UnitAbsyn.TYPEPARAMETER(name, nextElt)), params), ht, nextElt + 1)
                   end
-                  
+
                   (param <| params, ht, nextElt)  => begin
                       (params, ht, nextElt) = createTypeParameterLocations4(params, ht, nextElt)
                     (_cons(param, params), ht, nextElt)
                   end
-                  
+
                   _  => begin
                         print("createTypeParameterLocations4 failed\\n")
                       fail()
@@ -1070,8 +1070,8 @@
         end
 
          #= builds the stores and creates a hashtable from variable names to store locations =#
-        function buildStores(dae::DAE.DAElist) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local ht::HashTable.HashTable
+        function buildStores(dae::DAE.DAElist) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType}
+              local ht::HashTable.HashTableType
               local store::UnitAbsyn.Store
 
               (store, ht) = buildStores2(dae, emptyStore(), HashTable.emptyHashTable()) #= Build stores from variables =#
@@ -1080,7 +1080,7 @@
         end
 
          #= builds the unit terms from DAE elements (equations) =#
-        function buildTerms(env::FCore.Graph, dae::DAE.DAElist, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store} 
+        function buildTerms(env::FCore.Graph, dae::DAE.DAElist, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local terms::UnitAbsyn.UnitTerms
 
@@ -1101,7 +1101,7 @@
                   (_, DAE.DAE(elementLst =  nil()), _, store)  => begin
                     (nil, store)
                   end
-                  
+
                   (_, DAE.DAE(elementLst = DAE.EQUATION(e1, e2, _) <| elts), _, store)  => begin
                       (ut1, terms1, store) = buildTermExp(env, e1, false, ht, store)
                       (ut2, terms2, store) = buildTermExp(env, e2, false, ht, store)
@@ -1109,7 +1109,7 @@
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(e1, DAE.SUB(DAE.T_REAL_DEFAULT), e2)), terms), store)
                   end
-                  
+
                   (_, DAE.DAE(elementLst = DAE.EQUEQUATION(cr1, cr2, _) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       crefExp2 = Expression.crefExp(cr2)
@@ -1119,7 +1119,7 @@
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), crefExp2)), terms), store)
                   end
-                  
+
                   (_, DAE.DAE(elementLst = DAE.VAR(componentRef = cr1 && DAE.CREF_IDENT(_, _, _), binding = SOME(e1)) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       (ut1, terms1, store) = buildTermExp(env, crefExp1, false, ht, store)
@@ -1128,7 +1128,7 @@
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), e1)), terms), store)
                   end
-                  
+
                   (_, DAE.DAE(elementLst = DAE.DEFINE(cr1, e1, _) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       (ut1, terms1, store) = buildTermExp(env, crefExp1, false, ht, store)
@@ -1137,7 +1137,7 @@
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), e1)), terms), store)
                   end
-                  
+
                   (_, DAE.DAE(elementLst = _ <| elts), _, store)  => begin
                       (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
                     (terms, store)
@@ -1151,7 +1151,7 @@
          #= help function to buildTerms, handles expressions =#
         function buildTermExp(env::FCore.Graph, exp::DAE.Exp, idivOrMul::Bool #= is true if surrounding expression is division or multiplication. In that case
            the constant will be treated as dimensionless, otherwise it will be treated as unspecified
-           =#, iht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+           =#, iht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm} #= additional terms from e.g. function calls =#
               local ut::UnitAbsyn.UnitTerm
@@ -1176,7 +1176,7 @@
                   local uts::List{UnitAbsyn.UnitTerm}
                   local expl::List{DAE.Exp}
                   local u::UnitAbsyn.Unit
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local store::UnitAbsyn.Store
                   local divOrMul::Bool
                    #= /*case(env,e as DAE.RCONST(r),ht,store) equation
@@ -1195,7 +1195,7 @@
                       ht = BaseHashTable.add((ComponentReference.makeCrefIdent(s1, DAE.T_UNKNOWN_DEFAULT, nil), indx), ht)
                     (UnitAbsyn.LOC(indx, e), nil, store)
                   end
-                  
+
                   (_, e && DAE.RCONST(r), divOrMul, ht, store)  => begin
                       s1 = "" + intString(tick()) + "_" + realString(r)
                       u = if divOrMul
@@ -1207,17 +1207,17 @@
                       ht = BaseHashTable.add((ComponentReference.makeCrefIdent(s1, DAE.T_UNKNOWN_DEFAULT, nil), indx), ht)
                     (UnitAbsyn.LOC(indx, e), nil, store)
                   end
-                  
+
                   (_, DAE.CAST(_, e1), divOrMul, ht, store)  => begin
                       (ut, terms, store) = buildTermExp(env, e1, divOrMul, ht, store)
                     (ut, terms, store)
                   end
-                  
+
                   (_, e && DAE.CREF(cr, _), _, ht, store)  => begin
                       indx = BaseHashTable.get(cr, ht)
                     (UnitAbsyn.LOC(indx, e), nil, store)
                   end
-                  
+
                   (_, e && DAE.BINARY(e1, DAE.POW(_), e2 && DAE.ICONST(i)), divOrMul, ht, store)  => begin
                       (ut1, terms1, store) = buildTermExp(env, e1, divOrMul, ht, store)
                       (_, terms2, store) = buildTermExp(env, e2, divOrMul, ht, store)
@@ -1225,7 +1225,7 @@
                       ut = UnitAbsyn.POW(ut1, MMath.RATIONAL(i, 1), e)
                     (ut, terms, store)
                   end
-                  
+
                   (_, e && DAE.BINARY(e1, DAE.POW(_), e2 && DAE.RCONST(r)), divOrMul, ht, store)  => begin
                       (ut1, terms1, store) = buildTermExp(env, e1, divOrMul, ht, store)
                       (_, terms2, store) = buildTermExp(env, e2, divOrMul, ht, store)
@@ -1235,7 +1235,7 @@
                       ut = UnitAbsyn.POW(ut1, MMath.RATIONAL(i, 1), e)
                     (ut, terms, store)
                   end
-                  
+
                   (_, e && DAE.BINARY(e1, op, e2), divOrMul, ht, store)  => begin
                       divOrMul = Expression.operatorDivOrMul(op)
                       (ut1, terms1, store) = buildTermExp(env, e1, divOrMul, ht, store)
@@ -1244,26 +1244,26 @@
                       ut = buildTermOp(ut1, ut2, op, e)
                     (ut, terms, store)
                   end
-                  
+
                   (_, DAE.BINARY(e1, op, _), divOrMul, ht, store)  => begin
                       divOrMul = Expression.operatorDivOrMul(op)
                       (ut, terms, store) = buildTermExp(env, e1, divOrMul, ht, store)
                       @shouldFail (_, _, _) = buildTermExp(env, e1, divOrMul, ht, store)
                     (ut, terms, store)
                   end
-                  
+
                   (_, DAE.BINARY(e1, op, e2), divOrMul, ht, store)  => begin
                       divOrMul = Expression.operatorDivOrMul(op)
                       @shouldFail (_, _, _) = buildTermExp(env, e1, divOrMul, ht, store)
                       (ut, terms, store) = buildTermExp(env, e2, divOrMul, ht, store)
                     (ut, terms, store)
                   end
-                  
+
                   (_, DAE.UNARY(_, e1), divOrMul, ht, store)  => begin
                       (ut, terms, store) = buildTermExp(env, e1, divOrMul, ht, store)
                     (ut, terms, store)
                   end
-                  
+
                   (_, e && DAE.IFEXP(_, e1, e2), divOrMul, ht, store)  => begin
                       divOrMul = false
                       (ut1, terms1, store) = buildTermExp(env, e1, divOrMul, ht, store)
@@ -1271,13 +1271,13 @@
                       terms = listAppend(terms1, terms2)
                     (UnitAbsyn.EQN(ut1, ut2, e), terms, store)
                   end
-                  
+
                   (_, e && DAE.CALL(path = path, expLst = expl), divOrMul, ht, store)  => begin
                       divOrMul = false
                       (ut, terms, store) = buildTermCall(env, path, e, expl, divOrMul, ht, store)
                     (ut, terms, store)
                   end
-                  
+
                   (_, e && DAE.ARRAY(_, _, expl), _, ht, store)  => begin
                       print("vector =" + ExpressionDump.printExpStr(e) + "\\n")
                       (uts, terms, store) = buildTermExpList(env, expl, ht, store)
@@ -1285,7 +1285,7 @@
                       uts = listAppend(terms, uts)
                     (ut, uts, store)
                   end
-                  
+
                   (_, e && DAE.MATRIX(matrix = mexpl), _, ht, store)  => begin
                       print("Matrix =" + ExpressionDump.printExpStr(e) + "\\n")
                       expl = ListUtil.flatten(mexpl)
@@ -1294,7 +1294,7 @@
                       uts = listAppend(terms, uts)
                     (ut, uts, store)
                   end
-                  
+
                   (_, e && DAE.CALL(__), _, _, _)  => begin
                       print("buildTermDAE.CALL failed exp: " + ExpressionDump.printExpStr(e) + "\\n")
                     fail()
@@ -1313,7 +1313,7 @@
 
          #= help function to buildTermExpression. For each two terms from an array expression, it create
         and EQN to make the constraint that they must have the same unit =#
-        function buildArrayElementTerms(iuts::List{<:UnitAbsyn.UnitTerm}, iexpl::List{<:DAE.Exp}) ::List{UnitAbsyn.UnitTerm} 
+        function buildArrayElementTerms(iuts::List{<:UnitAbsyn.UnitTerm}, iexpl::List{<:DAE.Exp}) ::List{UnitAbsyn.UnitTerm}
               local outUts::List{UnitAbsyn.UnitTerm} = nil
 
               local rest_ut::List{UnitAbsyn.UnitTerm} = iuts
@@ -1335,7 +1335,7 @@
         end
 
          #= builds a term and additional terms from a function call =#
-        function buildTermCall(env::FCore.Graph, path::Absyn.Path, funcCallExp::DAE.Exp, expl::List{<:DAE.Exp}, divOrMul::Bool, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildTermCall(env::FCore.Graph, path::Absyn.Path, funcCallExp::DAE.Exp, expl::List{<:DAE.Exp}, divOrMul::Bool, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.UnitTerm, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm} #= additional terms from e.g. function calls =#
               local ut::UnitAbsyn.UnitTerm
@@ -1367,7 +1367,7 @@
 
          #= build stores and terms for assigning formal output arguments to
         new locations =#
-        function buildResultTerms(ifunctp::DAE.Type, funcInstId::ModelicaInteger, funcCallExp::DAE.Exp, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildResultTerms(ifunctp::DAE.Type, funcInstId::ModelicaInteger, funcCallExp::DAE.Exp, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm}
               local terms::List{UnitAbsyn.UnitTerm}
@@ -1397,12 +1397,12 @@
                       (store, indx2) = add(UnitAbsyn.UNSPECIFIED(), store)
                     (list(UnitAbsyn.LOC(indx2, funcCallExp)), list(UnitAbsyn.EQN(UnitAbsyn.LOC(indx2, funcCallExp), UnitAbsyn.LOC(indx, funcCallExp), funcCallExp)), store)
                   end
-                  
+
                   (DAE.T_FUNCTION(funcResultType = DAE.T_TUPLE(types = typeLst)), _, _, store)  => begin
                       (terms, extraTerms, store) = buildTupleResultTerms(typeLst, funcInstId, funcCallExp, store)
                     (terms, extraTerms, store)
                   end
-                  
+
                   _  => begin
                         print("buildResultTerms failed\\n")
                       fail()
@@ -1417,7 +1417,7 @@
         end
 
          #= help function to buildResultTerms =#
-        function buildTupleResultTerms(ifunctps::List{<:DAE.Type}, funcInstId::ModelicaInteger, funcCallExp::DAE.Exp, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildTupleResultTerms(ifunctps::List{<:DAE.Type}, funcInstId::ModelicaInteger, funcCallExp::DAE.Exp, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm}
               local terms::List{UnitAbsyn.UnitTerm}
@@ -1434,7 +1434,7 @@
                   ( nil(), _, _, store)  => begin
                     (nil, nil, store)
                   end
-                  
+
                   (tp <| functps, _, _, store)  => begin
                       (terms1, extraTerms1, store) = buildResultTerms(tp, funcInstId, funcCallExp, store)
                       (terms2, extraTerms2, store) = buildTupleResultTerms(functps, funcInstId, funcCallExp, store)
@@ -1448,7 +1448,7 @@
         end
 
          #= build terms from list of expressions =#
-        function buildTermExpList(env::FCore.Graph, iexpl::List{<:DAE.Exp}, ht::HashTable.HashTable, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store} 
+        function buildTermExpList(env::FCore.Graph, iexpl::List{<:DAE.Exp}, ht::HashTable.HashTableType, istore::UnitAbsyn.Store) ::Tuple{List{UnitAbsyn.UnitTerm}, List{UnitAbsyn.UnitTerm}, UnitAbsyn.Store}
               local outStore::UnitAbsyn.Store
               local extraTerms::List{UnitAbsyn.UnitTerm}
               local terms::List{UnitAbsyn.UnitTerm}
@@ -1464,14 +1464,14 @@
                   (_,  nil(), _, store)  => begin
                     (nil, nil, store)
                   end
-                  
+
                   (_, e <| expl, _, store)  => begin
                       (ut, eterms1, store) = buildTermExp(env, e, false, ht, store)
                       (terms, eterms2, store) = buildTermExpList(env, expl, ht, store)
                       extraTerms = listAppend(eterms1, eterms2)
                     (_cons(ut, terms), extraTerms, store)
                   end
-                  
+
                   (_, e <| _, _, _)  => begin
                       print("buildTermExpList failed for exp" + ExpressionDump.printExpStr(e) + "\\n")
                     fail()
@@ -1482,7 +1482,7 @@
         end
 
          #= help function to buildTermCall =#
-        function buildFuncTypeStores(funcType::DAE.Type, funcInstId::ModelicaInteger #= unique id for each function call to make unique type parameter names =#, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, List{ModelicaInteger}} 
+        function buildFuncTypeStores(funcType::DAE.Type, funcInstId::ModelicaInteger #= unique id for each function call to make unique type parameter names =#, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, List{ModelicaInteger}}
               local indxs::List{ModelicaInteger}
               local outStore::UnitAbsyn.Store
 
@@ -1495,7 +1495,7 @@
                       (store, indxs) = buildFuncTypeStores2(args, funcInstId, store)
                     (store, indxs)
                   end
-                  
+
                   (tp, _, _)  => begin
                       print("buildFuncTypeStores failed, tp" + Types.unparseType(tp) + "\\n")
                     fail()
@@ -1506,7 +1506,7 @@
         end
 
          #= help function to buildFuncTypeStores =#
-        function buildFuncTypeStores2(ifargs::List{<:DAE.FuncArg}, funcInstId::ModelicaInteger, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, List{ModelicaInteger}} 
+        function buildFuncTypeStores2(ifargs::List{<:DAE.FuncArg}, funcInstId::ModelicaInteger, istore::UnitAbsyn.Store) ::Tuple{UnitAbsyn.Store, List{ModelicaInteger}}
               local indxs::List{ModelicaInteger}
               local outStore::UnitAbsyn.Store
 
@@ -1521,7 +1521,7 @@
                   ( nil(), _, store)  => begin
                     (store, nil)
                   end
-                  
+
                   (DAE.FUNCARG(ty = tp) <| fargs, _, store)  => begin
                       unitStr = getUnitStr(tp)
                       unit = str2unit(unitStr, SOME(funcInstId))
@@ -1541,7 +1541,7 @@
 
          #= help function to e.g. buildFuncTypeStores2, retrieve a unit string
         from a Type (must be T_REAL) =#
-        function getUnitStr(itp::DAE.Type) ::String 
+        function getUnitStr(itp::DAE.Type) ::String
               local str::String
 
               str = begin
@@ -1553,10 +1553,10 @@
                         _ = begin
                           @match v begin
                             DAE.TYPES_VAR(name = "unit", binding = DAE.EQBOUND(exp = DAE.SCONST(str)))  => begin
-                                return 
+                                return
                               ()
                             end
-                            
+
                             _  => begin
                                 ()
                             end
@@ -1565,15 +1565,15 @@
                       end
                     ""
                   end
-                  
+
                   DAE.T_INTEGER(__)  => begin
                     ""
                   end
-                  
+
                   DAE.T_ARRAY(ty = tp)  => begin
                     getUnitStr(tp)
                   end
-                  
+
                   tp  => begin
                       print("getUnitStr for type " + Types.unparseType(tp) + " failed\\n")
                     fail()
@@ -1584,7 +1584,7 @@
         end
 
          #=  help function to buildTermCall =#
-        function buildFormal2ActualParamTerms(iformalParamIndxs::List{<:ModelicaInteger}, iactualParamIndxs::List{<:UnitAbsyn.UnitTerm}) ::UnitAbsyn.UnitTerms 
+        function buildFormal2ActualParamTerms(iformalParamIndxs::List{<:ModelicaInteger}, iactualParamIndxs::List{<:UnitAbsyn.UnitTerm}) ::UnitAbsyn.UnitTerms
               local terms::UnitAbsyn.UnitTerms
 
               terms = begin
@@ -1597,13 +1597,13 @@
                   ( nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (loc1 <| formalParamIndxs, ut <| actualParamIndxs)  => begin
                       terms = buildFormal2ActualParamTerms(formalParamIndxs, actualParamIndxs)
                       e = origExpInTerm(ut)
                     _cons(UnitAbsyn.EQN(UnitAbsyn.LOC(loc1, e), ut, e), terms)
                   end
-                  
+
                   _  => begin
                         print("buildFormal2ActualParamTerms failed\\n")
                       fail()
@@ -1614,7 +1614,7 @@
         end
 
          #= Returns the origExp of a term =#
-        function origExpInTerm(ut::UnitAbsyn.UnitTerm) ::DAE.Exp 
+        function origExpInTerm(ut::UnitAbsyn.UnitTerm) ::DAE.Exp
               local origExp::DAE.Exp
 
               origExp = begin
@@ -1623,27 +1623,27 @@
                   UnitAbsyn.ADD(_, _, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.SUB(_, _, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.MUL(_, _, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.DIV(_, _, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.EQN(_, _, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.LOC(_, e)  => begin
                     e
                   end
-                  
+
                   UnitAbsyn.POW(_, _, e)  => begin
                     e
                   end
@@ -1653,7 +1653,7 @@
         end
 
          #= Takes two UnitTerms and and DAE.Operator and creates a new UnitTerm  =#
-        function buildTermOp(ut1::UnitAbsyn.UnitTerm, ut2::UnitAbsyn.UnitTerm, op::DAE.Operator, origExp::DAE.Exp) ::UnitAbsyn.UnitTerm 
+        function buildTermOp(ut1::UnitAbsyn.UnitTerm, ut2::UnitAbsyn.UnitTerm, op::DAE.Operator, origExp::DAE.Exp) ::UnitAbsyn.UnitTerm
               local ut::UnitAbsyn.UnitTerm
 
               ut = begin
@@ -1661,15 +1661,15 @@
                   (_, _, DAE.ADD(__), _)  => begin
                     UnitAbsyn.ADD(ut1, ut2, origExp)
                   end
-                  
+
                   (_, _, DAE.SUB(__), _)  => begin
                     UnitAbsyn.SUB(ut1, ut2, origExp)
                   end
-                  
+
                   (_, _, DAE.MUL(__), _)  => begin
                     UnitAbsyn.MUL(ut1, ut2, origExp)
                   end
-                  
+
                   (_, _, DAE.DIV(__), _)  => begin
                     UnitAbsyn.DIV(ut1, ut2, origExp)
                   end
@@ -1679,8 +1679,8 @@
         end
 
          #= help function =#
-        function buildStores2(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStores2(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType}
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1696,12 +1696,12 @@
                   local funcs::DAE.FunctionTree
                   local elts::List{DAE.Element}
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
                   (DAE.DAE(elementLst =  nil()), _, _)  => begin
                     (inStore, inHt)
                   end
-                  
+
                   (DAE.DAE(elementLst = DAE.VAR(componentRef = cr, variableAttributesOption = attropt) <| elts), _, _)  => begin
                       @match DAE.SCONST(unitStr) = DAEUtil.getUnitAttr(attropt)
                       unit = str2unit(unitStr, NONE())
@@ -1710,13 +1710,13 @@
                       (store, ht) = buildStores2(DAE.DAE(elts), store, ht)
                     (store, ht)
                   end
-                  
+
                   (DAE.DAE(elementLst = DAE.VAR(componentRef = cr) <| _), _, _)  => begin
                       (store, indx) = add(UnitAbsyn.UNSPECIFIED(), inStore)
                       ht = BaseHashTable.add((cr, indx), inHt)
                     (store, ht)
                   end
-                  
+
                   (DAE.DAE(elementLst = _ <| elts), _, _)  => begin
                       (store, ht) = buildStores2(DAE.DAE(elts), inStore, inHt)
                     (store, ht)
@@ -1729,8 +1729,8 @@
         end
 
          #= help function =#
-        function buildStores3(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStores3(dae::DAE.DAElist, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType}
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1746,19 +1746,19 @@
                   local funcs::DAE.FunctionTree
                   local elts::List{DAE.Element}
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
                   (DAE.DAE( nil()), store, ht)  => begin
                     (store, ht)
                   end
-                  
+
                   (DAE.DAE(DAE.EQUATION(e1, e2, _) <| elts), store, ht)  => begin
                       (store, ht) = buildStoreExp(e1, store, ht, NONE())
                       (store, ht) = buildStoreExp(e2, store, ht, NONE())
                       (store, ht) = buildStores3(DAE.DAE(elts), store, ht)
                     (store, ht)
                   end
-                  
+
                   (DAE.DAE(_ <| elts), store, ht)  => begin
                       (store, ht) = buildStores3(DAE.DAE(elts), store, ht)
                     (store, ht)
@@ -1769,8 +1769,8 @@
         end
 
          #=  build stores from constants in expressions and from function calls =#
-        function buildStoreExp(exp::DAE.Exp, inStore::UnitAbsyn.Store, inHt::HashTable.HashTable, parentOp::Option{<:DAE.Operator}) ::Tuple{UnitAbsyn.Store, HashTable.HashTable} 
-              local outHt::HashTable.HashTable
+        function buildStoreExp(exp::DAE.Exp, inStore::UnitAbsyn.Store, inHt::HashTable.HashTableType, parentOp::Option{<:DAE.Operator}) ::Tuple{UnitAbsyn.Store, HashTable.HashTableType}
+              local outHt::HashTable.HashTableType
               local outStore::UnitAbsyn.Store
 
               (outStore, outHt) = begin
@@ -1784,7 +1784,7 @@
                   local op::DAE.Operator
                   local cref_::DAE.ComponentRef
                   local store::UnitAbsyn.Store
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                    #= /* Constant on top level, e.g. x = 1 => unspecified type */ =#
                 @matchcontinue (exp, inStore, inHt, parentOp) begin
                   (DAE.RCONST(r), store, ht, _)  => begin
@@ -1795,7 +1795,7 @@
                       ht = BaseHashTable.add((cref_, indx), ht)
                     (store, ht)
                   end
-                  
+
                   (DAE.CAST(_, DAE.ICONST(i)), store, ht, _)  => begin
                       unit = selectConstantUnit(parentOp)
                       (store, indx) = add(unit, store)
@@ -1804,24 +1804,24 @@
                       ht = BaseHashTable.add((cref_, indx), ht)
                     (store, ht)
                   end
-                  
+
                   (DAE.BINARY(e1, op, e2), store, ht, _)  => begin
                       (store, ht) = buildStoreExp(e1, store, ht, SOME(op))
                       (store, ht) = buildStoreExp(e2, store, ht, SOME(op))
                     (store, ht)
                   end
-                  
+
                   (DAE.UNARY(_, e1), store, ht, _)  => begin
                       (store, ht) = buildStoreExp(e1, store, ht, parentOp)
                     (store, ht)
                   end
-                  
+
                   (DAE.IFEXP(_, e1, e2), store, ht, _)  => begin
                       (store, ht) = buildStoreExp(e1, store, ht, parentOp)
                       (store, ht) = buildStoreExp(e2, store, ht, parentOp)
                     (store, ht)
                   end
-                  
+
                   (_, store, ht, _)  => begin
                     (store, ht)
                   end
@@ -1831,7 +1831,7 @@
         end
 
          #= Multiplying two units corresponds to adding the units and joining the typeParameter list =#
-        function unitMultiply(u1::UnitAbsyn.Unit, u2::UnitAbsyn.Unit) ::UnitAbsyn.Unit 
+        function unitMultiply(u1::UnitAbsyn.Unit, u2::UnitAbsyn.Unit) ::UnitAbsyn.Unit
               local u::UnitAbsyn.Unit
 
               u = begin
@@ -1854,7 +1854,7 @@
 
          #= returns UNSPECIFIED or dimensionless depending on
         parent expression as type of a constant expression =#
-        function selectConstantUnit(op::Option{<:DAE.Operator}) ::UnitAbsyn.Unit 
+        function selectConstantUnit(op::Option{<:DAE.Operator}) ::UnitAbsyn.Unit
               local unit::UnitAbsyn.Unit
 
               unit = begin
@@ -1862,15 +1862,15 @@
                   NONE()  => begin
                     UnitAbsyn.UNSPECIFIED()
                   end
-                  
+
                   SOME(DAE.ADD(_))  => begin
                     UnitAbsyn.UNSPECIFIED()
                   end
-                  
+
                   SOME(DAE.SUB(_))  => begin
                     UnitAbsyn.UNSPECIFIED()
                   end
-                  
+
                   SOME(_)  => begin
                     str2unit("1", NONE())
                   end
@@ -1880,7 +1880,7 @@
         end
 
          #= Translate a unit to a string =#
-        function unit2str(unit::UnitAbsyn.Unit) ::String 
+        function unit2str(unit::UnitAbsyn.Unit) ::String
               local res::String
 
               res = begin
@@ -1898,7 +1898,7 @@
                       res = UnitParserExt.unit2str(nums, denoms, tpnoms, tpdenoms, tpstrs, 1.0, 0.0)
                     res
                   end
-                  
+
                   UnitAbsyn.UNSPECIFIED(__)  => begin
                     "unspecified"
                   end
@@ -1910,7 +1910,7 @@
         end
 
          #= Translate a unit string to a unit =#
-        function str2unit(res::String, funcInstIdOpt::Option{<:ModelicaInteger}) ::UnitAbsyn.Unit 
+        function str2unit(res::String, funcInstIdOpt::Option{<:ModelicaInteger}) ::UnitAbsyn.Unit
               local unit::UnitAbsyn.Unit
 
               local nums::List{ModelicaInteger}
@@ -1926,7 +1926,7 @@
         end
 
          #= Translate a unit string to a unit =#
-        function str2unitWithScaleFactor(res::String, funcInstIdOpt::Option{<:ModelicaInteger}) ::Tuple{UnitAbsyn.Unit, ModelicaReal, ModelicaReal} 
+        function str2unitWithScaleFactor(res::String, funcInstIdOpt::Option{<:ModelicaInteger}) ::Tuple{UnitAbsyn.Unit, ModelicaReal, ModelicaReal}
               local offset::ModelicaReal
               local scaleFactor::ModelicaReal
               local unit::UnitAbsyn.Unit
@@ -1946,7 +1946,7 @@
           (unit, scaleFactor, offset)
         end
 
-        function getDerivedUnitsHelper(baseUnit::UnitAbsyn.Unit, baseUnitStr::String, inUnits::List{<:String}) ::List{String} 
+        function getDerivedUnitsHelper(baseUnit::UnitAbsyn.Unit, baseUnitStr::String, inUnits::List{<:String}) ::List{String}
               local outUnits::List{String} = nil
 
               local unit::UnitAbsyn.Unit
@@ -1966,7 +1966,7 @@
           outUnits
         end
 
-        function getDerivedUnits(baseUnit::UnitAbsyn.Unit, baseUnitStr::String) ::List{String} 
+        function getDerivedUnits(baseUnit::UnitAbsyn.Unit, baseUnitStr::String) ::List{String}
               local derivedUnits::List{String}
 
               local unitSymbols::List{String}
@@ -1989,7 +1989,7 @@
         end Test1;
         */ =#
 
-        function buildTest1() ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store} 
+        function buildTest1() ::Tuple{UnitAbsyn.UnitTerms, UnitAbsyn.Store}
               local sigma::UnitAbsyn.Store
               local ut::UnitAbsyn.UnitTerms
 

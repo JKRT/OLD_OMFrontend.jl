@@ -1,4 +1,4 @@
-  module InstFunction 
+  module InstFunction
 
 
     using MetaModelica
@@ -101,12 +101,12 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = List 
+        InstDims = List
 
          #= instantiate an external object.
          This is done by instantiating the destructor and constructor
          functions and create a DAE element containing these two. =#
-        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.State} 
+        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.State}
               local ciState::ClassInf.State
               local dae::DAE.DAElist #= resulting dae =#
               local outIH::InnerOuter.InstHierarchy
@@ -148,12 +148,12 @@
                       source = ElementSource.addElementSourceFileInfo(source, info)
                     (cache, env, ih, DAE.DAE(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
-                  
+
                   (cache, _, ih, _, _, true, _, _)  => begin
                       @match SOME(classNameFQ) = FGraph.getScopePath(inEnv)
                     (cache, inEnv, ih, DAE.emptyDae, ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstFunction.instantiateExternalObject failed.\\n")
@@ -181,7 +181,7 @@
          #= Checks that an external object instance does not have any modifiers. This is
            done because an external object may only have two elements, a constructor and
            a destructor, and there's no point in modifying these. =#
-        function checkExternalObjectMod(inMod::DAE.Mod, inClassName::String)  
+        function checkExternalObjectMod(inMod::DAE.Mod, inClassName::String)
               _ = begin
                   local id::DAE.Ident
                   local mod::DAE.Mod
@@ -190,11 +190,11 @@
                   (DAE.NOMOD(__), _)  => begin
                     ()
                   end
-                  
+
                   (DAE.MOD(subModLst =  nil()), _)  => begin
                     ()
                   end
-                  
+
                   (DAE.MOD(subModLst = DAE.NAMEMOD(ident = id, mod = mod) <| _), _)  => begin
                       info = Mod.getModInfo(mod)
                       Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(id, inClassName), info)
@@ -209,7 +209,7 @@
         end
 
          #= instantiates the destructor function of an external object =#
-        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy} 
+        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outCache::FCore.Cache
 
@@ -222,7 +222,7 @@
                       (cache, _, ih) = implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (cache, ih)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstFunction.instantiateExternalObjectDestructor failed.\\n")
@@ -234,7 +234,7 @@
         end
 
          #= instantiates the constructor function of an external object =#
-        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.Type} 
+        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.Type}
               local outType::DAE.Type
               local outIH::InnerOuter.InstHierarchy
               local outCache::FCore.Cache
@@ -250,7 +250,7 @@
                       (cache, ty, _) = Lookup.lookupType(cache, env1, Absyn.IDENT("constructor"), NONE())
                     (cache, ih, ty)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstFunction.instantiateExternalObjectConstructor failed.\\n")
@@ -264,7 +264,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -275,7 +275,7 @@
                   local cenv::FCore.Graph
                   local fpath::Absyn.Path
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c::SCode.Element
                   local n::String
                   local inst_dims::InstDims
@@ -294,14 +294,14 @@
                       cache = InstUtil.addFunctionsToDAE(cache, list(fun), pPrefix)
                     (cache, env, ih)
                   end
-                  
+
                   (cache, env, ih, mod, pre, c && SCode.CLASS(restriction = r, partialPrefix = pPrefix), inst_dims)  => begin
                       @shouldFail @match SCode.R_RECORD(_) = r
                       (cache, env, ih, funs) = implicitFunctionInstantiation2(cache, env, ih, mod, pre, c, inst_dims, false)
                       cache = InstUtil.addFunctionsToDAE(cache, funs, pPrefix)
                     (cache, env, ih)
                   end
-                  
+
                   (_, env, _, _, _, SCode.CLASS(name = n), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.implicitFunctionInstantiation failed " + n)
@@ -320,7 +320,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}} 
+        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
               local funcs::List{DAE.Function}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -336,7 +336,7 @@
                   local cenv::FCore.Graph
                   local fpath::Absyn.Path
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c::SCode.Element
                   local n::String
                   local inst_dims::InstDims
@@ -400,7 +400,7 @@
                       end
                     (cache, env_1, ih, list(DAE.FUNCTION(fpath, _cons(DAE.FUNCTION_DEF(list(e for e in daeElts if ! DAEUtil.isComment(e))), derFuncs), ty1, visibility, partialPrefixBool, isImpure, inlineType, source, SOME(cmt))))
                   end
-                  
+
                   (cache, env, ih, mod, pre, c && SCode.CLASS(partialPrefix = partialPrefix, prefixes = SCode.PREFIXES(visibility = visibility), name = n, restriction = restr && SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)), classDef = cd && parts && SCode.PARTS(externalDecl = SOME(scExtdecl)), info = info, encapsulatedPrefix = encapsulatedPrefix), inst_dims, _)  => begin
                       @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, true, info)
@@ -419,14 +419,14 @@
                       InstUtil.checkExternalFunction(daeElts, extdecl, AbsynUtil.pathString(fpath))
                     (cache, env_1, ih, list(DAE.FUNCTION(fpath, _cons(DAE.FUNCTION_EXT(daeElts, extdecl), derFuncs), ty1, visibility, partialPrefixBool, isImpure, DAE.NO_INLINE(), source, SOME(cmt))))
                   end
-                  
+
                   (cache, env, ih, _, pre, SCode.CLASS(name = n, prefixes = SCode.PREFIXES(visibility = visibility), restriction = SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(isImpure)), classDef = SCode.OVERLOAD(pathLst = funcnames), cmt = cmt), _, _)  => begin
                       (cache, env, ih, resfns) = instOverloadedFunctions(cache, env, ih, pre, funcnames, inClass.info) #= Overloaded functions =#
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env, n)
                       resfns = _cons(DAE.FUNCTION(fpath, list(DAE.FUNCTION_DEF(nil)), DAE.T_UNKNOWN_DEFAULT, visibility, true, isImpure, DAE.NO_INLINE(), DAE.emptyElementSource, SOME(cmt)), resfns)
                     (cache, env, ih, resfns)
                   end
-                  
+
                   (_, env, _, _, _, SCode.CLASS(name = n), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.implicitFunctionInstantiation2 failed " + n)
@@ -454,7 +454,7 @@
 
          #= instantiates all functions found in derivative annotations so they are also added to the
         dae and can be generated code for in case they are required =#
-        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
+        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
               local outCache::FCore.Cache
 
                #=  print(\"instantiate deriative functions for \"+AbsynUtil.pathString(path)+\"\\n\");
@@ -466,7 +466,7 @@
         end
 
          #= help function =#
-        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache 
+        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -484,7 +484,7 @@
                   (cache, _, _,  nil(), _, _)  => begin
                     cache
                   end
-                  
+
                   (cache, env, ih, p <| paths, _, _)  => begin
                       (cache, cdef, cenv) = Lookup.lookupClass(cache, env, p, SOME(info))
                       (cache, p) = Inst.makeFullyQualified(cache, cenv, p)
@@ -494,7 +494,7 @@
                               FCore.checkCachedInstFuncGuard(cache, p)
                             ()
                           end
-                          
+
                           _  => begin
                                 cache = FCore.addCachedInstFuncGuard(cache, p)
                                 (cache, _, ih, funcs) = implicitFunctionInstantiation2(cache, cenv, ih, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false)
@@ -506,7 +506,7 @@
                       end
                     instantiateDerivativeFuncs2(cache, env, ih, paths, path, info)
                   end
-                  
+
                   _  => begin
                         @match _cons(p, _) = inPaths
                         fun = AbsynUtil.pathString(p)
@@ -531,7 +531,7 @@
 
           Extended 2007-06-29, BZ
           Now this function also handles Derived function. =#
-        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -574,14 +574,14 @@
                       cache = FCore.addDaeExtFunction(cache, funs)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, SCode.CLASS(name = id, prefixes = prefixes, encapsulatedPrefix = e, partialPrefix = p, restriction = r, classDef = SCode.PARTS(elementLst = elts, externalDecl = extDecl), cmt = cmt, info = info))  => begin
                       elts = ListUtil.select(elts, isElementImportantForFunction)
                       stripped_class = SCode.CLASS(id, prefixes, e, p, r, SCode.PARTS(elts, nil, nil, nil, nil, nil, nil, extDecl), cmt, info)
                       (cache, env_1, ih, _) = implicitFunctionInstantiation2(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), stripped_class, nil, true)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, SCode.CLASS(name = id, classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn), modifications = mod1), info = info))  => begin
                       @match (cache, (@match SCode.CLASS() = c), cenv) = Lookup.lookupClass(cache, env, cn)
                       (cache, mod2) = Mod.elabMod(cache, env, ih, Prefix.NOPRE(), mod1, false, Mod.DERIVED(cn), info)
@@ -592,12 +592,12 @@
                       env_1 = FGraph.mkTypeNode(env_1, id, ty1)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, SCode.CLASS(classDef = SCode.OVERLOAD(__)))  => begin
                       (cache, env, ih, _) = implicitFunctionInstantiation2(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), inClass, nil, true)
                     (cache, env, ih)
                   end
-                  
+
                   (_, _, _, SCode.CLASS(name = id))  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.implicitFunctionTypeInstantiation failed " + id + "\\nenv: " + FGraph.getGraphNameStr(inEnv) + "\\nelelement: " + SCodeDump.unparseElementStr(inClass, SCodeDump.defaultOptions))
@@ -633,7 +633,7 @@
          #= This function instantiates the functions in the overload list of a
           overloading function definition and register the function types using
           the overloaded name. It also creates dae elements for the functions. =#
-        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}} 
+        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
               local outFns::List{DAE.Function}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -657,7 +657,7 @@
                   (cache, _, ih, _,  nil())  => begin
                     (cache, inEnv, ih, nil)
                   end
-                  
+
                   (cache, env, ih, _, fn <| fns)  => begin
                       @match (cache, (@match SCode.CLASS(restriction = rest) = c), cenv) = Lookup.lookupClass(cache, env, fn, SOME(inInfo))
                       @match true = SCodeUtil.isFunctionRestriction(rest)
@@ -665,7 +665,7 @@
                       (cache, env, ih, resfns2) = instOverloadedFunctions(cache, env, ih, pre, fns, inInfo)
                     (cache, env, ih, listAppend(resfns1, resfns2))
                   end
-                  
+
                   (_, _, _, _, fn <| _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.instOverloaded_functions failed " + AbsynUtil.pathString(fn))
@@ -692,7 +692,7 @@
           that type. If no explicit call and only one output parameter exists, then
           this will be the return type of the function, otherwise the return type
           will be void. =#
-        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::InnerOuter.InstHierarchy, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.ExternalDecl} 
+        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::InnerOuter.InstHierarchy, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.ExternalDecl}
               local daeextdecl::DAE.ExternalDecl
 
 
@@ -725,7 +725,7 @@
           variables exists, the implicit call is equivalent to:
               external \\\"C\\\" func(var1, var2, ...)
           where each var can be input or output. =#
-        function instExtMakeDefaultExternalCall(elements::List{<:DAE.Element}, funcType::DAE.Type, lang::String, info::SourceInfo) ::Tuple{List{DAE.ExtArg}, DAE.ExtArg} 
+        function instExtMakeDefaultExternalCall(elements::List{<:DAE.Element}, funcType::DAE.Type, lang::String, info::SourceInfo) ::Tuple{List{DAE.ExtArg}, DAE.ExtArg}
               local rettype::DAE.ExtArg
               local fargs::List{DAE.ExtArg}
 
@@ -747,19 +747,19 @@
                       end
                     (DAE.NOEXTARG(), false)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = DAE.T_TUPLE(__))  => begin
                     (DAE.NOEXTARG(), false)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = DAE.T_NORETCALL(__))  => begin
                     (DAE.NOEXTARG(), false)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = ty)  => begin
                     (DAE.EXTARG(DAEUtil.varCref(ListUtil.find(elements, DAEUtil.isOutputVar)), Absyn.OUTPUT(), ty), true)
                   end
-                  
+
                   _  => begin
                         Error.addInternalError("instExtMakeDefaultExternalCall failed for " + Types.unparseType(funcType), info)
                       fail()
@@ -772,15 +772,15 @@
                     DAE.VAR(direction = DAE.OUTPUT(__)) where (! singleOutput)  => begin
                       addExtVarToCall(elt.componentRef, Absyn.OUTPUT(), elt.dims, fargs)
                     end
-                    
+
                     DAE.VAR(direction = DAE.INPUT(__))  => begin
                       addExtVarToCall(elt.componentRef, Absyn.INPUT(), elt.dims, fargs)
                     end
-                    
+
                     DAE.VAR(direction = DAE.BIDIR(__))  => begin
                       addExtVarToCall(elt.componentRef, Absyn.OUTPUT(), elt.dims, fargs)
                     end
-                    
+
                     _  => begin
                         fargs
                     end
@@ -791,7 +791,7 @@
           (fargs, rettype)
         end
 
-        function addExtVarToCall(cr::DAE.ComponentRef, dir::Absyn.Direction, dims::DAE.Dimensions, fargs::List{<:DAE.ExtArg}) ::List{DAE.ExtArg} 
+        function addExtVarToCall(cr::DAE.ComponentRef, dir::Absyn.Direction, dims::DAE.Dimensions, fargs::List{<:DAE.ExtArg}) ::List{DAE.ExtArg}
 
 
               fargs = _cons(DAE.EXTARG(cr, dir, ComponentReference.crefTypeFull(cr)), fargs)
@@ -801,7 +801,7 @@
           fargs
         end
 
-        function getRecordConstructorFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, DAE.Function} 
+        function getRecordConstructorFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path) ::Tuple{FCore.Cache, DAE.Function}
               local outFunc::DAE.Function
               local outCache::FCore.Cache
 
@@ -827,7 +827,7 @@
                       func = FCore.getCachedInstFunc(inCache, path)
                     (inCache, func)
                   end
-                  
+
                   (_, _, _)  => begin
                       (_, recordCl, recordEnv) = Lookup.lookupClass(inCache, inEnv, inPath)
                       @match true = SCodeUtil.isRecord(recordCl)
@@ -855,7 +855,7 @@
                       cache = InstUtil.addFunctionsToDAE(cache, list(func), SCode.NOT_PARTIAL())
                     (cache, func)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("InstFunction.getRecordConstructorFunction failed for " + AbsynUtil.pathString(inPath))
@@ -869,7 +869,7 @@
         end
 
          #= Add record constructor whenever we instantiate a variable. Needed so we can cast to this constructor freely. =#
-        function addRecordConstructorFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inInfo::SourceInfo) ::FCore.Cache 
+        function addRecordConstructorFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inInfo::SourceInfo) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -895,7 +895,7 @@
                       (cache, _) = getRecordConstructorFunction(cache, inEnv, path)
                     cache
                   end
-                  
+
                   (cache, _, DAE.T_COMPLEX(ClassInf.RECORD(path), vars, eqCo), _)  => begin
                       path = AbsynUtil.makeFullyQualified(path)
                       vars = Types.filterRecordComponents(vars, inInfo)
@@ -910,7 +910,7 @@
                       cache = InstUtil.addFunctionsToDAE(cache, list(func), SCode.NOT_PARTIAL())
                     cache
                   end
-                  
+
                   _  => begin
                       inCache
                   end
@@ -921,7 +921,7 @@
           outCache
         end
 
-        function isElementImportantForFunction(elt::SCode.Element) ::Bool 
+        function isElementImportantForFunction(elt::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -929,7 +929,7 @@
                   SCode.COMPONENT(prefixes = SCode.PREFIXES(visibility = SCode.PROTECTED(__)), attributes = SCode.ATTR(direction = Absyn.BIDIR(__), variability = SCode.VAR(__)))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -938,7 +938,7 @@
           b
         end
 
-        function checkExtObjOutput(inType::DAE.Type, info::SourceInfo)  
+        function checkExtObjOutput(inType::DAE.Type, info::SourceInfo)
               _ = begin
                   local path::Absyn.Path
                   local ty::DAE.Type
@@ -951,7 +951,7 @@
               end
         end
 
-        function checkExtObjOutputWork(ty::DAE.Type, inTpl::Tuple{<:Absyn.Path, SourceInfo, Bool}) ::Tuple{DAE.Type, Tuple{Absyn.Path, SourceInfo, Bool}} 
+        function checkExtObjOutputWork(ty::DAE.Type, inTpl::Tuple{<:Absyn.Path, SourceInfo, Bool}) ::Tuple{DAE.Type, Tuple{Absyn.Path, SourceInfo, Bool}}
               local outTpl::Tuple{Absyn.Path, SourceInfo, Bool}
               local oty::DAE.Type = ty
 
@@ -976,7 +976,7 @@
                           end
                     outTpl
                   end
-                  
+
                   _  => begin
                       inTpl
                   end

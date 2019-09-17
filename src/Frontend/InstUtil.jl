@@ -1,4 +1,4 @@
-  module InstUtil 
+  module InstUtil
 
 
     using MetaModelica
@@ -93,11 +93,11 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = List 
+        InstDims = List
 
          #= This function creates a new, unique identifer.
           The same name is never returned twice. =#
-        function newIdent() ::DAE.ComponentRef 
+        function newIdent() ::DAE.ComponentRef
               local outComponentRef::DAE.ComponentRef
 
               local i::ModelicaInteger
@@ -112,7 +112,7 @@
         end
 
          #= This function returns true if the Class is not a function. =#
-        function isNotFunction(cls::SCode.Element) ::Bool 
+        function isNotFunction(cls::SCode.Element) ::Bool
               local res::Bool
 
               res = SCodeUtil.isFunction(cls)
@@ -120,7 +120,7 @@
           res
         end
 
-        function scodeFlatten(inProgram::SCode.Program, inPath::Absyn.Path) ::SCode.Program 
+        function scodeFlatten(inProgram::SCode.Program, inPath::Absyn.Path) ::SCode.Program
               local outProgram::SCode.Program
 
               outProgram = begin
@@ -129,12 +129,12 @@
                       @match false = Flags.isSet(Flags.DO_SCODE_DEP)
                     inProgram
                   end
-                  
+
                   (_, Absyn.IDENT(""))  => begin
                       outProgram = scodeFlattenProgram(inProgram)
                     outProgram
                   end
-                  
+
                   _  => begin
                         (outProgram, _) = NFSCodeFlatten.flattenClassInProgram(inPath, inProgram)
                       outProgram
@@ -144,7 +144,7 @@
           outProgram
         end
 
-        function scodeFlattenProgram(inProgram::SCode.Program) ::SCode.Program 
+        function scodeFlattenProgram(inProgram::SCode.Program) ::SCode.Program
               local outProgram::SCode.Program
 
               outProgram = begin
@@ -155,7 +155,7 @@
                       ErrorExt.delCheckpoint("scodeFlattenProgram")
                     outProgram
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("scodeFlattenProgram")
                       inProgram
@@ -165,12 +165,12 @@
           outProgram
         end
 
-         #= 
+         #=
         Author BZ
         This is a backpatch to fix the case of 'connection.isRoot' in initial if equations.
         After the class is instantiated a second sweep is done to check the initial if equations conditions.
         If all conditions are constant, we return only the 'correct' branch equations. =#
-        function reEvaluateInitialIfEqns(cache::FCore.Cache, env::FCore.Graph, dae::DAE.DAElist, isTopCall::Bool) ::DAE.DAElist 
+        function reEvaluateInitialIfEqns(cache::FCore.Cache, env::FCore.Graph, dae::DAE.DAElist, isTopCall::Bool) ::DAE.DAElist
               local odae::DAE.DAElist
 
               odae = begin
@@ -180,7 +180,7 @@
                       elems = listReverse(ListUtil.fold2r(elems, reEvaluateInitialIfEqns2, cache, env, nil))
                     DAE.DAE(elems)
                   end
-                  
+
                   (_, _, _, false)  => begin
                     dae
                   end
@@ -190,7 +190,7 @@
         end
 
          #=  =#
-        function reEvaluateInitialIfEqns2(acc::List{<:DAE.Element}, elem::DAE.Element, inCache::FCore.Cache, env::FCore.Graph) ::List{DAE.Element} 
+        function reEvaluateInitialIfEqns2(acc::List{<:DAE.Element}, elem::DAE.Element, inCache::FCore.Cache, env::FCore.Graph) ::List{DAE.Element}
               local oelems::List{DAE.Element}
 
               oelems = begin
@@ -210,7 +210,7 @@
                       selectedBranch = makeDAEElementInitial(selectedBranch)
                     listAppend(selectedBranch, acc)
                   end
-                  
+
                   _  => begin
                       _cons(elem, acc)
                   end
@@ -223,10 +223,10 @@
           oelems
         end
 
-         #= 
+         #=
         Author BZ
         Helper function for reEvaluateInitialIfEqns, makes the contenst of an initial if equation initial. =#
-        function makeDAEElementInitial(inElems::List{<:DAE.Element}) ::List{DAE.Element} 
+        function makeDAEElementInitial(inElems::List{<:DAE.Element}) ::List{DAE.Element}
               local outElems::List{DAE.Element}
 
               outElems = begin
@@ -245,37 +245,37 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   DAE.DEFINE(cr, e1, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIALDEFINE(cr, e1, s), outElems)
                   end
-                  
+
                   DAE.ARRAY_EQUATION(dims, e1, e2, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIAL_ARRAY_EQUATION(dims, e1, e2, s), outElems)
                   end
-                  
+
                   DAE.EQUATION(e1, e2, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIALEQUATION(e1, e2, s), outElems)
                   end
-                  
+
                   DAE.IF_EQUATION(expl, tbs, fb, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIAL_IF_EQUATION(expl, tbs, fb, s), outElems)
                   end
-                  
+
                   DAE.ALGORITHM(al, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIALALGORITHM(al, s), outElems)
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(e1, e2, s) <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(DAE.INITIAL_COMPLEX_EQUATION(e1, e2, s), outElems)
                   end
-                  
+
                   elem <| elems  => begin
                       outElems = makeDAEElementInitial(elems)
                     _cons(elem, outElems)
@@ -288,7 +288,7 @@
         end
 
          #= Looks up a top level class with the given name. =#
-        function lookupTopLevelClass(inName::String, inProgram::SCode.Program, inPrintError::Bool) ::SCode.Element 
+        function lookupTopLevelClass(inName::String, inProgram::SCode.Program, inPrintError::Bool) ::SCode.Element
               local outClass::SCode.Element
 
               outClass = begin
@@ -298,7 +298,7 @@
                       cls = ListUtil.getMemberOnTrue(inName, inProgram, SCodeUtil.isClassNamed)
                     cls
                   end
-                  
+
                   (_, _, true)  => begin
                       Error.addMessage(Error.LOAD_MODEL_ERROR, list(inName))
                     fail()
@@ -310,7 +310,7 @@
 
          #= Fixes the type of a class if it is uniontype or function reference.
           These are MetaModelica extensions. =#
-        function fixInstClassType(ty::DAE.Type, isPartialFn::Bool) ::DAE.Type 
+        function fixInstClassType(ty::DAE.Type, isPartialFn::Bool) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -326,11 +326,11 @@
                       @match "OpenModelica" = AbsynUtil.pathLastIdent(path2)
                     Util.assoc(name, list(("Expression", DAE.T_CODE(DAE.C_EXPRESSION())), ("ExpressionOrModification", DAE.T_CODE(DAE.C_EXPRESSION_OR_MODIFICATION())), ("TypeName", DAE.T_CODE(DAE.C_TYPENAME())), ("VariableName", DAE.T_CODE(DAE.C_VARIABLENAME())), ("VariableNames", DAE.T_CODE(DAE.C_VARIABLENAMES()))))
                   end
-                  
+
                   (_, false)  => begin
                     ty
                   end
-                  
+
                   (_, true)  => begin
                     Types.makeFunctionPolymorphicReference(ty)
                   end
@@ -339,7 +339,7 @@
           outType
         end
 
-        function updateEnumerationEnvironment(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inClass::SCode.Element, inCi_State::ClassInf.State) ::Tuple{FCore.Cache, FCore.Graph} 
+        function updateEnumerationEnvironment(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inClass::SCode.Element, inCi_State::ClassInf.State) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -358,7 +358,7 @@
                       (cache, env_1) = updateEnumerationEnvironment1(cache, env, AbsynUtil.pathString(pname), names, vars, p)
                     (cache, env_1)
                   end
-                  
+
                   (cache, env, _, _, _)  => begin
                     (cache, env)
                   end
@@ -368,7 +368,7 @@
         end
 
          #= update enumeration value in environment =#
-        function updateEnumerationEnvironment1(inCache::FCore.Cache, inEnv::FCore.Graph, inName::Absyn.Ident, inNames::List{<:String}, inVars::List{<:DAE.Var}, inPath::Absyn.Path) ::Tuple{FCore.Cache, FCore.Graph} 
+        function updateEnumerationEnvironment1(inCache::FCore.Cache, inEnv::FCore.Graph, inName::Absyn.Ident, inNames::List{<:String}, inVars::List{<:DAE.Var}, inPath::Absyn.Path) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -398,7 +398,7 @@
                       (cache, env_2) = updateEnumerationEnvironment1(cache, env_1, name, names, vars, p)
                     (cache, env_2)
                   end
-                  
+
                   (cache, env, _,  nil(), _, _)  => begin
                     (cache, env)
                   end
@@ -418,7 +418,7 @@
         end
 
          #= updates the deduced units in each DAE.VAR =#
-        function updateDeducedUnits(callScope::Bool, store::UnitAbsyn.InstStore, dae::DAE.DAElist) ::DAE.DAElist 
+        function updateDeducedUnits(callScope::Bool, store::UnitAbsyn.InstStore, dae::DAE.DAElist) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -431,7 +431,7 @@
                       elts = ListUtil.map2(elts, updateDeducedUnits2, vec, ht)
                     DAE.DAE(elts)
                   end
-                  
+
                   _  => begin
                       dae
                   end
@@ -441,7 +441,7 @@
         end
 
          #= updates the deduced units in each DAE.VAR =#
-        function updateDeducedUnits2(elt::DAE.Element, vec::Array{<:Option{<:UnitAbsyn.Unit}}, ht::HashTable.HashTable) ::DAE.Element 
+        function updateDeducedUnits2(elt::DAE.Element, vec::Array{<:Option{<:UnitAbsyn.Unit}}, ht::HashTable.HashTable) ::DAE.Element
               local oelt::DAE.Element
 
               oelt = begin
@@ -459,7 +459,7 @@
                       varOpt = DAEUtil.setUnitAttr(varOpt, DAE.SCONST(unitStr))
                     DAEUtil.setVariableAttributes(elt, varOpt)
                   end
-                  
+
                   _  => begin
                       elt
                   end
@@ -469,7 +469,7 @@
         end
 
          #= reports CONSISTENT or INCOMPLETE error message depending on content of store =#
-        function reportUnitConsistency(topScope::Bool, store::UnitAbsyn.InstStore)  
+        function reportUnitConsistency(topScope::Bool, store::UnitAbsyn.InstStore)
               _ = begin
                   local complete::Bool
                   local st::UnitAbsyn.Store
@@ -478,7 +478,7 @@
                       @match false = Flags.getConfigBool(Flags.UNIT_CHECKING)
                     ()
                   end
-                  
+
                   (true, UnitAbsyn.INSTSTORE(st, _, SOME(UnitAbsyn.CONSISTENT(__))))  => begin
                       (complete, _) = UnitChecker.isComplete(st)
                       Error.addMessage(if complete
@@ -488,7 +488,7 @@
                           end, nil)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -498,7 +498,7 @@
 
          #= Author: BZ, 2009-09
          Extract the part before the conector ex: a.b.c.connector_d.e would return a.b.c =#
-        function extractConnectorPrefix(connectorRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function extractConnectorPrefix(connectorRef::DAE.ComponentRef) ::DAE.ComponentRef
               local prefixCon::DAE.ComponentRef
 
               prefixCon = begin
@@ -512,11 +512,11 @@
                   DAE.CREF_IDENT(_, _, _)  => begin
                     fail()
                   end
-                  
+
                   DAE.CREF_QUAL(name, ty && DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)), subs, _)  => begin
                     ComponentReference.makeCrefIdent(name, ty, subs)
                   end
-                  
+
                   DAE.CREF_QUAL(name, ty, subs, child)  => begin
                       child = extractConnectorPrefix(child)
                     ComponentReference.makeCrefQual(name, ty, subs, child)
@@ -528,10 +528,10 @@
           prefixCon
         end
 
-         #= 
+         #=
         Author: BZ, 2009-09
         Helper function for updateTypesInUnconnectedConnectors2 =#
-        function updateCrefTypesWithConnectorPrefix(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::DAE.ComponentRef 
+        function updateCrefTypesWithConnectorPrefix(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -546,13 +546,13 @@
                       @match true = stringEq(name, name2)
                     ComponentReference.makeCrefQual(name, ty, subs, child2)
                   end
-                  
+
                   (DAE.CREF_QUAL(name, ty, subs, child), DAE.CREF_QUAL(name2, _, _, child2))  => begin
                       @match true = stringEq(name, name2)
                       outCref = updateCrefTypesWithConnectorPrefix(child, child2)
                     ComponentReference.makeCrefQual(name, ty, subs, outCref)
                   end
-                  
+
                   _  => begin
                         print(" ***** FAILURE with " + ComponentReference.printComponentRefStr(cr1) + " _and_ " + ComponentReference.printComponentRefStr(cr2) + "\\n")
                       fail()
@@ -562,7 +562,7 @@
           outCref
         end
 
-        function checkClassEqual(c1::SCode.Element, c2::SCode.Element) ::Bool 
+        function checkClassEqual(c1::SCode.Element, c2::SCode.Element) ::Bool
               local areEqual::Bool
 
               areEqual = begin
@@ -581,28 +581,28 @@
                       @shouldFail equality(c1, c2)
                     false
                   end
-                  
+
                   (SCode.CLASS(restriction = SCode.R_TYPE(__)), _)  => begin
                       @shouldFail equality(c1, c2)
                     false
                   end
-                  
+
                   (SCode.CLASS(restriction = r), _)  => begin
                       @match false = SCodeUtil.isFunctionRestriction(r)
                     true
                   end
-                  
+
                   (SCode.CLASS(classDef = SCode.PARTS(normalAlgorithmLst = normalAlgorithmLst1, initialAlgorithmLst = initialAlgorithmLst1)), SCode.CLASS(classDef = SCode.PARTS(normalAlgorithmLst = normalAlgorithmLst2, initialAlgorithmLst = initialAlgorithmLst2)))  => begin
                       @match true = intEq(listLength(normalAlgorithmLst1), listLength(normalAlgorithmLst2))
                       @match true = intEq(listLength(initialAlgorithmLst1), listLength(initialAlgorithmLst2))
                     true
                   end
-                  
+
                   (SCode.CLASS(classDef = cd1 && SCode.DERIVED(__)), SCode.CLASS(classDef = cd2 && SCode.DERIVED(__)))  => begin
                       equality(cd1, cd2)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -628,7 +628,7 @@
          #= Checks if two prefixes are equal, unless the class is a
          basic type, i.e. all reals, integers, enumerations with
          the same name, etc. are equal. =#
-        function prefixEqualUnlessBasicType(pre1::Prefix.Prefix, pre2::Prefix.Prefix, cls::SCode.Element)  
+        function prefixEqualUnlessBasicType(pre1::Prefix.Prefix, pre2::Prefix.Prefix, cls::SCode.Element)
               _ = begin
                   local idn::String
                    #=  adrpo: TODO! FIXME!, I think here we should have pre1 = Prefix.CLASSPRE(variability1) == pre2 = Prefix.CLASSPRE(variability2)
@@ -645,40 +645,40 @@
                   (_, _, SCode.CLASS(restriction = SCode.R_ENUMERATION(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_ENUMERATION(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_INTEGER(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_REAL(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_STRING(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_BOOLEAN(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(restriction = SCode.R_PREDEFINED_CLOCK(__)))  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(name = idn)) where (idn == "Real" || idn == "Integer" || idn == "String" || idn == "Boolean")  => begin
                     ()
                   end
-                  
+
                   (_, _, SCode.CLASS(name = "Clock"))  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     ()
                   end
-                  
+
                   _  => begin
                         equality(pre1, pre2)
                       ()
@@ -699,9 +699,9 @@
                =#
         end
 
-         #= 
+         #=
         Author: BZ, this function identifies built in classes. =#
-        function isBuiltInClass(className::String) ::Bool 
+        function isBuiltInClass(className::String) ::Bool
               local b::Bool
 
               b = begin
@@ -709,23 +709,23 @@
                   "Real"  => begin
                     true
                   end
-                  
+
                   "Integer"  => begin
                     true
                   end
-                  
+
                   "String"  => begin
                     true
                   end
-                  
+
                   "Boolean"  => begin
                     true
                   end
-                  
+
                   "Clock"  => begin
                     Config.synchronousFeaturesAllowed()
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -736,7 +736,7 @@
           b
         end
 
-        function equalityConstraintOutputDimension(inElements::List{<:SCode.Element}) ::ModelicaInteger 
+        function equalityConstraintOutputDimension(inElements::List{<:SCode.Element}) ::ModelicaInteger
               local outDimension::ModelicaInteger
 
               outDimension = begin
@@ -746,11 +746,11 @@
                    nil()  => begin
                     0
                   end
-                  
+
                   SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.OUTPUT(__), arrayDims = Absyn.SUBSCRIPT(Absyn.INTEGER(dim)) <|  nil())) <| _  => begin
                     dim
                   end
-                  
+
                   _ <| tail  => begin
                       dim = equalityConstraintOutputDimension(tail)
                     dim
@@ -762,7 +762,7 @@
 
          #=   Tests if the given elements contain equalityConstraint function and returns
             corresponding DAE.EqualityConstraint. =#
-        function equalityConstraint(inEnv::FCore.Graph, inCdefelts::List{<:SCode.Element}, info::SourceInfo) ::DAE.EqualityConstraint 
+        function equalityConstraint(inEnv::FCore.Graph, inCdefelts::List{<:SCode.Element}, info::SourceInfo) ::DAE.EqualityConstraint
               local outResult::DAE.EqualityConstraint = NONE()
 
               local els::List{SCode.Element}
@@ -792,7 +792,7 @@
 
          #= @author: adrpo
          do this unit checking ONLY if we have the flag! =#
-        function handleUnitChecking(cache::FCore.Cache, env::FCore.Graph, inStore::UnitAbsyn.InstStore, pre::Prefix.Prefix, compDAE::DAE.DAElist, daes::List{<:DAE.DAElist}, className::String #= for debugging =#) ::Tuple{FCore.Cache, FCore.Graph, UnitAbsyn.InstStore} 
+        function handleUnitChecking(cache::FCore.Cache, env::FCore.Graph, inStore::UnitAbsyn.InstStore, pre::Prefix.Prefix, compDAE::DAE.DAElist, daes::List{<:DAE.DAElist}, className::String #= for debugging =#) ::Tuple{FCore.Cache, FCore.Graph, UnitAbsyn.InstStore}
               local outStore::UnitAbsyn.InstStore
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -807,7 +807,7 @@
                   (_, _, store, _, _, _, _) where (! Flags.getConfigBool(Flags.UNIT_CHECKING))  => begin
                     (cache, env, store)
                   end
-                  
+
                   (_, _, store, _, _, _, _)  => begin
                       daetemp = DAEUtil.joinDaeLst(daes)
                       (store, ut) = UnitAbsynBuilder.instBuildUnitTerms(env, daetemp, compDAE, store)
@@ -847,89 +847,89 @@
         end
 
          #= see Modelica Specfification 3.1, 7.1.3 Restrictions on the Kind of Base Class =#
-        function checkExtendsRestrictionMatch(r1::SCode.Restriction, r2::SCode.Restriction)  
+        function checkExtendsRestrictionMatch(r1::SCode.Restriction, r2::SCode.Restriction)
               _ = begin
                 @match (r1, r2) begin
                   (SCode.R_PACKAGE(__), SCode.R_PACKAGE(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)), SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(_)), SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__)), SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__)), SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__)))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_TYPE(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_RECORD(_), SCode.R_RECORD(_))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CONNECTOR(_), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CONNECTOR(_), SCode.R_RECORD(_))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CONNECTOR(_), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_BLOCK(__), SCode.R_RECORD(false))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_BLOCK(__), SCode.R_BLOCK(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_MODEL(__), SCode.R_RECORD(false))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_MODEL(__), SCode.R_BLOCK(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_MODEL(__), SCode.R_MODEL(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_MODEL(__), SCode.R_CLASS(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CLASS(__), SCode.R_MODEL(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CLASS(__), SCode.R_RECORD(_))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CLASS(__), SCode.R_BLOCK(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_CLASS(__), SCode.R_CLASS(__))  => begin
                     ()
                   end
-                  
+
                   (SCode.R_OPERATOR(__), SCode.R_OPERATOR(__))  => begin
                     ()
                   end
@@ -983,7 +983,7 @@
 
          #= @author: adrpo
           This function will check extends for Modelica 3.1 restrictions =#
-        function checkExtendsForTypeRestiction(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inRestriction::SCode.Restriction, inSCodeElementLst::List{<:SCode.Element})  
+        function checkExtendsForTypeRestiction(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inRestriction::SCode.Restriction, inSCodeElementLst::List{<:SCode.Element})
               _ = begin
                   local p::Absyn.Path
                   local r1::SCode.Restriction
@@ -1000,25 +1000,25 @@
                       @match true = listMember(id, list("Real", "Integer", "Boolean", "String"))
                     ()
                   end
-                  
+
                   (_, _, _, r, SCode.EXTENDS(baseClassPath = Absyn.IDENT(id)) <|  nil())  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                       @match true = listMember(r, list(SCode.R_TYPE(), SCode.R_CONNECTOR(false), SCode.R_CONNECTOR(true)))
                       @match true = listMember(id, list("Real", "Integer", "Boolean", "String", "Clock"))
                     ()
                   end
-                  
+
                   (_, _, _, _, SCode.EXTENDS(baseClassPath = p) <|  nil())  => begin
                       @shouldFail (_, _, _) = Lookup.lookupClass(inCache, inEnv, p)
                     ()
                   end
-                  
+
                   (_, _, _, r1, SCode.EXTENDS(baseClassPath = p) <|  nil())  => begin
                       @match (_, SCode.CLASS(restriction = r2), _) = Lookup.lookupClass(inCache, inEnv, p)
                       checkExtendsRestrictionMatch(r1, r2)
                     ()
                   end
-                  
+
                   (_, _, _, r1, SCode.EXTENDS(baseClassPath = p) <|  nil())  => begin
                       @match (_, SCode.CLASS(restriction = r2), _) = Lookup.lookupClass(inCache, inEnv, p)
                       print("Error!: " + SCodeDump.restrString(r1) + " " + FGraph.printGraphPathStr(inEnv) + " cannot be extended by " + SCodeDump.restrString(r2) + " " + AbsynUtil.pathString(p) + " due to derived/base class restrictions.\\n")
@@ -1036,7 +1036,7 @@
                =#
         end
 
-        function checkDerivedRestriction(parentRestriction::SCode.Restriction, childRestriction::SCode.Restriction, childName::SCode.Ident) ::Bool 
+        function checkDerivedRestriction(parentRestriction::SCode.Restriction, childRestriction::SCode.Restriction, childName::SCode.Ident) ::Bool
               local b::Bool
 
               local b1::Bool
@@ -1072,11 +1072,11 @@
           b
         end
 
-         #= 
+         #=
         Author: BZ, 2009-05
         This function is called from instClassDef, recursivly remove modifers on each component.
         What ever is left in modifier is printed as a warning. That means that we have modifiers on a component that does not exist. =#
-        function matchModificationToComponents(inElems::List{<:SCode.Element}, inmod::DAE.Mod, callingScope::String)  
+        function matchModificationToComponents(inElems::List{<:SCode.Element}, inmod::DAE.Mod, callingScope::String)
               _ = begin
                   local elem::SCode.Element
                   local cn::String
@@ -1088,40 +1088,40 @@
                   (_, DAE.NOMOD(__), _)  => begin
                     ()
                   end
-                  
+
                   (_, DAE.MOD(subModLst =  nil()), _)  => begin
                     ()
                   end
-                  
+
                   ( nil(), _, _)  => begin
                       s1 = Mod.prettyPrintMod(inmod, 0)
                       s2 = s1 + " not found in <" + callingScope + ">"
                       Error.addMessage(Error.UNUSED_MODIFIER, list(s2))
                     fail()
                   end
-                  
+
                   (SCode.COMPONENT(name = cn) <| elems, mod, _)  => begin
                       mod = Mod.removeMod(mod, cn)
                       matchModificationToComponents(elems, mod, callingScope)
                     ()
                   end
-                  
+
                   (SCode.EXTENDS(__) <| elems, _, _)  => begin
                       matchModificationToComponents(elems, inmod, callingScope)
                     ()
                   end
-                  
+
                   (SCode.CLASS(name = cn, prefixes = SCode.PREFIXES(__)) <| elems, mod, _)  => begin
                       mod = Mod.removeMod(mod, cn)
                       matchModificationToComponents(elems, mod, callingScope)
                     ()
                   end
-                  
+
                   (SCode.IMPORT(__) <| elems, _, _)  => begin
                       matchModificationToComponents(elems, inmod, callingScope)
                     ()
                   end
-                  
+
                   (SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.NOT_REPLACEABLE(__))) <| elems, _, _)  => begin
                       matchModificationToComponents(elems, inmod, callingScope)
                     ()
@@ -1137,16 +1137,16 @@
         end
 
          #= Returns true if the given element is in the list =#
-        function elementNameMember(inElement::Tuple{<:SCode.Element, DAE.Mod}, els::List{<:SCode.Element}) ::Bool 
+        function elementNameMember(inElement::Tuple{<:SCode.Element, DAE.Mod}, els::List{<:SCode.Element}) ::Bool
               local isNamed::Bool
 
               isNamed = listMember(Util.tuple21(inElement), els)
           isNamed
         end
 
-         #= 
+         #=
         Author: adrpo, see extractConstantPlusDeps for comments =#
-        function extractConstantPlusDepsTpl(inComps::List{<:Tuple{<:SCode.Element, DAE.Mod}}, ocr::Option{<:DAE.ComponentRef}, allComps::List{<:SCode.Element}, className::String, ieql::List{<:SCode.Equation}, iieql::List{<:SCode.Equation}, ialgs::List{<:SCode.AlgorithmSection}, iialgs::List{<:SCode.AlgorithmSection}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}} 
+        function extractConstantPlusDepsTpl(inComps::List{<:Tuple{<:SCode.Element, DAE.Mod}}, ocr::Option{<:DAE.ComponentRef}, allComps::List{<:SCode.Element}, className::String, ieql::List{<:SCode.Equation}, iieql::List{<:SCode.Equation}, ialgs::List{<:SCode.AlgorithmSection}, iialgs::List{<:SCode.AlgorithmSection}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}}
               local oialgs::List{SCode.AlgorithmSection}
               local oalgs::List{SCode.AlgorithmSection}
               local oieql::List{SCode.Equation}
@@ -1163,11 +1163,11 @@
                   ( nil(), _, _, _, _, _, _, _)  => begin
                     (nil, ieql, iieql, ialgs, iialgs)
                   end
-                  
+
                   (_, NONE(), _, _, _, _, _, _)  => begin
                     (inComps, ieql, iieql, ialgs, iialgs)
                   end
-                  
+
                   (_, SOME(_), _, _, _, _, _, _)  => begin
                       lst = ListUtil.map(inComps, Util.tuple21)
                       lst = extractConstantPlusDeps2(lst, ocr, allComps, className, nil)
@@ -1176,7 +1176,7 @@
                       oel = ListUtil.filter1OnTrue(inComps, elementNameMember, lst)
                     (oel, nil, nil, nil, nil)
                   end
-                  
+
                   (_, SOME(cr), _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- InstUtil.extractConstantPlusDeps failure to find " + ComponentReference.printComponentRefStr(cr) + ", returning \\n")
@@ -1194,7 +1194,7 @@
           (oel, oeql, oieql, oalgs, oialgs)
         end
 
-         #= 
+         #=
         Author: BZ, 2009-04
         This function filters the list of elements to instantiate depending on optional(DAE.ComponentRef), the
         optional argument is set in Lookup.lookupVarInPackages.
@@ -1207,7 +1207,7 @@
         If the component specified in argument 2 is not found, we return all extend and import statements.
         TODO: search import and extends statements for specified variable.
               this includes to check class definitions to so that we do not need to instantiate local class definitions while looking for a constant. =#
-        function extractConstantPlusDeps(inComps::List{<:SCode.Element}, ocr::Option{<:DAE.ComponentRef}, allComps::List{<:SCode.Element}, className::String) ::List{SCode.Element} 
+        function extractConstantPlusDeps(inComps::List{<:SCode.Element}, ocr::Option{<:DAE.ComponentRef}, allComps::List{<:SCode.Element}, className::String) ::List{SCode.Element}
               local outComps::List{SCode.Element}
 
               outComps = begin
@@ -1222,14 +1222,14 @@
                   (_, NONE(), _, _)  => begin
                     inComps
                   end
-                  
+
                   (_, SOME(_), _, _)  => begin
                       outComps = extractConstantPlusDeps2(inComps, ocr, allComps, className, nil)
                       @match false = listEmpty(outComps)
                       outComps = listReverse(outComps)
                     outComps
                   end
-                  
+
                   (_, SOME(cr), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- InstUtil.extractConstantPlusDeps failure to find " + ComponentReference.printComponentRefStr(cr) + ", returning \\n")
@@ -1249,10 +1249,10 @@
           outComps
         end
 
-         #= 
+         #=
         Author: BZ, 2009-04
         Helper function for extractConstantPlusDeps =#
-        function extractConstantPlusDeps2(inComps::List{<:SCode.Element}, ocr::Option{<:DAE.ComponentRef}, inAllComps::List{<:SCode.Element}, className::String, inExisting::List{<:String}) ::List{SCode.Element} 
+        function extractConstantPlusDeps2(inComps::List{<:SCode.Element}, ocr::Option{<:DAE.ComponentRef}, inAllComps::List{<:SCode.Element}, className::String, inExisting::List{<:String}) ::List{SCode.Element}
               local outComps::List{SCode.Element}
 
               outComps = begin
@@ -1272,22 +1272,22 @@
                   ( nil(), SOME(_), _, _, _)  => begin
                     nil
                   end
-                  
+
                   ( nil(), _, _, _, _)  => begin
                     fail()
                   end
-                  
+
                   (_, NONE(), _, _, _)  => begin
                     inComps
                   end
-                  
+
                   (selem && SCode.CLASS(name = name2) <| comps, SOME(DAE.CREF_IDENT(__)), allComps, _, existing)  => begin
                       allComps = _cons(selem, allComps)
                       existing = _cons(name2, existing)
                       outComps = extractConstantPlusDeps2(comps, ocr, allComps, className, existing)
                     _cons(selem, outComps)
                   end
-                  
+
                   (selem && SCode.COMPONENT(name = name2, modifications = scmod) <| comps, SOME(DAE.CREF_IDENT(ident = name)), allComps, _, existing)  => begin
                       @match true = stringEq(name, name2)
                       crefs = getCrefFromMod(scmod)
@@ -1296,31 +1296,31 @@
                       recDeps = extractConstantPlusDeps3(crefs, allComps, className, existing)
                     _cons(selem, recDeps)
                   end
-                  
+
                   (selem && SCode.COMPONENT(name = name2) <| comps, SOME(DAE.CREF_IDENT(ident = name)), allComps, _, existing)  => begin
                       @match false = stringEq(name, name2)
                       allComps = _cons(selem, allComps)
                     extractConstantPlusDeps2(comps, ocr, allComps, className, existing)
                   end
-                  
+
                   (compMod && SCode.EXTENDS(__) <| comps, SOME(DAE.CREF_IDENT(__)), allComps, _, existing)  => begin
                       allComps = _cons(compMod, allComps)
                       recDeps = extractConstantPlusDeps2(comps, ocr, allComps, className, existing)
                     _cons(compMod, recDeps)
                   end
-                  
+
                   (compMod && SCode.IMPORT(__) <| comps, SOME(DAE.CREF_IDENT(__)), allComps, _, existing)  => begin
                       allComps = _cons(compMod, allComps)
                       recDeps = extractConstantPlusDeps2(comps, ocr, allComps, className, existing)
                     _cons(compMod, recDeps)
                   end
-                  
+
                   (compMod && SCode.DEFINEUNIT(__) <| comps, SOME(DAE.CREF_IDENT(__)), allComps, _, existing)  => begin
                       allComps = _cons(compMod, allComps)
                       recDeps = extractConstantPlusDeps2(comps, ocr, allComps, className, existing)
                     _cons(compMod, recDeps)
                   end
-                  
+
                   _  => begin
                         print(" failure in get_Constant_PlusDeps \\n")
                       fail()
@@ -1346,10 +1346,10 @@
           outComps
         end
 
-         #= 
+         #=
         Author: BZ, 2009-04
         Helper function for extractConstantPlusDeps =#
-        function extractConstantPlusDeps3(inAcrefs::List{<:Absyn.ComponentRef}, remainingComps::List{<:SCode.Element}, className::String, inExisting::List{<:String}) ::List{SCode.Element} 
+        function extractConstantPlusDeps3(inAcrefs::List{<:Absyn.ComponentRef}, remainingComps::List{<:SCode.Element}, className::String, inExisting::List{<:String}) ::List{SCode.Element}
               local outComps::List{SCode.Element}
 
               outComps = begin
@@ -1365,24 +1365,24 @@
                   ( nil(), _, _, _)  => begin
                     nil
                   end
-                  
+
                   (Absyn.CREF_FULLYQUALIFIED(acr) <| acrefs, _, _, existing)  => begin
                     extractConstantPlusDeps3(_cons(acr, acrefs), remainingComps, className, existing)
                   end
-                  
+
                   (Absyn.CREF_QUAL(s1, _, acr && Absyn.CREF_IDENT(_, _)) <| acrefs, _, _, existing) where (stringEq(className, s1))  => begin
                     extractConstantPlusDeps3(_cons(acr, acrefs), remainingComps, className, existing)
                   end
-                  
+
                   (Absyn.CREF_QUAL(_, _, _) <| acrefs, _, _, existing)  => begin
                       outComps = extractConstantPlusDeps3(acrefs, remainingComps, className, existing)
                     outComps
                   end
-                  
+
                   (Absyn.CREF_IDENT(s1, _) <| acrefs, _, _, existing) where (ListUtil.isMemberOnTrue(s1, existing, stringEq))  => begin
                     extractConstantPlusDeps3(acrefs, remainingComps, className, existing)
                   end
-                  
+
                   (Absyn.CREF_IDENT(s1, _) <| acrefs, _, _, existing)  => begin
                       cref_ = ComponentReference.makeCrefIdent(s1, DAE.T_UNKNOWN_DEFAULT, nil)
                       localComps = extractConstantPlusDeps2(remainingComps, SOME(cref_), nil, className, existing)
@@ -1408,7 +1408,7 @@
          Examples:
            removeSelfReference('Icons', 'Icons.BaseLibrary') => 'BaseLibrary'
            removeSelfReference('Icons', 'BlaBla.BaseLibrary') => 'BlaBla.BaseLibrary' =#
-        function removeSelfReference(className::String, path::Absyn.Path) ::Absyn.Path 
+        function removeSelfReference(className::String, path::Absyn.Path) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = if stringEq(className, AbsynUtil.pathFirstIdent(path))
@@ -1420,7 +1420,7 @@
         end
 
          #= prints the tuple of elements and modifiers to stdout =#
-        function printExtcomps(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}})  
+        function printExtcomps(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}})
               _ = begin
                   local s::String
                   local el::SCode.Element
@@ -1430,7 +1430,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   (el, mod) <| els  => begin
                       s = SCodeDump.unparseElementStr(el, SCodeDump.defaultOptions)
                       print(s)
@@ -1447,7 +1447,7 @@
          #= Returns only elements that are constants or have annotation(Evaluate = true)!
          author: PA & adrpo
          Used buy partialInstClassdef to instantiate constants in packages. =#
-        function constantEls(elements::List{<:SCode.Element}) ::List{SCode.Element} 
+        function constantEls(elements::List{<:SCode.Element}) ::List{SCode.Element}
               local outElements::List{SCode.Element}
 
               local attr::SCode.Attributes
@@ -1457,7 +1457,7 @@
                    SCode.COMPONENT(attributes = attr)  => begin
                      SCodeUtil.isConstant(SCodeUtil.attrVariability(attr))
                    end
-                   
+
                    _  => begin
                        false
                    end
@@ -1469,7 +1469,7 @@
          #= Returns only elements that are constants.
          author: @adrpo
          Used by partialInstClassdef to instantiate constants and parameters in packages. =#
-        function constantAndParameterEls(elements::List{<:SCode.Element}) ::List{SCode.Element} 
+        function constantAndParameterEls(elements::List{<:SCode.Element}) ::List{SCode.Element}
               local outElements::List{SCode.Element}
 
               local attr::SCode.Attributes
@@ -1479,7 +1479,7 @@
                    SCode.COMPONENT(attributes = attr)  => begin
                      SCodeUtil.isParameterOrConst(SCodeUtil.attrVariability(attr))
                    end
-                   
+
                    _  => begin
                        false
                    end
@@ -1489,7 +1489,7 @@
         end
 
          #= remove bindings for all elements if we do partial instantiation =#
-        function removeBindings(elements::List{<:SCode.Element}) ::List{SCode.Element} 
+        function removeBindings(elements::List{<:SCode.Element}) ::List{SCode.Element}
               local outElements::List{SCode.Element}
 
               outElements = begin
@@ -1508,12 +1508,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   SCode.COMPONENT(name, prefixes, attributes, typeSpec, _, comment, condition, info) <| els  => begin
                       els1 = removeBindings(els)
                     _cons(SCode.COMPONENT(name, prefixes, attributes, typeSpec, SCode.NOMOD(), comment, condition, info), els1)
                   end
-                  
+
                   el <| els  => begin
                       els1 = removeBindings(els)
                     _cons(el, els1)
@@ -1524,7 +1524,7 @@
         end
 
          #= remove bindings for all elements if we do partial instantiation =#
-        function removeExtBindings(elements::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function removeExtBindings(elements::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outElements::List{Tuple{SCode.Element, DAE.Mod}}
 
               outElements = begin
@@ -1543,12 +1543,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   (SCode.COMPONENT(name, prefixes, attributes, typeSpec, _, comment, condition, info), _) <| els  => begin
                       els1 = removeExtBindings(els)
                     _cons((SCode.COMPONENT(name, prefixes, attributes, typeSpec, SCode.NOMOD(), comment, condition, info), DAE.NOMOD()), els1)
                   end
-                  
+
                   el <| els  => begin
                       els1 = removeExtBindings(els)
                     _cons(el, els1)
@@ -1558,10 +1558,10 @@
           outElements
         end
 
-         #= 
+         #=
         Author: BZ, 2009-08
         Extract modifer for dependent variables(dep). =#
-        function getModsForDep(inDepCref::Absyn.ComponentRef, inElems::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::DAE.Mod 
+        function getModsForDep(inDepCref::Absyn.ComponentRef, inElems::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::DAE.Mod
               local omods::DAE.Mod
 
               omods = begin
@@ -1575,18 +1575,18 @@
                   (_,  nil())  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (dep, (SCode.COMPONENT(__), DAE.NOMOD(__)) <| elems)  => begin
                     getModsForDep(dep, elems)
                   end
-                  
+
                   (dep, (SCode.COMPONENT(name = name1), cmod) <| _)  => begin
                       name2 = AbsynUtil.printComponentRefStr(dep)
                       @match true = stringEq(name2, name1)
                       cmod = DAE.MOD(SCode.NOT_FINAL(), SCode.NOT_EACH(), list(DAE.NAMEMOD(name2, cmod)), NONE(), AbsynUtil.dummyInfo)
                     cmod
                   end
-                  
+
                   (dep, _ <| elems)  => begin
                       cmod = getModsForDep(dep, elems)
                     cmod
@@ -1598,7 +1598,7 @@
 
          #= Return the Arraydim of an optional arradim.
           Empty list returned if no arraydim present. =#
-        function getOptionArraydim(inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}) ::Absyn.ArrayDim 
+        function getOptionArraydim(inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}) ::Absyn.ArrayDim
               local outArrayDim::Absyn.ArrayDim
 
               outArrayDim = begin
@@ -1607,7 +1607,7 @@
                   SOME(dim)  => begin
                     dim
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -1620,7 +1620,7 @@
           (SCode.Element Mod) list by inserting DAE.NOMOD() for each element.
           Used to transform elements into a uniform list combined from inherited
           elements and ordinary elements. =#
-        function addNomod(inElements::List{<:SCode.Element}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function addNomod(inElements::List{<:SCode.Element}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outElements::List{Tuple{SCode.Element, DAE.Mod}}
 
               outElements = list((x, DAE.NOMOD()) for x in inElements)
@@ -1629,7 +1629,7 @@
 
          #= Sorts constants and parameters by dependencies, so that they are instantiated
           before they are used. =#
-        function sortElementList(inElements::List{<:Element}, inEnv::FCore.Graph, isFunctionScope::Bool) ::List{Element} 
+        function sortElementList(inElements::List{<:Element}, inEnv::FCore.Graph, isFunctionScope::Bool) ::List{Element}
 
 
               local outE::List{Element}
@@ -1654,13 +1654,13 @@
           inElements
         end
 
-        function printGraph(env::FGraph.Graph, g::List{<:Tuple{<:Element, List{<:Element}}}, order::List{<:Element}, cycles::List{<:Tuple{<:Element, List{<:Element}}})  
+        function printGraph(env::FGraph.Graph, g::List{<:Tuple{<:Element, List{<:Element}}}, order::List{<:Element}, cycles::List{<:Tuple{<:Element, List{<:Element}}})
               _ = begin
                 @matchcontinue (env, g, order, cycles) begin
                   (_,  nil(), _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, _, _)  => begin
                       print("Graph for env: " + FGraph.printGraphPathStr(env) + "\\n" + Graph.printGraph(g, elementName) + "\\n")
                       print("Element order:\\n\\t" + stringDelimitList(ListUtil.map(order, elementName), "\\n\\t") + "\\n")
@@ -1675,7 +1675,7 @@
                =#
         end
 
-        function getDepsFromExps(inExps::List{<:Absyn.Exp}, inAllElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inDependencies::List{<:Tuple{<:SCode.Element, DAE.Mod}}, isFunction::Bool) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function getDepsFromExps(inExps::List{<:Absyn.Exp}, inAllElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inDependencies::List{<:Tuple{<:SCode.Element, DAE.Mod}}, isFunction::Bool) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outDependencies::List{Tuple{SCode.Element, DAE.Mod}}
 
               outDependencies = begin
@@ -1688,7 +1688,7 @@
                   ( nil(), _)  => begin
                     inDependencies
                   end
-                  
+
                   (e <| rest, deps)  => begin
                       (_, (_, _, deps, _)) = AbsynUtil.traverseExpBidir(e, getElementDependenciesTraverserEnter, getElementDependenciesTraverserExit, (inAllElements, nil, deps, isFunction))
                       deps = getDepsFromExps(rest, inAllElements, deps, isFunction)
@@ -1707,14 +1707,14 @@
 
          #= @author: adrpo
          removes the name from deps (Real A[size(A,1)] dependency) =#
-        function removeCurrentElementFromArrayDimDeps(name::String, inDependencies::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function removeCurrentElementFromArrayDimDeps(name::String, inDependencies::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outDependencies::List{Tuple{SCode.Element, DAE.Mod}}
 
               outDependencies = list(dep for dep in inDependencies if ! stringEq(name, SCodeUtil.elementName(Util.tuple21(dep))))
           outDependencies
         end
 
-        function getExpsFromConstrainClass(inRP::SCode.Replaceable) ::Tuple{List{Absyn.Exp}, List{Absyn.Exp}} 
+        function getExpsFromConstrainClass(inRP::SCode.Replaceable) ::Tuple{List{Absyn.Exp}, List{Absyn.Exp}}
               local outSubsExps::List{Absyn.Exp} #= the expressions from subs =#
               local outBindingExp::List{Absyn.Exp} #= the bind exp if any =#
 
@@ -1726,11 +1726,11 @@
                   SCode.NOT_REPLACEABLE(__)  => begin
                     (nil, nil)
                   end
-                  
+
                   SCode.REPLACEABLE(NONE())  => begin
                     (nil, nil)
                   end
-                  
+
                   SCode.REPLACEABLE(SOME(SCode.CONSTRAINCLASS(modifier = m)))  => begin
                       (l1, l2) = getExpsFromMod(m)
                     (l1, l2)
@@ -1744,7 +1744,7 @@
           (outBindingExp #= the bind exp if any =#, outSubsExps #= the expressions from subs =#)
         end
 
-        function getExpsFromSubMods(inSubMods::List{<:SCode.SubMod} #= the component sub modifiers =#) ::List{Absyn.Exp} 
+        function getExpsFromSubMods(inSubMods::List{<:SCode.SubMod} #= the component sub modifiers =#) ::List{Absyn.Exp}
               local outSubsExps::List{Absyn.Exp} #= the expressions from subs =#
 
               outSubsExps = begin
@@ -1759,7 +1759,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   SCode.NAMEMOD(mod = mod) <| rest  => begin
                       (e, sm) = getExpsFromMod(mod)
                       exps = getExpsFromSubMods(rest)
@@ -1773,7 +1773,7 @@
           outSubsExps #= the expressions from subs =#
         end
 
-        function getCrefFromMod(inMod::SCode.Mod #= the component modifier =#) ::List{Absyn.ComponentRef} 
+        function getCrefFromMod(inMod::SCode.Mod #= the component modifier =#) ::List{Absyn.ComponentRef}
               local outCrefs::List{Absyn.ComponentRef}
 
               outCrefs = begin
@@ -1785,7 +1785,7 @@
                       outCrefs = ListUtil.flatten(ListUtil.map2(listAppend(l1, l2), AbsynUtil.getCrefFromExp, true, true))
                     outCrefs
                   end
-                  
+
                   _  => begin
                         print(getInstanceName() + ": could not retrieve crefs from SCode.Mod: " + SCodeDump.printModStr(inMod, SCodeDump.defaultOptions) + "\\n")
                       fail()
@@ -1795,7 +1795,7 @@
           outCrefs
         end
 
-        function getExpsFromMod(inMod::SCode.Mod #= the component modifier =#) ::Tuple{List{Absyn.Exp}, List{Absyn.Exp}} 
+        function getExpsFromMod(inMod::SCode.Mod #= the component modifier =#) ::Tuple{List{Absyn.Exp}, List{Absyn.Exp}}
               local outSubsExps::List{Absyn.Exp} #= the expressions from subs =#
               local outBindingExp::List{Absyn.Exp} #= the bind exp if any =#
 
@@ -1818,21 +1818,21 @@
                   SCode.NOMOD(__)  => begin
                     (nil, nil)
                   end
-                  
+
                   SCode.MOD(subModLst =  nil(), binding = NONE())  => begin
                     (nil, nil)
                   end
-                  
+
                   SCode.MOD(subModLst = subs, binding = SOME(e))  => begin
                       se = getExpsFromSubMods(subs)
                     (list(e), se)
                   end
-                  
+
                   SCode.MOD(subModLst = subs, binding = NONE())  => begin
                       se = getExpsFromSubMods(subs)
                     (nil, se)
                   end
-                  
+
                   SCode.REDECL(element = SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = rp), classDef = SCode.DERIVED(Absyn.TPATH(_, ado), m, _)))  => begin
                       (l1, l2) = getExpsFromConstrainClass(rp)
                       (_, se) = AbsynUtil.getExpsFromArrayDimOpt(ado)
@@ -1841,7 +1841,7 @@
                       l4 = listAppend(l2, l4)
                     (l1, l4)
                   end
-                  
+
                   SCode.REDECL(element = SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = rp), classDef = SCode.CLASS_EXTENDS(modifications = m)))  => begin
                       (l1, l2) = getExpsFromConstrainClass(rp)
                       (l3, l4) = getExpsFromMod(m)
@@ -1849,12 +1849,12 @@
                       l4 = listAppend(l2, l4)
                     (l3, l4)
                   end
-                  
+
                   SCode.REDECL(element = SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = rp)))  => begin
                       (l1, l2) = getExpsFromConstrainClass(rp)
                     (l1, l2)
                   end
-                  
+
                   SCode.REDECL(element = SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = rp), modifications = m, attributes = SCode.ATTR(arrayDims = ad)))  => begin
                       (l1, l2) = getExpsFromConstrainClass(rp)
                       (_, se) = AbsynUtil.getExpsFromArrayDim(ad)
@@ -1885,7 +1885,7 @@
          #= author: PA
           Similar to getCrefFromMod, but investigates
           array dimensionalitites instead. =#
-        function getCrefFromDim(inArrayDim::Absyn.ArrayDim) ::List{Absyn.ComponentRef} 
+        function getCrefFromDim(inArrayDim::Absyn.ArrayDim) ::List{Absyn.ComponentRef}
               local outAbsynComponentRefLst::List{Absyn.ComponentRef}
 
               outAbsynComponentRefLst = begin
@@ -1901,16 +1901,16 @@
                       res = ListUtil.union(l1, l2)
                     res
                   end
-                  
+
                   Absyn.NOSUB(__) <| rest  => begin
                       res = getCrefFromDim(rest)
                     res
                   end
-                  
+
                    nil()  => begin
                     nil
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstUtil.getCrefFromDim failed\\n")
@@ -1922,7 +1922,7 @@
         end
 
          #= Returns the dependencies given an element. =#
-        function getElementDependencies(inElement::Tuple{<:SCode.Element, DAE.Mod}, inAllElementsAndIsFunctionScope::Tuple{<:List{<:Tuple{<:SCode.Element, DAE.Mod}}, Bool}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function getElementDependencies(inElement::Tuple{<:SCode.Element, DAE.Mod}, inAllElementsAndIsFunctionScope::Tuple{<:List{<:Tuple{<:SCode.Element, DAE.Mod}}, Bool}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outDependencies::List{Tuple{SCode.Element, DAE.Mod}}
 
               outDependencies = begin
@@ -1962,12 +1962,12 @@
                       deps = ListUtil.union(deps, nil)
                     deps
                   end
-                  
+
                   ((SCode.COMPONENT(attributes = SCode.ATTR(direction = direction)), _), (_, true))  => begin
                       @match true = AbsynUtil.isInputOrOutput(direction)
                     nil
                   end
-                  
+
                   ((SCode.COMPONENT(name = name, condition = cExpOpt, prefixes = SCode.PREFIXES(replaceablePrefix = rp), attributes = SCode.ATTR(arrayDims = ad), modifications = mod), daeMod), (inAllElements, isFunction))  => begin
                       (_, exps) = AbsynUtil.getExpsFromArrayDim(ad)
                       (bexps, sexps) = getExpsFromMod(mod)
@@ -1984,7 +1984,7 @@
                       deps = ListUtil.union(deps, nil)
                     deps
                   end
-                  
+
                   ((SCode.CLASS(name = name, prefixes = SCode.PREFIXES(replaceablePrefix = rp), classDef = SCode.DERIVED(modifications = mod, attributes = SCode.ATTR(arrayDims = ad))), daeMod), (inAllElements, isFunction))  => begin
                       (_, exps) = AbsynUtil.getExpsFromArrayDim(ad)
                       (_, sexps) = getExpsFromMod(mod)
@@ -1998,7 +1998,7 @@
                       deps = ListUtil.union(deps, nil)
                     deps
                   end
-                  
+
                   ((SCode.CLASS(name = name, prefixes = SCode.PREFIXES(__), classDef = SCode.PARTS(externalDecl = externalDecl)), _), (inAllElements, isFunction))  => begin
                       exps = getExpsFromExternalDecl(externalDecl)
                       deps = getDepsFromExps(exps, inAllElements, nil, isFunction)
@@ -2006,7 +2006,7 @@
                       deps = ListUtil.union(deps, nil)
                     deps
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2053,7 +2053,7 @@
         end
 
          #= get dependencies from external declarations =#
-        function getExpsFromExternalDecl(inExternalDecl::Option{<:SCode.ExternalDecl}) ::List{Absyn.Exp} 
+        function getExpsFromExternalDecl(inExternalDecl::Option{<:SCode.ExternalDecl}) ::List{Absyn.Exp}
               local outExps::List{Absyn.Exp}
 
               outExps = begin
@@ -2062,7 +2062,7 @@
                   NONE()  => begin
                     nil
                   end
-                  
+
                   SOME(SCode.EXTERNALDECL(args = exps))  => begin
                     exps
                   end
@@ -2071,7 +2071,7 @@
           outExps
         end
 
-        function getExpsFromDefaults(inEls::SCode.Program, inAcc::List{<:Absyn.Exp}) ::List{Absyn.Exp} 
+        function getExpsFromDefaults(inEls::SCode.Program, inAcc::List{<:Absyn.Exp}) ::List{Absyn.Exp}
               local outExps::List{Absyn.Exp}
 
               outExps = begin
@@ -2086,7 +2086,7 @@
                   ( nil(), _)  => begin
                     inAcc
                   end
-                  
+
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = rp), modifications = m) <| rest, _)  => begin
                       exps = inAcc
                       (bexps, sexps) = getExpsFromConstrainClass(rp)
@@ -2096,7 +2096,7 @@
                       exps = getExpsFromDefaults(rest, exps)
                     exps
                   end
-                  
+
                   (_ <| rest, _)  => begin
                       exps = getExpsFromDefaults(rest, inAcc)
                     exps
@@ -2109,7 +2109,7 @@
          #= Traverse function used by getElementDependencies to collect all dependencies
           for an element. The first ElementList in the input argument is a list of all
           elements, and the second is a list of accumulated dependencies. =#
-        function getElementDependenciesTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:ElementList, List{<:ElementList}, ElementList, Bool}) ::Tuple{Absyn.Exp, Tuple{ElementList, List{ElementList}, ElementList, Bool}} 
+        function getElementDependenciesTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:ElementList, List{<:ElementList}, ElementList, Bool}) ::Tuple{Absyn.Exp, Tuple{ElementList, List{ElementList}, ElementList, Bool}}
               local outTuple::Tuple{ElementList, List{ElementList}, ElementList, Bool}
               local outExp::Absyn.Exp
 
@@ -2128,17 +2128,17 @@
                       e = ListUtil.find1(all_el, isElementNamed, id)
                     (exp, (all_el, stack, _cons(e, accum_el), b))
                   end
-                  
+
                   (exp && Absyn.CALL(function_ = cref), (all_el, stack, accum_el, b))  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       e = ListUtil.find1(all_el, isElementNamed, id)
                     (exp, (all_el, stack, _cons(e, accum_el), b))
                   end
-                  
+
                   (exp && Absyn.IFEXP(__), (all_el, stack, accum_el, false))  => begin
                     (exp, (all_el, _cons(accum_el, stack), nil, false))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -2150,7 +2150,7 @@
         end
 
          #= Dummy traversal function used by getElementDependencies. =#
-        function getElementDependenciesTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:ElementList, List{<:ElementList}, ElementList, Bool}) ::Tuple{Absyn.Exp, Tuple{ElementList, List{ElementList}, ElementList, Bool}} 
+        function getElementDependenciesTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:ElementList, List{<:ElementList}, ElementList, Bool}) ::Tuple{Absyn.Exp, Tuple{ElementList, List{ElementList}, ElementList, Bool}}
               local outTuple::Tuple{ElementList, List{ElementList}, ElementList, Bool}
               local outExp::Absyn.Exp
 
@@ -2176,7 +2176,7 @@
                       (_, (_, _, deps, _)) = AbsynUtil.traverseExpBidir(ifExp, getElementDependenciesTraverserEnter, getElementDependenciesTraverserExit, (all_el, nil, nil, false))
                     (exp, (all_el, rest_stack, listAppend(deps, stack_el), false))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -2187,7 +2187,7 @@
 
          #= Returns true if the given element has the same name as the given string,
           otherwise false. =#
-        function isElementNamed(inElement::Tuple{<:SCode.Element, DAE.Mod}, inName::String) ::Bool 
+        function isElementNamed(inElement::Tuple{<:SCode.Element, DAE.Mod}, inName::String) ::Bool
               local isNamed::Bool
 
               isNamed = begin
@@ -2196,11 +2196,11 @@
                   (SCode.COMPONENT(name = name), _)  => begin
                     name == inName
                   end
-                  
+
                   (SCode.CLASS(name = name), _)  => begin
                     name == inName
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2210,7 +2210,7 @@
         end
 
          #= Checks that two elements are equal, i.e. has the same name. =#
-        function isElementEqual(inElement1::Tuple{<:SCode.Element, DAE.Mod}, inElement2::Tuple{<:SCode.Element, DAE.Mod}) ::Bool 
+        function isElementEqual(inElement1::Tuple{<:SCode.Element, DAE.Mod}, inElement2::Tuple{<:SCode.Element, DAE.Mod}) ::Bool
               local isEqual::Bool
 
               isEqual = begin
@@ -2220,11 +2220,11 @@
                   ((SCode.COMPONENT(name = id1), _), (SCode.COMPONENT(name = id2), _))  => begin
                     stringEqual(id1, id2)
                   end
-                  
+
                   ((SCode.CLASS(name = id1), _), (SCode.CLASS(name = id2), _))  => begin
                     stringEqual(id1, id2)
                   end
-                  
+
                   _  => begin
                       stringEq(elementName(inElement1), elementName(inElement2))
                   end
@@ -2238,7 +2238,7 @@
          #= Checks the return value from Graph.topologicalSort. If the list of cycles is
           not empty, print an error message and fail, since it's not allowed for
           constants or parameters to have cyclic dependencies. =#
-        function checkCyclicalComponents(inCycles::List{<:Tuple{<:Element, List{<:Element}}}, inEnv::FCore.Graph)  
+        function checkCyclicalComponents(inCycles::List{<:Tuple{<:Element, List{<:Element}}}, inEnv::FCore.Graph)
               () = begin
                   local cycles::List{List{Element}}
                   local names::List{List{String}}
@@ -2250,13 +2250,13 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   _  => begin
                       graph = Graph.filterGraph(inCycles, isElementParamOrConst)
                       @match nil = Graph.findCycles(graph, isElementEqual)
                     ()
                   end
-                  
+
                   _  => begin
                         cycles = Graph.findCycles(inCycles, isElementEqual)
                         names = ListUtil.mapList(cycles, elementName)
@@ -2274,7 +2274,7 @@
               end
         end
 
-        function isElementParamOrConst(inElement::Tuple{<:SCode.Element, DAE.Mod}) ::Bool 
+        function isElementParamOrConst(inElement::Tuple{<:SCode.Element, DAE.Mod}) ::Bool
               local outIsParamOrConst::Bool
 
               outIsParamOrConst = begin
@@ -2283,7 +2283,7 @@
                   (SCode.COMPONENT(attributes = SCode.ATTR(variability = var)), _)  => begin
                     SCodeUtil.isParameterOrConst(var)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2293,7 +2293,7 @@
         end
 
          #= Returns the name of the given element. =#
-        function elementName(inElement::Tuple{<:SCode.Element, DAE.Mod}) ::String 
+        function elementName(inElement::Tuple{<:SCode.Element, DAE.Mod}) ::String
               local outName::String
 
               local elem::SCode.Element
@@ -2306,7 +2306,7 @@
                       outName = SCodeUtil.elementName(elem)
                     outName
                   end
-                  
+
                   _  => begin
                       str = SCodeDump.shortElementStr(Util.tuple21(inElement))
                     str
@@ -2318,7 +2318,7 @@
 
          #= author: PA
           This function filters out the class definitions (ElementMod) list. =#
-        function classdefElts2(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, partialPrefix::SCode.Partial) ::Tuple{List{SCode.Element}, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function classdefElts2(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, partialPrefix::SCode.Partial) ::Tuple{List{SCode.Element}, List{Tuple{SCode.Element, DAE.Mod}}}
               local outConstEls::List{Tuple{SCode.Element, DAE.Mod}}
               local outClassDefs::List{SCode.Element}
 
@@ -2333,23 +2333,23 @@
                   ( nil(), _)  => begin
                     (nil, nil)
                   end
-                  
+
                   ((cdef && SCode.CLASS(restriction = SCode.R_PACKAGE(__)), _) <| xs, SCode.PARTIAL(__))  => begin
                       (cdefs, els) = classdefElts2(xs, partialPrefix)
                     (_cons(cdef, cdefs), els)
                   end
-                  
+
                   ((cdef && SCode.CLASS(__), _) <| xs, SCode.NOT_PARTIAL(__))  => begin
                       (cdefs, els) = classdefElts2(xs, partialPrefix)
                     (_cons(cdef, cdefs), els)
                   end
-                  
+
                   (el && (SCode.COMPONENT(attributes = attr), _) <| xs, SCode.NOT_PARTIAL(__))  => begin
                       @match SCode.CONST() = SCodeUtil.attrVariability(attr)
                       (cdefs, els) = classdefElts2(xs, partialPrefix)
                     (cdefs, _cons(el, els))
                   end
-                  
+
                   (_ <| xs, _)  => begin
                       (cdefs, els) = classdefElts2(xs, partialPrefix)
                     (cdefs, els)
@@ -2362,7 +2362,7 @@
          #= author: PA
           This function filters out the class definitions
           and import statements of an Element list. =#
-        function classdefAndImpElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}} 
+        function classdefAndImpElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}}
               local restElts::List{SCode.Element}
               local cdefElts::List{SCode.Element}
 
@@ -2376,17 +2376,17 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   cdef && SCode.CLASS(__) <| xs  => begin
                       (_, restElts) = classdefAndImpElts(xs)
                     (_cons(cdef, restElts), restElts)
                   end
-                  
+
                   imp && SCode.IMPORT(__) <| xs  => begin
                       (cdefElts, restElts) = classdefAndImpElts(xs)
                     (_cons(imp, cdefElts), restElts)
                   end
-                  
+
                   e <| xs  => begin
                       (cdefElts, restElts) = classdefAndImpElts(xs)
                     (cdefElts, _cons(e, restElts))
@@ -2424,7 +2424,7 @@
 
          #= author: PA
           This function filters out the component Element in an Element list =#
-        function componentElts(inSCodeElementLst::List{<:SCode.Element}) ::List{SCode.Element} 
+        function componentElts(inSCodeElementLst::List{<:SCode.Element}) ::List{SCode.Element}
               local outSCodeElementLst::List{SCode.Element}
 
               outSCodeElementLst = begin
@@ -2435,12 +2435,12 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   cdef && SCode.COMPONENT(__) <| xs  => begin
                       res = componentElts(xs)
                     _cons(cdef, res)
                   end
-                  
+
                   _ <| xs  => begin
                       res = componentElts(xs)
                     res
@@ -2451,7 +2451,7 @@
         end
 
          #= This function adds class definitions and import statements to the environment. =#
-        function addClassdefsToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClasses::List{<:SCode.Element}, inImpl::Bool, inRedeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addClassdefsToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClasses::List{<:SCode.Element}, inImpl::Bool, inRedeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
@@ -2464,7 +2464,7 @@
 
          #= author: PA
           Helper relation to addClassdefsToEnv =#
-        function addClassdefToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSCodeElement::SCode.Element, inBoolean::Bool, redeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addClassdefToEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSCodeElement::SCode.Element, inBoolean::Bool, redeclareMod::Option{<:DAE.Mod}, checkDuplicates::Bool = false) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2498,23 +2498,23 @@
                       ih = InnerOuter.addClassIfInner(cl2, pre, env_1, ih)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, pre, sel1 && SCode.CLASS(__), _)  => begin
                       env_1 = FGraph.mkClassNode(env, sel1, pre, DAE.NOMOD(), checkDuplicates)
                       ih = InnerOuter.addClassIfInner(sel1, pre, env_1, ih)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, _, imp && SCode.IMPORT(__), _)  => begin
                       env_1 = FGraph.mkImportNode(env, imp)
                     (cache, env_1, ih)
                   end
-                  
+
                   (cache, env, ih, _, elt && SCode.DEFINEUNIT(__), _)  => begin
                       env_1 = FGraph.mkDefunitNode(env, elt)
                     (cache, env_1, ih)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstUtil.addClassdefToEnv2 failed\\n")
@@ -2538,7 +2538,7 @@
         end
 
          #= fails if the comp env path is NOT a prefix of comp type path =#
-        function checkCompEnvPathVsCompTypePath(inCompEnvPath::Option{<:Absyn.Path}, inCompTypePath::Absyn.Path)  
+        function checkCompEnvPathVsCompTypePath(inCompEnvPath::Option{<:Absyn.Path}, inCompTypePath::Absyn.Path)
               _ = begin
                   local ep::Absyn.Path
                   local tp::Absyn.Path
@@ -2548,7 +2548,7 @@
                   (_, Absyn.IDENT(_))  => begin
                     ()
                   end
-                  
+
                   (SOME(ep), tp)  => begin
                       tp = AbsynUtil.stripLast(tp)
                       @match true = AbsynUtil.pathPrefixOf(tp, ep)
@@ -2582,7 +2582,7 @@
           sizes of components and by investigating if-equations. If an if-equation
           has a boolean expression controlled by parameter(s), these are structural
           parameters. =#
-        function addComponentsToEnv(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.Prefix, state::ClassInf.State, components::List{<:Tuple{<:SCode.Element, DAE.Mod}}, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addComponentsToEnv(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.Prefix, state::ClassInf.State, components::List{<:Tuple{<:SCode.Element, DAE.Mod}}, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
 
 
 
@@ -2620,7 +2620,7 @@
                         Error.addSourceMessage(Error.COMPONENT_NAME_SAME_AS_TYPE_NAME, list(err_msg, AbsynUtil.pathString(ty_path)), comp.info)
                       true
                     end
-                    
+
                     SCode.COMPONENT(prefixes = prefs && SCode.PREFIXES(__), attributes = attr && SCode.ATTR(__))  => begin
                         ty_path = AbsynUtil.typeSpecPath(comp.typeSpec)
                         local_mod = Mod.lookupModificationP(mod, ty_path)
@@ -2634,11 +2634,11 @@
                         env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(comp.name, dattr, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE()), comp, cmod, FCore.VAR_UNTYPED(), FGraph.empty())
                       false
                     end
-                    
+
                     SCode.COMPONENT(__)  => begin
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -2659,7 +2659,7 @@
           This function collects all variables from the dimensionalities of
           component elements. These variables are candidates for structural
           parameters. =#
-        function getCrefsFromCompdims(inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Absyn.ComponentRef} 
+        function getCrefsFromCompdims(inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Absyn.ComponentRef}
               local outCrefs::List{Absyn.ComponentRef}
 
               outCrefs = begin
@@ -2672,14 +2672,14 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   (SCode.COMPONENT(attributes = SCode.ATTR(arrayDims = arraydim)), _) <| xs  => begin
                       crefs1 = getCrefFromDim(arraydim)
                       crefs2 = getCrefsFromCompdims(xs)
                       crefs = listAppend(crefs1, crefs2)
                     crefs
                   end
-                  
+
                   _ <| xs  => begin
                       crefs = getCrefsFromCompdims(xs)
                     crefs
@@ -2692,18 +2692,18 @@
          #= author: PA
           This function checks if a componentreferece is a member of
           a list of component references, disregarding subscripts. =#
-        function memberCrefs(inComponentRef::Absyn.ComponentRef, inComponentRefs::List{<:Absyn.ComponentRef}) ::Bool 
+        function memberCrefs(inComponentRef::Absyn.ComponentRef, inComponentRefs::List{<:Absyn.ComponentRef}) ::Bool
               local outIsMember::Bool
 
               outIsMember = ListUtil.isMemberOnTrue(inComponentRef, inComponentRefs, AbsynUtil.crefEqualNoSubs)
           outIsMember
         end
 
-         #= 
+         #=
          if we have an outer modification: redeclare X = Y
          and a component modification redeclare X = Z
          update the component modification to redeclare X = Y =#
-        function chainRedeclares(inModOuter::DAE.Mod #= the outer mod which should overwrite the inner mod =#, inModInner::SCode.Mod #= the inner mod =#) ::SCode.Mod 
+        function chainRedeclares(inModOuter::DAE.Mod #= the outer mod which should overwrite the inner mod =#, inModInner::SCode.Mod #= the inner mod =#) ::SCode.Mod
               local outMod::SCode.Mod
 
               local b::Bool
@@ -2732,11 +2732,11 @@
           outMod
         end
 
-         #= 
+         #=
          if we have an outer modification: redeclare X = Y
          and a component modification redeclare X = Z
          update the component modification to redeclare X = Y =#
-        function chainRedeclare_dispatch(inModOuter::DAE.Mod #= the outer mod which should overwrite the inner mod =#, inModInner::SCode.Mod #= the inner mod =#) ::Tuple{SCode.Mod, Bool} 
+        function chainRedeclare_dispatch(inModOuter::DAE.Mod #= the outer mod which should overwrite the inner mod =#, inModInner::SCode.Mod #= the inner mod =#) ::Tuple{SCode.Mod, Bool}
               local change::Bool
               local outMod::SCode.Mod
 
@@ -2762,23 +2762,23 @@
                       cls = SCodeUtil.setClassName(nInner, cls)
                     (SCode.REDECL(f, e, cls), true)
                   end
-                  
+
                   (_, SCode.REDECL(f, e, SCode.CLASS(name = nInner, classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = Absyn.IDENT(_))))))  => begin
                       @match DAE.REDECL(element = cls) = Mod.lookupCompModification(inModOuter, nInner)
                     (SCode.REDECL(f, e, cls), true)
                   end
-                  
+
                   (_, SCode.MOD(f, e, SCode.NAMEMOD(name, m && SCode.REDECL(__)) <| rest, b, info))  => begin
                       m2 = chainRedeclare_dispatch(inModOuter, m)
                       @match (SCode.MOD(subModLst = subs), _) = chainRedeclare_dispatch(inModOuter, SCode.MOD(f, e, rest, b, info))
                     (SCode.MOD(f, e, _cons(SCode.NAMEMOD(name, m2), subs), b, info), true)
                   end
-                  
+
                   (_, SCode.MOD(f, e, sm <| rest, b, info))  => begin
                       @match (SCode.MOD(subModLst = subs), change) = chainRedeclare_dispatch(inModOuter, SCode.MOD(f, e, rest, b, info))
                     (SCode.MOD(f, e, _cons(sm, subs), b, info), change)
                   end
-                  
+
                   _  => begin
                       (inModInner, false)
                   end
@@ -2802,7 +2802,7 @@
          #= @author: adrpo
          add the record constructor to the cache if we have
          it as the type of an input component to a function =#
-        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2823,7 +2823,7 @@
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(inCache, inEnv, inIH, inMod, inPrefix, inClass, inInstDims)
                     (cache, env, ih)
                   end
-                  
+
                   _  => begin
                       (inCache, inEnv, inIH)
                   end
@@ -2842,7 +2842,7 @@
 
          #= Check if variable is multiply declared and
          that all declarations are identical if so. =#
-        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.Prefix, ciState::ClassInf.State, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool 
+        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.Prefix, ciState::ClassInf.State, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool
               local alreadyDeclared::Bool
 
               alreadyDeclared = begin
@@ -2859,17 +2859,17 @@
                       ErrorExt.setCheckpoint("checkMultiplyDeclared")
                     fail()
                   end
-                  
+
                   (_, _, _, _, _, (SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(_))), _), _, _)  => begin
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, (SCode.COMPONENT(__), DAE.REDECL(_, _, _)), _, _)  => begin
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, newComp && (SCode.COMPONENT(name = n), _), _, _)  => begin
                       (_, _, oldElt, oldMod, instStatus, _) = Lookup.lookupIdentLocal(cache, env, n)
                       checkMultipleElementsIdentical(cache, env, (oldElt, oldMod), newComp)
@@ -2877,43 +2877,43 @@
                       ErrorExt.delCheckpoint("checkMultiplyDeclared")
                     alreadyDeclared
                   end
-                  
+
                   (_, _, _, _, _, (SCode.COMPONENT(name = n), _), _, _)  => begin
                       @shouldFail (_, _, _, _, _, _) = Lookup.lookupIdentLocal(cache, env, n)
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, (SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(_))), _), _, _)  => begin
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, (SCode.CLASS(__), DAE.REDECL(_, _, _)), _, _)  => begin
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, (SCode.CLASS(name = n, classDef = SCode.PARTS(elementLst = SCode.EXTENDS(baseClassPath = Absyn.IDENT(n2)) <| _)), _), _, _)  => begin
                       n = "parent" + "." + n
                       @match 0 = System.stringFind(n, n2)
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   (_, _, _, _, _, (newClass && SCode.CLASS(name = n), _), _, _)  => begin
                       (oldClass, _) = Lookup.lookupClassLocal(env, n)
                       checkMultipleClassesEquivalent(oldClass, newClass)
                       ErrorExt.delCheckpoint("checkMultiplyDeclared")
                     true
                   end
-                  
+
                   (_, _, _, _, _, (SCode.CLASS(name = n), _), _, _)  => begin
                       @shouldFail (_, _) = Lookup.lookupClassLocal(env, n)
                       ErrorExt.rollBack("checkMultiplyDeclared")
                     false
                   end
-                  
+
                   _  => begin
                         ErrorExt.delCheckpoint("checkMultiplyDeclared")
                         if Flags.isSet(Flags.FAILTRACE)
@@ -2927,7 +2927,7 @@
         end
 
          #= Translates InstStatus to a boolean indicating if component is allready declared. =#
-        function instStatusToBool(instStatus::FCore.Status) ::Bool 
+        function instStatusToBool(instStatus::FCore.Status) ::Bool
               local alreadyDeclared::Bool
 
               alreadyDeclared = begin
@@ -2935,11 +2935,11 @@
                   FCore.VAR_DAE(__)  => begin
                     true
                   end
-                  
+
                   FCore.VAR_UNTYPED(__)  => begin
                     false
                   end
-                  
+
                   FCore.VAR_TYPED(__)  => begin
                     false
                   end
@@ -2950,7 +2950,7 @@
 
          #= Checks that the old declaration is identical
          to the new one. If not, give error message =#
-        function checkMultipleElementsIdentical(inCache::FCore.Cache, inEnv::FCore.Graph, oldComponent::Tuple{<:SCode.Element, DAE.Mod}, newComponent::Tuple{<:SCode.Element, DAE.Mod})  
+        function checkMultipleElementsIdentical(inCache::FCore.Cache, inEnv::FCore.Graph, oldComponent::Tuple{<:SCode.Element, DAE.Mod}, newComponent::Tuple{<:SCode.Element, DAE.Mod})
               _ = begin
                   local oldElt::SCode.Element
                   local newElt::SCode.Element
@@ -2990,7 +2990,7 @@
                       @match true = SCodeUtil.elementEqual(oldElt, newElt)
                     ()
                   end
-                  
+
                   (cache, env, (SCode.COMPONENT(n1, prefixes1, attr1, Absyn.TPATH(tpath1, ad1), smod1, _, cond1, _), _), (SCode.COMPONENT(n2, prefixes2, attr2, Absyn.TPATH(tpath2, ad2), smod2, _, cond2, _), _))  => begin
                       @match true = stringEq(n1, n2)
                       @match true = SCodeUtil.prefixesEqual(prefixes1, prefixes2)
@@ -3004,7 +3004,7 @@
                       @match true = SCodeUtil.elementEqual(c1, c2)
                     ()
                   end
-                  
+
                   (cache, env, (oldElt && SCode.COMPONENT(n1, prefixes1, attr1, Absyn.TPATH(tpath1, ad1), smod1, _, cond1, old_info), _), (newElt && SCode.COMPONENT(n2, prefixes2, attr2, Absyn.TPATH(tpath2, ad2), smod2, _, cond2, new_info), _))  => begin
                       @match true = stringEq(n1, n2)
                       @match true = stringEq(n1, "m_flow")
@@ -3023,7 +3023,7 @@
                       Error.addMultiSourceMessage(Error.COMPILER_WARNING, list(s), list(old_info, new_info))
                     ()
                   end
-                  
+
                   (_, _, (oldElt && SCode.COMPONENT(info = old_info), _), (newElt && SCode.COMPONENT(info = new_info), _))  => begin
                       s1 = SCodeDump.unparseElementStr(oldElt, SCodeDump.defaultOptions)
                       s2 = SCodeDump.unparseElementStr(newElt, SCodeDump.defaultOptions)
@@ -3076,7 +3076,7 @@
 
          #= Checks that the old class definition is equivalent
          to the new one. If not, give error message =#
-        function checkMultipleClassesEquivalent(oldClass::SCode.Element, newClass::SCode.Element)  
+        function checkMultipleClassesEquivalent(oldClass::SCode.Element, newClass::SCode.Element)
               _ = begin
                   local oldCl::SCode.Element
                   local newCl::SCode.Element
@@ -3097,19 +3097,19 @@
                       ListUtil.threadMapAllValue(sl1, sl2, stringEq, true)
                     ()
                   end
-                  
+
                   (SCode.CLASS(restriction = SCode.R_ENUMERATION(__), classDef = SCode.PARTS(elementLst = elementLst)), SCode.CLASS(classDef = SCode.ENUMERATION(enumLst = enumLst)))  => begin
                       sl1 = ListUtil.map(enumLst, SCodeUtil.enumName)
                       sl2 = ListUtil.map(elementLst, SCodeUtil.elementName)
                       ListUtil.threadMapAllValue(sl1, sl2, stringEq, true)
                     ()
                   end
-                  
+
                   (oldCl, newCl)  => begin
                       @match true = SCodeUtil.elementEqual(oldCl, newCl)
                     ()
                   end
-                  
+
                   (oldCl, newCl)  => begin
                       s1 = SCodeDump.unparseElementStr(oldCl, SCodeDump.defaultOptions)
                       s2 = SCodeDump.unparseElementStr(newCl, SCodeDump.defaultOptions)
@@ -3126,7 +3126,7 @@
                =#
         end
 
-        function removeOptCrefFromCrefs(inCrefs::List{<:Absyn.ComponentRef}, inCref::Option{<:Absyn.ComponentRef}) ::List{Absyn.ComponentRef} 
+        function removeOptCrefFromCrefs(inCrefs::List{<:Absyn.ComponentRef}, inCref::Option{<:Absyn.ComponentRef}) ::List{Absyn.ComponentRef}
               local outCrefs::List{Absyn.ComponentRef}
 
               outCrefs = begin
@@ -3135,7 +3135,7 @@
                   (_, SOME(cref))  => begin
                     removeCrefFromCrefs(inCrefs, cref)
                   end
-                  
+
                   _  => begin
                       inCrefs
                   end
@@ -3145,7 +3145,7 @@
         end
 
          #= Removes a variable from a variable list =#
-        function removeCrefFromCrefs(inAbsynComponentRefLst::List{<:Absyn.ComponentRef}, inComponentRef::Absyn.ComponentRef) ::List{Absyn.ComponentRef} 
+        function removeCrefFromCrefs(inAbsynComponentRefLst::List{<:Absyn.ComponentRef}, inComponentRef::Absyn.ComponentRef) ::List{Absyn.ComponentRef}
               local outAbsynComponentRefLst::List{Absyn.ComponentRef}
 
               outAbsynComponentRefLst = begin
@@ -3159,17 +3159,17 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (Absyn.CREF_IDENT(name = n1, subscripts =  nil()) <| rest, cr2 && Absyn.CREF_IDENT(name = n2, subscripts =  nil())) where (stringEq(n1, n2))  => begin
                       rest_1 = removeCrefFromCrefs(rest, cr2)
                     rest_1
                   end
-                  
+
                   (Absyn.CREF_QUAL(name = n1) <| rest, cr2 && Absyn.CREF_IDENT(name = n2)) where (stringEq(n1, n2))  => begin
                       rest_1 = removeCrefFromCrefs(rest, cr2)
                     rest_1
                   end
-                  
+
                   (cr1 <| rest, cr2)  => begin
                       rest_1 = removeCrefFromCrefs(rest, cr2)
                     _cons(cr1, rest_1)
@@ -3183,7 +3183,7 @@
 
          #= Author: BZ, 2009-07
          A function for filtering out the modifications on the constraining type class. =#
-        function keepConstrainingTypeModifersOnly(inMod::DAE.Mod, elems::List{<:SCode.Element}) ::DAE.Mod 
+        function keepConstrainingTypeModifersOnly(inMod::DAE.Mod, elems::List{<:SCode.Element}) ::DAE.Mod
               local filteredMod::DAE.Mod
 
               filteredMod = begin
@@ -3197,15 +3197,15 @@
                   (_,  nil())  => begin
                     inMod
                   end
-                  
+
                   (DAE.NOMOD(__), _)  => begin
                     DAE.NOMOD()
                   end
-                  
+
                   (DAE.REDECL(_, _, _), _)  => begin
                     inMod
                   end
-                  
+
                   (DAE.MOD(f, e, subs, oe, info), _)  => begin
                       compNames = ListUtil.map(elems, SCodeUtil.elementName)
                       subs = keepConstrainingTypeModifersOnly2(subs, compNames)
@@ -3216,10 +3216,10 @@
           filteredMod
         end
 
-         #= 
+         #=
         Author BZ
         Helper function for keepConstrainingTypeModifersOnly =#
-        function keepConstrainingTypeModifersOnly2(isubs::List{<:DAE.SubMod}, elems::List{<:String}) ::List{DAE.SubMod} 
+        function keepConstrainingTypeModifersOnly2(isubs::List{<:DAE.SubMod}, elems::List{<:String}) ::List{DAE.SubMod}
               local osubs::List{DAE.SubMod}
 
               osubs = begin
@@ -3233,15 +3233,15 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (subs,  nil())  => begin
                     subs
                   end
-                  
+
                   (sub && DAE.NAMEMOD(ident = n) <| subs, _) where (ListUtil.isMemberOnTrue(n, elems, stringEq))  => begin
                     _cons(sub, keepConstrainingTypeModifersOnly2(subs, elems))
                   end
-                  
+
                   (_ <| subs, _)  => begin
                     keepConstrainingTypeModifersOnly2(subs, elems)
                   end
@@ -3253,7 +3253,7 @@
          #= Author: BZ, 2009-07
          This function examines a optional Absyn.ConstrainClass argument.
          If there is a constraining class, lookup the class and return its elements. =#
-        function extractConstrainingComps(cc::Option{<:SCode.ConstrainClass}, env::FCore.Graph, pre::Prefix.Prefix) ::List{SCode.Element} 
+        function extractConstrainingComps(cc::Option{<:SCode.ConstrainClass}, env::FCore.Graph, pre::Prefix.Prefix) ::List{SCode.Element}
               local elems::List{SCode.Element}
 
               elems = begin
@@ -3273,7 +3273,7 @@
                   (NONE(), _, _)  => begin
                     nil
                   end
-                  
+
                   (SOME(SCode.CONSTRAINCLASS(constrainingClass = path)), _, _)  => begin
                       @match (_, SCode.CLASS(name = name, classDef = SCode.PARTS(elementLst = selems)), _) = Lookup.lookupClass(FCore.emptyCache(), env, path)
                       (classes, classextendselts, extendselts, compelts) = splitElts(selems)
@@ -3282,7 +3282,7 @@
                       compelts = listAppend(classes, listAppend(compelts, extcompelts))
                     compelts
                   end
-                  
+
                   (SOME(SCode.CONSTRAINCLASS(path, mod, cmt)), _, _)  => begin
                       @match (_, SCode.CLASS(classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = path))), _) = Lookup.lookupClass(FCore.emptyCache(), env, path)
                       compelts = extractConstrainingComps(SOME(SCode.CONSTRAINCLASS(path, mod, cmt)), env, pre)
@@ -3297,7 +3297,7 @@
            InstBinding.instModEquation and the second the variables that bindings
            belonged to. The function moves the equations back as bindings for the
            variables, used for fixing record bindings. =#
-        function moveBindings(inEquations::DAE.DAElist, inVariables::DAE.DAElist) ::DAE.DAElist 
+        function moveBindings(inEquations::DAE.DAElist, inVariables::DAE.DAElist) ::DAE.DAElist
               local outVariables::DAE.DAElist
 
               local eqs::List{DAE.Element}
@@ -3315,7 +3315,7 @@
           outVariables
         end
 
-        function moveBindings2(inEquation::DAE.Element, inVariable::DAE.Element) ::DAE.Element 
+        function moveBindings2(inEquation::DAE.Element, inVariable::DAE.Element) ::DAE.Element
               local outVariable::DAE.Element
 
               outVariable = begin
@@ -3337,7 +3337,7 @@
                       bind_exp = moveBindings3(inEquation)
                     DAE.VAR(cref, kind, dir, prl, vis, ty, SOME(bind_exp), dims, ct, src, attr, cmt, io)
                   end
-                  
+
                   (_, DAE.VAR(componentRef = cref))  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- InstUtil.moveBindings failed on " + ComponentReference.printComponentRefStr(cref))
@@ -3348,7 +3348,7 @@
           outVariable
         end
 
-        function moveBindings3(inEquation::DAE.Element) ::DAE.Exp 
+        function moveBindings3(inEquation::DAE.Element) ::DAE.Exp
               local outBinding::DAE.Exp
 
               outBinding = begin
@@ -3357,7 +3357,7 @@
                   DAE.EQUATION(scalar = bind_exp)  => begin
                     bind_exp
                   end
-                  
+
                   DAE.DEFINE(exp = bind_exp)  => begin
                     bind_exp
                   end
@@ -3366,7 +3366,7 @@
           outBinding
         end
 
-        function checkModificationOnOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inName::String, inCref::DAE.ComponentRef, inMod::DAE.Mod, inVariability::SCode.Variability, inInnerOuter::Absyn.InnerOuter, inImpl::Bool, inInfo::SourceInfo)  
+        function checkModificationOnOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inName::String, inCref::DAE.ComponentRef, inMod::DAE.Mod, inVariability::SCode.Variability, inInnerOuter::Absyn.InnerOuter, inImpl::Bool, inInfo::SourceInfo)
               _ = begin
                   local sm::HashSet.HashSet
                   local cref::DAE.ComponentRef
@@ -3374,17 +3374,17 @@
                   (_, _, _, _, _, _, _, SCode.CONST(__), _, _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, _, _, _, _, _, SCode.PARAM(__), _, _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, InnerOuter.TOP_INSTANCE(sm = sm) <| _, _, _, _, DAE.MOD(__), _, Absyn.OUTER(__), _, _)  => begin
                       cref = PrefixUtil.prefixToCref(inPrefix)
                       @match true = BaseHashSet.has(cref, sm)
                     ()
                   end
-                  
+
                   _  => begin
                         @match false = InnerOuter.modificationOnOuter(inCache, inEnv, inIH, inPrefix, inName, inCref, inMod, inInnerOuter, inImpl, inInfo)
                       ()
@@ -3416,23 +3416,23 @@
         end
 
          #= Checks that a function variable is valid. =#
-        function checkFunctionVar(inName::String, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo)  
+        function checkFunctionVar(inName::String, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo)
               _ = begin
                 @match (inName, inAttributes, inPrefixes, inInfo) begin
                   (_, SCode.ATTR(direction = Absyn.BIDIR(__)), SCode.PREFIXES(visibility = SCode.PUBLIC(__)), _)  => begin
                       Error.addSourceMessage(Error.NON_FORMAL_PUBLIC_FUNCTION_VAR, list(inName), inInfo)
                     ()
                   end
-                  
+
                   (_, SCode.ATTR(direction = Absyn.BIDIR(__)), SCode.PREFIXES(visibility = SCode.PROTECTED(__)), _)  => begin
                     ()
                   end
-                  
+
                   (_, SCode.ATTR(__), SCode.PREFIXES(visibility = SCode.PROTECTED(__)), _)  => begin
                       Error.addSourceMessage(Error.PROTECTED_FORMAL_FUNCTION_VAR, list(inName), inInfo)
                     fail()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -3450,7 +3450,7 @@
                =#
         end
 
-        function checkFunctionVarType(inType::DAE.Type, inState::ClassInf.State, inVarName::String, inInfo::SourceInfo)  
+        function checkFunctionVarType(inType::DAE.Type, inState::ClassInf.State, inVarName::String, inInfo::SourceInfo)
               _ = begin
                   local ty_str::String
                 @matchcontinue (inType, inState, inVarName, inInfo) begin
@@ -3458,7 +3458,7 @@
                       @match true = Types.isValidFunctionVarType(inType)
                     ()
                   end
-                  
+
                   _  => begin
                         ty_str = Types.getTypeName(inType)
                         Error.addSourceMessage(Error.INVALID_FUNCTION_VAR_TYPE, list(ty_str, inVarName), inInfo)
@@ -3473,7 +3473,7 @@
          An exception are types extending builtin types, since they already
          have array types. This relation performs the lifting for alltypes
          except types extending basic types. =#
-        function liftNonBasicTypes(tp::DAE.Type, dimt::DAE.Dimension) ::DAE.Type 
+        function liftNonBasicTypes(tp::DAE.Type, dimt::DAE.Dimension) ::DAE.Type
               local outTp::DAE.Type
 
               outTp = begin
@@ -3483,7 +3483,7 @@
                       @match false = listEmpty(Types.getDimensions(ty))
                     tp
                   end
-                  
+
                   _  => begin
                       Types.liftArray(tp, dimt)
                   end
@@ -3494,7 +3494,7 @@
 
          #= If the binding expression has higher variability that the component, generates an error.
         Helper to makeVariableBinding. Author -- alleb =#
-        function checkHigherVariability(compConst::DAE.Const, bindConst::DAE.Const, pre::Prefix.Prefix, name::String, binding::DAE.Exp, info::SourceInfo)  
+        function checkHigherVariability(compConst::DAE.Const, bindConst::DAE.Const, pre::Prefix.Prefix, name::String, binding::DAE.Exp, info::SourceInfo)
               _ = begin
                   local c::DAE.Const
                   local c1::DAE.Const
@@ -3509,12 +3509,12 @@
                       equality(c, c1)
                     ()
                   end
-                  
+
                   (DAE.C_PARAM(__), DAE.C_UNKNOWN(__), _, _, _, _)  => begin
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                     ()
                   end
-                  
+
                   (c, c1, _, n, e, _)  => begin
                       sn = PrefixUtil.printPrefixStr2(pre) + n
                       sc = DAEUtil.constStr(c)
@@ -3537,7 +3537,7 @@
 
          #= Creates an array type from the element type
           given as argument and a list of dimensional sizes. =#
-        function makeArrayType(inDimensionLst::DAE.Dimensions, inType::DAE.Type) ::DAE.Type 
+        function makeArrayType(inDimensionLst::DAE.Dimensions, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -3551,12 +3551,12 @@
                   ( nil(), ty)  => begin
                     ty
                   end
-                  
+
                   (dim <| xs, tty)  => begin
                       ty_1 = makeArrayType(xs, tty)
                     DAE.T_ARRAY(ty_1, list(dim))
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstUtil.makeArrayType failed\\n")
@@ -3572,7 +3572,7 @@
           The builtin types have no dimension, whereas a user defined type might
           have dimensions. For instance, type Point = Real[3];
           has one dimension of size 3 and the class to instantiate is Real =#
-        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod} 
+        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod}
               local outMods::DAE.Mod #= modifications from base classes =#
               local classToInstantiate::SCode.Element
               local outDimensionLst::DAE.Dimensions
@@ -3606,16 +3606,16 @@
                   (cache, _, _, _, cl && SCode.CLASS(name = id), _, _) where (id == "Real" || id == "Integer" || id == "String" || id == "Boolean")  => begin
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (cache, _, _, _, cl && SCode.CLASS(name = "Clock"), _, _)  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (cache, _, _, _, cl && SCode.CLASS(restriction = SCode.R_RECORD(_), classDef = SCode.PARTS(__)), _, _)  => begin
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (cache, env, _, pre, cl && SCode.CLASS(name = id, info = info, classDef = SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(path = Absyn.IDENT(__), arrayDim = ad))), dims, impl)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       owncref = Absyn.CREF_IDENT(id, nil)
@@ -3623,20 +3623,20 @@
                       (cache, dim1) = elabArraydim(cache, env, owncref, Absyn.IDENT("Integer"), ad_1, NONE(), impl, true, false, pre, info, dims)
                     (cache, dim1, cl, DAE.NOMOD())
                   end
-                  
+
                   (cache, _, _, _, cl && SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)), partialPrefix = SCode.PARTIAL(__)), _, _)  => begin
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (_, _, _, _, SCode.CLASS(name = id, info = info, restriction = SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(_)), partialPrefix = SCode.NOT_PARTIAL(__)), _, _)  => begin
                       Error.addSourceMessage(Error.META_FUNCTION_TYPE_NO_PARTIAL_PREFIX, list(id), info)
                     fail()
                   end
-                  
+
                   (cache, _, _, _, cl && SCode.CLASS(restriction = SCode.R_UNIONTYPE(__)), _, _)  => begin
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (cache, env, ih, pre, SCode.CLASS(name = id, restriction = SCode.R_TYPE(__), info = info, classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod)), dims, impl)  => begin
                       (cache, cl, cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
                       owncref = Absyn.CREF_IDENT(id, nil)
@@ -3651,7 +3651,7 @@
                       res = listAppend(dim2, dim1)
                     (cache, res, cl, type_mods)
                   end
-                  
+
                   (cache, env, ih, pre, SCode.CLASS(classDef = SCode.PARTS(elementLst = els, normalEquationLst =  nil(), initialEquationLst =  nil(), normalAlgorithmLst =  nil(), initialAlgorithmLst =  nil())), _, impl)  => begin
                       @match (_, _, list(SCode.EXTENDS(path, _, mod, _, info)), nil) = splitElts(els)
                       (cache, mod_1) = Mod.elabModForBasicType(cache, env, ih, pre, mod, impl, Mod.EXTENDS(path), info)
@@ -3660,11 +3660,11 @@
                       type_mods = Mod.merge(mod_1, type_mods)
                     (cache, res, cl, type_mods)
                   end
-                  
+
                   (cache, _, _, _, cl && SCode.CLASS(__), _, _)  => begin
                     (cache, nil, cl, DAE.NOMOD())
                   end
-                  
+
                   (_, _, _, _, SCode.CLASS(__), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       id = SCodeDump.unparseElementStr(inClass, SCodeDump.defaultOptions)
@@ -3707,7 +3707,7 @@
            are used, for example like this:
              type enum1 = enumeration(val1, val2);
              type enum2 = enum1(start = val1);  val1 needs to be in the environment here. =#
-        function addEnumerationLiteralsToEnv(inEnv::FCore.Graph, inClass::SCode.Element) ::FCore.Graph 
+        function addEnumerationLiteralsToEnv(inEnv::FCore.Graph, inClass::SCode.Element) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -3718,7 +3718,7 @@
                       env = ListUtil.fold(enums, addEnumerationLiteralToEnv, inEnv)
                     env
                   end
-                  
+
                   _  => begin
                       inEnv
                   end
@@ -3729,7 +3729,7 @@
           outEnv
         end
 
-        function addEnumerationLiteralToEnv(inEnum::SCode.Element, inEnv::FCore.Graph) ::FCore.Graph 
+        function addEnumerationLiteralToEnv(inEnum::SCode.Element, inEnv::FCore.Graph) ::FCore.Graph
               local outEnv::FCore.Graph
 
               outEnv = begin
@@ -3740,7 +3740,7 @@
                       env = FGraph.mkComponentNode(inEnv, DAE.TYPES_VAR(lit, DAE.dummyAttrVar, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE()), inEnum, DAE.NOMOD(), FCore.VAR_UNTYPED(), FGraph.empty())
                     env
                   end
-                  
+
                   _  => begin
                         print("InstUtil.addEnumerationLiteralToEnv: Unknown enumeration type!\\n")
                       fail()
@@ -3750,7 +3750,7 @@
           outEnv
         end
 
-        function updateClassInfState(inCache::FCore.Cache, inNewEnv::FCore.Graph, inOldEnv::FCore.Graph, inCIState::ClassInf.State) ::ClassInf.State 
+        function updateClassInfState(inCache::FCore.Cache, inNewEnv::FCore.Graph, inOldEnv::FCore.Graph, inCIState::ClassInf.State) ::ClassInf.State
               local outCIState::ClassInf.State
 
               outCIState = begin
@@ -3765,12 +3765,12 @@
                       @match true = FGraph.isTopScope(inNewEnv)
                     ci_state
                   end
-                  
+
                   (_, _, _, ci_state)  => begin
                       @match true = stringEq(FGraph.getGraphNameStr(inNewEnv), FGraph.getGraphNameStr(inOldEnv))
                     ci_state
                   end
-                  
+
                   (_, _, _, _)  => begin
                       @match false = FGraph.isTopScope(inNewEnv)
                       id = FNode.refName(FGraph.lastScopeRef(inNewEnv))
@@ -3779,7 +3779,7 @@
                       ci_state = ClassInf.start(SCodeUtil.getClassRestriction(cls), FGraph.getGraphName(inNewEnv))
                     ci_state
                   end
-                  
+
                   _  => begin
                       inCIState
                   end
@@ -3798,7 +3798,7 @@
 
          #= function: instDAE.Dimension
           instantiates one dimension expression, See also instDimExpLst. =#
-        function evalEnumAndBoolDim(inDimension::DAE.Dimension) ::DAE.Dimension 
+        function evalEnumAndBoolDim(inDimension::DAE.Dimension) ::DAE.Dimension
               local outDimension::DAE.Dimension
 
               outDimension = begin
@@ -3809,7 +3809,7 @@
                   DAE.DIM_BOOLEAN(__)  => begin
                     DAE.DIM_INTEGER(2)
                   end
-                  
+
                   _  => begin
                       inDimension
                   end
@@ -3821,7 +3821,7 @@
          #= /*TODO: mahge: Remove me*/ =#
 
          #= the vesrion of instDimExp for the case of non-expanded arrays =#
-        function instDimExpNonSplit(inDimension::DAE.Dimension, inBoolean::Bool) ::DAE.Subscript 
+        function instDimExpNonSplit(inDimension::DAE.Dimension, inBoolean::Bool) ::DAE.Subscript
               local outSubscript::DAE.Subscript
 
               outSubscript = begin
@@ -3831,19 +3831,19 @@
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     DAE.WHOLEDIM()
                   end
-                  
+
                   (DAE.DIM_INTEGER(integer = i), _)  => begin
                     DAE.WHOLE_NONEXP(DAE.ICONST(i))
                   end
-                  
+
                   (DAE.DIM_ENUM(size = i), _)  => begin
                     DAE.WHOLE_NONEXP(DAE.ICONST(i))
                   end
-                  
+
                   (DAE.DIM_BOOLEAN(__), _)  => begin
                     DAE.WHOLE_NONEXP(DAE.ICONST(2))
                   end
-                  
+
                   (DAE.DIM_EXP(exp = e), _)  => begin
                     DAE.WHOLE_NONEXP(e)
                   end
@@ -3856,7 +3856,7 @@
 
          #= Tries to determine the size of a WHOLEDIM dimension by looking at a variables
           modifier. =#
-        function instWholeDimFromMod(dimensionExp::DAE.Dimension, modifier::DAE.Mod, inVarName::String, inInfo::SourceInfo) ::DAE.Dimension 
+        function instWholeDimFromMod(dimensionExp::DAE.Dimension, modifier::DAE.Mod, inVarName::String, inInfo::SourceInfo) ::DAE.Dimension
               local outDimension::DAE.Dimension
 
               outDimension = begin
@@ -3869,13 +3869,13 @@
                       @match _cons(d, _) = Expression.expDimensions(exp)
                     d
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__), DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = exp))), _, _)  => begin
                       exp_str = ExpressionDump.printExpStr(exp)
                       Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_FROM_MOD, list(inVarName, exp_str), inInfo)
                     fail()
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__), _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- InstUtil.instWholeDimFromMod failed\\n")
@@ -3894,7 +3894,7 @@
 
          #= Propagates attributes (flow, stream, discrete, parameter, constant, input,
           output) to elements in a structured component. =#
-        function propagateAttributes(inDae::DAE.DAElist, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo) ::DAE.DAElist 
+        function propagateAttributes(inDae::DAE.DAElist, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               local elts::List{DAE.Element}
@@ -3906,7 +3906,7 @@
         end
 
          #= Helper function to propagateAttributes. Propagates all attributes if needed. =#
-        function propagateAllAttributes(inElement::DAE.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo) ::DAE.Element 
+        function propagateAllAttributes(inElement::DAE.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inInfo::SourceInfo) ::DAE.Element
               local outElement::DAE.Element
 
               outElement = begin
@@ -3938,7 +3938,7 @@
                   (_, SCode.ATTR(connectorType = SCode.POTENTIAL(__), parallelism = SCode.NON_PARALLEL(__), variability = SCode.VAR(__), direction = Absyn.BIDIR(__)), SCode.PREFIXES(visibility = SCode.PUBLIC(__), finalPrefix = SCode.NOT_FINAL(__), innerOuter = Absyn.NOT_INNER_OUTER(__)), _)  => begin
                     inElement
                   end
-                  
+
                   (DAE.VAR(componentRef = cr, kind = vk, direction = vdir, parallelism = vprl, protection = vvis, ty = ty, binding = binding, dims = dims, connectorType = ct2, source = source, variableAttributesOption = var_attrs, comment = cmt, innerOuter = io2), SCode.ATTR(connectorType = ct1, parallelism = sprl, variability = var, direction = dir), SCode.PREFIXES(visibility = vis, finalPrefix = fp, innerOuter = io1), _)  => begin
                       vdir = propagateDirection(vdir, dir, cr, inInfo)
                       vk = propagateVariability(vk, var)
@@ -3949,12 +3949,12 @@
                       ct2 = propagateConnectorType(ct2, ct1, cr, inInfo)
                     DAE.VAR(cr, vk, vdir, vprl, vvis, ty, binding, dims, ct2, source, var_attrs, cmt, io2)
                   end
-                  
+
                   (DAE.COMP(ident = ident, dAElist = el, source = source, comment = cmt), _, _, _)  => begin
                       el = ListUtil.map3(el, propagateAllAttributes, inAttributes, inPrefixes, inInfo)
                     DAE.COMP(ident, el, source, cmt)
                   end
-                  
+
                   _  => begin
                       inElement
                   end
@@ -3971,7 +3971,7 @@
 
          #= Helper function to propagateAttributes. Propagates the input/output
           attribute to variables of a structured component. =#
-        function propagateDirection(inVarDirection::DAE.VarDirection, inDirection::Absyn.Direction, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.VarDirection 
+        function propagateDirection(inVarDirection::DAE.VarDirection, inDirection::Absyn.Direction, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.VarDirection
               local outVarDirection::DAE.VarDirection
 
               outVarDirection = begin
@@ -3984,11 +3984,11 @@
                   (_, Absyn.BIDIR(__), _, _)  => begin
                     inVarDirection
                   end
-                  
+
                   (DAE.BIDIR(__), _, _, _)  => begin
                     absynDirToDaeDir(inDirection)
                   end
-                  
+
                   _  => begin
                         s1 = Dump.directionSymbol(inDirection)
                         s2 = ComponentReference.printComponentRefStr(inCref)
@@ -4011,7 +4011,7 @@
 
          #= Helper function to propagateAttributes. Propagates the input/output
           attribute to variables of a structured component. =#
-        function propagateParallelism(inVarParallelism::DAE.VarParallelism, inParallelism::SCode.Parallelism, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.VarParallelism 
+        function propagateParallelism(inVarParallelism::DAE.VarParallelism, inParallelism::SCode.Parallelism, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.VarParallelism
               local outVarParallelism::DAE.VarParallelism
 
               outVarParallelism = begin
@@ -4028,17 +4028,17 @@
                   (_, SCode.NON_PARALLEL(__), _, _)  => begin
                     inVarParallelism
                   end
-                  
+
                   (DAE.NON_PARALLEL(__), _, _, _)  => begin
                     DAEUtil.scodePrlToDaePrl(inParallelism)
                   end
-                  
+
                   (daeprl1, _, _, _)  => begin
                       daeprl2 = DAEUtil.scodePrlToDaePrl(inParallelism)
                       @match true = DAEUtil.daeParallelismEqual(daeprl1, daeprl2)
                     daeprl1
                   end
-                  
+
                   _  => begin
                         daeprl2 = DAEUtil.scodePrlToDaePrl(inParallelism)
                         s1 = DAEDump.dumpVarParallelismStr(daeprl2)
@@ -4067,7 +4067,7 @@
 
          #= Helper function to propagateAttributes. Propagates the visibility (public or
            protected) attribute to variables of a structured component. =#
-        function propagateVisibility(inVarVisibility::DAE.VarVisibility, inVisibility::SCode.Visibility) ::DAE.VarVisibility 
+        function propagateVisibility(inVarVisibility::DAE.VarVisibility, inVisibility::SCode.Visibility) ::DAE.VarVisibility
               local outVarVisibility::DAE.VarVisibility
 
               outVarVisibility = begin
@@ -4075,7 +4075,7 @@
                   (_, SCode.PROTECTED(__))  => begin
                     DAE.PROTECTED()
                   end
-                  
+
                   _  => begin
                       inVarVisibility
                   end
@@ -4086,7 +4086,7 @@
 
          #= Helper function to propagateAttributes. Propagates the variability (parameter
           or constant) attribute to variables of a structured component. =#
-        function propagateVariability(inVarKind::DAE.VarKind, inVariability::SCode.Variability) ::DAE.VarKind 
+        function propagateVariability(inVarKind::DAE.VarKind, inVariability::SCode.Variability) ::DAE.VarKind
               local outVarKind::DAE.VarKind
 
               outVarKind = begin
@@ -4094,31 +4094,31 @@
                   (_, SCode.VAR(__))  => begin
                     inVarKind
                   end
-                  
+
                   (DAE.DISCRETE(__), _)  => begin
                     inVarKind
                   end
-                  
+
                   (_, SCode.DISCRETE(__))  => begin
                     DAE.DISCRETE()
                   end
-                  
+
                   (DAE.CONST(__), _)  => begin
                     inVarKind
                   end
-                  
+
                   (_, SCode.CONST(__))  => begin
                     DAE.CONST()
                   end
-                  
+
                   (DAE.PARAM(__), _)  => begin
                     inVarKind
                   end
-                  
+
                   (_, SCode.PARAM(__))  => begin
                     DAE.PARAM()
                   end
-                  
+
                   _  => begin
                       inVarKind
                   end
@@ -4133,7 +4133,7 @@
 
          #= Helper function to propagateAttributes. Propagates the final attribute to
           variables of a structured component. =#
-        function propagateFinal(inVarAttributes::Option{<:DAE.VariableAttributes}, inFinal::SCode.Final) ::Option{DAE.VariableAttributes} 
+        function propagateFinal(inVarAttributes::Option{<:DAE.VariableAttributes}, inFinal::SCode.Final) ::Option{DAE.VariableAttributes}
               local outVarAttributes::Option{DAE.VariableAttributes}
 
               outVarAttributes = begin
@@ -4141,7 +4141,7 @@
                   (_, SCode.FINAL(__))  => begin
                     DAEUtil.setFinalAttr(inVarAttributes, SCodeUtil.finalBool(inFinal))
                   end
-                  
+
                   _  => begin
                       inVarAttributes
                   end
@@ -4152,7 +4152,7 @@
 
          #= Helper function to propagateAttributes. Propagates the inner/outer attribute
           to variables of a structured component. =#
-        function propagateInnerOuter(inVarInnerOuter::Absyn.InnerOuter, inInnerOuter::Absyn.InnerOuter) ::Absyn.InnerOuter 
+        function propagateInnerOuter(inVarInnerOuter::Absyn.InnerOuter, inInnerOuter::Absyn.InnerOuter) ::Absyn.InnerOuter
               local outVarInnerOuter::Absyn.InnerOuter
 
               outVarInnerOuter = begin
@@ -4160,11 +4160,11 @@
                   (_, Absyn.NOT_INNER_OUTER(__))  => begin
                     inVarInnerOuter
                   end
-                  
+
                   (Absyn.NOT_INNER_OUTER(__), _)  => begin
                     inInnerOuter
                   end
-                  
+
                   _  => begin
                       inVarInnerOuter
                   end
@@ -4183,7 +4183,7 @@
 
          #= Helper function to propagateAttributes. Propagates the flow/stream attribute
            to variables of a structured component. =#
-        function propagateConnectorType(inVarConnectorType::DAE.ConnectorType, inConnectorType::SCode.ConnectorType, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.ConnectorType 
+        function propagateConnectorType(inVarConnectorType::DAE.ConnectorType, inConnectorType::SCode.ConnectorType, inCref::DAE.ComponentRef, inInfo::SourceInfo) ::DAE.ConnectorType
               local outVarConnectorType::DAE.ConnectorType
 
               outVarConnectorType = begin
@@ -4194,23 +4194,23 @@
                   (_, SCode.POTENTIAL(__), _, _)  => begin
                     inVarConnectorType
                   end
-                  
+
                   (DAE.POTENTIAL(__), SCode.FLOW(__), _, _)  => begin
                     DAE.FLOW()
                   end
-                  
+
                   (DAE.NON_CONNECTOR(__), SCode.FLOW(__), _, _)  => begin
                     DAE.FLOW()
                   end
-                  
+
                   (DAE.POTENTIAL(__), SCode.STREAM(__), _, _)  => begin
                     DAE.STREAM(NONE())
                   end
-                  
+
                   (DAE.NON_CONNECTOR(__), SCode.STREAM(__), _, _)  => begin
                     DAE.STREAM(NONE())
                   end
-                  
+
                   _  => begin
                         s1 = SCodeDump.connectorTypeStr(inConnectorType)
                         s2 = ComponentReference.printComponentRefStr(inCref)
@@ -4227,7 +4227,7 @@
 
          #= Translates Absyn.Direction to DAE.VarDirection.
           Needed so that input, output is transferred to DAE. =#
-        function absynDirToDaeDir(inDirection::Absyn.Direction) ::DAE.VarDirection 
+        function absynDirToDaeDir(inDirection::Absyn.Direction) ::DAE.VarDirection
               local outVarDirection::DAE.VarDirection
 
               outVarDirection = begin
@@ -4235,11 +4235,11 @@
                   Absyn.INPUT(__)  => begin
                     DAE.INPUT()
                   end
-                  
+
                   Absyn.OUTPUT(__)  => begin
                     DAE.OUTPUT()
                   end
-                  
+
                   Absyn.BIDIR(__)  => begin
                     DAE.BIDIR()
                   end
@@ -4249,7 +4249,7 @@
         end
 
          #= Returns true if attributes contain PARAM =#
-        function attrIsParam(inAttributes::SCode.Attributes) ::Bool 
+        function attrIsParam(inAttributes::SCode.Attributes) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -4257,7 +4257,7 @@
                   SCode.ATTR(variability = SCode.PARAM(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -4271,7 +4271,7 @@
           find arraydimensions and return as DAE.Dimension list.
           Used when components have submodifiers (on e.g. attributes) using
           size to find dimensions of component. =#
-        function elabComponentArraydimFromEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabComponentArraydimFromEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4301,14 +4301,14 @@
                       (cache, dims) = elabComponentArraydimFromEnv2(cache, eq, env)
                     (cache, dims)
                   end
-                  
+
                   (cache, env, DAE.CREF_IDENT(ident = id), _)  => begin
                       @match (cache, _, SCode.COMPONENT(attributes = SCode.ATTR(arrayDims = ad)), _, _, _) = Lookup.lookupIdent(cache, env, id)
                       (cache, subs) = Static.elabSubscripts(cache, env, ad, true, Prefix.NOPRE(), info)
                       dims = Expression.subscriptDimensions(subs)
                     (cache, dims)
                   end
-                  
+
                   (_, _, cref, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- InstUtil.elabComponentArraydimFromEnv failed: " + ComponentReference.printComponentRefStr(cref))
@@ -4323,7 +4323,7 @@
           Helper function to elabComponentArraydimFromEnv.
           This function is similar to elabArraydim, but it will only
           investigate binding (DAE.EqMod) and not the component declaration. =#
-        function elabComponentArraydimFromEnv2(inCache::FCore.Cache, inEqMod::DAE.EqMod, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabComponentArraydimFromEnv2(inCache::FCore.Cache, inEqMod::DAE.EqMod, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4347,7 +4347,7 @@
 
          #= Same functionality as elabArraydim, but takes an optional arraydim.
           In case of NONE(), empty DAE.Dimension list is returned. =#
-        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4367,7 +4367,7 @@
                       (cache, res) = elabArraydim(cache, env, owncref, path, ad, eq, impl, doVect, false, pre, info, inst_dims)
                     (cache, res)
                   end
-                  
+
                   (cache, _, _, _, NONE(), _, _, _, _, _, _)  => begin
                     (cache, nil)
                   end
@@ -4387,7 +4387,7 @@
           All this is accomplished by examining the two arguments separately
           and then using `complete_arraydime\\' or `compatible_arraydim\\' to
           check that that the dimension sizes are compatible and complete. =#
-        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions} 
+        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4426,16 +4426,16 @@
                       (cache, dim) = Static.elabArrayDims(cache, env, cref, ad, true, doVect, pre, info)
                     (cache, dim)
                   end
-                  
+
                   (cache, _, _, _,  nil(), _, _, _, _, _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, cref, _, ad, NONE(), impl, doVect, _, pre, info, _)  => begin
                       (cache, dim) = Static.elabArrayDims(cache, env, cref, ad, impl, doVect, pre, info)
                     (cache, dim)
                   end
-                  
+
                   (cache, env, cref, _, ad, SOME(DAE.TYPED(e, _, prop, _)), impl, doVect, _, pre, info, inst_dims)  => begin
                       t = Types.getPropType(prop)
                       (cache, dim1) = Static.elabArrayDims(cache, env, cref, ad, impl, doVect, pre, info)
@@ -4443,7 +4443,7 @@
                       dim3 = ListUtil.threadMap(dim1, dim2, compatibleArraydim)
                     (cache, dim3)
                   end
-                  
+
                   (cache, env, cref, _, ad, SOME(DAE.UNTYPED(aexp)), impl, doVect, _, pre, info, inst_dims)  => begin
                       (cache, e_1, prop) = Static.elabExp(cache, env, aexp, impl, doVect, pre, info)
                       (cache, e_1, prop) = Ceval.cevalIfConstant(cache, env, e_1, prop, impl, info)
@@ -4453,7 +4453,7 @@
                       dim3 = ListUtil.threadMap(dim1, dim2, compatibleArraydim)
                     (cache, dim3)
                   end
-                  
+
                   (cache, env, cref, _, ad, SOME(DAE.TYPED(e, _, DAE.PROP(t, _), _, info2)), impl, doVect, _, pre, info, inst_dims)  => begin
                       @match false = Flags.getConfigBool(Flags.CHECK_MODEL)
                       (_, dim1) = Static.elabArrayDims(cache, env, cref, ad, impl, doVect, pre, info)
@@ -4465,7 +4465,7 @@
                       Error.addMultiSourceMessage(Error.ARRAY_DIMENSION_MISMATCH, list(e_str, t_str, dim_str), _cons(info2, _cons(info, nil)))
                     fail()
                   end
-                  
+
                   (_, _, cref, _, ad, eq, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- InstUtil.elabArraydim failed on: \\n\\tcref:")
@@ -4494,7 +4494,7 @@
 
          #= This function prints array dimensions.
           The code is not included in the report. =#
-        function printDimStr(inDimensionLst::DAE.Dimensions) ::String 
+        function printDimStr(inDimensionLst::DAE.Dimensions) ::String
               local outString::String
 
               local dim_strings::List{String}
@@ -4509,7 +4509,7 @@
           have the same number of dimensions, and for every dimension at least one of
           the lists specifies it's size. If both lists specify a dimension size, they
           have to specify the same size. =#
-        function compatibleArraydim(inDimension1::DAE.Dimension, inDimension2::DAE.Dimension) ::DAE.Dimension 
+        function compatibleArraydim(inDimension1::DAE.Dimension, inDimension2::DAE.Dimension) ::DAE.Dimension
               local outDimension::DAE.Dimension
 
               outDimension = begin
@@ -4519,28 +4519,28 @@
                   (DAE.DIM_UNKNOWN(__), DAE.DIM_UNKNOWN(__))  => begin
                     DAE.DIM_UNKNOWN()
                   end
-                  
+
                   (_, DAE.DIM_UNKNOWN(__))  => begin
                     inDimension1
                   end
-                  
+
                   (DAE.DIM_UNKNOWN(__), _)  => begin
                     inDimension2
                   end
-                  
+
                   (_, DAE.DIM_EXP(__))  => begin
                     inDimension1
                   end
-                  
+
                   (DAE.DIM_EXP(__), _)  => begin
                     inDimension2
                   end
-                  
+
                   (_, _)  => begin
                       @match true = intEq(Expression.dimensionSize(inDimension1), Expression.dimensionSize(inDimension2))
                     inDimension1
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstUtil.compatibleArraydim failed\\n")
@@ -4553,7 +4553,7 @@
 
          #= Find out the dimension sizes of a type. The second argument is used to know
            how many dimensions should be extracted from the type. =#
-        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions 
+        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.Prefix, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               local flat_id::List{DAE.Dimension}
@@ -4581,7 +4581,7 @@
         end
 
          #= Help function to elabArraydimType. =#
-        function elabArraydimType2(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inDims::List{<:DAE.Dimension}) ::DAE.Dimensions 
+        function elabArraydimType2(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inDims::List{<:DAE.Dimension}) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               outDimensions = begin
@@ -4594,15 +4594,15 @@
                       compatibleArraydim(d, dim)
                     elabArraydimType2(t, inArrayDim, rest_dims)
                   end
-                  
+
                   (DAE.T_ARRAY(dims = d <|  nil(), ty = t), _,  nil())  => begin
                     _cons(d, elabArraydimType2(t, listRest(inArrayDim), nil))
                   end
-                  
+
                   (_,  nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (_, _ <| _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("Undefined! The type detected: ")
@@ -4617,7 +4617,7 @@
 
          #= @author: adrpo
          we might need to intantiate partial functions, but we should NOT add them to the DAE! =#
-        function addFunctionsToDAE(inCache::FCore.Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#, inPartialPrefix::SCode.Partial) ::FCore.Cache 
+        function addFunctionsToDAE(inCache::FCore.Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#, inPartialPrefix::SCode.Partial) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -4646,7 +4646,7 @@
           outCache
         end
 
-        function addNameToDerivativeMapping(inElts::List{<:DAE.Function}, path::Absyn.Path) ::List{DAE.Function} 
+        function addNameToDerivativeMapping(inElts::List{<:DAE.Function}, path::Absyn.Path) ::List{DAE.Function}
               local outElts::List{DAE.Function}
 
               outElts = list(begin
@@ -4655,7 +4655,7 @@
                       fn.functions = addNameToDerivativeMappingFunctionDefs(fn.functions, path)
                     fn
                   end
-                  
+
                   _  => begin
                       fn
                   end
@@ -4665,7 +4665,7 @@
         end
 
          #=  help function to addNameToDerivativeMapping =#
-        function addNameToDerivativeMappingFunctionDefs(inFuncs::List{<:DAE.FunctionDefinition}, path::Absyn.Path) ::List{DAE.FunctionDefinition} 
+        function addNameToDerivativeMappingFunctionDefs(inFuncs::List{<:DAE.FunctionDefinition}, path::Absyn.Path) ::List{DAE.FunctionDefinition}
               local outFuncs::List{DAE.FunctionDefinition}
 
               outFuncs = list(begin
@@ -4674,7 +4674,7 @@
                       fn.lowerOrderDerivatives = _cons(path, fn.lowerOrderDerivatives)
                     fn
                   end
-                  
+
                   _  => begin
                       fn
                   end
@@ -4683,10 +4683,10 @@
           outFuncs
         end
 
-         #= 
+         #=
         Authot BZ
         helper function for InstFunction.implicitFunctionInstantiation, returns derivative of function, if any. =#
-        function getDeriveAnnotation(cd::SCode.ClassDef, cmt::SCode.Comment, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation(cd::SCode.ClassDef, cmt::SCode.Comment, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition}
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4696,11 +4696,11 @@
                   (SCode.PARTS(elementLst = elemDecl, externalDecl = SOME(SCode.EXTERNALDECL(annotation_ = SOME(ann)))), _, _, _, _, _, _, _)  => begin
                     getDeriveAnnotation2(ann, elemDecl, baseFunc, inCache, inEnv, inIH, inPrefix, info)
                   end
-                  
+
                   (SCode.PARTS(elementLst = elemDecl), SCode.COMMENT(annotation_ = SOME(ann)), _, _, _, _, _, _)  => begin
                     getDeriveAnnotation2(ann, elemDecl, baseFunc, inCache, inEnv, inIH, inPrefix, info)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -4709,9 +4709,9 @@
           element
         end
 
-         #= 
+         #=
         helper function for getDeriveAnnotation =#
-        function getDeriveAnnotation2(ann::SCode.Annotation, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation2(ann::SCode.Annotation, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition}
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4726,10 +4726,10 @@
           element
         end
 
-         #= 
+         #=
         Author: bjozac
           helper function to getDeriveAnnotation2 =#
-        function getDeriveAnnotation3(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition} 
+        function getDeriveAnnotation3(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, baseFunc::Absyn.Path, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{DAE.FunctionDefinition}
               local element::List{DAE.FunctionDefinition}
 
               element = begin
@@ -4747,7 +4747,7 @@
                    nil()  => begin
                     fail()
                   end
-                  
+
                   SCode.NAMEMOD("derivative", SCode.MOD(subModLst = subs2, binding = SOME(Absyn.CREF(acr)))) <| subs  => begin
                       deriveFunc = AbsynUtil.crefToPath(acr)
                       (_, deriveFunc) = Inst.makeFullyQualified(inCache, inEnv, deriveFunc)
@@ -4760,7 +4760,7 @@
                       mapper = DAE.FUNCTION_DER_MAPPER(baseFunc, deriveFunc, order, conditionRefs, defaultDerivative, nil)
                     list(mapper)
                   end
-                  
+
                   _ <| subs  => begin
                     getDeriveAnnotation3(subs, elemDecl, baseFunc, inCache, inEnv, inIH, inPrefix, info)
                   end
@@ -4777,10 +4777,10 @@
           element
         end
 
-         #= 
+         #=
         helper function for getDeriveAnnotation
         Extracts conditions for derivative. =#
-        function getDeriveCondition(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{Tuple{ModelicaInteger, DAE.derivativeCond}} 
+        function getDeriveCondition(inSubs::List{<:SCode.SubMod}, elemDecl::List{<:SCode.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, info::SourceInfo) ::List{Tuple{ModelicaInteger, DAE.derivativeCond}}
               local outconds::List{Tuple{ModelicaInteger, DAE.derivativeCond}}
 
               outconds = begin
@@ -4797,21 +4797,21 @@
                   ( nil(), _, _, _, _, _, _)  => begin
                     nil
                   end
-                  
+
                   (SCode.NAMEMOD("noDerivative", SCode.MOD(binding = SOME(Absyn.CREF(acr)))) <| subs, _, _, _, _, _, _)  => begin
                       name = AbsynUtil.printComponentRefStr(acr)
                       outconds = getDeriveCondition(subs, elemDecl, inCache, inEnv, inIH, inPrefix, info)
                       varPos = setFunctionInputIndex(elemDecl, name, 1)
                     _cons((varPos, DAE.NO_DERIVATIVE(DAE.ICONST(99))), outconds)
                   end
-                  
+
                   (SCode.NAMEMOD("zeroDerivative", SCode.MOD(binding = SOME(Absyn.CREF(acr)))) <| subs, _, _, _, _, _, _)  => begin
                       name = AbsynUtil.printComponentRefStr(acr)
                       outconds = getDeriveCondition(subs, elemDecl, inCache, inEnv, inIH, inPrefix, info)
                       varPos = setFunctionInputIndex(elemDecl, name, 1)
                     _cons((varPos, DAE.ZERO_DERIVATIVE()), outconds)
                   end
-                  
+
                   (SCode.NAMEMOD("noDerivative", m && SCode.MOD(__)) <| subs, _, _, _, _, _, _)  => begin
                       @match (cache, DAE.MOD(subModLst = list(sub))) = Mod.elabMod(inCache, inEnv, inIH, inPrefix, m, false, Mod.COMPONENT("noDerivative"), info)
                       (name, cond) = extractNameAndExp(sub)
@@ -4819,7 +4819,7 @@
                       varPos = setFunctionInputIndex(elemDecl, name, 1)
                     _cons((varPos, cond), outconds)
                   end
-                  
+
                   (_ <| subs, _, _, _, _, _, _)  => begin
                     getDeriveCondition(subs, elemDecl, inCache, inEnv, inIH, inPrefix, info)
                   end
@@ -4828,9 +4828,9 @@
           outconds
         end
 
-         #= 
+         #=
         Author BZ =#
-        function setFunctionInputIndex(inElemDecl::List{<:SCode.Element}, str::String, currPos::ModelicaInteger) ::ModelicaInteger 
+        function setFunctionInputIndex(inElemDecl::List{<:SCode.Element}, str::String, currPos::ModelicaInteger) ::ModelicaInteger
               local index::ModelicaInteger
 
               index = begin
@@ -4841,16 +4841,16 @@
                       print(" failure in setFunctionInputIndex, didn't find any index for: " + str + "\\n")
                     fail()
                   end
-                  
+
                   (SCode.COMPONENT(name = str2, attributes = SCode.ATTR(direction = Absyn.INPUT(__))) <| _, _, _)  => begin
                       @match true = stringEq(str2, str)
                     currPos
                   end
-                  
+
                   (SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.INPUT(__))) <| elemDecl, _, _)  => begin
                     setFunctionInputIndex(elemDecl, str, currPos + 1)
                   end
-                  
+
                   (_ <| elemDecl, _, _)  => begin
                     setFunctionInputIndex(elemDecl, str, currPos)
                   end
@@ -4862,11 +4862,11 @@
           index
         end
 
-         #= 
+         #=
         Author BZ
         could be used by getDeriveCondition, depending on interpretation of spec compared to constructed libraries.
         helper function for getDeriveAnnotation =#
-        function extractNameAndExp(m::DAE.SubMod) ::Tuple{String, DAE.derivativeCond} 
+        function extractNameAndExp(m::DAE.SubMod) ::Tuple{String, DAE.derivativeCond}
               local cond::DAE.derivativeCond
               local inputVar::String
 
@@ -4876,15 +4876,15 @@
                   DAE.NAMEMOD(ident = inputVar, mod = DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = e))))  => begin
                     (inputVar, DAE.NO_DERIVATIVE(e))
                   end
-                  
+
                   DAE.NAMEMOD(ident = inputVar, mod = DAE.MOD(binding = NONE()))  => begin
                     (inputVar, DAE.NO_DERIVATIVE(DAE.ICONST(1)))
                   end
-                  
+
                   DAE.NAMEMOD(ident = inputVar, mod = DAE.MOD(binding = NONE()))  => begin
                     (inputVar, DAE.ZERO_DERIVATIVE())
                   end
-                  
+
                   _  => begin
                       ("", DAE.ZERO_DERIVATIVE())
                   end
@@ -4895,9 +4895,9 @@
           (inputVar, cond)
         end
 
-         #= 
+         #=
         helper function for getDeriveAnnotation =#
-        function getDerivativeSubModsOptDefault(inSubs::List{<:SCode.SubMod}, inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix) ::Option{Absyn.Path} 
+        function getDerivativeSubModsOptDefault(inSubs::List{<:SCode.SubMod}, inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix) ::Option{Absyn.Path}
               local defaultDerivative::Option{Absyn.Path}
 
               defaultDerivative = begin
@@ -4910,13 +4910,13 @@
                   ( nil(), _, _, _)  => begin
                     NONE()
                   end
-                  
+
                   (SCode.NAMEMOD("derivative", SCode.MOD(binding = SOME(Absyn.CREF(acr)))) <| _, _, _, _)  => begin
                       p = AbsynUtil.crefToPath(acr)
                       (_, p) = Inst.makeFullyQualified(inCache, inEnv, p)
                     SOME(p)
                   end
-                  
+
                   (_ <| subs, _, _, _)  => begin
                     getDerivativeSubModsOptDefault(subs, inCache, inEnv, inPrefix)
                   end
@@ -4925,10 +4925,10 @@
           defaultDerivative
         end
 
-         #= 
+         #=
         helper function for getDeriveAnnotation
         Get current derive order =#
-        function getDerivativeOrder(inSubs::List{<:SCode.SubMod}) ::ModelicaInteger 
+        function getDerivativeOrder(inSubs::List{<:SCode.SubMod}) ::ModelicaInteger
               local order::ModelicaInteger
 
               order = begin
@@ -4939,11 +4939,11 @@
                    nil()  => begin
                     1
                   end
-                  
+
                   SCode.NAMEMOD("order", SCode.MOD(binding = SOME(Absyn.INTEGER(order)))) <| _  => begin
                     order
                   end
-                  
+
                   _ <| subs  => begin
                     getDerivativeOrder(subs)
                   end
@@ -4954,7 +4954,7 @@
 
          #= This function sets the FQ path given as argument in types that have optional path set.
          (The optional path points to the class the type is built from) =#
-        function setFullyQualifiedTypename(inType::DAE.Type, path::Absyn.Path) ::DAE.Type 
+        function setFullyQualifiedTypename(inType::DAE.Type, path::Absyn.Path) ::DAE.Type
               local resType::DAE.Type
 
               resType = begin
@@ -4965,7 +4965,7 @@
                       resType.path = path
                     resType
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -4974,7 +4974,7 @@
           resType
         end
 
-        function classIsInlineFunc(elt::SCode.Element) ::DAE.InlineType 
+        function classIsInlineFunc(elt::SCode.Element) ::DAE.InlineType
               local outInlineType::DAE.InlineType
 
               outInlineType = begin
@@ -4982,7 +4982,7 @@
                   SCode.CLASS(__)  => begin
                     commentIsInlineFunc(elt.cmt)
                   end
-                  
+
                   _  => begin
                       DAE.DEFAULT_INLINE()
                   end
@@ -4991,7 +4991,7 @@
           outInlineType
         end
 
-        function commentIsInlineFunc(cmt::SCode.Comment) ::DAE.InlineType 
+        function commentIsInlineFunc(cmt::SCode.Comment) ::DAE.InlineType
               local outInlineType::DAE.InlineType
 
               outInlineType = begin
@@ -5000,7 +5000,7 @@
                   SCode.COMMENT(annotation_ = SOME(SCode.ANNOTATION(SCode.MOD(subModLst = smlst))))  => begin
                     isInlineFunc2(smlst)
                   end
-                  
+
                   _  => begin
                       DAE.DEFAULT_INLINE()
                   end
@@ -5009,7 +5009,7 @@
           outInlineType
         end
 
-        function isInlineFunc2(inSubModList::List{<:SCode.SubMod}) ::DAE.InlineType 
+        function isInlineFunc2(inSubModList::List{<:SCode.SubMod}) ::DAE.InlineType
               local res::DAE.InlineType
 
               local stop::Bool = false
@@ -5022,37 +5022,37 @@
                         res = DAE.NORM_INLINE()
                       false
                     end
-                    
+
                     SCode.NAMEMOD("Inline", SCode.MOD(binding = SOME(Absyn.BOOL(false))))  => begin
                         res = DAE.NO_INLINE()
                       false
                     end
-                    
+
                     SCode.NAMEMOD("LateInline", SCode.MOD(binding = SOME(Absyn.BOOL(true))))  => begin
                         res = DAE.AFTER_INDEX_RED_INLINE()
                       true
                     end
-                    
+
                     SCode.NAMEMOD("__MathCore_InlineAfterIndexReduction", SCode.MOD(binding = SOME(Absyn.BOOL(true))))  => begin
                         res = DAE.AFTER_INDEX_RED_INLINE()
                       true
                     end
-                    
+
                     SCode.NAMEMOD("__Dymola_InlineAfterIndexReduction", SCode.MOD(binding = SOME(Absyn.BOOL(true))))  => begin
                         res = DAE.AFTER_INDEX_RED_INLINE()
                       true
                     end
-                    
+
                     SCode.NAMEMOD("InlineAfterIndexReduction", SCode.MOD(binding = SOME(Absyn.BOOL(true))))  => begin
                         res = DAE.AFTER_INDEX_RED_INLINE()
                       true
                     end
-                    
+
                     SCode.NAMEMOD("__OpenModelica_EarlyInline", SCode.MOD(binding = SOME(Absyn.BOOL(true))))  => begin
                         res = DAE.EARLY_INLINE()
                       true
                     end
-                    
+
                     _  => begin
                         false
                     end
@@ -5066,7 +5066,7 @@
         end
 
          #= strips the assignment modification of the component declared as output =#
-        function stripFuncOutputsMod(elem::SCode.Element) ::SCode.Element 
+        function stripFuncOutputsMod(elem::SCode.Element) ::SCode.Element
               local stripped_elem::SCode.Element
 
               stripped_elem = begin
@@ -5092,7 +5092,7 @@
                       modBla = SCode.MOD(modFinPre, modEachPre, modSubML, NONE(), mod_info)
                     SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, finPre, inOut, repPre), attr, typeSpc, modBla, comm, cond, info)
                   end
-                  
+
                   e  => begin
                     e
                   end
@@ -5101,21 +5101,21 @@
           stripped_elem
         end
 
-         #= 
+         #=
           * All in-/outputs are referenced
           * There must be no algorithm section (checked earlier)
            =#
-        function checkExternalFunction(els::List{<:DAE.Element}, decl::DAE.ExternalDecl, name::String)  
+        function checkExternalFunction(els::List{<:DAE.Element}, decl::DAE.ExternalDecl, name::String)
               local i::ModelicaInteger
 
               if decl.language == "builtin"
-                return 
+                return
               end
               ListUtil.map2_0(els, checkExternalFunctionOutputAssigned, decl, name)
               checkFunctionInputUsed(els, SOME(decl), name)
         end
 
-        function checkFunctionInputUsed(elts::List{<:DAE.Element}, decl::Option{<:DAE.ExternalDecl}, name::String)  
+        function checkFunctionInputUsed(elts::List{<:DAE.Element}, decl::Option{<:DAE.ExternalDecl}, name::String)
               local invars::List{DAE.Element}
               local vars::List{DAE.Element}
               local algs::List{DAE.Element}
@@ -5129,10 +5129,10 @@
               ListUtil.map1_0(invars, warnUnusedFunctionVar, name)
         end
 
-         #= 
+         #=
           True if __OpenModelica_UnusedVariable does not exist in the element.
          =#
-        function checkInputUsedAnnotation(inElement::DAE.Element) ::Bool 
+        function checkInputUsedAnnotation(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -5143,7 +5143,7 @@
                       result = SCodeUtil.optCommentHasBooleanNamedAnnotation(cmt, "__OpenModelica_UnusedVariable")
                     ! result
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -5152,7 +5152,7 @@
           result
         end
 
-        function warnUnusedFunctionVar(v::DAE.Element, name::String)  
+        function warnUnusedFunctionVar(v::DAE.Element, name::String)
               local cr::DAE.ComponentRef
               local source::DAE.ElementSource
               local str::String
@@ -5162,7 +5162,7 @@
               Error.addSourceMessage(Error.FUNCTION_UNUSED_INPUT, list(str, name), ElementSource.getElementSourceFileInfo(source))
         end
 
-        function checkExternalDeclInputUsed(inames::List{<:DAE.Element}, decl::Option{<:DAE.ExternalDecl}) ::List{DAE.Element} 
+        function checkExternalDeclInputUsed(inames::List{<:DAE.Element}, decl::Option{<:DAE.ExternalDecl}) ::List{DAE.Element}
               local onames::List{DAE.Element}
 
               onames = begin
@@ -5173,11 +5173,11 @@
                   (names, NONE())  => begin
                     names
                   end
-                  
+
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   (names, SOME(DAE.EXTERNALDECL(returnArg = arg, args = args)))  => begin
                       names = ListUtil.select1(names, checkExternalDeclArgs, _cons(arg, args))
                     names
@@ -5187,7 +5187,7 @@
           onames
         end
 
-        function checkExpInputUsed(inExp::DAE.Exp, inEls::List{<:DAE.Element}) ::Tuple{DAE.Exp, List{DAE.Element}} 
+        function checkExpInputUsed(inExp::DAE.Exp, inEls::List{<:DAE.Element}) ::Tuple{DAE.Exp, List{DAE.Element}}
               local els::List{DAE.Element}
               local exp::DAE.Exp
 
@@ -5199,14 +5199,14 @@
                       els = ListUtil.select1(els, checkExpInputUsed3, cr)
                     (exp, els)
                   end
-                  
+
                   (exp && DAE.CALL(path = path), els)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       cr = ComponentReference.pathToCref(path)
                       els = ListUtil.select1(els, checkExpInputUsed3, cr)
                     (exp, els)
                   end
-                  
+
                   _  => begin
                       (inExp, inEls)
                   end
@@ -5215,7 +5215,7 @@
           (exp, els)
         end
 
-        function checkExpInputUsed3(el::DAE.Element, cr2::DAE.ComponentRef) ::Bool 
+        function checkExpInputUsed3(el::DAE.Element, cr2::DAE.ComponentRef) ::Bool
               local noteq::Bool
 
               local cr1::DAE.ComponentRef
@@ -5225,14 +5225,14 @@
           noteq
         end
 
-        function checkVarBindingsInputUsed(v::DAE.Element, els::List{<:DAE.Element}) ::Bool 
+        function checkVarBindingsInputUsed(v::DAE.Element, els::List{<:DAE.Element}) ::Bool
               local notfound::Bool
 
               notfound = ! ListUtil.isMemberOnTrue(v, els, checkVarBindingInputUsed)
           notfound
         end
 
-        function checkVarBindingInputUsed(v::DAE.Element, el::DAE.Element) ::Bool 
+        function checkVarBindingInputUsed(v::DAE.Element, el::DAE.Element) ::Bool
               local found::Bool
 
               found = begin
@@ -5242,11 +5242,11 @@
                   (DAE.VAR(__), DAE.VAR(direction = DAE.INPUT(__)))  => begin
                     false
                   end
-                  
+
                   (DAE.VAR(componentRef = cr), DAE.VAR(binding = SOME(exp)))  => begin
                     Expression.expHasCref(exp, cr)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5255,7 +5255,7 @@
           found
         end
 
-        function checkExternalDeclArgs(v::DAE.Element, args::List{<:DAE.ExtArg}) ::Bool 
+        function checkExternalDeclArgs(v::DAE.Element, args::List{<:DAE.ExtArg}) ::Bool
               local notfound::Bool
 
               notfound = ! ListUtil.isMemberOnTrue(v, args, extArgCrefEq)
@@ -5264,7 +5264,7 @@
 
          #= All outputs must either have a default binding or be used in the external function
         declaration as there is no way to make assignments in external functions. =#
-        function checkExternalFunctionOutputAssigned(v::DAE.Element, decl::DAE.ExternalDecl, name::String)  
+        function checkExternalFunctionOutputAssigned(v::DAE.Element, decl::DAE.ExternalDecl, name::String)
               _ = begin
                   local arg::DAE.ExtArg
                   local args::List{DAE.ExtArg}
@@ -5282,7 +5282,7 @@
                       end
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -5291,7 +5291,7 @@
         end
 
          #= See if an external argument matches a cref =#
-        function extArgCrefEq(v::DAE.Element, arg::DAE.ExtArg) ::Bool 
+        function extArgCrefEq(v::DAE.Element, arg::DAE.ExtArg) ::Bool
               local b::Bool
 
               b = begin
@@ -5303,20 +5303,20 @@
                       cr2 = ComponentReference.crefFirstCref(cr2)
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
-                  
+
                   (DAE.VAR(direction = DAE.OUTPUT(__)), _)  => begin
                     false
                   end
-                  
+
                   (DAE.VAR(componentRef = cr1), DAE.EXTARGSIZE(componentRef = cr2))  => begin
                       cr2 = ComponentReference.crefFirstCref(cr2)
                     ComponentReference.crefEqualNoStringCompare(cr1, cr2)
                   end
-                  
+
                   (DAE.VAR(componentRef = cr1), DAE.EXTARGEXP(exp = exp))  => begin
                     Expression.expHasCref(exp, cr1)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5331,7 +5331,7 @@
 
          #= If the external function id is present, then a function call must
           exist, i.e. explicit call was written in the external clause. =#
-        function isExtExplicitCall(inExternalDecl::SCode.ExternalDecl) ::Bool 
+        function isExtExplicitCall(inExternalDecl::SCode.ExternalDecl) ::Bool
               local isExplicit::Bool
 
               isExplicit = begin
@@ -5339,7 +5339,7 @@
                   SCode.EXTERNALDECL(funcName = SOME(_))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5349,7 +5349,7 @@
         end
 
          #= Succeds for Elements that are input or output components =#
-        function isInoutVar(inElement::SCode.Element) ::Bool 
+        function isInoutVar(inElement::SCode.Element) ::Bool
               local b::Bool
 
               b = isOutputVar(inElement) || isInputVar(inElement)
@@ -5357,7 +5357,7 @@
         end
 
          #= Succeds for element that is output component =#
-        function isOutputVar(inElement::SCode.Element) ::Bool 
+        function isOutputVar(inElement::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -5365,7 +5365,7 @@
                   SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.OUTPUT(__)))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5375,7 +5375,7 @@
         end
 
          #= Succeds for element that is input component =#
-        function isInputVar(inElement::SCode.Element) ::Bool 
+        function isInputVar(inElement::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -5383,7 +5383,7 @@
                   SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.INPUT(__)))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -5393,7 +5393,7 @@
         end
 
          #= Returns the function name of the externally defined function. =#
-        function instExtGetFname(inExternalDecl::SCode.ExternalDecl, inIdent::String) ::String 
+        function instExtGetFname(inExternalDecl::SCode.ExternalDecl, inIdent::String) ::String
               local outIdent::String
 
               outIdent = begin
@@ -5403,7 +5403,7 @@
                   (SCode.EXTERNALDECL(funcName = SOME(id)), _)  => begin
                     id
                   end
-                  
+
                   (SCode.EXTERNALDECL(funcName = NONE()), fid)  => begin
                     fid
                   end
@@ -5415,7 +5415,7 @@
          #= author: PA
           Return the annotation associated with an external function declaration.
           If no annotation is found, check the classpart annotations. =#
-        function instExtGetAnnotation(inExternalDecl::SCode.ExternalDecl) ::Option{SCode.Annotation} 
+        function instExtGetAnnotation(inExternalDecl::SCode.ExternalDecl) ::Option{SCode.Annotation}
               local outAnnotation::Option{SCode.Annotation}
 
               outAnnotation = begin
@@ -5431,7 +5431,7 @@
 
          #= Return the implementation language of the external function declaration.
           Defaults to \\\"C\\\" if no language specified. =#
-        function instExtGetLang(inExternalDecl::SCode.ExternalDecl) ::String 
+        function instExtGetLang(inExternalDecl::SCode.ExternalDecl) ::String
               local outString::String
 
               outString = begin
@@ -5440,7 +5440,7 @@
                   SCode.EXTERNALDECL(lang = SOME(lang))  => begin
                     lang
                   end
-                  
+
                   SCode.EXTERNALDECL(lang = NONE())  => begin
                     "C"
                   end
@@ -5453,7 +5453,7 @@
           This special function calls elabExpExt which handles size builtin
           calls specially, and uses the ordinary Static.elab_exp for other
           expressions. =#
-        function elabExpListExt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}} 
+        function elabExpListExt(inCache::FCore.Cache, inEnv::FCore.Graph, inAbsynExpLst::List{<:Absyn.Exp}, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
               local outTypesPropertiesLst::List{DAE.Properties}
               local outExpExpLst::List{DAE.Exp}
               local outCache::FCore.Cache
@@ -5474,7 +5474,7 @@
                   (cache, _,  nil(), _, _, _)  => begin
                     (cache, nil, nil)
                   end
-                  
+
                   (cache, env, e <| rest, impl, pre, _)  => begin
                       (cache, exp, p) = elabExpExt(cache, env, e, impl, pre, info)
                       (cache, exps, props) = elabExpListExt(cache, env, rest, impl, pre, info)
@@ -5489,7 +5489,7 @@
           special elabExp for explicit external calls.
           This special function calls elabExpExt which handles size builtin calls
           specially, and uses the ordinary Static.elab_exp for other expressions. =#
-        function elabExpExt(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabExpExt(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -5523,13 +5523,13 @@
                       exp = DAE.SIZE(arraycrefe, SOME(dimp))
                     (cache, exp, DAE.PROP(DAE.T_INTEGER_DEFAULT, DAE.C_VAR()))
                   end
-                  
+
                   (cache, env, absynExp, impl, pre, _)  => begin
                       (cache, e, prop) = Static.elabExp(cache, env, absynExp, impl, false, pre, info)
                       (cache, e, prop) = Ceval.cevalIfConstant(cache, env, e, prop, impl, info)
                     (cache, e, prop)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("-Inst.elabExpExt failed")
@@ -5544,7 +5544,7 @@
 
          #= author: LS
           instantiates function arguments, i.e. actual parameters, in external declaration. =#
-        function instExtGetFargs(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}} 
+        function instExtGetFargs(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}}
               local outDAEExtArgLst::List{DAE.ExtArg}
               local outCache::FCore.Cache
 
@@ -5566,7 +5566,7 @@
                       (cache, extargs) = instExtGetFargs2(cache, env, absexps, exps, props, lang, info)
                     (cache, extargs)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- InstUtil.instExtGetFargs failed")
@@ -5579,7 +5579,7 @@
 
          #= author: LS
           Helper function to instExtGetFargs =#
-        function instExtGetFargs2(inCache::FCore.Cache, inEnv::FCore.Graph, absynExps::List{<:Absyn.Exp}, inExpExpLst::List{<:DAE.Exp}, inTypesPropertiesLst::List{<:DAE.Properties}, lang::Option{<:String}, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}} 
+        function instExtGetFargs2(inCache::FCore.Cache, inEnv::FCore.Graph, absynExps::List{<:Absyn.Exp}, inExpExpLst::List{<:DAE.Exp}, inTypesPropertiesLst::List{<:DAE.Properties}, lang::Option{<:String}, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.ExtArg}}
               local outDAEExtArgLst::List{DAE.ExtArg}
               local outCache::FCore.Cache
 
@@ -5598,7 +5598,7 @@
                   (cache, _, _,  nil(), _, _, _)  => begin
                     (cache, nil)
                   end
-                  
+
                   (cache, env, ae <| aes, e <| exps, p <| props, _, _)  => begin
                       @match (cache, SOME(extarg)) = instExtGetFargsSingle(cache, env, ae, e, p, lang, info)
                       (cache, extargs) = instExtGetFargs2(cache, env, aes, exps, props, lang, info)
@@ -5611,7 +5611,7 @@
 
          #= author: LS
           Helper function to instExtGetFargs2, does the work for one argument. =#
-        function instExtGetFargsSingle(inCache::FCore.Cache, inEnv::FCore.Graph, absynExp::Absyn.Exp, inExp::DAE.Exp, inProperties::DAE.Properties, lang::Option{<:String}, info::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.ExtArg}} 
+        function instExtGetFargsSingle(inCache::FCore.Cache, inEnv::FCore.Graph, absynExp::Absyn.Exp, inExp::DAE.Exp, inProperties::DAE.Properties, lang::Option{<:String}, info::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.ExtArg}}
               local outExtArg::Option{DAE.ExtArg}
               local outCache::FCore.Cache
 
@@ -5642,12 +5642,12 @@
                       (cache, fattr, _, _, _, _, _, _, _) = Lookup.lookupVarLocal(cache, inEnv, fcr)
                     (cache, SOME(DAE.EXTARG(cref, DAEUtil.getAttrDirection(fattr), ty)))
                   end
-                  
+
                   (_, _, _, DAE.CREF(componentRef = cref && DAE.CREF_IDENT(__)), DAE.PROP(constFlag = DAE.C_VAR(__)), _, _)  => begin
                       (cache, attr, ty, _, _, _, _, _, _) = Lookup.lookupVarLocal(inCache, inEnv, cref)
                     (cache, SOME(DAE.EXTARG(cref, DAEUtil.getAttrDirection(attr), ty)))
                   end
-                  
+
                   (cache, env, _, DAE.CREF(componentRef = cref), DAE.PROP(__), _, _)  => begin
                       @shouldFail (_, _, _, _, _, _, _, _, _) = Lookup.lookupVarLocal(cache, env, cref)
                       crefstr = ComponentReference.printComponentRefStr(cref)
@@ -5655,30 +5655,30 @@
                       Error.addMessage(Error.LOOKUP_VARIABLE_ERROR, list(crefstr, scope))
                     (cache, NONE())
                   end
-                  
+
                   (cache, env, _, DAE.SIZE(exp = DAE.CREF(componentRef = cref), sz = SOME(dim)), DAE.PROP(__), _, _)  => begin
                       (cache, _, varty, _, _, _, _, _, _) = Lookup.lookupVarLocal(cache, env, cref)
                     (cache, SOME(DAE.EXTARGSIZE(cref, varty, dim)))
                   end
-                  
+
                   (cache, env, _, _, DAE.PROP(type_ = ty, constFlag = DAE.C_CONST(__)), _, _)  => begin
                       (cache, exp) = Ceval.cevalIfConstant(cache, env, inExp, inProperties, false, info)
                       @match true = Expression.isScalarConst(exp)
                     (cache, SOME(DAE.EXTARGEXP(exp, ty)))
                   end
-                  
+
                   (cache, _, _, _, DAE.PROP(type_ = ty), SOME("builtin"), _)  => begin
                     (cache, SOME(DAE.EXTARGEXP(inExp, ty)))
                   end
-                  
+
                   (cache, _, _, DAE.CALL(attr = DAE.CALL_ATTR(builtin = true)), DAE.PROP(type_ = ty), _, _)  => begin
                     (cache, SOME(DAE.EXTARGEXP(inExp, ty)))
                   end
-                  
+
                   (cache, _, Absyn.CREF(_), _, DAE.PROP(type_ = ty), _, _)  => begin
                     (cache, SOME(DAE.EXTARGEXP(inExp, ty)))
                   end
-                  
+
                   (cache, _, _, exp, DAE.PROP(__), _, _)  => begin
                       str = ExpressionDump.printExpStr(exp)
                       Error.addSourceMessage(Error.EXTERNAL_ARG_WRONG_EXP, list(str), info)
@@ -5699,7 +5699,7 @@
 
          #= author: LS
           Instantiates the return type of an external declaration. =#
-        function instExtGetRettype(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ExtArg} 
+        function instExtGetRettype(inCache::FCore.Cache, inEnv::FCore.Graph, inExternalDecl::SCode.ExternalDecl, inBoolean::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ExtArg}
               local outExtArg::DAE.ExtArg
               local outCache::FCore.Cache
 
@@ -5720,14 +5720,14 @@
                   (cache, _, SCode.EXTERNALDECL(output_ = NONE()), _, _, _)  => begin
                     (cache, DAE.NOEXTARG())
                   end
-                  
+
                   (cache, env, SCode.EXTERNALDECL(lang = lang, output_ = SOME(cref)), impl, pre, _)  => begin
                       @match (cache, SOME((exp, prop, _))) = Static.elabCref(cache, env, cref, impl, false, pre, info)
                       @match (cache, SOME(extarg)) = instExtGetFargsSingle(cache, env, Absyn.CREF(cref), exp, prop, lang, info)
                       assertExtArgOutputIsCrefVariable(lang, extarg, Types.getPropType(prop), Types.propAllConst(prop), info)
                     (cache, extarg)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- InstUtil.instExtRettype failed")
@@ -5740,30 +5740,30 @@
           (outCache, outExtArg)
         end
 
-        function assertExtArgOutputIsCrefVariable(lang::Option{<:String}, arg::DAE.ExtArg, ty::DAE.Type, c::DAE.Const, info::SourceInfo)  
+        function assertExtArgOutputIsCrefVariable(lang::Option{<:String}, arg::DAE.ExtArg, ty::DAE.Type, c::DAE.Const, info::SourceInfo)
               _ = begin
                   local str::String
                 @match (lang, arg, ty, c, info) begin
                   (SOME("builtin"), _, _, _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, DAE.T_ARRAY(__), _, _)  => begin
                       str = Types.unparseType(ty)
                       Error.addSourceMessage(Error.EXTERNAL_FUNCTION_RESULT_ARRAY_TYPE, list(str), info)
                     fail()
                   end
-                  
+
                   (_, DAE.EXTARG(__), _, DAE.C_VAR(__), _)  => begin
                     ()
                   end
-                  
+
                   (_, _, _, DAE.C_VAR(__), _)  => begin
                       str = DAEDump.dumpExtArgStr(arg)
                       Error.addSourceMessage(Error.EXTERNAL_FUNCTION_RESULT_NOT_CREF, list(str), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.EXTERNAL_FUNCTION_RESULT_NOT_VAR, nil, info)
                       fail()
@@ -5773,7 +5773,7 @@
         end
 
          #= Creates a DAE.VarVisibility from a SCode.Visibility =#
-        function makeDaeProt(visibility::SCode.Visibility) ::DAE.VarVisibility 
+        function makeDaeProt(visibility::SCode.Visibility) ::DAE.VarVisibility
               local res::DAE.VarVisibility
 
               res = begin
@@ -5781,7 +5781,7 @@
                   SCode.PROTECTED(__)  => begin
                     DAE.PROTECTED()
                   end
-                  
+
                   SCode.PUBLIC(__)  => begin
                     DAE.PUBLIC()
                   end
@@ -5790,7 +5790,7 @@
           res
         end
 
-        function makeDaeVariability(inVariability::SCode.Variability) ::DAE.VarKind 
+        function makeDaeVariability(inVariability::SCode.Variability) ::DAE.VarKind
               local outVariability::DAE.VarKind
 
               outVariability = begin
@@ -5798,15 +5798,15 @@
                   SCode.VAR(__)  => begin
                     DAE.VARIABLE()
                   end
-                  
+
                   SCode.PARAM(__)  => begin
                     DAE.PARAM()
                   end
-                  
+
                   SCode.CONST(__)  => begin
                     DAE.CONST()
                   end
-                  
+
                   SCode.DISCRETE(__)  => begin
                     DAE.DISCRETE()
                   end
@@ -5815,7 +5815,7 @@
           outVariability
         end
 
-        function makeDaeDirection(inDirection::Absyn.Direction) ::DAE.VarDirection 
+        function makeDaeDirection(inDirection::Absyn.Direction) ::DAE.VarDirection
               local outDirection::DAE.VarDirection
 
               outDirection = begin
@@ -5823,11 +5823,11 @@
                   Absyn.INPUT(__)  => begin
                     DAE.INPUT()
                   end
-                  
+
                   Absyn.OUTPUT(__)  => begin
                     DAE.OUTPUT()
                   end
-                  
+
                   Absyn.BIDIR(__)  => begin
                     DAE.BIDIR()
                   end
@@ -5841,7 +5841,7 @@
           indicates that the type should be a built-in type, one of the
           built-in type constructors is used.  Otherwise, a T_COMPLEX is
           built. =#
-        function mktype(inPath::Absyn.Path, inState::ClassInf.State, inTypesVarLst::List{<:DAE.Var}, inTypesTypeOption::Option{<:DAE.Type}, inEqualityConstraint::DAE.EqualityConstraint, inClass::SCode.Element, inheritedComment::SCode.Comment) ::DAE.Type 
+        function mktype(inPath::Absyn.Path, inState::ClassInf.State, inTypesVarLst::List{<:DAE.Var}, inTypesTypeOption::Option{<:DAE.Type}, inEqualityConstraint::DAE.EqualityConstraint, inClass::SCode.Element, inheritedComment::SCode.Comment) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -5867,87 +5867,87 @@
                   (_, ClassInf.TYPE_INTEGER(__), v, _, _, _)  => begin
                     DAE.T_INTEGER(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_REAL(__), v, _, _, _)  => begin
                     DAE.T_REAL(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_STRING(__), v, _, _, _)  => begin
                     DAE.T_STRING(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_BOOL(__), v, _, _, _)  => begin
                     DAE.T_BOOL(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_CLOCK(__), v, _, _, _)  => begin
                     DAE.T_CLOCK(v)
                   end
-                  
+
                   (p, ClassInf.TYPE_ENUM(__), _, _, _, _)  => begin
                     DAE.T_ENUMERATION(NONE(), p, nil, nil, nil)
                   end
-                  
+
                   (p, ClassInf.FUNCTION(__), vl, _, _, cl)  => begin
                       funcattr = getFunctionAttributes(cl, vl, inheritedComment)
                       functype = Types.makeFunctionType(p, vl, funcattr)
                     functype
                   end
-                  
+
                   (_, ClassInf.ENUMERATION(path = p), _, SOME(enumtype), _, _)  => begin
                       enumtype = Types.makeEnumerationType(p, enumtype)
                     enumtype
                   end
-                  
+
                   (_, ClassInf.TYPE(__), _, SOME(DAE.T_ARRAY(ty = arrayType)), NONE(), _)  => begin
                       classState = arrayTTypeToClassInfState(arrayType)
                       resType = mktype(inPath, classState, inTypesVarLst, inTypesTypeOption, inEqualityConstraint, inClass, inheritedComment)
                     resType
                   end
-                  
+
                   (_, ClassInf.TYPE(__), _, SOME(DAE.T_ARRAY(ty = arrayType)), SOME(_), _)  => begin
                       classState = arrayTTypeToClassInfState(arrayType)
                       resType = mktype(inPath, classState, inTypesVarLst, inTypesTypeOption, inEqualityConstraint, inClass, inheritedComment)
                       resType = DAE.T_SUBTYPE_BASIC(inState, nil, resType, inEqualityConstraint)
                     resType
                   end
-                  
+
                   (_, ClassInf.META_TUPLE(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (_, ClassInf.META_OPTION(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (_, ClassInf.META_LIST(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (_, ClassInf.META_POLYMORPHIC(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (_, ClassInf.META_ARRAY(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (_, ClassInf.META_UNIONTYPE(_), _, SOME(bc2), _, _)  => begin
                     bc2
                   end
-                  
+
                   (p, ClassInf.META_UNIONTYPE(_), _, _, _, _)  => begin
                       pstr = AbsynUtil.pathString(p)
                       info = SCodeUtil.elementInfo(inClass)
                       Error.addSourceMessage(Error.META_UNIONTYPE_ALIAS_MODS, list(pstr), info)
                     fail()
                   end
-                  
+
                   (_, st, l, NONE(), equalityConstraint, _)  => begin
                       @shouldFail @match ClassInf.META_UNIONTYPE(_) = st
                     DAE.T_COMPLEX(st, l, equalityConstraint)
                   end
-                  
+
                   (_, st, l, SOME(bc), equalityConstraint, _)  => begin
                       @shouldFail @match ClassInf.META_UNIONTYPE(_) = st
                     DAE.T_SUBTYPE_BASIC(st, l, bc, equalityConstraint)
@@ -5971,7 +5971,7 @@
           outType
         end
 
-        function arrayTTypeToClassInfState(arrayType::DAE.Type) ::ClassInf.State 
+        function arrayTTypeToClassInfState(arrayType::DAE.Type) ::ClassInf.State
               local classInfState::ClassInf.State
 
               classInfState = begin
@@ -5981,23 +5981,23 @@
                   DAE.T_INTEGER(__)  => begin
                     ClassInf.TYPE_INTEGER(Absyn.IDENT(""))
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     ClassInf.TYPE_REAL(Absyn.IDENT(""))
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     ClassInf.TYPE_STRING(Absyn.IDENT(""))
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     ClassInf.TYPE_BOOL(Absyn.IDENT(""))
                   end
-                  
+
                   DAE.T_CLOCK(__)  => begin
                     ClassInf.TYPE_CLOCK(Absyn.IDENT(""))
                   end
-                  
+
                   DAE.T_ARRAY(ty = t)  => begin
                       cs = arrayTTypeToClassInfState(t)
                     cs
@@ -6014,7 +6014,7 @@
           that it will create array types based on the last argument,
           which indicates wheter the class extends from a basictype.
           It is used only in the inst_class_basictype function. =#
-        function mktypeWithArrays(inPath::Absyn.Path, inState::ClassInf.State, inTypesVarLst::List{<:DAE.Var}, inTypesTypeOption::Option{<:DAE.Type}, inClass::SCode.Element, inheritedComment::SCode.Comment) ::DAE.Type 
+        function mktypeWithArrays(inPath::Absyn.Path, inState::ClassInf.State, inTypesVarLst::List{<:DAE.Var}, inTypesTypeOption::Option{<:DAE.Type}, inClass::SCode.Element, inheritedComment::SCode.Comment) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -6038,51 +6038,51 @@
                       @shouldFail ClassInf.isConnector(ci)
                     tp
                   end
-                  
+
                   (p, ClassInf.TYPE_INTEGER(__), v, _, _)  => begin
                       _ = getOptPath(p)
                     DAE.T_INTEGER(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_REAL(__), v, _, _)  => begin
                     DAE.T_REAL(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_STRING(__), v, _, _)  => begin
                     DAE.T_STRING(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_BOOL(__), v, _, _)  => begin
                     DAE.T_BOOL(v)
                   end
-                  
+
                   (_, ClassInf.TYPE_CLOCK(__), v, _, _)  => begin
                     DAE.T_CLOCK(v)
                   end
-                  
+
                   (p, ClassInf.TYPE_ENUM(__), _, _, _)  => begin
                     DAE.T_ENUMERATION(NONE(), p, nil, nil, nil)
                   end
-                  
+
                   (p, ClassInf.FUNCTION(__), vl, _, cl)  => begin
                       funcattr = getFunctionAttributes(cl, vl, inheritedComment)
                       functype = Types.makeFunctionType(p, vl, funcattr)
                     functype
                   end
-                  
+
                   (p, ClassInf.ENUMERATION(__), _, SOME(enumtype), _)  => begin
                       enumtype = Types.makeEnumerationType(p, enumtype)
                     enumtype
                   end
-                  
+
                   (_, st, l, NONE(), _)  => begin
                     DAE.T_COMPLEX(st, l, NONE())
                   end
-                  
+
                   (_, st, l, SOME(bc), _)  => begin
                     DAE.T_SUBTYPE_BASIC(st, l, bc, NONE())
                   end
-                  
+
                   _  => begin
                         print("InstUtil.mktypeWithArrays failed\\n")
                       fail()
@@ -6102,7 +6102,7 @@
 
          #= Helper function to mktype
           Transforms a Path into a Path option. =#
-        function getOptPath(inPath::Absyn.Path) ::Option{Absyn.Path} 
+        function getOptPath(inPath::Absyn.Path) ::Option{Absyn.Path}
               local outAbsynPathOption::Option{Absyn.Path}
 
               outAbsynPathOption = begin
@@ -6111,7 +6111,7 @@
                   Absyn.IDENT(name = "")  => begin
                     NONE()
                   end
-                  
+
                   p  => begin
                     SOME(p)
                   end
@@ -6122,7 +6122,7 @@
 
          #= This function is used to check that a
           protected element is not modified. =#
-        function checkProt(inVisibility::SCode.Visibility, inMod::DAE.Mod, inComponentRef::DAE.ComponentRef, info::SourceInfo)  
+        function checkProt(inVisibility::SCode.Visibility, inMod::DAE.Mod, inComponentRef::DAE.ComponentRef, info::SourceInfo)
               _ = begin
                   local cref::DAE.ComponentRef
                   local str1::String
@@ -6131,15 +6131,15 @@
                   (SCode.PUBLIC(__), _, _, _)  => begin
                     ()
                   end
-                  
+
                   (_, DAE.NOMOD(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (_, DAE.MOD(_, _,  nil(), NONE()), _, _)  => begin
                     ()
                   end
-                  
+
                   (SCode.PROTECTED(__), _, cref, _)  => begin
                       str1 = ComponentReference.printComponentRefStr(cref)
                       str2 = Mod.prettyPrintMod(inMod, 0)
@@ -6152,7 +6152,7 @@
 
          #= author: LP
           Retrieves the stateSelect value, as defined in DAE,  from an Expression option. =#
-        function getStateSelectFromExpOption(inExpExpOption::Option{<:DAE.Exp}) ::Option{DAE.StateSelect} 
+        function getStateSelectFromExpOption(inExpExpOption::Option{<:DAE.Exp}) ::Option{DAE.StateSelect}
               local outDAEStateSelectOption::Option{DAE.StateSelect}
 
               outDAEStateSelectOption = begin
@@ -6160,23 +6160,23 @@
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "StateSelect", path = Absyn.IDENT("never"))))  => begin
                     SOME(DAE.NEVER())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "StateSelect", path = Absyn.IDENT("avoid"))))  => begin
                     SOME(DAE.AVOID())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "StateSelect", path = Absyn.IDENT("default"))))  => begin
                     SOME(DAE.DEFAULT())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "StateSelect", path = Absyn.IDENT("prefer"))))  => begin
                     SOME(DAE.PREFER())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "StateSelect", path = Absyn.IDENT("always"))))  => begin
                     SOME(DAE.ALWAYS())
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -6187,7 +6187,7 @@
 
          #= Returns true if the given submod is a namemod with the same name as the given
           name, otherwise false. =#
-        function isSubModNamed(inName::String, inSubMod::DAE.SubMod) ::Bool 
+        function isSubModNamed(inName::String, inSubMod::DAE.SubMod) ::Bool
               local isNamed::Bool
 
               isNamed = begin
@@ -6196,7 +6196,7 @@
                   (_, DAE.NAMEMOD(ident = submod_name))  => begin
                     stringEqual(inName, submod_name)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6207,7 +6207,7 @@
 
          #= If the type is an array type this function creates an array of the given
           record, otherwise it just returns the input arguments. =#
-        function liftRecordBinding(inType::DAE.Type, inExp::DAE.Exp, inValue::Values.Value) ::Tuple{DAE.Exp, Values.Value} 
+        function liftRecordBinding(inType::DAE.Type, inExp::DAE.Exp, inValue::Values.Value) ::Tuple{DAE.Exp, Values.Value}
               local outValue::Values.Value
               local outExp::DAE.Exp
 
@@ -6231,7 +6231,7 @@
                       val = Values.ARRAY(vals, list(int_dim))
                     (exp, val)
                   end
-                  
+
                   _  => begin
                         @match false = Types.isArray(inType)
                       (inExp, inValue)
@@ -6244,7 +6244,7 @@
          #= author: PA
           The topmost instantiation call is treated specially with for instance unconnected connectors.
           This function returns true if the CallingScope indicates the top call. =#
-        function isTopCall(inCallingScope::InstTypes.CallingScope) ::Bool 
+        function isTopCall(inCallingScope::InstTypes.CallingScope) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -6252,7 +6252,7 @@
                   InstTypes.TOP_CALL(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -6262,7 +6262,7 @@
         end
 
          #=  Extracts SCode.Element name. =#
-        function extractCurrentName(sele::SCode.Element) ::Tuple{String, SourceInfo} 
+        function extractCurrentName(sele::SCode.Element) ::Tuple{String, SourceInfo}
               local oinfo::SourceInfo
               local ostring::String
 
@@ -6276,16 +6276,16 @@
                   SCode.CLASS(name = name, info = info)  => begin
                     (name, info)
                   end
-                  
+
                   SCode.COMPONENT(name = name, info = info)  => begin
                     (name, info)
                   end
-                  
+
                   SCode.EXTENDS(baseClassPath = path, info = info)  => begin
                       ret = AbsynUtil.pathString(path)
                     (ret, info)
                   end
-                  
+
                   SCode.IMPORT(imp = imp, info = info)  => begin
                       name = AbsynUtil.printImportString(imp)
                     (name, info)
@@ -6301,7 +6301,7 @@
             connect(non_expandable, expandable);
             connect(expandable, non_expandable);
             connect(expandable, expandable); =#
-        function reorderConnectEquationsExpandable(cache::FCore.Cache, env::FCore.Graph, inEquations::List{<:SCode.Equation}) ::Tuple{FCore.Cache, List{SCode.Equation}} 
+        function reorderConnectEquationsExpandable(cache::FCore.Cache, env::FCore.Graph, inEquations::List{<:SCode.Equation}) ::Tuple{FCore.Cache, List{SCode.Equation}}
               local outEquations::List{SCode.Equation}
 
 
@@ -6335,7 +6335,7 @@
                        @match true = Types.isExpandableConnector(ty2)
                      true
                    end
-                   
+
                    _  => begin
                          DoubleEnded.push_back(delst, eq)
                        false
@@ -6374,7 +6374,7 @@
                       DoubleEnded.push_list_back(delst, expandableEqs)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -6389,7 +6389,7 @@
          #= @author: adrpo
           This function will move all the *inner*
           elements first in the given list of elements =#
-        function sortInnerFirstTplLstElementMod(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function sortInnerFirstTplLstElementMod(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outTplLstElementMod::List{Tuple{SCode.Element, DAE.Mod}}
 
               outTplLstElementMod = begin
@@ -6407,7 +6407,7 @@
                       @match false = System.getHasInnerOuterDefinitions()
                     inTplLstElementMod
                   end
-                  
+
                   _  => begin
                       (innerElts, innerouterElts, otherElts) = splitInnerAndOtherTplLstElementMod(inTplLstElementMod)
                       (innerModelicaServices, innerModelica, innerOthers) = splitInners(innerElts, nil, nil, nil)
@@ -6434,7 +6434,7 @@
           *inner* ModelicaServices.*
           *inner* Modelica.*
           *inner* Other.* =#
-        function splitInners(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc1::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc2::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc3::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function splitInners(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc1::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc2::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inAcc3::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}}
               local outOthers::List{Tuple{SCode.Element, DAE.Mod}}
               local outModelica::List{Tuple{SCode.Element, DAE.Mod}}
               local outModelicaServices::List{Tuple{SCode.Element, DAE.Mod}}
@@ -6452,7 +6452,7 @@
                   ( nil(), _, _, _)  => begin
                     (listReverse(inAcc1), listReverse(inAcc2), listReverse(inAcc3))
                   end
-                  
+
                   (em <| rest, _, _, _)  => begin
                       e = Util.tuple21(em)
                       @match Absyn.TPATH(p, _) = SCodeUtil.getComponentTypeSpec(e)
@@ -6460,7 +6460,7 @@
                       (acc1, acc2, acc3) = splitInners(rest, _cons(em, inAcc1), inAcc2, inAcc3)
                     (acc1, acc2, acc3)
                   end
-                  
+
                   (em <| rest, _, _, _)  => begin
                       e = Util.tuple21(em)
                       @match Absyn.TPATH(p, _) = SCodeUtil.getComponentTypeSpec(e)
@@ -6468,7 +6468,7 @@
                       (acc1, acc2, acc3) = splitInners(rest, inAcc1, _cons(em, inAcc2), inAcc3)
                     (acc1, acc2, acc3)
                   end
-                  
+
                   (em && (_, _) <| rest, _, _, _)  => begin
                       (acc1, acc2, acc3) = splitInners(rest, inAcc1, inAcc2, _cons(em, inAcc3))
                     (acc1, acc2, acc3)
@@ -6480,7 +6480,7 @@
 
          #= @author: adrpo
           Split the elements into inner, inner outer and others =#
-        function splitInnerAndOtherTplLstElementMod(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function splitInnerAndOtherTplLstElementMod(inTplLstElementMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}}
               local outOtherTplLstElementMod::List{Tuple{SCode.Element, DAE.Mod}} = nil
               local outInnerOuterTplLstElementMod::List{Tuple{SCode.Element, DAE.Mod}} = nil
               local outInnerTplLstElementMod::List{Tuple{SCode.Element, DAE.Mod}} = nil
@@ -6504,7 +6504,7 @@
                          =#
                       ()
                     end
-                    
+
                     _  => begin
                            #=  any other components.
                            =#
@@ -6517,13 +6517,13 @@
           (outInnerTplLstElementMod, outInnerOuterTplLstElementMod, outOtherTplLstElementMod)
         end
 
-         #= 
+         #=
         This function splits the Element list into four lists
         1. Class definitions , imports and defineunits
         2. Class-extends class definitions
         3. Extends elements
         4. Components which are ordered by inner/outer, inner first =#
-        function splitEltsOrderInnerOuter(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}} 
+        function splitEltsOrderInnerOuter(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}}
               local compElts::List{SCode.Element}
               local extElts::List{SCode.Element}
               local classextendsElts::List{SCode.Element}
@@ -6552,13 +6552,13 @@
           (cdefImpElts, classextendsElts, extElts, compElts)
         end
 
-         #= 
+         #=
         This function splits the Element list into four lists
         1. Class definitions , imports and defineunits
         2. Class-extends class definitions
         3. Extends elements
         4. Components =#
-        function splitElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}} 
+        function splitElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}}
               local compElts::List{SCode.Element} = nil
               local extElts::List{SCode.Element} = nil
               local classextendsElts::List{SCode.Element} = nil
@@ -6573,7 +6573,7 @@
                             SCode.CLASS_EXTENDS(__)  => begin
                               true
                             end
-                            
+
                             _  => begin
                                 false
                             end
@@ -6589,28 +6589,28 @@
                          =#
                       ()
                     end
-                    
+
                     SCode.IMPORT(__)  => begin
                          #=  imports
                          =#
                         cdefImpElts = _cons(elt, cdefImpElts)
                       ()
                     end
-                    
+
                     SCode.DEFINEUNIT(__)  => begin
                          #=  units
                          =#
                         cdefImpElts = _cons(elt, cdefImpElts)
                       ()
                     end
-                    
+
                     SCode.EXTENDS(__)  => begin
                          #=  extends elements
                          =#
                         extElts = _cons(elt, extElts)
                       ()
                     end
-                    
+
                     SCode.COMPONENT(__)  => begin
                          #=  components
                          =#
@@ -6627,13 +6627,13 @@
           (cdefImpElts, classextendsElts, extElts, compElts)
         end
 
-         #= 
+         #=
         This function splits the Element list into these categories:
         1. Imports
         2. Define units and class definitions
         3. Class-extends class definitions
         4. Filtered class extends and imports =#
-        function splitEltsNoComponents(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}} 
+        function splitEltsNoComponents(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}}
               local filtered::List{SCode.Element}
               local classextendsElts::List{SCode.Element}
               local defElts::List{SCode.Element}
@@ -6648,27 +6648,27 @@
                    nil()  => begin
                     (nil, nil, nil, nil)
                   end
-                  
+
                   elt && SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__)) <| xs  => begin
                       (impElts, defElts, classextendsElts, filtered) = splitEltsNoComponents(xs)
                     (impElts, defElts, _cons(elt, classextendsElts), filtered)
                   end
-                  
+
                   elt && SCode.CLASS(__) <| xs  => begin
                       (impElts, defElts, classextendsElts, filtered) = splitEltsNoComponents(xs)
                     (impElts, _cons(elt, defElts), classextendsElts, _cons(elt, filtered))
                   end
-                  
+
                   elt && SCode.IMPORT(__) <| xs  => begin
                       (impElts, defElts, classextendsElts, filtered) = splitEltsNoComponents(xs)
                     (_cons(elt, impElts), defElts, classextendsElts, filtered)
                   end
-                  
+
                   elt && SCode.DEFINEUNIT(__) <| xs  => begin
                       (impElts, defElts, classextendsElts, filtered) = splitEltsNoComponents(xs)
                     (impElts, _cons(elt, defElts), classextendsElts, _cons(elt, filtered))
                   end
-                  
+
                   elt <| xs  => begin
                       (impElts, defElts, classextendsElts, filtered) = splitEltsNoComponents(xs)
                     (impElts, defElts, classextendsElts, _cons(elt, filtered))
@@ -6688,7 +6688,7 @@
           (impElts, defElts, classextendsElts, filtered)
         end
 
-         #= 
+         #=
          @author: adrpo
           Splits elements into these categories:
           1. Class definitions, imports and defineunits
@@ -6696,7 +6696,7 @@
           3. Extends elements
           4. Inner Components
           5. Any Other Components =#
-        function splitEltsInnerAndOther(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}} 
+        function splitEltsInnerAndOther(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}, List{SCode.Element}}
               local otherCompElts::List{SCode.Element}
               local innerCompElts::List{SCode.Element}
               local extElts::List{SCode.Element}
@@ -6719,38 +6719,38 @@
                    nil()  => begin
                     (nil, nil, nil, nil, nil)
                   end
-                  
+
                   cdef && SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__)) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (cdefImpElts, _cons(cdef, classextendsElts), extElts, innerComps, otherComps)
                   end
-                  
+
                   cdef && SCode.CLASS(__) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (_cons(cdef, cdefImpElts), classextendsElts, extElts, innerComps, otherComps)
                   end
-                  
+
                   imp && SCode.IMPORT(__) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (_cons(imp, cdefImpElts), classextendsElts, extElts, innerComps, otherComps)
                   end
-                  
+
                   imp && SCode.DEFINEUNIT(__) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (_cons(imp, cdefImpElts), classextendsElts, extElts, innerComps, otherComps)
                   end
-                  
+
                   ext && SCode.EXTENDS(__) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (cdefImpElts, classextendsElts, _cons(ext, extElts), innerComps, otherComps)
                   end
-                  
+
                   comp && SCode.COMPONENT(prefixes = SCode.PREFIXES(innerOuter = io)) <| xs  => begin
                       @match true = AbsynUtil.isInner(io)
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (cdefImpElts, classextendsElts, extElts, _cons(comp, innerComps), otherComps)
                   end
-                  
+
                   comp && SCode.COMPONENT(__) <| xs  => begin
                       (cdefImpElts, classextendsElts, extElts, innerComps, otherComps) = splitEltsInnerAndOther(xs)
                     (cdefImpElts, classextendsElts, extElts, innerComps, _cons(comp, otherComps))
@@ -6777,7 +6777,7 @@
          #= @author: adrpo
          this functions puts the component in front of the list if
          is inner or innerouter and at the end of the list otherwise =#
-        function orderComponents(inComp::SCode.Element, inCompElts::List{<:SCode.Element}) ::List{SCode.Element} 
+        function orderComponents(inComp::SCode.Element, inCompElts::List{<:SCode.Element}) ::List{SCode.Element}
               local outCompElts::List{SCode.Element}
 
               outCompElts = begin
@@ -6788,27 +6788,27 @@
                   (SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.INPUT(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(attributes = SCode.ATTR(direction = Absyn.OUTPUT(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(innerOuter = Absyn.INNER(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(innerOuter = Absyn.INNER_OUTER(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(attributes = SCode.ATTR(variability = SCode.CONST(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(attributes = SCode.ATTR(variability = SCode.PARAM(__))), _)  => begin
                     _cons(inComp, inCompElts)
                   end
-                  
+
                   (SCode.COMPONENT(__), _)  => begin
                       compElts = listAppend(inCompElts, list(inComp))
                     compElts
@@ -6829,7 +6829,7 @@
          #= This function splits the Element list into two lists
         1. Class-extends class definitions
         2. Any other element =#
-        function splitClassExtendsElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}} 
+        function splitClassExtendsElts(elts::List{<:SCode.Element}) ::Tuple{List{SCode.Element}, List{SCode.Element}}
               local outElts::List{SCode.Element}
               local classextendsElts::List{SCode.Element}
 
@@ -6841,12 +6841,12 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   cdef && SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__)) <| xs  => begin
                       (classextendsElts, res) = splitClassExtendsElts(xs)
                     (_cons(cdef, classextendsElts), res)
                   end
-                  
+
                   cdef <| xs  => begin
                       (classextendsElts, res) = splitClassExtendsElts(xs)
                     (classextendsElts, _cons(cdef, res))
@@ -6857,7 +6857,7 @@
         end
 
          #= function: addClassdefsToEnv3  =#
-        function addClassdefsToEnv3(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::Option{<:DAE.Mod}, sele::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element} 
+        function addClassdefsToEnv3(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inMod::Option{<:DAE.Mod}, sele::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element}
               local osele::SCode.Element
               local outIH::InnerOuter.InstHierarchy
               local oenv::FCore.Graph
@@ -6878,7 +6878,7 @@
                   (_, _, _, _, NONE(), _)  => begin
                     fail()
                   end
-                  
+
                   (cache, _, ih, pre, SOME(DAE.MOD(subModLst = lsm)), SCode.CLASS(name = str))  => begin
                       (mo2, _) = extractCorrectClassMod2(lsm, str, nil)
                       @match (cache, env2, ih, (@match SCode.CLASS() = sele2), _) = Inst.redeclareType(cache, env, ih, mo2, sele, pre, ClassInf.MODEL(Absyn.IDENT(str)), true, DAE.NOMOD())
@@ -6897,7 +6897,7 @@
 
          #=  This function extracts a modifier on a specific component.
          Referenced by the name. =#
-        function extractCorrectClassMod2(smod::List{<:DAE.SubMod}, name::String, premod::List{<:DAE.SubMod}) ::Tuple{DAE.Mod, List{DAE.SubMod}} 
+        function extractCorrectClassMod2(smod::List{<:DAE.SubMod}, name::String, premod::List{<:DAE.SubMod}) ::Tuple{DAE.Mod, List{DAE.SubMod}}
               local restmods::List{DAE.SubMod}
               local omod::DAE.Mod
 
@@ -6911,12 +6911,12 @@
                   ( nil(), _, _)  => begin
                     (DAE.NOMOD(), premod)
                   end
-                  
+
                   (DAE.NAMEMOD(id, mod) <| rest, _, _) where (stringEq(id, name))  => begin
                       rest2 = listAppend(premod, rest)
                     (mod, rest2)
                   end
-                  
+
                   (sub <| rest, _, _)  => begin
                       (mod, rest2) = extractCorrectClassMod2(rest, name, premod)
                     (mod, _cons(sub, rest2))
@@ -6927,7 +6927,7 @@
         end
 
          #= Helper function for traverseModAddFinal =#
-        function traverseModAddFinal(mod::SCode.Mod) ::SCode.Mod 
+        function traverseModAddFinal(mod::SCode.Mod) ::SCode.Mod
 
 
               mod = begin
@@ -6943,7 +6943,7 @@
                   SCode.NOMOD(__)  => begin
                     mod
                   end
-                  
+
                   SCode.REDECL(eachPrefix = each_, element = element1)  => begin
                       element2 = traverseModAddFinal3(element1)
                     if referenceEq(element1, element2)
@@ -6952,7 +6952,7 @@
                           SCode.REDECL(SCode.FINAL(), each_, element2)
                         end
                   end
-                  
+
                   SCode.MOD(f, each_, subs1, eq, info)  => begin
                       subs2 = ListUtil.mapCheckReferenceEq(subs1, traverseModAddFinal4)
                     if valueEq(SCode.FINAL(), f) && referenceEq(subs1, subs2)
@@ -6961,7 +6961,7 @@
                           SCode.MOD(SCode.FINAL(), each_, subs2, eq, info)
                         end
                   end
-                  
+
                   _  => begin
                         Error.addInternalError(getInstanceName(), sourceInfo())
                       fail()
@@ -6972,7 +6972,7 @@
         end
 
          #= Helper function for traverseModAddFinal2 =#
-        function traverseModAddFinal3(inElement::SCode.Element) ::SCode.Element 
+        function traverseModAddFinal3(inElement::SCode.Element) ::SCode.Element
               local outElement::SCode.Element
 
               outElement = begin
@@ -6997,15 +6997,15 @@
                           SCode.COMPONENT(name, prefixes, attr, tySpec, mod, cmt, cond, info)
                         end
                   end
-                  
+
                   SCode.IMPORT(__)  => begin
                     inElement
                   end
-                  
+
                   SCode.CLASS(__)  => begin
                     inElement
                   end
-                  
+
                   SCode.EXTENDS(p, vis, oldmod, ann, info)  => begin
                       mod = traverseModAddFinal(oldmod)
                     if referenceEq(oldmod, mod)
@@ -7014,7 +7014,7 @@
                           SCode.EXTENDS(p, vis, mod, ann, info)
                         end
                   end
-                  
+
                   _  => begin
                         print(" we failed with traverseModAddFinal3\\n")
                       fail()
@@ -7025,7 +7025,7 @@
         end
 
          #= Helper function for traverseModAddFinal2 =#
-        function traverseModAddFinal4(sub::SCode.SubMod) ::SCode.SubMod 
+        function traverseModAddFinal4(sub::SCode.SubMod) ::SCode.SubMod
 
 
               local mod::SCode.Mod
@@ -7038,7 +7038,7 @@
         end
 
          #= The function used to modify modifications for non-expanded arrays =#
-        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod 
+        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -7057,11 +7057,11 @@
                       @match true = Config.splitArrays()
                     mod
                   end
-                  
+
                   (_, _, _, _,  nil())  => begin
                     inMod
                   end
-                  
+
                   (cache, env, pre, mod, inst_dims)  => begin
                       exps = ListUtil.map(inst_dims, Expression.dimensionsToExps)
                       aexps = ListUtil.mapList(exps, Expression.unelabExp)
@@ -7076,7 +7076,7 @@
         end
 
          #= Helper function  for traverseModAddDims =#
-        function traverseModAddDims4(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inExps::List{<:List{<:Absyn.Exp}}, inIsTop::Bool) ::SCode.Mod 
+        function traverseModAddDims4(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMod::SCode.Mod, inExps::List{<:List{<:Absyn.Exp}}, inIsTop::Bool) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -7095,11 +7095,11 @@
                   (_, _, _, SCode.NOMOD(__), _, _)  => begin
                     inMod
                   end
-                  
+
                   (_, _, _, SCode.REDECL(__), _, _)  => begin
                     inMod
                   end
-                  
+
                   (cache, env, pre, SCode.MOD(f, SCode.NOT_EACH(__), submods, binding, info), exps, _)  => begin
                       submods2 = traverseModAddDims5(cache, env, pre, submods, exps)
                       binding = insertSubsInBinding(binding, exps)
@@ -7113,7 +7113,7 @@
         end
 
          #= Helper function  for traverseModAddDims2 =#
-        function traverseModAddDims5(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMods::List{<:SCode.SubMod}, inExps::List{<:List{<:Absyn.Exp}}) ::List{SCode.SubMod} 
+        function traverseModAddDims5(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inMods::List{<:SCode.SubMod}, inExps::List{<:List{<:Absyn.Exp}}) ::List{SCode.SubMod}
               local outMods::List{SCode.SubMod}
 
               outMods = begin
@@ -7129,7 +7129,7 @@
                   (_, _, _,  nil(), _)  => begin
                     nil
                   end
-                  
+
                   (cache, env, pre, SCode.NAMEMOD(n, mod) <| smods, _)  => begin
                       mod2 = traverseModAddDims4(cache, env, pre, mod, inExps, false)
                       smods2 = traverseModAddDims5(cache, env, pre, smods, inExps)
@@ -7140,7 +7140,7 @@
           outMods
         end
 
-        function insertSubsInBinding(inOpt::Option{<:Absyn.Exp}, inExps::List{<:List{<:Absyn.Exp}}) ::Option{Absyn.Exp} 
+        function insertSubsInBinding(inOpt::Option{<:Absyn.Exp}, inExps::List{<:List{<:Absyn.Exp}}) ::Option{Absyn.Exp}
               local outOpt::Option{Absyn.Exp}
 
               outOpt = begin
@@ -7153,7 +7153,7 @@
                   (NONE(), _)  => begin
                     NONE()
                   end
-                  
+
                   (SOME(e), exps)  => begin
                       vars = generateUnusedNamesLstCall(e, exps)
                       subs = ListUtil.mapList(vars, stringSub)
@@ -7169,14 +7169,14 @@
          #= Generates a list of variable names which are not used in any of expressions.
         The number of variables is the same as the length of input list.
         TODO: Write the REAL function! =#
-        function generateUnusedNames(inExp::Absyn.Exp, inList::List{<:Absyn.Exp}) ::List{String} 
+        function generateUnusedNames(inExp::Absyn.Exp, inList::List{<:Absyn.Exp}) ::List{String}
               local outNames::List{String}
 
               (outNames, _) = generateUnusedNames2(inList, 1)
           outNames
         end
 
-        function generateUnusedNames2(inList::List{<:Absyn.Exp}, inInt::ModelicaInteger) ::Tuple{List{String}, ModelicaInteger} 
+        function generateUnusedNames2(inList::List{<:Absyn.Exp}, inInt::ModelicaInteger) ::Tuple{List{String}, ModelicaInteger}
               local outInt::ModelicaInteger
               local outNames::List{String}
 
@@ -7191,7 +7191,7 @@
                   ( nil(), i)  => begin
                     (nil, i)
                   end
-                  
+
                   (_ <| exps, i)  => begin
                       s = intString(i)
                       s = "i" + s
@@ -7204,7 +7204,7 @@
           (outNames, outInt)
         end
 
-        function generateUnusedNamesLst(inList::List{<:List{<:Absyn.Exp}}, inInt::ModelicaInteger) ::Tuple{List{List{String}}, ModelicaInteger} 
+        function generateUnusedNamesLst(inList::List{<:List{<:Absyn.Exp}}, inInt::ModelicaInteger) ::Tuple{List{List{String}}, ModelicaInteger}
               local outInt::ModelicaInteger
               local outNames::List{List{String}}
 
@@ -7220,7 +7220,7 @@
                   ( nil(), i)  => begin
                     (nil, i)
                   end
-                  
+
                   (e0 <| exps, i)  => begin
                       (ns, i1) = generateUnusedNames2(e0, i)
                       (names, i2) = generateUnusedNamesLst(exps, i1)
@@ -7234,14 +7234,14 @@
          #= Generates a list of lists of variable names which are not used in any of expressions.
         The structure of lsis of lists is the same as of input list of lists.
         TODO: Write the REAL function! =#
-        function generateUnusedNamesLstCall(inExp::Absyn.Exp, inList::List{<:List{<:Absyn.Exp}}) ::List{List{String}} 
+        function generateUnusedNamesLstCall(inExp::Absyn.Exp, inList::List{<:List{<:Absyn.Exp}}) ::List{List{String}}
               local outNames::List{List{String}}
 
               (outNames, _) = generateUnusedNamesLst(inList, 1)
           outNames
         end
 
-        function stringsSubs(inNames::List{<:String}) ::List{Absyn.Subscript} 
+        function stringsSubs(inNames::List{<:String}) ::List{Absyn.Subscript}
               local outSubs::List{Absyn.Subscript}
 
               outSubs = begin
@@ -7252,7 +7252,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   n <| names  => begin
                       subs = stringsSubs(names)
                     _cons(Absyn.SUBSCRIPT(Absyn.CREF(Absyn.CREF_IDENT(n, nil))), subs)
@@ -7262,7 +7262,7 @@
           outSubs
         end
 
-        function stringSub(inName::String) ::Absyn.Subscript 
+        function stringSub(inName::String) ::Absyn.Subscript
               local outSub::Absyn.Subscript
 
               outSub = begin
@@ -7276,7 +7276,7 @@
           outSub
         end
 
-        function wrapIntoFor(inExp::Absyn.Exp, inNames::List{<:String}, inRanges::List{<:Absyn.Exp}) ::Absyn.Exp 
+        function wrapIntoFor(inExp::Absyn.Exp, inNames::List{<:String}, inRanges::List{<:Absyn.Exp}) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -7290,7 +7290,7 @@
                   (e,  nil(),  nil())  => begin
                     e
                   end
-                  
+
                   (e, n <| names, r <| ranges)  => begin
                       e2 = wrapIntoFor(e, names, ranges)
                     Absyn.CALL(Absyn.CREF_IDENT("array", nil), Absyn.FOR_ITER_FARG(e2, Absyn.COMBINE(), list(Absyn.ITERATOR(n, NONE(), SOME(Absyn.RANGE(Absyn.INTEGER(1), NONE(), r))))))
@@ -7300,7 +7300,7 @@
           outExp
         end
 
-        function wrapIntoForLst(inExp::Absyn.Exp, inNames::List{<:List{<:String}}, inRanges::List{<:List{<:Absyn.Exp}}) ::Absyn.Exp 
+        function wrapIntoForLst(inExp::Absyn.Exp, inNames::List{<:List{<:String}}, inRanges::List{<:List{<:Absyn.Exp}}) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               outExp = begin
@@ -7315,7 +7315,7 @@
                   (e,  nil(),  nil())  => begin
                     e
                   end
-                  
+
                   (e, n <| names, r <| ranges)  => begin
                       e2 = wrapIntoForLst(e, names, ranges)
                       e3 = wrapIntoFor(e2, n, r)
@@ -7326,7 +7326,7 @@
           outExp
         end
 
-        function componentHasCondition(component::Tuple{<:SCode.Element, DAE.Mod}) ::Bool 
+        function componentHasCondition(component::Tuple{<:SCode.Element, DAE.Mod}) ::Bool
               local hasCondition::Bool
 
               hasCondition = begin
@@ -7334,7 +7334,7 @@
                   (SCode.COMPONENT(condition = SOME(_)), _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -7343,7 +7343,7 @@
           hasCondition
         end
 
-        function instElementCondExp(inCache::FCore.Cache, inEnv::FCore.Graph, component::SCode.Element, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{Option{Bool}, FCore.Cache} 
+        function instElementCondExp(inCache::FCore.Cache, inEnv::FCore.Graph, component::SCode.Element, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{Option{Bool}, FCore.Cache}
               local outCache::FCore.Cache
               local outCondValue::Option{Bool}
 
@@ -7357,11 +7357,11 @@
                       (cond_val, cache) = instConditionalDeclaration(inCache, inEnv, cond_exp, prefix, info)
                     (SOME(cond_val), cache)
                   end
-                  
+
                   SCode.COMPONENT(condition = SOME(_))  => begin
                     (NONE(), inCache)
                   end
-                  
+
                   _  => begin
                       (SOME(true), inCache)
                   end
@@ -7370,7 +7370,7 @@
           (outCondValue, outCache)
         end
 
-        function instConditionalDeclaration(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::Absyn.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{Bool, FCore.Cache} 
+        function instConditionalDeclaration(inCache::FCore.Cache, inEnv::FCore.Graph, inCondition::Absyn.Exp, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{Bool, FCore.Cache}
               local outCache::FCore.Cache
               local outIsConditional::Bool
 
@@ -7404,7 +7404,7 @@
                   Values.BOOL(b)  => begin
                     b
                   end
-                  
+
                   Values.EMPTY(__)  => begin
                       if ! Config.getGraphicsExpMode()
                         Error.addSourceMessage(Error.CONDITIONAL_EXP_WITHOUT_VALUE, list(Dump.printExpStr(inCondition)), inInfo)
@@ -7412,7 +7412,7 @@
                       end
                     true
                   end
-                  
+
                   _  => begin
                         Error.addInternalError("InstUtil.instConditionalDeclaration got unexpected value " + ValuesUtil.valString(val), sourceInfo())
                       fail()
@@ -7427,7 +7427,7 @@
          #= Propagate ClassPrefix, i.e. variability to a component.
          This is needed to make sure that e.g. a parameter does
          not generate an equation but a binding. =#
-        function propagateClassPrefix(attr::SCode.Attributes, pre::Prefix.Prefix) ::SCode.Attributes 
+        function propagateClassPrefix(attr::SCode.Attributes, pre::Prefix.Prefix) ::SCode.Attributes
               local outAttr::SCode.Attributes
 
               outAttr = begin
@@ -7443,15 +7443,15 @@
                   (_, Prefix.PREFIX(_, Prefix.CLASSPRE(SCode.VAR(__))))  => begin
                     attr
                   end
-                  
+
                   (SCode.ATTR(variability = SCode.CONST(__)), _)  => begin
                     attr
                   end
-                  
+
                   (SCode.ATTR(ad, ct, prl, _, dir, isf), Prefix.PREFIX(_, Prefix.CLASSPRE(vt)))  => begin
                     SCode.ATTR(ad, ct, prl, vt, dir, isf)
                   end
-                  
+
                   _  => begin
                       attr
                   end
@@ -7470,7 +7470,7 @@
          If first arg is true, it returns the constant expression found in Value option.
          This is used to ensure that e.g. stateSelect attribute gets a constant value
          and not a parameter expression. =#
-        function checkUseConstValue(useConstValue::Bool, ie::DAE.Exp, v::Option{<:Values.Value}) ::DAE.Exp 
+        function checkUseConstValue(useConstValue::Bool, ie::DAE.Exp, v::Option{<:Values.Value}) ::DAE.Exp
               local outE::DAE.Exp
 
               outE = begin
@@ -7480,12 +7480,12 @@
                   (false, e, _)  => begin
                     e
                   end
-                  
+
                   (true, _, SOME(val))  => begin
                       e = ValuesUtil.valueExp(val)
                     e
                   end
-                  
+
                   (_, e, _)  => begin
                     e
                   end
@@ -7494,7 +7494,7 @@
           outE
         end
 
-        function propagateAbSCDirection(inVariability::SCode.Variability, inAttributes::SCode.Attributes, inClassAttributes::Option{<:SCode.Attributes}, inInfo::SourceInfo) ::SCode.Attributes 
+        function propagateAbSCDirection(inVariability::SCode.Variability, inAttributes::SCode.Attributes, inClassAttributes::Option{<:SCode.Attributes}, inInfo::SourceInfo) ::SCode.Attributes
               local outAttributes::SCode.Attributes
 
               outAttributes = begin
@@ -7503,11 +7503,11 @@
                   (SCode.CONST(__), _, _, _)  => begin
                     inAttributes
                   end
-                  
+
                   (SCode.PARAM(__), _, _, _)  => begin
                     inAttributes
                   end
-                  
+
                   _  => begin
                         @match SCode.ATTR(direction = dir) = inAttributes
                         dir = propagateAbSCDirection2(dir, inClassAttributes, inInfo)
@@ -7518,10 +7518,10 @@
           outAttributes
         end
 
-         #= 
+         #=
         Author BZ 2008-05
         This function merged derived SCode.Attributes with the current input SCode.Attributes. =#
-        function propagateAbSCDirection2(v1::Absyn.Direction, optDerAttr::Option{<:SCode.Attributes}, inInfo::SourceInfo) ::Absyn.Direction 
+        function propagateAbSCDirection2(v1::Absyn.Direction, optDerAttr::Option{<:SCode.Attributes}, inInfo::SourceInfo) ::Absyn.Direction
               local v3::Absyn.Direction
 
               v3 = begin
@@ -7530,20 +7530,20 @@
                   (_, NONE(), _)  => begin
                     v1
                   end
-                  
+
                   (Absyn.BIDIR(__), SOME(SCode.ATTR(direction = v2)), _)  => begin
                     v2
                   end
-                  
+
                   (_, SOME(SCode.ATTR(direction = Absyn.BIDIR(__))), _)  => begin
                     v1
                   end
-                  
+
                   (_, SOME(SCode.ATTR(direction = v2)), _)  => begin
                       equality(v1, v2)
                     v1
                   end
-                  
+
                   _  => begin
                         print(" failure in propagateAbSCDirection2, Absyn.DIRECTION mismatch")
                         Error.addSourceMessage(Error.COMPONENT_INPUT_OUTPUT_MISMATCH, list("", ""), inInfo)
@@ -7554,14 +7554,14 @@
           v3
         end
 
-        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type 
+        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
               local outType::DAE.Type
 
               outType = Types.simplifyType(makeCrefBaseType2(inBaseType, inDimensions))
           outType
         end
 
-        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type 
+        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -7580,11 +7580,11 @@
                       @match false = listEmpty(Types.getDimensions(ty))
                     ty
                   end
-                  
+
                   (_,  nil())  => begin
                     inBaseType
                   end
-                  
+
                   _  => begin
                         dims = ListUtil.last(inDimensions)
                         ty = Expression.liftArrayLeftList(inBaseType, dims)
@@ -7599,7 +7599,7 @@
 
          #= Author: BZ, 2009-07
           Get Absyn.ComponentRefs from dimension in SCode.COMPONENT =#
-        function getCrefFromCompDim(inEle::SCode.Element) ::List{Absyn.ComponentRef} 
+        function getCrefFromCompDim(inEle::SCode.Element) ::List{Absyn.ComponentRef}
               local cref::List{Absyn.ComponentRef}
 
               cref = begin
@@ -7608,7 +7608,7 @@
                   SCode.COMPONENT(attributes = SCode.ATTR(arrayDims = ads))  => begin
                     AbsynUtil.getCrefsFromSubs(ads, true, true)
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -7617,12 +7617,12 @@
           cref
         end
 
-         #= 
+         #=
           author: PA
           Return all variables in a conditional component clause.
           Done to instantiate components referenced in other components, See also getCrefFromMod and
           updateComponentsInEnv. =#
-        function getCrefFromCond(cond::Option{<:Absyn.Exp}) ::List{Absyn.ComponentRef} 
+        function getCrefFromCond(cond::Option{<:Absyn.Exp}) ::List{Absyn.ComponentRef}
               local crefs::List{Absyn.ComponentRef}
 
               crefs = begin
@@ -7631,7 +7631,7 @@
                   NONE()  => begin
                     nil
                   end
-                  
+
                   SOME(e)  => begin
                     AbsynUtil.getCrefFromExp(e, true, true)
                   end
@@ -7640,21 +7640,21 @@
           crefs
         end
 
-         #= 
+         #=
         For components that already have been visited by updateComponentsInEnv, they must be instantiated without
         modifiers to prevent infinite recursion. However, parameters and constants may not have recursive definitions.
         So we print errors for those instead. =#
-        function checkVariabilityOfUpdatedComponent(variability::SCode.Variability, cref::Absyn.ComponentRef)  
+        function checkVariabilityOfUpdatedComponent(variability::SCode.Variability, cref::Absyn.ComponentRef)
               _ = begin
                 @match (variability, cref) begin
                   (SCode.VAR(__), _)  => begin
                     ()
                   end
-                  
+
                   (SCode.DISCRETE(__), _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -7666,9 +7666,9 @@
                       Error.addMessage(Error.CIRCULAR_PARAM,{crefStr,varStr});*/ =#
         end
 
-         #= 
+         #=
         This function modifies equations into bindings for parameters =#
-        function propagateBinding(inVarsDae::DAE.DAElist, inEquationsDae::DAE.DAElist #= Note: functions from here are not considered =#) ::DAE.DAElist 
+        function propagateBinding(inVarsDae::DAE.DAElist, inEquationsDae::DAE.DAElist #= Note: functions from here are not considered =#) ::DAE.DAElist
               local outVarsDae::DAE.DAElist
 
               local vars::List{DAE.Element}
@@ -7699,7 +7699,7 @@
                         is = _cons(i, is)
                       v1
                     end
-                    
+
                     _  => begin
                         v
                     end
@@ -7720,7 +7720,7 @@
                         is = _cons(i, is)
                       ()
                     end
-                    
+
                     DAE.INITIAL_COMPLEX_EQUATION(lhs = DAE.CREF(componentRef = cr))  => begin
                         vars1 = list(begin
                           @match v begin
@@ -7728,7 +7728,7 @@
                                 is = _cons(i, is)
                               v
                             end
-                            
+
                             DAE.VAR(binding = NONE()) where (ComponentReference.crefPrefixOf(cr, v.componentRef))  => begin
                                  #=  Moving parameter bindings into initial equation section means we need to force fixed=false...
                                  =#
@@ -7736,7 +7736,7 @@
                                 Error.addSourceMessage(Error.MOVING_PARAMETER_BINDING_TO_INITIAL_EQ_SECTION, list(ComponentReference.printComponentRefStr(v.componentRef)), eq.source.info)
                               v
                             end
-                            
+
                             _  => begin
                                 v
                             end
@@ -7744,7 +7744,7 @@
                         end for v in vars1)
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -7758,9 +7758,9 @@
           outVarsDae
         end
 
-         #= 
+         #=
         Helper function for propagateBinding =#
-        function findCorrespondingBinding(inCref::DAE.ComponentRef, inEquations::List{<:DAE.Element}, i::ModelicaInteger = 0) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function findCorrespondingBinding(inCref::DAE.ComponentRef, inEquations::List{<:DAE.Element}, i::ModelicaInteger = 0) ::Tuple{DAE.Exp, ModelicaInteger}
 
               local outExp::DAE.Exp
 
@@ -7774,19 +7774,19 @@
                   (cref, DAE.DEFINE(componentRef = cref2, exp = e) <| _) where (ComponentReference.crefEqual(cref, cref2))  => begin
                     e
                   end
-                  
+
                   (cref, DAE.EQUATION(exp = DAE.CREF(cref2, _), scalar = e) <| _) where (ComponentReference.crefEqual(cref, cref2))  => begin
                     e
                   end
-                  
+
                   (cref, DAE.EQUEQUATION(cr1 = cref2, cr2 = cref3) <| _) where (ComponentReference.crefEqual(cref, cref2))  => begin
                     Expression.crefExp(cref3)
                   end
-                  
+
                   (cref, DAE.COMPLEX_EQUATION(lhs = DAE.CREF(cref2, _), rhs = e) <| _) where (ComponentReference.crefEqual(cref, cref2))  => begin
                     e
                   end
-                  
+
                   (cref, _ <| equations)  => begin
                       (outExp, i) = findCorrespondingBinding(cref, equations, i + 1)
                     outExp
@@ -7796,7 +7796,7 @@
           (outExp, i)
         end
 
-        function isPartial(partialPrefix::SCode.Partial, mods::DAE.Mod) ::SCode.Partial 
+        function isPartial(partialPrefix::SCode.Partial, mods::DAE.Mod) ::SCode.Partial
               local outPartial::SCode.Partial
 
               outPartial = begin
@@ -7804,7 +7804,7 @@
                   (SCode.PARTIAL(__), DAE.NOMOD(__))  => begin
                     SCode.PARTIAL()
                   end
-                  
+
                   _  => begin
                       SCode.NOT_PARTIAL()
                   end
@@ -7813,7 +7813,7 @@
           outPartial
         end
 
-        function isFunctionInput(classState::ClassInf.State, direction::Absyn.Direction) ::Bool 
+        function isFunctionInput(classState::ClassInf.State, direction::Absyn.Direction) ::Bool
               local functionInput::Bool
 
               functionInput = begin
@@ -7821,7 +7821,7 @@
                   (ClassInf.FUNCTION(__), Absyn.INPUT(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -7831,17 +7831,17 @@
         end
 
          #= This function extracts the comment section from a list of elements. =#
-        function extractComment(elts::List{<:DAE.Element}) ::SCode.Comment 
+        function extractComment(elts::List{<:DAE.Element}) ::SCode.Comment
               local cmt::SCode.Comment = SCode.COMMENT(NONE(), NONE())
 
               for elt in elts
                 _ = begin
                   @match elt begin
                     DAE.COMMENT(cmt = cmt)  => begin
-                        return 
+                        return
                       fail()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -7854,7 +7854,7 @@
          #= This function merges two comments together. The rule is that the string
           comment is taken from the first comment, and the annotations from both
           comments are merged. =#
-        function mergeClassComments(comment1::SCode.Comment, comment2::SCode.Comment) ::SCode.Comment 
+        function mergeClassComments(comment1::SCode.Comment, comment2::SCode.Comment) ::SCode.Comment
               local outComment::SCode.Comment
 
               outComment = begin
@@ -7879,7 +7879,7 @@
                       mods = listAppend(mods1, mods2)
                     SCode.COMMENT(SOME(SCode.ANNOTATION(SCode.MOD(SCode.NOT_FINAL(), SCode.NOT_EACH(), mods, NONE(), info))), str)
                   end
-                  
+
                   (SCode.COMMENT(ann1, str1), SCode.COMMENT(ann2, str2))  => begin
                       str = if isSome(str1)
                             str1
@@ -7898,7 +7898,7 @@
           outComment
         end
 
-        function makeNonExpSubscript(inSubscript::DAE.Subscript) ::DAE.Subscript 
+        function makeNonExpSubscript(inSubscript::DAE.Subscript) ::DAE.Subscript
               local outSubscript::DAE.Subscript
 
               outSubscript = begin
@@ -7908,7 +7908,7 @@
                   DAE.INDEX(e)  => begin
                     DAE.WHOLE_NONEXP(e)
                   end
-                  
+
                   subscript && DAE.WHOLE_NONEXP(_)  => begin
                     subscript
                   end
@@ -7919,7 +7919,7 @@
 
          #= Looks at the annotations of an SCode.Element to create the function attributes,
         i.e. Inline and Purity =#
-        function getFunctionAttributes(cl::SCode.Element, vl::List{<:DAE.Var}, inheritedComment::SCode.Comment) ::DAE.FunctionAttributes 
+        function getFunctionAttributes(cl::SCode.Element, vl::List{<:DAE.Var}, inheritedComment::SCode.Comment) ::DAE.FunctionAttributes
               local attr::DAE.FunctionAttributes
 
               attr = begin
@@ -7948,7 +7948,7 @@
                       unboxArgs = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_UnboxArguments")
                     DAE.FUNCTION_ATTRIBUTES(inlineType, isOpenModelicaPure, isImpure, false, DAE.FUNCTION_BUILTIN(SOME(name), unboxArgs), DAE.FP_NON_PARALLEL())
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__)))  => begin
                       inVars = ListUtil.select(vl, Types.isInputVar)
                       outVars = ListUtil.select(vl, Types.isOutputVar)
@@ -7958,7 +7958,7 @@
                       unboxArgs = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_UnboxArguments")
                     DAE.FUNCTION_ATTRIBUTES(inlineType, isOpenModelicaPure, false, false, DAE.FUNCTION_BUILTIN(SOME(name), unboxArgs), DAE.FP_PARALLEL_FUNCTION())
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__)))  => begin
                       inlineType = commentIsInlineFunc(inheritedComment)
                       isBuiltin = if SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_BuiltinPtr")
@@ -7969,11 +7969,11 @@
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
                     DAE.FUNCTION_ATTRIBUTES(inlineType, isOpenModelicaPure, false, false, isBuiltin, DAE.FP_PARALLEL_FUNCTION())
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_KERNEL_FUNCTION(__)))  => begin
                     DAE.FUNCTION_ATTRIBUTES(DAE.NO_INLINE(), true, false, false, DAE.FUNCTION_NOT_BUILTIN(), DAE.FP_KERNEL_FUNCTION())
                   end
-                  
+
                   SCode.CLASS(restriction = restriction)  => begin
                       inlineType = commentIsInlineFunc(inheritedComment)
                       hasOutVars = ListUtil.exist(vl, Types.isOutputVar)
@@ -7983,7 +7983,7 @@
                             DAE.FUNCTION_NOT_BUILTIN()
                           end
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
-                      isImpure = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__ModelicaAssociation_Impure") || SCodeUtil.isRestrictionImpure(restriction, hasOutVars || Config.languageStandardAtLeast(Config.LanguageStandard.'3.3'))
+                      isImpure = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__ModelicaAssociation_Impure") || SCodeUtil.isRestrictionImpure(restriction, hasOutVars || Config.languageStandardAtLeast(Config.LanguageStandard.S3_3))
                     DAE.FUNCTION_ATTRIBUTES(inlineType, isOpenModelicaPure, isImpure, false, isBuiltin, DAE.FP_NON_PARALLEL())
                   end
                 end
@@ -8001,7 +8001,7 @@
 
          #= Verifies that an element of a function is correct, i.e.
         public input/output, protected variable/parameter/constant or algorithm section =#
-        function checkFunctionElement(elt::DAE.Element, isExternal::Bool, info::SourceInfo)  
+        function checkFunctionElement(elt::DAE.Element, isExternal::Bool, info::SourceInfo)
               _ = begin
                   local str::String
                    #=  Variables have already been checked in checkFunctionVar.
@@ -8010,19 +8010,19 @@
                   (DAE.VAR(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(DAE.STMT_ASSIGN(exp = DAE.METARECORDCALL(__)) <|  nil())), _, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.ALGORITHM(__), false, _)  => begin
                     ()
                   end
-                  
+
                   (DAE.COMMENT(__), _, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         str = DAEDump.dumpElementsStr(list(elt))
                         Error.addSourceMessage(Error.FUNCTION_ELEMENT_WRONG_KIND, list(str), info)
@@ -8036,7 +8036,7 @@
                =#
         end
 
-        function printElementAndModList(inLstElAndMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::String 
+        function printElementAndModList(inLstElAndMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::String
               local outStr::String
 
               outStr = begin
@@ -8051,7 +8051,7 @@
                    nil()  => begin
                     ""
                   end
-                  
+
                   (e, m) <| rest  => begin
                       s1 = SCodeDump.unparseElementStr(e, SCodeDump.defaultOptions)
                       s2 = Mod.printModStr(m)
@@ -8064,7 +8064,7 @@
           outStr
         end
 
-        function splitClassDefsAndComponents(inLstElAndMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function splitClassDefsAndComponents(inLstElAndMod::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::Tuple{List{Tuple{SCode.Element, DAE.Mod}}, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponentDefs::List{Tuple{SCode.Element, DAE.Mod}}
               local outClassDefs::List{Tuple{SCode.Element, DAE.Mod}}
 
@@ -8082,12 +8082,12 @@
                    nil()  => begin
                     (nil, nil)
                   end
-                  
+
                   (e && SCode.COMPONENT(__), m) <| rest  => begin
                       (clsdefs, compdefs) = splitClassDefsAndComponents(rest)
                     (clsdefs, _cons((e, m), compdefs))
                   end
-                  
+
                   (e, m) <| rest  => begin
                       (clsdefs, compdefs) = splitClassDefsAndComponents(rest)
                     (_cons((e, m), clsdefs), compdefs)
@@ -8108,7 +8108,7 @@
          take binding to be the second and the other one you make NOMOD
          as it doesn't belong in the Boolean class.
          Weird Modelica.Media stuff =#
-        function selectModifiers(fromMerging::DAE.Mod, fromRedeclareType::DAE.Mod, typePath::Absyn.Path) ::Tuple{DAE.Mod, DAE.Mod} 
+        function selectModifiers(fromMerging::DAE.Mod, fromRedeclareType::DAE.Mod, typePath::Absyn.Path) ::Tuple{DAE.Mod, DAE.Mod}
               local classMod::DAE.Mod
               local bindingMod::DAE.Mod
 
@@ -8123,7 +8123,7 @@
                       @match true = redeclareBasicType(fromMerging)
                     (fromRedeclareType, fromRedeclareType)
                   end
-                  
+
                   _  => begin
                       (fromMerging, fromRedeclareType)
                   end
@@ -8134,7 +8134,7 @@
           (bindingMod, classMod)
         end
 
-        function redeclareBasicType(mod::DAE.Mod) ::Bool 
+        function redeclareBasicType(mod::DAE.Mod) ::Bool
               local isRedeclareOfBasicType::Bool
 
               isRedeclareOfBasicType = begin
@@ -8151,14 +8151,14 @@
                       @match true = listMember(name, list("Real", "Integer", "Boolean", "String", "Clock"))
                     true
                   end
-                  
+
                   DAE.REDECL(element = SCode.COMPONENT(typeSpec = Absyn.TPATH(path = path)))  => begin
                       @match false = Config.synchronousFeaturesAllowed()
                       name = AbsynUtil.pathFirstIdent(path)
                       @match true = listMember(name, list("Real", "Integer", "Boolean", "String"))
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -8172,7 +8172,7 @@
         end
 
          #= * Does tail recursion optimization =#
-        function optimizeFunctionCheckForLocals(path::Absyn.Path, inElts::List{<:DAE.Element}, oalg::Option{<:DAE.Element}, acc::List{<:DAE.Element}, invars::List{<:String}, outvars::List{<:String}) ::List{DAE.Element} 
+        function optimizeFunctionCheckForLocals(path::Absyn.Path, inElts::List{<:DAE.Element}, oalg::Option{<:DAE.Element}, acc::List{<:DAE.Element}, invars::List{<:String}, outvars::List{<:String}) ::List{DAE.Element}
               local outElts::List{DAE.Element}
 
               outElts = begin
@@ -8190,16 +8190,16 @@
                   (_,  nil(), NONE(), _, _, _)  => begin
                     listReverse(acc)
                   end
-                  
+
                   (_,  nil(), SOME(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(stmts), source)), _, _, _)  => begin
                       stmts = optimizeLastStatementTail(path, stmts, listReverse(invars), listReverse(outvars), nil)
                     listReverse(_cons(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(stmts), source), acc))
                   end
-                  
+
                   (_, DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS( nil())) <| elts, _, _, _, _)  => begin
                     optimizeFunctionCheckForLocals(path, elts, oalg, acc, invars, outvars)
                   end
-                  
+
                   (_, elt1 && DAE.ALGORITHM(source = source) <| elts, SOME(elt2), _, _, _)  => begin
                       str = AbsynUtil.pathString(path)
                       if ! Config.acceptMetaModelicaGrammar()
@@ -8207,19 +8207,19 @@
                       end
                     optimizeFunctionCheckForLocals(path, elts, SOME(elt1), _cons(elt2, acc), invars, outvars)
                   end
-                  
+
                   (_, elt && DAE.ALGORITHM(__) <| elts, NONE(), _, _, _)  => begin
                     optimizeFunctionCheckForLocals(path, elts, SOME(elt), acc, invars, outvars)
                   end
-                  
+
                   (_, elt && DAE.VAR(componentRef = DAE.CREF_IDENT(ident = name), direction = DAE.OUTPUT(__)) <| elts, _, _, _, _)  => begin
                     optimizeFunctionCheckForLocals(path, elts, oalg, _cons(elt, acc), invars, _cons(name, outvars))
                   end
-                  
+
                   (_, elt && DAE.VAR(componentRef = DAE.CREF_IDENT(ident = name), direction = DAE.INPUT(__)) <| elts, _, _, _, _)  => begin
                     optimizeFunctionCheckForLocals(path, elts, oalg, _cons(elt, acc), _cons(name, invars), outvars)
                   end
-                  
+
                   (_, elt <| elts, _, _, _, _)  => begin
                     optimizeFunctionCheckForLocals(path, elts, oalg, _cons(elt, acc), invars, outvars)
                   end
@@ -8228,7 +8228,7 @@
           outElts
         end
 
-        function optimizeLastStatementTail(path::Absyn.Path, inStmts::List{<:DAE.Statement}, invars::List{<:String}, outvars::List{<:String}, acc::List{<:DAE.Statement}) ::List{DAE.Statement} 
+        function optimizeLastStatementTail(path::Absyn.Path, inStmts::List{<:DAE.Statement}, invars::List{<:String}, outvars::List{<:String}, acc::List{<:DAE.Statement}) ::List{DAE.Statement}
               local ostmts::List{DAE.Statement}
 
               ostmts = begin
@@ -8239,7 +8239,7 @@
                       stmt = optimizeStatementTail(path, stmt, invars, outvars)
                     listReverse(_cons(stmt, acc))
                   end
-                  
+
                   (_, stmt <| stmts, _, _, _)  => begin
                     optimizeLastStatementTail(path, stmts, invars, outvars, _cons(stmt, acc))
                   end
@@ -8248,7 +8248,7 @@
           ostmts
         end
 
-        function optimizeStatementTail(path::Absyn.Path, inStmt::DAE.Statement, invars::List{<:String}, outvars::List{<:String}) ::DAE.Statement 
+        function optimizeStatementTail(path::Absyn.Path, inStmt::DAE.Statement, invars::List{<:String}, outvars::List{<:String}) ::DAE.Statement
               local ostmt::DAE.Statement
 
               ostmt = begin
@@ -8274,7 +8274,7 @@
                           end
                     stmt
                   end
-                  
+
                   (_, DAE.STMT_TUPLE_ASSIGN(tp, lhsLst, rhs, source), _, _)  => begin
                       lhsNames = ListUtil.map(lhsLst, Expression.simpleCrefName)
                       rhs = optimizeStatementTail2(path, rhs, lhsNames, invars, outvars, source)
@@ -8285,19 +8285,19 @@
                           end
                     stmt
                   end
-                  
+
                   (_, DAE.STMT_IF(cond, stmts, else_, source), _, _)  => begin
                       stmts = optimizeLastStatementTail(path, stmts, invars, outvars, nil)
                       else_ = optimizeElseTail(path, else_, invars, outvars)
                     DAE.STMT_IF(cond, stmts, else_, source)
                   end
-                  
+
                   (_, DAE.STMT_NORETCALL(rhs, source), _,  nil())  => begin
                       rhs = optimizeStatementTail2(path, rhs, nil, invars, nil, source)
                       stmt = DAE.STMT_NORETCALL(rhs, source)
                     stmt
                   end
-                  
+
                   _  => begin
                       inStmt
                   end
@@ -8306,7 +8306,7 @@
           ostmt
         end
 
-        function optimizeElseTail(path::Absyn.Path, inElse::DAE.Else, invars::List{<:String}, outvars::List{<:String}) ::DAE.Else 
+        function optimizeElseTail(path::Absyn.Path, inElse::DAE.Else, invars::List{<:String}, outvars::List{<:String}) ::DAE.Else
               local outElse::DAE.Else
 
               outElse = begin
@@ -8319,12 +8319,12 @@
                       else_ = optimizeElseTail(path, else_, invars, outvars)
                     DAE.ELSEIF(cond, stmts, else_)
                   end
-                  
+
                   (_, DAE.ELSE(stmts), _, _)  => begin
                       stmts = optimizeLastStatementTail(path, stmts, invars, outvars, nil)
                     DAE.ELSE(stmts)
                   end
-                  
+
                   _  => begin
                       inElse
                   end
@@ -8333,7 +8333,7 @@
           outElse
         end
 
-        function optimizeStatementTail2(path::Absyn.Path, rhs::DAE.Exp, lhsVars::List{<:String}, invars::List{<:String}, outvars::List{<:String}, source::DAE.ElementSource) ::DAE.Exp 
+        function optimizeStatementTail2(path::Absyn.Path, rhs::DAE.Exp, lhsVars::List{<:String}, invars::List{<:String}, outvars::List{<:String}, source::DAE.ElementSource) ::DAE.Exp
               local orhs::DAE.Exp
 
               @match true = valueEq(lhsVars, outvars)
@@ -8341,7 +8341,7 @@
           orhs
         end
 
-        function optimizeStatementTail3(path::Absyn.Path, rhs::DAE.Exp, vars::List{<:String}, lhsVars::List{<:String}, source::DAE.ElementSource) ::Tuple{DAE.Exp, Bool} 
+        function optimizeStatementTail3(path::Absyn.Path, rhs::DAE.Exp, vars::List{<:String}, lhsVars::List{<:String}, source::DAE.ElementSource) ::Tuple{DAE.Exp, Bool}
               local isTailRecursive::Bool
               local orhs::DAE.Exp
 
@@ -8378,19 +8378,19 @@
                       call.attr = attr
                     (call, true)
                   end
-                  
+
                   (_, DAE.IFEXP(e1, e2, e3), _, _)  => begin
                       (e2, b1) = optimizeStatementTail3(path, e2, vars, lhsVars, source)
                       (e3, b2) = optimizeStatementTail3(path, e3, vars, lhsVars, source)
                       @match true = b1 || b2
                     (DAE.IFEXP(e1, e2, e3), true)
                   end
-                  
+
                   (_, DAE.MATCHEXPRESSION(matchType && DAE.MATCH(_), inputs, aliases, localDecls, cases, et), _, _)  => begin
                       cases = optimizeStatementTailMatchCases(path, cases, false, nil, vars, lhsVars, source)
                     (DAE.MATCHEXPRESSION(matchType, inputs, aliases, localDecls, cases, et), true)
                   end
-                  
+
                   _  => begin
                       (rhs, false)
                   end
@@ -8400,7 +8400,7 @@
           (orhs, isTailRecursive)
         end
 
-        function optimizeStatementTailMatchCases(path::Absyn.Path, inCases::List{<:DAE.MatchCase}, changed::Bool, inAcc::List{<:DAE.MatchCase}, vars::List{<:String}, lhsVars::List{<:String}, source::DAE.ElementSource) ::List{DAE.MatchCase} 
+        function optimizeStatementTailMatchCases(path::Absyn.Path, inCases::List{<:DAE.MatchCase}, changed::Bool, inAcc::List{<:DAE.MatchCase}, vars::List{<:String}, lhsVars::List{<:String}, source::DAE.ElementSource) ::List{DAE.MatchCase}
               local ocases::List{DAE.MatchCase}
 
               ocases = begin
@@ -8421,13 +8421,13 @@
                   (_,  nil(), true, acc, _, _)  => begin
                     listReverse(acc)
                   end
-                  
+
                   (_, DAE.CASE(patterns, patternGuard, localDecls, body, SOME(exp), resultInfo, jump, info) <| cases, _, acc, _, _)  => begin
                       @match (exp, true) = optimizeStatementTail3(path, exp, vars, lhsVars, source)
                       case_ = DAE.CASE(patterns, patternGuard, localDecls, body, SOME(exp), resultInfo, jump, info)
                     optimizeStatementTailMatchCases(path, cases, true, _cons(case_, acc), vars, lhsVars, source)
                   end
-                  
+
                   (_, DAE.CASE(patterns, patternGuard, localDecls, body, SOME(DAE.TUPLE( nil())), resultInfo, jump, info) <| cases, _, acc, _, _)  => begin
                       @match DAE.STMT_NORETCALL(exp, sourceStmt) = ListUtil.last(body)
                       @match (exp, true) = optimizeStatementTail3(path, exp, vars, lhsVars, source)
@@ -8435,7 +8435,7 @@
                       case_ = DAE.CASE(patterns, patternGuard, localDecls, body, SOME(DAE.TUPLE(nil)), resultInfo, jump, info)
                     optimizeStatementTailMatchCases(path, cases, true, _cons(case_, acc), vars, lhsVars, source)
                   end
-                  
+
                   (_, case_ <| cases, _, acc, _, _)  => begin
                     optimizeStatementTailMatchCases(path, cases, changed, _cons(case_, acc), vars, lhsVars, source)
                   end
@@ -8445,7 +8445,7 @@
         end
 
          #= Cannot be part of Env due to RML issues =#
-        function pushStructuralParameters(cache::FCore.Cache) ::FCore.Cache 
+        function pushStructuralParameters(cache::FCore.Cache) ::FCore.Cache
               local ocache::FCore.Cache
 
               ocache = begin
@@ -8458,7 +8458,7 @@
                   FCore.CACHE(ie, f, (ht, crs), p)  => begin
                     FCore.CACHE(ie, f, (ht, _cons(nil, crs)), p)
                   end
-                  
+
                   _  => begin
                       cache
                   end
@@ -8468,7 +8468,7 @@
         end
 
          #= Cannot be part of Env due to RML issues =#
-        function popStructuralParameters(cache::FCore.Cache, pre::Prefix.Prefix) ::FCore.Cache 
+        function popStructuralParameters(cache::FCore.Cache, pre::Prefix.Prefix) ::FCore.Cache
               local ocache::FCore.Cache
 
               ocache = begin
@@ -8484,11 +8484,11 @@
                       ht = prefixAndAddCrefsToHt(cache, ht, pre, crs)
                     FCore.CACHE(ie, f, (ht, crss), p)
                   end
-                  
+
                   (FCore.CACHE(_, _, (_,  nil()), _), _)  => begin
                     cache
                   end
-                  
+
                   (FCore.NO_CACHE(__), _)  => begin
                     cache
                   end
@@ -8498,7 +8498,7 @@
         end
 
          #= Cannot be part of Env due to RML issues =#
-        function prefixAndAddCrefsToHt(cache::FCore.Cache, set::AvlSetCR.Tree, pre::Prefix.Prefix, icrs::List{<:DAE.ComponentRef}) ::AvlSetCR.Tree 
+        function prefixAndAddCrefsToHt(cache::FCore.Cache, set::AvlSetCR.Tree, pre::Prefix.Prefix, icrs::List{<:DAE.ComponentRef}) ::AvlSetCR.Tree
 
 
               for cr in icrs
@@ -8508,7 +8508,7 @@
           set
         end
 
-        function numStructuralParameterScopes(cache::FCore.Cache) ::ModelicaInteger 
+        function numStructuralParameterScopes(cache::FCore.Cache) ::ModelicaInteger
               local i::ModelicaInteger
 
               local lst::List{List{DAE.ComponentRef}}
@@ -8519,14 +8519,14 @@
         end
 
          #= Finds any variable that might be used without first being defined =#
-        function checkFunctionDefUse(elts::List{<:DAE.Element}, info::SourceInfo)  
+        function checkFunctionDefUse(elts::List{<:DAE.Element}, info::SourceInfo)
               _ = begin
                 @matchcontinue (elts, info) begin
                   (_, _)  => begin
                       _ = checkFunctionDefUse2(elts, NONE(), nil, nil, info)
                     ()
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("InstUtil.checkFunctionDefUse failed"), info)
                       ()
@@ -8536,7 +8536,7 @@
         end
 
          #= Finds any variable that might be used without first being defined =#
-        function checkFunctionDefUse2(elts::List{<:DAE.Element}, alg::Option{<:List{<:DAE.Statement}} #= NONE() in first iteration =#, inUnbound::List{<:String} #= {} in first iteration =#, inOutputs::List{<:String} #= List of variables that are also used, when returning =#, inInfo::SourceInfo) ::List{String} 
+        function checkFunctionDefUse2(elts::List{<:DAE.Element}, alg::Option{<:List{<:DAE.Statement}} #= NONE() in first iteration =#, inUnbound::List{<:String} #= {} in first iteration =#, inOutputs::List{<:String} #= List of variables that are also used, when returning =#, inInfo::SourceInfo) ::List{String}
               local outUnbound::List{String}
 
               outUnbound = begin
@@ -8554,18 +8554,18 @@
                   ( nil(), NONE(), _, _, _)  => begin
                     inUnbound
                   end
-                  
+
                   ( nil(), SOME(stmts), unbound, outputs, _)  => begin
                       (_, _, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, false, (false, false, unbound))
                       unbound = ListUtil.fold1(outputs, checkOutputDefUse, inInfo, unbound)
                     unbound
                   end
-                  
+
                   (DAE.VAR(direction = DAE.INPUT(__)) <| rest, _, unbound, _, _)  => begin
                       unbound = checkFunctionDefUse2(rest, alg, unbound, inOutputs, inInfo)
                     unbound
                   end
-                  
+
                   (DAE.VAR(direction = dir, componentRef = DAE.CREF_IDENT(ident = name), ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_), varLst = vars), dims = dims, binding = NONE()) <| rest, _, unbound, _, _)  => begin
                       vars = ListUtil.filterOnTrue(vars, Types.varIsVariable)
                       names = ListUtil.map1r(ListUtil.map(vars, Types.varName), stringAppend, name + ".")
@@ -8584,19 +8584,19 @@
                       unbound = checkFunctionDefUse2(rest, alg, unbound, outputs, inInfo)
                     unbound
                   end
-                  
+
                   (DAE.VAR(direction = dir, componentRef = DAE.CREF_IDENT(ident = name), dims = dims, binding = NONE()) <| rest, _, unbound, _, _)  => begin
                       unbound = ListUtil.consOnTrue(Expression.dimensionsKnownAndNonZero(dims), name, unbound)
                       outputs = ListUtil.consOnTrue(DAEUtil.varDirectionEqual(dir, DAE.OUTPUT()), name, inOutputs)
                       unbound = checkFunctionDefUse2(rest, alg, unbound, outputs, inInfo)
                     unbound
                   end
-                  
+
                   (DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(stmts)) <| rest, NONE(), unbound, _, _)  => begin
                       unbound = checkFunctionDefUse2(rest, SOME(stmts), unbound, inOutputs, inInfo)
                     unbound
                   end
-                  
+
                   (_ <| rest, _, unbound, _, _)  => begin
                       unbound = checkFunctionDefUse2(rest, alg, unbound, inOutputs, inInfo)
                     unbound
@@ -8620,7 +8620,7 @@
           outUnbound
         end
 
-        function checkOutputDefUse(name::String, info::SourceInfo, inUnbound::List{<:String}) ::List{String} 
+        function checkOutputDefUse(name::String, info::SourceInfo, inUnbound::List{<:String}) ::List{String}
               local outUnbound::List{String}
 
               local b::Bool
@@ -8632,7 +8632,7 @@
         end
 
          #= Find any variable that might be used in the statement without prior definition. Any defined variables are removed from undefined. =#
-        function checkFunctionDefUseStmt(inStmt::DAE.Statement, inLoop::Bool, inUnbound::Tuple{<:Bool, Bool, List{<:String}} #= Return or Break ; Returned for sure ; Unbound =#) ::Tuple{Bool, Bool, List{String}} 
+        function checkFunctionDefUseStmt(inStmt::DAE.Statement, inLoop::Bool, inUnbound::Tuple{<:Bool, Bool, List{<:String}} #= Return or Break ; Returned for sure ; Unbound =#) ::Tuple{Bool, Bool, List{String}}
               local outUnbound::Tuple{Bool, Bool, List{String}} #=  =#
 
               outUnbound = begin
@@ -8657,13 +8657,13 @@
                   (_, _, (true, _, _))  => begin
                     inUnbound
                   end
-                  
+
                   (_, _, (false, true, _))  => begin
                       info = ElementSource.getElementSourceFileInfo(ElementSource.getStatementSource(inStmt))
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list("InstUtil.checkFunctionDefUseStmt failed"), info)
                     fail()
                   end
-                  
+
                   (DAE.STMT_ASSIGN(exp1 = lhs, exp = rhs, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(rhs, findUnboundVariableUse, (unbound, info))
@@ -8671,7 +8671,7 @@
                       unbound = crefFiltering(lhs, unbound)
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = lhss, exp = rhs, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(rhs, findUnboundVariableUse, (unbound, info))
@@ -8679,7 +8679,7 @@
                       unbound = ListUtil.fold(lhss, crefFiltering, unbound)
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_ASSIGN_ARR(lhs = lhs, exp = rhs, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(rhs, findUnboundVariableUse, (unbound, info))
@@ -8687,13 +8687,13 @@
                       unbound = crefFiltering(lhs, unbound)
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_IF(exp, stmts, else_, source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (b1, b2, unbound) = checkFunctionDefUseElse(DAE.ELSEIF(exp, stmts, else_), unbound, inLoop, info)
                     (b1, b2, unbound)
                   end
-                  
+
                   (DAE.STMT_FOR(iter = iter, range = exp, statementLst = stmts, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, iter) #= TODO: This is not needed if all references are tagged CREF_ITER =#
@@ -8701,7 +8701,7 @@
                       (_, b, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, true, (false, false, unbound))
                     (b, b, unbound)
                   end
-                  
+
                   (DAE.STMT_PARFOR(iter = iter, range = exp, statementLst = stmts, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, iter) #= TODO: This is not needed if all references are tagged CREF_ITER =#
@@ -8709,62 +8709,62 @@
                       (_, b, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, true, (false, false, unbound))
                     (b, b, unbound)
                   end
-                  
+
                   (DAE.STMT_WHILE(exp = exp, statementLst = stmts, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp, findUnboundVariableUse, (unbound, info))
                       (_, b, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, true, (false, false, unbound))
                     (b, b, unbound)
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = DAE.BCONST(false)), _, (_, _, _))  => begin
                     (true, true, nil)
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = exp1, msg = exp2, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp1, findUnboundVariableUse, (unbound, info))
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp2, findUnboundVariableUse, (unbound, info))
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_TERMINATE(msg = exp, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp, findUnboundVariableUse, (unbound, info))
                     (true, true, unbound)
                   end
-                  
+
                   (DAE.STMT_NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("fail"), expLst =  nil())), _, (_, _, _))  => begin
                     (true, true, nil)
                   end
-                  
+
                   (DAE.STMT_NORETCALL(exp = exp, source = source), _, (_, _, unbound))  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp, findUnboundVariableUse, (unbound, info))
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_BREAK(__), _, (_, _, unbound))  => begin
                     (true, false, unbound)
                   end
-                  
+
                   (DAE.STMT_RETURN(__), _, (_, _, unbound))  => begin
                     (true, true, unbound)
                   end
-                  
+
                   (DAE.STMT_CONTINUE(__), _, (_, _, unbound))  => begin
                     (false, false, unbound)
                   end
-                  
+
                   (DAE.STMT_ARRAY_INIT(__), _, _)  => begin
                     inUnbound
                   end
-                  
+
                   (DAE.STMT_FAILURE(body = stmts), _, (_, _, unbound))  => begin
                       (_, b, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, inLoop, (false, false, unbound))
                     (b, b, unbound)
                   end
-                  
+
                   _  => begin
                         str = DAEDump.ppStatementStr(inStmt)
                         str = "InstUtil.checkFunctionDefUseStmt failed: " + str
@@ -8789,7 +8789,7 @@
           outUnbound #=  =#
         end
 
-        function checkFunctionDefUseElse(inElse::DAE.Else, inUnbound::List{<:String}, inLoop::Bool, info::SourceInfo) ::Tuple{Bool, Bool, List{String}} 
+        function checkFunctionDefUseElse(inElse::DAE.Else, inUnbound::List{<:String}, inLoop::Bool, info::SourceInfo) ::Tuple{Bool, Bool, List{String}}
               local outUnbound::Tuple{Bool, Bool, List{String}}
 
               outUnbound = begin
@@ -8807,7 +8807,7 @@
                   (DAE.NOELSE(__), _, _, _)  => begin
                     (false, false, inUnbound)
                   end
-                  
+
                   (DAE.ELSEIF(exp, stmts, else_), unbound, iloop, _)  => begin
                       (_, (unbound, _)) = Expression.traverseExpTopDown(exp, findUnboundVariableUse, (unbound, info))
                       (b1, b2, unboundBranch) = checkFunctionDefUseElse(else_, unbound, inLoop, info)
@@ -8827,7 +8827,7 @@
                       b2 = b2 && b4
                     (b1, b2, unbound)
                   end
-                  
+
                   (DAE.ELSE(stmts), unbound, _, _)  => begin
                       (b1, b2, unbound) = ListUtil.fold1(stmts, checkFunctionDefUseStmt, inLoop, (false, false, unbound))
                     (b1, b2, unbound)
@@ -8839,7 +8839,7 @@
         end
 
          #= If the expression is a cref, remove it from the unbound variables =#
-        function crefFiltering(inExp::DAE.Exp, inUnbound::List{<:String}) ::List{String} 
+        function crefFiltering(inExp::DAE.Exp, inUnbound::List{<:String}) ::List{String}
               local outUnbound::List{String}
 
               outUnbound = begin
@@ -8853,32 +8853,32 @@
                   (DAE.CREF(componentRef = DAE.WILD(__)), _)  => begin
                     inUnbound
                   end
-                  
+
                   (DAE.CREF(componentRef = DAE.CREF_QUAL(ident = id1, componentRef = DAE.CREF_IDENT(ident = id2))), unbound)  => begin
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, id1 + "." + id2)
                     unbound
                   end
-                  
+
                   (DAE.CREF(componentRef = DAE.CREF_IDENT(ident = id1), ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_))), unbound)  => begin
                       id1 = id1 + "."
                       unbound = ListUtil.filter2OnTrue(unbound, Util.notStrncmp, id1, stringLength(id1))
                     unbound
                   end
-                  
+
                   (DAE.CREF(componentRef = cr), unbound)  => begin
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, ComponentReference.crefFirstIdent(cr))
                     unbound
                   end
-                  
+
                   (DAE.ASUB(exp = exp), unbound)  => begin
                     crefFiltering(exp, unbound)
                   end
-                  
+
                   (DAE.PATTERN(pattern = pattern), unbound)  => begin
                       (_, unbound) = Patternm.traversePattern(pattern, patternFiltering, unbound)
                     unbound
                   end
-                  
+
                   _  => begin
                       inUnbound
                   end
@@ -8891,7 +8891,7 @@
           outUnbound
         end
 
-        function patternFiltering(inPat::DAE.Pattern, inLst::List{<:String}) ::Tuple{DAE.Pattern, List{String}} 
+        function patternFiltering(inPat::DAE.Pattern, inLst::List{<:String}) ::Tuple{DAE.Pattern, List{String}}
               local unbound::List{String} = inLst
               local outPat::DAE.Pattern = inPat
 
@@ -8900,11 +8900,11 @@
                   DAE.PAT_AS(__)  => begin
                     ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, inPat.id)
                   end
-                  
+
                   DAE.PAT_AS_FUNC_PTR(__)  => begin
                     ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, inPat.id)
                   end
-                  
+
                   _  => begin
                       unbound
                   end
@@ -8913,7 +8913,7 @@
           (outPat, unbound)
         end
 
-        function traverseCrefSubs(exp::DAE.Exp, info::SourceInfo, inUnbound::List{<:String}) ::List{String} 
+        function traverseCrefSubs(exp::DAE.Exp, info::SourceInfo, inUnbound::List{<:String}) ::List{String}
               local outUnbound::List{String}
 
               outUnbound = begin
@@ -8924,7 +8924,7 @@
                       (_, (unbound, _)) = Expression.traverseExpTopDownCrefHelper(cr, findUnboundVariableUse, (unbound, info))
                     unbound
                   end
-                  
+
                   _  => begin
                       inUnbound
                   end
@@ -8934,7 +8934,7 @@
         end
 
          #= Check if the expression is used before it is defined =#
-        function findUnboundVariableUse(inExp::DAE.Exp, inTpl::Tuple{<:List{<:String}, SourceInfo}) ::Tuple{DAE.Exp, Bool, Tuple{List{String}, SourceInfo}} 
+        function findUnboundVariableUse(inExp::DAE.Exp, inTpl::Tuple{<:List{<:String}, SourceInfo}) ::Tuple{DAE.Exp, Bool, Tuple{List{String}, SourceInfo}}
               local outTpl::Tuple{List{String}, SourceInfo}
               local cont::Bool
               local outExp::DAE.Exp
@@ -8957,11 +8957,11 @@
                   (exp && DAE.SIZE(__), arg)  => begin
                     (exp, false, arg)
                   end
-                  
+
                   (exp && DAE.CALL(path = Absyn.IDENT("isPresent"), attr = DAE.CALL_ATTR(builtin = true)), arg)  => begin
                     (exp, false, arg)
                   end
-                  
+
                   (DAE.CREF(componentRef = DAE.WILD(__)), (_, info))  => begin
                        #=  _ shouldn't be allowed to be used like a variable, but until that's
                        =#
@@ -8970,7 +8970,7 @@
                       Error.addSourceMessage(Error.WARNING_DEF_USE, list("_"), info)
                     (inExp, true, inTpl)
                   end
-                  
+
                   (exp && DAE.CREF(componentRef = cr), (unbound, info))  => begin
                       b = listMember(ComponentReference.crefFirstIdent(cr), unbound)
                       str = ComponentReference.crefFirstIdent(cr)
@@ -8978,14 +8978,14 @@
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, str)
                     (exp, true, (unbound, info))
                   end
-                  
+
                   (exp && DAE.CALL(path = Absyn.IDENT(name)), (unbound, info))  => begin
                       b = listMember(name, unbound)
                       Error.assertionOrAddSourceMessage(! b, Error.WARNING_DEF_USE, list(name), info)
                       unbound = ListUtil.filter1OnTrue(unbound, Util.stringNotEqual, name)
                     (exp, true, (unbound, info))
                   end
-                  
+
                   (exp && DAE.MATCHEXPRESSION(inputs = inputs, localDecls = localDecls, cases = cases), (unbound, info))  => begin
                       (_, (unbound, _)) = Expression.traverseExpTopDown(DAE.LIST(inputs), findUnboundVariableUse, (unbound, info))
                       unboundLocal = checkFunctionDefUse2(localDecls, NONE(), unbound, nil, info)
@@ -8993,7 +8993,7 @@
                       unbound = ListUtil.fold1r(unbounds, ListUtil.intersectionOnTrue, stringEq, unbound)
                     (exp, false, (unbound, info))
                   end
-                  
+
                   (exp, arg)  => begin
                     (exp, true, arg)
                   end
@@ -9005,7 +9005,7 @@
         end
 
          #= Check if the expression is used before it is defined =#
-        function findUnboundVariableUseInCase(case_::DAE.MatchCase, inUnbound::List{<:String}) ::List{String} 
+        function findUnboundVariableUseInCase(case_::DAE.MatchCase, inUnbound::List{<:String}) ::List{String}
               local unbound::List{String}
 
               unbound = begin
@@ -9028,7 +9028,7 @@
           unbound
         end
 
-        function checkParallelismWRTEnv(inEnv::FCore.Graph, inName::String, inAttr::SCode.Attributes, inInfo::SourceInfo) ::Bool 
+        function checkParallelismWRTEnv(inEnv::FCore.Graph, inName::String, inAttr::SCode.Attributes, inInfo::SourceInfo) ::Bool
               local isValid::Bool
 
               isValid = begin
@@ -9052,7 +9052,7 @@
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -9061,7 +9061,7 @@
           isValid
         end
 
-        function instDimsHasZeroDims(inInstDims::List{<:List{<:DAE.Dimension}}) ::Bool 
+        function instDimsHasZeroDims(inInstDims::List{<:List{<:DAE.Dimension}}) ::Bool
               local outHasZeroDims::Bool
 
               outHasZeroDims = begin
@@ -9072,11 +9072,11 @@
                       @match true = ListUtil.exist(dims, Expression.dimensionIsZero)
                     true
                   end
-                  
+
                   _ <| rest_dims  => begin
                     instDimsHasZeroDims(rest_dims)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9088,7 +9088,7 @@
          #= help function for updateComponentInEnv,
         For components that already have been visited by updateComponentsInEnv, they must be instantiated without
         modifiers to prevent infinite recursion =#
-        function noModForUpdatedComponents(variability::SCode.Variability, updatedComps::HashTable5.HashTable, cref::Absyn.ComponentRef, mods::DAE.Mod, cmod::DAE.Mod, m::SCode.Mod) ::Tuple{DAE.Mod, DAE.Mod, SCode.Mod} 
+        function noModForUpdatedComponents(variability::SCode.Variability, updatedComps::HashTable5.HashTable, cref::Absyn.ComponentRef, mods::DAE.Mod, cmod::DAE.Mod, m::SCode.Mod) ::Tuple{DAE.Mod, DAE.Mod, SCode.Mod}
               local outM::SCode.Mod
               local outCmod::DAE.Mod
               local outMods::DAE.Mod
@@ -9099,7 +9099,7 @@
                       checkVariabilityOfUpdatedComponent(variability, cref)
                     (DAE.NOMOD(), DAE.NOMOD(), SCode.NOMOD())
                   end
-                  
+
                   _  => begin
                       (mods, cmod, m)
                   end
@@ -9110,7 +9110,7 @@
 
          #= Takes a component's modifier and final attribute, and return FINAL if either
            of them is final, otherwise NOT_FINAL. =#
-        function propagateModFinal(inMod::DAE.Mod, inFinal::SCode.Final) ::SCode.Final 
+        function propagateModFinal(inMod::DAE.Mod, inFinal::SCode.Final) ::SCode.Final
               local outFinal::SCode.Final
 
               outFinal = begin
@@ -9121,11 +9121,11 @@
                   (_, SCode.FINAL(__))  => begin
                     inFinal
                   end
-                  
+
                   (DAE.MOD(finalPrefix = fp), _)  => begin
                     fp
                   end
-                  
+
                   _  => begin
                       inFinal
                   end
@@ -9145,11 +9145,11 @@
          #= ------------------------------
          =#
 
-        DomainFieldOpt = Option 
+        DomainFieldOpt = Option
 
-        DomainFieldsLst = List 
+        DomainFieldsLst = List
 
-        function addGhostCells(inCompelts::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inEqs::List{<:SCode.Equation}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function addGhostCells(inCompelts::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inEqs::List{<:SCode.Equation}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outCompelts::List{Tuple{SCode.Element, DAE.Mod}}
 
               local fieldNamesP::List{Absyn.Ident}
@@ -9162,7 +9162,7 @@
           outCompelts
         end
 
-        function fieldsInPderEq(eq::SCode.Equation, inFieldNames::List{<:Absyn.Ident}) ::List{Absyn.Ident} 
+        function fieldsInPderEq(eq::SCode.Equation, inFieldNames::List{<:Absyn.Ident}) ::List{Absyn.Ident}
               local outFieldNames::List{Absyn.Ident}
 
               outFieldNames = begin
@@ -9176,7 +9176,7 @@
                       (_, fieldNames1) = AbsynUtil.traverseExpTopDown(rhs_exp, fieldInPderExp, fieldNames1)
                     listAppend(inFieldNames, fieldNames1)
                   end
-                  
+
                   _  => begin
                       inFieldNames
                   end
@@ -9185,7 +9185,7 @@
           outFieldNames
         end
 
-        function fieldInPderExp(inExp::Absyn.Exp, inFieldNames::List{<:Absyn.Ident}) ::Tuple{Absyn.Exp, List{Absyn.Ident}} 
+        function fieldInPderExp(inExp::Absyn.Exp, inFieldNames::List{<:Absyn.Ident}) ::Tuple{Absyn.Exp, List{Absyn.Ident}}
               local outFieldNames::List{Absyn.Ident}
               local outExp::Absyn.Exp
 
@@ -9195,11 +9195,11 @@
                   Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "pder"), functionArgs = Absyn.FUNCTIONARGS(args = Absyn.CREF(Absyn.CREF_IDENT(name = newFieldName)) <| _ <|  nil()))  => begin
                     ListUtil.unionElt(newFieldName, inFieldNames)
                   end
-                  
+
                   Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "pder"), functionArgs = Absyn.FUNCTIONARGS(args = Absyn.CREF(Absyn.CREF_IDENT(name = newFieldName)) <| _ <| _ <|  nil()))  => begin
                     ListUtil.unionElt(newFieldName, inFieldNames)
                   end
-                  
+
                   _  => begin
                       inFieldNames
                   end
@@ -9209,7 +9209,7 @@
           (outExp, outFieldNames)
         end
 
-        function addGhostCells2(inCompelt::Tuple{<:SCode.Element, DAE.Mod}, fieldNamesP::List{<:Absyn.Ident}, inGhosts::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}} 
+        function addGhostCells2(inCompelt::Tuple{<:SCode.Element, DAE.Mod}, fieldNamesP::List{<:Absyn.Ident}, inGhosts::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{Tuple{SCode.Element, DAE.Mod}}
               local outGhosts::List{Tuple{SCode.Element, DAE.Mod}}
 
               outGhosts = begin
@@ -9244,7 +9244,7 @@
                       ghostR = (SCode.COMPONENT(stringAppend(name, "ghostR"), prefixes, SCode.ATTR(arrayDims, connectorType, parallelism, variability, direction, Absyn.NONFIELD()), typeSpec, SCode.MOD(finalPrefix, eachPrefix, subModLst, binding, info2), comment, condition, info), daeMod)
                     _cons(ghostL, _cons(ghostR, inGhosts))
                   end
-                  
+
                   _  => begin
                       inGhosts
                   end
@@ -9256,7 +9256,7 @@
           outGhosts
         end
 
-        function isSubModDomainOrStart(subMod::SCode.SubMod) ::Bool 
+        function isSubModDomainOrStart(subMod::SCode.SubMod) ::Bool
               local isNotDomain::Bool
 
               isNotDomain = begin
@@ -9265,7 +9265,7 @@
                   SCode.NAMEMOD(ident = idn) where (idn == "domain" || idn == "start")  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9274,7 +9274,7 @@
           isNotDomain
         end
 
-        function elabField(inCache::FCore.Cache, inEnv::FCore.Graph, name::String, attr::SCode.Attributes, inDims::DAE.Dimensions, inMod::DAE.Mod, inInfo::SourceInfo) ::Tuple{DAE.Dimensions, DAE.Mod, DomainFieldOpt} 
+        function elabField(inCache::FCore.Cache, inEnv::FCore.Graph, name::String, attr::SCode.Attributes, inDims::DAE.Dimensions, inMod::DAE.Mod, inInfo::SourceInfo) ::Tuple{DAE.Dimensions, DAE.Mod, DomainFieldOpt}
               local outFieldDomOpt::DomainFieldOpt
               local outMod::DAE.Mod
               local outDims::DAE.Dimensions
@@ -9293,7 +9293,7 @@
                   (SCode.ATTR(isField = Absyn.NONFIELD(__)), _)  => begin
                     (inDims, inMod, NONE())
                   end
-                  
+
                   (SCode.ATTR(isField = Absyn.FIELD(__)), DAE.MOD(finalPrefix = finalPrefix, eachPrefix = eachPrefix, subModLst = subModLst, binding = binding, info = info))  => begin
                       (domainSubMod, subModLst) = ListUtil.findAndRemove(subModLst, findDomainSubMod)
                       dcr = getQualDcr(domainSubMod, inInfo)
@@ -9307,7 +9307,7 @@
                       dim_f = DAE.DIM_INTEGER(N)
                     (_cons(dim_f, inDims), outMod, SOME((Absyn.CREF_IDENT(name, nil), dcr)))
                   end
-                  
+
                   (_, DAE.NOMOD(__))  => begin
                       Error.addSourceMessageAndFail(Error.PDEModelica_ERROR, list("Field variable '" + name + "' has no domain modifier."), inInfo)
                     (inDims, inMod, NONE())
@@ -9317,7 +9317,7 @@
           (outDims, outMod, outFieldDomOpt)
         end
 
-        function findDomainSubMod(subMod::DAE.SubMod) ::Bool 
+        function findDomainSubMod(subMod::DAE.SubMod) ::Bool
               local isDomain::Bool
 
               isDomain = begin
@@ -9325,7 +9325,7 @@
                   DAE.NAMEMOD(ident = "domain")  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9334,7 +9334,7 @@
           isDomain
         end
 
-        function getQualDcr(domainSubMod::DAE.SubMod, inInfo::SourceInfo) ::DAE.ComponentRef 
+        function getQualDcr(domainSubMod::DAE.SubMod, inInfo::SourceInfo) ::DAE.ComponentRef
               local dcr::DAE.ComponentRef
 
               dcr = begin
@@ -9343,7 +9343,7 @@
                   DAE.NAMEMOD(ident = "domain", mod = DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = DAE.CREF(componentRef = cr, ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = Absyn.FULLYQUALIFIED(path = Absyn.IDENT(name = "DomainLineSegment1D")))))))))  => begin
                     cr
                   end
-                  
+
                   _  => begin
                       Error.addSourceMessageAndFail(Error.PDEModelica_ERROR, list("The domain type is wrong.\\n"), inInfo)
                     fail()
@@ -9353,7 +9353,7 @@
           dcr
         end
 
-        function getNDcr(dcr::DAE.ComponentRef) ::Tuple{ModelicaInteger, DAE.ComponentRef} 
+        function getNDcr(dcr::DAE.ComponentRef) ::Tuple{ModelicaInteger, DAE.ComponentRef}
               local outCrOpt::DAE.ComponentRef
               local outN::ModelicaInteger
 
@@ -9365,7 +9365,7 @@
                   DAE.CREF_QUAL(componentRef = cr1)  => begin
                     getNDcr(cr1)
                   end
-                  
+
                   DAE.CREF_IDENT(identType = DAE.T_COMPLEX(varLst = varLst))  => begin
                       N = ListUtil.findSome(varLst, findN)
                     (N, dcr)
@@ -9376,7 +9376,7 @@
         end
 
          #= a map function to find N in domain class modifiers =#
-        function findN(inVar::DAE.Var) ::Option{ModelicaInteger} 
+        function findN(inVar::DAE.Var) ::Option{ModelicaInteger}
               local optN::Option{ModelicaInteger}
 
               optN = begin
@@ -9385,7 +9385,7 @@
                   DAE.TYPES_VAR(name = "N", binding = DAE.EQBOUND(evaluatedExp = SOME(Values.INTEGER(N))))  => begin
                     SOME(N)
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -9395,7 +9395,7 @@
         end
 
          #= map function that adds each prefix to given modifier =#
-        function addEach(inSubMod::DAE.SubMod) ::DAE.SubMod 
+        function addEach(inSubMod::DAE.SubMod) ::DAE.SubMod
               local outSubMod::DAE.SubMod
 
               local ident::DAE.Ident
@@ -9426,7 +9426,7 @@
          #= ----end elabField and sub funs
          =#
 
-        function optAppendField(inDomFieldsLst::DomainFieldsLst, fieldDomOpt::DomainFieldOpt) ::DomainFieldsLst 
+        function optAppendField(inDomFieldsLst::DomainFieldsLst, fieldDomOpt::DomainFieldOpt) ::DomainFieldsLst
               local outDomFieldsLst::DomainFieldsLst
 
               outDomFieldsLst = begin
@@ -9437,7 +9437,7 @@
                   NONE()  => begin
                     inDomFieldsLst
                   end
-                  
+
                   SOME((fieldCr, domainCr))  => begin
                       (outDomFieldsLst, found) = ListUtil.map2Fold(inDomFieldsLst, optAppendFieldMapFun, domainCr, fieldCr, false)
                       if ! found
@@ -9450,7 +9450,7 @@
           outDomFieldsLst
         end
 
-        function optAppendFieldMapFun(inDomainFields::Tuple{<:DAE.ComponentRef, List{<:Absyn.ComponentRef}}, domainCrToAdd::DAE.ComponentRef, fieldCrToAdd::Absyn.ComponentRef, inFound::Bool) ::Tuple{Tuple{DAE.ComponentRef, List{Absyn.ComponentRef}}, Bool} 
+        function optAppendFieldMapFun(inDomainFields::Tuple{<:DAE.ComponentRef, List{<:Absyn.ComponentRef}}, domainCrToAdd::DAE.ComponentRef, fieldCrToAdd::Absyn.ComponentRef, inFound::Bool) ::Tuple{Tuple{DAE.ComponentRef, List{Absyn.ComponentRef}}, Bool}
               local outFound::Bool
               local outDomainFields::Tuple{DAE.ComponentRef, List{Absyn.ComponentRef}}
 
@@ -9462,7 +9462,7 @@
                       @match true = ComponentReference.crefEqual(domainCr, domainCrToAdd)
                     ((domainCr, _cons(fieldCrToAdd, fieldCrLst)), true)
                   end
-                  
+
                   _  => begin
                       (inDomainFields, inFound)
                   end
@@ -9474,7 +9474,7 @@
          #= ----end optAppendField and sub funs
          =#
 
-        function discretizePDE(inEQ::SCode.Equation, inDomFieldLst::DomainFieldsLst, inDiscretizedEQs::List{<:SCode.Equation}) ::List{SCode.Equation} 
+        function discretizePDE(inEQ::SCode.Equation, inDomFieldLst::DomainFieldsLst, inDiscretizedEQs::List{<:SCode.Equation}) ::List{SCode.Equation}
               local outDiscretizedEQs::List{SCode.Equation}
 
               local newDiscretizedEQs::List{SCode.Equation}
@@ -9498,13 +9498,13 @@
                       (N, fieldLst) = getDomNFields(inDomFieldLst, domainCr, info)
                     creatFieldEqs(lhs_exp, rhs_exp, domainCr, N, fieldLst, comment, info)
                   end
-                  
+
                   SCode.EQUATION(SCode.EQ_PDE(expLeft = lhs_exp, expRight = rhs_exp, domain = domainCr && Absyn.CREF_QUAL(name, subscripts, Absyn.CREF_IDENT(name = "interior")), comment = comment, info = info))  => begin
                       domainCr1 = Absyn.CREF_IDENT(name, subscripts)
                       (N, fieldLst) = getDomNFields(inDomFieldLst, domainCr1, info)
                     creatFieldEqs(lhs_exp, rhs_exp, domainCr, N, fieldLst, comment, info)
                   end
-                  
+
                   SCode.EQUATION(SCode.EQ_PDE(expLeft = lhs_exp, expRight = rhs_exp, domain = Absyn.CREF_QUAL(name, subscripts, Absyn.CREF_IDENT(name = "left")), comment = comment, info = info))  => begin
                       domainCr1 = Absyn.CREF_IDENT(name, subscripts)
                       (N, fieldLst) = getDomNFields(inDomFieldLst, domainCr1, info)
@@ -9512,7 +9512,7 @@
                       (rhs_exp, _) = AbsynUtil.traverseExp(rhs_exp, extrapFieldTraverseFun, 1)
                     list(newEQFun(1, lhs_exp, rhs_exp, domainCr1, N, true, fieldLst, comment, info))
                   end
-                  
+
                   SCode.EQUATION(SCode.EQ_PDE(expLeft = lhs_exp, expRight = rhs_exp, domain = Absyn.CREF_QUAL(name, subscripts, Absyn.CREF_IDENT(name = "right")), comment = comment, info = info))  => begin
                       domainCr1 = Absyn.CREF_IDENT(name, subscripts)
                       (N, fieldLst) = getDomNFields(inDomFieldLst, domainCr1, info)
@@ -9520,13 +9520,13 @@
                       (rhs_exp, _) = AbsynUtil.traverseExp(rhs_exp, extrapFieldTraverseFun, N)
                     list(newEQFun(N, lhs_exp, rhs_exp, domainCr1, N, true, fieldLst, comment, info))
                   end
-                  
+
                   SCode.EQUATION(SCode.EQ_PDE(__))  => begin
                       print("Unhandled type of EQ_PDE in discretizePDE\\n")
                       fail()
                     nil
                   end
-                  
+
                   _  => begin
                       list(inEQ)
                   end
@@ -9546,7 +9546,7 @@
           outDiscretizedEQs
         end
 
-        function extrapFieldTraverseFun(inExp::Absyn.Exp, inN::ModelicaInteger #= If N = 1 then left extrapolation, right extrapolation otherwise =#) ::Tuple{Absyn.Exp, ModelicaInteger} 
+        function extrapFieldTraverseFun(inExp::Absyn.Exp, inN::ModelicaInteger #= If N = 1 then left extrapolation, right extrapolation otherwise =#) ::Tuple{Absyn.Exp, ModelicaInteger}
               local outN::ModelicaInteger = inN
               local outExp::Absyn.Exp
 
@@ -9563,7 +9563,7 @@
                       end
                     Absyn.BINARY(Absyn.BINARY(Absyn.INTEGER(2), Absyn.MUL(), Absyn.CREF(Absyn.CREF_IDENT(name, _cons(Absyn.SUBSCRIPT(Absyn.INTEGER(inN)), subscripts)))), Absyn.SUB(), Absyn.CREF(Absyn.CREF_IDENT(name, _cons(Absyn.SUBSCRIPT(Absyn.INTEGER(inN + i)), subscripts))))
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -9574,7 +9574,7 @@
           (outExp, outN)
         end
 
-        function getDomNFields(inDomFieldLst::DomainFieldsLst, inDomainCr::Absyn.ComponentRef, info::SCode.SourceInfo) ::Tuple{ModelicaInteger, List{Absyn.ComponentRef}} 
+        function getDomNFields(inDomFieldLst::DomainFieldsLst, inDomainCr::Absyn.ComponentRef, info::SCode.SourceInfo) ::Tuple{ModelicaInteger, List{Absyn.ComponentRef}}
               local outFieldLst::List{Absyn.ComponentRef} = nil
               local outN::ModelicaInteger = 0
 
@@ -9586,7 +9586,7 @@
           (outN, outFieldLst)
         end
 
-        function domNFieldsFindFun(inDomFields::Tuple{<:DAE.ComponentRef, List{<:Absyn.ComponentRef}}, inDomainCr::Absyn.ComponentRef) ::Option{Tuple{ModelicaInteger, List{Absyn.ComponentRef}}} 
+        function domNFieldsFindFun(inDomFields::Tuple{<:DAE.ComponentRef, List{<:Absyn.ComponentRef}}, inDomainCr::Absyn.ComponentRef) ::Option{Tuple{ModelicaInteger, List{Absyn.ComponentRef}}}
               local outOptNFields::Option{Tuple{ModelicaInteger, List{Absyn.ComponentRef}}}
 
               outOptNFields = begin
@@ -9601,7 +9601,7 @@
                       N = ListUtil.findSome(varLst, findN)
                     SOME((N, fieldCrLst))
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -9610,7 +9610,7 @@
           outOptNFields
         end
 
-        function absynDAECrefEqualName(domainCr1::Absyn.ComponentRef, domainCr2::DAE.ComponentRef) ::Bool 
+        function absynDAECrefEqualName(domainCr1::Absyn.ComponentRef, domainCr2::DAE.ComponentRef) ::Bool
               local equal::Bool
 
               local name1::String
@@ -9623,7 +9623,7 @@
                   (Absyn.CREF_IDENT(name = name1), DAE.CREF_IDENT(ident = name2)) where (stringEqual(name1, name2))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9632,7 +9632,7 @@
           equal
         end
 
-        function extrapolateFieldEq(isRight::Bool, fieldCr::Absyn.ComponentRef, domainCr::Absyn.ComponentRef, N::ModelicaInteger, comment::SCode.Comment, info::SCode.SourceInfo, fieldLst::List{<:Absyn.ComponentRef}) ::SCode.Equation 
+        function extrapolateFieldEq(isRight::Bool, fieldCr::Absyn.ComponentRef, domainCr::Absyn.ComponentRef, N::ModelicaInteger, comment::SCode.Comment, info::SCode.SourceInfo, fieldLst::List{<:Absyn.ComponentRef}) ::SCode.Equation
               local outEQ::SCode.Equation
 
               local name::Absyn.Ident
@@ -9668,7 +9668,7 @@
         end
 
          #= creates list of equations for fields. If the equation contains pder it spans 2:N-1, otherwise 1:N =#
-        function creatFieldEqs(lhs_exp::Absyn.Exp, rhs_exp::Absyn.Exp, domainCr::Absyn.ComponentRef, N::ModelicaInteger, fieldLst::List{<:Absyn.ComponentRef}, comment::SCode.Comment, info::SCode.SourceInfo) ::List{SCode.Equation} 
+        function creatFieldEqs(lhs_exp::Absyn.Exp, rhs_exp::Absyn.Exp, domainCr::Absyn.ComponentRef, N::ModelicaInteger, fieldLst::List{<:Absyn.ComponentRef}, comment::SCode.Comment, info::SCode.SourceInfo) ::List{SCode.Equation}
               local outDiscretizedEQs::List{SCode.Equation}
 
               local bl::Bool
@@ -9683,7 +9683,7 @@
                   (false, false)  => begin
                     list(newEQFun(i, lhs_exp, rhs_exp, domainCr, N, false, fieldLst, comment, info) for i in 1:N)
                   end
-                  
+
                   _  => begin
                       list(newEQFun(i, lhs_exp, rhs_exp, domainCr, N, false, fieldLst, comment, info) for i in 1:N)
                   end
@@ -9700,7 +9700,7 @@
           outDiscretizedEQs
         end
 
-        function hasPderTraverseFun(inExp::Absyn.Exp, inHasPder::Bool) ::Tuple{Absyn.Exp, Bool} 
+        function hasPderTraverseFun(inExp::Absyn.Exp, inHasPder::Bool) ::Tuple{Absyn.Exp, Bool}
               local outHasPder::Bool
               local outExp::Absyn.Exp = inExp
 
@@ -9709,11 +9709,11 @@
                   (_, true)  => begin
                     true
                   end
-                  
+
                   (Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "pder")), _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -9722,7 +9722,7 @@
           (outExp, outHasPder)
         end
 
-        function newEQFun(i::ModelicaInteger, inLhs_exp::Absyn.Exp, inRhs_exp::Absyn.Exp, domainCr::Absyn.ComponentRef, N::ModelicaInteger, isBC::Bool, fieldLst::List{<:Absyn.ComponentRef}, comment::SCode.Comment, info::SCode.SourceInfo) ::SCode.Equation 
+        function newEQFun(i::ModelicaInteger, inLhs_exp::Absyn.Exp, inRhs_exp::Absyn.Exp, domainCr::Absyn.ComponentRef, N::ModelicaInteger, isBC::Bool, fieldLst::List{<:Absyn.ComponentRef}, comment::SCode.Comment, info::SCode.SourceInfo) ::SCode.Equation
               local outEQ::SCode.Equation
 
               local outLhs_exp::Absyn.Exp
@@ -9734,7 +9734,7 @@
           outEQ
         end
 
-        function discretizeTraverseFun(inExp::Absyn.Exp, inTup::Tuple{<:ModelicaInteger, List{<:Absyn.ComponentRef}, Absyn.ComponentRef, SCode.SourceInfo, Bool, ModelicaInteger, Bool}) ::Tuple{Absyn.Exp, Tuple{ModelicaInteger, List{Absyn.ComponentRef}, Absyn.ComponentRef, SCode.SourceInfo, Bool, ModelicaInteger, Bool}} 
+        function discretizeTraverseFun(inExp::Absyn.Exp, inTup::Tuple{<:ModelicaInteger, List{<:Absyn.ComponentRef}, Absyn.ComponentRef, SCode.SourceInfo, Bool, ModelicaInteger, Bool}) ::Tuple{Absyn.Exp, Tuple{ModelicaInteger, List{Absyn.ComponentRef}, Absyn.ComponentRef, SCode.SourceInfo, Bool, ModelicaInteger, Bool}}
               local outTup::Tuple{ModelicaInteger, List{Absyn.ComponentRef}, Absyn.ComponentRef, SCode.SourceInfo, Bool, ModelicaInteger, Bool}
               local outExp::Absyn.Exp
 
@@ -9776,7 +9776,7 @@
                   Absyn.CREF(Absyn.CREF_QUAL(name = domName, subscripts =  nil(), componentRef = Absyn.CREF_IDENT(name = "x", subscripts =  nil())))  => begin
                     Absyn.CREF(Absyn.CREF_QUAL(name = domName, subscripts = nil, componentRef = Absyn.CREF_IDENT(name = "x", subscripts = list(Absyn.SUBSCRIPT(Absyn.INTEGER(i))))))
                   end
-                  
+
                   Absyn.CREF(fieldCr && Absyn.CREF_IDENT(name, subscripts))  => begin
                       @match true = ListUtil.isMemberOnTrue(fieldCr, fieldLst, AbsynUtil.crefEqual)
                       exp = if isBC && i == 1
@@ -9788,7 +9788,7 @@
                           end
                     exp
                   end
-                  
+
                   Absyn.CALL(Absyn.CREF_IDENT("pder",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(fieldCr && Absyn.CREF_IDENT(name, subscripts)) <| Absyn.CREF(Absyn.CREF_IDENT(name = "x")) <|  nil(), _))  => begin
                       if ! ListUtil.isMemberOnTrue(fieldCr, fieldLst, AbsynUtil.crefEqual)
                         failVar = true
@@ -9806,7 +9806,7 @@
                           end
                     Absyn.BINARY(Absyn.BINARY(rightVar, Absyn.SUB(), leftVar), Absyn.DIV(), Absyn.BINARY(Absyn.INTEGER(2), Absyn.MUL(), Absyn.CREF(Absyn.CREF_QUAL(domName, nil, Absyn.CREF_IDENT("dx", nil)))))
                   end
-                  
+
                   Absyn.CALL(Absyn.CREF_IDENT("pder",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(fieldCr && Absyn.CREF_IDENT(name, subscripts)) <| Absyn.CREF(Absyn.CREF_IDENT(name = "x")) <| Absyn.CREF(Absyn.CREF_IDENT(name = "x")) <|  nil(), _))  => begin
                       if ! ListUtil.isMemberOnTrue(fieldCr, fieldLst, AbsynUtil.crefEqual)
                         failVar = true
@@ -9825,17 +9825,17 @@
                           end
                     Absyn.BINARY(Absyn.BINARY(Absyn.BINARY(leftVar, Absyn.SUB(), Absyn.BINARY(Absyn.INTEGER(2), Absyn.MUL(), actualVar)), Absyn.ADD(), rightVar), Absyn.DIV(), Absyn.BINARY(Absyn.CREF(Absyn.CREF_QUAL(domName, nil, Absyn.CREF_IDENT("dx", nil))), Absyn.POW(), Absyn.INTEGER(2)))
                   end
-                  
+
                   Absyn.CALL(Absyn.CREF_IDENT("pder",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(_) <| _ <|  nil(), _))  => begin
                       Error.addSourceMessageAndFail(Error.COMPILER_ERROR, list("You are differentiating with respect to variable that is not a coordinate."), info)
                     inExp
                   end
-                  
+
                   Absyn.CALL(Absyn.CREF_IDENT("pder",  nil()), Absyn.FUNCTIONARGS(_ <| _ <|  nil(), _))  => begin
                       Error.addSourceMessageAndFail(Error.COMPILER_ERROR, list("Unsupported partial derivative."), info)
                     inExp
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -9861,7 +9861,7 @@
                   (nameLoc, _) where (stringEqual(nameLoc, name))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
