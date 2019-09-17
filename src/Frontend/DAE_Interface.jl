@@ -1,13 +1,7 @@
 #=
  This file is needed to provide a necessary interface for Prefix.jl
 =#
-module DAE_Interface
-
-using MetaModelica
-using ExportAll
-
 const Dimensions = List  #= a list of dimensions =#
-
 @UniontypeDecl VarKind
 @UniontypeDecl ConnectorType
 @UniontypeDecl VarDirection
@@ -67,7 +61,3 @@ EvaluateSingletonTypeFunction = Function
 @UniontypeDecl ComponentRef
 @UniontypeDecl Subscript
 @UniontypeDecl Expand
-
-@exportAll()
-
-end #= DAE_Interface =#

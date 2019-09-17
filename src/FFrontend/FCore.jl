@@ -83,11 +83,13 @@ const Refs = List
 const Parents = Refs
 const Scope = Refs
 const Children = RefTree.Tree
+println("FCore Hello3")
 import AbsynUtil
+println("FCore Hello4")
 import AvlSetCR
-println("After DAE1")
+println("FCore Before DAE1")
 import DAE
-println("After DAE2")
+println("FCore After DAE2")
 import Mutable
 using Mutable: MutableType
 import SCode

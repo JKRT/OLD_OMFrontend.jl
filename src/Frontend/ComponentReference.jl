@@ -41,7 +41,7 @@
          */ =#
          #=  public imports
          =#
-
+  println("ComponentReference.jl 0")
         import Absyn
 
         import DAE
@@ -49,6 +49,7 @@
         import File
          #=  protected imports
          =#
+  println("ComponentReference.jl 1")
 
         import ClassInf
 
@@ -57,7 +58,7 @@
         import Debug
 
         import Dump
-
+  println("ComponentReference.jl 2")
         import Error
 
         import Expression
@@ -65,13 +66,13 @@
         import ExpressionDump
 
         import Flags
-
+  println("ComponentReference.jl 3")
         import ListUtil
 
         import MetaModelica.Dangerous
 
         import Print
-
+  println("ComponentReference.jl 4")
         import System
 
         import Types
@@ -79,7 +80,7 @@
         import Util
          #=  do not make this public. instead use the function below.
          =#
-
+println("ComponentReference.jl 5")
          const dummyCref = DAE.CREF_IDENT("dummy", DAE.T_UNKNOWN_DEFAULT, nil)::DAE.ComponentRef
 
          #=

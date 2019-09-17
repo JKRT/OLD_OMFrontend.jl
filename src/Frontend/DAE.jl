@@ -31,12 +31,13 @@
 
 module DAE
 
-
 using MetaModelica
+
+include("./DAE_Interface.jl")
+
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 #= I use a interface here to avoid certain types of circular dependencies =#
-using DAE_Interface
 
 import Absyn
 import AbsynUtil

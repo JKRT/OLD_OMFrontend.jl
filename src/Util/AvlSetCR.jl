@@ -38,9 +38,12 @@ using ExportAll
 
 import BaseAvlSet
 using BaseAvlSet
-import DAE
-import ComponentReference
-Key = DAE.ComponentRef
-#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+#import ComponentReference
+Key = Int
+
+function setKeyForAvlSetCR(key)
+  Key = key
+end
+
 @exportAll()
 end
