@@ -1,75 +1,7 @@
-module DAE
-
-
-using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-using ExportAll
-  #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-  const Dimensions = List  #= a list of dimensions =#
-@UniontypeDecl VarKind
-@UniontypeDecl ConnectorType
-@UniontypeDecl VarDirection
-@UniontypeDecl VarParallelism
-@UniontypeDecl VarVisibility
-@UniontypeDecl VarInnerOuter
-@UniontypeDecl ElementSource
-@UniontypeDecl SymbolicOperation
-@UniontypeDecl EquationExp
-@UniontypeDecl Element
-@UniontypeDecl Function
-@UniontypeDecl InlineType
-@UniontypeDecl FunctionDefinition
-@UniontypeDecl derivativeCond
-@UniontypeDecl VariableAttributes
-@UniontypeDecl StateSelect
-@UniontypeDecl Uncertainty
-@UniontypeDecl Distribution
-@UniontypeDecl ExtArg
-@UniontypeDecl ExternalDecl
-@UniontypeDecl DAElist
-@UniontypeDecl Algorithm
-@UniontypeDecl Constraint
-@UniontypeDecl ClassAttributes
-@UniontypeDecl Statement
-@UniontypeDecl Else
-@UniontypeDecl Var
-@UniontypeDecl Attributes
-@UniontypeDecl BindingSource
-@UniontypeDecl Binding
-@UniontypeDecl Type
-@UniontypeDecl CodeType
-@UniontypeDecl EvaluateSingletonType
-EvaluateSingletonTypeFunction = Function
-@UniontypeDecl FunctionAttributes
-@UniontypeDecl FunctionBuiltin
-@UniontypeDecl FunctionParallelism
-@UniontypeDecl Dimension
-@UniontypeDecl DimensionBinding
-@UniontypeDecl FuncArg
-@UniontypeDecl Const
-@UniontypeDecl TupleConst
-@UniontypeDecl Properties
-@UniontypeDecl EqMod
-@UniontypeDecl SubMod
-@UniontypeDecl Mod
-@UniontypeDecl ClockKind
-@UniontypeDecl Exp
-@UniontypeDecl TailCall
-@UniontypeDecl CallAttributes
-@UniontypeDecl ReductionInfo
-@UniontypeDecl ReductionIterator
-@UniontypeDecl MatchCase
-@UniontypeDecl MatchType
-@UniontypeDecl Pattern
-@UniontypeDecl Operator
-@UniontypeDecl ComponentRef
-@UniontypeDecl Subscript
-@UniontypeDecl Expand
-
 #= /*
 * This file is part of OpenModelica.
 *
-* Copyright (c) 1998-2014, Open Source Modelica Consortium (OSMC),
+* Copyright (c) 1998-CurrentYear, Open Source Modelica Consortium (OSMC),
 * c/o Linköpings universitet, Department of Computer and Information Science,
 * SE-58183 Linköping, Sweden.
 *
@@ -95,15 +27,21 @@ EvaluateSingletonTypeFunction = Function
 *
 * See the full OSMC Public License conditions for more details.
 *
-*/ =#
-#=  public imports
 =#
+
+module DAE
+
+
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+#= I use a interface here to avoid certain types of circular dependencies =#
+using DAE_Interface
+
 import Absyn
 import AbsynUtil
-import BaseAvlTree
 import ClassInf
 import SCode
-import Prefix
 import Values
 import Connect
 
@@ -221,6 +159,8 @@ end
   end
 end
 
+#= Must be imported here =#
+import Prefix
 #= gives information about the origin of the element =#
 @Uniontype ElementSource begin
   @Record SOURCE begin
@@ -236,7 +176,7 @@ end
 end
 
 const emptyElementSource = SOURCE(AbsynUtil.dummyInfo, nil, Prefix.NOCOMPPRE(), nil, nil, nil, nil)::ElementSource
-
+println("Test test test")
 @Uniontype SymbolicOperation begin
   @Record FLATTEN begin
 
@@ -331,7 +271,7 @@ end
     rhs::Exp
   end
 end
-
+println("Test test test2")
 @Uniontype Element begin
   @Record VAR begin
 
@@ -2213,21 +2153,17 @@ end
 translations of the corresponding types in the `Absyn\\' module. =#
 @Uniontype Subscript begin
   @Record WHOLEDIM begin
-
   end
 
   @Record SLICE begin
-
     exp #= a{1:3,1}, a{1:2:10,2} =#::Exp
   end
 
   @Record INDEX begin
-
     exp #= a[i+1] =#::Exp
   end
 
   @Record WHOLE_NONEXP begin
-
     exp::Exp
   end
 end

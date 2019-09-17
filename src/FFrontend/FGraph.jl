@@ -44,6 +44,29 @@ import DAE
 import Prefix
 import ClassInf
 import FCore
+
+const Name = FCore.Name
+const Id = FCore.Id
+const Seq = FCore.Seq
+const Next = FCore.Next
+const Node = FCore.Node
+const Data = FCore.Data
+const Kind = FCore.Kind
+const Ref = FCore.Ref
+const Refs = FCore.Refs
+const RefTree = FCore.RefTree
+const Children = FCore.Children
+const Parents = FCore.Parents
+const Scope = FCore.Scope
+const Top = FCore.Top
+const Graph = FCore.Graph
+println(Graph)
+println(FCore.G)
+const Extra = FCore.Extra
+const Visited = FCore.Visited
+const Status = FCore.Status
+const emptyGraph = FCore.EG("empty")
+
 import FNode
 import InnerOuter
 
@@ -64,26 +87,6 @@ import Error
 import ComponentReference
 import Types
 import SCodeUtil
-
-const Name = FCore.Name
-const Id = FCore.Id
-const Seq = FCore.Seq
-const Next = FCore.Next
-const Node = FCore.Node
-const Data = FCore.Data
-const Kind = FCore.Kind
-const Ref = FCore.Ref
-const Refs = FCore.Refs
-const RefTree = FCore.RefTree
-const Children = FCore.Children
-const Parents = FCore.Parents
-const Scope = FCore.Scope
-const Top = FCore.Top
-const Graph = FCore.Graph
-const Extra = FCore.Extra
-const Visited = FCore.Visited
-const Status = FCore.Status
-const emptyGraph = FCore.EG("empty")::FCore.Graph
 
          #= get the top node ref from the graph =#
         function top(inGraph::Graph) ::Ref

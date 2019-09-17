@@ -7071,8 +7071,6 @@
 
          #= add functions present in the element list to the function tree =#
         function addDaeFunction(functions::List{<:DAE.Function}, functionTree::DAE.FunctionTree) ::DAE.FunctionTree
-
-
               for f in functions
                 functionTree = DAE.AvlTreePathFunction.add(functionTree, functionName(f), SOME(f))
               end
