@@ -106,8 +106,8 @@
          #= instantiate an external object.
          This is done by instantiating the destructor and constructor
          functions and create a DAE element containing these two. =#
-        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.State}
-              local ciState::ClassInf.State
+        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.SMNode}
+              local ciState::ClassInf.SMNode
               local dae::DAE.DAElist #= resulting dae =#
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -329,7 +329,7 @@
               (outCache, outEnv, outIH, funcs) = begin
                   local ty::DAE.Type
                   local ty1::DAE.Type
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local env_1::FCore.Graph
                   local env::FCore.Graph
                   local tempenv::FCore.Graph

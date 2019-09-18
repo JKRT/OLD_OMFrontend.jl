@@ -616,7 +616,7 @@
                   local ad::DAE.Dimensions
                   local dim::DAE.Dimension
                   local vars::List{DAE.Var}
-                  local CIS::ClassInf.State
+                  local CIS::ClassInf.SMNode
                   local ec::DAE.EqualityConstraint
                    #=  convert just the array!
                    =#
@@ -1895,8 +1895,8 @@
                   local t2::DAE.Type
                   local tp2::DAE.Type
                   local tp1::DAE.Type
-                  local st1::ClassInf.State
-                  local st2::ClassInf.State
+                  local st1::ClassInf.SMNode
+                  local st2::ClassInf.SMNode
                   local type_list1::List{DAE.Type}
                   local type_list2::List{DAE.Type}
                   local tList1::List{DAE.Type}
@@ -2280,7 +2280,7 @@
                   local ty_1::DAE.Type
                   local n::String
                   local id::String
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local cs::List{DAE.Var}
                   local bc::Option{DAE.Type}
                   local attr::DAE.Attributes
@@ -2593,7 +2593,7 @@
                   local ty::Type
                   local dim::DAE.Dimension
                   local d::DAE.Dimension
-                  local ci::ClassInf.State
+                  local ci::ClassInf.SMNode
                   local varlst::List{DAE.Var}
                   local ec::EqualityConstraint
                   local tty::Type
@@ -2792,7 +2792,7 @@
                   local restype::Type
                   local dimlst::DAE.Dimensions
                   local vs::List{DAE.Var}
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local params::List{DAE.FuncArg}
                   local path::Absyn.Path
                   local p::Absyn.Path
@@ -3160,7 +3160,7 @@
               str = begin
                   local vars::List{DAE.Var}
                   local l::List{String}
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local dims::List{DAE.Dimension}
                   local t::Type
                   local ty::Type
@@ -3366,7 +3366,7 @@
               local s::String #= Connector type =#
 
               (s, s2) = begin
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local connectorName::Absyn.Path
                   local vars::List{DAE.Var}
                   local varNames::List{String}
@@ -4436,7 +4436,7 @@
                   local dimstr::String
                   local tystr::String
                   local str::String
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local ty::DAE.Type
                   local arrayty::DAE.Type
                   local dims::List{DAE.Dimension}
@@ -4835,7 +4835,7 @@
                   local dims::DAE.Dimensions
                   local tys::List{DAE.Type}
                   local varLst::List{DAE.Var}
-                  local CIS::ClassInf.State
+                  local CIS::ClassInf.SMNode
                   local ec::DAE.EqualityConstraint
                 @matchcontinue inType begin
                   DAE.T_FUNCTION(__)  => begin
@@ -5083,8 +5083,8 @@
               local isEqual::Bool
 
               isEqual = begin
-                  local cty1::ClassInf.State
-                  local cty2::ClassInf.State
+                  local cty1::ClassInf.SMNode
+                  local cty2::ClassInf.SMNode
                   local vars1::List{DAE.Var}
                   local vars2::List{DAE.Var}
                   local ad1::DAE.Dimension
@@ -5386,7 +5386,7 @@
                   local t::DAE.Type
                   local dims::DAE.Dimensions
                   local dim::DAE.Dimension
-                  local ci::ClassInf.State
+                  local ci::ClassInf.SMNode
                   local vl::List{DAE.Var}
                   local eqc::EqualityConstraint
                    #=  subtype basic crap
@@ -6474,7 +6474,7 @@
                   local strs::List{String}
                   local dim::DAE.Dimension
                   local ty::Type
-                  local cinf::ClassInf.State
+                  local cinf::ClassInf.SMNode
                   local bc::Option{DAE.Type}
                   local tys::List{DAE.Type}
                   local explists::List{List{DAE.Exp}}
@@ -8417,7 +8417,7 @@
                   local vars::List{DAE.Var}
                   local path::Absyn.Path
                   local eq::EqualityConstraint
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local farg::List{DAE.FuncArg}
                   local functionAttributes::DAE.FunctionAttributes
                   local singleton::Bool
@@ -8801,7 +8801,7 @@
               defaultValue = begin
                   local vars::List{DAE.Var}
                   local comp::List{String}
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local t::Type
                   local tys::List{DAE.Type}
                   local s1::String
@@ -9089,7 +9089,7 @@
 
               outIsValid = begin
                   local ty::Type
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                 @match inType begin
                   DAE.T_COMPLEX(complexClassType = state)  => begin
                     isValidFunctionVarState(state)
@@ -9107,7 +9107,7 @@
           outIsValid
         end
 
-        function isValidFunctionVarState(inState::ClassInf.State) ::Bool
+        function isValidFunctionVarState(inState::ClassInf.SMNode) ::Bool
               local outIsValid::Bool
 
               outIsValid = begin
@@ -9222,7 +9222,7 @@
               local outIsOverdetermined::Bool
 
               outIsOverdetermined = begin
-                  local cct::ClassInf.State
+                  local cct::ClassInf.SMNode
                 @match inType begin
                   DAE.T_COMPLEX(complexClassType = cct, equalityConstraint = SOME(_))  => begin
                     ClassInf.isTypeOrRecord(cct)
@@ -9263,7 +9263,7 @@
           (oty, ob)
         end
 
-        function classTypeEqualIfRecord(st1::ClassInf.State, st2::ClassInf.State) ::Bool
+        function classTypeEqualIfRecord(st1::ClassInf.SMNode, st2::ClassInf.SMNode) ::Bool
               local b::Bool
 
               b = begin
@@ -9471,7 +9471,7 @@
                   local sub_vars::List{DAE.Var}
                   local ty::DAE.Type
                   local dims::DAE.Dimensions
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local ec::EqualityConstraint
                   local tys::List{DAE.Type}
                 @match inType begin

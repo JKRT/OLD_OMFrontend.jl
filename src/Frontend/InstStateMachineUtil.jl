@@ -41,6 +41,8 @@
          *
          */ =#
 
+        import SCode
+
         import DAE
 
         import Config
@@ -72,6 +74,8 @@
         import Expression
 
         import Debug
+        
+        import Prefix
 
         import PrefixUtil
 
@@ -84,7 +88,7 @@
                        =#
                        componentRef::DAE.ComponentRef
                        isInitial::Bool
-                       edges #= relations to other modes due to in- and out-going transitions =#::HashSet.HashSet
+                       edges #= relations to other modes due to in- and out-going transitions =#::HashSet.HashSetType
               end
          end
 
@@ -99,8 +103,8 @@
          @Uniontype IncidenceTable begin
               @Record INCIDENCE_TABLE begin
 
-                       cref2index #= Map cref to corresponding index in incidence matrix =#::HashTable.HashTable
-                       incidence[:, :] #= Incidence matrix showing which modes are connected by transitions =#::Bool
+                       cref2index #= Map cref to corresponding index in incidence matrix =#::HashTable.HashTableType
+                       incidence #= Incidence matrix showing which modes are connected by transitions =#::Array{Array{Bool}}
               end
          end
 
@@ -110,7 +114,7 @@
          #=  Table mapping crefs of SMNodes to corresponding crefs of FlatSMGroup
          =#
         SMNodeToFlatSMGroupTable = HashTableCG.HashTable 
-         const SMS_PRE = "smOf" #= prefix for flat State Machine names =#::String
+         const SMS_PRE = "smOf" #= prefix for flat SMNode Machine names =#::String
 
          const DEBUG_SMDUMP = false #= enable verbose stdout debug information during elaboration =#::Bool
 
@@ -142,7 +146,7 @@
                   print("***** InstStateMachineUtil.createSMNodeToFlatSMGroupTable: START ***** \\n")
                 end
                 if DEBUG_SMDUMP
-                  print("***** State machine node table: ***** \\n")
+                  print("***** SMNode machine node table: ***** \\n")
                 end
                 if DEBUG_SMDUMP
                   BaseHashTable.dumpHashTable(smNodeTable)
@@ -169,7 +173,7 @@
                   print(stringDelimitList(ListUtil.map(initialStates, ComponentReference.printComponentRefStr), ", ") + "\\n")
                 end
                 if DEBUG_SMDUMP
-                  print("***** Flat State Machine Groups: ***** \\n")
+                  print("***** Flat SMNode Machine Groups: ***** \\n")
                 end
                 flatSMGroup = extractFlatSMGroup(initialStates, transClosure, nStates)
                 if DEBUG_SMDUMP
@@ -250,7 +254,7 @@
               local crefs::List{DAE.ComponentRef}
               local derCrefsAcc::List{DAE.ComponentRef} = nil
               local outerOutputCrefs::List{DAE.ComponentRef}
-              local derCrefsSet::HashSet.HashSet
+              local derCrefsSet::HashSet.HashSetType
               local emptyTree::DAE.FunctionTree
               local dAElistNew::List{DAE.Element}
               local mergeEqns::List{DAE.Element}
@@ -383,7 +387,7 @@
               outerCrefsStripped = ListUtil.map(outerCrefs, ComponentReference.crefStripLastIdent)
                #=  FIXME this variables are generated in StateMachineFlatten.addStateActivationAndReset(..) which is UGLY
                =#
-              outerCrefDers = ListUtil.map(outerCrefs, ("_der$") -> ComponentReference.appendStringLastIdent(inString = "_der"))
+              outerCrefDers = ListUtil.map(outerCrefs, fn -> ComponentReference.appendStringLastIdent(inString = "_der\$"))
                #=  der(x)
                =#
               exp = DAE.CALL(Absyn.IDENT("der"), list(DAE.CREF(innerCref, ty)), DAE.callAttrBuiltinReal)
@@ -826,14 +830,14 @@
         function extractFlatSMGroup(initialStates::List{<:DAE.ComponentRef}, iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::List{FlatSMGroup} 
               local flatSMGroup::List{FlatSMGroup}
 
-              local cref2index::HashTable.HashTable
+              local cref2index::HashTable.HashTableType
               local incidence::Bool[nStates, nStates]
               local entries::List{Tuple{DAE.ComponentRef, ModelicaInteger}}
               local i2cref::Array{DAE.ComponentRef}
               local cref::DAE.ComponentRef
               local members::List{DAE.ComponentRef}
               local membersArr::Array{DAE.ComponentRef}
-              local memberSet::HashSet.HashSet
+              local memberSet::HashSet.HashSetType
               local n::ModelicaInteger
               local i::ModelicaInteger
               local j::ModelicaInteger
@@ -930,7 +934,7 @@
         function transitiveClosure(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable 
               local transClosure::IncidenceTable
 
-              local cref2index::HashTable.HashTable
+              local cref2index::HashTable.HashTableType
               local incidence::Bool[nStates, nStates]
               local n::ModelicaInteger
               local k::ModelicaInteger
@@ -966,7 +970,7 @@
         function createIncidenceTable(smNodes::SMNodeTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable 
               local iTable::IncidenceTable
 
-              local cref2index::HashTable.HashTable #= Map cref to corresponding index in incidence matrix =#
+              local cref2index::HashTable.HashTableType #= Map cref to corresponding index in incidence matrix =#
               local incidence::Bool[nStates, nStates] #= Incidence matrix showing which states are connected by transitions =#
               local iRow::Array{Bool}
               local n::ModelicaInteger
@@ -975,7 +979,7 @@
               local j::ModelicaInteger
               local k::ModelicaInteger
               local cref::DAE.ComponentRef
-              local edges::HashSet.HashSet
+              local edges::HashSet.HashSetType
               local crefs1::Array{DAE.ComponentRef}
               local crefs2::Array{DAE.ComponentRef}
 
@@ -1005,7 +1009,7 @@
         Author: BTH
         Print incidence table. =#
         function printIncidenceTable(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#)  
-              local cref2index::HashTable.HashTable
+              local cref2index::HashTable.HashTableType
               local incidence::Bool[nStates, nStates]
               local entries::List{Tuple{DAE.ComponentRef, ModelicaInteger}}
               local entry::Tuple{DAE.ComponentRef, ModelicaInteger}
@@ -1139,8 +1143,8 @@
                   local cref2::DAE.ComponentRef
                   local isInitial1::Bool
                   local isInitial2::Bool
-                  local edges1::HashSet.HashSet
-                  local edges2::HashSet.HashSet
+                  local edges1::HashSet.HashSetType
+                  local edges2::HashSet.HashSetType
                 @match inElement begin
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("transition"), expLst = DAE.CREF(componentRef = cref1) <| DAE.CREF(componentRef = cref2) <| _))  => begin
                       smnode1 = if BaseHashTable.hasKey(cref1, outTable)
@@ -1190,7 +1194,7 @@
          #= 
         Author: BTH
         Return list of states defined in current context (by checking 'transtion' and 'initialState' operators) =#
-        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.Prefix) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
+        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.PrefixType) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
               local initialStates::List{DAE.ComponentRef} #= Only initial states =#
               local states::List{DAE.ComponentRef} #= Initial and non-initial states =#
 
@@ -1225,7 +1229,7 @@
          #= 
         Helper function to getSMStatesInContext.
         Swapped order of inputs of PrefixUtil.prefixCrefNoContext(..) in order to use it with map1 =#
-        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.Prefix) ::DAE.ComponentRef 
+        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.PrefixType) ::DAE.ComponentRef 
               local outCref::DAE.ComponentRef
 
               outCref = PrefixUtil.prefixCrefNoContext(inPre, inCref)

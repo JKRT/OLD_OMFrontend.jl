@@ -2894,7 +2894,7 @@
         end
 
          #= Converts a SCode.ConnectorType to a DAE.ConnectorType, given a class type. =#
-        function toConnectorType(inConnectorType::SCode.ConnectorType, inState::ClassInf.State) ::DAE.ConnectorType
+        function toConnectorType(inConnectorType::SCode.ConnectorType, inState::ClassInf.SMNode) ::DAE.ConnectorType
               local outConnectorType::DAE.ConnectorType
 
               outConnectorType = begin
@@ -2943,7 +2943,7 @@
          #= Converts scode parallelsim to dae parallelism.
           Prints a warning if parallel variables are used
           in a non-function class. =#
-        function toDaeParallelism(inCref::DAE.ComponentRef, inParallelism::SCode.Parallelism, inState::ClassInf.State, inInfo::SourceInfo) ::DAE.VarParallelism
+        function toDaeParallelism(inCref::DAE.ComponentRef, inParallelism::SCode.Parallelism, inState::ClassInf.SMNode, inInfo::SourceInfo) ::DAE.VarParallelism
               local outParallelism::DAE.VarParallelism
 
               outParallelism = begin
@@ -6793,7 +6793,7 @@
          =#
          #=      local
          =#
-         #=        HashTable.HashTable ht;
+         #=        HashTable.HashTableType ht;
          =#
          #=      case _
          =#
@@ -6823,9 +6823,9 @@
          =#
          #=    Helper function of transformDerInline.\"
          =#
-         #=    input tuple<DAE.Exp,HashTable.HashTable> itpl;
+         #=    input tuple<DAE.Exp,HashTable.HashTableType> itpl;
          =#
-         #=    output tuple<DAE.Exp,HashTable.HashTable> otpl;
+         #=    output tuple<DAE.Exp,HashTable.HashTableType> otpl;
          =#
          #=  algorithm
          =#
@@ -6835,7 +6835,7 @@
          =#
          #=        DAE.ComponentRef cr,cref_1,cref_2;
          =#
-         #=        HashTable.HashTable crs0,crs1;
+         #=        HashTable.HashTableType crs0,crs1;
          =#
          #=        DAE.Exp exp,e1,e2;
          =#

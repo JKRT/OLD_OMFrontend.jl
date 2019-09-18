@@ -170,7 +170,7 @@ const stateSelectComps = list(SCode.COMPONENT("never", commonPrefixes, attrConst
 
 const uncertaintyComps = list(SCode.COMPONENT("given", commonPrefixes, attrConst, Absyn.TPATH(Absyn.IDENT("EnumType"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), SCode.COMPONENT("sought", commonPrefixes, attrConst, Absyn.TPATH(Absyn.IDENT("EnumType"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), SCode.COMPONENT("refine", commonPrefixes, attrConst, Absyn.TPATH(Absyn.IDENT("EnumType"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo)) #= The Uncertainty enumeration =#::List
 
-const stateSelectType = SCode.CLASS("StateSelect", commonPrefixes, SCode.NOT_ENCAPSULATED(), SCode.NOT_PARTIAL(), SCode.R_ENUMERATION(), SCode.PARTS(stateSelectComps, nil, nil, nil, nil, nil, nil, NONE()), SCode.noComment, AbsynUtil.dummyInfo) #= The State Select Type =#::SCode.Element
+const stateSelectType = SCode.CLASS("StateSelect", commonPrefixes, SCode.NOT_ENCAPSULATED(), SCode.NOT_PARTIAL(), SCode.R_ENUMERATION(), SCode.PARTS(stateSelectComps, nil, nil, nil, nil, nil, nil, NONE()), SCode.noComment, AbsynUtil.dummyInfo) #= The SMNode Select Type =#::SCode.Element
 
 const uncertaintyType = SCode.CLASS("Uncertainty", commonPrefixes, SCode.NOT_ENCAPSULATED(), SCode.NOT_PARTIAL(), SCode.R_ENUMERATION(), SCode.PARTS(uncertaintyComps, nil, nil, nil, nil, nil, nil, NONE()), SCode.noComment, AbsynUtil.dummyInfo) #= The Uncertainty Type =#::SCode.Element
 

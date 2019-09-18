@@ -109,14 +109,14 @@ module InnerOuter
                        outDae::DAE.DAElist
                        outSets::Connect.Sets
                        outType::DAE.Type
-                       outGraph::ConnectionGraph.ConnectionGraph
+                       outGraph::ConnectionGraph.ConnectionGraphType
               end
          end
 
          @Uniontype InstInner begin
               @Record INST_INNER begin
 
-                       innerPrefix #= the prefix of the inner. we need it to prefix the outer variables with it! =#::Prefix.Prefix
+                       innerPrefix #= the prefix of the inner. we need it to prefix the outer variables with it! =#::Prefix.PrefixType
                        name::SCode.Ident
                        io::Absyn.InnerOuter
                        fullName #= full inner component name =#::String
@@ -149,7 +149,7 @@ module InnerOuter
                        path #= top model path =#::Option{Absyn.Path}
                        ht #= hash table with fully qualified components =#::InstHierarchyHashTable
                        outerPrefixes #= the outer prefixes help us prefix the outer components with the correct prefix of inner component directly =#::OuterPrefixes
-                       sm #= Set of synchronous SM states (fully qualified components) =#::HashSet.HashSet
+                       sm #= Set of synchronous SM states (fully qualified components) =#::HashSet.HashSetType
               end
          end
 
@@ -161,8 +161,8 @@ module InnerOuter
          If it is InnerOuter declared, we rename all the crefs
          in this equation to unique vars, while we want to keep
          them with this prefix for the inner part of the innerouter. =#
-        function handleInnerOuterEquations(io::Absyn.InnerOuter, inDae::DAE.DAElist, inIH::InstHierarchy, inGraphNew::ConnectionGraph.ConnectionGraph, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{DAE.DAElist, InstHierarchy, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function handleInnerOuterEquations(io::Absyn.InnerOuter, inDae::DAE.DAElist, inIH::InstHierarchy, inGraphNew::ConnectionGraph.ConnectionGraphType, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{DAE.DAElist, InstHierarchy, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outIH::InstHierarchy
               local odae::DAE.DAElist
 
@@ -170,8 +170,8 @@ module InnerOuter
                   local dae1::DAE.DAElist
                   local dae2::DAE.DAElist
                   local dae::DAE.DAElist
-                  local graphNew::ConnectionGraph.ConnectionGraph
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graphNew::ConnectionGraph.ConnectionGraphType
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstHierarchy
                    #=  is an outer, remove equations
                    =#
@@ -249,7 +249,7 @@ module InnerOuter
                   local io2::Absyn.InnerOuter
                   local f1::Connect.Face
                   local f2::Connect.Face
-                  local scope::Prefix.Prefix
+                  local scope::Prefix.PrefixType
                   local source::DAE.ElementSource #= the origin of the element =#
                    #=  the left hand side is an outer!
                    =#
@@ -481,8 +481,8 @@ module InnerOuter
          set, if a corresponding innner component can be found in the environment.
          If not, they are kept in the outerConnects for use higher up in the instance
          hierarchy. =#
-        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph}
-              local outCGraph::ConnectionGraph.ConnectionGraph
+        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraphType}
+              local outCGraph::ConnectionGraph.ConnectionGraphType
               local outInnerOuterConnects::List{Connect.OuterConnect}
               local outSets::Connect.Sets
 
@@ -496,7 +496,7 @@ module InnerOuter
 
          #= @author: adrpo
          This function will strip the given prefix from the component references. =#
-        function removeInnerPrefixFromCref(inPrefix::Prefix.Prefix, inCref::DAE.ComponentRef) ::DAE.ComponentRef
+        function removeInnerPrefixFromCref(inPrefix::Prefix.PrefixType, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -538,8 +538,8 @@ module InnerOuter
         end
 
          #= help function to retrieveOuterConnections =#
-        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inOuterConnects::List{<:Connect.OuterConnect}, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{List{Connect.OuterConnect}, Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraph}
-              local outCGraph::ConnectionGraph.ConnectionGraph
+        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inOuterConnects::List{<:Connect.OuterConnect}, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{List{Connect.OuterConnect}, Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraphType}
+              local outCGraph::ConnectionGraph.ConnectionGraphType
               local outInnerOuterConnects::List{Connect.OuterConnect}
               local outSets::Connect.Sets
               local outOuterConnects::List{Connect.OuterConnect}
@@ -559,11 +559,11 @@ module InnerOuter
                   local outer1::Bool
                   local outer2::Bool
                   local added::Bool
-                  local scope::Prefix.Prefix
+                  local scope::Prefix.PrefixType
                   local source::DAE.ElementSource #= the origin of the element =#
                   local info::SourceInfo
                   local sets::Connect.Sets
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                    #=  handle empty
                    =#
                 @matchcontinue (inCache, inEnv, inIH, inPrefix, inOuterConnects, inSets, inTopCall, inCGraph) begin
@@ -656,8 +656,8 @@ module InnerOuter
          inner component. In that is case the outer
          connection (from inside sub-components) forms
          a connection set of their own. =#
-        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraph) ::Tuple{Connect.Sets, ConnectionGraph.ConnectionGraph}
-              local outCGraph::ConnectionGraph.ConnectionGraph
+        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.PrefixType, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{Connect.Sets, ConnectionGraph.ConnectionGraphType}
+              local outCGraph::ConnectionGraph.ConnectionGraphType
               local outSets::Connect.Sets
 
               (outSets, outCGraph) = begin
@@ -676,7 +676,7 @@ module InnerOuter
                   local env::FCore.Graph
                   local io1::Absyn.InnerOuter
                   local io2::Absyn.InnerOuter
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                    #=  if it was added, return the same
                    =#
                 @match (inCache, inEnv, inIH, pre, inSets, added, cr1, iio1, f1, cr2, iio2, f2, info, inCGraph) begin
@@ -722,7 +722,7 @@ module InnerOuter
          2008-12: This is an extension of addOuterConnectIfEmpty,
                   with the difference that we only need to find
                   one variable in the enviroment. =#
-        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.Prefix, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo) ::Connect.Sets
+        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.PrefixType, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo) ::Connect.Sets
               local outSets::Connect.Sets
 
               outSets = begin
@@ -741,7 +741,7 @@ module InnerOuter
                   local env::FCore.Graph
                   local io1::Absyn.InnerOuter
                   local io2::Absyn.InnerOuter
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  if it was added, return the same
                    =#
                 @matchcontinue (inCache, inEnv, inIH, inPre, inSets, added, cr1, iio1, f1, cr2, iio2, f2, info) begin
@@ -1067,12 +1067,12 @@ module InnerOuter
          #= @author: adrpo
          Given an instance hierarchy and a component name find the
          modification of the inner component with the same name =#
-        function lookupInnerInIH(inTIH::TopInstance, inPrefix::Prefix.Prefix, inComponentIdent::SCode.Ident) ::InstInner
+        function lookupInnerInIH(inTIH::TopInstance, inPrefix::Prefix.PrefixType, inComponentIdent::SCode.Ident) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = begin
                   local name::SCode.Ident
-                  local prefix::Prefix.Prefix
+                  local prefix::Prefix.PrefixType
                   local ht::InstHierarchyHashTable
                   local cref::DAE.ComponentRef
                   local instInner::InstInner
@@ -1174,7 +1174,7 @@ module InnerOuter
          #=
         Author BZ, 2008-11
         According to specification modifiers on outer elements is not allowed. =#
-        function modificationOnOuter(cache::FCore.Cache, env::FCore.Graph, ih::InstHierarchy, prefix::Prefix.Prefix, componentName::String, cr::DAE.ComponentRef, inMod::DAE.Mod, io::Absyn.InnerOuter, impl::Bool, inInfo::SourceInfo) ::Bool
+        function modificationOnOuter(cache::FCore.Cache, env::FCore.Graph, ih::InstHierarchy, prefix::Prefix.PrefixType, componentName::String, cr::DAE.ComponentRef, inMod::DAE.Mod, io::Absyn.InnerOuter, impl::Bool, inInfo::SourceInfo) ::Bool
               local modd::Bool
 
               modd = begin
@@ -1202,7 +1202,7 @@ module InnerOuter
         end
 
          #= switches the inner to outer attributes of a component in the dae. =#
-        function switchInnerToOuterAndPrefix(inDae::List{<:DAE.Element}, io::Absyn.InnerOuter, pre::Prefix.Prefix) ::List{DAE.Element}
+        function switchInnerToOuterAndPrefix(inDae::List{<:DAE.Element}, io::Absyn.InnerOuter, pre::Prefix.PrefixType) ::List{DAE.Element}
               local outDae::List{DAE.Element}
 
               outDae = begin
@@ -1271,7 +1271,7 @@ module InnerOuter
         end
 
          #= prefixes all the outer variables in the DAE with the given prefix. =#
-        function prefixOuterDaeVars(inDae::List{<:DAE.Element}, crefPrefix::Prefix.Prefix) ::List{DAE.Element}
+        function prefixOuterDaeVars(inDae::List{<:DAE.Element}, crefPrefix::Prefix.PrefixType) ::List{DAE.Element}
               local outDae::List{DAE.Element}
 
               outDae = begin
@@ -1470,7 +1470,7 @@ module InnerOuter
          #= /
          =#
 
-        function emptyInstInner(innerPrefix::Prefix.Prefix, name::String) ::InstInner
+        function emptyInstInner(innerPrefix::Prefix.PrefixType, name::String) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = INST_INNER(innerPrefix, name, Absyn.NOT_INNER_OUTER(), "", Absyn.IDENT(""), "", NONE(), nil, NONE())
@@ -1480,14 +1480,14 @@ module InnerOuter
          #= @author: adrpo
          This function lookups the result of instatiation of the inner
          component given an instance hierarchy a prefix and a component name. =#
-        function lookupInnerVar(inCache::Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.Prefix, inIdent::SCode.Ident, io::Absyn.InnerOuter) ::InstInner
+        function lookupInnerVar(inCache::Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inIdent::SCode.Ident, io::Absyn.InnerOuter) ::InstInner
               local outInstInner::InstInner
 
               outInstInner = begin
                   local cache::Cache
                   local n::String
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local tih::TopInstance
                   local instInner::InstInner
                    #=  adrpo: if component is an outer or an inner/outer we need to
@@ -1525,7 +1525,7 @@ module InnerOuter
          #= @author: adrpo
          This function updates the instance hierarchy by adding
          the INNER components to it with the given prefix =#
-        function updateInstHierarchy(inIH::InstHierarchy, inPrefix::Prefix.Prefix, inInnerOuter::Absyn.InnerOuter, inInstInner::InstInner) ::InstHierarchy
+        function updateInstHierarchy(inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inInnerOuter::Absyn.InnerOuter, inInstInner::InstInner) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1539,7 +1539,7 @@ module InnerOuter
                   local pathOpt::Option{Absyn.Path}
                   local outerPrefixes::OuterPrefixes
                   local cref_::DAE.ComponentRef
-                  local sm::HashSet.HashSet
+                  local sm::HashSet.HashSetType
                    #= /* only add inner elements
                       case(ih,inPrefix,inInnerOuter,inInstInner as INST_INNER(name=name))
                         equation
@@ -1596,7 +1596,7 @@ module InnerOuter
         end
 
          #= @author: BTH
-        Add State Machine state to collection of State Machine states in instance hierarchy. =#
+        Add SMNode Machine state to collection of SMNode Machine states in instance hierarchy. =#
         function updateSMHierarchy(smState::DAE.ComponentRef, inIH::InstHierarchy) ::InstHierarchy
               local outIH::InstHierarchy
 
@@ -1609,8 +1609,8 @@ module InnerOuter
                   local ht::InstHierarchyHashTable
                   local pathOpt::Option{Absyn.Path}
                   local outerPrefixes::OuterPrefixes
-                  local sm::HashSet.HashSet
-                  local sm2::HashSet.HashSet
+                  local sm::HashSet.HashSetType
+                  local sm2::HashSet.HashSetType
                    #=  no hashtable, create one!
                    =#
                 @match (smState, inIH) begin
@@ -1650,7 +1650,7 @@ module InnerOuter
           outIH
         end
 
-        function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.Prefix, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
+        function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
               local outIH::InstHierarchy
 
               outIH = begin
@@ -1695,7 +1695,7 @@ module InnerOuter
                   local ht::InstHierarchyHashTable
                   local pathOpt::Option{Absyn.Path}
                   local outerPrefixes::OuterPrefixes
-                  local sm::HashSet.HashSet
+                  local sm::HashSet.HashSetType
                    #=  no hashtable, create one!
                    =#
                 @matchcontinue (inIH, inOuterComponentRef, inInnerComponentRef) begin
@@ -1736,7 +1736,7 @@ module InnerOuter
 
          #= @author: adrpo
           This function searches for outer crefs and prefixes them with the inner prefix =#
-        function prefixOuterCrefWithTheInnerPrefix(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inPrefix::Prefix.Prefix) ::DAE.ComponentRef
+        function prefixOuterCrefWithTheInnerPrefix(inIH::InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inPrefix::Prefix.PrefixType) ::DAE.ComponentRef
               local outInnerComponentRef::DAE.ComponentRef
 
               outInnerComponentRef = begin
@@ -1874,7 +1874,7 @@ module InnerOuter
               local outStr::String
 
               outStr = begin
-                  local innerPrefix::Prefix.Prefix
+                  local innerPrefix::Prefix.PrefixType
                   local name::SCode.Ident
                   local io::Absyn.InnerOuter
                   local instResult::Option{InstResult}

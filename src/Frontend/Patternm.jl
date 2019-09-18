@@ -2774,7 +2774,7 @@
                   local ld_mod::List{Tuple{SCode.Element, DAE.Mod}}
                   local dae1::DAE.DAElist
                   local env2::FCore.Graph
-                  local dummyFunc::ClassInf.State
+                  local dummyFunc::ClassInf.SMNode
                   local str::String
                   local cache::FCore.Cache
                   local env::FCore.Graph

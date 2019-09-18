@@ -70,7 +70,7 @@ NOTE: Component prefixes are stored in inverse order c.b[2].a! =#
     dimensions #= dimensions =#::List{Dimension}
     subscripts #= subscripts =#::List{Subscript}
     next #= next prefix =#::ComponentPrefix
-    ci_state #= to be able to at least partially fill in type information properly for DAE.VAR =#::ClassInf.State
+    ci_state #= to be able to at least partially fill in type information properly for DAE.VAR =#::ClassInf.SMNode
     info::SourceInfo
   end
 

@@ -48,7 +48,7 @@ using ExportAll
 
 import Absyn
 import AbsynUtil
-import MutableType
+import Mutable
 import SCode
 import Util
 
@@ -63,6 +63,8 @@ import NFSCodeCheck
 import AbsynToSCode
 import SCodeUtil
 import System
+
+MutableType = Mutable.MutableType
 
 Import = Absyn.Import
   const tmpTickIndex = 2::ModelicaInteger

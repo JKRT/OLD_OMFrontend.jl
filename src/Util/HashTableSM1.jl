@@ -97,7 +97,7 @@
 
               local componentRef::DAE.ComponentRef
               local isInitial::Bool
-              local edges::HashSet.HashSet
+              local edges::HashSet.HashSetType
               local crefs::List{DAE.ComponentRef}
               local paths::List{String}
 

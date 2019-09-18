@@ -1101,14 +1101,14 @@ the dimension of the output and the inline type of the function =#
 
   @Record T_COMPLEX begin
 
-    complexClassType #= The type of a class =#::ClassInf.State
+    complexClassType #= The type of a class =#::ClassInf.SMNode
     varLst #= The variables of a complex type =#::List{Var}
     equalityConstraint::EqualityConstraint
   end
 
   @Record T_SUBTYPE_BASIC begin
 
-    complexClassType #= The type of a class =#::ClassInf.State
+    complexClassType #= The type of a class =#::ClassInf.SMNode
     varLst #= complexVarLst; The variables of a complex type! Should be empty, kept here to verify! =#::List{Var}
     complexType #= complexType; A complex type can be a subtype of another (primitive) type (through extends) =#::Type
     equalityConstraint::EqualityConstraint
@@ -1146,7 +1146,7 @@ the dimension of the output and the inline type of the function =#
 
   @Record T_ANYTYPE begin
 
-    anyClassType #= anyClassType - used for generic types. When class state present the type is assumed to be a complex type which has that restriction. =#::Option{ClassInf.State}
+    anyClassType #= anyClassType - used for generic types. When class state present the type is assumed to be a complex type which has that restriction. =#::Option{ClassInf.SMNode}
   end
 
   #=  MetaModelica extensions

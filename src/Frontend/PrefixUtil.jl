@@ -243,7 +243,7 @@
           list, the resulting prefix is `a.b{10}.c.d\\'.  Remember that
           prefixes components are stored in the opposite order from the
           normal order used when displaying them. =#
-        function prefixAdd(inIdent::String, inType::List{<:DAE.Dimension}, inIntegerLst::List{<:DAE.Subscript}, inPrefix::Prefix.PrefixType, vt::SCode.Variability, ci_state::ClassInf.State, inInfo::SourceInfo) ::Prefix.PrefixType
+        function prefixAdd(inIdent::String, inType::List{<:DAE.Dimension}, inIntegerLst::List{<:DAE.Subscript}, inPrefix::Prefix.PrefixType, vt::SCode.Variability, ci_state::ClassInf.SMNode, inInfo::SourceInfo) ::Prefix.PrefixType
               local outPrefix::Prefix.PrefixType
 
               outPrefix = begin
@@ -271,7 +271,7 @@
                   local b::List{DAE.Subscript}
                   local cp::Prefix.ClassPrefix
                   local c::Prefix.ComponentPrefix
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local pdims::List{DAE.Dimension}
                   local info::SourceInfo
                 @match inPrefix begin
@@ -487,7 +487,7 @@
                   local ident_ty::DAE.Type
                   local xs::Prefix.ComponentPrefix
                   local cp::Prefix.ClassPrefix
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local cache::FCore.Cache
                   local env::FCore.Graph
                 @match (inCache, inEnv, inIH, inPrefix, inExpComponentRefOption) begin

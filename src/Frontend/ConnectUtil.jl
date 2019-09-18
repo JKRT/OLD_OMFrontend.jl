@@ -109,7 +109,7 @@
           connections down in the instance hierarchy, but the list of connection crefs
           needs to be propagated to be able to evaluate the cardinality operator. See
           comments in addSet below for how the sets are merged later. =#
-        function newSet(prefix::Prefix.Prefix, sets::Sets) ::Sets
+        function newSet(prefix::Prefix.PrefixType, sets::Sets) ::Sets
 
 
               local pstr::String
@@ -290,7 +290,7 @@
 
          #= If the class state indicates a connector, this function adds all flow
           variables in the dae as inside connectors to the connection sets. =#
-        function addConnectorVariablesFromDAE(ignore::Bool, classState::ClassInf.State, prefix::Prefix.Prefix, vars::List{<:DAE.Var}, info::SourceInfo, elementSource::DAE.ElementSource, sets::Sets) ::Sets
+        function addConnectorVariablesFromDAE(ignore::Bool, classState::ClassInf.SMNode, prefix::Prefix.PrefixType, vars::List{<:DAE.Var}, info::SourceInfo, elementSource::DAE.ElementSource, sets::Sets) ::Sets
 
 
               sets = begin
@@ -321,7 +321,7 @@
         end
 
          #= Adds a flow variable from the DAE to the sets as an inside flow variable. =#
-        function addFlowVariableFromDAE(variable::DAE.Var, elementSource::DAE.ElementSource, prefix::Prefix.Prefix, sets::Sets) ::Sets
+        function addFlowVariableFromDAE(variable::DAE.Var, elementSource::DAE.ElementSource, prefix::Prefix.PrefixType, sets::Sets) ::Sets
 
 
               local crefs::List{DAE.ComponentRef}
@@ -447,7 +447,7 @@
 
          #= Adds information to the connection sets about which flow variables each
           stream variable is associated to. =#
-        function addStreamFlowAssociations(sets::Sets, prefix::Prefix.Prefix, streamVars::List{<:DAE.Var}, flowVars::List{<:DAE.Var}) ::Sets
+        function addStreamFlowAssociations(sets::Sets, prefix::Prefix.PrefixType, streamVars::List{<:DAE.Var}, flowVars::List{<:DAE.Var}) ::Sets
 
 
               local flow_var::DAE.Var
@@ -612,7 +612,7 @@
         end
 
          #= Adds a single inside flow variable to the connection sets. =#
-        function addInsideFlowVariable(sets::Sets, cref::DAE.ComponentRef, source::DAE.ElementSource, prefix::Prefix.Prefix) ::Sets
+        function addInsideFlowVariable(sets::Sets, cref::DAE.ComponentRef, source::DAE.ElementSource, prefix::Prefix.PrefixType) ::Sets
 
 
               local e::ConnectorElement
@@ -666,7 +666,7 @@
          #= Adds a connection with a reference to an outer connector These are added to a
            special list, such that they can be moved up in the instance hierarchy to a
            place where both instances are defined. =#
-        function addOuterConnection(scope::Prefix.Prefix, sets::Sets, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, f1::Face, f2::Face, source::DAE.ElementSource) ::Sets
+        function addOuterConnection(scope::Prefix.PrefixType, sets::Sets, cr1::DAE.ComponentRef, cr2::DAE.ComponentRef, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, f1::Face, f2::Face, source::DAE.ElementSource) ::Sets
 
 
               local new_oc::OuterConnect
@@ -1429,7 +1429,7 @@
 
          #= Generates equations from a connection set and evaluates stream operators if
           called from the top scope, otherwise does nothing. =#
-        function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraph, modelNameQualified::String) ::DAE.DAElist
+        function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraphType, modelNameQualified::String) ::DAE.DAElist
 
 
               local set_list::List{Set}
@@ -3099,7 +3099,7 @@
 
          #= Checks a short connector definition that has extended a basic type, i.e.
            connector C = Real;. =#
-        function checkShortConnectorDef(state::ClassInf.State, attributes::SCode.Attributes, info::SourceInfo) ::Bool
+        function checkShortConnectorDef(state::ClassInf.SMNode, attributes::SCode.Attributes, info::SourceInfo) ::Bool
               local isValid::Bool
 
               isValid = begin

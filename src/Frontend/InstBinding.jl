@@ -591,7 +591,7 @@
 
          #= This function looks at the equation part of a modification, and
           if there is a declaration equation builds a DAE.Binding for it. =#
-        function makeBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inAttributes::SCode.Attributes, inMod::DAE.Mod, inType::DAE.Type, inPrefix::Prefix.Prefix, componentName::String, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Binding} 
+        function makeBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inAttributes::SCode.Attributes, inMod::DAE.Mod, inType::DAE.Type, inPrefix::Prefix.PrefixType, componentName::String, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Binding} 
               local outBinding::DAE.Binding
               local outCache::FCore.Cache
 
@@ -890,7 +890,7 @@
         end
 
          #= Returns a variable's bound expression. =#
-        function makeVariableBinding(inType::DAE.Type, inMod::DAE.Mod, inConst::DAE.Const, inPrefix::Prefix.Prefix, inName::String) ::Option{DAE.Exp} 
+        function makeVariableBinding(inType::DAE.Type, inMod::DAE.Mod, inConst::DAE.Const, inPrefix::Prefix.PrefixType, inName::String) ::Option{DAE.Exp} 
               local outBinding::Option{DAE.Exp}
 
               local oeq_mod::Option{DAE.EqMod} = Mod.modEquation(inMod)
