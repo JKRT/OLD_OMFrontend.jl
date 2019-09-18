@@ -48,6 +48,8 @@
          */ =#
          #=  public imports
          =#
+         
+        Type_a = Any
 
         import Absyn
 
@@ -219,8 +221,8 @@
           (outExp, hasChanged)
         end
 
-        function simplifyTraverseHelper(inExp::DAE.Exp, inA::A) ::Tuple{DAE.Exp, A}
-              local a::A
+        function simplifyTraverseHelper(inExp::DAE.Exp, inA::Type_a) ::Tuple{DAE.Exp, Type_a}
+              local a::Type_a
               local exp::DAE.Exp
 
               a = inA
@@ -228,8 +230,8 @@
           (exp, a)
         end
 
-        function simplify1TraverseHelper(inExp::DAE.Exp, inA::A) ::Tuple{DAE.Exp, A}
-              local a::A
+        function simplify1TraverseHelper(inExp::DAE.Exp, inA::Type_a) ::Tuple{DAE.Exp, Type_a}
+              local a::Type_a
               local outExp::DAE.Exp
 
               a = inA
@@ -1659,7 +1661,7 @@
                     e1
                   end
 
-                  DAE.CALL(path = Absyn.IDENT("$_DF$DER"), expLst = e1 <|  nil()) where (Expression.isConst(e1))  => begin
+                  DAE.CALL(path = Absyn.IDENT("\$_DF\$DER"), expLst = e1 <|  nil()) where (Expression.isConst(e1))  => begin
                     Expression.makeConstZeroE(e1)
                   end
 

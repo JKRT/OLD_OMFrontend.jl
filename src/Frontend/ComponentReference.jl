@@ -633,7 +633,7 @@ println("ComponentReference.jl 5")
               outString = begin
                   local cr::DAE.ComponentRef
                 @match inComponentRef begin
-                  DAE.CREF_QUAL(ident = "$DER", subscriptLst =  nil(), componentRef = cr)  => begin
+                  DAE.CREF_QUAL(ident = "\$DER", subscriptLst =  nil(), componentRef = cr)  => begin
                     "der(" + printComponentRefStr(cr) + ")"
                   end
 
@@ -799,16 +799,26 @@ println("ComponentReference.jl 5")
           outEqual
         end
 
-
+      module CompareWithSubsType 
+        using ExportAll
+        
+        const WithoutSubscripts = 1
+        const WithGenericSubscript = 2
+        const WithGenericSubscriptNotAlphabetic = 3
+        const WithIntSubscrip = 4
+        
+        @exportAll()
+      end
 
         module CompareWithGenericSubscript
-
 
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-               const compareSubscript = CompareWithSubsType.WithGenericSubscript::CompareWithSubsType
+              import CompareWithSubsType
+              
+              compareSubscript = CompareWithSubsType.WithGenericSubscript::Int64
 
               function compare(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
                     local res::ModelicaInteger
@@ -922,7 +932,9 @@ println("ComponentReference.jl 5")
           using ExportAll
 
 
-          @ExtendedFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithGenericSubscriptNotAlphabetic)
+          using CompareWithGenericSubscript
+          
+          compareSubscript = CompareWithSubsType.WithGenericSubscriptNotAlphabetic
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
@@ -935,7 +947,9 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-          @ExtendeFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithoutSubscripts)
+          using CompareWithGenericSubscript
+
+          compareSubscript = CompareWithSubsType.WithoutSubscripts
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
@@ -948,7 +962,9 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-          @ExtendedFunction CompareWithGenericSubscript(compareSubscript = CompareWithSubsType.WithIntSubscript)
+          using CompareWithGenericSubscript
+          
+          compareSubscript = CompareWithSubsType.WithIntSubscript
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
@@ -1597,7 +1613,7 @@ println("ComponentReference.jl 5")
               outCR = begin
                   local cr::DAE.ComponentRef
                 @match inCR begin
-                  DAE.CREF_QUAL(ident = "$PRE", componentRef = cr)  => begin
+                  DAE.CREF_QUAL(ident = "\$PRE", componentRef = cr)  => begin
                     cr
                   end
 
@@ -4280,7 +4296,7 @@ println("ComponentReference.jl 5")
                       fail()
                     end
 
-                    DAE.CREF_QUAL(ident = "$DER")  => begin
+                    DAE.CREF_QUAL(ident = "\$DER")  => begin
                         File.write(file, "der(")
                         writeCref(file, c.componentRef, escape)
                         File.write(file, ")")
@@ -4288,7 +4304,7 @@ println("ComponentReference.jl 5")
                       fail()
                     end
 
-                    DAE.CREF_QUAL(ident = "$CLKPRE")  => begin
+                    DAE.CREF_QUAL(ident = "\$CLKPRE")  => begin
                         File.write(file, "previous(")
                         writeCref(file, c.componentRef, escape)
                         File.write(file, ")")

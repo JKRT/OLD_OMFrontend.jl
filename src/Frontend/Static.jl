@@ -1301,7 +1301,7 @@
                 c = Types.constAnd(exp_const, iter_const)
                 fn = begin
                   @match inReductionFn begin
-                    Absyn.CREF_IDENT("$array",  nil())  => begin
+                    Absyn.CREF_IDENT("\$array",  nil())  => begin
                       Absyn.IDENT("array")
                     end
 
@@ -1693,7 +1693,7 @@
                   local cr2::Absyn.ComponentRef
                   local env::FCore.Graph
                 @match AbsynUtil.makeNotFullyQualified(path) begin
-                  Absyn.IDENT("$array")  => begin
+                  Absyn.IDENT("\$array")  => begin
                     (inEnv, NONE())
                   end
 
@@ -1774,7 +1774,7 @@
                     (inExp, ty, ty, SOME(Values.ARRAY(nil, list(0))), fn)
                   end
 
-                  (Absyn.IDENT(name = "$array"), _)  => begin
+                  (Absyn.IDENT(name = "\$array"), _)  => begin
                       ty = ListUtil.foldr(dims, Types.liftArray, inType)
                     (inExp, ty, ty, SOME(Values.ARRAY(nil, list(0))), fn)
                   end

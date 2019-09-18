@@ -101,6 +101,8 @@
          #=  Set graph represented as an adjacency list.
          =#
 
+        DaeEdges = List # ConnectionGraph.DaeEdges # this doesn't seem to work, it says DaeEdges is undefined!
+
         SetGraph = Array
 
          #= This function creates a 'new' set for the given prefix. This means that it
@@ -1439,8 +1441,8 @@
               local has_stream::Bool
               local has_expandable::Bool
               local has_cardinality::Bool
-              local broken::ConnectionGraph.DaeEdges
-              local connected::ConnectionGraph.DaeEdges
+              local broken::DaeEdges
+              local connected::DaeEdges
 
               setGlobalRoot(Global.isInStream, NONE())
               if ! topScope
@@ -1893,7 +1895,7 @@
 
          #= Dispatches to the correct equation generating function based on the type of
           the given set. =#
-        function equationsDispatch(sets::List{<:Set}, connected::ConnectionGraph.DaeEdges, broken::ConnectionGraph.DaeEdges) ::DAE.DAElist
+        function equationsDispatch(sets::List{<:Set}, connected::DaeEdges, broken::DaeEdges) ::DAE.DAElist
               local DAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{ConnectorElement}

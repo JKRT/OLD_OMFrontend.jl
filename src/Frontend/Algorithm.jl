@@ -486,7 +486,7 @@
                   local tpl::List{DAE.Type}
                   local clist::List{DAE.TupleConst}
                   local ty::DAE.Type
-                  local const::DAE.Const
+                  local constVar::DAE.Const
                 @matchcontinue (inExpExpLst, inTypesPropertiesLst, inExp, inProperties, initial_, source) begin
                   (lhs, lprop, rhs, _, _, _)  => begin
                       bvals = ListUtil.map(lprop, Types.propAnyConst)

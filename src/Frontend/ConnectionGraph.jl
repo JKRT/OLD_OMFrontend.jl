@@ -59,9 +59,11 @@
 
         DaeEdge = Tuple  #= a tuple with two crefs and dae elements for equatityConstraint function call =#
 
-        DaeEdges = List  #= A list of edges, each edge associated with two lists of DAE elements
+        DaeEdges = List{DaeEdge}  #= A list of edges, each edge associated with two lists of DAE elements
          (these elements represent equations to be added if the edge
          is broken) =#
+         
+        export DaeEdge, DaeEdges
 
         DefiniteRoot = DAE.ComponentRef  #= root defined with Connection.root =#
 

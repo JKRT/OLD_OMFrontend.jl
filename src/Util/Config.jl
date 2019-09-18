@@ -46,7 +46,13 @@ module Config
 
   #TODO. Fill me in
   struct LanguageStandard
-
+    S1_x::Int64
+    S2_x::Int64
+    S3_0::Int64
+    S3_1::Int64
+    S3_2::Int64
+    S3_3::Int64
+    Slatest::Int64
   end
 
 

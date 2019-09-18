@@ -88,7 +88,7 @@
           (nextIndex, number)
         end
 
-        function Strings_advanced_skipWhiteSpace(string::String, startIndex::ModelicaInteger(min = 1) = 1) ::ModelicaInteger 
+        function Strings_advanced_skipWhiteSpace(string::String, startIndex::ModelicaInteger = 1) ::ModelicaInteger 
               local nextIndex::ModelicaInteger
 
             #= TODO: Defined in the runtime =#
