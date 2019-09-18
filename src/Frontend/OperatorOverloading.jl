@@ -922,7 +922,7 @@
                      const addRealArrays = list((DAE.ADD_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
                      const addStringArrays = list((DAE.ADD_ARR(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN()))), list(at, at), at) for at in stringarrtypes)::List
                      const addScalars = list((DAE.ADD(int_scalar), list(int_scalar, int_scalar), int_scalar), (DAE.ADD(real_scalar), list(real_scalar, real_scalar), real_scalar), (DAE.ADD(DAE.T_STRING_DEFAULT), list(DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT), DAE.T_STRING_DEFAULT))::List
-                     const addTypes = listAppend(addScalars, listAppend(addIntArrays, listAppend(addRealArrays, addStringArrays)))::List
+                     const addTypes = nil::List # listAppend(addScalars, listAppend(addIntArrays, listAppend(addRealArrays, addStringArrays)))::List
                      const addIntArrayScalars = list(@do_threaded_for (DAE.ADD_ARRAY_SCALAR(int_vector), list(at, rhs), at) (at, rhs) (intarrtypes, inttypes))::List
                      const addRealArrayScalars = list(@do_threaded_for (DAE.ADD_ARRAY_SCALAR(real_vector), list(at, rhs), at) (at, rhs) (realarrtypes, realtypes))::List
                      const addStringArrayScalars = nil::List
@@ -930,26 +930,26 @@
                      const subIntArrays = list((DAE.SUB_ARR(int_vector), list(at, at), at) for at in intarrtypes)::List
                      const subRealArrays = list((DAE.SUB_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
                      const subScalars = list((DAE.SUB(int_scalar), list(int_scalar, int_scalar), int_scalar), (DAE.SUB(real_scalar), list(real_scalar, real_scalar), real_scalar))::List
-                     const subTypes = listAppend(subScalars, listAppend(subIntArrays, subRealArrays))::List
+                     const subTypes = nil::List # listAppend(subScalars, listAppend(subIntArrays, subRealArrays))::List
                      const subIntArrayScalars = list(@do_threaded_for (DAE.SUB_SCALAR_ARRAY(int_vector), list(lhs, at), at) (at, lhs) (intarrtypes, inttypes))::List
                      const subRealArrayScalars = list(@do_threaded_for (DAE.SUB_SCALAR_ARRAY(real_vector), list(lhs, at), at) (at, lhs) (realarrtypes, realtypes))::List
-                     const subEwTypes = listAppend(subScalars, listAppend(subIntArrayScalars, listAppend(subRealArrayScalars, listAppend(subIntArrays, subRealArrays))))::List
+                     const subEwTypes = nil::List # listAppend(subScalars, listAppend(subIntArrayScalars, listAppend(subRealArrayScalars, listAppend(subIntArrays, subRealArrays))))::List
                      const mulScalars = list((int_mul, list(int_scalar, int_scalar), int_scalar), (real_mul, list(real_scalar, real_scalar), real_scalar))::List
                      const mulScalarProduct = list((int_mul_sp, list(int_vector, int_vector), int_scalar), (real_mul_sp, list(real_vector, real_vector), real_scalar))::List
                      const mulMatrixProduct = list((int_mul_mp, list(int_vector, int_matrix), int_vector), (int_mul_mp, list(int_matrix, int_vector), int_vector), (int_mul_mp, list(int_matrix, int_matrix), int_matrix), (real_mul_mp, list(real_vector, real_matrix), real_vector), (real_mul_mp, list(real_matrix, real_vector), real_vector), (real_mul_mp, list(real_matrix, real_matrix), real_matrix))::List
                      const mulIntArrayScalars = list(@do_threaded_for (DAE.MUL_ARRAY_SCALAR(int_vector), list(at, rhs), at) (at, rhs) (intarrtypes, inttypes))::List
                      const mulRealArrayScalars = list(@do_threaded_for (DAE.MUL_ARRAY_SCALAR(real_vector), list(at, rhs), at) (at, rhs) (realarrtypes, realtypes))::List
-                     const mulTypes = listAppend(mulScalars, listAppend(mulIntArrayScalars, listAppend(mulRealArrayScalars, listAppend(mulScalarProduct, mulMatrixProduct))))::List
+                     const mulTypes = nil::List # listAppend(mulScalars, listAppend(mulIntArrayScalars, listAppend(mulRealArrayScalars, listAppend(mulScalarProduct, mulMatrixProduct))))::List
                      const mulIntArray = list((DAE.MUL_ARR(int_vector), list(at, at), at) for at in intarrtypes)::List
                      const mulRealArray = list((DAE.MUL_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
-                     const mulEwTypes = listAppend(mulScalars, listAppend(mulIntArrayScalars, listAppend(mulRealArrayScalars, listAppend(mulIntArray, mulRealArray))))::List
+                     const mulEwTypes = nil::List # listAppend(mulScalars, listAppend(mulIntArrayScalars, listAppend(mulRealArrayScalars, listAppend(mulIntArray, mulRealArray))))::List
                      const divTypes = _cons((real_div, list(real_scalar, real_scalar), real_scalar), list(@do_threaded_for (DAE.DIV_ARRAY_SCALAR(real_vector), list(at, rhs), at) (at, rhs) (realarrtypes, realtypes)))::List
                      const divRealScalarArray = list(@do_threaded_for (DAE.DIV_SCALAR_ARRAY(real_vector), list(lhs, at), at) (at, lhs) (realarrtypes, realtypes))::List
                      const divArrs = list((DAE.DIV_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
-                     const divEwTypes = listAppend(divTypes, listAppend(divRealScalarArray, divArrs))::List
+                     const divEwTypes = nil::List # listAppend(divTypes, listAppend(divRealScalarArray, divArrs))::List
                      const powTypes = list((real_pow, list(real_scalar, real_scalar), real_scalar), (DAE.POW_ARR(real_scalar), list(real_matrix, int_scalar), real_matrix))::List
-                     const andTypes = _cons((DAE.AND(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for (DAE.AND(bool_scalar), list(at, at), at) (at) (boolarrtypes)))::List
-                     const orTypes = _cons((DAE.OR(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for (DAE.OR(bool_scalar), list(at, at), at) (at) (boolarrtypes)))::List
+                     const andTypes = nil::List # _cons((DAE.AND(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for (DAE.AND(bool_scalar), list(at, at), at) (at) (boolarrtypes)))::List
+                     const orTypes = nil::List # _cons((DAE.OR(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for (DAE.OR(bool_scalar), list(at, at), at) (at) (boolarrtypes)))::List
                      #=  ADD
                      =#
                      #=  ADD_EW
@@ -1369,18 +1369,30 @@
           using MetaModelica
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
+                
+              import Absyn
 
               using BaseAvlTree
               Key = Absyn.Path 
               Value = Absyn.Path 
 
+#= TODO! FIXME! handle redeclare ... extends stuff
+  redeclare function extends keyStr
+  algorithm
+    outString := AbsynUtil.pathString(inKey);
+  end keyStr;
+  redeclare function extends valueStr
+  algorithm
+    outString := AbsynUtil.pathString(inValue);
+  end valueStr;
+  redeclare function extends keyCompare
+  algorithm
+    outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
+  end keyCompare;
+  redeclare function addConflictDefault = addConflictKeep;
+=#
 
-
-
-
-
-
-                @ExtendedFunction addConflictDefault addConflictKeep()
+              addConflictDefault = addConflictKeep
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
@@ -1393,17 +1405,29 @@
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
+              import Absyn
+
               using BaseAvlTree
               Key = Absyn.Path 
               Value = List 
 
+#= TODO! FIXME! handle redeclare ... extends stuff
+  redeclare function extends keyStr
+  algorithm
+    outString := AbsynUtil.pathString(inKey);
+  end keyStr;
+  redeclare function extends valueStr
+  algorithm
+    outString := Types.unparseType(DAE.T_METATUPLE(inValue));
+  end valueStr;
+  redeclare function extends keyCompare
+  algorithm
+    outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
+  end keyCompare;
+  redeclare function addConflictDefault = addConflictKeep;
+=#
 
-
-
-
-
-
-                @ExtendedFunction addConflictDefault addConflictKeep()
+              addConflictDefault = addConflictKeep
 
           #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
           @exportAll()
