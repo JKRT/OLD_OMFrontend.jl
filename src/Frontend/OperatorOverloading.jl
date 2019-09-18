@@ -922,6 +922,9 @@
                      const addRealArrays = list((DAE.ADD_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
                      const addStringArrays = list((DAE.ADD_ARR(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN()))), list(at, at), at) for at in stringarrtypes)::List
                      const addScalars = list((DAE.ADD(int_scalar), list(int_scalar, int_scalar), int_scalar), (DAE.ADD(real_scalar), list(real_scalar, real_scalar), real_scalar), (DAE.ADD(DAE.T_STRING_DEFAULT), list(DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT), DAE.T_STRING_DEFAULT))::List
+                     
+                     # TODO! FIXME! uncomment these below and fix the conversion!
+                     
                      const addTypes = nil::List # listAppend(addScalars, listAppend(addIntArrays, listAppend(addRealArrays, addStringArrays)))::List
                      const addIntArrayScalars = list(@do_threaded_for (DAE.ADD_ARRAY_SCALAR(int_vector), list(at, rhs), at) (at, rhs) (intarrtypes, inttypes))::List
                      const addRealArrayScalars = list(@do_threaded_for (DAE.ADD_ARRAY_SCALAR(real_vector), list(at, rhs), at) (at, rhs) (realarrtypes, realtypes))::List

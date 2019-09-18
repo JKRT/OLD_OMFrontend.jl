@@ -607,8 +607,6 @@
           source
         end
 
-          @ExtendedFunction getInfo getElementSourceFileInfo()
-
          #= Gets the file information associated with an element.
         If there are several candidates, select the first one. =#
         function getElementSourceFileInfo(source::DAE.ElementSource) ::SourceInfo 
@@ -617,6 +615,8 @@
               info = source.info
           info
         end
+        
+        getInfo = getElementSourceFileInfo
 
          #= @author: adrpo
          retrieves the paths from the DAE.ElementSource.SOURCE.typeLst =#

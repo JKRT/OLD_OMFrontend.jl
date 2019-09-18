@@ -6,15 +6,10 @@
     using ExportAll
 
         import BaseAvlTree
-        extends BaseAvlTree
+        using  BaseAvlTree
+        
         Key = String 
         Value = String 
-
-
-
-
-
-
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

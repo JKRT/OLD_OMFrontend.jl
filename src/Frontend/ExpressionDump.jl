@@ -13,6 +13,8 @@
 
     printComponentRefStrFunc = Function
     printCallFunc = Function
+    
+    Type_a = Any
 
          #= /*
          * This file is part of OpenModelica.

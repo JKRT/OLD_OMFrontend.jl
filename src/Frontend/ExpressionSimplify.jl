@@ -1661,7 +1661,7 @@
                     e1
                   end
 
-                  DAE.CALL(path = Absyn.IDENT("$_DF$DER"), expLst = e1 <|  nil()) where (Expression.isConst(e1))  => begin
+                  DAE.CALL(path = Absyn.IDENT("\$_DF\$DER"), expLst = e1 <|  nil()) where (Expression.isConst(e1))  => begin
                     Expression.makeConstZeroE(e1)
                   end
 

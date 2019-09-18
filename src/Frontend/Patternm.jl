@@ -18,6 +18,8 @@
     FuncExpType = Function
 
     FuncExpType = Function
+    
+    Type_a = Any
 
          #= /*
          * This file is part of OpenModelica.
@@ -263,7 +265,7 @@
                   local attr::DAE.Attributes
                   local elabExp::DAE.Exp
                   local prop::DAE.Properties
-                  local const::DAE.Const
+                  local constVar::DAE.Const
                   local val::Values.Value
                   local variability::SCode.Variability
                 @matchcontinue (inCache, env, inLhs, ty, info, numError) begin
@@ -802,7 +804,7 @@
           str
         end
 
-        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function elabMatchExpression(inCache::FCore.Cache, inEnv::FCore.Graph, matchExp::Absyn.Exp, impl::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -816,7 +818,7 @@
                   local decls::List{Absyn.ElementItem}
                   local cases::List{Absyn.Case}
                   local matchDecls::List{DAE.Element}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local elabExps::List{DAE.Exp}
                   local elabCases::List{DAE.MatchCase}
                   local tys::List{DAE.Type}
@@ -1641,8 +1643,8 @@
         end
 
          #= Simplifies a pattern, for example (_,_,_)=>_. For use with traversePattern =#
-        function simplifyPattern(inPat::DAE.Pattern, extra::A) ::Tuple{DAE.Pattern, A}
-              local outExtra::A = extra
+        function simplifyPattern(inPat::DAE.Pattern, extra::Type_a) ::Tuple{DAE.Pattern, Type_a}
+              local outExtra::Type_a = extra
               local outPat::DAE.Pattern
 
               outPat = begin
@@ -2258,7 +2260,7 @@
           b
         end
 
-        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type}
+        function elabMatchCases(cache::FCore.Cache, env::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.MatchCase}, DAE.Type}
               local resType::DAE.Type
               local elabCases::List{DAE.MatchCase}
               local outCache::FCore.Cache
@@ -2273,7 +2275,7 @@
           (outCache, elabCases, resType)
         end
 
-        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}}
+        function elabMatchCases2(inCache::FCore.Cache, inEnv::FCore.Graph, cases::List{<:Absyn.Case}, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inAccCases::List{<:DAE.MatchCase} #= Order does matter =#, inAccExps::List{<:DAE.Exp} #= Order does matter =#, inAccTypes::List{<:DAE.Type} #= Order does not matter =#) ::Tuple{FCore.Cache, List{DAE.MatchCase}, List{DAE.Exp}, List{DAE.Type}}
               local resTypes::List{DAE.Type}
               local resExps::List{DAE.Exp}
               local elabCases::List{DAE.MatchCase}
@@ -2304,7 +2306,7 @@
           (outCache, elabCases, resExps, resTypes)
         end
 
-        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}}
+        function elabMatchCase(inCache::FCore.Cache, inEnv::FCore.Graph, acase::Absyn.Case, tys::List{<:DAE.Type}, inputAliases::List{<:List{<:String}}, matchExpLocalTree::AvlSetString.Tree, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.MatchCase, Option{DAE.Exp}, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resExp::Option{DAE.Exp}
               local elabCase::DAE.MatchCase
@@ -2396,7 +2398,7 @@
           (outCache, elabCase, resExp, resType)
         end
 
-        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}}
+        function elabResultExp(inCache::FCore.Cache, inEnv::FCore.Graph, inBody::List{<:DAE.Statement} #= Is input in case we want to optimize for tail-recursion =#, exp::Absyn.Exp, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Statement}, Option{DAE.Exp}, SourceInfo, Option{DAE.Type}}
               local resType::Option{DAE.Type}
               local resultInfo::SourceInfo
               local resExp::Option{DAE.Exp}
@@ -2428,7 +2430,7 @@
           (outCache, outBody, resExp, resultInfo, resType)
         end
 
-        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}}
+        function elabPatternGuard(inCache::FCore.Cache, inEnv::FCore.Graph, patternGuard::Option{<:Absyn.Exp}, impl::Bool, performVectorization::Bool, pre::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{DAE.Exp}}
               local outPatternGuard::Option{DAE.Exp}
               local outCache::FCore.Cache
 
@@ -2670,8 +2672,8 @@
           (outPattern, extra)
         end
 
-        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::A) ::Tuple{List{DAE.MatchCase}, A}
-              local oa::A
+        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::Type_a) ::Tuple{List{DAE.MatchCase}, Type_a}
+              local oa::Type_a
               local outCases::List{DAE.MatchCase}
 
               (outCases, oa) = begin
@@ -2688,7 +2690,7 @@
                   local info::SourceInfo
                   local cases::List{DAE.MatchCase}
                   local cases1::List{DAE.MatchCase}
-                  local a::A
+                  local a::Type_a
                 @match (inCases, func, inA) begin
                   ( nil(), _, a)  => begin
                     (nil, a)
@@ -2711,8 +2713,8 @@
           (outCases, oa)
         end
 
-        function traverseCasesTopDown(inCases::List{DAE.MatchCase}, func::FuncExpType, inA::A)  where {A}
-              local a::A = inA
+        function traverseCasesTopDown(inCases::List{DAE.MatchCase}, func::FuncExpType, inA::Type_a)  where {Type_a}
+              local a::Type_a = inA
               local cases::List{DAE.MatchCase} = nil
 
               local patterns::List{DAE.Pattern}
@@ -2726,7 +2728,7 @@
               local jump::ModelicaInteger
               local resultInfo::SourceInfo
               local info::SourceInfo
-              local tpl::Tuple{FuncExpType, A}
+              local tpl::Tuple{FuncExpType, Type_a}
 
               for c in inCases
                 @match DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) = c

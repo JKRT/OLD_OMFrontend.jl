@@ -68,7 +68,7 @@
 
         import AvlTreeStringString
 
-        import BackendInterface
+        #import BackendInterface
 
         import ComponentReference
 
@@ -423,7 +423,8 @@
                   (cache, env, e && DAE.CALL(path = funcpath, expLst = expl, attr = DAE.CALL_ATTR(isImpure = false)), impl, msg, _)  => begin
                       @match false = AbsynUtil.pathEqual(Absyn.QUALIFIED("Connection", Absyn.IDENT("isRoot")), funcpath)
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
-                      (cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
+                      @assert(false, "BackendInterface.cevalCallFunction not supported yet!")
+                      #(cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
                     (cache, newval)
                   end
 
@@ -434,7 +435,8 @@
                   end
 
                   (cache, env, e && DAE.CALL(__), true, msg, _)  => begin
-                      (cache, value) = BackendInterface.cevalInteractiveFunctions(cache, env, e, msg, numIter + 1)
+                      @assert(false, "BackendInterface.cevalInteractiveFunctions not supported yet!")
+                      #(cache, value) = BackendInterface.cevalInteractiveFunctions(cache, env, e, msg, numIter + 1)
                     (cache, value)
                   end
 
@@ -1039,7 +1041,8 @@
 
                   (cache, env, e && DAE.CALL(expLst = expl, attr = DAE.CALL_ATTR(builtin = true)), impl, msg, _)  => begin
                       (cache, vallst) = cevalList(cache, env, expl, impl, msg, numIter)
-                      (cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
+                      @assert(false, "BackendInterface.cevaCallFunction not supported yet!")
+                      #(cache, newval) = BackendInterface.cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
                     (cache, newval)
                   end
                 end
