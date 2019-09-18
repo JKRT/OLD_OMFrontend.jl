@@ -799,7 +799,16 @@ println("ComponentReference.jl 5")
           outEqual
         end
 
-
+      module CompareWithSubsType 
+        using ExportAll
+        
+        const WithoutSubscripts = 1
+        const WithGenericSubscript = 2
+        const WithGenericSubscriptNotAlphabetic = 3
+        const WithIntSubscrip = 4
+        
+        @exportAll()
+      end
 
         module CompareWithGenericSubscript
 
@@ -807,14 +816,9 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-              struct CompareWithSubsType 
-                WithoutSubscripts::Int64
-                WithGenericSubscript::Int64
-                WithGenericSubscriptNotAlphabetic::Int64
-                WithIntSubscrip::Int64
-              end
-
-              const compareSubscript = CompareWithSubsType.WithGenericSubscript::Int64
+              import CompareWithSubsType
+              
+              compareSubscript = CompareWithSubsType.WithGenericSubscript::Int64
 
               function compare(cr1::DAE.ComponentRef, cr2::DAE.ComponentRef) ::ModelicaInteger
                     local res::ModelicaInteger
