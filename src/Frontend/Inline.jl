@@ -744,7 +744,7 @@
                   end
                   
                   (e, fns, source)  => begin
-                      (e_1, _) = Expression.traverseExpBottomUp(e, (fns, AvlSetPath.Tree.EMPTY(__)) -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), nil)
+                      (e_1, _) = Expression.traverseExpBottomUp(e, fn -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), nil)
                       b = ! referenceEq(e, e_1)
                       if b
                         source = ElementSource.addSymbolicTransformation(source, DAE.OP_INLINE(DAE.PARTIAL_EQUATION(e), DAE.PARTIAL_EQUATION(e_1)))
@@ -1025,7 +1025,7 @@
                             newExp
                           end
                       @match (newExp, (_, _, true)) = Expression.traverseExpBottomUp(newExp, replaceArgs, (argmap, checkcr, true))
-                      (newExp1, assrtLst) = Expression.traverseExpBottomUp(newExp, (fns, AvlSetPath.add(visitedPaths, p)) -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.add(visitedPaths, p)), assrtLst)
+                      (newExp1, assrtLst) = Expression.traverseExpBottomUp(newExp, fn -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.add(visitedPaths, p)), assrtLst)
                     (newExp1, assrtLst)
                   end
                   
@@ -1821,7 +1821,7 @@
               local exp::DAE.EquationExp
 
               (exp, source) = ExpressionSimplify.simplifyAddSymbolicOperation(inExp, inSource)
-              (exp, source) = inlineEquationExp(exp, (fns, AvlSetPath.Tree.EMPTY(__)) -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), source)
+              (exp, source) = inlineEquationExp(exp, fn -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), source)
           (exp, source)
         end
 

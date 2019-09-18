@@ -78,7 +78,7 @@
 
          const BUILTIN_TIME = SOME((DAE.CREF(DAE.CREF_IDENT("time", DAE.T_REAL_DEFAULT, nil), DAE.T_REAL_DEFAULT), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_VAR()), DAE.dummyAttrInput))::Option
         import ArrayUtil
-        import BackendInterface
+        # import BackendInterface
         import Ceval
         import ClassInf
         import ComponentReference
@@ -100,7 +100,7 @@
         import InnerOuter
         import ListUtil
         import Lookup
-        import MutableType
+        import Mutable
         import OperatorOverloading
         import Patternm
         import PrefixUtil
@@ -111,6 +111,8 @@
         import Types
         import ValuesUtil
         import VarTransform
+        
+        MutableType = Mutable.MutableType
 
          #= Expression elaboration of Absyn.Exp list, i.e. lists of expressions. =#
         function elabExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inExpl::List{<:Absyn.Exp}, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inLastType::DAE.Type = DAE.T_UNKNOWN_DEFAULT #= The type of the last evaluated expression; used to speed up instantiation of enumeration :) =#) ::Tuple{FCore.Cache, List{DAE.Exp}, List{DAE.Properties}}
@@ -251,11 +253,11 @@
 
                #=  Apply any rewrite rules we have, if any.
                =#
-              e = if BackendInterface.noRewriteRulesFrontEnd()
+              e = inExp #= if BackendInterface.noRewriteRulesFrontEnd()
                     inExp
                   else
                     BackendInterface.rewriteFrontEnd(inExp)
-                  end
+                  end =#
               num_errmsgs = Error.getNumErrorMessages()
               try
                 elabfunc = begin
@@ -6491,7 +6493,8 @@
 
                   ()  => begin
                        #= /* Handle the scripting interface */ =#
-                      (cache, e, prop) = BackendInterface.elabCallInteractive(cache, env, fn, args, nargs, impl, pre, info) #= Elaborate interactive function calls, such as simulate(), plot() etc. =#
+                       @assert(false, "no support for interactive calls!")
+                      #(cache, e, prop) = BackendInterface.elabCallInteractive(cache, env, fn, args, nargs, impl, pre, info) #= Elaborate interactive function calls, such as simulate(), plot() etc. =#
                     (cache, e, prop)
                   end
                 end
