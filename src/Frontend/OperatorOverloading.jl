@@ -66,7 +66,7 @@
         import Types
         import Values
 
-        function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Operator, inProp1::DAE.Properties, inExp1::DAE.Exp, inProp2::DAE.Properties, inExp2::DAE.Exp, AbExp::Absyn.Exp #= needed for function replaceOperatorWithFcall (not  really sure what is done in there though.) =#, AbExp1::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, AbExp2::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, inImpl::Bool, inPre::Prefix.Prefix #= For error-messages only =#, inInfo::SourceInfo #= For error-messages only =#) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Operator, inProp1::DAE.Properties, inExp1::DAE.Exp, inProp2::DAE.Properties, inExp2::DAE.Exp, AbExp::Absyn.Exp #= needed for function replaceOperatorWithFcall (not  really sure what is done in there though.) =#, AbExp1::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, AbExp2::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, inImpl::Bool, inPre::Prefix.PrefixType #= For error-messages only =#, inInfo::SourceInfo #= For error-messages only =#) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
               local outProp::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -158,7 +158,7 @@
         It looks if there is an operator function defined for the specific
         operation. If there is then it will call that function and returns the
         resulting expression.  =#
-        function unary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Operator, inProp1::DAE.Properties, inExp1::DAE.Exp, AbExp::Absyn.Exp #= needed for function replaceOperatorWithFcall (not  really sure what is done in there though.) =#, AbExp1::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, inImpl::Bool, inPre::Prefix.Prefix #= For error-messages only =#, inInfo::SourceInfo #= For error-messages only =#) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function unary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Operator, inProp1::DAE.Properties, inExp1::DAE.Exp, AbExp::Absyn.Exp #= needed for function replaceOperatorWithFcall (not  really sure what is done in there though.) =#, AbExp1::Absyn.Exp #= We need this when/if we elaborate user defined operator functions =#, inImpl::Bool, inPre::Prefix.PrefixType #= For error-messages only =#, inInfo::SourceInfo #= For error-messages only =#) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
               local outProp::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -228,7 +228,7 @@
         end
 
          #= This functions checks if the builtin function string is overloaded for opertor records =#
-        function string(inCache::FCore.Cache, inEnv::FCore.Graph, inExp1::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPre::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function string(inCache::FCore.Cache, inEnv::FCore.Graph, inExp1::Absyn.Exp, inImpl::Bool, inDoVect::Bool, inPre::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
               local outProp::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -308,91 +308,6 @@
         function initCache()  
               setGlobalRoot(Global.operatorOverloadingCache, (AvlTreePathPathEnv.Tree.EMPTY(), AvlTreePathOperatorTypes.Tree.EMPTY()))
         end
-
-         #= /* We have these as constants instead of function calls as done previously
-         * because it takes a long time to generate these types over and over again.
-         * The types are a bit hard to read, but they are simply 1 through 9-dimensional
-         * arrays of the basic types. */ =#
-         const intarrtypes = list(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
-         #=  1-dim
-         =#
-         #=  2-dim
-         =#
-         #=  3-dim
-         =#
-         #=  4-dim
-         =#
-         #=  5-dim
-         =#
-         #=  6-dim
-         =#
-         #=  7-dim
-         =#
-         #=  8-dim
-         =#
-         #=  9-dim
-         =#
-         const realarrtypes = list(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
-         #=  1-dim
-         =#
-         #=  2-dim
-         =#
-         #=  3-dim
-         =#
-         #=  4-dim
-         =#
-         #=  5-dim
-         =#
-         #=  6-dim
-         =#
-         #=  7-dim
-         =#
-         #=  8-dim
-         =#
-         #=  9-dim
-         =#
-         const boolarrtypes = list(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
-         #=  1-dim
-         =#
-         #=  2-dim
-         =#
-         #=  3-dim
-         =#
-         #=  4-dim
-         =#
-         #=  5-dim
-         =#
-         #=  6-dim
-         =#
-         #=  7-dim
-         =#
-         #=  8-dim
-         =#
-         #=  9-dim
-         =#
-         const stringarrtypes = list(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
-         #=  1-dim
-         =#
-         #=  2-dim
-         =#
-         #=  3-dim
-         =#
-         #=  4-dim
-         =#
-         #=  5-dim
-         =#
-         #=  6-dim
-         =#
-         #=  7-dim
-         =#
-         #=  8-dim
-         =#
-         #=  9-dim
-         =#
-         #= /* Simply a list of 9 of that basic type; used to match with the array types */ =#
-         const inttypes = list(DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT)::List
-         const realtypes = list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT)::List
-         const stringtypes = list(DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT)::List
 
         function deoverloadBinaryUserdefNoConstructor(inTypeList::List{<:DAE.Type}, inLhs::DAE.Exp, inRhs::DAE.Exp, lhsType::DAE.Type, rhsType::DAE.Type, inAcc::List{<:Tuple{<:DAE.Exp, Option{<:DAE.Type}}}) ::List{Tuple{DAE.Exp, Option{DAE.Type}}} 
               local outExps::List{Tuple{DAE.Exp, Option{DAE.Type}}}
@@ -573,7 +488,7 @@
         It looks if there is an operator function defined for the specific
         operation. If there is then it will call that function and returns the
         resulting expression.  =#
-        function binaryUserdef(inCache::FCore.Cache, inEnv::FCore.Graph, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, Option{DAE.Type}, DAE.Type} 
+        function binaryUserdef(inCache::FCore.Cache, inEnv::FCore.Graph, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, Option{DAE.Type}, DAE.Type} 
               local outType::DAE.Type
               local foldType::Option{DAE.Type}
               local outExp::DAE.Exp
@@ -631,7 +546,7 @@
           (outCache, outExp, foldType, outType)
         end
 
-        function binaryUserdefArray(inCache::FCore.Cache, env::FCore.Graph, inExps::List{<:Tuple{<:DAE.Exp, Option{<:DAE.Type}}}, isArray::Bool, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, Option{DAE.Type}}}} 
+        function binaryUserdefArray(inCache::FCore.Cache, env::FCore.Graph, inExps::List{<:Tuple{<:DAE.Exp, Option{<:DAE.Type}}}, isArray::Bool, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, Option{DAE.Type}}}} 
               local exps::List{Tuple{DAE.Exp, Option{DAE.Type}}}
               local cache::FCore.Cache
 
@@ -680,7 +595,7 @@
           (cache, exps)
         end
 
-        function binaryUserdefArray2(inCache::FCore.Cache, env::FCore.Graph, isScalar1::Bool, isVector1::Bool, isMatrix1::Bool, isScalar2::Bool, isVector2::Bool, isMatrix2::Bool, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, Option{DAE.Type}}}} 
+        function binaryUserdefArray2(inCache::FCore.Cache, env::FCore.Graph, isScalar1::Bool, isVector1::Bool, isMatrix1::Bool, isScalar2::Bool, isVector2::Bool, isMatrix2::Bool, inOper::Absyn.Operator, inExp1::DAE.Exp, inExp2::DAE.Exp, inType1::DAE.Type, inType2::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, Option{DAE.Type}}}} 
               local exps::List{Tuple{DAE.Exp, Option{DAE.Type}}}
               local cache::FCore.Cache
 
@@ -895,10 +810,98 @@
 
               module OperatorsBinary 
 
-
+                
                 using MetaModelica
                 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
                 using ExportAll
+
+                     import DAE
+
+                     #= /* We have these as constants instead of function calls as done previously
+                     * because it takes a long time to generate these types over and over again.
+                     * The types are a bit hard to read, but they are simply 1 through 9-dimensional
+                     * arrays of the basic types. */ =#
+                     const intarrtypes = list(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_INTEGER_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
+                     #=  1-dim
+                     =#
+                     #=  2-dim
+                     =#
+                     #=  3-dim
+                     =#
+                     #=  4-dim
+                     =#
+                     #=  5-dim
+                     =#
+                     #=  6-dim
+                     =#
+                     #=  7-dim
+                     =#
+                     #=  8-dim
+                     =#
+                     #=  9-dim
+                     =#
+                     const realarrtypes = list(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
+                     #=  1-dim
+                     =#
+                     #=  2-dim
+                     =#
+                     #=  3-dim
+                     =#
+                     #=  4-dim
+                     =#
+                     #=  5-dim
+                     =#
+                     #=  6-dim
+                     =#
+                     #=  7-dim
+                     =#
+                     #=  8-dim
+                     =#
+                     #=  9-dim
+                     =#
+                     const boolarrtypes = list(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_BOOL_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
+                     #=  1-dim
+                     =#
+                     #=  2-dim
+                     =#
+                     #=  3-dim
+                     =#
+                     #=  4-dim
+                     =#
+                     #=  5-dim
+                     =#
+                     #=  6-dim
+                     =#
+                     #=  7-dim
+                     =#
+                     #=  8-dim
+                     =#
+                     #=  9-dim
+                     =#
+                     const stringarrtypes = list(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())), list(DAE.DIM_UNKNOWN())))::List
+                     #=  1-dim
+                     =#
+                     #=  2-dim
+                     =#
+                     #=  3-dim
+                     =#
+                     #=  4-dim
+                     =#
+                     #=  5-dim
+                     =#
+                     #=  6-dim
+                     =#
+                     #=  7-dim
+                     =#
+                     #=  8-dim
+                     =#
+                     #=  9-dim
+                     =#
+                     #= /* Simply a list of 9 of that basic type; used to match with the array types */ =#
+                     const inttypes = list(DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT, DAE.T_INTEGER_DEFAULT)::List
+                     const realtypes = list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT)::List
+                     const stringtypes = list(DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT, DAE.T_STRING_DEFAULT)::List
+
 
                      const int_scalar = DAE.T_INTEGER_DEFAULT::DAE.Type
                      const real_scalar = DAE.T_REAL_DEFAULT::DAE.Type
@@ -1654,7 +1657,7 @@
 
           The basic principle is that the first operator that matches is chosen.
           . =#
-        function deoverload(inOperators::List{<:Tuple{<:DAE.Operator, List{<:DAE.Type}, DAE.Type}}, inArgs::List{<:Tuple{<:DAE.Exp, DAE.Type}}, aexp::Absyn.Exp #= for error-messages =#, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{DAE.Operator, List{DAE.Exp}, DAE.Type} 
+        function deoverload(inOperators::List{<:Tuple{<:DAE.Operator, List{<:DAE.Type}, DAE.Type}}, inArgs::List{<:Tuple{<:DAE.Exp, DAE.Type}}, aexp::Absyn.Exp #= for error-messages =#, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{DAE.Operator, List{DAE.Exp}, DAE.Type} 
               local outType::DAE.Type
               local outArgs::List{DAE.Exp}
               local outOperator::DAE.Operator
@@ -1670,7 +1673,7 @@
                   local op::DAE.Operator
                   local args::List{Tuple{DAE.Exp, DAE.Type}}
                   local xs::List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ty::DAE.Type
                   local exps_str::List{String}
                   local tps_str::List{String}
@@ -1721,7 +1724,7 @@
 
          #= This function determines the return type of
           an operator and the types of the operands. =#
-        function computeReturnType(inOperator::DAE.Operator, inTypesTypeLst::List{<:DAE.Type}, inType::DAE.Type, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::DAE.Type 
+        function computeReturnType(inOperator::DAE.Operator, inTypesTypeLst::List{<:DAE.Type}, inType::DAE.Type, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::DAE.Type 
               local outType::DAE.Type
 
               outType = begin
@@ -1740,7 +1743,7 @@
                   local m1::DAE.Dimension
                   local m2::DAE.Dimension
                   local p::DAE.Dimension
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                 @matchcontinue (inOperator, inTypesTypeLst, inType, inPrefix, inInfo) begin
                   (DAE.ADD_ARR(__), typ1 <| typ2 <|  nil(), _, _, _)  => begin
                       @match true = Types.subtype(typ1, typ2)
@@ -2186,14 +2189,14 @@
         end
 
          #= Check if we have Real == Real or Real != Real, if so give a warning. =#
-        function warnUnsafeRelations(inEnv::FCore.Graph, inExp::Absyn.Exp, variability::DAE.Const, t1::DAE.Type, t2::DAE.Type, e1::DAE.Exp, e2::DAE.Exp, op::DAE.Operator, inPrefix::Prefix.Prefix, inInfo::SourceInfo)  
+        function warnUnsafeRelations(inEnv::FCore.Graph, inExp::Absyn.Exp, variability::DAE.Const, t1::DAE.Type, t2::DAE.Type, e1::DAE.Exp, e2::DAE.Exp, op::DAE.Operator, inPrefix::Prefix.PrefixType, inInfo::SourceInfo)  
               _ = begin
                   local b1::Bool
                   local b2::Bool
                   local stmtString::String
                   local opString::String
                   local pre_str::String
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                    #=  == or != on Real is permitted in functions, so don't print an error if
                    =#
                    #=  we're in a function.
