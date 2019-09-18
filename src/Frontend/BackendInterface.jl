@@ -67,7 +67,7 @@
         end
 
          #= Note: elabCall_InteractiveFunction is set in the error buffer; the called function should pop it =#
-        function elabCallInteractive(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExps::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplInst::Bool, inPrefix::Prefix.Prefix, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
+        function elabCallInteractive(inCache::FCore.Cache, inEnv::FCore.Graph, inCref::Absyn.ComponentRef, inExps::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplInst::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties} 
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache

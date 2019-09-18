@@ -138,9 +138,9 @@
           Instantiates an equation by calling
           instEquationCommon with Inital set
           to NON_INITIAL. =#
-        function instEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -155,9 +155,9 @@
         end
 
          #= Instantiation of EEquation, used in for loops and if-equations. =#
-        function instEEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instEEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -171,9 +171,9 @@
          #= author: LS, ELN
           Instantiates initial equation by calling inst_equation_common with Inital
           set to INITIAL. =#
-        function instInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEquation::SCode.Equation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -188,9 +188,9 @@
         end
 
          #= Instantiates initial EEquation used in for loops and if equations  =#
-        function instEInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instEInitialEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEEquation::SCode.EEquation, inImpl::Bool, unrollForLoops::Bool #= Unused, to comply with Inst.instList interface. =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -207,9 +207,9 @@
 
           This function takes an equation from the source and generates DAE
           equations and connection sets. =#
-        function instEquationCommon(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instEquationCommon(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -220,7 +220,7 @@
 
               _ = begin
                   local s::String
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                 @matchcontinue () begin
                   ()  => begin
                       state = ClassInf.trans(inState, ClassInf.FOUND_EQUATION())
@@ -257,9 +257,9 @@
 
            This function takes an equation from the source and generates DAE equations
            and connection sets. =#
-        function instEquationCommonWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, inFlattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph = inGraph
-              local outState::ClassInf.State
+        function instEquationCommonWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inFlattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets = inSets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy = inIH
@@ -290,7 +290,6 @@
                   local expl::List{DAE.Exp}
                   local props::List{DAE.Properties}
                   local c::DAE.Const
-                  local val::Values.Value
                   local idx::ModelicaInteger
                   local eql::List{SCode.EEquation}
                   local else_branch::List{SCode.EEquation}
@@ -545,7 +544,7 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function makeEqSource(inInfo::Absyn.Info, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inFlattenOp::DAE.SymbolicOperation) ::DAE.ElementSource
+        function makeEqSource(inInfo::Absyn.Info, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inFlattenOp::DAE.SymbolicOperation) ::DAE.ElementSource
               local outSource::DAE.ElementSource
 
               outSource = ElementSource.createElementSource(inInfo, FGraph.getScopePath(inEnv), inPrefix)
@@ -607,7 +606,7 @@
 
          #= Helper function to instEquationCommonWork. Elaborates and type checks an
            argument for some builtin operators, like assert and terminate. =#
-        function instOperatorArg(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inArg::Absyn.Exp, inImpl::Bool, inExpectedType::DAE.Type, inOperatorName::String, inArgName::String, inArgIndex::ModelicaInteger, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
+        function instOperatorArg(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inArg::Absyn.Exp, inImpl::Bool, inExpectedType::DAE.Type, inOperatorName::String, inArgName::String, inArgIndex::ModelicaInteger, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp}
               local outArg::DAE.Exp
               local outCache::FCore.Cache
 
@@ -643,9 +642,9 @@
         end
 
          #= This function handles Connections.* no return operators =#
-        function handleConnectionsOperators(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, flattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function handleConnectionsOperators(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inEEquation::SCode.EEquation, inInitial::SCode.Initial, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraphType, flattenOp::DAE.SymbolicOperation) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -657,13 +656,13 @@
                   local csets_1::Connect.Sets
                   local csets::Connect.Sets
                   local dae::DAE.DAElist
-                  local ci_state_1::ClassInf.State
-                  local ci_state::ClassInf.State
-                  local ci_state_2::ClassInf.State
+                  local ci_state_1::ClassInf.SMNode
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_2::ClassInf.SMNode
                   local env::FCore.Graph
                   local env_1::FCore.Graph
                   local env_2::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c1::Absyn.ComponentRef
                   local c2::Absyn.ComponentRef
                   local cr::Absyn.ComponentRef
@@ -709,7 +708,7 @@
                   local valList::List{Values.Value}
                   local expl1::List{DAE.Exp}
                   local blist::List{Bool}
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local lst::List{Tuple{Absyn.ComponentRef, ModelicaInteger}}
                   local tpl::Tuple{Absyn.ComponentRef, ModelicaInteger}
@@ -822,7 +821,7 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function potentialRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, ModelicaInteger}
+        function potentialRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.PrefixType, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, ModelicaInteger}
               local outPriority::ModelicaInteger
               local outCref::Absyn.ComponentRef
 
@@ -855,7 +854,7 @@
           (outCref, outPriority)
         end
 
-        function uniqueRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.Prefix, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, Absyn.Exp}
+        function uniqueRootArguments(inFunctionArgs::Absyn.FunctionArgs, info::SourceInfo, inPrefix::Prefix.PrefixType, inEEquation::SCode.EEquation) ::Tuple{Absyn.ComponentRef, Absyn.Exp}
               local outMessage::Absyn.Exp
               local outCref::Absyn.ComponentRef
 
@@ -1020,7 +1019,7 @@
         into its condensed form. By default, most array variables are vectorized,
         i.e. v becomes {v[1],v[2],..,v[n]}. But for array equations containing function calls this is not wanted.
         This function detect this case and elaborates expressions without vectorization. =#
-        function condenseArrayEquation(inCache::FCore.Cache, inEnv::FCore.Graph, ie1::Absyn.Exp, ie2::Absyn.Exp, elabedE1::DAE.Exp, elabedE2::DAE.Exp, iprop::DAE.Properties #= To determine if array equation =#, iprop2::DAE.Properties #= To determine if array equation =#, impl::Bool, inPrefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Exp, DAE.Properties}
+        function condenseArrayEquation(inCache::FCore.Cache, inEnv::FCore.Graph, ie1::Absyn.Exp, ie2::Absyn.Exp, elabedE1::DAE.Exp, elabedE2::DAE.Exp, iprop::DAE.Properties #= To determine if array equation =#, iprop2::DAE.Properties #= To determine if array equation =#, impl::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Exp, DAE.Properties}
               local oprop::DAE.Properties #= If we have an expandable tuple =#
               local outE2::DAE.Exp
               local outE1::DAE.Exp
@@ -1036,7 +1035,7 @@
                   local prop1::DAE.Properties
                   local prop::DAE.Properties
                   local prop2::DAE.Properties
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local e1::Absyn.Exp
                   local e2::Absyn.Exp
                 @matchcontinue (inCache, inEnv, ie1, ie2, elabedE1, elabedE2, iprop, iprop2, impl, inPrefix, info) begin
@@ -1119,8 +1118,8 @@
         end
 
          #= updats The ClassInf state machine when an equation is instantiated. =#
-        function instEquationCommonCiTrans(inState::ClassInf.State, inInitial::SCode.Initial) ::ClassInf.State
-              local outState::ClassInf.State
+        function instEquationCommonCiTrans(inState::ClassInf.SMNode, inInitial::SCode.Initial) ::ClassInf.SMNode
+              local outState::ClassInf.SMNode
 
               outState = begin
                 @match inInitial begin
@@ -1138,15 +1137,15 @@
 
          #= Unrolling a loop is a way of removing the non-linear structure of the FOR
            clause by explicitly repeating the body of the loop once for each iteration. =#
-        function unroll(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inIdent::Ident, inIteratorType::DAE.Type, inValue::Values.Value, inEquations::List{<:SCode.EEquation}, inInitial::SCode.Initial, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, DAE.DAElist, Connect.Sets, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph = inGraph
+        function unroll(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inIdent::Ident, inIteratorType::DAE.Type, inValue::Values.Value, inEquations::List{<:SCode.EEquation}, inInitial::SCode.Initial, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, DAE.DAElist, Connect.Sets, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outSets::Connect.Sets = inSets
               local outDae::DAE.DAElist
               local outCache::FCore.Cache = inCache
 
               local values::List{Values.Value}
               local env::FCore.Graph
-              local ci_state::ClassInf.State = inState
+              local ci_state::ClassInf.SMNode = inState
               local daes::List{DAE.DAElist} = nil
               local dae::DAE.DAElist
 
@@ -1729,7 +1728,7 @@
         end
 
          #= Unrolls a for-loop that contains when-statements. =#
-        function unrollForLoop(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inStatement::SCode.Statement, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function unrollForLoop(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inStatement::SCode.Statement, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache
 
@@ -1755,7 +1754,7 @@
           (outCache, outStatements)
         end
 
-        function instForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= For statements can produce multiple statements due to unrolling. =#
               local outCache::FCore.Cache
 
@@ -1786,7 +1785,7 @@
           (outCache, outStatements #= For statements can produce multiple statements due to unrolling. =#)
         end
 
-        function instForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 
@@ -1892,9 +1891,9 @@
          #= Algorithms are converted to the representation defined in
           the module Algorithm, and the added to the DAE result.
           This function converts an algorithm section. =#
-        function instAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -1905,14 +1904,14 @@
                   local env::FCore.Graph
                   local statements_1::List{DAE.Statement}
                   local csets::Connect.Sets
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local statements::List{SCode.Statement}
                   local stmt::SCode.Statement
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local algSCode::SCode.AlgorithmSection
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local source::DAE.ElementSource #= the origin of the element =#
                   local dae::DAE.DAElist
@@ -1952,9 +1951,9 @@
          #= Algorithms are converted to the representation defined
           in the module Algorithm, and the added to the DAE result.
           This function converts an algorithm section. =#
-        function instInitialAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instInitialAlgorithm(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inAlgorithm::SCode.AlgorithmSection, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -1965,12 +1964,12 @@
                   local env::FCore.Graph
                   local statements_1::List{DAE.Statement}
                   local csets::Connect.Sets
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local statements::List{SCode.Statement}
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local pre::Prefix.PrefixType
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local source::DAE.ElementSource #= the origin of the element =#
                   local dae::DAE.DAElist
@@ -1996,8 +1995,8 @@
         end
 
          #= Constraints are elaborated and converted to DAE =#
-        function instConstraint(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inState::ClassInf.State, inConstraints::SCode.ConstraintSection, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.State}
-              local outState::ClassInf.State
+        function instConstraint(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inConstraints::SCode.ConstraintSection, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.SMNode}
+              local outState::ClassInf.SMNode
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2005,11 +2004,11 @@
               (outCache, outEnv, outDae, outState) = begin
                   local env::FCore.Graph
                   local constraints_1::List{DAE.Exp}
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local constraints::List{Absyn.Exp}
                   local impl::Bool
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local source::DAE.ElementSource #= the origin of the element =#
                   local dae::DAE.DAElist
                 @matchcontinue (inCache, inEnv, inPrefix, inState, inConstraints, inImpl) begin
@@ -2032,7 +2031,7 @@
         end
 
          #= This function instantiates a list of algorithm statements. =#
-        function instStatements(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatements::List{<:SCode.Statement}, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instStatements(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inStatements::List{<:SCode.Statement}, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 
@@ -2049,7 +2048,7 @@
 
          #= Helper function to instStatement. Elaborates, evalutes if constant, and
            prefixes an expression. =#
-        function instExp(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inExp::Absyn.Exp, inImpl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+        function instExp(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inExp::Absyn.Exp, inImpl::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
               local outCache::FCore.Cache
@@ -2061,7 +2060,7 @@
         end
 
          #= Instantiates an algorithm statement. =#
-        function instStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= More statements due to loop unrolling. =#
               local outCache::FCore.Cache = inCache
 
@@ -2370,7 +2369,7 @@
          #= @author: adrpo
           Unrolling a for loop is explicitly repeating
           the body of the loop once for each iteration. =#
-        function loopOverRange(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, ci_state::ClassInf.State, inIdent::Ident, inValue::Values.Value, inAlgItmLst::List{<:SCode.Statement}, source::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function loopOverRange(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, ci_state::ClassInf.SMNode, inIdent::Ident, inValue::Values.Value, inAlgItmLst::List{<:SCode.Statement}, source::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= for statements can produce more statements than one by unrolling =#
               local outCache::FCore.Cache
 
@@ -2378,7 +2377,7 @@
                   local env_1::FCore.Graph
                   local env_2::FCore.Graph
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local i::String
                   local fst::Values.Value
                   local v::Values.Value
@@ -2447,9 +2446,9 @@
           outExp
         end
 
-        function instIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}}
+        function instIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Element}}
               local outEquations::List{DAE.Element}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2459,22 +2458,22 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}}
+        function instIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{List{DAE.Element}}}
               local outEquations::List{List{DAE.Element}}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
               (outCache, outEnv, outIH, outState, outEquations) = begin
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local csets::Connect.Sets
                   local csets_1::Connect.Sets
                   local csets_2::Connect.Sets
-                  local ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
-                  local ci_state_2::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
+                  local ci_state_2::ClassInf.SMNode
                   local impl::Bool
                   local llb::List{List{DAE.Element}}
                   local es::List{List{SCode.EEquation}}
@@ -2482,7 +2481,7 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local ih::InnerOuter.InstHierarchy
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local seq::List{SCode.EEquation}
                   local rest_seq::List{List{SCode.EEquation}}
                   local deq::List{DAE.Element}
@@ -2502,9 +2501,9 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instInitialIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Element}}
+        function instInitialIfEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inEquations::List{<:SCode.EEquation}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Element}}
               local outEquations::List{DAE.Element}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2514,9 +2513,9 @@
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
-        function instInitialIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{List{DAE.Element}}}
+        function instInitialIfEqBranches(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inBranches::List{<:List{<:SCode.EEquation}}, inImpl::Bool, inAccumEqs::List{<:List{<:DAE.Element}} = nil) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{List{DAE.Element}}}
               local outEquations::List{List{DAE.Element}}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2525,7 +2524,7 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local ih::InnerOuter.InstHierarchy
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local seq::List{SCode.EEquation}
                   local rest_seq::List{List{SCode.EEquation}}
                   local deq::List{DAE.Element}
@@ -2583,7 +2582,7 @@
         end
 
          #= This function helps instStatement to handle elseif parts. =#
-        function instElseIfs(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, ci_state::ClassInf.State, inElseIfBranches::List{<:Tuple{<:Absyn.Exp, List{<:SCode.Statement}}}, source::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}}
+        function instElseIfs(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, ci_state::ClassInf.SMNode, inElseIfBranches::List{<:Tuple{<:Absyn.Exp, List{<:SCode.Statement}}}, source::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, info::SourceInfo) ::Tuple{FCore.Cache, List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}}
               local outElseIfBranches::List{Tuple{DAE.Exp, DAE.Properties, List{DAE.Statement}}}
               local outCache::FCore.Cache
 
@@ -2599,7 +2598,7 @@
                   local l::List{SCode.Statement}
                   local tail::List{Tuple{Absyn.Exp, List{SCode.Statement}}}
                   local cache::FCore.Cache
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local ih::InstanceHierarchy
                 @matchcontinue (inCache, inEnv, inIH, inPre, ci_state, inElseIfBranches, source, initial_, inImpl, unrollForLoops, info) begin
                   (cache, _, _, _, _,  nil(), _, _, _, _, _)  => begin
@@ -2625,8 +2624,8 @@
           (outCache, outElseIfBranches)
         end
 
-        function instWhenEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, inBranch::Tuple{<:Absyn.Exp, List{<:SCode.EEquation}}, inImpl::Bool, inUnrollLoops::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Exp, List{DAE.Element}, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instWhenEqBranch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, inBranch::Tuple{<:Absyn.Exp, List{<:SCode.EEquation}}, inImpl::Bool, inUnrollLoops::Bool, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Exp, List{DAE.Element}, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEquations::List{DAE.Element}
               local outCondition::DAE.Exp
               local outIH::InnerOuter.InstHierarchy
@@ -2721,8 +2720,8 @@
           Generates connectionsets for connections.
           Parameters and constants in connectors should generate appropriate assert statements.
           Hence, a DAE.Element list is returned as well. =#
-        function instConnect(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instConnect(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.PrefixType, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImplicit::Bool, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -2750,7 +2749,7 @@
                   local sets::Connect.Sets
                   local dae::DAE.DAElist
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c1::Absyn.ComponentRef
                   local c2::Absyn.ComponentRef
                   local cache::FCore.Cache
@@ -2760,7 +2759,7 @@
                   local prl2::SCode.Parallelism
                   local vt1::SCode.Variability
                   local vt2::SCode.Variability
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local subs1::List{Absyn.Subscript}
                   local subs2::List{Absyn.Subscript}
@@ -2850,7 +2849,7 @@
           (outCache, outEnv, outIH, outSets, outDae, outGraph)
         end
 
-        function instConnector(inCache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, connectorCref::Absyn.ComponentRef, impl::Bool, prefix::Prefix.Prefix, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Attributes, DAE.ConnectorType, SCode.Variability, Absyn.InnerOuter, Connect.Face, DAE.Type, Bool}
+        function instConnector(inCache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, connectorCref::Absyn.ComponentRef, impl::Bool, prefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.ComponentRef, DAE.Attributes, DAE.ConnectorType, SCode.Variability, Absyn.InnerOuter, Connect.Face, DAE.Type, Bool}
               local deleted::Bool
               local ty::DAE.Type
               local face::Connect.Face
@@ -2886,7 +2885,7 @@
               outType = begin
                   local ty::DAE.Type
                   local dims::DAE.Dimensions
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local vars::List{DAE.Var}
                   local ec::DAE.EqualityConstraint
                 @match inType begin
@@ -2923,12 +2922,12 @@
          #=
         Author BZ, 2009-09
           Helper function for instConnect, prints error message for the case with non constant(or parameter) subscript(/s) =#
-        function checkConstantVariability(inrefs::List{<:Absyn.ComponentRef}, cache::FCore.Cache, env::FCore.Graph, affectedConnector::String, inPrefix::Prefix.Prefix, info::SourceInfo)
+        function checkConstantVariability(inrefs::List{<:Absyn.ComponentRef}, cache::FCore.Cache, env::FCore.Graph, affectedConnector::String, inPrefix::Prefix.PrefixType, info::SourceInfo)
               _ = begin
                   local cr::Absyn.ComponentRef
                   local prop::DAE.Properties
                   local constVar::DAE.Const
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local s1::String
                   local refs::List{Absyn.ComponentRef}
                 @matchcontinue (inrefs, cache, env, affectedConnector, inPrefix, info) begin
@@ -2958,8 +2957,8 @@
 
          #= @author: adrpo
           this function handle the connections of expandable connectors =#
-        function connectExpandableConnectors(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function connectExpandableConnectors(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.PrefixType, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -2995,7 +2994,7 @@
                   local env1::FCore.Graph
                   local env2::FCore.Graph
                   local envComponentEmpty::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c1::Absyn.ComponentRef
                   local c2::Absyn.ComponentRef
                   local c1_prefix::Absyn.ComponentRef
@@ -3006,7 +3005,7 @@
                   local vt2::SCode.Variability
                   local prl1::SCode.Parallelism
                   local prl2::SCode.Parallelism
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local componentName::String
                   local dir1::Absyn.Direction
@@ -3014,7 +3013,7 @@
                   local binding::DAE.Binding
                   local cnstForRange::Option{DAE.Const}
                   local splicedExpData::InstTypes.SplicedExpData
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local variables1::List{String}
                   local variables2::List{String}
                   local variablesUnion::List{String}
@@ -3352,7 +3351,7 @@
          connect(expandable, non-expandable)
          should generate a DAE for the expandable part.
          Expand the array if needed. =#
-        function generateExpandableDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, cref::DAE.ComponentRef, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource) ::DAE.DAElist
+        function generateExpandableDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, cref::DAE.ComponentRef, state::ClassInf.SMNode, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource) ::DAE.DAElist
               local outDAE::DAE.DAElist
 
               outDAE = begin
@@ -3380,7 +3379,7 @@
         end
 
          #= declare a list of crefs, one for each array element =#
-        function daeDeclareList(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, crefs::List{<:DAE.ComponentRef}, state::ClassInf.State, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource, acc::DAE.DAElist) ::DAE.DAElist
+        function daeDeclareList(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, crefs::List{<:DAE.ComponentRef}, state::ClassInf.SMNode, ty::DAE.Type, attrs::SCode.Attributes, vis::SCode.Visibility, io::Absyn.InnerOuter, source::DAE.ElementSource, acc::DAE.DAElist) ::DAE.DAElist
               local outDAE::DAE.DAElist
 
               outDAE = begin
@@ -3481,8 +3480,8 @@
          #= @author: adrpo
           this function handle the connections of expandable connectors
           that contain components =#
-        function connectExpandableVariables(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inVariablesUnion::List{<:String}, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function connectExpandableVariables(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.PrefixType, inComponentRefLeft::Absyn.ComponentRef, inComponentRefRight::Absyn.ComponentRef, inVariablesUnion::List{<:String}, inImpl::Bool, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -3496,13 +3495,13 @@
                   local dae1::DAE.DAElist
                   local dae2::DAE.DAElist
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local c1::Absyn.ComponentRef
                   local c2::Absyn.ComponentRef
                   local c1_full::Absyn.ComponentRef
                   local c2_full::Absyn.ComponentRef
                   local cache::FCore.Cache
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local names::List{String}
                   local name::String
@@ -3533,13 +3532,13 @@
         end
 
          #= @author: adrpo
-          this function gets the ClassInf.State from the given type.
+          this function gets the ClassInf.SMNode from the given type.
           it will fail if the type is not a complex type. =#
-        function getStateFromType(ty::DAE.Type) ::ClassInf.State
-              local outState::ClassInf.State
+        function getStateFromType(ty::DAE.Type) ::ClassInf.SMNode
+              local outState::ClassInf.SMNode
 
               outState = begin
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                 @match ty begin
                   DAE.T_COMPLEX(complexClassType = state)  => begin
                     state
@@ -3615,7 +3614,7 @@
          #= This function tests whether a type is a eligible to be used in connections. =#
         function validConnector(inType::DAE.Type, inCref::DAE.ComponentRef, inInfo::SourceInfo)
               _ = begin
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local tp::DAE.Type
                   local str::String
                 @matchcontinue (inType, inCref, inInfo) begin
@@ -3860,8 +3859,8 @@
           adds the components to the set, and for complex types it traverses
           the subcomponents and recursively connects them to each other.
           A DAE.Element list is returned for assert statements. =#
-        function connectComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix3::Prefix.Prefix, cr1::DAE.ComponentRef, inFace5::Connect.Face, inType6::DAE.Type, vt1::SCode.Variability, cr2::DAE.ComponentRef, inFace8::Connect.Face, inType9::DAE.Type, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function connectComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix3::Prefix.PrefixType, cr1::DAE.ComponentRef, inFace5::Connect.Face, inType6::DAE.Type, vt1::SCode.Variability, cr2::DAE.ComponentRef, inFace8::Connect.Face, inType9::DAE.Type, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -3878,7 +3877,7 @@
                   local sets_1::Connect.Sets
                   local sets::Connect.Sets
                   local env::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local f1::Connect.Face
                   local f2::Connect.Face
                   local t1::DAE.Type
@@ -3897,7 +3896,7 @@
                   local t2_str::String
                   local c2_str::String
                   local cache::FCore.Cache
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local source::DAE.ElementSource #= the origin of the element =#
                   local inlineType1::DAE.InlineType
@@ -4200,8 +4199,8 @@
           outAssert
         end
 
-        function connectArrayComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inLhsCrefs::List{<:DAE.ComponentRef}, inLhsFace::Connect.Face, inLhsType::DAE.Type, inLhsVar::SCode.Variability, inLhsIO::Absyn.InnerOuter, inRhsCrefs::List{<:DAE.ComponentRef}, inRhsFace::Connect.Face, inRhsType::DAE.Type, inRhsVar::SCode.Variability, inRhsIO::Absyn.InnerOuter, inConnectorType::DAE.ConnectorType, inGraph::ConnectionGraph.ConnectionGraph, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function connectArrayComponents(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.PrefixType, inLhsCrefs::List{<:DAE.ComponentRef}, inLhsFace::Connect.Face, inLhsType::DAE.Type, inLhsVar::SCode.Variability, inLhsIO::Absyn.InnerOuter, inRhsCrefs::List{<:DAE.ComponentRef}, inRhsFace::Connect.Face, inRhsType::DAE.Type, inRhsVar::SCode.Variability, inRhsIO::Absyn.InnerOuter, inConnectorType::DAE.ConnectorType, inGraph::ConnectionGraph.ConnectionGraphType, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -4219,7 +4218,7 @@
                   local sets::Connect.Sets
                   local dae1::DAE.DAElist
                   local dae2::DAE.DAElist
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                 @match (inCache, inEnv, inIH, inSets, inPrefix, inLhsCrefs, inLhsFace, inLhsType, inLhsVar, inLhsIO, inRhsCrefs, inRhsFace, inRhsType, inRhsVar, inRhsIO, inConnectorType, inGraph, inInfo) begin
                   (_, _, _, _, _, lhs <| rest_lhs, _, _, _, _, rhs <| rest_rhs, _, _, _, _, _, _, _)  => begin
                       (cache, env, ih, sets, dae1, graph) = connectComponents(inCache, inEnv, inIH, inSets, inPrefix, lhs, inLhsFace, inLhsType, inLhsVar, rhs, inRhsFace, inRhsType, inRhsVar, inConnectorType, inLhsIO, inRhsIO, inGraph, inInfo)
@@ -4239,8 +4238,8 @@
          #= This function connects two subcomponents by adding the component
           name to the current path and recursively connecting the components
           using the function connectComponents. =#
-        function connectVars(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.Prefix, inComponentRef3::DAE.ComponentRef, inFace4::Connect.Face, inTypesVarLst5::List{<:DAE.Var}, vt1::SCode.Variability, inComponentRef6::DAE.ComponentRef, inFace7::Connect.Face, inTypesVarLst8::List{<:DAE.Var}, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraph, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraph}
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function connectVars(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSets::Connect.Sets, inPrefix::Prefix.PrefixType, inComponentRef3::DAE.ComponentRef, inFace4::Connect.Face, inTypesVarLst5::List{<:DAE.Var}, vt1::SCode.Variability, inComponentRef6::DAE.ComponentRef, inFace7::Connect.Face, inTypesVarLst8::List{<:DAE.Var}, vt2::SCode.Variability, inConnectorType::DAE.ConnectorType, io1::Absyn.InnerOuter, io2::Absyn.InnerOuter, inGraph::ConnectionGraph.ConnectionGraphType, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Connect.Sets, DAE.DAElist, ConnectionGraph.ConnectionGraphType}
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outDae::DAE.DAElist
               local outSets::Connect.Sets
               local outIH::InnerOuter.InstHierarchy
@@ -4273,7 +4272,7 @@
                   local vtb::SCode.Variability
                   local ty_2::DAE.Type
                   local cache::FCore.Cache
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                 @match (inCache, inEnv, inIH, inSets, inPrefix, inComponentRef3, inFace4, inTypesVarLst5, vt1, inComponentRef6, inFace7, inTypesVarLst8, vt2, inConnectorType, io1, io2, inGraph, info) begin
                   (cache, env, ih, sets, _, _, _,  nil(), _, _, _,  nil(), _, _, _, _, graph, _)  => begin
@@ -4635,7 +4634,7 @@
                =#
         end
 
-        function instAssignment(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, alg::SCode.Statement, source::DAE.ElementSource, initial_::SCode.Initial, impl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instAssignment(inCache::FCore.Cache, inEnv::FCore.Graph, ih::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, alg::SCode.Statement, source::DAE.ElementSource, initial_::SCode.Initial, impl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local stmts::List{DAE.Statement} #= more statements due to loop unrolling =#
               local outCache::FCore.Cache
 
@@ -4644,7 +4643,7 @@
                   local env::FCore.Graph
                   local e_1::DAE.Exp
                   local eprop::DAE.Properties
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local var::Absyn.Exp
                   local value::Absyn.Exp
                   local info::SourceInfo
@@ -4669,7 +4668,7 @@
           (outCache, stmts #= more statements due to loop unrolling =#)
         end
 
-        function instAssignment2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.Prefix, var::Absyn.Exp, inRhs::Absyn.Exp, value::DAE.Exp, props::DAE.Properties, info::SourceInfo, inSource::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instAssignment2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, var::Absyn.Exp, inRhs::Absyn.Exp, value::DAE.Exp, props::DAE.Properties, info::SourceInfo, inSource::DAE.ElementSource, initial_::SCode.Initial, inImpl::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, numError::ModelicaInteger) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local stmts::List{DAE.Statement} #= more statements due to loop unrolling =#
               local outCache::FCore.Cache
 
@@ -4961,7 +4960,7 @@
           oty
         end
 
-        function instParForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instParForStatement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inForStatement::SCode.Statement, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement} #= For statements can produce multiple statements due to unrolling. =#
               local outCache::FCore.Cache
 
@@ -4992,7 +4991,7 @@
           (outCache, outStatements #= For statements can produce multiple statements due to unrolling. =#)
         end
 
-        function instParForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inState::ClassInf.State, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
+        function instParForStatement_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inIterator::String, inRange::DAE.Exp, inRangeProps::DAE.Properties, inBody::List{<:SCode.Statement}, inInfo::SourceInfo, inSource::DAE.ElementSource, inInitial::SCode.Initial, inImpl::Bool, inUnrollLoops::Bool) ::Tuple{FCore.Cache, List{DAE.Statement}}
               local outStatements::List{DAE.Statement}
               local outCache::FCore.Cache = inCache
 

@@ -7638,7 +7638,7 @@
                   local new_dims::List{DAE.Dimension}
                   local arg::ArgT
                   local changed::Bool
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local vars::List{DAE.Var}
                   local ec::DAE.EqualityConstraint
                 @match inType begin

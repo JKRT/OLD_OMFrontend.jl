@@ -96,7 +96,7 @@
 
         import Mod
 
-        import MutableType
+        import Mutable
 
         import Prefix
 
@@ -114,6 +114,10 @@
         import ValuesUtil
 
         import Values
+        
+        MutableType = Mutable.MutableType
+        
+        
          #= /*   - Lookup functions
 
           These functions look up class and variable names in the environment.
@@ -281,7 +285,7 @@
                   local r::SCode.Restriction
                   local types::List{DAE.Var}
                   local names::List{String}
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local encflag::SCode.Encapsulated
                   local mod::DAE.Mod
                    #=  Record constructors
@@ -645,7 +649,7 @@
                   local prevFrames::FCore.Scope
                   local frame::FCore.Ref
                   local restr::SCode.Restriction
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local encflag::SCode.Encapsulated
                   local id::String
                   local c::SCode.Element
@@ -690,7 +694,7 @@
 
         function checkPartialScope(inEnv::FCore.Graph, inParentEnv::FCore.Graph, inCache::FCore.Cache, inInfo::Option{<:SourceInfo})
               local el::SCode.Element
-              local pre::Prefix.Prefix
+              local pre::Prefix.PrefixType
               local name::String
               local pre_str::String
               local cc_str::String
@@ -990,7 +994,7 @@
                   local env_1::FCore.Graph
                   local env2::FCore.Graph
                   local env::FCore.Graph
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local path::Absyn.Path
                   local firstIdent::Absyn.Ident
                   local rest::List{Absyn.Import}
@@ -1054,8 +1058,8 @@
                   local env::FCore.Graph
                   local env3::FCore.Graph
                   local prevFrames::FCore.Scope
-                  local ci_state::ClassInf.State
-                  local cistate1::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local cistate1::ClassInf.SMNode
                   local path::Absyn.Path
                   local rest::List{Absyn.Import}
                   local cache::FCore.Cache
@@ -1542,7 +1546,7 @@
                   local prevFrames::FCore.Scope
                   local fs::FCore.Scope
                   local node::FCore.Node
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local attr::DAE.Attributes
                   local ty::DAE.Type
                   local bind::DAE.Binding
@@ -1674,7 +1678,7 @@
                   local prevFrames::FCore.Scope
                   local fs::FCore.Scope
                   local node::FCore.Node
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local attr::DAE.Attributes
                   local ty::DAE.Type
                   local bind::DAE.Binding
@@ -2090,8 +2094,8 @@
                   local c::SCode.Element
                   local encflag::SCode.Encapsulated
                   local restr::SCode.Restriction
-                  local ci_state::ClassInf.State
-                  local cistate1::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local cistate1::ClassInf.SMNode
                   local r::FCore.Ref
                   local rs::FCore.Scope
                   local cache::FCore.Cache

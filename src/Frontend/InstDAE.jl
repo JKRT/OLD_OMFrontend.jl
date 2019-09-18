@@ -90,7 +90,7 @@
           The functions daeDeclare2 and daeDeclare3 below are helper functions that perform parts of the task.
           Note: Currently, this function can only declare scalar variables, i.e. the element type of an array type is used. To indicate that the variable
           is an array, the InstDims attribute is used. This will need to be redesigned in the futurue, when array variables should not be flattened out in the frontend. =#
-        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.State, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::List{<:List{<:DAE.Dimension}}, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist 
+        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.SMNode, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::List{<:List{<:DAE.Dimension}}, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist 
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -98,7 +98,7 @@
                   local dae::DAE.DAElist
                   local vn::DAE.ComponentRef
                   local daeParallelism::DAE.VarParallelism
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local ty::DAE.Type
                   local ct::SCode.ConnectorType
                   local vis::SCode.Visibility
@@ -138,7 +138,7 @@
           outDae
         end
 
-        function showDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inState::ClassInf.State, inDAE::DAE.DAElist)  
+        function showDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inState::ClassInf.SMNode, inDAE::DAE.DAElist)  
               _ = begin
                   local str::String
                   local sstr::String
@@ -201,7 +201,7 @@
                   local comment::Option{SCode.Comment}
                   local l::List{String}
                   local dae::DAE.DAElist
-                  local ci::ClassInf.State
+                  local ci::ClassInf.SMNode
                   local dim::ModelicaInteger
                   local s::String
                   local ty::DAE.Type

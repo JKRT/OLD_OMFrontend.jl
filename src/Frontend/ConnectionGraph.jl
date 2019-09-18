@@ -832,11 +832,11 @@
           outStr
         end
 
-        function setRootDistance(finalRoots::List{<:DAE.ComponentRef}, table::HashTable3.HashTable, distance::ModelicaInteger, nextLevel::List{<:DAE.ComponentRef}, irooted::HashTable.HashTable) ::HashTable.HashTable
-              local orooted::HashTable.HashTable
+        function setRootDistance(finalRoots::List{<:DAE.ComponentRef}, table::HashTable3.HashTable, distance::ModelicaInteger, nextLevel::List{<:DAE.ComponentRef}, irooted::HashTable.HashTableType) ::HashTable.HashTableType
+              local orooted::HashTable.HashTableType
 
               orooted = begin
-                  local rooted::HashTable.HashTable
+                  local rooted::HashTable.HashTableType
                   local rest::List{DAE.ComponentRef}
                   local next::List{DAE.ComponentRef}
                   local cr::DAE.ComponentRef
@@ -959,7 +959,7 @@
               local outDae::List{DAE.Element}
 
               outDae = begin
-                  local rooted::HashTable.HashTable
+                  local rooted::HashTable.HashTableType
                   local table::HashTable3.HashTable
                   local branches::Edges
                   local connections::DaeEdges
@@ -998,8 +998,8 @@
         end
 
          #= Helper function for evaluation of Connections.rooted, Connections.isRoot, Connections.uniqueRootIndices =#
-        function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTable.HashTable, List{<:DAE.ComponentRef}, ConnectionGraphType}) ::Tuple{DAE.Exp, Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraphType}}
-              local outRoots::Tuple{HashTable.HashTable, List{DAE.ComponentRef}, ConnectionGraphType}
+        function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTable.HashTableType, List{<:DAE.ComponentRef}, ConnectionGraphType}) ::Tuple{DAE.Exp, Tuple{HashTable.HashTableType, List{DAE.ComponentRef}, ConnectionGraphType}}
+              local outRoots::Tuple{HashTable.HashTableType, List{DAE.ComponentRef}, ConnectionGraphType}
               local outExp::DAE.Exp
 
               (outExp, outRoots) = begin
@@ -1008,7 +1008,7 @@
                   local uroots::DAE.Exp
                   local nodes::DAE.Exp
                   local message::DAE.Exp
-                  local rooted::HashTable.HashTable
+                  local rooted::HashTable.HashTableType
                   local cref::DAE.ComponentRef
                   local cref1::DAE.ComponentRef
                   local result::Bool
@@ -1095,7 +1095,7 @@
           (outExp, outRoots)
         end
 
-        function getRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, rooted::HashTable.HashTable) ::Bool
+        function getRooted(cref1::DAE.ComponentRef, cref2::DAE.ComponentRef, rooted::HashTable.HashTableType) ::Bool
               local result::Bool
 
               result = begin

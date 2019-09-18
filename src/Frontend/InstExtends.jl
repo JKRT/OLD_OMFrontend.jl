@@ -113,7 +113,7 @@
          #= This function flattens out the inheritance structure of a class. It takes an
            SCode.Element list and flattens out the extends nodes of that list. The
            result is a list of components and lists of equations and algorithms. =#
-        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local outComments::List{SCode.Comment} = nil
               local outInitialAlgs::List{SCode.AlgorithmSection} = nil
               local outNormalAlgs::List{SCode.AlgorithmSection} = nil
@@ -368,7 +368,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local outComments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}
@@ -409,7 +409,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.State, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local comments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}

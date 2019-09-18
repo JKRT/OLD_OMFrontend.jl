@@ -6,6 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    Type_a = Any
+
     BasicTypeAttrTyper = Function
 
     InstFunc = Function
@@ -120,8 +122,8 @@
         import InstExtends
         import ListUtil
         import Lookup
-        import MutableType
-        import OperatorOverloading
+        import Mutable
+        # import OperatorOverloading
         import PrefixUtil
         import SCodeUtil
         import SCodeInstUtil
@@ -136,8 +138,11 @@
         import SCodeDump
         import UnitAbsynBuilder
         import InstStateMachineUtil
-        import NFUnitCheck
+        # import NFUnitCheck
         import DAEDump
+        
+        MutableType = Mutable.MutableType
+        
          #=  BTH
          =#
 
@@ -165,7 +170,7 @@
                   local cdef::SCode.Element
                   local cache::FCore.Cache
                   local ih::InstanceHierarchy
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local source::DAE.ElementSource #= the origin of the element =#
                   local daeElts::List{DAE.Element}
                   local cmt::Option{SCode.Comment}
@@ -279,7 +284,7 @@
                        #=  instantiate a class
                        =#
                       (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(cache, ih, cdecls, path, doSCodeDep)
-                      outDAElist = NFUnitCheck.checkUnits(outDAElist, FCore.getFunctionTree(outCache))
+                      # outDAElist = NFUnitCheck.checkUnits(outDAElist, FCore.getFunctionTree(outCache))
                     (outCache, outEnv, outIH, outDAElist)
                   end
                   
@@ -380,8 +385,8 @@
           (outCache, outEnv, outIH, outDAElist)
         end
 
-        function makeTopComponentPrefix(inGraph::FGraph.Graph, inName::Absyn.Ident) ::Prefix.Prefix 
-              local outPrefix::Prefix.Prefix
+        function makeTopComponentPrefix(inGraph::FGraph.Graph, inName::Absyn.Ident) ::Prefix.PrefixType 
+              local outPrefix::Prefix.PrefixType
 
               local p::Absyn.Path
 
@@ -447,10 +452,10 @@
            o Initialize the class inference state machine
            o Instantiate all the elements and equations
            o Generate equations from the connection sets built during instantiation =#
-        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ClassInf.State, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ClassInf.SMNode, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local optDerAttr::Option{SCode.Attributes}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outType::DAE.Type
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
@@ -464,7 +469,7 @@
                   local env_1::FCore.Graph
                   local env_3::FCore.Graph
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local csets::Connect.Sets
                   local n::String
                   local scopeName::String
@@ -477,8 +482,8 @@
                   local recursionDepthReached::Bool
                   local partialPrefix::SCode.Partial
                   local encflag::SCode.Encapsulated
-                  local ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
                   local dae1::DAE.DAElist
                   local dae1_1::DAE.DAElist
                   local dae::DAE.DAElist
@@ -491,7 +496,7 @@
                   local inst_dims::InstDims
                   local callscope::InstTypes.CallingScope
                   local oDA::Option{SCode.Attributes}
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local equalityConstraint::DAE.EqualityConstraint
                   local info::SourceInfo
@@ -564,8 +569,8 @@
           extending from basic types. See instBasictypeBaseclass.
           NOTE: This function should only be called from instBasictypeBaseclass.
           This is new functionality in Modelica v 2.2. =#
-        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, List{DAE.Var}, ClassInf.State} 
-              local outState::ClassInf.State
+        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, List{DAE.Var}, ClassInf.SMNode} 
+              local outState::ClassInf.SMNode
               local outTypeVars::List{DAE.Var} #= attributes of builtin types =#
               local outType::DAE.Type
               local outSets::Connect.Sets
@@ -579,8 +584,8 @@
                   local env_1::FCore.Graph
                   local env_3::FCore.Graph
                   local env::FCore.Graph
-                  local ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
                   local c_1::SCode.Element
                   local c::SCode.Element
                   local dae1::DAE.DAElist
@@ -594,7 +599,7 @@
                   local impl::Bool
                   local ty::DAE.Type
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local n::String
                   local r::SCode.Restriction
                   local inst_dims::InstDims
@@ -636,13 +641,13 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local outType::Option{DAE.Type}
               local outVars::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
@@ -653,7 +658,7 @@
               (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outVars, outType, optDerAttr, outEqualityConstraint, outGraph) = begin
                   local bc::Option{DAE.Type}
                   local env::FCore.Graph
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local c::SCode.Element
                   local r::SCode.Restriction
                   local n::String
@@ -663,7 +668,7 @@
                   local cache::FCore.Cache
                   local oDA::Option{SCode.Attributes}
                   local equalityConstraint::DAE.EqualityConstraint
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local s1::String
                   local s2::String
@@ -723,7 +728,7 @@
          generation of functions in implicit instanitation (according to
          *implicitInstantiation* boolean) can cause circular dependencies
          (e.g. if a function uses a constant in its body) =#
-        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.Prefix, state::ClassInf.State, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraph, sets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, ClassInf.State, ConnectionGraph.ConnectionGraph, Connect.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint} 
+        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraphType, sets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType, Connect.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint} 
               local equalityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local ty::Option{DAE.Type}
@@ -740,18 +745,18 @@
               local cache_path::Absyn.Path
               local inputs::InstHashTable.CachedInstItemInputs
               local outputs::InstHashTable.CachedInstItemOutputs
-              local bbx::Tuple{InstDims, Bool, DAE.Mod, Connect.Sets, ClassInf.State, SCode.Element, Option{DAE.ComponentRef}}
-              local bby::Tuple{InstDims, Bool, DAE.Mod, Connect.Sets, ClassInf.State, SCode.Element, Option{DAE.ComponentRef}}
+              local bbx::Tuple{InstDims, Bool, DAE.Mod, Connect.Sets, ClassInf.SMNode, SCode.Element, Option{DAE.ComponentRef}}
+              local bby::Tuple{InstDims, Bool, DAE.Mod, Connect.Sets, ClassInf.SMNode, SCode.Element, Option{DAE.ComponentRef}}
               local m::DAE.Mod
-              local pre::Prefix.Prefix
+              local pre::Prefix.PrefixType
               local csets::Connect.Sets
-              local st::ClassInf.State
+              local st::ClassInf.SMNode
               local e::SCode.Element
               local dims::InstDims
               local impl::Bool
               local scr::Option{DAE.ComponentRef}
               local cs::InstTypes.CallingScope
-              local cached_graph::ConnectionGraph.ConnectionGraph
+              local cached_graph::ConnectionGraph.ConnectionGraphType
 
                #=  Packages derived from partial packages should do partialInstClass, since it
                =#
@@ -837,13 +842,13 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local outTypesTypeOption::Option{DAE.Type}
               local outTypesVarLst::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
@@ -856,9 +861,9 @@
                   local env::FCore.Graph
                   local env_1::FCore.Graph
                   local mods::DAE.Mod
-                  local pre::Prefix.Prefix
-                  local ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
+                  local pre::Prefix.PrefixType
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
                   local c::SCode.Element
                   local inst_dims::InstDims
                   local impl::Bool
@@ -872,7 +877,7 @@
                   local cache::FCore.Cache
                   local oDA::Option{SCode.Attributes}
                   local callscope::InstTypes.CallingScope
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local dae::DAE.DAElist
                   local dae1::DAE.DAElist
@@ -1270,7 +1275,7 @@
           outType
         end
 
-        function instBasicTypeAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper, inPrefix::Prefix.Prefix) ::List{DAE.Var} 
+        function instBasicTypeAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper, inPrefix::Prefix.PrefixType) ::List{DAE.Var} 
               local outVars::List{DAE.Var}
 
               outVars = begin
@@ -1437,7 +1442,7 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.Prefix, state::ClassInf.State, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Var}} 
+        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
               local vars::List{DAE.Var}
 
 
@@ -1447,11 +1452,11 @@
               local cache_path::Absyn.Path
               local inputs::InstHashTable.CachedPartialInstItemInputs
               local outputs::InstHashTable.CachedPartialInstItemOutputs
-              local bbx::Tuple{InstDims, DAE.Mod, ClassInf.State, SCode.Element}
-              local bby::Tuple{InstDims, DAE.Mod, ClassInf.State, SCode.Element}
+              local bbx::Tuple{InstDims, DAE.Mod, ClassInf.SMNode, SCode.Element}
+              local bby::Tuple{InstDims, DAE.Mod, ClassInf.SMNode, SCode.Element}
               local m::DAE.Mod
-              local pre::Prefix.Prefix
-              local st::ClassInf.State
+              local pre::Prefix.PrefixType
+              local st::ClassInf.SMNode
               local e::SCode.Element
               local dims::InstDims
               local partial_inst::Bool
@@ -1503,9 +1508,9 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Var}} 
+        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
               local outVars::List{DAE.Var} = nil
-              local outState::ClassInf.State = inState
+              local outState::ClassInf.SMNode = inState
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
@@ -1566,13 +1571,13 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.Prefix, inState5::ClassInf.State, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local outTypesTypeOption::Option{DAE.Type}
               local outTypesVarLst::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
@@ -1588,13 +1593,13 @@
         This function will try to instantiate the
         class definition as a it would extend a basic
         type =#
-        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.Prefix, inState5::ClassInf.State, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local outTypesTypeOption::Option{DAE.Type}
               local outTypesVarLst::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
@@ -1617,19 +1622,19 @@
                   local dae1::DAE.DAElist
                   local dae2::DAE.DAElist
                   local dae::DAE.DAElist
-                  local ci_state1::ClassInf.State
-                  local ci_state::ClassInf.State
+                  local ci_state1::ClassInf.SMNode
+                  local ci_state::ClassInf.SMNode
                   local tys::List{DAE.Var}
                   local bc::Option{DAE.Type}
                   local mods::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local re::SCode.Restriction
                   local impl::Bool
                   local vis::SCode.Visibility
                   local inst_dims::InstDims
                   local cache::FCore.Cache
                   local eqConstraint::DAE.EqualityConstraint
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local store::UnitAbsyn.InstStore
                    #=  This rule describes how to instantiate a class definition
@@ -1707,13 +1712,13 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.Prefix, inState5::ClassInf.State, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
+        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local oty::Option{DAE.Type}
               local outTypesVarLst::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
@@ -1760,16 +1765,16 @@
                   local dae7::DAE.DAElist
                   local dae8::DAE.DAElist
                   local dae::DAE.DAElist
-                  local ci_state1::ClassInf.State
-                  local ci_state::ClassInf.State
-                  local ci_state2::ClassInf.State
-                  local ci_state3::ClassInf.State
-                  local ci_state4::ClassInf.State
-                  local ci_state5::ClassInf.State
-                  local ci_state6::ClassInf.State
-                  local ci_state7::ClassInf.State
-                  local new_ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
+                  local ci_state1::ClassInf.SMNode
+                  local ci_state::ClassInf.SMNode
+                  local ci_state2::ClassInf.SMNode
+                  local ci_state3::ClassInf.SMNode
+                  local ci_state4::ClassInf.SMNode
+                  local ci_state5::ClassInf.SMNode
+                  local ci_state6::ClassInf.SMNode
+                  local ci_state7::ClassInf.SMNode
+                  local new_ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
                   local vars::List{DAE.Var}
                   local bc::Option{DAE.Type}
                   local mods::DAE.Mod
@@ -1777,7 +1782,7 @@
                   local mod_1::DAE.Mod
                   local mods_1::DAE.Mod
                   local checkMods::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local eqs::List{SCode.Equation}
                   local initeqs::List{SCode.Equation}
                   local eqs2::List{SCode.Equation}
@@ -1822,7 +1827,7 @@
                   local comments::List{SCode.Comment}
                   local eqConstraint::DAE.EqualityConstraint
                   local callscope::InstTypes.CallingScope
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                   local fdae::DAE.DAElist
                   local unrollForLoops::Bool
@@ -2271,7 +2276,7 @@
 
          #= Function: instClassDefHelper
          MetaModelica extension. KS TODO: Document this function!!!! =#
-        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.Prefix, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::Connect.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Type}, Connect.Sets, Option{SCode.Attributes}} 
+        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.PrefixType, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::Connect.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Type}, Connect.Sets, Option{SCode.Attributes}} 
               local outAttr::Option{SCode.Attributes}
               local outSets::Connect.Sets
               local outType::List{DAE.Type}
@@ -2283,7 +2288,7 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local cenv::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local dims::InstDims
                   local impl::Bool
                   local localAccTypes::List{DAE.Type}
@@ -2358,7 +2363,7 @@
                   local dae::DAE.DAElist
                   local ty::DAE.Type
                   local tys::List{DAE.Var}
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local b1::Bool
                   local b2::Bool
                   local b3::Bool
@@ -2445,7 +2450,7 @@
                   local env::FCore.Graph
                   local dae::DAE.DAElist
                   local ty::DAE.Type
-                  local st::ClassInf.State
+                  local st::ClassInf.SMNode
                   local b1::Bool
                   local b2::Bool
                   local path::Absyn.Path
@@ -2484,9 +2489,9 @@
 
          #= This function is used by partialInstClassIn for instantiating local class
            definitions and inherited class definitions only. =#
-        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.State, List{DAE.Var}} 
+        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
               local outVars::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2612,11 +2617,11 @@
         end
 
          #= Instantiates a list of elements. =#
-        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, ConnectionGraph.ConnectionGraph, InstUtil.DomainFieldsLst} 
+        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldsLst} 
               local domainFieldsListOut::InstUtil.DomainFieldsLst = nil
-              local outGraph::ConnectionGraph.ConnectionGraph = inGraph
+              local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var}
-              local outState::ClassInf.State = inState
+              local outState::ClassInf.SMNode = inState
               local outSets::Connect.Sets = inSets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore = inStore
@@ -2728,11 +2733,11 @@
           outEqual
         end
 
-        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, Connect.Sets, ClassInf.State, List{DAE.Var}, ConnectionGraph.ConnectionGraph, InstUtil.DomainFieldOpt} 
+        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt} 
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
-              local outGraph::ConnectionGraph.ConnectionGraph = inGraph
+              local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var} = nil
-              local outState::ClassInf.State = inState
+              local outState::ClassInf.SMNode = inState
               local outSets::Connect.Sets = inSets
               local outDae::List{DAE.Element} = nil
               local outStore::UnitAbsyn.InstStore = inStore
@@ -2779,7 +2784,7 @@
          #= Checks if an element has a conditional expression that evaluates to false,
            and adds it to the set of deleted components if it does. Otherwise the
            function does nothing. =#
-        function isDeletedComponent(element::Tuple{<:SCode.Element, DAE.Mod}, prefix::Prefix.Prefix, stopOnError::Bool, env::FCore.Graph, cache::FCore.Cache) ::Tuple{Bool, FCore.Graph, FCore.Cache} 
+        function isDeletedComponent(element::Tuple{<:SCode.Element, DAE.Mod}, prefix::Prefix.PrefixType, stopOnError::Bool, env::FCore.Graph, cache::FCore.Cache) ::Tuple{Bool, FCore.Graph, FCore.Cache} 
 
 
               local isDeleted::Bool
@@ -2838,11 +2843,11 @@
          #= 
           This monster function instantiates an element of a class definition.  An
           element is either a class definition, a variable, or an import clause. =#
-        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.Prefix, inState::ClassInf.State, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraph, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.State, List{DAE.Var}, ConnectionGraph.ConnectionGraph, InstUtil.DomainFieldOpt} 
+        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt} 
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
-              local outGraph::ConnectionGraph.ConnectionGraph
+              local outGraph::ConnectionGraph.ConnectionGraphType
               local outVars::List{DAE.Var}
-              local outState::ClassInf.State
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outUnitStore::UnitAbsyn.InstStore
@@ -2862,9 +2867,9 @@
                   local impl::Bool
                   local is_function_input::Bool
                   local callscope::InstTypes.CallingScope
-                  local ci_state::ClassInf.State
-                  local graph::ConnectionGraph.ConnectionGraph
-                  local graph_new::ConnectionGraph.ConnectionGraph
+                  local ci_state::ClassInf.SMNode
+                  local graph::ConnectionGraph.ConnectionGraphType
+                  local graph_new::ConnectionGraph.ConnectionGraphType
                   local csets::Connect.Sets
                   local dae_attr::DAE.Attributes
                   local binding::DAE.Binding
@@ -2900,7 +2905,7 @@
                   local cond::Option{Absyn.Exp}
                   local eq::Option{DAE.EqMod}
                   local comment::SCode.Comment
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local attr::SCode.Attributes
                   local cls::SCode.Element
                   local comp::SCode.Element
@@ -2923,7 +2928,7 @@
                   local topInstance::InnerOuter.TopInstance
                    #=  BTH
                    =#
-                  local sm::HashSet.HashSet
+                  local sm::HashSet.HashSetType
                    #=  BTH
                    =#
                   local isInSM::Bool
@@ -3158,7 +3163,7 @@
          #= never fail and *NEVER* display any error messages as this function
          prints non-true error messages and even so instElementList dependency
          analysis might work fine and still instantiate. =#
-        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.State, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3192,7 +3197,7 @@
           This function updates component modifiers to typed modifiers.
           Typed modifiers are needed  to merge modifiers and to be able to
           fully instantiate a component. =#
-        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.State, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3202,7 +3207,7 @@
                   local env::FCore.Graph
                   local env2::FCore.Graph
                   local env3::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local umod::SCode.Mod
                   local crefs::List{Absyn.ComponentRef}
                   local crefs_1::List{Absyn.ComponentRef}
@@ -3217,7 +3222,7 @@
                   local elMod::Tuple{SCode.Element, DAE.Mod}
                   local comp::SCode.Element
                   local redComp::SCode.Element
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local impl::Bool
                   local cache::FCore.Cache
                   local ih::InstanceHierarchy
@@ -3306,7 +3311,7 @@
          #= This function takes a DAE.Mod and an SCode.Element and if the modification
            contains a redeclare of that element, the type is changed and an updated
            element is returned. =#
-        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.Prefix, inState::ClassInf.State, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element, DAE.Mod} 
+        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element, DAE.Mod} 
               local outMod::DAE.Mod = DAE.NOMOD()
               local outElement::SCode.Element = inElement
               local outIH::InnerOuter.InstHierarchy = inIH
@@ -3440,7 +3445,7 @@
           component can be instantiated fully and the type of the component can be
           determined. The type is added/updated to the environment such that other
           components can use it when they are instantiated. =#
-        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.State, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = env
               local outCache::FCore.Cache = cache
@@ -3477,7 +3482,7 @@
         end
 
          #= Helper function to updateComponentsInEnv. Does the work for one variable. =#
-        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.State, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
+        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
               local outUpdatedComps::Option{HashTable5.HashTable}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3534,7 +3539,7 @@
                   local instStatus::FCore.Status
                   local cache::FCore.Cache
                   local updatedComps::HashTable5.HashTable
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                    #=  if there are no modifications, return the same!
                    =#
                    #= case (cache,env,ih,pre,DAE.NOMOD(),cref,ci_state,csets,impl,_)
@@ -3689,7 +3694,7 @@
 
          #=  Helper function, checks if the component was already instantiated.
           If it was, don't do it again. =#
-        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.State, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
+        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
               local outUpdatedComps::HashTable5.HashTable
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3706,7 +3711,7 @@
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
-        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.State, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
+        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.SMNode, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
               local outUpdatedComps::HashTable5.HashTable = inUpdatedComps
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
@@ -4074,9 +4079,9 @@
 
          #= This is a utility used to do instantiation of list
           of things, collecting the result in another list. =#
-        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.Prefix, inSets::Connect.Sets, inState::ClassInf.State, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.State, ConnectionGraph.ConnectionGraph} 
-              local outGraph::ConnectionGraph.ConnectionGraph
-              local outState::ClassInf.State
+        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType} 
+              local outGraph::ConnectionGraph.ConnectionGraphType
+              local outState::ClassInf.SMNode
               local outSets::Connect.Sets
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
@@ -4088,13 +4093,13 @@
                   local env_1::FCore.Graph
                   local env_2::FCore.Graph
                   local mod::DAE.Mod
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local csets::Connect.Sets
                   local csets_1::Connect.Sets
                   local csets_2::Connect.Sets
-                  local ci_state::ClassInf.State
-                  local ci_state_1::ClassInf.State
-                  local ci_state_2::ClassInf.State
+                  local ci_state::ClassInf.SMNode
+                  local ci_state_1::ClassInf.SMNode
+                  local ci_state_2::ClassInf.SMNode
                   local impl::Bool
                   local dae1::DAE.DAElist
                   local dae2::DAE.DAElist
@@ -4102,7 +4107,7 @@
                   local e::Type_a
                   local es::List{Type_a}
                   local cache::FCore.Cache
-                  local graph::ConnectionGraph.ConnectionGraph
+                  local graph::ConnectionGraph.ConnectionGraphType
                   local ih::InstanceHierarchy
                 @match (inCache, inEnv, inIH, inPrefix, inSets, inState, instFunc, inTypeALst, inBoolean, unrollForLoops, inGraph) begin
                   (cache, env, ih, _, csets, ci_state, _,  nil(), _, _, graph)  => begin
@@ -4120,8 +4125,8 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function instConstraints(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inState::ClassInf.State, inConstraints::List{<:SCode.ConstraintSection}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.State} 
-              local outState::ClassInf.State
+        function instConstraints(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inConstraints::List{<:SCode.ConstraintSection}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.SMNode} 
+              local outState::ClassInf.SMNode
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -4131,7 +4136,7 @@
                   local env2::FCore.Graph
                   local constraints_1::DAE.DAElist
                   local constraints_2::DAE.DAElist
-                  local ci_state::ClassInf.State
+                  local ci_state::ClassInf.SMNode
                   local rest::List{SCode.ConstraintSection}
                   local constr::SCode.ConstraintSection
                   local cache::FCore.Cache
@@ -4158,7 +4163,7 @@
           (outCache, outEnv, outDae, outState)
         end
 
-        function instClassAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
+        function instClassAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -4189,7 +4194,7 @@
           (outCache, outEnv, outDae)
         end
 
-        function instClassAttributes2(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.Prefix, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo, inClsAttrs::DAE.DAElist) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
+        function instClassAttributes2(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo, inClsAttrs::DAE.DAElist) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -4197,7 +4202,7 @@
               (outCache, outEnv, outDae) = begin
                   local env::FCore.Graph
                   local env_2::FCore.Graph
-                  local pre::Prefix.Prefix
+                  local pre::Prefix.PrefixType
                   local impl::Bool
                   local na::Absyn.NamedArg
                   local rest::List{Absyn.NamedArg}
@@ -4413,7 +4418,7 @@
          But also instantiate the declared type, if any.
          If it fails (declarations of array dimensions using
          the size of itself) it will just remove the element. =#
-        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.State, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{<:List{<:DAE.Dimension}}, pre::Prefix.Prefix, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}} 
+        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.SMNode, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{<:List{<:DAE.Dimension}}, pre::Prefix.PrefixType, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}} 
               local o1::List{Absyn.ComponentRef}
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -4438,7 +4443,7 @@
                   local n::Ident
                   local c::SCode.Element
                   local ty::DAE.Type
-                  local state::ClassInf.State
+                  local state::ClassInf.SMNode
                   local vis::SCode.Visibility
                   local ct::SCode.ConnectorType
                   local attr::SCode.Attributes
@@ -4637,7 +4642,7 @@
 
          #= author: PA
           Help function to updateComponentsInEnv. =#
-        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.Prefix, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.State, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
+        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
               local outUpdatedComps::Option{HashTable5.HashTable} = inUpdatedComps
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
@@ -5029,8 +5034,8 @@
 
               local cache_path::Absyn.Path
               local cls::SCode.Element
-              local prefix::Prefix.Prefix
-              local prefix2::Prefix.Prefix
+              local prefix::Prefix.PrefixType
+              local prefix2::Prefix.PrefixType
               local env2::FCore.Graph
               local enc::SCode.Encapsulated
               local res::SCode.Restriction
@@ -5050,7 +5055,7 @@
           (cache, env)
         end
 
-        function generateCachePath(env::FCore.Graph, cls::SCode.Element, prefix::Prefix.Prefix, callScope::InstTypes.CallingScope) ::Absyn.Path 
+        function generateCachePath(env::FCore.Graph, cls::SCode.Element, prefix::Prefix.PrefixType, callScope::InstTypes.CallingScope) ::Absyn.Path 
               local cachePath::Absyn.Path
 
               local name::String
@@ -5060,7 +5065,7 @@
           cachePath
         end
 
-        function generatePrefixStr(inPrefix::Prefix.Prefix) ::String 
+        function generatePrefixStr(inPrefix::Prefix.PrefixType) ::String 
               local str::String
 
               try
@@ -5078,7 +5083,7 @@
         end
 
          #= Merges the function's comments from inherited classes =#
-        function instFunctionAnnotations(comments::List{<:SCode.Comment}, state::ClassInf.State) ::DAE.DAElist 
+        function instFunctionAnnotations(comments::List{<:SCode.Comment}, state::ClassInf.SMNode) ::DAE.DAElist 
               local dae::DAE.DAElist = DAE.emptyDae
 
               local comment::Option{String} = NONE()

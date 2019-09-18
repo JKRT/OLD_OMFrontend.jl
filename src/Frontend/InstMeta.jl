@@ -35,6 +35,8 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
+        
+        import Absyn
         import ClassInf
         import DAE
         import FCore
@@ -45,7 +47,7 @@
         import SCodeUtil
         import Types
 
-        function fixUniontype(inCache::FCore.Cache, inEnv::FCore.Graph, inState::ClassInf.State, inClassDef::SCode.ClassDef) ::Tuple{FCore.Cache, Option{DAE.Type}} 
+        function fixUniontype(inCache::FCore.Cache, inEnv::FCore.Graph, inState::ClassInf.SMNode, inClassDef::SCode.ClassDef) ::Tuple{FCore.Cache, Option{DAE.Type}} 
               local outType::Option{DAE.Type}
               local cache::FCore.Cache = inCache
 
@@ -78,7 +80,7 @@
                       b = listLength(paths) == 1
                       if b
                         p2 = listGet(paths, 1)
-                        singletonType = DAE.EVAL_SINGLETON_TYPE_FUNCTION((arrayCreate(1, (cache, inEnv, p2, NONE()))) -> fixUniontype2(arr = arrayCreate(1, (cache, inEnv, p2, NONE()))))
+                        singletonType = DAE.EVAL_SINGLETON_TYPE_FUNCTION(fn -> fixUniontype2(arr = arrayCreate(1, (cache, inEnv, p2, NONE()))))
                       else
                         singletonType = DAE.NOT_SINGLETON()
                       end

@@ -65,7 +65,7 @@
                   local s1::String
                   local s2::String
                   local s3::String
-                  local ht::HashTable.HashTable
+                  local ht::HashTable.HashTableType
                   local st::UnitAbsyn.InstStore
                 @matchcontinue (tms, ist) begin
                   (_, st)  => begin

@@ -38,7 +38,7 @@
         import Absyn
         import AbsynUtil
         import BaseAvlSet
-        extends BaseAvlSet
+        using BaseAvlSet
         Key = Absyn.Path 
 
 

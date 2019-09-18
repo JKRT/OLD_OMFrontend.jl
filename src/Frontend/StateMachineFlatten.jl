@@ -87,7 +87,7 @@
 
                        ident::DAE.Ident
                        smComps #= First element is the initial state =#::Array{DAE.Element}
-                       #=  Flat State machine semantics (SMS)
+                       #=  Flat SMNode machine semantics (SMS)
                        =#
                        t #= List/Array of transition data sorted in priority =#::List{Transition}
                        c #= Transition conditions sorted in priority =#::List{DAE.Exp}
@@ -104,7 +104,7 @@
               end
          end
 
-         const SMS_PRE = "smOf" #= prefix for crefs of fresh State Machine Semantics variables/knowns =#::String
+         const SMS_PRE = "smOf" #= prefix for crefs of fresh SMNode Machine Semantics variables/knowns =#::String
 
          #= 
         Author: BTH

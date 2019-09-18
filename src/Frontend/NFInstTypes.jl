@@ -28,6 +28,8 @@
     @UniontypeDecl Frame 
     @UniontypeDecl AvlTree 
     @UniontypeDecl AvlTreeValue 
+    
+    Env = List
 
          #= /*
          * This file is part of OpenModelica.
@@ -575,8 +577,6 @@
                        entries::AvlTree
               end
          end
-
-        Env = List 
 
         AvlKey = String 
 

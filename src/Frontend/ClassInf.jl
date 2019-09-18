@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl State 
+    @UniontypeDecl SMNode 
     @UniontypeDecl Event 
 
          #= /*
@@ -57,7 +57,7 @@
         import SCodeDump
 
           #= - Machine states, the string contains the classname. =#
-         @Uniontype State begin
+         @Uniontype SMNode begin
               @Record UNKNOWN begin
 
                        path::Absyn.Path
@@ -232,7 +232,7 @@
 
           The code is excluded from the report.
          =#
-        function printStateStr(inState::State) ::String 
+        function printStateStr(inState::SMNode) ::String 
               local outString::String
 
               outString = begin
@@ -363,7 +363,7 @@
           outString
         end
 
-        function printState(inState::State)  
+        function printState(inState::SMNode)  
               _ = begin
                   local p::Absyn.Path
                 @match inState begin
@@ -470,7 +470,7 @@
         end
 
          #= Returns the classname of the state. =#
-        function getStateName(inState::State) ::Absyn.Path 
+        function getStateName(inState::SMNode) ::Absyn.Path 
               local outPath::Absyn.Path
 
               outPath = begin
@@ -622,8 +622,8 @@
 
          #= 
           This is the state machine initialization function. =#
-        function start(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::State 
-              local outState::State
+        function start(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode 
+              local outState::SMNode
 
               outState = start_dispatch(inRestriction, AbsynUtil.makeFullyQualified(inPath))
           outState
@@ -634,8 +634,8 @@
 
          #= 
           This is the state machine initialization function. =#
-        function start_dispatch(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::State 
-              local outState::State
+        function start_dispatch(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode 
+              local outState::SMNode
 
               outState = begin
                   local p::Absyn.Path
@@ -738,12 +738,12 @@
           This is the state machine transition function.  It describes the
           transitions between states at different events.
          =#
-        function trans(inState::State, inEvent::Event) ::State 
-              local outState::State
+        function trans(inState::SMNode, inEvent::Event) ::SMNode 
+              local outState::SMNode
 
               outState = begin
                   local p::Absyn.Path
-                  local st::State
+                  local st::SMNode
                   local ev::Event
                   local isExpandable::Bool
                   local b::Bool
@@ -990,7 +990,7 @@
           restriction using this function to find out if it is an error to
           use this class definition as a connector.
          =#
-        function valid(inState::State, inRestriction::SCode.Restriction)  
+        function valid(inState::SMNode, inRestriction::SCode.Restriction)  
               _ = begin
                   local p::Absyn.Path
                 @match (inState, inRestriction) begin
@@ -1169,9 +1169,9 @@
 
          #= This function has the same semantical meaning as the function
           `valid\\'.  However, it prints an error message when it fails. =#
-        function assertValid(inState::State, inRestriction::SCode.Restriction, info::SourceInfo)  
+        function assertValid(inState::SMNode, inRestriction::SCode.Restriction, info::SourceInfo)  
               _ = begin
-                  local st::State
+                  local st::SMNode
                   local re::SCode.Restriction
                   local str1::String
                   local str2::String
@@ -1195,11 +1195,11 @@
 
          #= This function has the same semantical meaning as the function
           `trans\\'.  However, it prints an error message when it fails. =#
-        function assertTrans(inState::State, event::Event, info::SourceInfo) ::State 
-              local outState::State
+        function assertTrans(inState::SMNode, event::Event, info::SourceInfo) ::SMNode 
+              local outState::SMNode
 
               outState = begin
-                  local st::State
+                  local st::SMNode
                   local str1::String
                   local str2::String
                   local str3::String
@@ -1221,14 +1221,14 @@
         end
 
          #= 
-          Finds a State in the list that matches the state given as first argument.
+          Finds a SMNode in the list that matches the state given as first argument.
           NOTE: Currently not used anywhere.
          =#
-        function matchingState(inState::State, inStateLst::List{<:State}) ::Bool 
+        function matchingState(inState::SMNode, inStateLst::List{<:SMNode}) ::Bool 
               local outBoolean::Bool
 
               outBoolean = begin
-                  local rest::List{State}
+                  local rest::List{SMNode}
                   local res::Bool
                 @match (inState, inStateLst) begin
                   (_,  nil())  => begin
@@ -1307,7 +1307,7 @@
         end
 
          #= returns true if state is FUNCTION. =#
-        function isFunction(inState::State) ::Bool 
+        function isFunction(inState::SMNode) ::Bool 
               local b::Bool
 
               b = begin
@@ -1325,7 +1325,7 @@
         end
 
          #= Fails for states that are not FUNCTION or RECORD. =#
-        function isFunctionOrRecord(inState::State) ::Bool 
+        function isFunctionOrRecord(inState::SMNode) ::Bool 
               local b::Bool
 
               b = begin
@@ -1349,7 +1349,7 @@
          #= 
           Fails for states that are not CONNECTOR.
          =#
-        function isConnector(inState::State)  
+        function isConnector(inState::SMNode)  
               _ = begin
                 @match inState begin
                   CONNECTOR(__)  => begin
@@ -1373,7 +1373,7 @@
           res
         end
 
-        function isTypeOrRecord(inState::State) ::Bool 
+        function isTypeOrRecord(inState::SMNode) ::Bool 
               local outIsTypeOrRecord::Bool
 
               outIsTypeOrRecord = begin
@@ -1394,7 +1394,7 @@
           outIsTypeOrRecord
         end
 
-        function isRecord(inState::State) ::Bool 
+        function isRecord(inState::SMNode) ::Bool 
               local outIsRecord::Bool
 
               outIsRecord = begin
@@ -1411,7 +1411,7 @@
           outIsRecord
         end
 
-        function isMetaRecord(inState::State) ::Bool 
+        function isMetaRecord(inState::SMNode) ::Bool 
               local outIsRecord::Bool
 
               outIsRecord = begin
