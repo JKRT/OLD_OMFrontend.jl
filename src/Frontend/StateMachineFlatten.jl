@@ -1575,7 +1575,6 @@
               local flatSmSemantics::FlatSmSemantics
 
               local crefInitialState::DAE.ComponentRef
-              local preRef::DAE.ComponentRef
                #=  Modeling variables and parameters/constants
                =#
               local defaultIntVar::DAE.Element
@@ -1870,7 +1869,7 @@
                 eqs = _cons(DAE.EQUATION(exp, cExp, DAE.emptyElementSource), eqs)
                 exp1 = DAE.CREF(arrayGet(cRefs, i), DAE.T_BOOL_DEFAULT)
                 @match DAE.VAR(binding = bindExp) = arrayGet(tImmediateVars, i)
-                rhs = if Util.applyOptionOrDefault(bindExp, (DAE.BCONST(true)) -> Expression.expEqual(inExp1 = DAE.BCONST(true)), false)
+                rhs = if Util.applyOptionOrDefault(bindExp, (fn) -> Expression.expEqual(inExp1 = DAE.BCONST(true)), false)
                       exp
                     else
                       DAE.CALL(Absyn.IDENT("previous"), list(exp), DAE.callAttrBuiltinImpureBool)

@@ -57,6 +57,8 @@
     FuncExpType = Function
 
     FuncExpType = Function
+    
+    Type_a = Any
 
          #= /*
          * This file is part of OpenModelica.
@@ -135,7 +137,7 @@
 
          #= return the DAE.Const as a string. (VAR|PARAM|CONST)
         Used for debugging. =#
-        function constStr(constExpr::DAE.ConstExpr) ::String
+        function constStr(constExpr::DAE.Const) ::String
               local str::String
 
               str = begin
@@ -157,7 +159,7 @@
         end
 
          #= return the DAE.Const as a friendly string. Used for debugging. =#
-        function constStrFriendly(constExpr::DAE.ConstExpr) ::String
+        function constStrFriendly(constExpr::DAE.Const) ::String
               local str::String
 
               str = begin
@@ -5100,7 +5102,8 @@
                         end
                       end for d in element.dims)
                       new_ty = begin
-                        @match (@match element.ty = ty) begin
+                        ty = element.ty
+                        @match ty begin
                           DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__))  => begin
                               changed = false
                               varLst = list(begin
