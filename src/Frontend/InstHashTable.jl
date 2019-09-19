@@ -42,6 +42,8 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
+        
+        import Absyn
         import Connect
         import ConnectionGraph
         import ClassInf
@@ -55,13 +57,14 @@
         import Global
         import OperatorOverloading
 
-        Key = Absyn.Path
-        Value = CachedInstItems
         CachedInstItemInputs = Tuple
         CachedInstItemOutputs = Tuple
         CachedPartialInstItemInputs = Tuple
         CachedPartialInstItemOutputs = Tuple
         CachedInstItems = List
+        
+        Key = Absyn.Path
+        Value = CachedInstItems
 
         function init()
           local ht::HashTable

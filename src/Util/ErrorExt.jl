@@ -46,35 +46,35 @@
         end
 
         function printMessagesStr(warningsAsErrors::Bool = false) ::String 
-              local outString::String
+              local outString::String = "not implemented"
 
             #= TODO: Defined in the runtime =#
           outString
         end
 
         function getNumMessages() ::ModelicaInteger 
-              local num::ModelicaInteger
+              local num::ModelicaInteger = 0
 
             #= TODO: Defined in the runtime =#
           num
         end
 
         function getNumErrorMessages() ::ModelicaInteger 
-              local num::ModelicaInteger
+              local num::ModelicaInteger = 0
 
             #= TODO: Defined in the runtime =#
           num
         end
 
         function getNumWarningMessages() ::ModelicaInteger 
-              local num::ModelicaInteger
+              local num::ModelicaInteger = 0
 
             #= TODO: Defined in the runtime =#
           num
         end
 
         function getMessages() ::List{Error.TotalMessage} 
-              local res::List{Error.TotalMessage}
+              local res::List{Error.TotalMessage} = nil
 
             #= TODO: Defined in the runtime =#
           res
@@ -86,7 +86,7 @@
 
          #= Used to rollback/delete checkpoints without considering the identifier. Used to reset the error messages after a stack overflow exception. =#
         function getNumCheckpoints() ::ModelicaInteger 
-              local n::ModelicaInteger
+              local n::ModelicaInteger = 0
 
             #= TODO: Defined in the runtime =#
           n
@@ -117,7 +117,7 @@
         end
 
         function printErrorsNoWarning() ::String 
-              local outString::String
+              local outString::String = "not implemented"
 
             #= TODO: Defined in the runtime =#
           outString
@@ -134,7 +134,7 @@
         returning all error messages added since that point in time. A unique identifier for the checkpoint must be provided
         The application will exit with return code -1 if this identifier does not match. =#
         function popCheckPoint(id::String #= unique identifier =#) ::List{ModelicaInteger} 
-              local handles::List{ModelicaInteger} #= opaque pointers; you MUST pass them back or memory is leaked =#
+              local handles::List{ModelicaInteger} #= opaque pointers; you MUST pass them back or memory is leaked =# = nil
 
             #= TODO: Defined in the runtime =#
           handles #= opaque pointers; you MUST pass them back or memory is leaked =#
@@ -155,7 +155,7 @@
           You can use it to rollBack/delete a checkpoint, but you're
           not sure that it exists (due to MetaModelica backtracking). =#
         function isTopCheckpoint(id::String #= unique identifier =#) ::Bool 
-              local isThere::Bool #= tells us if the checkpoint exists (true) or doesn't (false) =#
+              local isThere::Bool #= tells us if the checkpoint exists (true) or doesn't (false) =# = true
 
             #= TODO: Defined in the runtime =#
           isThere #= tells us if the checkpoint exists (true) or doesn't (false) =#

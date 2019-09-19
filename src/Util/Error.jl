@@ -1692,7 +1692,7 @@
 
          #= Prints out a message and terminates the execution. =#
         function terminateError(message::String, info::SourceInfo)
-              ErrorExt.addSourceMessage(0, MessageType.TRANSLATION(), Severity.INTERNAL(), info.lineNumberStart, info.columnNumberStart, info.lineNumberEnd, info.columnNumberEnd, info.isReadOnly, info.fileName, "%s", list(message))
+              ErrorExt.addSourceMessage(0, TRANSLATION(), INTERNAL(), info.lineNumberStart, info.columnNumberStart, info.lineNumberEnd, info.columnNumberEnd, info.isReadOnly, info.fileName, "%s", list(message))
               print(ErrorExt.printMessagesStr())
               System.exit(-1)
         end

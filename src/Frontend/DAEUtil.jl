@@ -134,6 +134,7 @@
         import Util
         import StateMachineFlatten
         import VarTransform
+        import AvlSetCR
 
          #= return the DAE.Const as a string. (VAR|PARAM|CONST)
         Used for debugging. =#
