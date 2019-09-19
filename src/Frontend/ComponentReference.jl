@@ -6,6 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    Type_a = Any
 
     FuncType = Function
 
@@ -82,6 +83,10 @@
          =#
 println("ComponentReference.jl 5")
          const dummyCref = DAE.CREF_IDENT("dummy", DAE.T_UNKNOWN_DEFAULT, nil)::DAE.ComponentRef
+
+         const preNamePrefix = DAE.preNamePrefix
+         const previousNamePrefix = DAE.previousNamePrefix
+         const startNamePrefix = DAE.startNamePrefix
 
          #=
           author: PA
@@ -805,7 +810,7 @@ println("ComponentReference.jl 5")
         const WithoutSubscripts = 1
         const WithGenericSubscript = 2
         const WithGenericSubscriptNotAlphabetic = 3
-        const WithIntSubscrip = 4
+        const WithIntSubscript = 4
         
         @exportAll()
       end
@@ -816,7 +821,8 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-              import CompareWithSubsType
+              import ..CompareWithSubsType
+              import DAE
               
               compareSubscript = CompareWithSubsType.WithGenericSubscript::Int64
 
@@ -932,7 +938,8 @@ println("ComponentReference.jl 5")
           using ExportAll
 
 
-          using CompareWithGenericSubscript
+          using ..CompareWithGenericSubscript
+          import ..CompareWithSubsType
           
           compareSubscript = CompareWithSubsType.WithGenericSubscriptNotAlphabetic
 
@@ -947,7 +954,8 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-          using CompareWithGenericSubscript
+          using ..CompareWithGenericSubscript
+          import ..CompareWithSubsType
 
           compareSubscript = CompareWithSubsType.WithoutSubscripts
 
@@ -962,7 +970,8 @@ println("ComponentReference.jl 5")
           #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
           using ExportAll
 
-          using CompareWithGenericSubscript
+          using ..CompareWithGenericSubscript
+          import ..CompareWithSubsType
           
           compareSubscript = CompareWithSubsType.WithIntSubscript
 
@@ -1561,7 +1570,7 @@ println("ComponentReference.jl 5")
 
               b = begin
                 @match cr begin
-                  DAE.CREF_QUAL(ident = DAE.preNamePrefix)  => begin
+                  DAE.CREF_QUAL(ident = preNamePrefix)  => begin
                     true
                   end
 
@@ -1578,7 +1587,7 @@ println("ComponentReference.jl 5")
 
               b = begin
                 @match cr begin
-                  DAE.CREF_QUAL(ident = DAE.previousNamePrefix)  => begin
+                  DAE.CREF_QUAL(ident = previousNamePrefix)  => begin
                     true
                   end
 
@@ -1595,7 +1604,7 @@ println("ComponentReference.jl 5")
 
               b = begin
                 @match cr begin
-                  DAE.CREF_QUAL(ident = DAE.startNamePrefix)  => begin
+                  DAE.CREF_QUAL(ident = startNamePrefix)  => begin
                     true
                   end
 
@@ -2507,7 +2516,7 @@ println("ComponentReference.jl 5")
         function crefPrefixPre(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
-              outCref = makeCrefQual(DAE.preNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
+              outCref = makeCrefQual(preNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
           outCref
         end
 
@@ -2516,7 +2525,7 @@ println("ComponentReference.jl 5")
         function crefPrefixPrevious(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
-              outCref = makeCrefQual(DAE.previousNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
+              outCref = makeCrefQual(previousNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
           outCref
         end
 
@@ -2534,7 +2543,7 @@ println("ComponentReference.jl 5")
 
               cref = begin
                 @match cref begin
-                  DAE.CREF_QUAL(ident = DAE.preNamePrefix)  => begin
+                  DAE.CREF_QUAL(ident = preNamePrefix)  => begin
                     cref.componentRef
                   end
 
@@ -2551,7 +2560,7 @@ println("ComponentReference.jl 5")
         function crefPrefixStart(inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
-              outCref = makeCrefQual(DAE.startNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
+              outCref = makeCrefQual(startNamePrefix, DAE.T_UNKNOWN_DEFAULT, nil, inCref)
           outCref
         end
 
@@ -4283,7 +4292,7 @@ println("ComponentReference.jl 5")
           s
         end
 
-        function writeCref(file::File.File, cref::DAE.ComponentRef, escape::File.Escape = File.Escape.None)
+        function writeCref(file::File.FILE, cref::DAE.ComponentRef, escape::File.Escape = File.Escape.None)
               local c::DAE.ComponentRef = cref
 
               while true
@@ -4323,7 +4332,7 @@ println("ComponentReference.jl 5")
               end
         end
 
-        function writeSubscripts(file::File.File, subs::List{<:DAE.Subscript}, escape::File.Escape = File.Escape.None)
+        function writeSubscripts(file::File.FILE, subs::List{<:DAE.Subscript}, escape::File.Escape = File.Escape.None)
               local first::Bool = true
               local i::ModelicaInteger
               local exp::DAE.Exp

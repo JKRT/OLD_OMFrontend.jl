@@ -86,6 +86,9 @@
     FuncExpType = Function
 
     FuncExpType = Function
+    
+    Argument = Any
+    Type_a = Any
 
          #= /*
          * This file is part of OpenModelica.
@@ -134,6 +137,9 @@
         Type = DAE.Type
         Subscript = DAE.Subscript
         Var = DAE.Var
+        
+        Type_a = Any
+        
          #=  protected imports
          =#
 
@@ -1455,7 +1461,7 @@
           outType
         end
 
-        function unliftArrayIgnoreFirst(a::A, inType::DAE.Type) ::DAE.Type
+        function unliftArrayIgnoreFirst(a::Type_a, inType::DAE.Type) ::DAE.Type
               local outType::DAE.Type
 
               outType = unliftArray(inType)
@@ -2443,7 +2449,7 @@
                         expLst2 = makeASUBsForDimension(exp2)
                       end
                       ty = typeof(listHead(expLst1))
-                      expLst = ListUtil.threadMap(expLst1, expLst2, (DAE.ADD(ty)) -> makeBinaryExp(inOp = DAE.ADD(ty)))
+                      expLst = ListUtil.threadMap(expLst1, expLst2, fn -> makeBinaryExp(inOp = DAE.ADD(ty)))
                     expLst
                   end
 
@@ -8412,7 +8418,7 @@
                     (inExp, false, inTpl)
                   end
 
-                  (DAE.CALL(path = Absyn.IDENT(name = "$_round")), _)  => begin
+                  (DAE.CALL(path = Absyn.IDENT(name = "\$_round")), _)  => begin
                     (inExp, false, inTpl)
                   end
 
@@ -11621,8 +11627,6 @@
               local len2::ModelicaInteger
               local e2::DAE.Exp
               local rest_expl2::List{DAE.Exp} = inExpl2
-              local len1::ModelicaInteger
-              local len2::ModelicaInteger
 
                #=  Check that the lists have the same length, otherwise they can't be equal.
                =#
@@ -16506,12 +16510,13 @@
               local con::Bool = true
               local con1::Bool
               local ii::ModelicaInteger = 1
+              local e::DAE.Exp
+              local e1::DAE.Exp
+              local e2::DAE.Exp
+
 
               while con && ii < 15
                 (oExp1, oExp2, con) = begin
-                    local e::DAE.Exp
-                    local e1::DAE.Exp
-                    local e2::DAE.Exp
                   @matchcontinue (oExp1, oExp2) begin
                     (_, _)  => begin
                         @match (e1, e2, true) = createResidualExp3(oExp1, oExp2)
@@ -16533,9 +16538,6 @@
                   end
                 end
                 (oExp1, oExp2, con1) = begin
-                    local e::DAE.Exp
-                    local e1::DAE.Exp
-                    local e2::DAE.Exp
                   @matchcontinue (oExp1, oExp2) begin
                     (_, _)  => begin
                         @match true = isZero(oExp1)

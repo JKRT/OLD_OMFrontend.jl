@@ -614,7 +614,7 @@
               @match FLAGS(debug_flags, _) = loadFlags()
               config_flags = createConfigFlags()
               saveFlags(FLAGS(debug_flags, config_flags))
-        end
+        end        
 
          #= Checks that the flags listed in allDebugFlags have sequential and unique indices. =#
         function checkDebugFlags()  
@@ -624,7 +624,7 @@
               for flag in allDebugFlags
                 index = index + 1
                 if flag.index != index
-                  err_str = "Invalid flag '" + flag.name + "' with index " + String(flag.index) + " (expected " + String(index) + ") in Flags.allDebugFlags. Make sure that all flags are present and ordered correctly!"
+                  err_str = "Invalid flag '" + flag.name + "' with index " + string(flag.index) + " (expected " + string(index) + ") in Flags.allDebugFlags. Make sure that all flags are present and ordered correctly!"
                   Error.terminateError(err_str, sourceInfo())
                 end
               end
@@ -642,7 +642,7 @@
               for flag in allConfigFlags
                 index = index + 1
                 if flag.index != index
-                  err_str = "Invalid flag '" + flag.name + "' with index " + String(flag.index) + " (expected " + String(index) + ") in Flags.allConfigFlags. Make sure that all flags are present and ordered correctly!"
+                  err_str = "Invalid flag '" + flag.name + "' with index " + string(flag.index) + " (expected " + string(index) + ") in Flags.allConfigFlags. Make sure that all flags are present and ordered correctly!"
                   Error.terminateError(err_str, sourceInfo())
                 end
               end
