@@ -1518,7 +1518,7 @@
                   local tStart::ModelicaReal
                   local tEnd::ModelicaReal
                   local t::ModelicaReal
-                  local graphVizStream::IOStream.IOStream
+                  local graphVizStream::IOStream.IOStreamType
                   local infoNode::List{String}
                    #=  don't do anything if we don't have -d=cgraphGraphVizFile or -d=cgraphGraphVizShow
                    =#

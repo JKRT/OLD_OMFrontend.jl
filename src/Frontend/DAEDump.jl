@@ -7,8 +7,10 @@
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
     @UniontypeDecl splitElements 
-    @UniontypeDecl compWithSplitElements 
+    @UniontypeDecl compWithSplitElements
     @UniontypeDecl functionList 
+    
+    Type_a = Any
 
     FuncTypeType_aToString = Function
 
@@ -660,7 +662,7 @@
          #= Dump variables to Print buffer. =#
         function dumpVars(lst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#)  
               local str::String
-              local myStream::IOStream.IOStream
+              local myStream::IOStream.IOStreamType
 
               myStream = IOStream.create("", IOStream.LIST())
               myStream = dumpVarsStream(lst, printTypeDimension, myStream)
@@ -1322,7 +1324,7 @@
                   local s1::String
                   local s2::String
                   local sourceStr::String
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local src::DAE.ElementSource
                   local cmt::List{SCode.Comment}
                 @matchcontinue inElement begin
@@ -3205,7 +3207,7 @@
               local outString::String
 
               outString = begin
-                  local myStream::IOStream.IOStream
+                  local myStream::IOStream.IOStreamType
                   local str::String
                 @match els begin
                   _  => begin
@@ -3224,7 +3226,7 @@
               local outString::String
 
               outString = begin
-                  local myStream::IOStream.IOStream
+                  local myStream::IOStream.IOStreamType
                   local str::String
                 @match algs begin
                   _  => begin
@@ -3243,7 +3245,7 @@
               local outString::String
 
               outString = begin
-                  local myStream::IOStream.IOStream
+                  local myStream::IOStream.IOStreamType
                   local str::String
                 @match constrs begin
                   _  => begin
@@ -3263,13 +3265,13 @@
          #= /************ IOStream based implementation ***************/ =#
 
          #= This function prints the DAE to a stream. =#
-        function dumpStream(dae::DAE.DAElist, functionTree::DAE.FunctionTree, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpStream(dae::DAE.DAElist, functionTree::DAE.FunctionTree, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local daelist::List{DAE.Element}
                   local funcs::List{DAE.Function}
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                 @match (dae, functionTree, inStream) begin
                   (DAE.DAE(daelist), _, str)  => begin
                       funcs = DAEUtil.getFunctionList(functionTree)
@@ -3356,14 +3358,14 @@
         end
 
          #= Dumps components to a stream. =#
-        function dumpCompElementStream(inElement::DAE.Element, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpCompElementStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local n::String
                   local l::List{DAE.Element}
                   local c::Option{SCode.Comment}
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                 @matchcontinue (inElement, inStream) begin
                   (DAE.COMP(ident = n, dAElist = l, comment = c), str)  => begin
                       str = IOStream.append(str, "class ")
@@ -3388,11 +3390,11 @@
         end
 
          #= Dump elements to a stream =#
-        function dumpElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local v::List{DAE.Element}
                   local o::List{DAE.Element}
                   local ie::List{DAE.Element}
@@ -3454,15 +3456,15 @@
         end
 
          #= Dump components with split elements (e.g., state machines) to a stream. =#
-        function dumpCompWithSplitElementsStream(inCompLst::List{<:compWithSplitElements}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpCompWithSplitElementsStream(inCompLst::List{<:compWithSplitElements}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local name::String
                   local spltElems::splitElements
                   local comment::Option{SCode.Comment}
                   local cstr::String
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local xs::List{compWithSplitElements}
                   local v::List{DAE.Element}
                   local o::List{DAE.Element}
@@ -3519,11 +3521,11 @@
         end
 
          #= Dump algorithms to a stream. =#
-        function dumpAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local stmts::List{DAE.Statement}
                   local xs::List{DAE.Element}
                 @matchcontinue (inElementLst, inStream) begin
@@ -3548,11 +3550,11 @@
         end
 
          #= Dump initialalgorithms to a stream. =#
-        function dumpInitialAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpInitialAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local stmts::List{DAE.Statement}
                   local xs::List{DAE.Element}
                 @matchcontinue (inElementLst, inStream) begin
@@ -3577,8 +3579,8 @@
         end
 
          #= Dump equations to a stream. =#
-        function dumpEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local s1::String
@@ -3600,7 +3602,7 @@
                   local cr::DAE.ComponentRef
                   local cr1::DAE.ComponentRef
                   local cr2::DAE.ComponentRef
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local el::DAE.Element
                   local path::Absyn.Path
                   local dims::DAE.Dimensions
@@ -3771,13 +3773,13 @@
         end
 
          #=  =#
-        function dumpIfEquationsStream(iconds::List{<:DAE.Exp}, itbs::List{<:List{<:DAE.Element}}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpIfEquationsStream(iconds::List{<:DAE.Exp}, itbs::List{<:List{<:DAE.Element}}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local c::DAE.Exp
                   local tb::List{DAE.Element}
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local conds::List{DAE.Exp}
                   local tbs::List{List{DAE.Element}}
                 @match (iconds, itbs, inStream) begin
@@ -3799,8 +3801,8 @@
         end
 
          #= Dump initial equations to a stream. =#
-        function dumpInitialEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpInitialEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local s1::String
@@ -3814,7 +3816,7 @@
                   local xs2::List{DAE.Element}
                   local trueBranches::List{List{DAE.Element}}
                   local c::DAE.ComponentRef
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local conds::List{DAE.Exp}
                   local src::DAE.ElementSource
                 @matchcontinue (inElementLst, inStream) begin
@@ -3901,11 +3903,11 @@
         end
 
          #= Dump constraints to a stream. =#
-        function dumpConstraintStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpConstraintStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local exps::List{DAE.Exp}
                   local xs::List{DAE.Element}
                 @matchcontinue (inElementLst, inStream) begin
@@ -3942,7 +3944,7 @@
 
               str = begin
                   local l::List{DAE.Element}
-                  local myStream::IOStream.IOStream
+                  local myStream::IOStream.IOStreamType
                 @match d begin
                   DAE.DAE(elementLst = l)  => begin
                       myStream = IOStream.create("", IOStream.LIST())
@@ -3956,11 +3958,11 @@
         end
 
          #= Dump variables to a string. =#
-        function dumpVarsStream(inElementLst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpVarsStream(inElementLst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local first::DAE.Element
                   local rest::List{DAE.Element}
                    #=  handle nothingness
@@ -4048,8 +4050,8 @@
         end
 
          #= Dump var to a stream. =#
-        function dumpVarStream(inElement::DAE.Element, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpVarStream(inElement::DAE.Element, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local final_str::String
@@ -4074,7 +4076,7 @@
                   local cmt::Option{SCode.Comment}
                   local binding::Option{DAE.Exp}
                   local dims::DAE.InstDims
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local ty_vars::List{DAE.Var}
                 @matchcontinue (inElement, printTypeDimension, inStream) begin
                   (DAE.VAR(componentRef = id, kind = kind, direction = dir, parallelism = prl, protection = vis, ty = ty, dims = dims, binding = binding, variableAttributesOption = attr, comment = cmt), _, str)  => begin
@@ -4106,11 +4108,11 @@
         end
 
          #= Dump algorithm to a stream =#
-        function dumpAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local stmts::List{DAE.Statement}
                 @matchcontinue (inElement, inStream) begin
                   (DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(statementLst = stmts)), str)  => begin
@@ -4128,11 +4130,11 @@
         end
 
          #= Dump algorithm to a stream =#
-        function dumpInitialAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpInitialAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local stmts::List{DAE.Statement}
                 @matchcontinue (inElement, inStream) begin
                   (DAE.INITIALALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(statementLst = stmts)), str)  => begin
@@ -4150,8 +4152,8 @@
         end
 
          #= Prettyprint an algorithm statement to a string. =#
-        function ppStatementStream(alg::DAE.Statement, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function ppStatementStream(alg::DAE.Statement, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               local tmp::String
               local hnd::ModelicaInteger
@@ -4219,8 +4221,8 @@
         end
 
          #= Dump function to a stream =#
-        function dumpFunctionStream(inElement::DAE.Function, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpFunctionStream(inElement::DAE.Function, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = begin
                   local fstr::String
@@ -4232,7 +4234,7 @@
                   local t::DAE.Type
                   local tp::DAE.Type
                   local inlineType::DAE.InlineType
-                  local str::IOStream.IOStream
+                  local str::IOStream.IOStreamType
                   local c::Option{SCode.Comment}
                   local ext_decl::DAE.ExternalDecl
                   local isImpure::Bool
@@ -4306,8 +4308,8 @@
         end
 
          #= Dump function elements to a stream. =#
-        function dumpFunctionElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStream) ::IOStream.IOStream 
-              local outStream::IOStream.IOStream
+        function dumpFunctionElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+              local outStream::IOStream.IOStreamType
 
               outStream = dumpVarsStream(l, true, inStream)
               outStream = ListUtil.fold(l, dumpAlgorithmStream, outStream)
@@ -4547,7 +4549,6 @@
                   local cr2::DAE.ComponentRef
                   local es::List{DAE.Exp}
                   local elst::List{DAE.Element}
-                  local path::Absyn.Path
                   local src::DAE.ElementSource
                   local cmt::List{SCode.Comment}
                 @matchcontinue inElement begin
