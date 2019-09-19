@@ -999,7 +999,7 @@
           See man (3) iconv for more information.
          =#
         function iconv(string::String, from::String, to::String)::String
-              local result::String
+              local result::String = string
 
             #= Defined in the runtime =#
           result
