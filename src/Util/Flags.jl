@@ -65,6 +65,8 @@
         import StringUtil
 
         import System
+        
+        const emptyFlags = nil ::List{String};
 
          @Uniontype DebugFlag begin
               @Record DEBUG_FLAG begin
@@ -748,7 +750,7 @@
                #=  Stop parsing arguments if -- is encountered.
                =#
               outArgs = ListUtil.append_reverse(outArgs, rest_args)
-              _ = ListUtil.map2(outArgs, System.iconv, "UTF-8", "UTF-8")
+              # _ = ListUtil.map2(outArgs, System.iconv, "UTF-8", "UTF-8")
               Error.assertionOrAddSourceMessage(numError == Error.getNumErrorMessages(), Error.UTF8_COMMAND_LINE_ARGS, nil, Util.dummyInfo)
               saveFlags(flags)
           outArgs

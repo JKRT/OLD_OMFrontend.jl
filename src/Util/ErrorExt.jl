@@ -37,37 +37,54 @@
          */ =#
         import Error
 
+        global errors = nil::List
+        global warnings = nil::List
+
         function registerModelicaFormatError()  
             #= TODO: Defined in the runtime =#
         end
 
         function addSourceMessage(id::Error.ErrorID, msg_type::Error.MessageType, msg_severity::Error.Severity, sline::ModelicaInteger, scol::ModelicaInteger, eline::ModelicaInteger, ecol::ModelicaInteger, read_only::Bool, filename::String, msg::String, tokens::List{<:String})  
+            global errors
+            global warnings
+            _ = begin
+              @match msg_severity begin
+               Error.ERROR() => 
+                 begin
+                   errors = _cons("Error: " + filename + " msg: " + msg, errors)
+                 end
+               _ => 
+                 begin
+                   warnings = _cons("Warning: " + filename + " msg: " + msg, warnings)
+                 end
+              end
+            end
             #= TODO: Defined in the runtime =#
         end
 
         function printMessagesStr(warningsAsErrors::Bool = false) ::String 
-              local outString::String = "not implemented"
+              local outString::String = stringDelimitList(errors, ", ")
 
             #= TODO: Defined in the runtime =#
           outString
         end
 
         function getNumMessages() ::ModelicaInteger 
-              local num::ModelicaInteger = 0
+              local num::ModelicaInteger = listLength(errors) + listLength(warnings)
 
             #= TODO: Defined in the runtime =#
           num
         end
 
         function getNumErrorMessages() ::ModelicaInteger 
-              local num::ModelicaInteger = 0
+              local num::ModelicaInteger = listLength(errors)
 
             #= TODO: Defined in the runtime =#
           num
         end
 
         function getNumWarningMessages() ::ModelicaInteger 
-              local num::ModelicaInteger = 0
+              local num::ModelicaInteger = listLength(warnings)
 
             #= TODO: Defined in the runtime =#
           num
@@ -82,6 +99,8 @@
 
         function clearMessages()  
             #= TODO: Defined in the runtime =#
+            errors = nil
+            warnings = nil
         end
 
          #= Used to rollback/delete checkpoints without considering the identifier. Used to reset the error messages after a stack overflow exception. =#
@@ -117,7 +136,7 @@
         end
 
         function printErrorsNoWarning() ::String 
-              local outString::String = "not implemented"
+              local outString::String = stringDelimitList(errors, ", ")
 
             #= TODO: Defined in the runtime =#
           outString
