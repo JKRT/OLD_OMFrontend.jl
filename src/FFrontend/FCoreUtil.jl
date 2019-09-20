@@ -1,7 +1,19 @@
 module FCoreUtil
 
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+#= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+
+
 using FCore
+import Absyn
+import SCode
+import DAE
 import DAEUtil
+import Mutable
+using Mutable: MutableType
+
 
 function next(inext::Next) ::Next
   local onext::Next
@@ -17,7 +29,7 @@ function emptyCache() ::Cache
   local instFuncs::MutableType{DAE.FunctionTree}
   local ht::StructuralParameters
 
-  instFuncs = Mutable.create(DAE.AvlTreePathFunction.Tree.EMPTY())
+  instFuncs = Mutable.create(DAE.AvlTreePathFunction.EMPTY())
   ht = (AvlSetCR.EMPTY(), nil)
   cache = CACHE(NONE(), instFuncs, ht, Absyn.IDENT("##UNDEFINED##"))
   cache
@@ -359,4 +371,7 @@ function getRecordConstructorPath(inPath::Absyn.Path) ::Absyn.Path
   outPath
 end
 
-end FCoreUtil
+#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+@exportAll()
+
+end

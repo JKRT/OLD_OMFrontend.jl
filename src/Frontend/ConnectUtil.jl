@@ -2814,7 +2814,7 @@
                   DAE.CREF_QUAL(ident = id)  => begin
                        #=  is a qualified cref and is a connector => OUTSIDE
                        =#
-                      @match (_, _, DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)), _, _, _, _, _, _) = Lookup.lookupVar(FCore.emptyCache(), env, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
+                      @match (_, _, DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)), _, _, _, _, _, _) = Lookup.lookupVar(FCoreUtil.emptyCache(), env, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                     Face.OUTSIDE()
                   end
 

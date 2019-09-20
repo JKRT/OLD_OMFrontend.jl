@@ -2252,7 +2252,7 @@
               local outBinding::DAE.Binding
               local outType::DAE.Type
 
-              (_, _, outType, outBinding, _, _, _, _, _) = Lookup.lookupVar(FCore.emptyCache(), inEnv, inCref)
+              (_, _, outType, outBinding, _, _, _, _, _) = Lookup.lookupVar(FCoreUtil.emptyCache(), inEnv, inCref)
           (outType, outBinding)
         end
 
@@ -2437,7 +2437,7 @@
                   local env::FCore.Graph
                 @match (inRecordName, inType, inEnv) begin
                   (Absyn.IDENT(name = id), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = p), varLst = vars), _)  => begin
-                      (_, _, _, _, _, env) = Lookup.lookupIdentLocal(FCore.emptyCache(), inEnv, id)
+                      (_, _, _, _, _, env) = Lookup.lookupIdentLocal(FCoreUtil.emptyCache(), inEnv, id)
                       vals = ListUtil.map1(vars, getRecordComponentValue, env)
                       var_names = ListUtil.map(vars, Types.getVarName)
                     Values.RECORD(p, vals, var_names, -1)
@@ -2465,7 +2465,7 @@
                   end
                   
                   (DAE.TYPES_VAR(name = id, ty = ty), _)  => begin
-                      @match (_, DAE.TYPES_VAR(binding = binding), _, _, _, _) = Lookup.lookupIdentLocal(FCore.emptyCache(), inEnv, id)
+                      @match (_, DAE.TYPES_VAR(binding = binding), _, _, _, _) = Lookup.lookupIdentLocal(FCoreUtil.emptyCache(), inEnv, id)
                       val = getBindingOrDefault(binding, ty)
                     val
                   end

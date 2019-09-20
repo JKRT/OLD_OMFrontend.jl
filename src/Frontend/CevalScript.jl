@@ -1195,7 +1195,7 @@
                   (_, _, "setCommandLineOptions", Values.STRING(str) <|  nil(), _)  => begin
                       args = System.strtok(str, " ")
                       @match nil = Flags.readArgs(args)
-                    (FCore.emptyCache(), Values.BOOL(true))
+                    (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
                   
                   (cache, _, "setCommandLineOptions", _, _)  => begin
@@ -1638,7 +1638,7 @@
                       Print.clearBuf()
                       SymbolTable.setAbsyn(p)
                       execStat("loadModel(" + AbsynUtil.pathString(path) + ")")
-                    (FCore.emptyCache(), Values.BOOL(b))
+                    (FCoreUtil.emptyCache(), Values.BOOL(b))
                   end
                   
                   (cache, _, "loadModel", Values.CODE(Absyn.C_TYPENAME(path)) <| _, _)  => begin
@@ -1653,7 +1653,7 @@
                       newp = loadFile(name, encoding, SymbolTable.getAbsyn(), b)
                       execStat("loadFile(" + name + ")")
                       SymbolTable.setAbsyn(newp)
-                    (FCore.emptyCache(), Values.BOOL(true))
+                    (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
                   
                   (cache, _, "loadFile", _, _)  => begin
@@ -1665,7 +1665,7 @@
                       newps = Parser.parallelParseFilesToProgramList(strs, encoding, numThreads = i)
                       newp = ListUtil.fold(newps, (false, Settings.getModelicaPath(Config.getRunningTestsuite(__))) -> checkUsesAndUpdateProgram(checkUses = false, modelicaPath = Settings.getModelicaPath(Config.getRunningTestsuite())), SymbolTable.getAbsyn())
                       SymbolTable.setAbsyn(newp)
-                    (FCore.emptyCache(), Values.BOOL(true))
+                    (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
                   
                   (cache, _, "loadFiles", _, _)  => begin
@@ -1775,7 +1775,7 @@
                       else
                         Error.addMessage(Error.FILE_NOT_FOUND_ERROR, list(filename))
                       end
-                    (FCore.emptyCache(), Values.BOOL(b))
+                    (FCoreUtil.emptyCache(), Values.BOOL(b))
                   end
                   
                   (cache, _, "loadEncryptedPackage", _, _)  => begin
@@ -1896,7 +1896,7 @@
                       newp = Parser.parsestring(str, name)
                       newp = Interactive.updateProgram(newp, SymbolTable.getAbsyn(), mergeAST)
                       SymbolTable.setAbsyn(newp)
-                    (FCore.emptyCache(), Values.BOOL(true))
+                    (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
                   
                   (cache, _, "loadString", _, _)  => begin
@@ -2058,7 +2058,7 @@
                   local path::Absyn.Path
                 @matchcontinue (val, env) begin
                   (Values.CODE(Absyn.C_TYPENAME(path && Absyn.IDENT(_))), _)  => begin
-                      @match (_, _, _, DAE.VALBOUND(valBound = (@match Values.CODE(A = Absyn.C_TYPENAME()) = res)), _, _, _, _, _) = Lookup.lookupVar(FCore.emptyCache(), env, ComponentReference.pathToCref(path))
+                      @match (_, _, _, DAE.VALBOUND(valBound = (@match Values.CODE(A = Absyn.C_TYPENAME()) = res)), _, _, _, _, _) = Lookup.lookupVar(FCoreUtil.emptyCache(), env, ComponentReference.pathToCref(path))
                     res
                   end
                   
@@ -2530,7 +2530,7 @@
                   
                   (cache, env, _, _, _, _, _)  => begin
                       cache = if cleanCache
-                            FCore.emptyCache()
+                            FCoreUtil.emptyCache()
                           else
                             cache
                           end
@@ -2638,7 +2638,7 @@
               if ! skip
                 try
                   ErrorExt.setCheckpoint("getNonPartialElementsForInstantiatedClass")
-                  (_, env) = Inst.instantiateClass(FCore.emptyCache(), InnerOuter.emptyInstHierarchy, sp, AbsynUtil.makeNotFullyQualified(p), doSCodeDep = false)
+                  (_, env) = Inst.instantiateClass(FCoreUtil.emptyCache(), InnerOuter.emptyInstHierarchy, sp, AbsynUtil.makeNotFullyQualified(p), doSCodeDep = false)
                   elts = FCore.RefTree.fold(FNode.children(FNode.fromRef(FGraph.lastScopeRef(env))), addNonPartialClassRef, nil)
                   ErrorExt.rollBack("getNonPartialElementsForInstantiatedClass")
                   return elts

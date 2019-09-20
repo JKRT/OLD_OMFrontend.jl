@@ -3281,16 +3281,16 @@
                   end
 
                   (SOME(SCode.CONSTRAINCLASS(constrainingClass = path)), _, _)  => begin
-                      @match (_, SCode.CLASS(name = name, classDef = SCode.PARTS(elementLst = selems)), _) = Lookup.lookupClass(FCore.emptyCache(), env, path)
+                      @match (_, SCode.CLASS(name = name, classDef = SCode.PARTS(elementLst = selems)), _) = Lookup.lookupClass(FCoreUtil.emptyCache(), env, path)
                       (classes, classextendselts, extendselts, compelts) = splitElts(selems)
-                      (_, _, _, _, extcomps, _, _, _, _) = InstExtends.instExtendsAndClassExtendsList(FCore.emptyCache(), env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), pre, extendselts, classextendselts, selems, ClassInf.UNKNOWN(Absyn.IDENT("")), name, true, false)
+                      (_, _, _, _, extcomps, _, _, _, _) = InstExtends.instExtendsAndClassExtendsList(FCoreUtil.emptyCache(), env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), pre, extendselts, classextendselts, selems, ClassInf.UNKNOWN(Absyn.IDENT("")), name, true, false)
                       extcompelts = ListUtil.map(extcomps, Util.tuple21)
                       compelts = listAppend(classes, listAppend(compelts, extcompelts))
                     compelts
                   end
 
                   (SOME(SCode.CONSTRAINCLASS(path, mod, cmt)), _, _)  => begin
-                      @match (_, SCode.CLASS(classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = path))), _) = Lookup.lookupClass(FCore.emptyCache(), env, path)
+                      @match (_, SCode.CLASS(classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = path))), _) = Lookup.lookupClass(FCoreUtil.emptyCache(), env, path)
                       compelts = extractConstrainingComps(SOME(SCode.CONSTRAINCLASS(path, mod, cmt)), env, pre)
                     compelts
                   end
