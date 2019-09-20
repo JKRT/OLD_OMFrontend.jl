@@ -56,6 +56,8 @@
         import Flags
         import Global
         import OperatorOverloading
+        import BaseHashTable
+        import AbsynUtil
 
         CachedInstItemInputs = Tuple
         CachedInstItemOutputs = Tuple

@@ -667,12 +667,12 @@
              applyOption(SOME(1), intString) => SOME(\\\"1\\\")
              applyOption(NONE(),  intString) => NONE()
            =#
-        function applyOption(inOption::Option{TI}, inFunc::FuncType)  where {TI, TO}
-              local outOption::Option{TO}
+        function applyOption(inOption::Option{TI}, inFunc::FuncType)  where {TI}
+              local outOption::Option{Any}
 
               outOption = begin
                   local ival::TI
-                  local oval::TO
+                  local oval::Any
                 @match inOption begin
                   SOME(ival)  => begin
                     SOME(inFunc(ival))
@@ -687,12 +687,12 @@
         end
 
          #= Like applyOption but takes an additional argument =#
-        function applyOption1(inOption::Option{TI}, inFunc::FuncType, inArg::ArgT)  where {TI, TO, ArgT}
-              local outOption::Option{TO}
+        function applyOption1(inOption::Option{TI}, inFunc::FuncType, inArg::ArgT)  where {TI, ArgT}
+              local outOption::Option{Any}
 
               outOption = begin
                   local ival::TI
-                  local oval::TO
+                  local oval::Any
                 @match inOption begin
                   SOME(ival)  => begin
                     SOME(inFunc(ival, inArg))

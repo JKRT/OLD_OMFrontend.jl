@@ -1354,8 +1354,6 @@
         function getConfigInt(inFlag::ConfigFlag) ::ModelicaInteger 
               local outValue::ModelicaInteger
               val = getConfigValue(inFlag)
-              @show inFlag
-              @show val
               @match INT_FLAG(data = outValue) = getConfigValue(inFlag)
           outValue
         end
