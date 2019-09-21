@@ -5406,7 +5406,7 @@
         function cevalSimple(exp::DAE.Exp) ::Values.Value
               local val::Values.Value
 
-              (_, val) = ceval(FCore.emptyCache(), FGraph.empty(), exp, false, Absyn.MSG(AbsynUtil.dummyInfo), 0)
+              (_, val) = ceval(FCoreUtil.emptyCache(), FGraph.empty(), exp, false, Absyn.MSG(AbsynUtil.dummyInfo), 0)
           val
         end
 

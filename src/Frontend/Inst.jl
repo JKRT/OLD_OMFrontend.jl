@@ -3817,7 +3817,7 @@
 
                #=  prog := scodeFlatten(prog, path);
                =#
-              (cache, env) = Builtin.initialGraph(FCore.emptyCache())
+              (cache, env) = Builtin.initialGraph(FCoreUtil.emptyCache())
               env_1 = FGraphBuildEnv.mkProgramGraph(prog, FCore.USERDEFINED(), env)
               outCache = cache
           (outCache, env_1)

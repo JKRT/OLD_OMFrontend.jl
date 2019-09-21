@@ -1094,14 +1094,14 @@ module InnerOuter
 
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
-                      (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
                       instInner = get(cref, ht)
                     instInner
                   end
 
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
-                      (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
                       @shouldFail _ = get(cref, ht)
                       instInner = lookupInnerInIH(inTIH, prefix, name)
                     instInner
@@ -1239,7 +1239,7 @@ module InnerOuter
                   end
 
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = Absyn.INNER(__)) <| r, _, _)  => begin
-                      (_, cr) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, pre, cr)
+                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, pre, cr)
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
@@ -1303,7 +1303,7 @@ module InnerOuter
                   end
 
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = io) <| r, _)  => begin
-                      (_, cr) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, crefPrefix, cr)
+                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, crefPrefix, cr)
                       r_1 = prefixOuterDaeVars(r, crefPrefix)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
@@ -1545,7 +1545,7 @@ module InnerOuter
                         equation
                           false = AbsynUtil.isInner(inInnerOuter);
                            prefix the name!
-                          (_,cref) = PrefixUtil.prefixCref(FCore.emptyCache(),{},emptyInstHierarchy,inPrefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, {}));
+                          (_,cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(),{},emptyInstHierarchy,inPrefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, {}));
                            print (\"InnerOuter.updateInstHierarchy jumping over non-inner: \" + ComponentReference.printComponentRefStr(cref) + \"\\n\");
                         then
                           ih;*/ =#
@@ -1562,7 +1562,7 @@ module InnerOuter
 
                   (TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm) <| restIH, _, _, INST_INNER(name = name))  => begin
                       cref_ = ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil)
-                      (_, cref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, cref_)
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, cref_)
                       ht = add((cref, inInstInner), ht)
                     _cons(TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm), restIH)
                   end
@@ -1586,7 +1586,7 @@ module InnerOuter
                =#
                #=  prefix the name!
                =#
-               #= (_,cref) = PrefixUtil.prefixCref(FCore.emptyCache(),{},emptyInstHierarchy,inPrefix, ComponentReference.makeCrefIdent(\"UNKNOWN\", DAE.T_UNKNOWN_DEFAULT, {}));
+               #= (_,cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(),{},emptyInstHierarchy,inPrefix, ComponentReference.makeCrefIdent(\"UNKNOWN\", DAE.T_UNKNOWN_DEFAULT, {}));
                =#
                #=  fprintln(Flags.INNER_OUTER, \"InnerOuter.updateInstHierarchy failure for: \" +
                =#
@@ -1753,7 +1753,7 @@ module InnerOuter
                   end
 
                   (TOP_INSTANCE(_, _, outerPrefixes && _ <| _, _) <|  nil(), _, _)  => begin
-                      (_, fullCref) = PrefixUtil.prefixCref(FCore.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, inOuterComponentRef)
+                      (_, fullCref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, inOuterComponentRef)
                       (outerCrefPrefix, innerCrefPrefix) = searchForInnerPrefix(fullCref, inOuterComponentRef, outerPrefixes)
                       innerCref = changeOuterReferenceToInnerReference(fullCref, outerCrefPrefix, innerCrefPrefix)
                     innerCref

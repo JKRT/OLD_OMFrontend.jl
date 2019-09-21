@@ -750,7 +750,7 @@
                #=  Stop parsing arguments if -- is encountered.
                =#
               outArgs = ListUtil.append_reverse(outArgs, rest_args)
-              # _ = ListUtil.map2(outArgs, System.iconv, "UTF-8", "UTF-8")
+              _ = ListUtil.map2(outArgs, System.iconv, "UTF-8", "UTF-8")
               Error.assertionOrAddSourceMessage(numError == Error.getNumErrorMessages(), Error.UTF8_COMMAND_LINE_ARGS, nil, Util.dummyInfo)
               saveFlags(flags)
           outArgs
@@ -1353,7 +1353,7 @@
          #= Returns the value of an integer configuration flag. =#
         function getConfigInt(inFlag::ConfigFlag) ::ModelicaInteger 
               local outValue::ModelicaInteger
-
+              val = getConfigValue(inFlag)
               @match INT_FLAG(data = outValue) = getConfigValue(inFlag)
           outValue
         end

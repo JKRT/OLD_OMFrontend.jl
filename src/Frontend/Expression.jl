@@ -740,13 +740,13 @@
                   local e::DAE.Exp
                 @match inExp begin
                   DAE.CODE(Absyn.C_VARIABLENAME(cref), _)  => begin
-                      (_, e_cref) = Static.elabUntypedCref(FCore.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
+                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
                       e = crefExp(e_cref)
                     e
                   end
 
                   DAE.CODE(Absyn.C_EXPRESSION(Absyn.CALL(Absyn.CREF_IDENT("der",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(cref) <|  nil(),  nil()))), _)  => begin
-                      (_, e_cref) = Static.elabUntypedCref(FCore.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
+                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
                       e = crefExp(e_cref)
                     DAE.CALL(Absyn.IDENT("der"), list(e), DAE.callAttrBuiltinReal)
                   end

@@ -89,7 +89,7 @@
                       p = doSCodeDep(inProgram, inPath)
                       lst = nil
                       System.realtimeTick(ClockIndexes.RT_CLOCK_FINST)
-                      (_, g) = FBuiltin.initialGraph(FCore.emptyCache())
+                      (_, g) = FBuiltin.initialGraph(FCoreUtil.emptyCache())
                       g = FGraphBuild.mkProgramGraph(p, FCore.USERDEFINED(), g)
                       lst = ListUtil.consr(lst, System.realtimeTock(ClockIndexes.RT_CLOCK_FINST))
                       print("SCode->FGraph:  " + realString(listHead(lst)) + "\\n")
@@ -148,7 +148,7 @@
                       lst = ListUtil.consr(lst, System.realtimeTock(ClockIndexes.RT_CLOCK_FINST))
                       print("SCode depend:   " + realString(listHead(lst)) + "\\n")
                       System.realtimeTick(ClockIndexes.RT_CLOCK_FINST)
-                      (_, g) = FBuiltin.initialGraph(FCore.emptyCache())
+                      (_, g) = FBuiltin.initialGraph(FCoreUtil.emptyCache())
                       lst = ListUtil.consr(lst, System.realtimeTock(ClockIndexes.RT_CLOCK_FINST))
                       print("Initial graph:  " + realString(listHead(lst)) + "\\n")
                       System.realtimeTick(ClockIndexes.RT_CLOCK_FINST)

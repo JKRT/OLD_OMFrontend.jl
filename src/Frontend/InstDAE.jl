@@ -252,7 +252,7 @@
                   end
                   
                   (vn, DAE.T_SUBTYPE_BASIC(complexType = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
-                      (_, dae_var_attr) = InstBinding.instDaeVariableAttributes(FCore.emptyCache(), FGraph.empty(), DAE.NOMOD(), tp, nil)
+                      (_, dae_var_attr) = InstBinding.instDaeVariableAttributes(FCoreUtil.emptyCache(), FGraph.empty(), DAE.NOMOD(), tp, nil)
                       dae = daeDeclare2(vn, tp, ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, io, source, declareComplexVars)
                     dae
                   end
