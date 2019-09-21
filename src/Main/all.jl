@@ -1,17 +1,45 @@
-#= Note run from this folder=#
-JIT_STACK_START_SIZE = 32768
-JIT_STACK_MAX_SIZE = 1048576
-Base.PCRE.JIT_STACK[] = ccall((:pcre2_jit_stack_create_8, Base.PCRE.PCRE_LIB), Ptr{Cvoid},
-                              (Cint, Cint, Ptr{Cvoid}),
-                              JIT_STACK_START_SIZE, JIT_STACK_MAX_SIZE, C_NULL)
-ccall((:pcre2_jit_stack_assign_8, Base.PCRE.PCRE_LIB), Cvoid,
-      (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), Base.PCRE.MATCH_CONTEXT[], C_NULL, Base.PCRE.JIT_STACK[])
+#=
+# This file is part of OpenModelica.
+#
+# Copyright (c) 1998-CurrentYear, Open Source Modelica Consortium (OSMC),
+# c/o Linköpings universitet, Department of Computer and Information Science,
+# SE-58183 Linköping, Sweden.
+#
+# All rights reserved.
+#
+# THIS PROGRAM IS PROVIDED UNDER THE TERMS OF GPL VERSION 3 LICENSE OR
+# THIS OSMC PUBLIC LICENSE (OSMC-PL) VERSION 1.2.
+# ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
+# RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
+# ACCORDING TO RECIPIENTS CHOICE.
+#
+# The OpenModelica software and the Open Source Modelica
+# Consortium (OSMC) Public License (OSMC-PL) are obtained
+# from OSMC, either from the above address,
+# from the URLs: http:www.ida.liu.se/projects/OpenModelica or
+# http:www.openmodelica.org, and in the OpenModelica distribution.
+# GNU version 3 is obtained from: http:www.gnu.org/copyleft/gpl.html.
+#
+# This program is distributed WITHOUT ANY WARRANTY; without
+# even the implied warranty of  MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE, EXCEPT AS EXPRESSLY SET FORTH
+# IN THE BY RECIPIENT SELECTED SUBSIDIARY LICENSE CONDITIONS OF OSMC-PL.
+#
+# See the full OSMC Public License conditions for more details.
+#
+=#
 
 #=TODO make it call the parserscript from OpenModelica home=#
-push!(LOAD_PATH, "src/Util/.")
-push!(LOAD_PATH, "src/Frontend/.")
-push!(LOAD_PATH, "src/FFrontend/.")
-push!(LOAD_PATH, ".")
+const UTIL = "src/Util/."
+const FRONTEND = "src/Frontend/."
+const FFRONTEND = "src/FFrontend/."
+const CURRENT_DIRECTORY = "."
+if ! (CURRENT_DIRECTORY in LOAD_PATH && FRONTEND in LOAD_PATH && FFRONTEND in LOAD_PATH)
+  push!(LOAD_PATH, CURRENT_DIRECTORY)
+  push!(LOAD_PATH, UTIL)
+  push!(LOAD_PATH, FRONTEND)
+  push!(LOAD_PATH, FFRONTEND)
+end
 println(LOAD_PATH)
 # include("./Absyn.jl")
 # include("./AbsynUtil.jl")
@@ -28,12 +56,10 @@ t  = PARTS(list(), list(), list(PUBLIC(list(ELEMENTITEM(ELEMENT(false, NONE(), N
 
 HelloWorld = PROGRAM(list(CLASS("HelloWorld", false, false ,false, R_CLASS(), PARTS(list(), list(), list(PUBLIC(list(ELEMENTITEM(ELEMENT(false, NONE(), NOT_INNER_OUTER(), COMPONENTS(ATTR(false, false, NON_PARALLEL(), VAR(), BIDIR(), NONFIELD(), list()), TPATH(IDENT("Real"), NONE()), list(COMPONENTITEM(COMPONENT("x", list(), SOME(CLASSMOD(list(MODIFICATION(false, NON_EACH(), IDENT("start"), SOME(CLASSMOD(list(), EQMOD(INTEGER(1::ModelicaInteger), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 2, 16, 2, 19)))), NONE(), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 2, 10, 2, 19))), NOMOD()))), NONE(), NONE()))), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 2, 3, 2, 20), NONE())), ELEMENTITEM(ELEMENT(false, NONE(), NOT_INNER_OUTER(), COMPONENTS(ATTR(false, false, NON_PARALLEL(), PARAM(), BIDIR(), NONFIELD(), list()), TPATH(IDENT("Real"), NONE()), list(COMPONENTITEM(COMPONENT("a", list(), SOME(CLASSMOD(list(), EQMOD(INTEGER(1::ModelicaInteger), SOURCEINFO("/home/johti1b/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 3, 20, 3, 23))))), NONE(), NONE()))), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 3, 3, 3, 23), NONE())))), EQUATIONS(list(EQUATIONITEM(EQ_EQUALS(CALL(CREF_IDENT("der", list()), FUNCTIONARGS(list(CREF(CREF_IDENT("x", list()))), list())), UNARY(UMINUS(), BINARY(CREF(CREF_IDENT("a", list())), MUL(), CREF(CREF_IDENT("x", list()))))), NONE(), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 5, 3, 5, 19))))), list(), NONE()), SOURCEINFO("/home/johti17/OpenModelica/OMCompiler/Examples/HelloWorld.mo", false, 1, 1, 6, 15))), TOP())
 
-
 # initialize globals
 Global.initialize()
 # make sure we have all the flags loaded!
 Flags.new(Flags.emptyFlags)
-
 AbsynToSCode.translateAbsyn2SCode(HelloWorld)
 
 #= Try the bouncing ball =#
