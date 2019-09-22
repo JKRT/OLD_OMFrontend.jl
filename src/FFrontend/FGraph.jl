@@ -60,8 +60,7 @@ const Parents = FCore.Parents
 const Scope = FCore.Scope
 const Top = FCore.Top
 const Graph = FCore.Graph
-println(Graph)
-println(FCore.G)
+println("Graph = FCore.Graph")
 const Extra = FCore.Extra
 const Visited = FCore.Visited
 const Status = FCore.Status

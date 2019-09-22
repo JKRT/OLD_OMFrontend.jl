@@ -302,8 +302,78 @@ function elabArglist(inTypes::List{<:DAE.Type}, inArgs::List{<:Tuple{<:DAE.Exp, 
   (outArgs, outTypes)
 end
 
+module AvlTreePathPathEnv
+
+
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+
+  import Absyn
+
+using BaseAvlTree
+Key = Absyn.Path
+Value = Absyn.Path
+
+#= TODO! FIXME! handle redeclare ... extends stuff
+redeclare function extends keyStr
+algorithm
+outString := AbsynUtil.pathString(inKey);
+end keyStr;
+redeclare function extends valueStr
+algorithm
+outString := AbsynUtil.pathString(inValue);
+end valueStr;
+redeclare function extends keyCompare
+algorithm
+outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
+end keyCompare;
+redeclare function addConflictDefault = addConflictKeep;
+=#
+
+addConflictDefault = addConflictKeep
+
+#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+@exportAll()
+end
+
+module AvlTreePathOperatorTypes
+
+
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+
+  import Absyn
+
+using BaseAvlTree
+Key = Absyn.Path
+Value = List
+
+#= TODO! FIXME! handle redeclare ... extends stuff
+redeclare function extends keyStr
+algorithm
+outString := AbsynUtil.pathString(inKey);
+end keyStr;
+redeclare function extends valueStr
+algorithm
+outString := Types.unparseType(DAE.T_METATUPLE(inValue));
+end valueStr;
+redeclare function extends keyCompare
+algorithm
+outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
+end keyCompare;
+redeclare function addConflictDefault = addConflictKeep;
+=#
+
+addConflictDefault = addConflictKeep
+
+#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+@exportAll()
+end
+
 function initCache()
-  setGlobalRoot(Global.operatorOverloadingCache, (AvlTreePathPathEnv.Tree.EMPTY(), AvlTreePathOperatorTypes.Tree.EMPTY()))
+  setGlobalRoot(Global.operatorOverloadingCache, (AvlTreePathPathEnv.EMPTY(), AvlTreePathOperatorTypes.EMPTY()))
 end
 
 function deoverloadBinaryUserdefNoConstructor(inTypeList::List{<:DAE.Type}, inLhs::DAE.Exp, inRhs::DAE.Exp, lhsType::DAE.Type, rhsType::DAE.Type, inAcc::List{<:Tuple{<:DAE.Exp, Option{<:DAE.Type}}}) ::List{Tuple{DAE.Exp, Option{DAE.Type}}}
@@ -797,6 +867,10 @@ using MetaModelica
 using ExportAll
   import DAE
 
+function _listAppend(a, b)
+  nil
+end
+
 #= /* We have these as constants instead of function calls as done previously
 * because it takes a long time to generate these types over and over again.
 * The types are a bit hard to read, but they are simply 1 through 9-dimensional
@@ -1230,76 +1304,6 @@ function getOperatorFuncsOrEmpty(inCache::FCore.Cache, env::FCore.Graph, tys::Li
     end
   end
   (cache, funcs)
-end
-
-module AvlTreePathPathEnv
-
-
-using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-using ExportAll
-
-  import Absyn
-
-using BaseAvlTree
-Key = Absyn.Path
-Value = Absyn.Path
-
-#= TODO! FIXME! handle redeclare ... extends stuff
-redeclare function extends keyStr
-algorithm
-outString := AbsynUtil.pathString(inKey);
-end keyStr;
-redeclare function extends valueStr
-algorithm
-outString := AbsynUtil.pathString(inValue);
-end valueStr;
-redeclare function extends keyCompare
-algorithm
-outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
-end keyCompare;
-redeclare function addConflictDefault = addConflictKeep;
-=#
-
-addConflictDefault = addConflictKeep
-
-#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-@exportAll()
-end
-
-module AvlTreePathOperatorTypes
-
-
-using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-using ExportAll
-
-  import Absyn
-
-using BaseAvlTree
-Key = Absyn.Path
-Value = List
-
-#= TODO! FIXME! handle redeclare ... extends stuff
-redeclare function extends keyStr
-algorithm
-outString := AbsynUtil.pathString(inKey);
-end keyStr;
-redeclare function extends valueStr
-algorithm
-outString := Types.unparseType(DAE.T_METATUPLE(inValue));
-end valueStr;
-redeclare function extends keyCompare
-algorithm
-outResult := AbsynUtil.pathCompareNoQual(inKey1,inKey2);
-end keyCompare;
-redeclare function addConflictDefault = addConflictKeep;
-=#
-
-addConflictDefault = addConflictKeep
-
-#= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-@exportAll()
 end
 
 function getOperatorFuncsOrEmptySingleTy(cache::FCore.Cache, env::FCore.Graph, ty::DAE.Type, opName::String, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.Type}}

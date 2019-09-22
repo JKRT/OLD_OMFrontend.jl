@@ -8456,7 +8456,7 @@
 
               ocache = begin
                   local ie::Option{FCore.Graph}
-                  local f::MutableType{DAE.FunctionTree}
+                  local f::MutableType #= {DAE.FunctionTree} =#
                   local ht::AvlSetCR.Tree
                   local crs::List{List{DAE.ComponentRef}}
                   local p::Absyn.Path
@@ -8479,7 +8479,7 @@
 
               ocache = begin
                   local ie::Option{FCore.Graph}
-                  local f::MutableType{DAE.FunctionTree}
+                  local f::MutableType #= {DAE.FunctionTree} =#
                   local ht::AvlSetCR.Tree
                   local crs::List{DAE.ComponentRef}
                   local crss::List{List{DAE.ComponentRef}}

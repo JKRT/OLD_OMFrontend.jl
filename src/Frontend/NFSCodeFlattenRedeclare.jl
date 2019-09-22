@@ -596,8 +596,8 @@
               outNewItem = begin
                   local el1::SCode.Element
                   local el2::SCode.Element
-                  local iu1::Option{MutableType{Bool}}
-                  local iu2::Option{MutableType{Bool}}
+                  local iu1::Option{MutableType #= {Bool} =#}
+                  local iu2::Option{MutableType #= {Bool} =#}
                   local env1::Env
                   local env2::Env
                   local ty1::NFSCodeEnv.ClassType

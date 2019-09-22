@@ -476,7 +476,7 @@ function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
     =#
     @matchcontinue inCache begin
       cache  => begin
-        graph = FCore.getCachedInitialGraph(cache)
+        graph = FCoreUtil.getCachedInitialGraph(cache)
         (cache, graph)
       end
 
@@ -513,13 +513,13 @@ function getSetInitialGraph(inEnvOpt::Option{<:FGraph.Graph})::FGraph.Graph
   local initialEnv::FGraph.Graph
 
   initialEnv = begin
-    local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
+    local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}} = nil
     local graph::FGraph.Graph
 
     @matchcontinue inEnvOpt begin
       _  => begin
         @shouldFail _ = getGlobalRoot(Global.builtinGraphIndex)
-        setGlobalRoot(Global.builtinGraphIndex, nil)
+        setGlobalRoot(Global.builtinGraphIndex, assocLst)
         fail()
       end
 

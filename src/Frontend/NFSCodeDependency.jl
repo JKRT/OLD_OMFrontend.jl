@@ -401,7 +401,7 @@
         function markItemAsUsed(inItem::Item, inEnv::Env)  
               _ = begin
                   local cls_env::NFSCodeEnv.Frame
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                   local name::String
                 @match (inItem, inEnv) begin
                   (NFSCodeEnv.VAR(isUsed = SOME(is_used)), _)  => begin
@@ -426,7 +426,7 @@
          #= Marks a single frame as used. =#
         function markFrameAsUsed(inFrame::NFSCodeEnv.Frame)  
               _ = begin
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                 @match inFrame begin
                   NFSCodeEnv.FRAME(isUsed = SOME(is_used))  => begin
                       Mutable.update(is_used, true)
@@ -445,7 +445,7 @@
           miss anything in the enclosing scopes of an item. =#
         function markEnvAsUsed(inEnv::Env)  
               _ = begin
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                   local rest_env::Env
                   local f::NFSCodeEnv.Frame
                 @matchcontinue inEnv begin
@@ -967,7 +967,7 @@
         function markAsUsedOnConstant(inName::SCode.Ident, inAttr::SCode.Attributes, inEnv::Env, inInfo::SourceInfo)  
               _ = begin
                   local cls_and_vars::EnvTree.Tree
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                   local var::SCode.Variability
                 @matchcontinue (inName, inAttr, inEnv, inInfo) begin
                   (_, SCode.ATTR(variability = var), NFSCodeEnv.FRAME(clsAndVars = cls_and_vars) <| _, _)  => begin
@@ -987,7 +987,7 @@
         function markAsUsedOnRestriction(inName::SCode.Ident, inRestriction::SCode.Restriction, inEnv::Env, inInfo::SourceInfo)  
               _ = begin
                   local cls_and_vars::EnvTree.Tree
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                 @matchcontinue (inName, inRestriction, inEnv, inInfo) begin
                   (_, _, NFSCodeEnv.FRAME(clsAndVars = cls_and_vars) <| _, _)  => begin
                       @match true = markAsUsedOnRestriction2(inRestriction)
@@ -1662,7 +1662,7 @@
                   local env2::Env
                   local cls::SCode.Element
                   local cls_ty::NFSCodeEnv.ClassType
-                  local is_used::MutableType{Bool}
+                  local is_used::MutableType #= {Bool} =#
                    #=  Check if the current environment is not used, we can quit here if that's
                    =#
                    #=  the case.
@@ -2036,7 +2036,7 @@
               local re::List{SCode.Element}
               local cei::Option{SCode.Element}
               local imps::NFSCodeEnv.ImportTable
-              local is_used::Option{MutableType{Bool}}
+              local is_used::Option{MutableType #= {Bool} =#}
               local env::Env
 
               @match list(NFSCodeEnv.FRAME(name, ty, cls_and_vars, NFSCodeEnv.EXTENDS_TABLE(bcl, re, cei), imps, is_used)) = inEnv

@@ -5417,7 +5417,7 @@
               local val::Values.Value
               local cache::FCore.Cache
               local structuralParameters::FCore.StructuralParameters
-              local functionTree::MutableType{DAE.FunctionTree}
+              local functionTree::MutableType #= {DAE.FunctionTree} =#
 
               structuralParameters = (AvlSetCR.EMPTY(), nil)
               functionTree = Mutable.create(functions)

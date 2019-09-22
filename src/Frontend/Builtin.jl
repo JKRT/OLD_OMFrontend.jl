@@ -39,6 +39,7 @@
         import DAE
         import SCode
         import FCore
+        import FCoreUtil
         import FGraph
 
         import ClassInf
@@ -148,7 +149,7 @@
                    =#
                 @matchcontinue inCache begin
                   cache  => begin
-                      graph = FCore.getCachedInitialGraph(cache)
+                      graph = FCoreUtil.getCachedInitialGraph(cache)
                       graph = FGraph.clone(graph)
                     (cache, graph)
                   end
@@ -191,7 +192,7 @@
               local initialEnv::FGraph.Graph
 
               initialEnv = begin
-                  local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
+                  local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}} = nil
                   local graph::FGraph.Graph
                   local f::ModelicaInteger
                    #=  nothing there
@@ -199,7 +200,7 @@
                 @matchcontinue inEnvOpt begin
                   _  => begin
                       @shouldFail _ = getGlobalRoot(Global.builtinGraphIndex)
-                      setGlobalRoot(Global.builtinGraphIndex, nil)
+                      setGlobalRoot(Global.builtinGraphIndex, assocLst)
                     fail()
                   end
                   

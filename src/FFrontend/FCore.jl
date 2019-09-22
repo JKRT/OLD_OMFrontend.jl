@@ -450,7 +450,7 @@ test = DAE.FunctionTree
   @Record CACHE begin
 
     initialGraph #= and the initial environment =#::Option{Graph}
-    functions #= set of Option<DAE.Function>; NONE() means instantiation started; SOME() means it's finished =#::MutableType{DAE.FunctionTree}
+    functions #= set of Option<DAE.Function>; NONE() means instantiation started; SOME() means it's finished =#::MutableType #= {DAE.FunctionTree} =#
     evaluatedParams #= ht of prefixed crefs and a stack of evaluated but not yet prefix crefs =#::StructuralParameters
     modelName #= name of the model being instantiated =#::Absyn.Path
   end

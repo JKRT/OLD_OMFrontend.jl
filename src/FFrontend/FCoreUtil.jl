@@ -27,7 +27,7 @@ end
 function emptyCache() ::Cache
   local cache::Cache
 
-  local instFuncs::MutableType{DAE.FunctionTree}
+  local instFuncs::MutableType #= {DAE.FunctionTree} =#
   local ht::StructuralParameters
 
   instFuncs = Mutable.create(DAE.AvlTreePathFunction.EMPTY())
@@ -49,7 +49,7 @@ function addEvaluatedCref(cache::Cache, var::SCode.Variability, cr::DAE.Componen
 
   ocache = begin
     local initialGraph::Option{Graph}
-    local functions::MutableType{DAE.FunctionTree}
+    local functions::MutableType #= {DAE.FunctionTree} =#
     local ht::AvlSetCR.Tree
     local st::List{List{DAE.ComponentRef}}
     local crs::List{DAE.ComponentRef}
@@ -89,7 +89,7 @@ function setCacheClassName(inCache::Cache, p::Absyn.Path) ::Cache
   local outCache::Cache
 
   outCache = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     local ht::StructuralParameters
     local igraph::Option{Graph}
     @match (inCache, p) begin
@@ -130,7 +130,7 @@ function getCachedInstFunc(inCache::Cache, path::Absyn.Path) ::DAE.Function
   local func::DAE.Function
 
   func = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     @match (inCache, path) begin
       (CACHE(functions = ef), _)  => begin
         @match SOME(func) = DAE.AvlTreePathFunction.get(Mutable.access(ef), path)
@@ -144,7 +144,7 @@ end
 #= succeeds if the FQ function is in the set of functions =#
 function checkCachedInstFuncGuard(inCache::Cache, path::Absyn.Path)
   _ = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     @match (inCache, path) begin
       (CACHE(functions = ef), _)  => begin
         DAE.AvlTreePathFunction.get(Mutable.access(ef), path)
@@ -159,7 +159,7 @@ function getFunctionTree(cache::Cache) ::DAE.FunctionTree
   local ft::DAE.FunctionTree
 
   ft = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     @match cache begin
       CACHE(functions = ef)  => begin
         Mutable.access(ef)
@@ -179,7 +179,7 @@ function addCachedInstFuncGuard(cache::Cache, func::Absyn.Path #= fully qualifie
   local outCache::Cache
 
   outCache = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     local igraph::Option{Graph}
     local ht::StructuralParameters
     local p::Absyn.Path
@@ -217,7 +217,7 @@ function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qua
   local outCache::Cache
 
   outCache = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     local igraph::Option{Graph}
     local ht::StructuralParameters
     local p::Absyn.Path
@@ -240,7 +240,7 @@ function addDaeExtFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully 
   local outCache::Cache
 
   outCache = begin
-    local ef::MutableType{DAE.FunctionTree}
+    local ef::MutableType #= {DAE.FunctionTree} =#
     local igraph::Option{Graph}
     local ht::StructuralParameters
     local p::Absyn.Path
