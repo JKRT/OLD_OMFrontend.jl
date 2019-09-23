@@ -52,7 +52,7 @@ const Next = FCore.Next
 const Node = FCore.Node
 const Data = FCore.Data
 const Kind = FCore.Kind
-const Ref = FCore.Ref
+const MMRef = FCore.MMRef
 const Refs = FCore.Refs
 const RefTree = FCore.RefTree
 const Children = FCore.Children
@@ -88,8 +88,8 @@ import Types
 import SCodeUtil
 
          #= get the top node ref from the graph =#
-        function top(inGraph::Graph) ::Ref
-              local outRef::Ref
+        function top(inGraph::Graph) ::MMRef
+              local outRef::MMRef
 
               outRef = begin
                 @match inGraph begin
@@ -134,14 +134,14 @@ import SCodeUtil
         end
 
          #= get the last ref from the current scope the graph =#
-        function lastScopeRef(inGraph::Graph) ::Ref
-              local outRef::Ref
+        function lastScopeRef(inGraph::Graph) ::MMRef
+              local outRef::MMRef
 
               outRef = listHead(currentScope(inGraph))
           outRef
         end
 
-        function setLastScopeRef(inRef::Ref, inGraph::Graph) ::Graph
+        function setLastScopeRef(inRef::MMRef, inGraph::Graph) ::Graph
               local outGraph::Graph = inGraph
 
               outGraph = begin
@@ -160,8 +160,8 @@ import SCodeUtil
         end
 
          #= remove the last ref from the current scope the graph =#
-        function stripLastScopeRef(inGraph::Graph) ::Tuple{Graph, Ref}
-              local outRef::Ref
+        function stripLastScopeRef(inGraph::Graph) ::Tuple{Graph, MMRef}
+              local outRef::MMRef
               local outGraph::Graph
 
               local t::Top
@@ -178,8 +178,8 @@ import SCodeUtil
         function topScope(inGraph::Graph) ::Graph
               local outGraph::Graph
 
-              local t::Ref
-              local r::Ref
+              local t::MMRef
+              local r::MMRef
               local s::Scope
               local gn::Name
               local v::Visited
@@ -213,7 +213,7 @@ import SCodeUtil
               local n::Node
               local s::Scope
               local v::Visited
-              local nr::Ref
+              local nr::MMRef
               local next::Next
               local id::Id
               local ag::Array{Graph}
@@ -271,7 +271,7 @@ import SCodeUtil
               outGraph = begin
                   local g::Graph
                   local t::Top
-                  local nt::Ref
+                  local nt::MMRef
                   local gn::Name
                   local s::Scope
                   local v::Visited
@@ -311,8 +311,8 @@ import SCodeUtil
               local outGraph::Graph
 
               outGraph = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local n::Name
                   local id::Id
                   local p::Parents
@@ -361,12 +361,12 @@ import SCodeUtil
         end
 
          #= update the class scope in the source =#
-        function updateSourceTargetScope(inRef::Ref, inTargetScope::Scope) ::Ref
-              local outRef::Ref
+        function updateSourceTargetScope(inRef::MMRef, inTargetScope::Scope) ::MMRef
+              local outRef::MMRef
 
               outRef = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local g::Graph
                   local sc::Scope
                    #=  update the target scope of the node, hopefully existing
@@ -390,12 +390,12 @@ import SCodeUtil
         end
 
          #= update the class scope in the source =#
-        function updateInstance(inRef::Ref, inVar::DAE.Var) ::Ref
-              local outRef::Ref
+        function updateInstance(inRef::MMRef, inVar::DAE.Var) ::MMRef
+              local outRef::MMRef
 
               outRef = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local g::Graph
                   local sc::Scope
                    #=  update the instance node
@@ -421,8 +421,8 @@ import SCodeUtil
               local outGraph::Graph
 
               outGraph = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local n::Name
                   local id::Id
                   local p::Parents
@@ -473,8 +473,8 @@ import SCodeUtil
               local outGraph::Graph
 
               outGraph = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local n::Name
                   local id::Id
                   local p::Parents
@@ -514,12 +514,12 @@ import SCodeUtil
         end
 
          #= This function updates a class element in the given parent ref =#
-        function updateClassElement(inRef::Ref, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::Ref
-              local outRef::Ref
+        function updateClassElement(inRef::MMRef, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, instStatus::FCore.Status, inTargetGraph::Graph) ::MMRef
+              local outRef::MMRef
 
               outRef = begin
-                  local pr::Ref
-                  local r::Ref
+                  local pr::MMRef
+                  local r::MMRef
                   local n::Name
                   local id::Id
                   local p::Parents
@@ -548,7 +548,7 @@ import SCodeUtil
 
               outGraph = begin
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                   local c::SCode.Element
                   local v::DAE.Var
                 @match (inGraph, name, ty, binding, variability, constOfForIteratorRange) begin
@@ -599,8 +599,8 @@ import SCodeUtil
                   local g::Graph
                   local n::Name
                   local no::Node
-                  local r::Ref
-                  local p::Ref
+                  local r::MMRef
+                  local p::MMRef
                    #=  else open a new scope!
                    =#
                 @matchcontinue (inGraph, encapsulatedPrefix, inName, inScopeType) begin
@@ -627,7 +627,7 @@ import SCodeUtil
         function openScope(inGraph::Graph, encapsulatedPrefix::SCode.Encapsulated, inName::Name, inScopeType::Option{<:FCore.ScopeType}) ::Graph
               local outGraph::Graph
 
-              local p::Ref
+              local p::MMRef
 
               p = lastScopeRef(inGraph)
               outGraph = begin
@@ -635,7 +635,7 @@ import SCodeUtil
                   local gComp::Graph
                   local n::Name
                   local no::Node
-                  local r::Ref
+                  local r::MMRef
                   local sc::Scope
                    #=  see if we have it as a class instance
                    =#
@@ -727,7 +727,7 @@ import SCodeUtil
 
               outPath = begin
                   local p::Absyn.Path
-                  local r::Ref
+                  local r::MMRef
                 @matchcontinue inGraph begin
                   _  => begin
                       @match list(r) = currentScope(inGraph)
@@ -768,7 +768,7 @@ import SCodeUtil
 
               local p::Absyn.Path
               local s::Scope
-              local r::Ref
+              local r::MMRef
 
               @match _cons(r, s) = currentScope(inGraph)
               p = AbsynUtil.makeIdentPathFromString(FNode.refName(r))
@@ -794,7 +794,7 @@ import SCodeUtil
 
          #= @author:adrpo
          push the given ref as first element in the graph scope list =#
-        function pushScopeRef(graph::Graph, inRef::Ref) ::Graph
+        function pushScopeRef(graph::Graph, inRef::MMRef) ::Graph
 
 
               _ = begin
@@ -1075,7 +1075,7 @@ import SCodeUtil
                   local g::Graph
                   local cg::Graph
                   local m::DAE.Mod
-                  local r::Ref
+                  local r::MMRef
                   local i::FCore.Status
                    #=  Graph of component
                    =#
@@ -1114,7 +1114,7 @@ import SCodeUtil
               outGraph = begin
                   local n::Name
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                    #=  already there as class instance, do nothing!
                    =#
                 @matchcontinue (inGraph, inClass, inPrefix, inMod) begin
@@ -1143,7 +1143,7 @@ import SCodeUtil
               outGraph = begin
                   local n::Name
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                 @match (inGraph, inName, inType) begin
                   (g, _, _)  => begin
                       r = lastScopeRef(g)
@@ -1163,7 +1163,7 @@ import SCodeUtil
               outGraph = begin
                   local n::Name
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                 @match (inGraph, inImport) begin
                   (g, _)  => begin
                       r = lastScopeRef(g)
@@ -1183,7 +1183,7 @@ import SCodeUtil
               outGraph = begin
                   local n::Name
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                 @match (inGraph, inDu) begin
                   (g, _)  => begin
                       r = lastScopeRef(g)
@@ -1262,7 +1262,7 @@ import SCodeUtil
 
               inFunction = begin
                   local s::Scope
-                  local r::Ref
+                  local r::MMRef
                 @match inGraph begin
                   FCore.G(scope = s) where (checkScopeType(s, SOME(FCore.FUNCTION_SCOPE())) || checkScopeType(s, SOME(FCore.PARALLEL_SCOPE())))  => begin
                     true
@@ -1281,7 +1281,7 @@ import SCodeUtil
               local name::Name
 
               name = begin
-                  local r::Ref
+                  local r::MMRef
                 @match inGraph begin
                   _  => begin
                       r = lastScopeRef(inGraph)
@@ -1300,7 +1300,7 @@ import SCodeUtil
               local yes::Bool
 
               yes = begin
-                  local r::Ref
+                  local r::MMRef
                   local rest::Scope
                   local restr::SCode.Restriction
                   local st::Option{FCore.ScopeType}
@@ -1348,7 +1348,7 @@ import SCodeUtil
               local outRestriction::SCode.Restriction
 
               outRestriction = begin
-                  local r::Ref
+                  local r::MMRef
                   local st::FCore.ScopeType
                 @matchcontinue inScope begin
                   r <| _ where (FNode.isRefClass(r))  => begin
@@ -1393,7 +1393,7 @@ import SCodeUtil
                   local path::Absyn.Path
                   local path_1::Absyn.Path
                   local rest::Scope
-                  local ref::Ref
+                  local ref::MMRef
                 @matchcontinue inScope begin
                   ref <| rest where (! FNode.isRefTop(ref))  => begin
                       id = FNode.refName(ref)
@@ -1460,7 +1460,7 @@ import SCodeUtil
 
               (outRealGraph, outForScope) = begin
                   local g::Graph
-                  local r::Ref
+                  local r::MMRef
                   local s::Scope
                 @match (inGraph, inAcc) begin
                   (FCore.EG(_), _)  => begin
@@ -1489,7 +1489,7 @@ import SCodeUtil
 
               variables = begin
                   local lst::List{Name}
-                  local r::Ref
+                  local r::MMRef
                    #=  empty case
                    =#
                 @match inGraph begin
@@ -1519,7 +1519,7 @@ import SCodeUtil
         function removeComponentsFromScope(inGraph::Graph) ::Graph
               local outGraph::Graph
 
-              local r::Ref
+              local r::MMRef
               local n::Node
 
               r = lastScopeRef(inGraph)
@@ -1535,7 +1535,7 @@ import SCodeUtil
         function cloneLastScopeRef(inGraph::Graph) ::Graph
               local outGraph::Graph
 
-              local r::Ref
+              local r::MMRef
 
               (outGraph, r) = stripLastScopeRef(inGraph)
               r = FNode.copyRefNoUpdate(r)
@@ -1577,12 +1577,12 @@ import SCodeUtil
 
               (outVersionedTargetClassEnv, outVersionedTargetClass, outIH) = begin
                   local gclass::Graph
-                  local classRef::Ref
-                  local sourceRef::Ref
-                  local targetClassParentRef::Ref
-                  local versionRef::Ref
+                  local classRef::MMRef
+                  local sourceRef::MMRef
+                  local targetClassParentRef::MMRef
+                  local versionRef::MMRef
                   local n::Node
-                  local r::Ref
+                  local r::MMRef
                   local crefPrefix::Prefix.PrefixType
                   local sourceScope::Scope
                   local c::SCode.Element
@@ -1722,7 +1722,7 @@ import SCodeUtil
               local yes::Bool
 
               yes = begin
-                  local r::Ref
+                  local r::MMRef
                 @matchcontinue (inGraph, inClass) begin
                   (_, _)  => begin
                       r = FNode.child(lastScopeRef(inGraph), SCodeUtil.elementName(inClass))
@@ -1745,10 +1745,10 @@ import SCodeUtil
               (outName, outCrefPrefix) = begin
                   local gcomp::Graph
                   local gclass::Graph
-                  local classRef::Ref
-                  local compRef::Ref
+                  local classRef::MMRef
+                  local compRef::MMRef
                   local n::Node
-                  local r::Ref
+                  local r::MMRef
                   local crefPrefix::Prefix.PrefixType
                   local name::Name
                 @match (inSourceEnv, inSourceName, inPrefix, inMod, inTargetClassEnv, inTargetClassName) begin
@@ -1783,7 +1783,7 @@ import SCodeUtil
 
               outPrefix = begin
                   local p::Prefix.PrefixType
-                  local r::Ref
+                  local r::MMRef
                 @matchcontinue (inEnv, inClassName) begin
                   (_, _)  => begin
                       r = FNode.child(lastScopeRef(inEnv), inClassName)
@@ -1855,8 +1855,8 @@ import SCodeUtil
                   local n2::String
                   local rest1::Scope
                   local rest2::Scope
-                  local r1::Ref
-                  local r2::Ref
+                  local r1::MMRef
+                  local r2::MMRef
                 @match (inPrefixEnv, inEnv) begin
                   ( nil(), _ <| _)  => begin
                     true
@@ -1880,8 +1880,8 @@ import SCodeUtil
               outEnv = begin
                   local g::Graph
                   local n::Node
-                  local ref::Ref
-                  local refParent::Ref
+                  local ref::MMRef
+                  local refParent::MMRef
                 @matchcontinue (inEnv, inName, inStatus) begin
                   (g, _, _)  => begin
                       refParent = lastScopeRef(g)
@@ -1916,8 +1916,8 @@ import SCodeUtil
               outStatus = begin
                   local g::Graph
                   local n::Node
-                  local ref::Ref
-                  local refParent::Ref
+                  local ref::MMRef
+                  local refParent::MMRef
                   local s::FCore.Data
                    #=  child exists and has a status node
                    =#

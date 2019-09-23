@@ -21,6 +21,10 @@ module BaseAvlTree
     FoldFunc = Function
 
     MapFunc = Function
+    
+    function keyStr end 
+    function keyCompare end
+
 
          #= /*
          * This file is part of OpenModelica.
@@ -53,10 +57,9 @@ module BaseAvlTree
          *
          */ =#
         import BaseAvlSet
-        using BaseAvlSet
-        const Value = ModelicaInteger
-         #=  TODO: We should have an Any type
-         =#
+                
+        const Key = Any
+        const Value = Any
 
           #= The binary tree data structure. =#
          @Uniontype Tree begin
@@ -124,6 +127,11 @@ module BaseAvlTree
          #= Inserts a new node in the tree. =#
         function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
               local tree::Tree = inTree
+
+              println("BaseAvlTree")
+              @show keyCompare
+              @show methods(keyCompare)
+
 
               tree = begin
                   local key::Key

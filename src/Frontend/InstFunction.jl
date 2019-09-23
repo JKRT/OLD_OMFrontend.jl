@@ -124,7 +124,7 @@
                   local fs::FCore.Graph
                   local fs1::FCore.Graph
                   local env::FCore.Graph
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local ih::InstanceHierarchy
                   local source::DAE.ElementSource #= the origin of the element =#
                    #=  Explicit instantiation, generate constructor and destructor and the function type.

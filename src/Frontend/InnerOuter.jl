@@ -1337,7 +1337,7 @@ module InnerOuter
                   local envIn::FCore.Graph
                   local envRest::FCore.Graph
                   local cr::DAE.ComponentRef
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local n::FCore.Node
                    #=  handle nothingness
                    =#
@@ -1385,8 +1385,8 @@ module InnerOuter
           outNode
         end
 
-        function switchInnerToOuterInChild(name::FCore.Name, cr::DAE.ComponentRef, inRef::FCore.Ref) ::FCore.Ref
-              local ref::FCore.Ref
+        function switchInnerToOuterInChild(name::FCore.Name, cr::DAE.ComponentRef, inRef::FCore.MMRef) ::FCore.MMRef
+              local ref::FCore.MMRef
 
               local n::FCore.Node
 
@@ -1404,7 +1404,7 @@ module InnerOuter
 
               outNode = begin
                   local cr::DAE.ComponentRef
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local node::FCore.Node
                   local name::DAE.Ident
                   local attributes::DAE.Attributes

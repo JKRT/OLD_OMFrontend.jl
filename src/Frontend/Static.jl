@@ -7270,7 +7270,7 @@
                   local scopeName::String
                   local errorString::String
                   local restScope::FCore.Scope
-                  local ref::FCore.Ref
+                  local ref::FCore.MMRef
                    #=  non-parallel builtin function call is OK everywhere.
                    =#
                 @matchcontinue (inFn, isBuiltin, inFuncParallelism, inScope, inInfo) begin

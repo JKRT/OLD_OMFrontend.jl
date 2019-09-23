@@ -114,7 +114,7 @@
 
               du = begin
                   local env::FCore.Graph
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue (p, tpl) begin
                   (_, _)  => begin
                       (_, _, env) = Lookup.lookupClass(Util.tuple21(tpl), Util.tuple22(tpl), p, NONE())

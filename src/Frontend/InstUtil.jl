@@ -9044,7 +9044,7 @@
                   local prl::SCode.Parallelism
                   local isparglobal::Bool
                   local hasnodir::Bool
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue (inEnv, inName, inAttr, inInfo) begin
                   (_, _, SCode.ATTR(parallelism = prl, direction = dir), _)  => begin
                       r = FGraph.lastScopeRef(inEnv)

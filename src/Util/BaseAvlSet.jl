@@ -40,7 +40,7 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        const Key = ModelicaInteger
+        const Key = Any
 
           #= The binary tree data structure. =#
          @Uniontype Tree begin

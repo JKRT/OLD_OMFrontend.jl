@@ -1847,7 +1847,7 @@
                   local adno::List{Absyn.Subscript}
                   local smCompCrefs::List{DAE.ComponentRef} #= state machine components crefs =#
                   local smInitialCrefs::List{DAE.ComponentRef} #= state machine crefs of initial states =#
-                  local lastRef::FCore.Ref
+                  local lastRef::FCore.MMRef
                   local smCompToFlatSM::InstStateMachineUtil.SMNodeToFlatSMGroupTable
                    #= List<tuple<Absyn.ComponentRef,DAE.ComponentRef>> fieldDomLst;
                    =#
@@ -3876,7 +3876,7 @@
                   local fs::FCore.Graph
                   local name::Absyn.Ident
                   local ename::Absyn.Ident
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue path begin
                   _  => begin
                       @match (cache, SCode.CLASS(name = name), env_1) = Lookup.lookupClass(cache, inEnv, path)
@@ -3934,7 +3934,7 @@
                   local fs::FCore.Graph
                   local name::Absyn.Ident
                   local ename::Absyn.Ident
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                    #=  To make a class fully qualified, the class path is looked up in the environment.
                    =#
                    #=  The FQ path consist of the simple class name appended to the environment path of the looked up class.
@@ -5030,7 +5030,7 @@
           path
         end
 
-        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.Ref) ::Tuple{FCore.Cache, FCore.Graph} 
+        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.MMRef) ::Tuple{FCore.Cache, FCore.Graph} 
 
 
 

@@ -192,7 +192,7 @@
               local initialEnv::FGraph.Graph
 
               initialEnv = begin
-                  local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}} = nil
+                  local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
                   local graph::FGraph.Graph
                   local f::ModelicaInteger
                    #=  nothing there
@@ -200,7 +200,7 @@
                 @matchcontinue inEnvOpt begin
                   _  => begin
                       @shouldFail _ = getGlobalRoot(Global.builtinGraphIndex)
-                      setGlobalRoot(Global.builtinGraphIndex, assocLst)
+                      setGlobalRoot(Global.builtinGraphIndex, nil)
                     fail()
                   end
                   

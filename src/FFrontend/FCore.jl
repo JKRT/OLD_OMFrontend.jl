@@ -53,25 +53,47 @@ using ExportAll
 @UniontypeDecl Cache
 @UniontypeDecl ScopeType
 
+  #The question is can we just use Ref? I think so. Add Compatabilty for MetaModelica.jl for now...
+  MMRef = Array  #= array of 1 =#
+
 #=Redef of standard types in this file=#
 const Name = String  #= an identifier is just a string =#
 const Names = List  #= list of names =#
 println("FCore Hello1")
-  module RefTree
+
+module RefTree
   using MetaModelica
   #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
   using ExportAll
   import BaseAvlTree
+  import BaseAvlSet
   import FCore.Name
-  import FCore.Ref
+  import FCore.MMRef
   import FCore.Node
   using BaseAvlTree
   Key = String
-  Value = Ref
-  #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-  export Key
-  export Value
+  Value = MMRef
+  
+  function keyStr(s)::String
+    s
   end
+  
+  function keyCompare(key1::String, key2::String)
+    stringCompare(key1, key2)
+  end
+  
+  @show keyCompare
+  @show methods(keyCompare)
+  
+  function valueStr(inValue)::String
+    local s::String
+    @match Node.N(name = s) = arrayGet(inValue, 1)
+    s
+  end
+  
+  #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
+  @exportAll()  
+end
 
 println("FCore Hello2")
 import Absyn
@@ -118,8 +140,6 @@ end
 const emptyScope = nil #= empty scope =#::Scope
 const emptyImportTable = IMPORT_TABLE(false, nil, nil)::ImportTable
 
-  #The question is can we just use Ref? I think so. Add Compatabilty for MetaModelica.jl for now...
-  #Ref = Array  #= array of 1 =#
 
   @Uniontype Node begin
     @Record N begin
@@ -360,7 +380,7 @@ end
 @Uniontype Visit begin
   @Record VN begin
 
-    ref #= which node it is =#::Ref
+    ref #= which node it is =#::MMRef
     seq #= order in which was visited =#::Seq
   end
 end
@@ -424,7 +444,7 @@ end
   @Record GTOP begin
     graph::Array{Graph}
     name #= name of the graph =#::Name
-    node #= the top node =#::Ref
+    node #= the top node =#::MMRef
     extra #= extra information =#::Extra
   end
 end

@@ -74,9 +74,10 @@ Next = FCore.Next
 Node = FCore.Node
 Data = FCore.Data
 Kind = FCore.Kind
-Ref = FCore.Ref
+MMRef = FCore.MMRef
 Refs = FCore.Refs
 import FCore.RefTree
+import FCoreUtil
 Children = FCore.Children
 Parents = FCore.Parents
 Scope = FCore.Scope
@@ -89,7 +90,7 @@ Import = FCore.Import
 const topNodeName = "top"::Name
 #=  these names are used mostly for edges in the graph
 =#
-#=  the edges are saved inside the AvlTree (\"name\", Ref)
+#=  the edges are saved inside the AvlTree (\"name\", MMRef)
 =#
 const tyNodeName = "ty" #= type node =#::Name
 const ftNodeName = "ft" #= function types node =#::Name
@@ -121,8 +122,8 @@ const statusNodeName = "status" #= an status node =#::Name
 
 #= @author: adrpo
 turns a node into a ref =#
-function toRef(inNode::Node) ::Ref
-  local outRef::Ref
+function toRef(inNode::Node) ::MMRef
+  local outRef::MMRef
 
   outRef = arrayCreate(1, inNode)
   outRef
@@ -130,7 +131,7 @@ end
 
 #= @author: adrpo
 turns a ref into a node =#
-function fromRef(inRef::Ref) ::Node
+function fromRef(inRef::MMRef) ::Node
   local outNode::Node
 
   outNode = arrayGet(inRef, 1)
@@ -139,8 +140,8 @@ end
 
 #= @author: adrpo
 sets a node into a ref =#
-function updateRef(inRef::Ref, inNode::Node) ::Ref
-  local outRef::Ref
+function updateRef(inRef::MMRef, inNode::Node) ::MMRef
+  local outRef::MMRef
 
   outRef = arrayUpdate(inRef, 1, inNode)
   outRef
@@ -167,15 +168,15 @@ function hasParents(inNode::Node) ::Bool
   b
 end
 
-function refParents(inRef::Ref) ::Parents
+function refParents(inRef::MMRef) ::Parents
   local p::Parents
 
   @match FCore.N(parents = p) = fromRef(inRef)
   p
 end
 
-function refPushParents(inRef::Ref, inParents::Parents) ::Ref
-  local outRef::Ref
+function refPushParents(inRef::MMRef, inParents::Parents) ::MMRef
+  local outRef::MMRef
 
   local n::Name
   local i::Id
@@ -204,8 +205,8 @@ function setParents(inNode::Node, inParents::Parents) ::Node
 end
 
 #= returns a target from a REF node =#
-function target(inNode::Node) ::Ref
-  local outRef::Ref
+function target(inNode::Node) ::MMRef
+  local outRef::MMRef
 
   @match _cons(outRef, _) = targetScope(inNode)
   outRef
@@ -228,7 +229,7 @@ end
 function new(inName::Name, inId::Id, inParents::Parents, inData::Data) ::Node
   local node::Node
 
-  node = FCore.N(inName, inId, inParents, RefTree.new(), inData)
+  node = FCore.N(inName, inId, inParents, RefTree.EMPTY(), inData)
   node
 end
 
@@ -328,26 +329,8 @@ function compareQualifiedImportNames(inImport1::Import, inImport2::Import) ::Boo
   outEqual
 end
 
-function addChildRef(inParentRef::Ref, inName::Name, inChildRef::Ref, checkDuplicate::Bool = false)
-  local n::Name
-  local i::ModelicaInteger
-  local p::Parents
-  local c::Children
-  local d::Data
-  local parent::Ref
-
-  @match FCore.N(n, i, p, c, d) = fromRef(inParentRef)
-  c = RefTree.add(c, inName, inChildRef, if checkDuplicate
-                  printElementConflictError
-                  else
-                  RefTree.addConflictReplace
-                  end)
-  parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
-  FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))
-end
-
-function printElementConflictError(newRef::Ref, oldRef::Ref, name::RefTree.Key) ::Ref
-  local dummy::Ref
+function printElementConflictError(newRef::MMRef, oldRef::MMRef, name::RefTree.Key) ::MMRef
+  local dummy::MMRef
 
   local info1::SourceInfo
   local info2::SourceInfo
@@ -363,7 +346,23 @@ function printElementConflictError(newRef::Ref, oldRef::Ref, name::RefTree.Key) 
   dummy
 end
 
-function addImportToRef(ref::Ref, imp::SCode.Element)
+function addChildRef(inParentRef::MMRef, inName::Name, inChildRef::MMRef, checkDuplicate::Bool = false)
+  local n::Name
+  local i::ModelicaInteger
+  local p::Parents
+  local c::Children
+  local d::Data
+  local parent::MMRef
+
+  @match FCore.N(n, i, p, c, d) = fromRef(inParentRef)
+  @show RefTree.keyCompare
+  @show methods(RefTree.keyCompare)
+  c = RefTree.add(c, inName, inChildRef, #= if checkDuplicate = =# printElementConflictError #= else RefTree.addConflictReplace end =#)
+  parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
+  FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))
+end
+
+function addImportToRef(ref::MMRef, imp::SCode.Element)
   local n::Name
   local id::ModelicaInteger
   local p::Parents
@@ -372,14 +371,14 @@ function addImportToRef(ref::Ref, imp::SCode.Element)
   local e::SCode.Element
   local t::Kind
   local it::ImportTable
-  local r::Ref
+  local r::MMRef
 
   @match FCore.N(n, id, p, c, FCore.IM(it)) = fromRef(ref)
   it = addImport(imp, it)
   r = updateRef(ref, FCore.N(n, id, p, c, FCore.IM(it)))
 end
 
-function addTypesToRef(ref::Ref, inTys::List{<:DAE.Type})
+function addTypesToRef(ref::MMRef, inTys::List{<:DAE.Type})
   local n::Name
   local id::ModelicaInteger
   local p::Parents
@@ -389,7 +388,7 @@ function addTypesToRef(ref::Ref, inTys::List{<:DAE.Type})
   local t::Kind
   local it::ImportTable
   local tys::List{DAE.Type}
-  local r::Ref
+  local r::MMRef
 
   @match FCore.N(n, id, p, c, FCore.FT(tys)) = fromRef(ref)
   tys = ListUtil.unique(listAppend(inTys, tys))
@@ -398,7 +397,7 @@ function addTypesToRef(ref::Ref, inTys::List{<:DAE.Type})
   r = updateRef(ref, FCore.N(n, id, p, c, FCore.FT(tys)))
 end
 
-function addIteratorsToRef(ref::Ref, inIterators::Absyn.ForIterators)
+function addIteratorsToRef(ref::MMRef, inIterators::Absyn.ForIterators)
   local n::Name
   local id::ModelicaInteger
   local p::Parents
@@ -407,7 +406,7 @@ function addIteratorsToRef(ref::Ref, inIterators::Absyn.ForIterators)
   local e::SCode.Element
   local t::Kind
   local it::Absyn.ForIterators
-  local r::Ref
+  local r::MMRef
 
   @match FCore.N(n, id, p, c, FCore.FS(it)) = fromRef(ref)
   it = listAppend(it, inIterators)
@@ -416,7 +415,7 @@ function addIteratorsToRef(ref::Ref, inIterators::Absyn.ForIterators)
   r = updateRef(ref, FCore.N(n, id, p, c, FCore.FS(it)))
 end
 
-function addDefinedUnitToRef(ref::Ref, du::SCode.Element)
+function addDefinedUnitToRef(ref::MMRef, du::SCode.Element)
   local n::Name
   local id::ModelicaInteger
   local p::Parents
@@ -425,7 +424,7 @@ function addDefinedUnitToRef(ref::Ref, du::SCode.Element)
   local e::SCode.Element
   local t::Kind
   local it::ImportTable
-  local r::Ref
+  local r::MMRef
   local dus::List{SCode.Element}
 
   @match FCore.N(n, id, p, c, FCore.DU(dus)) = fromRef(ref)
@@ -446,7 +445,7 @@ function name(n::Node) ::String
   name
 end
 
-function refName(r::Ref) ::String
+function refName(r::MMRef) ::String
   local n::String
 
   n = name(fromRef(r))
@@ -466,7 +465,7 @@ function data(n::Node) ::Data
   d
 end
 
-function refData(r::Ref) ::Data
+function refData(r::MMRef) ::Data
   local outData::Data
 
   outData = data(fromRef(r))
@@ -475,8 +474,8 @@ end
 
 #= @author: adrpo
 return the top node ref =#
-function top(inRef::Ref) ::Ref
-  local outTop::Ref
+function top(inRef::MMRef) ::MMRef
+  local outTop::MMRef
 
   outTop = inRef
   while hasParents(fromRef(outTop))
@@ -510,7 +509,7 @@ function hasChild(inNode::Node, inName::Name) ::Bool
   b
 end
 
-function refHasChild(inRef::Ref, inName::Name) ::Bool
+function refHasChild(inRef::MMRef, inName::Name) ::Bool
   local b::Bool
 
   b = hasChild(fromRef(inRef), inName)
@@ -545,15 +544,15 @@ function setData(inNode::Node, inData::Data) ::Node
   outNode
 end
 
-function child(inParentRef::Ref, inName::Name) ::Ref
-  local outChildRef::Ref
+function child(inParentRef::MMRef, inName::Name) ::MMRef
+  local outChildRef::MMRef
 
   outChildRef = childFromNode(fromRef(inParentRef), inName)
   outChildRef
 end
 
-function childFromNode(inNode::Node, inName::Name) ::Ref
-  local outChildRef::Ref
+function childFromNode(inNode::Node, inName::Name) ::MMRef
+  local outChildRef::MMRef
 
   local c::Children
 
@@ -748,7 +747,7 @@ function toPathStr(inNode::Node) ::String
     local p::Parents
     local c::Children
     local d::Data
-    local nr::Ref
+    local nr::MMRef
     local s::String
     #=  top node
     =#
@@ -828,7 +827,7 @@ function isImplicitScope(inNode::Node) ::Bool
 end
 
 #= anything that is not a class or a component is an implicit scope! =#
-function isRefImplicitScope(inRef::Ref) ::Bool
+function isRefImplicitScope(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isImplicitScope(fromRef(inRef))
@@ -877,7 +876,7 @@ function isUserDefined(inNode::Node) ::Bool
   local b::Bool
 
   b = begin
-    local p::Ref
+    local p::MMRef
     @match inNode begin
       FCore.N(data = FCore.CL(kind = FCore.USERDEFINED(__)))  => begin
         true
@@ -1213,7 +1212,7 @@ function isClone(inNode::Node) ::Bool
   local b::Bool
 
   b = begin
-    local r::Ref
+    local r::MMRef
     @match inNode begin
       FCore.N(parents = r <| _)  => begin
         b = isRefVersion(r)
@@ -1286,11 +1285,11 @@ end
 #= @author: adrpo
 returns the first NON implicit
 reference from the given scope! =#
-function nonImplicitRefFromScope(inScope::Scope) ::Ref
-  local outRef::Ref
+function nonImplicitRefFromScope(inScope::Scope) ::MMRef
+  local outRef::MMRef
 
   outRef = begin
-    local r::Ref
+    local r::MMRef
     local rest::Scope
     @match inScope begin
       nil()  => begin
@@ -1316,7 +1315,7 @@ is not found up to the top the
 empty list is returned.
 note that for A.B.C.D.E.F searching for B from F will give you
 {C, D, E, F} =#
-function namesUpToParentName(inRef::Ref, inName::Name) ::Names
+function namesUpToParentName(inRef::MMRef, inName::Name) ::Names
   local outNames::Names
 
   outNames = namesUpToParentName_dispatch(inRef, inName, nil)
@@ -1330,11 +1329,11 @@ is not found up to the top the
 empty list is returned.
 note that for A.B.C.D.E.F searching for B from F will give you
 {C, D, E, F} =#
-function namesUpToParentName_dispatch(inRef::Ref, inName::Name, acc::Names) ::Names
+function namesUpToParentName_dispatch(inRef::MMRef, inName::Name, acc::Names) ::Names
   local outNames::Names
 
   outNames = begin
-    local r::Ref
+    local r::MMRef
     local names::Names
     local name::Name
     #=  bah, error!
@@ -1362,11 +1361,11 @@ end
 
 #= @author: adrpo
 returns the target of the modifer =#
-function getModifierTarget(inRef::Ref) ::Ref
-  local outRef::Ref
+function getModifierTarget(inRef::MMRef) ::MMRef
+  local outRef::MMRef
 
   outRef = begin
-    local r::Ref
+    local r::MMRef
     #=  bah, error!
     =#
     @matchcontinue inRef begin
@@ -1400,7 +1399,7 @@ NOTE:
 the starting point reference is included and
 the scope is returned reversed, from leafs
 to top =#
-function originalScope(inRef::Ref) ::Scope
+function originalScope(inRef::MMRef) ::Scope
   local outScope::Scope
 
   outScope = originalScope_dispatch(inRef, nil)
@@ -1413,12 +1412,12 @@ NOTE:
 the starting point reference is included and
 the scope is returned reversed, from leafs
 to top =#
-function originalScope_dispatch(inRef::Ref, inAcc::Scope) ::Scope
+function originalScope_dispatch(inRef::MMRef, inAcc::Scope) ::Scope
   local outScope::Scope
 
   outScope = begin
     local acc::Scope
-    local r::Ref
+    local r::MMRef
     #=  top
     =#
     @match (inRef, inAcc) begin
@@ -1439,8 +1438,8 @@ end
 
 #= @author:
 return the original parent from the parents (the last one) =#
-function original(inParents::Parents) ::Ref
-  local outOriginal::Ref
+function original(inParents::Parents) ::MMRef
+  local outOriginal::MMRef
 
   outOriginal = ListUtil.last(inParents)
   outOriginal
@@ -1452,7 +1451,7 @@ NOTE:
 the starting point reference is included and
 the scope is returned reversed, from leafs
 to top =#
-function contextualScope(inRef::Ref) ::Scope
+function contextualScope(inRef::MMRef) ::Scope
   local outScope::Scope
 
   outScope = contextualScope_dispatch(inRef, nil)
@@ -1465,12 +1464,12 @@ NOTE:
 the starting point reference is included and
 the scope is returned reversed, from leafs
 to top =#
-function contextualScope_dispatch(inRef::Ref, inAcc::Scope) ::Scope
+function contextualScope_dispatch(inRef::MMRef, inAcc::Scope) ::Scope
   local outScope::Scope
 
   outScope = begin
     local acc::Scope
-    local r::Ref
+    local r::MMRef
     #=  top
     =#
     @match (inRef, inAcc) begin
@@ -1491,8 +1490,8 @@ end
 
 #= @author:
 return the contextual parent from the parents (the first one) =#
-function contextual(inParents::Parents) ::Ref
-  local outContextual::Ref
+function contextual(inParents::Parents) ::MMRef
+  local outContextual::MMRef
 
   outContextual = listHead(inParents)
   outContextual
@@ -1502,12 +1501,12 @@ end
 lookup a reference based on given scope names
 NOTE:
 inRef/outRef could be in a totally different graph =#
-function lookupRef(inRef::Ref, inScope::Scope) ::Ref
-  local outRef::Ref
+function lookupRef(inRef::MMRef, inScope::Scope) ::MMRef
+  local outRef::MMRef
 
   outRef = begin
     local s::Scope
-    local r::Ref
+    local r::MMRef
     #=  for the top, return itself
     =#
     @matchcontinue (inRef, inScope) begin
@@ -1533,11 +1532,11 @@ end
 lookup a reference based on given scope names
 NOTE:
 inRef/outRef could be in a totally different graph =#
-function lookupRef_dispatch(inRef::Ref, inScope::Scope) ::Ref
-  local outRef::Ref
+function lookupRef_dispatch(inRef::MMRef, inScope::Scope) ::MMRef
+  local outRef::MMRef
 
   outRef = begin
-    local r::Ref
+    local r::MMRef
     local rest::Scope
     local n::Name
     @match (inRef, inScope) begin
@@ -1561,7 +1560,7 @@ end
 #= @author: adrpo
 filter the children of the given
 reference by the given filter =#
-function filter(inRef::Ref, inFilter::Filter) ::Refs
+function filter(inRef::MMRef, inFilter::Filter) ::Refs
   local filtered::Refs
 
   local c::Children
@@ -1572,7 +1571,7 @@ function filter(inRef::Ref, inFilter::Filter) ::Refs
   filtered
 end
 
-function filter_work(name::Name, ref::Ref, filter::Filter, accum::Refs) ::Refs
+function filter_work(name::Name, ref::MMRef, filter::Filter, accum::Refs) ::Refs
   local refs::Refs = accum
 
   if filter(ref)
@@ -1581,161 +1580,161 @@ function filter_work(name::Name, ref::Ref, filter::Filter, accum::Refs) ::Refs
   refs
 end
 
-function isRefExtends(inRef::Ref) ::Bool
+function isRefExtends(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isExtends(fromRef(inRef))
   b
 end
 
-function isRefDerived(inRef::Ref) ::Bool
+function isRefDerived(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isDerived(fromRef(inRef))
   b
 end
 
-function isRefComponent(inRef::Ref) ::Bool
+function isRefComponent(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isComponent(fromRef(inRef))
   b
 end
 
-function isRefConstrainClass(inRef::Ref) ::Bool
+function isRefConstrainClass(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isConstrainClass(fromRef(inRef))
   b
 end
 
-function isRefClass(inRef::Ref) ::Bool
+function isRefClass(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isClass(fromRef(inRef))
   b
 end
 
-function isRefInstance(inRef::Ref) ::Bool
+function isRefInstance(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isInstance(fromRef(inRef))
   b
 end
 
-function isRefRedeclare(inRef::Ref) ::Bool
+function isRefRedeclare(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isRedeclare(fromRef(inRef))
   b
 end
 
-function isRefClassExtends(inRef::Ref) ::Bool
+function isRefClassExtends(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isClassExtends(fromRef(inRef))
   b
 end
 
-function isRefCref(inRef::Ref) ::Bool
+function isRefCref(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isCref(fromRef(inRef))
   b
 end
 
-function isRefReference(inRef::Ref) ::Bool
+function isRefReference(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isReference(fromRef(inRef))
   b
 end
 
-function isRefUserDefined(inRef::Ref) ::Bool
+function isRefUserDefined(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isUserDefined(fromRef(inRef))
   b
 end
 
-function isRefTop(inRef::Ref) ::Bool
+function isRefTop(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isTop(fromRef(inRef))
   b
 end
 
-function isRefBasicType(inRef::Ref) ::Bool
+function isRefBasicType(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isBasicType(fromRef(inRef))
   b
 end
 
-function isRefBuiltin(inRef::Ref) ::Bool
+function isRefBuiltin(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isBuiltin(fromRef(inRef))
   b
 end
 
-function isRefFunction(inRef::Ref) ::Bool
+function isRefFunction(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isFunction(fromRef(inRef))
   b
 end
 
-function isRefRecord(inRef::Ref) ::Bool
+function isRefRecord(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isRecord(fromRef(inRef))
   b
 end
 
-function isRefSection(inRef::Ref) ::Bool
+function isRefSection(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isSection(fromRef(inRef))
   b
 end
 
-function isRefMod(inRef::Ref) ::Bool
+function isRefMod(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isMod(fromRef(inRef))
   b
 end
 
-function isRefModHolder(inRef::Ref) ::Bool
+function isRefModHolder(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isModHolder(fromRef(inRef))
   b
 end
 
-function isRefClone(inRef::Ref) ::Bool
+function isRefClone(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isClone(fromRef(inRef))
   b
 end
 
-function isRefVersion(inRef::Ref) ::Bool
+function isRefVersion(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isVersion(fromRef(inRef))
   b
 end
 
-function isRefDims(inRef::Ref) ::Bool
+function isRefDims(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isDims(fromRef(inRef))
   b
 end
 
-function isRefIn(inRef::Ref, inFunctionRefIs::FunctionRefIs) ::Bool
+function isRefIn(inRef::MMRef, inFunctionRefIs::FunctionRefIs) ::Bool
   local b::Bool
 
   b = isIn(fromRef(inRef), inFunctionRefIs)
@@ -1745,7 +1744,7 @@ end
 #= @author: adrpo
 return all refs as given by
 depth first search =#
-function dfs(inRef::Ref) ::Refs
+function dfs(inRef::MMRef) ::Refs
   local outRefs::Refs
 
   outRefs = begin
@@ -1816,11 +1815,11 @@ function imports(inNode::Node) ::Tuple{List{Import}, List{Import}}
   (outQualifiedImports, outUnQualifiedImports)
 end
 
-function derivedRef(inRef::Ref) ::Refs
+function derivedRef(inRef::MMRef) ::Refs
   local outRefs::Refs
 
   outRefs = begin
-    local r::Ref
+    local r::MMRef
     @match inRef begin
       _ where (isRefDerived(inRef))  => begin
         list(child(inRef, refNodeName))
@@ -1834,7 +1833,7 @@ function derivedRef(inRef::Ref) ::Refs
   outRefs
 end
 
-function extendsRefs(inRef::Ref) ::Refs
+function extendsRefs(inRef::MMRef) ::Refs
   local outRefs::Refs
 
   outRefs = begin
@@ -1867,14 +1866,14 @@ end
 clone a node ref entire subtree
 the clone will have 2 parents
 {inParentRef, originalParentRef} =#
-function cloneRef(inName::Name, inRef::Ref, inParentRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
-  local outRef::Ref
+function cloneRef(inName::Name, inRef::MMRef, inParentRef::MMRef, inGraph::Graph) ::Tuple{Graph, MMRef}
+  local outRef::MMRef
   local outGraph::Graph
 
   (outGraph, outRef) = begin
     local n::Node
     local g::Graph
-    local r::Ref
+    local r::MMRef
     @match (inName, inRef, inParentRef, inGraph) begin
       (_, _, _, g)  => begin
         (g, r) = clone(fromRef(inRef), inParentRef, g)
@@ -1890,14 +1889,14 @@ end
 clone a node entire subtree
 the clone will have 2 parents
 {inParentRef, originalParentRef} =#
-function clone(inNode::Node, inParentRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
-  local outRef::Ref
+function clone(inNode::Node, inParentRef::MMRef, inGraph::Graph) ::Tuple{Graph, MMRef}
+  local outRef::MMRef
   local outGraph::Graph
 
   (outGraph, outRef) = begin
     local n::Node
     local g::Graph
-    local r::Ref
+    local r::MMRef
     local name::Name
     local id::Id
     local parents::Parents
@@ -1931,7 +1930,7 @@ end
 clone a node entire subtree
 the clone will have 2 parents
 {inParentRef, originalParentRef} =#
-function cloneTree(inChildren::Children, inParentRef::Ref, inGraph::Graph) ::Tuple{Graph, Children}
+function cloneTree(inChildren::Children, inParentRef::MMRef, inGraph::Graph) ::Tuple{Graph, Children}
   local outChildren::Children
   local outGraph::Graph
 
@@ -1939,9 +1938,9 @@ function cloneTree(inChildren::Children, inParentRef::Ref, inGraph::Graph) ::Tup
   (outGraph, outChildren)
 end
 
-function cloneChild(name::Name, parentRef::Ref, inRef::Ref, inGraph::Graph) ::Tuple{Ref, Graph}
+function cloneChild(name::Name, parentRef::MMRef, inRef::MMRef, inGraph::Graph) ::Tuple{MMRef, Graph}
   local graph::Graph
-  local ref::Ref
+  local ref::MMRef
 
   (graph, ref) = cloneRef(name, inRef, parentRef, inGraph)
   (ref, graph)
@@ -1950,14 +1949,14 @@ end
 #= @author: adrpo
 copy a node ref entire subtree
 this is like clone but the parents are kept as they are =#
-function copyRef(inRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
-  local outRef::Ref
+function copyRef(inRef::MMRef, inGraph::Graph) ::Tuple{Graph, MMRef}
+  local outRef::MMRef
   local outGraph::Graph
 
   (outGraph, outRef) = begin
     local n::Node
     local g::Graph
-    local r::Ref
+    local r::MMRef
     @match (inRef, inGraph) begin
       (_, g)  => begin
         r = copyRefNoUpdate(inRef)
@@ -1979,14 +1978,14 @@ end
 
 #= @author: adrpo
 update all parent and node data references in the graph =#
-function updateRefs(inRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
-  local outRef::Ref
+function updateRefs(inRef::MMRef, inGraph::Graph) ::Tuple{Graph, MMRef}
+  local outRef::MMRef
   local outGraph::Graph
 
   (outGraph, outRef) = begin
     local n::Node
     local g::Graph
-    local r::Ref
+    local r::MMRef
     @match (inRef, inGraph) begin
       (_, g)  => begin
         (r, g) = apply1(inRef, updateRefInGraph, (inRef, g))
@@ -2001,12 +2000,12 @@ function updateRefs(inRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
   (outGraph, outRef)
 end
 
-function updateRefInGraph(name::Name, inRef::Ref, inTopRefAndGraph::Tuple{<:Ref, Graph}) ::Tuple{Ref, Graph}
-  local outTopRefAndGraph::Tuple{Ref, Graph}
+function updateRefInGraph(name::Name, inRef::MMRef, inTopRefAndGraph::Tuple{<:MMRef, Graph}) ::Tuple{MMRef, Graph}
+  local outTopRefAndGraph::Tuple{MMRef, Graph}
 
   outTopRefAndGraph = begin
-    local r::Ref
-    local t::Ref
+    local r::MMRef
+    local t::MMRef
     local g::Graph
     local n::Name
     local i::Id
@@ -2030,11 +2029,11 @@ end
 
 #= @author: adrpo
 lookup a reference based on old reference in a different graph =#
-function lookupRefFromRef(inRef::Ref, inOldRef::Ref) ::Ref
-  local outRef::Ref
+function lookupRefFromRef(inRef::MMRef, inOldRef::MMRef) ::MMRef
+  local outRef::MMRef
 
   outRef = begin
-    local r::Ref
+    local r::MMRef
     local s::Scope
     @match (inRef, inOldRef) begin
       (_, _)  => begin
@@ -2052,12 +2051,12 @@ end
 #= @author: adrpo
 update references in the node data currently just REF and CLONE hold other references.
 if you add more nodes in FCore that have references in them you need to update this function too! =#
-function updateRefInData(inData::Data, inRef::Ref) ::Data
+function updateRefInData(inData::Data, inRef::MMRef) ::Data
   local outData::Data
 
   outData = begin
-    local oldRef::Ref
-    local r::Ref
+    local oldRef::MMRef
+    local r::MMRef
     local e::SCode.Element
     local i::DAE.Var
     local m::DAE.Mod
@@ -2080,16 +2079,16 @@ end
 
 #= @author: adrpo
 copy a node ref entire subtree =#
-function copyRefNoUpdate(inRef::Ref) ::Ref
-  local outRef::Ref = copy(fromRef(inRef))
+function copyRefNoUpdate(inRef::MMRef) ::MMRef
+  local outRef::MMRef = copy(fromRef(inRef))
   outRef
 end
 
 #= @author: adrpo
 copy a node entire subtree.
 this is like clone but the parents are kept as they are =#
-function copy(inNode::Node) ::Ref
-  local outRef::Ref
+function copy(inNode::Node) ::MMRef
+  local outRef::MMRef
 
   local node::Node = inNode
 
@@ -2106,8 +2105,8 @@ function copy(inNode::Node) ::Ref
   outRef
 end
 
-function copyChild(name::Name, inRef::Ref) ::Ref
-  local ref::Ref = copyRefNoUpdate(inRef)
+function copyChild(name::Name, inRef::MMRef) ::MMRef
+  local ref::MMRef = copyRefNoUpdate(inRef)
   ref
 end
 
@@ -2133,7 +2132,7 @@ end
 
 #= @author: adrpo
 get element from the ref =#
-function getElementFromRef(inRef::Ref) ::SCode.Element
+function getElementFromRef(inRef::MMRef) ::SCode.Element
   local outElement::SCode.Element
 
   outElement = getElement(fromRef(inRef))
@@ -2142,7 +2141,7 @@ end
 
 #= returns true if the node ref is a for-loop scope or a valueblock scope.
 This is indicated by the name of the frame. =#
-function isImplicitRefName(r::Ref) ::Bool
+function isImplicitRefName(r::MMRef) ::Bool
   local b::Bool
 
   b = begin
@@ -2161,24 +2160,24 @@ end
 
 #= @author: adrpo
 get the DAE.Var from the child node named itNodeName of this reference =#
-function refInstVar(inRef::Ref) ::DAE.Var
+function refInstVar(inRef::MMRef) ::DAE.Var
   local v::DAE.Var
 
-  local r::Ref
+  local r::MMRef
 
   r = refInstance(inRef)
   @match FCore.IT(i = v) = refData(r)
   v
 end
 
-function refInstance(inRef::Ref) ::Ref
-  local r::Ref
+function refInstance(inRef::MMRef) ::MMRef
+  local r::MMRef
 
   r = child(inRef, itNodeName)
   r
 end
 
-function isRefRefUnresolved(inRef::Ref) ::Bool
+function isRefRefUnresolved(inRef::MMRef) ::Bool
   local b::Bool
 
   b = begin
@@ -2201,32 +2200,32 @@ function isRefRefUnresolved(inRef::Ref) ::Bool
   b
 end
 
-function isRefRefResolved(inRef::Ref) ::Bool
+function isRefRefResolved(inRef::MMRef) ::Bool
   local b::Bool
 
   b = ! isRefRefUnresolved(inRef)
   b
 end
 
-function refRef(inRef::Ref) ::Ref
-  local r::Ref
+function refRef(inRef::MMRef) ::MMRef
+  local r::MMRef
 
   r = child(inRef, refNodeName)
   r
 end
 
-function refRefTargetScope(inRef::Ref) ::Scope
+function refRefTargetScope(inRef::MMRef) ::Scope
   local sc::Scope
 
-  local r::Ref
+  local r::MMRef
 
   r = refRef(inRef)
   sc = targetScope(fromRef(r))
   sc
 end
 
-function refImport(inRef::Ref) ::Ref
-  local r::Ref
+function refImport(inRef::MMRef) ::MMRef
+  local r::MMRef
 
   r = child(inRef, imNodeName)
   r
