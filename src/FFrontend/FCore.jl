@@ -74,25 +74,22 @@ module RefTree
   Key = String
   Value = MMRef
   
-  function keyStr(s)::String
+  function BaseAvlTree.keyStr(s)::String
     s
   end
   
-  function keyCompare(key1::String, key2::String)
+  function BaseAvlTree.keyCompare(key1::String, key2::String)
     stringCompare(key1, key2)
   end
   
-  @show keyCompare
-  @show methods(keyCompare)
-  
-  function valueStr(inValue)::String
+  function BaseAvlTree.valueStr(inValue)::String
     local s::String
     @match Node.N(name = s) = arrayGet(inValue, 1)
     s
   end
   
   #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
-  @exportAll()  
+  @exportAll()
 end
 
 println("FCore Hello2")
