@@ -53,7 +53,7 @@
         Node = FCore.Node 
         Data = FCore.Data 
         Kind = FCore.Kind 
-        Ref = FCore.Ref 
+        Ref = FCore.MMRef 
         Refs = FCore.Refs 
         Children = FCore.Children 
         Parents = FCore.Parents 

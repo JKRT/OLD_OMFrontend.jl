@@ -148,7 +148,7 @@ end
     clsAndVars::EnvTree.Tree
     extendsTable::ExtendsTable
     importTable::ImportTable
-  isUsed #= Used by SCodeDependency. =#::Option{MutableType{Bool}}
+  isUsed #= Used by SCodeDependency. =#::Option{MutableType #= {Bool} =#}
   end
 end
 
@@ -174,7 +174,7 @@ end
   @Record VAR begin
 
     var::SCode.Element
-    isUsed #= Used by SCodeDependency. =#::Option{MutableType{Bool}}
+    isUsed #= Used by SCodeDependency. =#::Option{MutableType #= {Bool} =#}
   end
 
   @Record CLASS begin
@@ -346,7 +346,7 @@ function newFrame(inName::Option{<:String}, inType::FrameType) ::Frame
   local tree::EnvTree.Tree
   local exts::ExtendsTable
   local imps::ImportTable
-  local is_used::MutableType{Bool}
+  local is_used::MutableType #= {Bool} =#
 
   tree = EnvTree.new()
   exts = newExtendsTable()
@@ -405,7 +405,7 @@ end
 function newVarItem(inVar::SCode.Element, inIsUsed::Bool) ::Item
   local outVarItem::Item
 
-  local is_used::MutableType{Bool}
+  local is_used::MutableType #= {Bool} =#
 
   is_used = Mutable.create(inIsUsed)
   outVarItem = VAR(inVar, SOME(is_used))
@@ -486,7 +486,7 @@ function removeExtendsFromLocalScope(inEnv::Env) ::Env
   local imps::ImportTable
   local exts::ExtendsTable
   local rest::Env
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
 
   @match _cons(FRAME(name = name, frameType = ty, clsAndVars = tree, importTable = imps, isUsed = is_used), rest) = inEnv
   exts = newExtendsTable()
@@ -503,7 +503,7 @@ function removeExtendFromLocalScope(inExtend::Absyn.Path, inEnv::Env) ::Env
   local tree::EnvTree.Tree
   local imps::ImportTable
   local rest::Env
-  local iu::Option{MutableType{Bool}}
+  local iu::Option{MutableType #= {Bool} =#}
   local bcl::List{Extends}
   local re::List{SCode.Element}
   local cei::Option{SCode.Element}
@@ -533,7 +533,7 @@ function removeRedeclaresFromLocalScope(inEnv::Env) ::Env
   local imps::ImportTable
   local exts::ExtendsTable
   local rest::Env
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
   local bc::List{Extends}
   local cei::Option{SCode.Element}
 
@@ -566,7 +566,7 @@ function removeClsAndVarsFromFrame(inFrame::Frame) ::Tuple{Frame, EnvTree.Tree}
   local tree::EnvTree.Tree
   local imps::ImportTable
   local exts::ExtendsTable
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
 
   @match FRAME(name = name, frameType = ty, clsAndVars = outClsAndVars, extendsTable = exts, importTable = imps, isUsed = is_used) = inFrame
   tree = EnvTree.new()
@@ -587,7 +587,7 @@ function setImportTableHidden(inEnv::Env, inHidden::Bool) ::Env
   local rest::Env
   local qi::List{Import}
   local uqi::List{Import}
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
 
   @match _cons(FRAME(name = name, frameType = ty, clsAndVars = tree, extendsTable = exts, importTable = IMPORT_TABLE(qualifiedImports = qi, unqualifiedImports = uqi), isUsed = is_used), rest) = inEnv
   outEnv = _cons(FRAME(name, ty, tree, exts, IMPORT_TABLE(inHidden, qi, uqi), is_used), rest)
@@ -622,7 +622,7 @@ function isItemUsed(inItem::Item) ::Bool
   local isUsed::Bool
 
   isUsed = begin
-    local is_used::MutableType{Bool}
+    local is_used::MutableType #= {Bool} =#
     local item::Item
     @match inItem begin
       CLASS(env = FRAME(isUsed = SOME(is_used)) <|  nil())  => begin
@@ -655,7 +655,7 @@ function linkItemUsage(inSrcItem::Item, inDestItem::Item) ::Item
   local outDestItem::Item
 
   outDestItem = begin
-    local is_used::Option{MutableType{Bool}}
+    local is_used::Option{MutableType #= {Bool} =#}
     local elem::SCode.Element
     local cls_ty::ClassType
     local name::Option{String}
@@ -824,7 +824,7 @@ function extendEnvWithVar(inVar::SCode.Element, inEnv::Env) ::Env
   local outEnv::Env
 
   local var_name::String
-  local is_used::MutableType{Bool}
+  local is_used::MutableType #= {Bool} =#
   local ty::Absyn.TypeSpec
   local info::SourceInfo
 
@@ -844,7 +844,7 @@ function extendEnvWithItem(inItem::Item, inEnv::Env, inItemName::String) ::Env
   local imps::ImportTable
   local ty::FrameType
   local rest::Env
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
 
   @match _cons(FRAME(name, ty, tree, exts, imps, is_used), rest) = inEnv
   tree = EnvTree.add(tree, inItemName, inItem, extendEnvWithItemConflict)
@@ -869,7 +869,7 @@ function updateItemInEnv(inItem::Item, inEnv::Env, inItemName::String) ::Env
   local imps::ImportTable
   local ty::FrameType
   local rest::Env
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
 
   @match _cons(FRAME(name, ty, tree, exts, imps, is_used), rest) = inEnv
   tree = EnvTree.add(tree, inItemName, inItem)
@@ -892,7 +892,7 @@ function extendEnvWithImport(inImport::SCode.Element, inEnv::Env) ::Env
     local rest::Env
     local info::SourceInfo
     local hidden::Bool
-    local is_used::Option{MutableType{Bool}}
+    local is_used::Option{MutableType #= {Bool} =#}
     #=  Unqualified imports
     =#
     @match (inImport, inEnv) begin
@@ -1708,7 +1708,7 @@ function setEnvExtendsTable(inExtendsTable::ExtendsTable, inEnv::Env) ::Env
   local ty::FrameType
   local tree::EnvTree.Tree
   local imps::ImportTable
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
   local rest_env::Env
 
   @match _cons(FRAME(name, ty, tree, _, imps, is_used), rest_env) = inEnv
@@ -1723,7 +1723,7 @@ function setEnvClsAndVars(inTree::EnvTree.Tree, inEnv::Env) ::Env
   local ty::FrameType
   local ext::ExtendsTable
   local imps::ImportTable
-  local is_used::Option{MutableType{Bool}}
+  local is_used::Option{MutableType #= {Bool} =#}
   local rest_env::Env
 
   @match _cons(FRAME(name, ty, _, ext, imps, is_used), rest_env) = inEnv
@@ -1866,7 +1866,7 @@ function buildInitialEnv() ::Env
   local tree::EnvTree.Tree
   local exts::ExtendsTable
   local imps::ImportTable
-  local is_used::MutableType{Bool}
+  local is_used::MutableType #= {Bool} =#
   local p::SCode.Program
   local initialClasses::List{Absyn.Class}
 

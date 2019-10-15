@@ -521,7 +521,7 @@
         end
 
          #= help function to lookupClass, does all the work. =#
-        function lookupClass1(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClass1(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -542,7 +542,7 @@
         end
 
          #= help function to lookupClass, does all the work. =#
-        function lookupClass2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClass2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path #= The path of the class to lookup =#, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -550,7 +550,7 @@
 
               (outCache, outClass, outEnv, outPrevFrames) = begin
                   local f::FCore.Node
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local cache::FCore.Cache
                   local c::SCode.Element
                   local env::FCore.Graph
@@ -563,7 +563,7 @@
                   local scope::Absyn.Path
                   local id::String
                   local pack::String
-                  local optFrame::Option{FCore.Ref}
+                  local optFrame::Option{FCore.MMRef}
                    #=  Fully qualified names are looked up in top scope. With previous frames remembered.
                    =#
                 @match (inCache, inEnv, inPath, inPrevFrames) begin
@@ -600,7 +600,7 @@
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
 
-        function lookupClassQualified(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, path::Absyn.Path, inOptFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClassQualified(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, path::Absyn.Path, inOptFrame::Option{<:FCore.MMRef}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -612,8 +612,8 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local prevFrames::FCore.Scope
-                  local frame::FCore.Ref
-                  local optFrame::Option{FCore.Ref}
+                  local frame::FCore.MMRef
+                  local optFrame::Option{FCore.MMRef}
                    #=  Qualified names first identifier cached in previous frames
                    =#
                 @match (inCache, inEnv, id, path, inOptFrame, inPrevFrames) begin
@@ -637,7 +637,7 @@
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
 
-        function lookupClassQualified2(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, inC::SCode.Element, optFrame::Option{<:FCore.Ref}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClassQualified2(inCache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path, inC::SCode.Element, optFrame::Option{<:FCore.MMRef}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in previous frames of the environment =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph #= The environment in which the class was found (not the environment inside the class) =#
               local outClass::SCode.Element
@@ -647,13 +647,13 @@
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local prevFrames::FCore.Scope
-                  local frame::FCore.Ref
+                  local frame::FCore.MMRef
                   local restr::SCode.Restriction
                   local ci_state::ClassInf.SMNode
                   local encflag::SCode.Encapsulated
                   local id::String
                   local c::SCode.Element
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local mod::DAE.Mod
                 @matchcontinue (inCache, inEnv, path, inC, optFrame, inPrevFrames) begin
                   (cache, env, _, _, SOME(frame), prevFrames)  => begin
@@ -751,14 +751,14 @@
           outPath
         end
 
-        function lookupPrevFrames(id::String, inPrevFrames::FCore.Scope) ::Tuple{Option{FCore.Ref}, FCore.Scope}
+        function lookupPrevFrames(id::String, inPrevFrames::FCore.Scope) ::Tuple{Option{FCore.MMRef}, FCore.Scope}
               local outPrevFrames::FCore.Scope
-              local outFrame::Option{FCore.Ref}
+              local outFrame::Option{FCore.MMRef}
 
               (outFrame, outPrevFrames) = begin
                   local sid::String
                   local prevFrames::FCore.Scope
-                  local ref::FCore.Ref
+                  local ref::FCore.MMRef
                 @matchcontinue (id, inPrevFrames) begin
                   (_, ref <| prevFrames)  => begin
                       @match false = FNode.isRefTop(ref)
@@ -818,7 +818,7 @@
               local outCache::FCore.Cache
 
               (outCache, outBoolean) = begin
-                  local f::FCore.Ref
+                  local f::FCore.MMRef
                   local ident::String
                   local res::Bool
                   local env::FCore.Graph
@@ -868,7 +868,7 @@
               local outCache::FCore.Cache
 
               (outCache, outClassEnv, outAttributes, outType, outBinding, constOfForIteratorRange, outBoolean, splicedExpData, outComponentEnv, name) = begin
-                  local f::FCore.Ref
+                  local f::FCore.MMRef
                   local cref::DAE.ComponentRef
                   local ident::String
                   local more::Bool
@@ -911,7 +911,7 @@
         end
 
          #= Helper function to lookupQualifiedImportedClassInEnv. =#
-        function lookupQualifiedImportedClassInFrame(inCache::FCore.Cache, inImport::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupQualifiedImportedClassInFrame(inCache::FCore.Cache, inImport::List{<:Absyn.Import}, inEnv::FCore.Graph, inIdent::SCode.Ident, inState::MutableType #= {<:Bool} =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -919,7 +919,7 @@
 
               (outCache, outClass, outEnv, outPrevFrames) = begin
                   local fr::FCore.Node
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local c::SCode.Element
                   local env_1::FCore.Graph
                   local env::FCore.Graph
@@ -999,7 +999,7 @@
                   local firstIdent::Absyn.Ident
                   local rest::List{Absyn.Import}
                   local cache::FCore.Cache
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local mod::DAE.Mod
                    #=  Not found, instantiate
                    =#
@@ -1044,7 +1044,7 @@
 
               (outCache, outClass, outEnv, outPrevFrames, outBoolean) = begin
                   local fr::FCore.Node
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local c::SCode.Element
                   local c_1::SCode.Element
                   local id::String
@@ -1398,7 +1398,7 @@
                   local cnstForRange::Option{DAE.Const}
                   local env::FCore.Graph
                   local componentEnv::FCore.Graph
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                    #=  look into the current frame
                    =#
@@ -1455,7 +1455,7 @@
                   local cnstForRange::Option{DAE.Const}
                   local env::FCore.Graph
                   local componentEnv::FCore.Graph
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                    #=  look into the current frame
                    =#
@@ -1519,7 +1519,7 @@
           Note: the splicedExpData is currently not relevant, since constants are always evaluated to a value.
                 However, this might change in the future since it makes more sense to calculate the constants
                 during setup in runtime (to gain precision and postpone choice of precision to runtime). =#
-        function lookupVarInPackages(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
+        function lookupVarInPackages(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String #= We only return the environment the component was found in; not its FQ name. =#
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData #= currently not relevant for constants, but might be used in the future =#
@@ -1554,9 +1554,9 @@
                   local cr::DAE.ComponentRef
                   local sb::List{DAE.Subscript}
                   local sid::Option{String}
-                  local f::FCore.Ref
-                  local rr::FCore.Ref
-                  local of::Option{FCore.Ref}
+                  local f::FCore.MMRef
+                  local rr::FCore.MMRef
+                  local of::Option{FCore.MMRef}
                   local cache::FCore.Cache
                   local cnstForRange::Option{DAE.Const}
                   local path::Absyn.Path
@@ -1652,7 +1652,7 @@
           Note: the splicedExpData is currently not relevant, since constants are always evaluated to a value.
                 However, this might change in the future since it makes more sense to calculate the constants
                 during setup in runtime (to gain precision and postpone choice of precision to runtime). =#
-        function lookupVarInPackagesIdent(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ss::List{<:DAE.Subscript}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType{<:Bool} #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
+        function lookupVarInPackagesIdent(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, ss::List{<:DAE.Subscript}, inPrevFrames::FCore.Scope #= Environment in reverse order. Contains frames we previously had in the scope. Will be looked up instead of the environment in order to avoid infinite recursion. =#, inState::MutableType #= {<:Bool} =# #= If true, we have found a class. If the path was qualified, we should no longer look in a lower scope. =#) ::Tuple{FCore.Cache, FCore.Graph, DAE.Attributes, DAE.Type, DAE.Binding, Option{DAE.Const}, InstTypes.SplicedExpData, FCore.Graph, String}
               local name::String #= We only return the environment the component was found in; not its FQ name. =#
               local outComponentEnv::FCore.Graph
               local splicedExpData::InstTypes.SplicedExpData #= currently not relevant for constants, but might be used in the future =#
@@ -1686,9 +1686,9 @@
                   local cr::DAE.ComponentRef
                   local sb::List{DAE.Subscript}
                   local sid::Option{String}
-                  local f::FCore.Ref
-                  local rr::FCore.Ref
-                  local of::Option{FCore.Ref}
+                  local f::FCore.MMRef
+                  local rr::FCore.MMRef
+                  local of::Option{FCore.MMRef}
                   local cache::FCore.Cache
                   local cnstForRange::Option{DAE.Const}
                   local path::Absyn.Path
@@ -1815,7 +1815,7 @@
                   local c::SCode.Element
                   local m::DAE.Mod
                   local i::FCore.Status
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                   local env::FCore.Graph
                   local componentEnv::FCore.Graph
@@ -1856,7 +1856,7 @@
                   local sid::Option{String}
                   local ht::FCore.Children
                   local id::String
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @match (inEnv, inIdent) begin
                   (env && FCore.G(scope = r <| _), id)  => begin
                       ht = FNode.children(FNode.fromRef(r))
@@ -1888,7 +1888,7 @@
                   local id::String
                   local e::FCore.Graph
                   local cache::FCore.Cache
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                 @matchcontinue (inCache, inEnv, inIdent) begin
                   (cache, FCore.G(scope = r <| _), id)  => begin
@@ -2096,7 +2096,7 @@
                   local restr::SCode.Restriction
                   local ci_state::ClassInf.SMNode
                   local cistate1::ClassInf.SMNode
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                   local cache::FCore.Cache
                   local mod::DAE.Mod
@@ -2198,7 +2198,7 @@
                   local ht::FCore.Children
                   local cache::FCore.Cache
                   local path::Absyn.Path
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue (inCache, inEnv) begin
                   (cache, env && FCore.G(scope = r <| _))  => begin
                       ht = FNode.children(FNode.fromRef(r))
@@ -2218,11 +2218,11 @@
           (outCache, outType, outEnv)
         end
 
-        function getHtTypes(inParentRef::FCore.Ref) ::FCore.Children
+        function getHtTypes(inParentRef::FCore.MMRef) ::FCore.Children
               local ht::FCore.Children
 
               ht = begin
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                    #=  there is a ty node
                    =#
                 @matchcontinue inParentRef begin
@@ -2334,7 +2334,7 @@
               local outFuncTypes::List{DAE.Type}
               local outCache::FCore.Cache
 
-              local r::FCore.Ref
+              local r::FCore.MMRef
               local data::FNode.Data
               local ty::DAE.Type
 
@@ -2769,7 +2769,7 @@
           It first checks the current scope, and then base classes. The specification
           says that we first search elements in the current scope (+ the ones inherited
           from base classes) =#
-        function lookupClassInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClassInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, inPrevFrames::FCore.Scope, inState::MutableType #= {<:Bool} =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -2783,7 +2783,7 @@
                   local i_env::FCore.Graph
                   local prevFrames::FCore.Scope
                   local frame::FCore.Node
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local rs::FCore.Scope
                   local sid::String
                   local scope::String
@@ -2853,7 +2853,7 @@
         end
 
          #= Search for a class within one frame. =#
-        function lookupClassInFrame(inCache::FCore.Cache, inFrame::FCore.Node, inEnv::FCore.Graph, inIdent::SCode.Ident, inPrevFrames::FCore.Scope, inState::MutableType{<:Bool}, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
+        function lookupClassInFrame(inCache::FCore.Cache, inFrame::FCore.Node, inEnv::FCore.Graph, inIdent::SCode.Ident, inPrevFrames::FCore.Scope, inState::MutableType #= {<:Bool} =#, inInfo::Option{<:SourceInfo}) ::Tuple{FCore.Cache, SCode.Element, FCore.Graph, FCore.Scope}
               local outPrevFrames::FCore.Scope
               local outEnv::FCore.Graph
               local outClass::SCode.Element
@@ -2864,7 +2864,7 @@
                   local totenv::FCore.Graph
                   local env_1::FCore.Graph
                   local prevFrames::FCore.Scope
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                   local sid::Option{String}
                   local ht::FCore.Children
                   local name::String
@@ -2936,7 +2936,7 @@
               local outElement::SCode.Element
               local outVar::DAE.Var
 
-              local r::FCore.Ref
+              local r::FCore.MMRef
               local s::FCore.Scope
               local n::FCore.Node
               local name::String
@@ -3601,7 +3601,7 @@
                   local ht::FCore.Children
                   local res::Option{Bool}
                   local ic::Option{DAE.Const}
-                  local ref::FCore.Ref
+                  local ref::FCore.MMRef
                   local b::Bool
                    #=  Look in the current scope.
                    =#

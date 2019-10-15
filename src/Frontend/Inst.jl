@@ -58,6 +58,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import InnerOuter
 
@@ -178,7 +180,7 @@
                    =#
                 @match (inCache, inIH, inProgram, inPath) begin
                   (cache, ih, cdecls && _ <| _, path && Absyn.IDENT(__))  => begin
-                      cache = FCore.setCacheClassName(cache, path)
+                      cache = FCoreUtil.setCacheClassName(cache, path)
                       if doSCodeDep
                         cdecls = InstUtil.scodeFlatten(cdecls, inPath)
                         ExecStat.execStat("FrontEnd - scodeFlatten")
@@ -196,7 +198,7 @@
                   end
                   
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
-                      cache = FCore.setCacheClassName(cache, path)
+                      cache = FCoreUtil.setCacheClassName(cache, path)
                       if doSCodeDep
                         cdecls = InstUtil.scodeFlatten(cdecls, inPath)
                         ExecStat.execStat("FrontEnd - scodeFlatten")
@@ -1593,7 +1595,7 @@
         This function will try to instantiate the
         class definition as a it would extend a basic
         type =#
-        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1712,7 +1714,7 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1845,7 +1847,7 @@
                   local adno::List{Absyn.Subscript}
                   local smCompCrefs::List{DAE.ComponentRef} #= state machine components crefs =#
                   local smInitialCrefs::List{DAE.ComponentRef} #= state machine crefs of initial states =#
-                  local lastRef::FCore.Ref
+                  local lastRef::FCore.MMRef
                   local smCompToFlatSM::InstStateMachineUtil.SMNodeToFlatSMGroupTable
                    #= List<tuple<Absyn.ComponentRef,DAE.ComponentRef>> fieldDomLst;
                    =#
@@ -2344,7 +2346,7 @@
           end RealSignal;
           Such classes can not have any other components,
           and can only inherit one basic type. =#
-        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, info::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}} 
+        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}} 
               local outTypeVars::List{DAE.Var}
               local outTypesTypeOption::Option{DAE.Type}
               local outDae::DAE.DAElist #= contain functions =#
@@ -2439,7 +2441,7 @@
         Author: BZ, 2009-02
         Helper function for instBasictypeBaseClass
         Handles the fail case rollbacks/deleteCheckpoint of errors. =#
-        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, inInfo::SourceInfo, stopInst::MutableType{<:Bool} #= prevent instantiation of classes adding components to primary types =#)  
+        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, inInfo::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#)  
               _ = begin
                   local m_1::DAE.Mod
                   local mods::DAE.Mod
@@ -3874,7 +3876,7 @@
                   local fs::FCore.Graph
                   local name::Absyn.Ident
                   local ename::Absyn.Ident
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue path begin
                   _  => begin
                       @match (cache, SCode.CLASS(name = name), env_1) = Lookup.lookupClass(cache, inEnv, path)
@@ -3932,7 +3934,7 @@
                   local fs::FCore.Graph
                   local name::Absyn.Ident
                   local ename::Absyn.Ident
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                    #=  To make a class fully qualified, the class path is looked up in the environment.
                    =#
                    #=  The FQ path consist of the simple class name appended to the environment path of the looked up class.
@@ -5028,7 +5030,7 @@
           path
         end
 
-        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.Ref) ::Tuple{FCore.Cache, FCore.Graph} 
+        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.MMRef) ::Tuple{FCore.Cache, FCore.Graph} 
 
 
 

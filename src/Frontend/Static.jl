@@ -6858,7 +6858,7 @@
           as actual arguments in a function call to that function, this
           function finds the function definition and matches the actual
           arguments to the formal parameters. =#
-        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.PrefixType, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
+        function elabCallArgs2(inCache::FCore.Cache, inEnv::FCore.Graph, inPath::Absyn.Path, inAbsynExpLst::List{<:Absyn.Exp}, inAbsynNamedArgLst::List{<:Absyn.NamedArg}, inBoolean::Bool, stopElab::MutableType #= {<:Bool} =#, inPrefix::Prefix.PrefixType, info::SourceInfo, numErrors::ModelicaInteger) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 
@@ -7270,7 +7270,7 @@
                   local scopeName::String
                   local errorString::String
                   local restScope::FCore.Scope
-                  local ref::FCore.Ref
+                  local ref::FCore.MMRef
                    #=  non-parallel builtin function call is OK everywhere.
                    =#
                 @matchcontinue (inFn, isBuiltin, inFuncParallelism, inScope, inInfo) begin
@@ -7440,7 +7440,7 @@
           isValid
         end
 
-        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType{<:Bool}, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
+        function elabCallArgsMetarecord(inCache::FCore.Cache, inEnv::FCore.Graph, inType::DAE.Type, inPosArgs::List{<:Absyn.Exp}, inNamedArgs::List{<:Absyn.NamedArg}, inImplicit::Bool, stopElab::MutableType #= {<:Bool} =#, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, Option{Tuple{DAE.Exp, DAE.Properties}}}
               local expProps::Option{Tuple{DAE.Exp, DAE.Properties}}
               local outCache::FCore.Cache
 

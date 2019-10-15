@@ -44,7 +44,6 @@ import AbsynUtil
 import ClassInf
 import SCode
 import Values
-import Connect
 
 Ident = String
 
@@ -273,237 +272,6 @@ end
   end
 end
 println("Test test test2")
-@Uniontype Element begin
-  @Record VAR begin
-
-    componentRef #=  The variable name =#::ComponentRef
-    kind #= varible kind: variable, constant, parameter, discrete etc. =#::VarKind
-    direction #= input, output or bidir =#::VarDirection
-    parallelism #= parglobal, parlocal, or non_parallel =#::VarParallelism
-    protection #= if protected or public =#::VarVisibility
-    ty #= Full type information required =#::Type
-    binding #= Binding expression e.g. for parameters ; value of start attribute =#::Option{Exp}
-    dims #= dimensions =#::InstDims
-    connectorType #= The connector type: flow, stream, no prefix, or not a connector element. =#::ConnectorType
-    source #= the origins of the component/equation/algorithm =#::ElementSource
-    variableAttributesOption::Option{VariableAttributes}
-    comment::Option{SCode.Comment}
-    innerOuter #= inner/outer required to 'change' outer references =#::Absyn.InnerOuter
-  end
-
-  @Record DEFINE begin
-
-    componentRef::ComponentRef
-    exp::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIALDEFINE begin
-
-    componentRef::ComponentRef
-    exp::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record EQUATION begin
-
-    exp::Exp
-    scalar::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record EQUEQUATION begin
-
-    cr1::ComponentRef
-    cr2::ComponentRef
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record ARRAY_EQUATION begin
-
-    dimension #= dimension sizes =#::Dimensions
-    exp::Exp
-    array::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIAL_ARRAY_EQUATION begin
-
-    dimension #= dimension sizes =#::Dimensions
-    exp::Exp
-    array::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record CONNECT_EQUATION begin
-
-    lhsElement::Element
-    lhsFace::Connect.Face
-    rhsElement::Element
-    rhsFace::Connect.Face
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record COMPLEX_EQUATION begin
-
-    lhs::Exp
-    rhs::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIAL_COMPLEX_EQUATION begin
-
-    lhs::Exp
-    rhs::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record WHEN_EQUATION begin
-
-    condition #= Condition =#::Exp
-    equations #= Equations =#::List{Element}
-    elsewhen_ #= Elsewhen should be of type WHEN_EQUATION =#::Option{Element}
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record FOR_EQUATION begin
-
-    type_ #= this is the type of the iterator =#::Type
-    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
-    iter #= the iterator variable =#::Ident
-    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
-    range #= range for the loop =#::Exp
-    equations #= Equations =#::List{Element}
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record IF_EQUATION begin
-
-    condition1 #= Condition =#::List{Exp}
-    equations2 #= Equations of true branch =#::List{List{Element}}
-    equations3 #= Equations of false branch =#::List{Element}
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIAL_IF_EQUATION begin
-
-    condition1 #= Condition =#::List{Exp}
-    equations2 #= Equations of true branch =#::List{List{Element}}
-    equations3 #= Equations of false branch =#::List{Element}
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIALEQUATION begin
-
-    exp1::Exp
-    exp2::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record ALGORITHM begin
-
-    algorithm_::Algorithm
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIALALGORITHM begin
-
-    algorithm_::Algorithm
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record COMP begin
-
-    ident::Ident
-    dAElist #= a component with subelements, normally only used at top level. =#::List{Element}
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-    #=  we might not this here.
-    =#
-    comment::Option{SCode.Comment}
-  end
-
-  @Record EXTOBJECTCLASS begin
-
-    path #= className of external object =#::Absyn.Path
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record ASSERT begin
-
-    condition::Exp
-    message::Exp
-    level::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-  @Record INITIAL_ASSERT begin
-
-    condition::Exp
-    message::Exp
-    level::Exp
-    source #= the origin of the component/equation/algorithm =#::ElementSource
-  end
-
-@Record TERMINATE begin
-
-  message::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record INITIAL_TERMINATE begin
-
-  message::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record REINIT begin
-
-  componentRef::ComponentRef
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record NORETCALL begin
-
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record INITIAL_NORETCALL begin
-
-  exp::Exp
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record CONSTRAINT begin
-
-  constraints::Constraint
-  source #= the origin of the component/equation/algorithm =#::ElementSource
-end
-
-@Record CLASS_ATTRIBUTES begin
-
-  classAttrs::ClassAttributes
-end
-
-@Record FLAT_SM begin
-
-  ident::Ident
-  dAElist #= The states/modes transitions and variable
-  merging equations within the the flat state machine =#::List{Element}
-end
-
-@Record SM_COMP begin
-
-  componentRef::ComponentRef
-  dAElist #= a component with subelements =#::List{Element}
-end
-
-@Record COMMENT begin
-
-  cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
-end
-end
 
 
 @Uniontype Function begin
@@ -767,7 +535,7 @@ module AvlTreePathFunction
 using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
-  using BaseAvlTree
+using BaseAvlTree
 import Absyn
 Key = Absyn.Path
 Value = Option
@@ -2148,6 +1916,240 @@ CREF_IDENT(..) is used for non-qualifed component names, e.g. x =#
 
   @Record WILD begin
   end
+end
+
+import Connect
+
+@Uniontype Element begin
+  @Record VAR begin
+
+    componentRef #=  The variable name =#::ComponentRef
+    kind #= varible kind: variable, constant, parameter, discrete etc. =#::VarKind
+    direction #= input, output or bidir =#::VarDirection
+    parallelism #= parglobal, parlocal, or non_parallel =#::VarParallelism
+    protection #= if protected or public =#::VarVisibility
+    ty #= Full type information required =#::Type
+    binding #= Binding expression e.g. for parameters ; value of start attribute =#::Option{Exp}
+    dims #= dimensions =#::InstDims
+    connectorType #= The connector type: flow, stream, no prefix, or not a connector element. =#::ConnectorType
+    source #= the origins of the component/equation/algorithm =#::ElementSource
+    variableAttributesOption::Option{VariableAttributes}
+    comment::Option{SCode.Comment}
+    innerOuter #= inner/outer required to 'change' outer references =#::Absyn.InnerOuter
+  end
+
+  @Record DEFINE begin
+
+    componentRef::ComponentRef
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIALDEFINE begin
+
+    componentRef::ComponentRef
+    exp::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record EQUATION begin
+
+    exp::Exp
+    scalar::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record EQUEQUATION begin
+
+    cr1::ComponentRef
+    cr2::ComponentRef
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record ARRAY_EQUATION begin
+
+    dimension #= dimension sizes =#::Dimensions
+    exp::Exp
+    array::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIAL_ARRAY_EQUATION begin
+
+    dimension #= dimension sizes =#::Dimensions
+    exp::Exp
+    array::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record CONNECT_EQUATION begin
+
+    lhsElement::Element
+    lhsFace::Connect.Face
+    rhsElement::Element
+    rhsFace::Connect.Face
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record COMPLEX_EQUATION begin
+
+    lhs::Exp
+    rhs::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIAL_COMPLEX_EQUATION begin
+
+    lhs::Exp
+    rhs::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record WHEN_EQUATION begin
+
+    condition #= Condition =#::Exp
+    equations #= Equations =#::List{Element}
+    elsewhen_ #= Elsewhen should be of type WHEN_EQUATION =#::Option{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record FOR_EQUATION begin
+
+    type_ #= this is the type of the iterator =#::Type
+    iterIsArray #= True if the iterator has an array type, otherwise false. =#::Bool
+    iter #= the iterator variable =#::Ident
+    index #= the index of the iterator variable, to make it unique; used by the new inst =#::ModelicaInteger
+    range #= range for the loop =#::Exp
+    equations #= Equations =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record IF_EQUATION begin
+
+    condition1 #= Condition =#::List{Exp}
+    equations2 #= Equations of true branch =#::List{List{Element}}
+    equations3 #= Equations of false branch =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIAL_IF_EQUATION begin
+
+    condition1 #= Condition =#::List{Exp}
+    equations2 #= Equations of true branch =#::List{List{Element}}
+    equations3 #= Equations of false branch =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIALEQUATION begin
+
+    exp1::Exp
+    exp2::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record ALGORITHM begin
+
+    algorithm_::Algorithm
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIALALGORITHM begin
+
+    algorithm_::Algorithm
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record COMP begin
+
+    ident::Ident
+    dAElist #= a component with subelements, normally only used at top level. =#::List{Element}
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+    #=  we might not this here.
+    =#
+    comment::Option{SCode.Comment}
+  end
+
+  @Record EXTOBJECTCLASS begin
+
+    path #= className of external object =#::Absyn.Path
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record ASSERT begin
+
+    condition::Exp
+    message::Exp
+    level::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+  @Record INITIAL_ASSERT begin
+
+    condition::Exp
+    message::Exp
+    level::Exp
+    source #= the origin of the component/equation/algorithm =#::ElementSource
+  end
+
+@Record TERMINATE begin
+
+  message::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record INITIAL_TERMINATE begin
+
+  message::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record REINIT begin
+
+  componentRef::ComponentRef
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record NORETCALL begin
+
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record INITIAL_NORETCALL begin
+
+  exp::Exp
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record CONSTRAINT begin
+
+  constraints::Constraint
+  source #= the origin of the component/equation/algorithm =#::ElementSource
+end
+
+@Record CLASS_ATTRIBUTES begin
+
+  classAttrs::ClassAttributes
+end
+
+@Record FLAT_SM begin
+
+  ident::Ident
+  dAElist #= The states/modes transitions and variable
+  merging equations within the the flat state machine =#::List{Element}
+end
+
+@Record SM_COMP begin
+
+  componentRef::ComponentRef
+  dAElist #= a component with subelements =#::List{Element}
+end
+
+@Record COMMENT begin
+
+  cmt #= Functions store the inherited class annotations in the DAE =#::SCode.Comment
+end
 end
 
 #= The `Subscript\\' and `ComponentRef\\' datatypes are simple

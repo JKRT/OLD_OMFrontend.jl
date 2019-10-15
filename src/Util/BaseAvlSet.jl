@@ -40,13 +40,15 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        const Key = ModelicaInteger
+        const Key = Any
+        const Value = Any
 
           #= The binary tree data structure. =#
          @Uniontype Tree begin
               @Record NODE begin
 
                        key #= The key of the node. =#::Key
+                       value::Value
                        height #= Height of tree, used for balancing =#::ModelicaInteger
                        left #= Left subtree. =#::Tree
                        right #= Right subtree. =#::Tree
@@ -55,6 +57,7 @@
               @Record LEAF begin
 
                        key #= The key of the node. =#::Key
+                       value::Value
               end
 
               @Record EMPTY begin
@@ -431,7 +434,7 @@
         end
 
          #= Balances a Tree =#
-        function balance(inTree::Tree) ::Tree
+        function balance(inTree)
               local outTree::Tree = inTree
 
               outTree = begin

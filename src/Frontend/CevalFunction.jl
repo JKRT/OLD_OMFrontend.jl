@@ -1716,8 +1716,8 @@
                   local vals::List{Option{Values.Value}}
                   local cache::FCore.Cache
                   local graph::FCore.Graph
-                  local parent::FCore.Ref
-                  local child::FCore.Ref
+                  local parent::FCore.MMRef
+                  local child::FCore.MMRef
                   local node::FCore.Node
                 @match (inRecordType, inOptValue, inCache, inGraph) begin
                   (DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__), varLst = var_lst), _, _, _)  => begin

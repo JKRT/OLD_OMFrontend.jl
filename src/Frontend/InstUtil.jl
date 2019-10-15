@@ -8456,7 +8456,7 @@
 
               ocache = begin
                   local ie::Option{FCore.Graph}
-                  local f::MutableType{DAE.FunctionTree}
+                  local f::MutableType #= {DAE.FunctionTree} =#
                   local ht::AvlSetCR.Tree
                   local crs::List{List{DAE.ComponentRef}}
                   local p::Absyn.Path
@@ -8479,7 +8479,7 @@
 
               ocache = begin
                   local ie::Option{FCore.Graph}
-                  local f::MutableType{DAE.FunctionTree}
+                  local f::MutableType #= {DAE.FunctionTree} =#
                   local ht::AvlSetCR.Tree
                   local crs::List{DAE.ComponentRef}
                   local crss::List{List{DAE.ComponentRef}}
@@ -9044,7 +9044,7 @@
                   local prl::SCode.Parallelism
                   local isparglobal::Bool
                   local hasnodir::Bool
-                  local r::FCore.Ref
+                  local r::FCore.MMRef
                 @matchcontinue (inEnv, inName, inAttr, inInfo) begin
                   (_, _, SCode.ATTR(parallelism = prl, direction = dir), _)  => begin
                       r = FGraph.lastScopeRef(inEnv)

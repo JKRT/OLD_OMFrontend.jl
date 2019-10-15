@@ -2515,7 +2515,7 @@
                   local str::String
                   local n::ModelicaInteger
                   local env2::FCore.Graph
-                  local ref::FCore.Ref
+                  local ref::FCore.MMRef
                   local lookupCache::FCore.Cache
                   local children::FCore.Children
                   local path::Absyn.Path
@@ -2664,7 +2664,7 @@
           elts
         end
 
-        function addNonPartialClassRef(name::FCore.Name, ref::FCore.Ref, accum::List{<:SCode.Element}) ::List{SCode.Element} 
+        function addNonPartialClassRef(name::FCore.Name, ref::FCore.MMRef, accum::List{<:SCode.Element}) ::List{SCode.Element} 
               local classes::List{SCode.Element}
 
               local e::SCode.Element

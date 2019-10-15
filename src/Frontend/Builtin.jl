@@ -39,6 +39,7 @@
         import DAE
         import SCode
         import FCore
+        import FCoreUtil
         import FGraph
 
         import ClassInf
@@ -148,7 +149,7 @@
                    =#
                 @matchcontinue inCache begin
                   cache  => begin
-                      graph = FCore.getCachedInitialGraph(cache)
+                      graph = FCoreUtil.getCachedInitialGraph(cache)
                       graph = FGraph.clone(graph)
                     (cache, graph)
                   end

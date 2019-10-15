@@ -928,7 +928,7 @@
               local bcl::List{Extends}
               local re::List{SCode.Element}
               local imps::NFSCodeEnv.ImportTable
-              local iu::Option{MutableType{Bool}}
+              local iu::Option{MutableType #= {Bool} =#}
 
               @match _cons(NFSCodeEnv.FRAME(name, ty, tree, NFSCodeEnv.EXTENDS_TABLE(bcl, re, _), imps, iu), rest_env) = inEnv
               tree = EnvTree.map(tree, (inEnv) -> update3(inEnv = inEnv))

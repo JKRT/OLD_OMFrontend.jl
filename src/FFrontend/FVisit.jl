@@ -54,7 +54,7 @@
         Seq = FCore.Seq 
         Next = FCore.Next 
         Node = FCore.Node 
-        Ref = FCore.Ref 
+        Ref = FCore.MMRef 
         Data = FCore.Data 
         Visit = FCore.Visit 
         VAvlTree = FCore.VAvlTree 

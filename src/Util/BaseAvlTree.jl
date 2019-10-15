@@ -6,7 +6,6 @@ module BaseAvlTree
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Tree
     valueStr = Function
     ConflictFunc = Function
 
@@ -21,6 +20,10 @@ module BaseAvlTree
     FoldFunc = Function
 
     MapFunc = Function
+    
+    function keyStr end 
+    function keyCompare end
+
 
          #= /*
          * This file is part of OpenModelica.
@@ -53,34 +56,14 @@ module BaseAvlTree
          *
          */ =#
         import BaseAvlSet
-        using BaseAvlSet
-        const Value = ModelicaInteger
-         #=  TODO: We should have an Any type
-         =#
-
-          #= The binary tree data structure. =#
-         @Uniontype Tree begin
-              @Record NODE begin
-
-                       key #= The key of the node. =#::Key
-                       value::Value
-                       height #= Height of tree, used for balancing =#::ModelicaInteger
-                       left #= Left subtree. =#::Tree
-                       right #= Right subtree. =#::Tree
-              end
-
-              @Record LEAF begin
-
-                       key #= The key of the node. =#::Key
-                       value::Value
-              end
-
-              @Record EMPTY begin
-
-              end
-         end
-
-
+                
+        const Key = Any
+        const Value = Any
+        
+        Tree = BaseAvlSet.Tree
+        EMPTY = BaseAvlSet.EMPTY
+        NODE = BaseAvlSet.NODE
+        LEAF = BaseAvlSet.LEAF
 
         function printNodeStr(inNode::Tree) ::String
               local outString::String
@@ -120,6 +103,9 @@ module BaseAvlTree
               local value::Value = oldValue
           value
         end
+
+
+        balance = BaseAvlSet.balance
 
          #= Inserts a new node in the tree. =#
         function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree

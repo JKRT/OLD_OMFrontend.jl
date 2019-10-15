@@ -599,7 +599,7 @@
 
          #= Retrieves the external flag that signals the use of the cardinality operator. =#
         function getUsesCardinality()::Bool
-              local outUses::Bool
+              local outUses::Bool = true
 
             #= Defined in the runtime =#
           outUses
@@ -616,67 +616,68 @@
          retrieves the external flag that signals the presence
          of inner/outer comoponent definitions in a model =#
         function getHasInnerOuterDefinitions()::Bool
-              local hasInnerOuterDefinitions::Bool
+              local hasInnerOuterDefinitions::Bool = true
 
             #= Defined in the runtime =#
           hasInnerOuterDefinitions
         end
 
-         #= returns a tick that can be reset =#
-        function tmpTick()::ModelicaInteger
-              local tickNo::ModelicaInteger
-
-              tickNo = tmpTickIndex(index = 0)
-          tickNo
-        end
-
-         #= resets the tick so it restarts on start =#
-        function tmpTickReset(start::ModelicaInteger)
-            #= Defined in the runtime =#
-        end
+        global tickArray = zeros(1024)
+        global tickArrayMax = zeros(1024)
 
          #= returns a tick that can be reset. TODO: remove me when bootstrapped (default argument index=0) =#
         function tmpTickIndex(index::ModelicaInteger)::ModelicaInteger
-              local tickNo::ModelicaInteger
-
-            #= Defined in the runtime =#
+          local tickNo::ModelicaInteger = tickArray[index+1]
+          tickArray[index+1] = tickArray[index+1] + 1
+          tickArrayMax[index+1] = max(tickArray[index+1], tickArrayMax[index+1])
           tickNo
         end
 
          #= returns a tick that can be reset and reserves N values in it.
            TODO: remove me when bootstrapped (default argument index=0) =#
         function tmpTickIndexReserve(index::ModelicaInteger, reserve #= current tick + reserve =#::ModelicaInteger)::ModelicaInteger
-              local tickNo::ModelicaInteger
-
-            #= Defined in the runtime =#
+          local tickNo::ModelicaInteger = tickArray[index+1]
+          tickArray[index+1] = tickArray[index+1] + reserve
+          tickArrayMax[index+1] = max(tickArray[index+1], tickArrayMax[index+1])
           tickNo
         end
 
          #= resets the tick so it restarts on start. TODO: remove me when bootstrapped (default argument index=0) =#
         function tmpTickResetIndex(start::ModelicaInteger, index::ModelicaInteger)
-            #= Defined in the runtime =#
+          tickArray[index+1] = start
+          tickArrayMax[index+1] = start
         end
 
          #= sets the index, like tmpTickResetIndex, but does not reset the maximum counter =#
         function tmpTickSetIndex(start::ModelicaInteger, index::ModelicaInteger)
-            #= Defined in the runtime =#
+          tickArray[index+1] = start
+          tickArrayMax[index+1] = max(tickArray[index+1], tickArrayMax[index+1])
         end
 
          #= returns the max tick since the last reset =#
         function tmpTickMaximum(index::ModelicaInteger)::ModelicaInteger
-              local maxIndex::ModelicaInteger
-
-            #= Defined in the runtime =#
+          local maxIndex::ModelicaInteger = tickArrayMax[index+1]
           maxIndex
+        end
+
+         #= returns a tick that can be reset =#
+        function tmpTick()::ModelicaInteger
+          local tickNo::ModelicaInteger
+          tickNo = tmpTickIndex(index = 0)
+          tickNo
+        end
+
+         #= resets the tick so it restarts on start =#
+        function tmpTickReset(start::ModelicaInteger)
+          #= Defined in the runtime =#
+          tmpTickResetIndex(start, 0)
         end
 
          #= Returns true if the current user is root.
         Used by main to disable running omc as root as it is very dangerous.
         Consider opening a socket and letting anyone run system() commands without authentication. As root. =#
         function userIsRoot()::Bool
-              local isRoot::Bool
-
-            #= Defined in the runtime =#
+          local isRoot::Bool = (ENV["USER"] == "root")
           isRoot
         end
 

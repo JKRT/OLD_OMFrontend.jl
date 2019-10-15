@@ -476,7 +476,7 @@ function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
     =#
     @matchcontinue inCache begin
       cache  => begin
-        graph = FCore.getCachedInitialGraph(cache)
+        graph = FCoreUtil.getCachedInitialGraph(cache)
         (cache, graph)
       end
 
