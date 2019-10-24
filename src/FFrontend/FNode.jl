@@ -1,22 +1,3 @@
-module FNode
-
-
-using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
-using ExportAll
-  #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
-
-  FunctionRefIs = Function
-
-Filter = Function
-
-Filter = Function
-
-FunctionRefIs = Function
-
-Apply = Function
-
 #= /*
 * This file is part of OpenModelica.
 *
@@ -47,16 +28,29 @@ Apply = Function
 * See the full OSMC Public License conditions for more details.
 *
 */ =#
-#=  public imports
-=#
+
+module FNode
+
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+  #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+
+
+FunctionRefIs = Function
+
+Filter = Function
+
+FunctionRefIs = Function
+
+Apply = Function
 
 import Absyn
 import AbsynUtil
 import DAE
+import DAEUtil
 import SCode
 import FCore
-#=  protected imports
-=#
 
 import Error
 import ListUtil
@@ -544,24 +538,17 @@ function setData(inNode::Node, inData::Data) ::Node
   outNode
 end
 
-function child(inParentRef::MMRef, inName::Name) ::MMRef
-  local outChildRef::MMRef
-
-  outChildRef = childFromNode(fromRef(inParentRef), inName)
-  outChildRef
+function child(inParentRef::MMRef, inName::Name)::MMRef
+  childFromNode(fromRef(inParentRef), inName)
 end
 
-function childFromNode(inNode::Node, inName::Name) ::MMRef
-  local outChildRef::MMRef
-
-  local c::Children
-
-  c = children(inNode)
-  outChildRef = RefTree.get(c, inName)
-  outChildRef
+function childFromNode(inNode::Node, inName::Name)::MMRef
+  println("Here we are!")
+  methods(RefTree.get)
+  RefTree.get(children(inNode), inName)
 end
 
-function element2Data(inElement::SCode.Element, inKind::Kind) ::Tuple{Data, DAE.Var}
+function element2Data(inElement::SCode.Element, inKind::Kind)::Tuple{Data, DAE.Var}
   local outVar::DAE.Var
   local outData::Data
 

@@ -73,11 +73,12 @@ function parsestring(str::String, infoFilename::String = "<interactive>") ::Absy
 end
 
 #= Like parse, but skips the SCode check to avoid infinite loops for ModelicaBuiltin.mo. =#
-function parsebuiltin(filename::String, encoding::String, libraryPath::String = "", lveInstance::Option{<:ModelicaInteger} = NONE(), acceptedGram::ModelicaInteger = Config.acceptedGrammar(), languageStandardInt::ModelicaInteger = Flags.getConfigEnum(Flags.LANGUAGE_STANDARD)) ::Absyn.Program
+function parsebuiltin(filename::String, encoding::String, libraryPath::String = "", lveInstance::Option{<:ModelicaInteger} = NONE(),
+                      acceptedGram::ModelicaInteger = Config.acceptedGrammar(),
+                      languageStandardInt::ModelicaInteger = Flags.getConfigEnum(Flags.LANGUAGE_STANDARD))::Absyn.Program
   local outProgram::Absyn.Program
-
   local realpath::String
-
+  println("Filename for parsebuiltin!: $filename")  
   realpath = Util.replaceWindowsBackSlashWithPathDelimiter(System.realpath(filename))
   outProgram = ParserExt.parse(realpath, Util.testsuiteFriendly(realpath), acceptedGram, encoding, languageStandardInt, Config.getRunningTestsuite(), libraryPath, lveInstance)
   outProgram

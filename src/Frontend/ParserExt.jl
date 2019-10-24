@@ -37,9 +37,10 @@ using ExportAll
 import Absyn
 
 #= Parse a mo-file =#
-function parse(filename::String, infoFilename::String, acceptedGram::ModelicaInteger, encoding::String, languageStandardInt::ModelicaInteger, runningTestsuite::Bool, libraryPath::String, lveInstance::Option{<:ModelicaInteger}) ::Absyn.Program
+function parse(filename::String, infoFilename::String, acceptedGram::ModelicaInteger, encoding::String, languageStandardInt::ModelicaInteger, runningTestsuite::Bool, libraryPath::String, lveInstance::Option{<:ModelicaInteger})::Absyn.Program
   #= TODO: Defined in the runtime =#
-  outProgram
+  println("Calling ParseExt.parse with: $filename $infoFilename $acceptedGram $encoding $languageStandardInt $runningTestsuite $libraryPath")
+  outProgram = OpenModelicaParser.parseFile(filename)
 end
 
 #= Parse a mos-file =#

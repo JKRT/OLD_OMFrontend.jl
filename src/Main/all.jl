@@ -78,13 +78,17 @@ AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
 #@time AbsynToSCode.translateAbsyn2SCode(P)
 #@time AbsynToSCode.translateAbsyn2SCode(P)
 
+println("*******************************")
 println("SCode done")
-
+println("*******************************")
+#= Creating a cache. At this point the SCode is the bouncing ball... =#
 cache = FCoreUtil.emptyCache()
 import Absyn
 className = Absyn.IDENT("BouncingBall")
 (cache,_,_,dae) = Inst.instantiateClass(cache,InnerOuter.emptyInstHierarchy,scode,className);
 @show dae
-
+println("*******************************")
+println("DAE done")
+println("*******************************")
 println("Goodbye")
 

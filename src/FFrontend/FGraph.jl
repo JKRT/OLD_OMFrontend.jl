@@ -207,7 +207,7 @@ import SCodeUtil
         end
 
          #= make a new graph =#
-        function new(inGraphName::Name, inPath::Absyn.Path) ::Graph
+        function new(inGraphName::Name, inPath)::Graph
               local outGraph::Graph
 
               local n::Node

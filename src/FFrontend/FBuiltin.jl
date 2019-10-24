@@ -332,11 +332,21 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
   local spNF::SCode.Program
   local spCF::SCode.Program
 
-  fileModelicaNF = Settings.getInstallationDirectoryPath() + "/lib/omc/NFModelicaBuiltin.mo"
-  fileModelicaCF = Settings.getInstallationDirectoryPath() + "/lib/omc/ModelicaBuiltin.mo"
-  fileMetaModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/MetaModelicaBuiltin.mo"
-  fileParModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/ParModelicaBuiltin.mo"
-  filePDEModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/PDEModelicaBuiltin.mo"
+  if Sys.isunix()
+    fileModelicaNF = Settings.getInstallationDirectoryPath() + "/lib/omc/NFModelicaBuiltin.mo"
+    fileModelicaCF = Settings.getInstallationDirectoryPath() + "/lib/omc/ModelicaBuiltin.mo"
+    fileMetaModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/MetaModelicaBuiltin.mo"
+    fileParModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/ParModelicaBuiltin.mo"
+    filePDEModelica = Settings.getInstallationDirectoryPath() + "/lib/omc/PDEModelicaBuiltin.mo"
+  elseif Sys.iswindows()
+    fileModelicaNF = Settings.getInstallationDirectoryPath() + "\\lib\\omc\\NFModelicaBuiltin.mo"
+    fileModelicaCF = Settings.getInstallationDirectoryPath() + "\\lib\\omc\\ModelicaBuiltin.mo"
+    fileMetaModelica = Settings.getInstallationDirectoryPath() + "\\lib\\omc\\MetaModelicaBuiltin.mo"
+    fileParModelica = Settings.getInstallationDirectoryPath() + "\\lib\\omc\\ParModelicaBuiltin.mo"
+    filePDEModelica = Settings.getInstallationDirectoryPath() + "\\lib\\omc\\PDEModelicaBuiltin.mo"
+  else
+    throw("Unsupported system: Not Windows. Not Unix.")
+  end
   (initialProgram, initialSCodeProgram) = begin
     @matchcontinue () begin
       ()  => begin
@@ -356,9 +366,10 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileMetaModelica), Error.FILE_NOT_FOUND_ERROR, list(fileMetaModelica), AbsynUtil.dummyInfo)
-        @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-        @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-        @match Absyn.PROGRAM(classes = classes2, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileMetaModelica, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
+        acceptedGram = Flags.METAMODELICA
+        @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram)
+        @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram)
+        @match Absyn.PROGRAM(classes = classes2, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileMetaModelica, "UTF-8", "", NONE(), acceptedGram)
         classesNF = listAppend(classes1NF, classes2)
         classesCF = listAppend(classes1CF, classes2)
         pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
@@ -405,8 +416,8 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.MODELICA) || intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.OPTIMICA)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
-        @match (@match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = pNF) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-        @match (@match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = pCF) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
+        @match (@match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = pNF) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), Flags.METAMODELICA)
+        @match (@match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = pCF) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), Flags.METAMODELICA)
         spNF = ListUtil.map(classes1NF, AbsynToSCode.translateClass)
         spCF = ListUtil.map(classes1CF, AbsynToSCode.translateClass)
         assocLst = getGlobalRoot(Global.builtinIndex)
@@ -499,12 +510,6 @@ function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
       end
     end
   end
-  #=  then look in the global roots[builtinEnvIndex]
-  =#
-  #=  if no cached version found create initial graph.
-  =#
-  #=  add the ModelicaBuiltin/MetaModelicaBuiltin classes in the initial graph
-  =#
   (outCache, graph)
 end
 

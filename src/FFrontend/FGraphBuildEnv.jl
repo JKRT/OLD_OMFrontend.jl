@@ -79,15 +79,13 @@ module FGraphBuildEnv
         import Util
 
          #= builds nodes out of classes =#
-        function mkProgramGraph(inProgram::SCode.Program, inKind::Kind, graph::Graph) ::Graph
-
-
-              local topRef::MMRef
-
-              topRef = FGraph.top(graph)
-              for cls in inProgram
+        function mkProgramGraph(inProgram::SCode.Program, inKind::Kind, graph::Graph)::Graph
+            local topRef::MMRef
+            println(methods(FGraph.top))
+            topRef = FGraph.top(graph)
+            for cls in inProgram
                 graph = mkClassGraph(cls, topRef, inKind, graph, true)
-              end
+            end
           graph
         end
 

@@ -1,4 +1,3 @@
-
 #= /*
 * This file is part of OpenModelica.
 *
@@ -63,7 +62,6 @@ println("FCore Hello1")
 
 module RefTree
   using MetaModelica
-  #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
   using ExportAll
   import BaseAvlTree
   import BaseAvlSet
@@ -73,7 +71,42 @@ module RefTree
   using BaseAvlTree
   Key = String
   Value = MMRef
-  
+
+function get(tree, key::Key)::MMRef
+    local value::Value
+    local k::Key
+    k = begin
+        @match tree begin
+            NODE(__)  => begin
+                tree.key
+            end
+            LEAF(__)  => begin
+                tree.key
+            end
+        end
+    end
+    value = begin
+        @match (keyCompare(key, k), tree) begin
+            (0, LEAF(__))  => begin
+                tree.value
+            end
+
+            (0, NODE(__))  => begin
+                tree.value
+            end
+
+            (1, NODE(__))  => begin
+                get(tree.right, key)
+            end
+
+            (-1, NODE(__))  => begin
+                get(tree.left, key)
+            end
+        end
+    end
+    value
+end
+
   function BaseAvlTree.keyStr(s)::String
     s
   end
@@ -88,7 +121,6 @@ module RefTree
     s
   end
   
-  #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
   @exportAll()
 end
 
