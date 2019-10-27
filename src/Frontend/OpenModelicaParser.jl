@@ -1,9 +1,11 @@
 module OpenModelicaParser
 
 import Absyn
-import Settings
-
 using MetaModelica
+
+#import Settings
+INSTALLATION_DIRECTORY_PATH = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+
 struct ParseError end
 
 function isDerCref(exp::Absyn.Exp)::Bool
@@ -14,17 +16,21 @@ function isDerCref(exp::Absyn.Exp)::Bool
 end
   
 const _libpath = if Sys.iswindows()
-   joinpath(Settings.getInstallationDirectoryPath(), "/lib/libomparse-julia.dll")
+  #global ajaj = realpath(Settings.getInstallationDirectoryPath())
+  local instDir = INSTALLATION_DIRECTORY_PATH
+  joinpath(instDir, "lib", "ext", "libomparse-julia.dll")
 else
-  joinpath(Settings.getInstallationDirectoryPath(), "../lib/libomparse-julia.so")
+  #joinpath(Settings.getInstallationDirectoryPath(), "/lib/ext/libomparse-julia.so")
 end
   
 function parseFile(fileName::String)::Absyn.Program
-  res = ccall((:parseFile,_libpath),Any,(String,),fileName)
+  local res = ccall((:parseFile, _libpath), Any, (String,) , fileName)
   if res == nothing
     throw(ParseError())
   end
   res
 end
+
+#parseFile("Banan.mo")
   
 end

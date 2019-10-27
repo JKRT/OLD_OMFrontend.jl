@@ -565,10 +565,9 @@ end
 
 
 function initialGraphModelica(graph::FGraph.Graph, mkTypeNode::MakeTypeNode, mkCompNode::MakeCompNode) ::FGraph.Graph
-
-
-  local enumeration2int::DAE.Type = DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ENUMERATION(NONE(), Absyn.IDENT(""), nil, nil, nil), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("Integer"))
-
+  local enumeration2int::DAE.Type = DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ENUMERATION(NONE(), Absyn.IDENT(""), nil, nil, nil),
+                                                                    DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())),
+                                                   DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("Integer"))
   graph = mkCompNode(timeComp, FGraph.top(graph), FCore.BUILTIN(), graph)
   graph = FGraph.updateComp(graph, timeVar, FCore.VAR_UNTYPED(), FGraph.empty())
   graph = mkTypeNode(list(DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), false))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality")), DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), true))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality"))), FGraph.top(graph), "cardinality", graph)
@@ -594,8 +593,6 @@ function initialGraphMetaModelica(graph::FGraph.Graph, mkTypeNode::MakeTypeNode)
 end
 
 function initialGraphOptimica(graph::FGraph.Graph, mkCompNode::MakeCompNode) ::FGraph.Graph
-
-
   if ! Config.acceptOptimicaGrammar()
     return graph
   end
@@ -616,7 +613,6 @@ end
 if the element does not exist it fails =#
 function getElementWithPathCheckBuiltin(inProgram::SCode.Program, inPath::Absyn.Path) ::SCode.Element
   local outElement::SCode.Element
-
   outElement = begin
     local sp::SCode.Program
     local rest::SCode.Program

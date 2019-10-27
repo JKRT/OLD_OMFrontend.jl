@@ -35,6 +35,7 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 import Absyn
+import OpenModelicaParser
 
 #= Parse a mo-file =#
 function parse(filename::String, infoFilename::String, acceptedGram::ModelicaInteger, encoding::String, languageStandardInt::ModelicaInteger, runningTestsuite::Bool, libraryPath::String, lveInstance::Option{<:ModelicaInteger})::Absyn.Program
