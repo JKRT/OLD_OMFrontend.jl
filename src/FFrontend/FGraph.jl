@@ -730,7 +730,7 @@ import SCodeUtil
                   local r::MMRef
                 @matchcontinue inGraph begin
                   _  => begin
-                      @match list(r) = currentScope(inGraph)
+                      @match r <| nil = currentScope(inGraph)
                       @match true = FNode.isRefTop(r)
                     NONE()
                   end
