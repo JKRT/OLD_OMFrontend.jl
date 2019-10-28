@@ -73,11 +73,13 @@ import Inst
 Global.initialize()
 # make sure we have all the flags loaded!
 Flags.new(Flags.emptyFlags)
-AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
+
+@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
+@show scode
 
 #= Try the bouncing ball =#
-@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
-@show scode
+#@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
+#@show scode
 #using Modelica_Standard_Library_AST
 #using BenchmarkTools
 #using Profile
@@ -89,12 +91,17 @@ println("*******************************")
 println("SCode done")
 println("*******************************")
 #= Creating a cache. At this point the SCode is the bouncing ball... =#
+println("empty cache")
+Flags.set(Flags.SCODE_INST, true)
+Flags.set(Flags.EXEC_STAT, true)
 cache = FCoreUtil.emptyCache()
+println("after empty cache")
 import Absyn
 import InnerOuter
-Flags.set(Flags.SCODE_INST, true)
-className = Absyn.IDENT("BouncingBall")
+className = Absyn.IDENT("HelloWorld")
+println("dive in inst")
 (cache,_,_,dae) = Inst.instantiateClass(cache,InnerOuter.emptyInstHierarchy,scode,className);
+println("after inst")
 @show dae
 println("*******************************")
 println("DAE done")
