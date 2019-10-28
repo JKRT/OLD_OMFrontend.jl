@@ -330,9 +330,8 @@ end
 function setCachedInitialGraph(cache::Cache, g::Graph) ::Cache
   cache = begin
     @match cache begin
-      CACHE(__)  => begin
-        cache.initialGraph = SOME(g)
-        cache
+      CACHE(_, b, c, d) => begin
+        cache = CACHE(SOME(g), b, c, d)
       end
 
       _  => begin
