@@ -1639,7 +1639,6 @@
          #= This function simply converts a Path to a string. =#
         function pathString(path::Path, delimiter::String = ".", usefq::Bool = true, reverse::Bool = false) ::String
               local s::String
-
               local p1::Path
               local p2::Path
               local count::ModelicaInteger = 0

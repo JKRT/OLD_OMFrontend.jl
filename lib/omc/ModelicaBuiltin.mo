@@ -420,7 +420,7 @@ function smooth "Indicate smoothness of expression"
   See <a href=\"modelica://ModelicaReference.Operators.'smooth()'\">smooth()</a>
 </html>"));
 end smooth;
-
+/*
 function diagonal<T> "Returns a diagonal matrix"
   input T v[:];
   output T mat[size(v,1),size(v,1)];
@@ -429,7 +429,7 @@ function diagonal<T> "Returns a diagonal matrix"
   See <a href=\"modelica://ModelicaReference.Operators.'diagonal()'\">diagonal()</a>
 </html>"));
 end diagonal;
-
+*/
 function cardinality "Number of connectors in connection"
   input Real c;
   output Integer numOccurances;
@@ -764,6 +764,7 @@ external "builtin";
 annotation(version="Modelica 3.3");
 end spatialDistribution;
 
+/*
 function previous<T> "Access previous value of a clocked variable"
   input T u;
   output T y;
@@ -772,7 +773,7 @@ function previous<T> "Access previous value of a clocked variable"
   See <a href=\"modelica://ModelicaReference.Operators.'previous()'\">previous()</a>
 </html>"));
 end previous;
-
+*/
 function subSample = $overload(OpenModelica.Internal.subSampleExpression, OpenModelica.Internal.subSampleClock)
   "Conversion from faster clock to slower clock"
   annotation(version="Modelica 3.3", Documentation(info="<html>
@@ -784,7 +785,7 @@ function superSample = $overload(OpenModelica.Internal.superSampleExpression, Op
   annotation(version="Modelica 3.3", Documentation(info="<html>
   See <a href=\"modelica://ModelicaReference.Operators.'superSample()'\">superSample()</a>
 </html>"));
-
+/*
 function hold<T> "Conversion from clocked discrete-time to continuous time"
   input T u;
   output T y;
@@ -802,7 +803,7 @@ function noClock<T> "Clock of y=Clock(u) is always inferred"
   See <a href=\"modelica://ModelicaReference.Operators.'noClock()'\">noClock()</a>
 </html>"));
 end noClock;
-
+*/
 function interval = $overload(OpenModelica.Internal.intervalInferred, OpenModelica.Internal.intervalExpression)
    "Returns the interval between the previous and present tick of the clock of its argument"
   annotation(Documentation(info="<html>
@@ -902,7 +903,7 @@ package Internal "Contains internal implementations, e.g. overloaded builtin fun
     output Real interval;
     external "builtin" interval=interval();
   end intervalInferred;
-
+/*
   function intervalExpression<T>
     input T u;
     output Real y;
@@ -917,14 +918,14 @@ package Internal "Contains internal implementations, e.g. overloaded builtin fun
     external "builtin" y=subSample(u,factor);
     annotation(__OpenModelica_UnboxArguments=true);
   end subSampleExpression;
-
+*/
   impure function subSampleClock
     input Clock u;
     parameter input Integer factor(min=0)=0;
     output Clock y;
     external "builtin" y=subSample(u,factor);
   end subSampleClock;
-
+/*
   impure function superSampleExpression<T>
     input T u;
     parameter input Integer factor(min=0)=0;
@@ -932,7 +933,7 @@ package Internal "Contains internal implementations, e.g. overloaded builtin fun
     external "builtin" y=superSample(u,factor);
     annotation(__OpenModelica_UnboxArguments=true);
   end superSampleExpression;
-
+*/
   impure function superSampleClock
     input Clock u;
     parameter input Integer factor(min=0)=0;

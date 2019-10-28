@@ -36,9 +36,7 @@ module FBuiltin
 using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
-  #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
-  MakeTypeNode = Function
+MakeTypeNode = Function
 MakeCompNode = Function
 
 import Absyn
@@ -52,9 +50,9 @@ import Error
 import SCode
 
 import FCore
-println(FCore.Seq)
+
 import FGraph
-println(FGraph.Graph)
+
 import ClassInf
 
 import Config
@@ -79,13 +77,8 @@ import Settings
 import System
 
 import Util
-#= /* These imports were used in e.g. MSL 1.6. They should not be here anymore...
-If you need them, add them to the initial environment and recompile; they are not standard Modelica.
-import arcsin = asin;
-import arccos = acos;
-import arctan = atan;
-import ln = log;
-*/ =#
+
+
 #=  Predefined DAE.Types
 =#
 #=  Real arrays
@@ -311,9 +304,7 @@ end
 function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
   local initialSCodeProgram::SCode.Program
   local initialProgram::Absyn.Program
-
-  #=  legend: NF = new frontend; CF = current frontend
-  =#
+  #=  legend: NF = new frontend; CF = current frontend =#
   local fileModelicaNF::String
   local fileModelicaCF::String
   local fileMetaModelica::String
@@ -350,19 +341,23 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
   (initialProgram, initialSCodeProgram) = begin
     @matchcontinue () begin
       ()  => begin
+        println("Part 1")
         @shouldFail _ = getGlobalRoot(Global.builtinIndex)
         setGlobalRoot(Global.builtinIndex, nil)
         fail()
       end
 
       ()  => begin
+        @info("First case")
         assocLst = getGlobalRoot(Global.builtinIndex)
         (p, sp) = Util.assoc(Util.makeTuple(Flags.getConfigEnum(Flags.GRAMMAR), Flags.isSet(Flags.SCODE_INST)), assocLst)
         (p, sp)
       end
 
       ()  => begin
+        @info("Second case")
         @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.METAMODELICA)
+        @info("Second case")
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileMetaModelica), Error.FILE_NOT_FOUND_ERROR, list(fileMetaModelica), AbsynUtil.dummyInfo)
@@ -370,9 +365,9 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram)
         @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram)
         @match Absyn.PROGRAM(classes = classes2, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileMetaModelica, "UTF-8", "", NONE(), acceptedGram)
-        classesNF = listAppend(classes1NF, classes2)
+        #classesNF = listAppend(classes1NF, classes2)
         classesCF = listAppend(classes1CF, classes2)
-        pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
+        #pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
         pCF = Absyn.PROGRAM(classesCF, Absyn.TOP())
         pNF = MetaUtil.createMetaClassesInProgram(pNF)
         @match Absyn.PROGRAM(classes = classesNF) = pNF
@@ -391,7 +386,9 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
       end
 
       ()  => begin
+        @info("third case")
         @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.PARMODELICA)
+        @info("third case")
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileMetaModelica), Error.FILE_NOT_FOUND_ERROR, list(fileMetaModelica), AbsynUtil.dummyInfo)
@@ -413,9 +410,11 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         end
         (p, sp)
       end
-
+      
       ()  => begin
+        @info("Forth case")
         @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.MODELICA) || intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.OPTIMICA)
+        @info("Forth case")
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
         pNF = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), Flags.METAMODELICA)
@@ -424,45 +423,49 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = pCF
         spNF = ListUtil.map(classes1NF, AbsynToSCode.translateClass)
         spCF = ListUtil.map(classes1CF, AbsynToSCode.translateClass)
+        @info "We have PCF"
         assocLst = getGlobalRoot(Global.builtinIndex)
-        setGlobalRoot(Global.builtinIndex, _cons(((Flags.MODELICA, true), (pNF, spNF)), _cons(((Flags.MODELICA, false), (pCF, spCF)), assocLst)))
+        @info "We have PCF"
+        setGlobalRoot(Global.builtinIndex, _cons(((Flags.MODELICA, true), (nothing, nothing)), _cons(((Flags.MODELICA, false), (pCF, spCF)), assocLst)))
+        @info "We have PCF"
         (p, sp) = if Flags.isSet(Flags.SCODE_INST)
           (pNF, spNF)
         else
           (pCF, spCF)
         end
-        (p, sp)
       end
 
-()  => begin
-  @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.PDEMODELICA)
-  Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
-  Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
-  Error.assertionOrAddSourceMessage(System.regularFileExists(filePDEModelica), Error.FILE_NOT_FOUND_ERROR, list(filePDEModelica), AbsynUtil.dummyInfo)
-  @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-  @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-  @match Absyn.PROGRAM(classes = classes2, within_ = Absyn.TOP()) = Parser.parsebuiltin(filePDEModelica, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
-  classesNF = listAppend(classes1NF, classes2)
-  classesCF = listAppend(classes1CF, classes2)
-  pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
-  pCF = Absyn.PROGRAM(classesCF, Absyn.TOP())
-  spNF = ListUtil.map(classesNF, AbsynToSCode.translateClass)
-  spCF = ListUtil.map(classesCF, AbsynToSCode.translateClass)
-  assocLst = getGlobalRoot(Global.builtinIndex)
-  setGlobalRoot(Global.builtinIndex, _cons(((Flags.PDEMODELICA, true), (pNF, spNF)), _cons(((Flags.PDEMODELICA, false), (pCF, spCF)), assocLst)))
-  (p, sp) = if Flags.isSet(Flags.SCODE_INST)
-    (pNF, spNF)
-  else
-    (pCF, spCF)
-  end
-  (p, sp)
-end
+     ()  => begin
+      @info("Fifth case")
+       @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.PDEMODELICA)
+       Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
+       Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
+       Error.assertionOrAddSourceMessage(System.regularFileExists(filePDEModelica), Error.FILE_NOT_FOUND_ERROR, list(filePDEModelica), AbsynUtil.dummyInfo)
+       @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
+       @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
+       @match Absyn.PROGRAM(classes = classes2, within_ = Absyn.TOP()) = Parser.parsebuiltin(filePDEModelica, "UTF-8", "", NONE(), acceptedGram = Flags.METAMODELICA)
+       classesNF = listAppend(classes1NF, classes2)
+       classesCF = listAppend(classes1CF, classes2)
+       pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
+       pCF = Absyn.PROGRAM(classesCF, Absyn.TOP())
+       spNF = ListUtil.map(classesNF, AbsynToSCode.translateClass)
+       spCF = ListUtil.map(classesCF, AbsynToSCode.translateClass)
+       assocLst = getGlobalRoot(Global.builtinIndex)
+       setGlobalRoot(Global.builtinIndex, _cons(((Flags.PDEMODELICA, true), (pNF, spNF)), _cons(((Flags.PDEMODELICA, false), (pCF, spCF)), assocLst)))
+       (p, sp) = if Flags.isSet(Flags.SCODE_INST)
+         (pNF, spNF)
+       else
+         (pCF, spCF)
+       end
+       (p, sp)
+     end
 
-_  => begin
-  Error.addInternalError("FBuiltin.getInitialFunctions failed.", sourceInfo())
-  fail()
-end
-end
+    _  => begin
+      println("FBuiltin.getInitialFunctions failed.")
+      Error.addInternalError("FBuiltin.getInitialFunctions failed.", sourceInfo())
+      fail()
+    end
+  end
 end
 (initialProgram, initialSCodeProgram)
 end
@@ -480,9 +483,7 @@ others. =#
 function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
   local graph::FGraph.Graph
   local outCache::FCore.Cache
-
   local cache::FCore.Cache
-
   (outCache, graph) = begin
     local initialClasses::List{Absyn.Class}
     local initialProgram::SCode.Program
@@ -520,7 +521,6 @@ end
 #= gets/sets the initial environment depending on grammar flags =#
 function getSetInitialGraph(inEnvOpt::Option{<:FGraph.Graph})::FGraph.Graph
   local initialEnv::FGraph.Graph
-
   initialEnv = begin
     local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
     local graph::FGraph.Graph

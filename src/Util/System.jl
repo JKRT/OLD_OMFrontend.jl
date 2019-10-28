@@ -1066,10 +1066,8 @@ end
 
 #= Translate a string from msgid to msgstr using the language of the chosen locale =#
 function gettext(msgid::String)::String
-    local msgstr::String
-
-    #= Defined in the runtime =#
-    msgstr
+  #= TODO Defined in the runtime =#
+  "GETTEXT_NOT_DONE FOR: $msgid"
 end
 
 #= Takes any boxed input =#
