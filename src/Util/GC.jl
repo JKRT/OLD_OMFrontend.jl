@@ -118,26 +118,17 @@
         function getProfStats() ::ProfStats 
               local stats::ProfStats
 
-              local heapsize_full::ModelicaInteger
-              local free_bytes_full::ModelicaInteger
-              local unmapped_bytes::ModelicaInteger
-              local bytes_allocd_since_gc::ModelicaInteger
-              local allocd_bytes_before_gc::ModelicaInteger
-              local non_gc_bytes::ModelicaInteger
-              local gc_no::ModelicaInteger
-              local markers_m1::ModelicaInteger
-              local bytes_reclaimed_since_gc::ModelicaInteger
-              local reclaimed_bytes_before_gc::ModelicaInteger
-
-               #= Inner, dummy function to preserve the full integer sizes =#
-              function GC_get_prof_stats_modelica() ::Tuple{ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger} 
-                    local stats::Tuple{ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger, ModelicaInteger}
-
-                  #= TODO: Defined in the runtime =#
-                stats
-              end
-
-              (heapsize_full, free_bytes_full, unmapped_bytes, bytes_allocd_since_gc, allocd_bytes_before_gc, non_gc_bytes, gc_no, markers_m1, bytes_reclaimed_since_gc, reclaimed_bytes_before_gc) = GC_get_prof_stats_modelica()
+              local heapsize_full::ModelicaInteger = 0
+              local free_bytes_full::ModelicaInteger = 0
+              local unmapped_bytes::ModelicaInteger = 0
+              local bytes_allocd_since_gc::ModelicaInteger = 0
+              local allocd_bytes_before_gc::ModelicaInteger = 0
+              local non_gc_bytes::ModelicaInteger = 0
+              local gc_no::ModelicaInteger = 0
+              local markers_m1::ModelicaInteger = 0
+              local bytes_reclaimed_since_gc::ModelicaInteger = 0
+              local reclaimed_bytes_before_gc::ModelicaInteger = 0
+              
               stats = PROFSTATS(heapsize_full, free_bytes_full, unmapped_bytes, bytes_allocd_since_gc, allocd_bytes_before_gc, non_gc_bytes, gc_no, markers_m1, bytes_reclaimed_since_gc, reclaimed_bytes_before_gc)
           stats
         end

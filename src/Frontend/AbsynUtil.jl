@@ -1659,7 +1659,7 @@
                        #=  Do not allocate memory if we're just going to copy the only identifier
                        =#
                       s = p1.name
-                      return
+                      return s
                     ()
                   end
 
