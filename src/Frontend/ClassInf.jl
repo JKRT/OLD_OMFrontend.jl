@@ -43,6 +43,8 @@
         import SCode
 
         import Absyn
+        
+        import AbsynUtil
 
         import Config
 

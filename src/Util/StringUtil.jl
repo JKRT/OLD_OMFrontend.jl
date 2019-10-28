@@ -289,15 +289,11 @@
 
          #= Repeat str n times =#
         function repeat(str::String, n::ModelicaInteger) ::String
-              local res::String = ""
+          local res::String = ""
 
-              local len::ModelicaInteger = stringLength(str)
-              local ext::System.StringAllocator = System.StringAllocator(len * n)
-
-              for i in 0:n - 1
-                System.stringAllocatorStringCopy(ext, str, len * i)
-              end
-              res = System.stringAllocatorResult(ext, res)
+          for i in 0:n - 1
+            res = res + str
+          end
           res
         end
 
@@ -369,30 +365,7 @@
         end
 
         function stringAppend9(str1::String, str2::String, str3::String, str4::String = "", str5::String = "", str6::String = "", str7::String = "", str8::String = "", str9::String = "") ::String
-              local str::String
-
-              local sb::System.StringAllocator = System.StringAllocator(stringLength(str1) + stringLength(str2) + stringLength(str3) + stringLength(str4) + stringLength(str5) + stringLength(str6) + stringLength(str7) + stringLength(str8) + stringLength(str9))
-              local c::ModelicaInteger = 0
-
-              System.stringAllocatorStringCopy(sb, str1, c)
-              c = c + stringLength(str1)
-              System.stringAllocatorStringCopy(sb, str2, c)
-              c = c + stringLength(str2)
-              System.stringAllocatorStringCopy(sb, str3, c)
-              c = c + stringLength(str3)
-              System.stringAllocatorStringCopy(sb, str4, c)
-              c = c + stringLength(str4)
-              System.stringAllocatorStringCopy(sb, str5, c)
-              c = c + stringLength(str5)
-              System.stringAllocatorStringCopy(sb, str6, c)
-              c = c + stringLength(str6)
-              System.stringAllocatorStringCopy(sb, str7, c)
-              c = c + stringLength(str7)
-              System.stringAllocatorStringCopy(sb, str8, c)
-              c = c + stringLength(str8)
-              System.stringAllocatorStringCopy(sb, str9, c)
-              c = c + stringLength(str9)
-              str = System.stringAllocatorResult(sb, str1)
+          local str::String = str1 + str2 + str3 + str4 + str5 + str6 + str7 + str8 + str9
           str
         end
 

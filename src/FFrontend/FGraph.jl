@@ -799,8 +799,8 @@ import SCodeUtil
 
               _ = begin
                 @match graph begin
-                  FCore.G(__)  => begin
-                      graph.scope = _cons(inRef, graph.scope)
+                  FCore.G(t, s)  => begin
+                      graph = FCore.G(t, _cons(inRef, graph.scope))
                     ()
                   end
                 end
@@ -815,8 +815,8 @@ import SCodeUtil
 
               _ = begin
                 @match graph begin
-                  FCore.G(__)  => begin
-                      graph.scope = listAppend(inScope, graph.scope)
+                  FCore.G(t, s)  => begin
+                      graph = FCore.G(t, listAppend(inScope, graph.scope))
                     ()
                   end
                 end
@@ -831,8 +831,8 @@ import SCodeUtil
 
               _ = begin
                 @match graph begin
-                  FCore.G(__)  => begin
-                      graph.scope = inScope
+                  FCore.G(t, s)  => begin
+                      graph.scope = FCore.G(t, inScope)
                     ()
                   end
                 end
