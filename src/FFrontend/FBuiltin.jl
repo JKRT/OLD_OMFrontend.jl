@@ -374,8 +374,10 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         classesCF = listAppend(classes1CF, classes2)
         pNF = Absyn.PROGRAM(classesNF, Absyn.TOP())
         pCF = Absyn.PROGRAM(classesCF, Absyn.TOP())
-        @match (@match Absyn.PROGRAM(classes = classesNF) = pNF) = MetaUtil.createMetaClassesInProgram(pNF)
-        @match (@match Absyn.PROGRAM(classes = classesCF) = pCF) = MetaUtil.createMetaClassesInProgram(pCF)
+        pNF = MetaUtil.createMetaClassesInProgram(pNF)
+        @match Absyn.PROGRAM(classes = classesNF) = pNF
+        pCF = MetaUtil.createMetaClassesInProgram(pCF)
+        @match Absyn.PROGRAM(classes = classesCF) = pCF
         spNF = ListUtil.map(classesNF, AbsynToSCode.translateClass)
         spCF = ListUtil.map(classesCF, AbsynToSCode.translateClass)
         assocLst = getGlobalRoot(Global.builtinIndex)
@@ -416,8 +418,10 @@ function getInitialFunctions() ::Tuple{Absyn.Program, SCode.Program}
         @match true = intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.MODELICA) || intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.OPTIMICA)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaNF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaNF), AbsynUtil.dummyInfo)
         Error.assertionOrAddSourceMessage(System.regularFileExists(fileModelicaCF), Error.FILE_NOT_FOUND_ERROR, list(fileModelicaCF), AbsynUtil.dummyInfo)
-        @match (@match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = pNF) = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), Flags.METAMODELICA)
-        @match (@match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = pCF) = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), Flags.METAMODELICA)
+        pNF = Parser.parsebuiltin(fileModelicaNF, "UTF-8", "", NONE(), Flags.METAMODELICA)
+        @match Absyn.PROGRAM(classes = classes1NF, within_ = Absyn.TOP()) = pNF
+        pCF = Parser.parsebuiltin(fileModelicaCF, "UTF-8", "", NONE(), Flags.METAMODELICA)
+        @match Absyn.PROGRAM(classes = classes1CF, within_ = Absyn.TOP()) = pCF
         spNF = ListUtil.map(classes1NF, AbsynToSCode.translateClass)
         spCF = ListUtil.map(classes1CF, AbsynToSCode.translateClass)
         assocLst = getGlobalRoot(Global.builtinIndex)
