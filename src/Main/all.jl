@@ -101,7 +101,7 @@ println("*******************************")
 #= Creating a cache. At this point the SCode is the bouncing ball... =#
 println("empty cache")
 Flags.set(Flags.SCODE_INST, true)
-Flags.set(Flags.EXEC_STAT, true)
+# Flags.set(Flags.EXEC_STAT, true) # not yet working!
 cache = FCoreUtil.emptyCache()
 println("after empty cache")
 import Absyn

@@ -274,47 +274,12 @@
               local outCache::FCore.Cache
 
               println("Inst.instantiateClass 1")
+              
+              (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(inCache, inIH, inProgram, inPath, doSCodeDep)
+              
+              println("Inst.instantiateClass 2")
 
-              (outCache, outEnv, outIH, outDAElist) = begin
-                  local cr::Absyn.Path
-                  local path::Absyn.Path
-                  local cdecls::List{SCode.Element}
-                  local cname_str::String
-                  local cache::FCore.Cache
-                  local ih::InstanceHierarchy
-                  local stackOverflow::Bool
-                @matchcontinue (inCache, inIH, inProgram, inPath) begin
-                  (_, _,  nil(), _)  => begin
-                      Error.addMessage(Error.NO_CLASSES_LOADED, nil)
-                    fail()
-                  end
-                  
-                  (cache, ih, cdecls && _ <| _, path)  => begin
-                       #=  instantiate a class
-                       =#
-                      (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(cache, ih, cdecls, path, doSCodeDep)
-                      # outDAElist = NFUnitCheck.checkUnits(outDAElist, FCore.getFunctionTree(outCache))
-                    (outCache, outEnv, outIH, outDAElist)
-                  end
-                  
-                  (_, _, _ <| _, path)  => begin
-                      stackOverflow = setStackOverflowSignal(false)
-                      cname_str = AbsynUtil.pathString(path) + (if stackOverflow
-                            ". The compiler got into Stack Overflow!"
-                          else
-                            ""
-                          end)
-                      if ! Config.getGraphicsExpMode()
-                        Error.addMessage(Error.ERROR_FLATTENING, list(cname_str))
-                      end
-                      InstHashTable.release()
-                    fail()
-                  end
-                end
-              end
-               #=  let the GC collect these as they are used only by Inst!
-               =#
-          (outCache, outEnv, outIH, outDAElist)
+              (outCache, outEnv, outIH, outDAElist)
         end
 
          #= Author: BZ, 2009-07
