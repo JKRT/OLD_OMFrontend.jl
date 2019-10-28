@@ -227,36 +227,6 @@
                   end
                 end
               end
-               #= System.stopTimer();
-               =#
-               #= print(\"\\nInstClass: \" + realString(System.getTimerIntervalTime()));
-               =#
-               #= System.startTimer();
-               =#
-               #= print(\"\\nReEvaluateIf\");
-               =#
-               #= print(\" ********************** backpatch 1 **********************\\n\");
-               =#
-               #= System.stopTimer();
-               =#
-               #= print(\"\\nReEvaluateIf: \" + realString(System.getTimerIntervalTime()));
-               =#
-               #=  check the model for balancing
-               =#
-               #=  Debug.fcall2(Flags.CHECK_MODEL_BALANCE, checkModelBalancing, SOME(path), dae);
-               =#
-               #= System.startTimer();
-               =#
-               #= print(\"\\nSetSource+DAE\");
-               =#
-               #=  set the source of this element
-               =#
-               #= System.stopTimer();
-               =#
-               #= print(\"\\nSetSource+DAE: \" + realString(System.getTimerIntervalTime()));
-               =#
-               #=  let the GC collect these as they are used only by Inst!
-               =#
           (outCache, outEnv, outIH, outDAElist)
         end
 
@@ -4534,86 +4504,6 @@
                   end
                 end
               end
-               #=  we have reference to ourself, try to instantiate type with all but the self reference removed!
-               =#
-               #=  we really need to keep at least the redeclare modifications here!!
-               =#
-               #=  m = Mod.elabUntypedMod(smod, env, pre);
-               =#
-               #=  print(\"component: \" + n + \" ty: \" + Types.printTypeStr(ty) + \"\\n\");
-               =#
-               #=  not working, try again :)
-               =#
-               #=  we have reference to ourself, try to instantiate type with redeclares and constants applied
-               =#
-               #=  we really need to keep at least the redeclare modifications here!!
-               =#
-               #=  m = Mod.elabUntypedMod(smod, env, pre);
-               =#
-               #=  print(\"component: \" + n + \" ty: \" + Types.printTypeStr(ty) + \"\\n\");
-               =#
-               #=  not working, try again :)
-               =#
-               #=  we have reference to ourself, try to instantiate type with redeclares only applied
-               =#
-               #=  we really need to keep at least the redeclare modifications here!!
-               =#
-               #=  m = Mod.elabUntypedMod(smod, env, pre);
-               =#
-               #=  print(\"component: \" + n + \" ty: \" + Types.printTypeStr(ty) + \"\\n\");
-               =#
-               #=  not working, try again :)
-               =#
-               #=  we have reference to ourself, GEE, nothing worked previously try with NOMOD!
-               =#
-               #=  we really need to keep at least the redeclare modifications here!!
-               =#
-               #=  smod = SCodeInstUtil.removeNonConstantBindingsKeepRedeclares(scodeMod, true);
-               =#
-               #=  (cache,m) = Mod.elabMod(cache, env, ih, pre, smod, impl, info);  m = Mod.elabUntypedMod(smod, env, pre);
-               =#
-               #=  print(\"component: \" + n + \" ty: \" + Types.printTypeStr(ty) + \"\\n\");
-               =#
-               #=  not working .... really not working, don't bother!
-               =#
-               #= /*
-                   adrpo, try to remove the modifier containing the self expression and use that to instantiate the type!
-                  case(cache,env,ih,store,cl1,c1 as Absyn.CREF_IDENT(name = n), sty, state,
-                       (attr as SCode.ATTR(arrayDims = ad, connectorType = ct,
-                                           parallelism= prl1, variability = var1, direction = dir)),
-                       _,_,_,_,_,_,_)
-                    equation
-                      ErrorExt.setCheckpoint(\"Inst.removeSelfReferenceAndUpdate\");
-                      cl2 = InstUtil.removeCrefFromCrefs(cl1, c1);
-                      (cache,c,cenv) = Lookup.lookupClass(cache,env, sty, SOME(info));
-                      (cache,dims) = InstUtil.elabArraydim(cache,cenv, c1, sty, ad, NONE(), impl, NONE(), true, false, pre, info, inst_dims);
-
-                      sM = NFSCodeMod.removeCrefPrefixFromModExp(scodeMod, inRef);
-
-                      (cache, dM) = elabMod(cache, env, ih, pre, sM, impl, info);
-                      dM = Mod.elabUntypedMod(sM, env, pre);
-
-                      (cenv, c, ih) = FGraph.createVersionScope(env, n, pre, dM, cenv, c, ih);
-                      (cache,compenv,ih,store,_,_,ty,_) =
-                        InstVar.instVar(cache, cenv, ih, store, state, dM, pre, n, c, attr,
-                          inPrefixes, dims, {}, inst_dims, true, NONE(), info, ConnectionGraph.EMPTY, Connect.emptySet, env);
-
-                       print(\"component: \" + n + \" ty: \" + Types.printTypeStr(ty) + \"\\n\");
-
-                      io = SCodeUtil.prefixesInnerOuter(inPrefixes);
-                      vis = SCodeUtil.prefixesVisibility(inPrefixes);
-                      new_var = DAE.TYPES_VAR(n,DAE.ATTR(ct,prl1,var1,dir,io,vis),ty,DAE.UNBOUND(),NONE());
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_TYPED(), compenv);
-                      ErrorExt.delCheckpoint(\"Inst.removeSelfReferenceAndUpdate\");
-                    then
-                      (cache,env,ih,store,cl2);
-
-                  case(_, _, _, _, _, Absyn.CREF_IDENT(name = n), _, _, _, _, _, _, _, _, _, _)
-                    equation
-                      ErrorExt.rollBack(\"Inst.removeSelfReferenceAndUpdate\");
-                    then
-                      fail();
-                  */ =#
           (outCache, outEnv, outIH, outStore, o1)
         end
 
