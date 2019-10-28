@@ -185,14 +185,19 @@
                         cdecls = InstUtil.scodeFlatten(cdecls, inPath)
                         ExecStat.execStat("FrontEnd - scodeFlatten")
                       end
+                      println("Inst.instantiateClass_dispatch 1")
                       (cache, env) = Builtin.initialGraph(cache)
+                      println("Inst.instantiateClass_dispatch 2")
                       env = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
+                      println("Inst.instantiateClass_dispatch 3")
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       if Flags.isSet(Flags.GC_PROF)
                         print(GC.profStatsStr(GC.getProfStats(), head = "GC stats after pre-frontend work (building graphs):") + "\\n")
                       end
                       ExecStat.execStat("FrontEnd - mkProgramGraph")
+                      println("Inst.instantiateClass_dispatch 4")
                       (cache, env, ih, dae2) = instClassInProgram(cache, env, ih, cdecls, path, source)
+                      println("Inst.instantiateClass_dispatch 5")
                       InstHashTable.release()
                     (cache, env, ih, dae2)
                   end
@@ -268,46 +273,13 @@
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
-              (outCache, outEnv, outIH, outDAElist) = begin
-                  local cr::Absyn.Path
-                  local path::Absyn.Path
-                  local cdecls::List{SCode.Element}
-                  local cname_str::String
-                  local cache::FCore.Cache
-                  local ih::InstanceHierarchy
-                  local stackOverflow::Bool
-                @matchcontinue (inCache, inIH, inProgram, inPath) begin
-                  (_, _,  nil(), _)  => begin
-                      Error.addMessage(Error.NO_CLASSES_LOADED, nil)
-                    fail()
-                  end
-                  
-                  (cache, ih, cdecls && _ <| _, path)  => begin
-                       #=  instantiate a class
-                       =#
-                      (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(cache, ih, cdecls, path, doSCodeDep)
-                      # outDAElist = NFUnitCheck.checkUnits(outDAElist, FCore.getFunctionTree(outCache))
-                    (outCache, outEnv, outIH, outDAElist)
-                  end
-                  
-                  (_, _, _ <| _, path)  => begin
-                      stackOverflow = setStackOverflowSignal(false)
-                      cname_str = AbsynUtil.pathString(path) + (if stackOverflow
-                            ". The compiler got into Stack Overflow!"
-                          else
-                            ""
-                          end)
-                      if ! Config.getGraphicsExpMode()
-                        Error.addMessage(Error.ERROR_FLATTENING, list(cname_str))
-                      end
-                      InstHashTable.release()
-                    fail()
-                  end
-                end
-              end
-               #=  let the GC collect these as they are used only by Inst!
-               =#
-          (outCache, outEnv, outIH, outDAElist)
+              println("Inst.instantiateClass 1")
+              
+              (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(inCache, inIH, inProgram, inPath, doSCodeDep)
+              
+              println("Inst.instantiateClass 2")
+
+              (outCache, outEnv, outIH, outDAElist)
         end
 
          #= Author: BZ, 2009-07
@@ -525,6 +497,7 @@
                         Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(strDepth, scopeName), info)
                         fail()
                       end
+                      println("Inst.instClass 1")
                       isFn = SCodeUtil.isFunctionRestriction(r)
                       notIsPartial = ! SCodeUtil.partialBool(partialPrefix)
                       isPartialFn = isFn && SCodeUtil.partialBool(partialPrefix)
@@ -532,7 +505,9 @@
                       env_1 = FGraph.openScope(env, encflag, n, FGraph.restrictionToScopeType(r))
                       ci_state = ClassInf.start(r, FGraph.getGraphName(env_1))
                       csets = ConnectUtil.newSet(pre, inSets)
+                      println("Inst.instClass 2")
                       (cache, env_3, ih, store, dae1, csets, ci_state_1, tys, bc_ty, oDA, equalityConstraint, graph) = instClassIn(cache, env_1, ih, store, mod, pre, ci_state, c, SCode.PUBLIC(), inst_dims, impl, callscope, graph, csets, NONE())
+                      println("Inst.instClass 3")
                       csets = ConnectUtil.addSet(inSets, csets)
                       (cache, fq_class) = makeFullyQualifiedIdent(cache, env, n)
                       callscope_1 = InstUtil.isTopCall(callscope)

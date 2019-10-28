@@ -49,7 +49,8 @@
                   if i == 2
                     GC.gcollect()
                   end
-                  @match (@match GC.PROFSTATS(bytes_allocd_since_gc = since, allocd_bytes_before_gc = before, heapsize_full = heapsize_full, free_bytes_full = free_bytes_full) = stats) = GC.getProfStats()
+                  stats = GC.getProfStats()
+                  @match GC.PROFSTATS(bytes_allocd_since_gc = since, allocd_bytes_before_gc = before, heapsize_full = heapsize_full, free_bytes_full = free_bytes_full) = stats
                   memory = since + before
                   oldStats = getGlobalRoot(Global.gcProfilingIndex)
                   @match GC.PROFSTATS(bytes_allocd_since_gc = since, allocd_bytes_before_gc = before) = oldStats
