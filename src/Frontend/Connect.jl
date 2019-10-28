@@ -12,7 +12,7 @@ using ExportAll
 @UniontypeDecl SetTrieNode
 @UniontypeDecl OuterConnect
 @UniontypeDecl Sets
-@UniontypeDecl Set
+@UniontypeDecl CSet
 
 #= /*
 * This file is part of OpenModelica.
@@ -154,7 +154,7 @@ end
 end
 
 #= A set of connection elements. =#
-@Uniontype Set begin
+@Uniontype CSet begin
   @Record SET begin
 
     ty::ConnectorType

@@ -41,7 +41,7 @@ import OpenModelicaParser
 function parse(filename::String, infoFilename::String, acceptedGram::ModelicaInteger, encoding::String, languageStandardInt::ModelicaInteger, runningTestsuite::Bool, libraryPath::String, lveInstance::Option{<:ModelicaInteger})::Absyn.Program
   #= TODO: Defined in the runtime =#
   println("Calling ParseExt.parse with: $filename $infoFilename $acceptedGram $encoding $languageStandardInt $runningTestsuite $libraryPath")
-  outProgram = OpenModelicaParser.parseFile(filename)
+  outProgram = OpenModelicaParser.parseFile(filename, acceptedGram)
 end
 
 #= Parse a mos-file =#

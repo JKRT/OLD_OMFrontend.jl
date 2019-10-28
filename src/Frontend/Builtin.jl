@@ -167,7 +167,7 @@
                       graph = FGraphBuildEnv.mkProgramGraph(initialProgram, FCore.BUILTIN(), graph)
                       graph = FBuiltin.initialGraphOptimica(graph, FGraphBuildEnv.mkCompNode)
                       graph = FBuiltin.initialGraphMetaModelica(graph, FGraphBuildEnv.mkTypeNode)
-                      cache = FCore.setCachedInitialGraph(cache, graph)
+                      cache = FCoreUtil.setCachedInitialGraph(cache, graph)
                       _ = getSetInitialGraph(SOME(graph))
                       graph = FGraph.clone(graph)
                     (cache, graph)

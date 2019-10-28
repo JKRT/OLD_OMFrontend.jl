@@ -14,6 +14,7 @@
         import Expression
         import ListUtil
         import SCode
+        import Flags
 
         function mergeSources(src1::DAE.ElementSource, src2::DAE.ElementSource) ::DAE.ElementSource 
               local mergedSrc::DAE.ElementSource

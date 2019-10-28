@@ -90,15 +90,15 @@
          #=  Import some types from Connect.
          =#
         import Connect.Face
-        import Connect.ConnectorType
         import Connect.ConnectorElement
+        import Connect.ConnectorType
         import Connect.SetTrieNode
         import Connect.SetTrie
         import Connect.SetConnection
         import Connect.OuterConnect
         import Connect.Sets
-        import Connect.Set
-         #=  Set graph represented as an adjacency list.
+        import Connect.CSet
+         #=  CSet graph represented as an adjacency list.
          =#
 
         DaeEdges = List # ConnectionGraph.DaeEdges # this doesn't seem to work, it says DaeEdges is undefined!
@@ -118,7 +118,7 @@
               local sc::ModelicaInteger
               local cr::DAE.ComponentRef
 
-              @match Sets.SETS(setCount = sc) = sets
+              @match Connect.SETS(setCount = sc) = sets
               try
                 cr = PrefixUtil.prefixFirstCref(prefix)
                 pstr = ComponentReference.printComponentRefStr(cr)
@@ -126,7 +126,7 @@
                 cr = DAE.WILD()
                 pstr = ""
               end
-              sets = Sets.SETS(SetTrieNode.SET_TRIE_NODE(pstr, cr, nil, 0), sc, nil, nil)
+              sets = Connect.SETS(Connect.SET_TRIE_NODE(pstr, cr, nil, 0), sc, nil, nil)
           sets
         end
 
@@ -148,11 +148,11 @@
                     parentSets
                   end
 
-                  (Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))), Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))))  => begin
+                  (Connect.SETS(sets = Connect.SET_TRIE_NODE(cref = DAE.WILD(__))), Connect.SETS(sets = Connect.SET_TRIE_NODE(cref = DAE.WILD(__))))  => begin
                     childSets
                   end
 
-                  (Sets.SETS(sets = node && SetTrieNode.SET_TRIE_NODE(__)), Sets.SETS(__))  => begin
+                  (Connect.SETS(sets = node && Connect.SET_TRIE_NODE(__)), Connect.SETS(__))  => begin
                        #=  If both sets are nameless, i.e. a top scope set, just return the child
                        =#
                        #=  set as it is. This is to avoid getting nestled top scope sets in some
@@ -167,7 +167,7 @@
                     parentSets
                   end
 
-                  (Sets.SETS(node && SetTrieNode.SET_TRIE_NODE(__), _, c1, o1), Sets.SETS(_, sc, c2, o2))  => begin
+                  (Connect.SETS(node && Connect.SET_TRIE_NODE(__), _, c1, o1), Connect.SETS(_, sc, c2, o2))  => begin
                        #=  In the normal case we add the trie on the child sets to the parent, and
                        =#
                        #=  also merge their lists of outer connects.
@@ -175,7 +175,7 @@
                       c1 = listAppend(c2, c1)
                       o1 = listAppend(o2, o1)
                       node.nodes = _cons(childSets.sets, node.nodes)
-                    Sets.SETS(node, sc, c1, o1)
+                    Connect.SETS(node, sc, c1, o1)
                   end
                 end
               end
@@ -188,7 +188,7 @@
 
               isEmpty = begin
                 @match sets begin
-                  Sets.SETS(sets = SetTrieNode.SET_TRIE_NODE(nodes =  nil()), connections =  nil(), outerConnects =  nil())  => begin
+                  Connect.SETS(sets = Connect.SET_TRIE_NODE(nodes =  nil()), connections =  nil(), outerConnects =  nil())  => begin
                     true
                   end
 
@@ -225,11 +225,11 @@
                 node = setTrieGet(cref, trie, false)
                 count = begin
                   @match node begin
-                    SetTrieNode.SET_TRIE_NODE(__)  => begin
+                    Connect.SET_TRIE_NODE(__)  => begin
                       node.connectCount
                     end
 
-                    SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                    Connect.SET_TRIE_LEAF(__)  => begin
                       node.connectCount
                     end
                   end
@@ -266,19 +266,19 @@
               ty = begin
                 @match connectorType begin
                   DAE.POTENTIAL(__)  => begin
-                    ConnectorType.EQU()
+                    Connect.EQU()
                   end
 
                   DAE.FLOW(__)  => begin
-                    ConnectorType.FLOW()
+                    Connect.FLOW()
                   end
 
                   DAE.STREAM(flowName)  => begin
-                    ConnectorType.STREAM(flowName)
+                    Connect.STREAM(flowName)
                   end
 
                   DAE.NON_CONNECTOR(__)  => begin
-                    ConnectorType.NO_TYPE()
+                    Connect.NO_TYPE()
                   end
 
                   _  => begin
@@ -620,10 +620,10 @@
               local e::ConnectorElement
 
               try
-                setTrieGetElement(cref, Face.INSIDE(), sets.sets)
+                setTrieGetElement(cref, Connect.INSIDE(), sets.sets)
               catch
                 sets.setCount = sets.setCount + 1
-                e = newElement(cref, Face.INSIDE(), ConnectorType.FLOW(), source, sets.setCount)
+                e = newElement(cref, Connect.INSIDE(), Connect.FLOW(), source, sets.setCount)
                 sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
@@ -648,7 +648,7 @@
 
               _ = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       node.flowAssociation = SOME(flowCref)
                     ()
                   end
@@ -661,7 +661,7 @@
         function getStreamFlowAssociation(streamCref::DAE.ComponentRef, sets::Sets) ::DAE.ComponentRef
               local flowCref::DAE.ComponentRef
 
-              @match SetTrieNode.SET_TRIE_LEAF(flowAssociation = SOME(flowCref)) = setTrieGet(streamCref, sets.sets, false)
+              @match Connect.SET_TRIE_LEAF(flowAssociation = SOME(flowCref)) = setTrieGet(streamCref, sets.sets, false)
           flowCref
         end
 
@@ -676,7 +676,7 @@
                #=  Only add a new outer connection if it doesn't already exist in the list.
                =#
               if ! ListUtil.exist2(sets.outerConnects, outerConnectionMatches, cr1, cr2)
-                new_oc = OuterConnect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
+                new_oc = Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
                 sets.outerConnects = _cons(new_oc, sets.outerConnects)
               end
           sets
@@ -689,7 +689,7 @@
 
               matches = begin
                 @match oc begin
-                  OuterConnect.OUTERCONNECT(__)  => begin
+                  Connect.OUTERCONNECT(__)  => begin
                     ComponentReference.crefEqual(oc.cr1, cr1) && ComponentReference.crefEqual(oc.cr2, cr2) || ComponentReference.crefEqual(oc.cr1, cr2) && ComponentReference.crefEqual(oc.cr2, cr1)
                   end
                 end
@@ -786,7 +786,7 @@
 
               outerElements = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                     ListUtil.map2Flat(node.nodes, collectOuterElements2, face, NONE())
                   end
 
@@ -807,12 +807,12 @@
                   local nodes::List{SetTrieNode}
                   local e::ConnectorElement
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(cref = cr)  => begin
+                  Connect.SET_TRIE_NODE(cref = cr)  => begin
                       cr = optPrefixCref(prefix, cr)
                     ListUtil.map2Flat(node.nodes, collectOuterElements2, face, SOME(cr))
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       e = setTrieGetLeafElement(node, face)
                       cr = getElementName(e)
                       e = setElementName(e, optPrefixCref(prefix, cr))
@@ -831,7 +831,7 @@
               local ty::ConnectorType
               local src::DAE.ElementSource
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(name = name, ty = ty, source = src) = outerElement
+              @match Connect.CONNECTOR_ELEMENT(name = name, ty = ty, source = src) = outerElement
               name = ComponentReference.joinCrefs(innerCref, name)
               innerElement = findElement(name, innerFace, ty, src, sets)
           innerElement
@@ -873,7 +873,7 @@
         function newElement(cref::DAE.ComponentRef, face::Face, ty::ConnectorType, source::DAE.ElementSource, set::ModelicaInteger) ::ConnectorElement
               local element::ConnectorElement
 
-              element = ConnectorElement.CONNECTOR_ELEMENT(cref, face, ty, source, set)
+              element = Connect.CONNECTOR_ELEMENT(cref, face, ty, source, set)
           element
         end
 
@@ -883,7 +883,7 @@
 
               local set::ModelicaInteger
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(set = set) = element
+              @match Connect.CONNECTOR_ELEMENT(set = set) = element
               isNew = set == Connect.NEW_SET
           isNew
         end
@@ -892,7 +892,7 @@
         function getElementSetIndex(inElement::ConnectorElement) ::ModelicaInteger
               local outIndex::ModelicaInteger
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(set = outIndex) = inElement
+              @match Connect.CONNECTOR_ELEMENT(set = outIndex) = inElement
           outIndex
         end
 
@@ -908,7 +908,7 @@
         function getElementName(element::ConnectorElement) ::DAE.ComponentRef
               local name::DAE.ComponentRef
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(name = name) = element
+              @match Connect.CONNECTOR_ELEMENT(name = name) = element
           name
         end
 
@@ -924,7 +924,7 @@
         function getElementSource(element::ConnectorElement) ::DAE.ElementSource
               local source::DAE.ElementSource
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(source = source) = element
+              @match Connect.CONNECTOR_ELEMENT(source = source) = element
           source
         end
 
@@ -934,12 +934,12 @@
 
               leaf = begin
                 @match element begin
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__))  => begin
-                    SetTrieNode.SET_TRIE_LEAF(id, SOME(element), NONE(), NONE(), 0)
+                  Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__))  => begin
+                    Connect.SET_TRIE_LEAF(id, SOME(element), NONE(), NONE(), 0)
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.OUTSIDE(__))  => begin
-                    SetTrieNode.SET_TRIE_LEAF(id, NONE(), SOME(element), NONE(), 0)
+                  Connect.CONNECTOR_ELEMENT(face = Connect.OUTSIDE(__))  => begin
+                    Connect.SET_TRIE_LEAF(id, NONE(), SOME(element), NONE(), 0)
                   end
                 end
               end
@@ -969,7 +969,7 @@
                       cr = ComponentReference.crefFirstCref(cref)
                       id = ComponentReference.printComponentRefStr(cr)
                       node = setTrieNewNode(cref.componentRef, element)
-                    SetTrieNode.SET_TRIE_NODE(id, cr, list(node), 0)
+                    Connect.SET_TRIE_NODE(id, cr, list(node), 0)
                   end
                 end
               end
@@ -981,11 +981,11 @@
 
               name = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                     node.name
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                     node.name
                   end
                 end
@@ -1111,15 +1111,15 @@
 
               _ = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       _ = begin
                         @match element.face begin
-                          Face.INSIDE(__)  => begin
+                          Connect.INSIDE(__)  => begin
                               node.insideElement = SOME(element)
                             ()
                           end
 
-                          Face.OUTSIDE(__)  => begin
+                          Connect.OUTSIDE(__)  => begin
                               node.outsideElement = SOME(element)
                             ()
                           end
@@ -1139,11 +1139,11 @@
               element = begin
                   local e::ConnectorElement
                 @match (face, node) begin
-                  (Face.INSIDE(__), SetTrieNode.SET_TRIE_LEAF(insideElement = SOME(e)))  => begin
+                  (Connect.INSIDE(__), Connect.SET_TRIE_LEAF(insideElement = SOME(e)))  => begin
                     e
                   end
 
-                  (Face.OUTSIDE(__), SetTrieNode.SET_TRIE_LEAF(outsideElement = SOME(e)))  => begin
+                  (Connect.OUTSIDE(__), Connect.SET_TRIE_LEAF(outsideElement = SOME(e)))  => begin
                     e
                   end
                 end
@@ -1181,13 +1181,13 @@
               _ = begin
                   local id::String
                 @match (cref, trie) begin
-                  (DAE.CREF_QUAL(__), SetTrieNode.SET_TRIE_NODE(__))  => begin
+                  (DAE.CREF_QUAL(__), Connect.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
                       trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
                     ()
                   end
 
-                  (DAE.CREF_IDENT(__), SetTrieNode.SET_TRIE_NODE(__))  => begin
+                  (DAE.CREF_IDENT(__), Connect.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
                       trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
                     ()
@@ -1232,7 +1232,7 @@
                 @match cref begin
                   DAE.CREF_IDENT(__)  => begin
                       id = ComponentReference.printComponentRefStr(cref)
-                      node = SetTrieNode.SET_TRIE_LEAF(id, NONE(), NONE(), NONE(), 0)
+                      node = Connect.SET_TRIE_LEAF(id, NONE(), NONE(), NONE(), 0)
                       node = updateFunc(arg, node)
                     _cons(node, nodes)
                   end
@@ -1241,7 +1241,7 @@
                       cr = ComponentReference.crefFirstCref(cref)
                       id = ComponentReference.printComponentRefStr(cr)
                       child_nodes = setTrieUpdateNode2(cref.componentRef, arg, updateFunc, nil)
-                    _cons(SetTrieNode.SET_TRIE_NODE(id, cr, child_nodes, 0), nodes)
+                    _cons(Connect.SET_TRIE_NODE(id, cr, child_nodes, 0), nodes)
                   end
                 end
               end
@@ -1291,13 +1291,13 @@
               _ = begin
                   local nodes::List{SetTrieNode}
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                       (nodes, arg) = ListUtil.map1Fold(node.nodes, setTrieTraverseLeaves, updateFunc, arg)
                       node.nodes = nodes
                     ()
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       (node, arg) = updateFunc(node, arg)
                     ()
                   end
@@ -1317,7 +1317,7 @@
               local id_nosubs::String
               local node::SetTrieNode
 
-              @match SetTrieNode.SET_TRIE_NODE(nodes = nodes) = trie
+              @match Connect.SET_TRIE_NODE(nodes = nodes) = trie
               id_nosubs = ComponentReference.crefFirstIdent(cref)
               subs_str = ListUtil.toString(ComponentReference.crefFirstSubs(cref), ExpressionDump.printSubscriptStr, "", "[", ",", "]", false)
               id_subs = id_nosubs + subs_str
@@ -1368,11 +1368,11 @@
 
               isNamed = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                     id == node.name
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                     id == node.name
                   end
 
@@ -1400,7 +1400,7 @@
 
               isNamed = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                     id == node.name
                   end
 
@@ -1417,7 +1417,7 @@
 
               isNode = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                     true
                   end
 
@@ -1434,8 +1434,8 @@
         function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraphType, modelNameQualified::String) ::DAE.DAElist
 
 
-              local set_list::List{Set}
-              local set_array::Array{Set}
+              local set_list::List{CSet}
+              local set_array::Array{CSet}
               local dae::DAE.DAElist
               local dae2::DAE.DAElist
               local has_stream::Bool
@@ -1481,7 +1481,7 @@
 
          #= @author: adrpo
          returns only the sets containing expandable connectors =#
-        function getExpandableEquSetsAsCrefs(sets::List{<:Set}) ::List{List{DAE.ComponentRef}}
+        function getExpandableEquSetsAsCrefs(sets::List{<:CSet}) ::List{List{DAE.ComponentRef}}
               local crefSets::List{List{DAE.ComponentRef}} = nil
 
               local cref_set::List{DAE.ComponentRef}
@@ -1489,7 +1489,7 @@
               for set in sets
                 _ = begin
                   @match set begin
-                    Set.SET(ty = ConnectorType.EQU(__))  => begin
+                    Connect.SET(ty = Connect.EQU(__))  => begin
                         cref_set = getAllEquCrefs(list(set))
                         if ListUtil.applyAndFold(cref_set, boolOr, isExpandable, false)
                           crefSets = _cons(cref_set, crefSets)
@@ -1506,14 +1506,14 @@
           crefSets
         end
 
-        function removeCrefsFromSets(sets::List{<:Set}, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::List{Set}
+        function removeCrefsFromSets(sets::List{<:CSet}, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::List{CSet}
 
 
               sets = ListUtil.select1(sets, removeCrefsFromSets2, nonUsefulExpandable)
           sets
         end
 
-        function removeCrefsFromSets2(set::Set, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::Bool
+        function removeCrefsFromSets2(set::CSet, nonUsefulExpandable::List{<:DAE.ComponentRef}) ::Bool
               local isInSet::Bool
 
               local setCrefs::List{DAE.ComponentRef}
@@ -1607,12 +1607,12 @@
         end
 
          #= Generates an array of sets from a connection set. =#
-        function generateSetArray(sets::Sets) ::Array{Set}
-              local setArray::Array{Set}
+        function generateSetArray(sets::Sets) ::Array{CSet}
+              local setArray::Array{CSet}
 
                #=  Create a new array.
                =#
-              setArray = arrayCreate(sets.setCount, Set.SET(ConnectorType.NO_TYPE(), nil))
+              setArray = arrayCreate(sets.setCount, Connect.SET(Connect.NO_TYPE(), nil))
                #=  Add connection pointers to the array.
                =#
               setArray = setArrayAddConnections(sets.connections, sets.setCount, setArray)
@@ -1630,7 +1630,7 @@
           that belongs to set 2 are instead added to set 1. To make sure that we get
           correct pointers we build a graph and use an algorithm to find the strongly
           connected components in it. =#
-        function setArrayAddConnections(connections::List{<:SetConnection}, setCount::ModelicaInteger, sets::Array{<:Set}) ::Array{Set}
+        function setArrayAddConnections(connections::List{<:SetConnection}, setCount::ModelicaInteger, sets::Array{<:CSet}) ::Array{CSet}
 
 
               local graph::SetGraph
@@ -1668,7 +1668,7 @@
 
          #= Helper function to setArrayAddConnections, adds a connection pointer to the
            set array. =#
-        function setArrayAddConnection(set::ModelicaInteger, edges::List{<:ModelicaInteger}, sets::Array{<:Set}, graph::SetGraph) ::Tuple{Array{Set}, SetGraph}
+        function setArrayAddConnection(set::ModelicaInteger, edges::List{<:ModelicaInteger}, sets::Array{<:CSet}, graph::SetGraph) ::Tuple{Array{CSet}, SetGraph}
 
 
 
@@ -1689,19 +1689,19 @@
 
          #= Helper function to setArrayAddConnection, adds a pointer from the given
            pointer to the pointee. =#
-        function setArrayAddConnection2(setPointer::ModelicaInteger, setPointee::ModelicaInteger, sets::Array{<:Set}) ::Array{Set}
+        function setArrayAddConnection2(setPointer::ModelicaInteger, setPointee::ModelicaInteger, sets::Array{<:CSet}) ::Array{CSet}
 
 
-              local set::Set
+              local set::CSet
 
               set = sets[setPointee]
               sets = begin
                 @match set begin
-                  Set.SET(__)  => begin
-                    arrayUpdate(sets, setPointer, Set.SET_POINTER(setPointee))
+                  Connect.SET(__)  => begin
+                    arrayUpdate(sets, setPointer, Connect.SET_POINTER(setPointee))
                   end
 
-                  Set.SET_POINTER(__)  => begin
+                  Connect.SET_POINTER(__)  => begin
                     setArrayAddConnection2(setPointer, set.index, sets)
                   end
                 end
@@ -1716,7 +1716,7 @@
         end
 
          #= This function fills the set array with the sets from the set trie. =#
-        function generateSetArray2(sets::SetTrie, prefix::List{<:DAE.ComponentRef}, setArray::Array{<:Set}) ::Array{Set}
+        function generateSetArray2(sets::SetTrie, prefix::List{<:DAE.ComponentRef}, setArray::Array{<:CSet}) ::Array{CSet}
 
 
               setArray = begin
@@ -1725,15 +1725,15 @@
                   local prefix_cr::Option{DAE.ComponentRef}
                   local flow_cr::Option{DAE.ComponentRef}
                 @match sets begin
-                  SetTrieNode.SET_TRIE_NODE(cref = DAE.WILD(__))  => begin
+                  Connect.SET_TRIE_NODE(cref = DAE.WILD(__))  => begin
                     ListUtil.fold1(sets.nodes, generateSetArray2, prefix, setArray)
                   end
 
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                     ListUtil.fold1(sets.nodes, generateSetArray2, _cons(sets.cref, prefix), setArray)
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(insideElement = ie, outsideElement = oe, flowAssociation = flow_cr)  => begin
+                  Connect.SET_TRIE_LEAF(insideElement = ie, outsideElement = oe, flowAssociation = flow_cr)  => begin
                       ie = insertFlowAssociationInStreamElement(ie, flow_cr)
                       oe = insertFlowAssociationInStreamElement(oe, flow_cr)
                       prefix_cr = buildElementPrefix(prefix)
@@ -1761,8 +1761,8 @@
                 @match SOME(el) = element
                 element = begin
                   @match el begin
-                    ConnectorElement.CONNECTOR_ELEMENT(ty = ConnectorType.STREAM(NONE()))  => begin
-                        el.ty = ConnectorType.STREAM(flowCref)
+                    Connect.CONNECTOR_ELEMENT(ty = Connect.STREAM(NONE()))  => begin
+                        el.ty = Connect.STREAM(flowCref)
                       SOME(el)
                     end
 
@@ -1776,7 +1776,7 @@
         end
 
          #= Adds a connector element to the set array. =#
-        function setArrayAddElement(element::Option{<:ConnectorElement}, prefix::Option{<:DAE.ComponentRef}, sets::Array{<:Set}) ::Array{Set}
+        function setArrayAddElement(element::Option{<:ConnectorElement}, prefix::Option{<:DAE.ComponentRef}, sets::Array{<:CSet}) ::Array{CSet}
 
 
               sets = begin
@@ -1789,11 +1789,11 @@
                     sets
                   end
 
-                  (SOME(el && ConnectorElement.CONNECTOR_ELEMENT(__)), NONE())  => begin
+                  (SOME(el && Connect.CONNECTOR_ELEMENT(__)), NONE())  => begin
                     setArrayUpdate(sets, el.set, el)
                   end
 
-                  (SOME(el && ConnectorElement.CONNECTOR_ELEMENT(__)), SOME(prefix_cr))  => begin
+                  (SOME(el && Connect.CONNECTOR_ELEMENT(__)), SOME(prefix_cr))  => begin
                        #=  An element but no prefix, add the element as it is.
                        =#
                        #=  Both an element and a prefix, add the prefix to the element before adding
@@ -1834,16 +1834,16 @@
         end
 
          #= Updates the element at a given index in the set array. =#
-        function setArrayUpdate(sets::Array{<:Set}, index::ModelicaInteger, element::ConnectorElement) ::Array{Set}
+        function setArrayUpdate(sets::Array{<:CSet}, index::ModelicaInteger, element::ConnectorElement) ::Array{CSet}
 
 
-              local set::Set
+              local set::CSet
               local el::List{ConnectorElement}
 
               set = sets[index]
               sets = begin
                 @match (set, element) begin
-                  (Set.SET(__), ConnectorElement.CONNECTOR_ELEMENT(__))  => begin
+                  (Connect.SET(__), Connect.CONNECTOR_ELEMENT(__))  => begin
                       if Config.orderConnections() && isEquType(element.ty)
                         el = ListUtil.mergeSorted(list(element), set.elements, equSetElementLess)
                       else
@@ -1853,10 +1853,10 @@
                        =#
                        #=  Other sets, just add them.
                        =#
-                    arrayUpdate(sets, index, Set.SET(element.ty, el))
+                    arrayUpdate(sets, index, Connect.SET(element.ty, el))
                   end
 
-                  (Set.SET_POINTER(__), _)  => begin
+                  (Connect.SET_POINTER(__), _)  => begin
                     setArrayUpdate(sets, set.index, element)
                   end
                 end
@@ -1875,17 +1875,17 @@
         end
 
          #= Returns the set on a given index in the set array. =#
-        function setArrayGet(setArray::Array{<:Set}, index::ModelicaInteger) ::Set
-              local set::Set
+        function setArrayGet(setArray::Array{<:CSet}, index::ModelicaInteger) ::CSet
+              local set::CSet
 
               set = setArray[index]
               set = begin
                 @match set begin
-                  Set.SET(__)  => begin
+                  Connect.SET(__)  => begin
                     set
                   end
 
-                  Set.SET_POINTER(__)  => begin
+                  Connect.SET_POINTER(__)  => begin
                     setArrayGet(setArray, set.index)
                   end
                 end
@@ -1895,7 +1895,7 @@
 
          #= Dispatches to the correct equation generating function based on the type of
           the given set. =#
-        function equationsDispatch(sets::List{<:Set}, connected::DaeEdges, broken::DaeEdges) ::DAE.DAElist
+        function equationsDispatch(sets::List{<:CSet}, connected::DaeEdges, broken::DaeEdges) ::DAE.DAElist
               local DAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{ConnectorElement}
@@ -1906,11 +1906,11 @@
               for set in sets
                 DAE = begin
                   @match set begin
-                    Set.SET_POINTER(__)  => begin
+                    Connect.SET_POINTER(__)  => begin
                       DAE
                     end
 
-                    Set.SET(ty = ConnectorType.EQU(__))  => begin
+                    Connect.SET(ty = Connect.EQU(__))  => begin
                          #=  A set pointer left from generateSetList, ignore it.
                          =#
                          #=  Here we do some overconstrained connection breaking.
@@ -1922,15 +1922,15 @@
                       DAE
                     end
 
-                    Set.SET(ty = ConnectorType.FLOW(__), elements = eql)  => begin
+                    Connect.SET(ty = Connect.FLOW(__), elements = eql)  => begin
                       DAEUtil.joinDaes(generateFlowEquations(eql), DAE)
                     end
 
-                    Set.SET(ty = ConnectorType.STREAM(__), elements = eql)  => begin
+                    Connect.SET(ty = Connect.STREAM(__), elements = eql)  => begin
                       DAEUtil.joinDaes(generateStreamEquations(eql, flowThreshold), DAE)
                     end
 
-                    Set.SET(ty = ConnectorType.NO_TYPE(__))  => begin
+                    Connect.SET(ty = Connect.NO_TYPE(__))  => begin
                          #=  Should never happen.
                          =#
                         Error.addMessage(Error.INTERNAL_ERROR, list("ConnectUtil.equationsDispatch failed on connection set with no type."))
@@ -2071,12 +2071,12 @@
 
               _ = begin
                 @match node begin
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                       node.connectCount = node.connectCount + amount
                     ()
                   end
 
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       node.connectCount = node.connectCount + amount
                     ()
                   end
@@ -2105,15 +2105,15 @@
                    #=  Unconnected stream connector, do nothing!
                    =#
                 @match elements begin
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__)) <|  nil()  => begin
                     DAE.emptyDae
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <| ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__)) <| Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__)) <|  nil()  => begin
                     DAE.emptyDae
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(name = cr1, face = Face.OUTSIDE(__), source = src1) <| ConnectorElement.CONNECTOR_ELEMENT(name = cr2, face = Face.OUTSIDE(__), source = src2) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(name = cr1, face = Connect.OUTSIDE(__), source = src1) <| Connect.CONNECTOR_ELEMENT(name = cr2, face = Connect.OUTSIDE(__), source = src2) <|  nil()  => begin
                        #=  Both inside, do nothing!
                        =#
                        #=  Both outside:
@@ -2131,7 +2131,7 @@
                     dae
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(name = cr1, source = src1) <| ConnectorElement.CONNECTOR_ELEMENT(name = cr2, source = src2) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(name = cr1, source = src1) <| Connect.CONNECTOR_ELEMENT(name = cr2, source = src2) <|  nil()  => begin
                        #=  One inside, one outside:
                        =#
                        #=  cr1 = cr2;
@@ -2161,7 +2161,7 @@
 
               isOutside = begin
                 @match element begin
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.OUTSIDE(__))  => begin
+                  Connect.CONNECTOR_ELEMENT(face = Connect.OUTSIDE(__))  => begin
                     true
                   end
 
@@ -2290,7 +2290,7 @@
 
               local flow_cr::DAE.ComponentRef
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(ty = ConnectorType.STREAM(SOME(flow_cr))) = element
+              @match Connect.CONNECTOR_ELEMENT(ty = Connect.STREAM(SOME(flow_cr))) = element
               streamExp = Expression.crefExp(element.name)
               flowExp = Expression.crefExp(flow_cr)
           (streamExp, flowExp)
@@ -2302,7 +2302,7 @@
 
               local flow_cr::DAE.ComponentRef
 
-              @match ConnectorElement.CONNECTOR_ELEMENT(ty = ConnectorType.STREAM(SOME(flow_cr))) = element
+              @match Connect.CONNECTOR_ELEMENT(ty = Connect.STREAM(SOME(flow_cr))) = element
               flowExp = Expression.crefExp(flow_cr)
           flowExp
         end
@@ -2414,7 +2414,7 @@
 
          #= Evaluates connection operators inStream, actualStream and cardinality in the
            given DAE. =#
-        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:Set}, DAE::DAE.DAElist) ::DAE.DAElist
+        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:CSet}, DAE::DAE.DAElist) ::DAE.DAElist
 
 
               local flow_threshold::ModelicaReal
@@ -2431,7 +2431,7 @@
         end
 
          #= Helper function to evaluateConnectionOperators. =#
-        function evaluateConnectionOperators2(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, hasCardinality::Bool, flowThreshold::ModelicaReal) ::Tuple{DAE.Exp, Sets}
+        function evaluateConnectionOperators2(exp::DAE.Exp, sets::Sets, setArray::Array{<:CSet}, hasCardinality::Bool, flowThreshold::ModelicaReal) ::Tuple{DAE.Exp, Sets}
 
 
 
@@ -2449,7 +2449,7 @@
          #= Helper function to evaluateConnectionOperators2. Checks if the given
            expression is a call to inStream or actualStream, and if so calls the
            appropriate function in ConnectUtil to evaluate the call. =#
-        function evaluateConnectionOperatorsExp(exp::DAE.Exp, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal, changed::Bool) ::Tuple{DAE.Exp, Bool}
+        function evaluateConnectionOperatorsExp(exp::DAE.Exp, sets::Sets, setArray::Array{<:CSet}, flowThreshold::ModelicaReal, changed::Bool) ::Tuple{DAE.Exp, Bool}
 
 
 
@@ -2495,7 +2495,7 @@
 
          #= This function evaluates the inStream operator for a component reference,
            given the connection sets. =#
-        function evaluateInStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
+        function evaluateInStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:CSet}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local e::ConnectorElement
@@ -2503,12 +2503,12 @@
               local set::ModelicaInteger
 
               try
-                e = findElement(streamCref, Face.INSIDE(), ConnectorType.STREAM(NONE()), DAE.emptyElementSource, sets)
+                e = findElement(streamCref, Connect.INSIDE(), Connect.STREAM(NONE()), DAE.emptyElementSource, sets)
                 if isNewElement(e)
                   sl = list(e)
                 else
-                  @match ConnectorElement.CONNECTOR_ELEMENT(set = set) = e
-                  @match Set.SET(ty = ConnectorType.STREAM(), elements = sl) = setArrayGet(setArray, set)
+                  @match Connect.CONNECTOR_ELEMENT(set = set) = e
+                  @match Connect.SET(ty = Connect.STREAM(), elements = sl) = setArrayGet(setArray, set)
                 end
                 exp = generateInStreamExp(streamCref, sl, sets, setArray, flowThreshold)
               catch
@@ -2528,7 +2528,7 @@
 
          #= Helper function to evaluateInStream. Generates an expression for inStream
           given a connection set. =#
-        function generateInStreamExp(streamCref::DAE.ComponentRef, streams::List{<:ConnectorElement}, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
+        function generateInStreamExp(streamCref::DAE.ComponentRef, streams::List{<:ConnectorElement}, sets::Sets, setArray::Array{<:CSet}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local reducedStreams::List{ConnectorElement}
@@ -2547,28 +2547,28 @@
                    #=  inStream(c) = c;
                    =#
                 @match reducedStreams begin
-                  ConnectorElement.CONNECTOR_ELEMENT(name = c, face = Face.INSIDE(__)) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(name = c, face = Connect.INSIDE(__)) <|  nil()  => begin
                     Expression.crefExp(c)
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <| ConnectorElement.CONNECTOR_ELEMENT(face = Face.INSIDE(__)) <|  nil()  => begin
+                  Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__)) <| Connect.CONNECTOR_ELEMENT(face = Connect.INSIDE(__)) <|  nil()  => begin
                        #=  Two inside connected stream connectors:
                        =#
                        #=  inStream(c1) = c2;
                        =#
                        #=  inStream(c2) = c1;
                        =#
-                      @match list(ConnectorElement.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match list(Connect.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
                       e = Expression.crefExp(c)
                     e
                   end
 
-                  ConnectorElement.CONNECTOR_ELEMENT(face = f1) <| ConnectorElement.CONNECTOR_ELEMENT(face = f2) <|  nil() where (! faceEqual(f1, f2))  => begin
+                  Connect.CONNECTOR_ELEMENT(face = f1) <| Connect.CONNECTOR_ELEMENT(face = f2) <|  nil() where (! faceEqual(f1, f2))  => begin
                        #=  One inside, one outside connected stream connector:
                        =#
                        #=  inStream(c1) = inStream(c2);
                        =#
-                      @match list(ConnectorElement.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match list(Connect.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
                       e = evaluateInStream(c, sets, setArray, flowThreshold)
                     e
                   end
@@ -2595,7 +2595,7 @@
 
          #= This function evaluates the actualStream operator for a component reference,
           given the connection sets. =#
-        function evaluateActualStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:Set}, flowThreshold::ModelicaReal) ::DAE.Exp
+        function evaluateActualStream(streamCref::DAE.ComponentRef, sets::Sets, setArray::Array{<:CSet}, flowThreshold::ModelicaReal) ::DAE.Exp
               local exp::DAE.Exp
 
               local flow_cr::DAE.ComponentRef
@@ -2808,18 +2808,18 @@
                    =#
                 @matchcontinue componentRef begin
                   DAE.CREF_IDENT(__)  => begin
-                    Face.OUTSIDE()
+                    Connect.OUTSIDE()
                   end
 
                   DAE.CREF_QUAL(ident = id)  => begin
                        #=  is a qualified cref and is a connector => OUTSIDE
                        =#
                       @match (_, _, DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)), _, _, _, _, _, _) = Lookup.lookupVar(FCoreUtil.emptyCache(), env, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
-                    Face.OUTSIDE()
+                    Connect.OUTSIDE()
                   end
 
                   DAE.CREF_QUAL(__)  => begin
-                    Face.INSIDE()
+                    Connect.INSIDE()
                   end
                 end
               end
@@ -2848,19 +2848,19 @@
               outFace = begin
                 @match inComponentRef begin
                   DAE.CREF_IDENT(__)  => begin
-                    Face.OUTSIDE()
+                    Connect.OUTSIDE()
                   end
 
                   DAE.CREF_QUAL(identType = DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _)))  => begin
-                    Face.OUTSIDE()
+                    Connect.OUTSIDE()
                   end
 
                   DAE.CREF_QUAL(identType = DAE.T_ARRAY(ty = DAE.T_COMPLEX(complexClassType = ClassInf.CONNECTOR(_, _))))  => begin
-                    Face.OUTSIDE()
+                    Connect.OUTSIDE()
                   end
 
                   DAE.CREF_QUAL(__)  => begin
-                    Face.INSIDE()
+                    Connect.INSIDE()
                   end
                 end
               end
@@ -3192,7 +3192,7 @@
                   local name::String
                   local res::String
                 @match trie begin
-                  SetTrieNode.SET_TRIE_LEAF(__)  => begin
+                  Connect.SET_TRIE_LEAF(__)  => begin
                       res = accumName + "." + trie.name + ":"
                       res = res + printLeafElementStr(trie.insideElement)
                       res = res + printLeafElementStr(trie.outsideElement)
@@ -3200,11 +3200,11 @@
                     res
                   end
 
-                  SetTrieNode.SET_TRIE_NODE(name = "")  => begin
+                  Connect.SET_TRIE_NODE(name = "")  => begin
                     stringAppendList(ListUtil.map1(trie.nodes, printSetTrieStr, accumName))
                   end
 
-                  SetTrieNode.SET_TRIE_NODE(__)  => begin
+                  Connect.SET_TRIE_NODE(__)  => begin
                       name = accumName + "." + trie.name
                       res = stringAppendList(ListUtil.map1(trie.nodes, printSetTrieStr, name))
                     res
@@ -3222,7 +3222,7 @@
                   local e::ConnectorElement
                   local res::String
                 @match element begin
-                  SOME(e && ConnectorElement.CONNECTOR_ELEMENT(__))  => begin
+                  SOME(e && Connect.CONNECTOR_ELEMENT(__))  => begin
                       res = " " + printFaceStr(e.face) + " "
                       res = res + printConnectorTypeStr(e.ty) + " [" + String(e.set) + "]"
                     res
@@ -3252,15 +3252,15 @@
 
               string = begin
                 @match face begin
-                  Face.INSIDE(__)  => begin
+                  Connect.INSIDE(__)  => begin
                     "inside"
                   end
 
-                  Face.OUTSIDE(__)  => begin
+                  Connect.OUTSIDE(__)  => begin
                     "outside"
                   end
 
-                  Face.NO_FACE(__)  => begin
+                  Connect.NO_FACE(__)  => begin
                     "unknown"
                   end
                 end
@@ -3274,15 +3274,15 @@
 
               string = begin
                 @match ty begin
-                  ConnectorType.EQU(__)  => begin
+                  Connect.EQU(__)  => begin
                     "equ"
                   end
 
-                  ConnectorType.FLOW(__)  => begin
+                  Connect.FLOW(__)  => begin
                     "flow"
                   end
 
-                  ConnectorType.STREAM(__)  => begin
+                  Connect.STREAM(__)  => begin
                     "stream"
                   end
                 end
@@ -3329,17 +3329,17 @@
           string
         end
 
-         #= Prints a Set to a String. =#
-        function printSetStr(set::Set) ::String
+         #= Prints a CSet to a String. =#
+        function printSetStr(set::CSet) ::String
               local string::String
 
               string = begin
                 @match set begin
-                  Set.SET(__)  => begin
+                  Connect.SET(__)  => begin
                     stringDelimitList(ListUtil.map(set.elements, printElementStr), ", ")
                   end
 
-                  Set.SET_POINTER(__)  => begin
+                  Connect.SET_POINTER(__)  => begin
                     "pointer to set " + intString(set.index)
                   end
                 end
@@ -3349,13 +3349,13 @@
 
          #= @author: adrpo
          return all crefs present in EQU sets =#
-        function getAllEquCrefs(sets::List{<:Set}) ::List{DAE.ComponentRef}
+        function getAllEquCrefs(sets::List{<:CSet}) ::List{DAE.ComponentRef}
               local crefs::List{DAE.ComponentRef} = nil
 
               for set in sets
                 _ = begin
                   @match set begin
-                    Set.SET(ty = ConnectorType.EQU(__))  => begin
+                    Connect.SET(ty = Connect.EQU(__))  => begin
                         for e in set.elements
                           crefs = _cons(e.name, crefs)
                         end
@@ -3383,7 +3383,7 @@
          7. substract (2) from (1)
          8. substract (6) from (7)
          9. remove (8) from the DAE (5) =#
-        function removeUnusedExpandableVariablesAndConnections(sets::List{<:Set}, DAE::DAE.DAElist) ::Tuple{List{Set}, DAE.DAElist}
+        function removeUnusedExpandableVariablesAndConnections(sets::List{<:CSet}, DAE::DAE.DAElist) ::Tuple{List{CSet}, DAE.DAElist}
 
 
 
@@ -3449,7 +3449,7 @@
 
               isEqu = begin
                 @match ty begin
-                  ConnectorType.EQU(__)  => begin
+                  Connect.EQU(__)  => begin
                     true
                   end
 

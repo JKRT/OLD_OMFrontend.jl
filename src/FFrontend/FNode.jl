@@ -2084,7 +2084,8 @@ function copy(inNode::Node) ::MMRef
       FCore.N(__)  => begin
         #=  copy children
         =#
-        node.children = RefTree.map(node.children, copyChild)
+        # node.children = RefTree.map(node.children, copyChild)
+        print("NOOOOOOOOOOOOOOOOOOOOOOOOO! i hope this was not used!")
         toRef(node)
       end
     end
