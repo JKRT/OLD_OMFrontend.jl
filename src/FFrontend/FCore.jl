@@ -110,17 +110,17 @@ end
   function BaseAvlTree.keyStr(s)::String
     s
   end
-  
+
   function BaseAvlTree.keyCompare(key1::String, key2::String)
     stringCompare(key1, key2)
   end
-  
+
   function BaseAvlTree.valueStr(inValue)::String
     local s::String
     @match Node.N(name = s) = arrayGet(inValue, 1)
     s
   end
-  
+
   @exportAll()
 end
 
@@ -494,7 +494,8 @@ const firstId = 0::Id
 #=  ************************ Cache structures *************************** =#
 
 StructuralParameters = Tuple
-test = DAE.FunctionTree
+# test = DAE.FunctionTree
+
 @Uniontype Cache begin
   @Record CACHE begin
 

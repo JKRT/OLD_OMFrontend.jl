@@ -1920,6 +1920,8 @@ end
 
 import Connect
 
+const emptySet = Connect.SETS(Connect.SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Connect.Sets
+
 @Uniontype Element begin
   @Record VAR begin
 

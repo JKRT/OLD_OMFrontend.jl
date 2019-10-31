@@ -2802,7 +2802,7 @@
                       ld_mod = InstUtil.addNomod(ld2)
                       dummyFunc = ClassInf.FUNCTION(Absyn.IDENT("dummieFunc"), false)
                       (cache, env2, _) = InstUtil.addComponentsToEnv(cache, env2, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, impl)
-                      (cache, env2, _, _, dae1, _, _, _, _, _) = Inst.instElementList(cache, env2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, nil, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, true)
+                      (cache, env2, _, _, dae1, _, _, _, _, _) = Inst.instElementList(cache, env2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, nil, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
                       names = ListUtil.map(ld2, SCodeUtil.elementName)
                       declsTree = AvlSetString.addList(AvlSetString.new(), names)
                       res = if b

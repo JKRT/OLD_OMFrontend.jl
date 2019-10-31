@@ -380,7 +380,7 @@
                           else
                             InstTypes.INNER_CALL()
                           end
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, Connect.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, false, info)
                       env_1 = env
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env_1, n)
@@ -402,7 +402,7 @@
                   end
 
                   (cache, env, ih, mod, pre, c && SCode.CLASS(partialPrefix = partialPrefix, prefixes = SCode.PREFIXES(visibility = visibility), name = n, restriction = restr && SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)), classDef = cd && parts && SCode.PARTS(externalDecl = SOME(scExtdecl)), info = info, encapsulatedPrefix = encapsulatedPrefix), inst_dims, _)  => begin
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, true, info)
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env, n)
                       cmt = InstUtil.extractComment(daeElts)
@@ -412,7 +412,7 @@
                       checkExtObjOutput(ty1, info)
                       env_1 = FGraph.mkTypeNode(cenv, n, ty1)
                       vis = SCode.PUBLIC()
-                      (cache, tempenv, ih, _, _, _, _, _, _, _, _, _) = Inst.instClassdef(cache, env_1, ih, UnitAbsyn.noStore, mod, pre, ClassInf.FUNCTION(fpath, isImpure), n, parts, restr, vis, partialPrefix, encapsulatedPrefix, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, NONE(), cmt, info) #= how to get this? impl =#
+                      (cache, tempenv, ih, _, _, _, _, _, _, _, _, _) = Inst.instClassdef(cache, env_1, ih, UnitAbsyn.noStore, mod, pre, ClassInf.FUNCTION(fpath, isImpure), n, parts, restr, vis, partialPrefix, encapsulatedPrefix, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE(), cmt, info) #= how to get this? impl =#
                       (cache, ih, extdecl) = instExtDecl(cache, tempenv, ih, n, scExtdecl, daeElts, ty1, true, pre, info) #= impl =#
                       source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
                       partialPrefixBool = SCodeUtil.partialBool(partialPrefix)
@@ -585,7 +585,7 @@
                   (cache, env, ih, SCode.CLASS(name = id, classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn), modifications = mod1), info = info))  => begin
                       @match (cache, (@match SCode.CLASS() = c), cenv) = Lookup.lookupClass(cache, env, cn)
                       (cache, mod2) = Mod.elabMod(cache, env, ih, Prefix.NOPRE(), mod1, false, Mod.DERIVED(cn), info)
-                      (cache, _, ih, _, _, _, ty, _, _, _) = Inst.instClass(cache, cenv, ih, UnitAbsynBuilder.emptyInstStore(), mod2, Prefix.NOPRE(), c, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                      (cache, _, ih, _, _, _, ty, _, _, _) = Inst.instClass(cache, cenv, ih, UnitAbsynBuilder.emptyInstStore(), mod2, Prefix.NOPRE(), c, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       env_1 = env
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env_1, id)
                       ty1 = InstUtil.setFullyQualifiedTypename(ty, fpath)
@@ -834,7 +834,7 @@
                       name = SCodeUtil.getElementName(recordCl)
                       newName = FGraph.getInstanceOriginalName(recordEnv, name)
                       recordCl = SCodeUtil.setClassName(newName, recordCl)
-                      (cache, _, _, _, _, _, recType, _, _, _) = Inst.instClass(inCache, recordEnv, InnerOuter.emptyInstHierarchy, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), Prefix.NOPRE(), recordCl, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                      (cache, _, _, _, _, _, recType, _, _, _) = Inst.instClass(inCache, recordEnv, InnerOuter.emptyInstHierarchy, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), Prefix.NOPRE(), recordCl, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       @match DAE.T_COMPLEX(ClassInf.RECORD(path), vars, eqCo) = recType
                       vars = Types.filterRecordComponents(vars, SCodeUtil.elementInfo(recordCl))
                       (inputs, locals) = ListUtil.extractOnTrue(vars, Types.isModifiableTypesVar)

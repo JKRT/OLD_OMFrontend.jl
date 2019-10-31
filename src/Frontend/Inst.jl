@@ -216,7 +216,7 @@
                         print(GC.profStatsStr(GC.getProfStats(), head = "GC stats after pre-frontend work (building graphs):") + "\\n")
                       end
                       ExecStat.execStat("FrontEnd - mkProgramGraph")
-                      (cache, env, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet) #= impl =#
+                      (cache, env, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       dae = InstUtil.reEvaluateInitialIfEqns(cache, env, dae, true)
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
@@ -303,7 +303,7 @@
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
                       @match (cache, (@match SCode.CLASS(name = n) = cdef), env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
                       cdef = SCodeUtil.classSetPartial(cdef, SCode.NOT_PARTIAL())
-                      (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env_2, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet) #= impl =#
+                      (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env_2, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       pathstr = AbsynUtil.pathString(path)
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
@@ -369,7 +369,7 @@
                   
                   (_, _, _, _, Absyn.IDENT(name = name), _)  => begin
                       cls = InstUtil.lookupTopLevelClass(name, inProgram, true)
-                      (cache, env, ih, _, dae, _, _, _, _, _) = instClass(inCache, inEnv, inIH, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(inEnv, name), cls, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                      (cache, env, ih, _, dae, _, _, _, _, _) = instClass(inCache, inEnv, inIH, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(inEnv, name), cls, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       dae = InstUtil.reEvaluateInitialIfEqns(cache, env, dae, true)
                       elts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cls)
@@ -1947,7 +1947,7 @@
                       env3 = FGraph.openScope(cenv, enc2, cn2, SOME(FCore.CLASS_SCOPE()))
                       ci_state2 = ClassInf.start(r, FGraph.getGraphName(env3))
                       new_ci_state = ClassInf.start(r, FGraph.getGraphName(env3))
-                      (cache, cenv_2, _, _, _, _, _, _, _, _, _, _) = instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ci_state2, c, SCode.PUBLIC(), nil, false, callscope, ConnectionGraph.EMPTY, Connect.emptySet, NONE())
+                      (cache, cenv_2, _, _, _, _, _, _, _, _, _, _) = instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ci_state2, c, SCode.PUBLIC(), nil, false, callscope, ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                       (cache, mod_1) = Mod.elabMod(cache, cenv_2, ih, pre, mod, impl, Mod.DERIVED(cn), info)
                       mods_1 = Mod.merge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
@@ -2326,7 +2326,7 @@
                       (cache, m_1) = Mod.elabModForBasicType(cache, env, ih, Prefix.NOPRE(), mod, true, Mod.DERIVED(path), info)
                       m_2 = Mod.merge(mods, m_1, className)
                       (cache, cdef, cenv) = Lookup.lookupClass(cache, env, path, SOME(info))
-                      (cache, _, ih, store, dae, _, ty, tys, _) = instClassBasictype(cache, cenv, ih, store, m_2, Prefix.NOPRE(), cdef, inst_dims, false, InstTypes.INNER_CALL(), Connect.emptySet)
+                      (cache, _, ih, store, dae, _, ty, tys, _) = instClassBasictype(cache, cenv, ih, store, m_2, Prefix.NOPRE(), cdef, inst_dims, false, InstTypes.INNER_CALL(), DAE.emptySet)
                       b1 = Types.basicType(ty)
                       b2 = Types.arrayType(ty)
                       b3 = Types.extendsBasicType(ty)
@@ -2412,7 +2412,7 @@
                       (cache, m_1) = Mod.elabModForBasicType(cache, env, ih, Prefix.NOPRE(), mod, true, Mod.DERIVED(path), inInfo)
                       (cache, cdef, cenv) = Lookup.lookupClass(cache, env, path, SOME(info))
                       cdef_1 = SCodeUtil.classSetPartial(cdef, SCode.NOT_PARTIAL())
-                      (cache, _, ih, _, _, _, ty, _, _, _) = instClass(cache, cenv, ih, store, m_1, Prefix.NOPRE(), cdef_1, inst_dims, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet) #= impl =#
+                      (cache, _, ih, _, _, _, ty, _, _, _) = instClass(cache, cenv, ih, store, m_1, Prefix.NOPRE(), cdef_1, inst_dims, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       b1 = Types.basicType(ty)
                       b2 = Types.arrayType(ty)
                       @match true = boolOr(b1, b2)
@@ -2509,7 +2509,7 @@
                       (outCache, outEnv, outIH) = InstUtil.addComponentsToEnv(outCache, outEnv, outIH, mod, inPrefix, inState, const_els, false)
                        #=  Instantiate constants.
                        =#
-                      (outCache, outEnv, outIH, _, _, _, outState, outVars, _, _) = instElementList(outCache, outEnv, outIH, UnitAbsyn.noStore, mod, inPrefix, outState, const_els, inInstDims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, false)
+                      (outCache, outEnv, outIH, _, _, _, outState, outVars, _, _) = instElementList(outCache, outEnv, outIH, UnitAbsyn.noStore, mod, inPrefix, outState, const_els, inInstDims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, false)
                     (outCache, outEnv, outIH, outState, outVars)
                   end
                   
@@ -3698,7 +3698,7 @@
                 own_cref = Absyn.CREF_IDENT(inName, nil)
                 (outCache, dims) = InstUtil.elabArraydim(outCache, outEnv, own_cref, inPath, inSubscripts, eq, inImpl, true, false, inPrefix, inInfo, nil)
                 (cls_env, cls, outIH) = FGraph.createVersionScope(outEnv, inName, inPrefix, mod, inClsEnv, inClass, outIH)
-                (outCache, comp_env, outIH, _, _, _, ty) = InstVar.instVar(outCache, cls_env, outIH, UnitAbsyn.noStore, inState, mod, inPrefix, inName, cls, inAttr, inPrefixes, dims, nil, nil, inImpl, SCode.noComment, inInfo, ConnectionGraph.EMPTY, Connect.emptySet, outEnv)
+                (outCache, comp_env, outIH, _, _, _, ty) = InstVar.instVar(outCache, cls_env, outIH, UnitAbsyn.noStore, inState, mod, inPrefix, inName, cls, inAttr, inPrefixes, dims, nil, nil, inImpl, SCode.noComment, inInfo, ConnectionGraph.EMPTY, DAE.emptySet, outEnv)
                 (outCache, binding) = InstBinding.makeBinding(outCache, outEnv, inAttr, mod, ty, inPrefix, inName, inInfo)
                 var = DAE.TYPES_VAR(inName, inDAttr, ty, binding, NONE())
                 outEnv = FGraph.updateComp(outEnv, var, FCore.VAR_TYPED(), comp_env)
@@ -4271,7 +4271,7 @@
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
                       @match (cache, (@match SCode.CLASS() = cdef), env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
-                      (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet) #= impl =#
+                      (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       _ = AbsynUtil.pathString(path)
                     (cache, env_2, ih, dae)
                   end
@@ -4310,7 +4310,7 @@
                 @matchcontinue (inCache, inEnv, inIH, inProgram, inPath) begin
                   (cache, env, ih, c && SCode.CLASS(name = name1) <| _, Absyn.IDENT(name = name2))  => begin
                       @match true = stringEq(name1, name2)
-                      (cache, env_1, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet) #= impl =#
+                      (cache, env_1, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                     (cache, env_1, ih, dae)
                   end
                   
@@ -4419,7 +4419,7 @@
                       smod = SCodeInstUtil.removeSelfReferenceFromMod(scodeMod, c1)
                       (cache, m) = Mod.elabMod(cache, env, ih, pre, smod, impl, Mod.COMPONENT(n), info)
                       (cenv, c, ih) = FGraph.createVersionScope(env, n, pre, m, cenv, c, ih)
-                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, Connect.emptySet, env)
+                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, DAE.emptySet, env)
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
@@ -4441,7 +4441,7 @@
                       smod = SCodeInstUtil.removeNonConstantBindingsKeepRedeclares(scodeMod, false)
                       (cache, m) = Mod.elabMod(cache, env, ih, pre, smod, impl, Mod.COMPONENT(n), info)
                       (cenv, c, ih) = FGraph.createVersionScope(env, n, pre, m, cenv, c, ih)
-                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, Connect.emptySet, env)
+                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, DAE.emptySet, env)
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
@@ -4463,7 +4463,7 @@
                       smod = SCodeInstUtil.removeNonConstantBindingsKeepRedeclares(scodeMod, true)
                       (cache, m) = Mod.elabMod(cache, env, ih, pre, smod, impl, Mod.COMPONENT(n), info)
                       (cenv, c, ih) = FGraph.createVersionScope(env, n, pre, m, cenv, c, ih)
-                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, Connect.emptySet, env)
+                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, DAE.emptySet, env)
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
@@ -4484,7 +4484,7 @@
                       (cache, dims) = InstUtil.elabArraydim(cache, cenv, c1, sty, ad, NONE(), impl, true, false, pre, info, inst_dims)
                       m = DAE.NOMOD()
                       (cenv, c, ih) = FGraph.createVersionScope(env, n, pre, m, cenv, c, ih)
-                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, Connect.emptySet, env)
+                      (cache, compenv, ih, store, _, _, ty, _) = InstVar.instVar(cache, cenv, ih, store, state, m, pre, n, c, attr, inPrefixes, dims, nil, inst_dims, true, SCode.noComment, info, ConnectionGraph.EMPTY, DAE.emptySet, env)
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())

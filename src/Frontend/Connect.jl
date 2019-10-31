@@ -167,8 +167,6 @@ end
   end
 end
 
-const emptySet = SETS(SET_TRIE_NODE("", DAE.WILD(), nil, 0), 0, nil, nil)::Sets
-
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()
 end

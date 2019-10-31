@@ -2454,7 +2454,7 @@
               local outCache::FCore.Cache
 
               checkForConnectInIfBranch(inEquations)
-              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, Connect.emptySet, inState, instEEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
+              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
@@ -2509,7 +2509,7 @@
               local outCache::FCore.Cache
 
               checkForConnectInIfBranch(inEquations)
-              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, Connect.emptySet, inState, instEInitialEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
+              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEInitialEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
