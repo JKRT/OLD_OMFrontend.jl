@@ -301,7 +301,8 @@
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
-                      @match (cache, (@match SCode.CLASS(name = n) = cdef), env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
+                      @match (cache, cdef, env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
+                      @match SCode.CLASS(name = n) = cdef
                       cdef = SCodeUtil.classSetPartial(cdef, SCode.NOT_PARTIAL())
                       (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env_2, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       pathstr = AbsynUtil.pathString(path)
@@ -2592,7 +2593,7 @@
               cache = InstUtil.pushStructuralParameters(inCache)
                #=  Sort elements based on their dependencies.
                =#
-              el = InstUtil.sortElementList(inElements, inEnv, FGraph.inFunctionScope(inEnv))
+              el = inElements # InstUtil.sortElementList(inElements, inEnv, FGraph.inFunctionScope(inEnv))
                #=  adrpo: MAKE SURE inner objects ARE FIRST in the list for instantiation!
                =#
               el = InstUtil.sortInnerFirstTplLstElementMod(el)
@@ -2693,7 +2694,9 @@
               local outCache::FCore.Cache
 
               local elt::Tuple{SCode.Element, DAE.Mod}
+              local elts::List{Tuple{SCode.Element, DAE.Mod}}
               local is_deleted::Bool
+              local zzz::DAE.DAElist
 
                #=  Check if the component has a conditional expression that evaluates to false.
                =#
@@ -2705,8 +2708,10 @@
               end
               try
                 ErrorExt.setCheckpoint("instElement2")
-                @match (outCache, outEnv, outIH, list(elt)) = updateCompeltsMods(inCache, outEnv, outIH, inPrefix, list(inElement), outState, inImplicit)
-                @match (outCache, outEnv, outIH, outStore, DAE.DAE(outDae), outSets, outState, outVars, outGraph, outFieldDomOpt) = instElement(outCache, outEnv, outIH, outStore, inMod, inPrefix, outState, elt, inInstDims, inImplicit, inCallingScope, outGraph, inSets)
+                @match (outCache, outEnv, outIH, elts) = updateCompeltsMods(inCache, outEnv, outIH, inPrefix, list(inElement), outState, inImplicit)
+                elt = listHead(elts)
+                @match (outCache, outEnv, outIH, outStore, zzz, outSets, outState, outVars, outGraph, outFieldDomOpt) = instElement(outCache, outEnv, outIH, outStore, inMod, inPrefix, outState, elt, inInstDims, inImplicit, inCallingScope, outGraph, inSets)
+                @match DAE.DAE(outDae) = zzz
                 Error.clearCurrentComponent()
                 ErrorExt.delCheckpoint("instElement2")
               catch
@@ -2904,7 +2909,12 @@
                   end
 
                   (cache, env, ih, store, mods, pre, ci_state, (el && SCode.COMPONENT(name = name, typeSpec = Absyn.TPATH(__)), cmod), inst_dims, impl, _, graph, csets)  => begin
-                      @match SCode.COMPONENT(name = name, prefixes = (@match SCode.PREFIXES(finalPrefix = final_prefix, innerOuter = io) = prefixes), attributes = (@match SCode.ATTR(arrayDims = ad) = attr), typeSpec = (@match Absyn.TPATH(path = t) = ts), modifications = m, comment = comment, condition = cond, info = info) = el
+                      @match SCode.COMPONENT(
+                               name = name, prefixes = prefixes, attributes = attr, typeSpec = ts,
+                               modifications = m, comment = comment, condition = cond, info = info) = el
+                      @match Absyn.TPATH(path = t) = ts
+                      @match SCode.ATTR(arrayDims = ad) = attr
+                      @match SCode.PREFIXES(finalPrefix = final_prefix, innerOuter = io) = prefixes
                       @match true = if Config.acceptParModelicaGrammar()
                             InstUtil.checkParallelismWRTEnv(env, name, attr, info)
                           else
@@ -3181,8 +3191,8 @@
                     (cache, env, ih, nil)
                   end
 
-                  (cache, env, ih, pre, elMod && (_, DAE.NOMOD(__)) <| xs, ci_state, impl)  => begin
-                      (cache, env, ih, res) = updateCompeltsMods_dispatch(cache, env, ih, pre, xs, ci_state, impl)
+                  (cache, env, ih, pre, (elMod && (_, DAE.NOMOD(__))) <| xs, ci_state, impl)  => begin
+                    (cache, env, ih, res) = updateCompeltsMods_dispatch(cache, env, ih, pre, xs, ci_state, impl)
                     (cache, env, ih, _cons(elMod, res))
                   end
 

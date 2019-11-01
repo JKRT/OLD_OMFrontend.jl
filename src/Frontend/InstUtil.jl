@@ -1620,6 +1620,7 @@
 
 
               local outE::List{Element}
+              local outEls::List{Element}
               local cycleElts::List{Element}
               local cycles::List{Tuple{Element, List{Element}}}
               local g::List{Tuple{Element, List{Element}}}
@@ -1629,7 +1630,7 @@
               if ! Config.acceptMetaModelicaGrammar()
                 g = Graph.buildGraph(inElements, getElementDependencies, (inElements, isFunctionScope))
                 (outE, cycles) = Graph.topologicalSort(g, isElementEqual)
-                inElements = listAppend(outE, ListUtil.map(cycles, Util.tuple21))
+                outEls = listAppend(outE, ListUtil.map(cycles, Util.tuple21))
                 checkCyclicalComponents(cycles, inEnv)
               end
                #=  sort the elements according to the dependencies
@@ -1638,7 +1639,7 @@
                =#
                #=  append the elements in the cycles as they might not actually be cycles, but they depend on elements not in the list (i.e. package constants, etc)!
                =#
-          inElements
+          outEls
         end
 
         function printGraph(env::FGraph.Graph, g::List{<:Tuple{<:Element, List{<:Element}}}, order::List{<:Element}, cycles::List{<:Tuple{<:Element, List{<:Element}}})
