@@ -110,11 +110,13 @@ println("after empty cache")
 import Absyn
 import InnerOuter
 className = Absyn.IDENT("HelloWorld")
-println("dive in inst")
-# (cache,_,_,dae) = Inst.instantiateClass(cache,InnerOuter.emptyInstHierarchy,scode,className)
-println("after inst")
-# @show dae
-println("*******************************")
-println("DAE done")
-println("*******************************")
-println("Goodbye")
+if false
+  println("dive in inst")
+  (cache,_,_,dae) = Inst.instantiateClass(cache,InnerOuter.emptyInstHierarchy,scode,className)
+  println("after inst")
+  @show dae
+  println("*******************************")
+  println("DAE done")
+  println("*******************************")
+  println("Goodbye")
+end

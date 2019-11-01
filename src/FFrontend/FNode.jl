@@ -349,8 +349,8 @@ function addChildRef(inParentRef::MMRef, inName::Name, inChildRef::MMRef, checkD
   local parent::MMRef
 
   @match FCore.N(n, i, p, c, d) = fromRef(inParentRef)
-  @show RefTree.keyCompare
-  @show methods(RefTree.keyCompare)
+  #@show RefTree.keyCompare
+  #@show methods(RefTree.keyCompare)
   c = RefTree.add(c, inName, inChildRef, #= if checkDuplicate = =# printElementConflictError #= else RefTree.addConflictReplace end =#)
   parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
   FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))

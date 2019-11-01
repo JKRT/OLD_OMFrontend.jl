@@ -1,4 +1,4 @@
-  module Inst 
+  module Inst
 
 
     using MetaModelica
@@ -58,7 +58,7 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import InnerOuter
@@ -83,7 +83,7 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = InstTypes.InstDims 
+        InstDims = InstTypes.InstDims
 
 
 
@@ -142,15 +142,15 @@
         import InstStateMachineUtil
         # import NFUnitCheck
         import DAEDump
-        
+
         MutableType = Mutable.MutableType
-        
+
          #=  BTH
          =#
 
          #=  instantiate a class.
          if this function fails with stack overflow, it will be caught in the caller =#
-        function instantiateClass_dispatch(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instantiateClass_dispatch(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -201,7 +201,7 @@
                       InstHashTable.release()
                     (cache, env, ih, dae2)
                   end
-                  
+
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
                       cache = FCoreUtil.setCacheClassName(cache, path)
                       if doSCodeDep
@@ -237,16 +237,16 @@
            First, all the class definitions are added to the environment without
           modifications, and then the specified class is instantiated in the
           function instClassInProgram =#
-        function instantiateClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool = true #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instantiateClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool = true #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
               println("Inst.instantiateClass 1")
-              
+
               (outCache, outEnv, outIH, outDAElist) = instantiateClass_dispatch(inCache, inIH, inProgram, inPath, doSCodeDep)
-              
+
               println("Inst.instantiateClass 2")
 
               (outCache, outEnv, outIH, outDAElist)
@@ -256,7 +256,7 @@
          This is a function for instantiating partial 'top' classes.
          It does so by converting the partial class into a non partial class.
          Currently used by: MathCore.modelEquations, CevalScript.checkModel =#
-        function instantiatePartialClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instantiatePartialClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -288,7 +288,7 @@
                       Error.addMessage(Error.NO_CLASSES_LOADED, nil)
                     fail()
                   end
-                  
+
                   (cache, ih, cdecls && _ <| _, path && Absyn.IDENT(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
@@ -297,7 +297,7 @@
                       (cache, env_2, ih, dae) = instClassInProgram(cache, env_1, ih, cdecls, path, source)
                     (cache, env_2, ih, dae)
                   end
-                  
+
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
@@ -311,7 +311,7 @@
                       dae = DAE.DAE(list(DAE.COMP(pathstr, daeElts, source, cmt)))
                     (cache, env_2, ih, dae)
                   end
-                  
+
                   (_, _, _, path) where (! Config.getGraphicsExpMode())  => begin
                       cname_str = AbsynUtil.pathString(path)
                       Error.addMessage(Error.ERROR_FLATTENING, list(cname_str))
@@ -329,7 +329,7 @@
           (outCache, outEnv, outIH, outDAElist)
         end
 
-        function makeTopComponentPrefix(inGraph::FGraph.Graph, inName::Absyn.Ident) ::Prefix.PrefixType 
+        function makeTopComponentPrefix(inGraph::FGraph.Graph, inName::Absyn.Ident) ::Prefix.PrefixType
               local outPrefix::Prefix.PrefixType
 
               local p::Absyn.Path
@@ -343,7 +343,7 @@
         end
 
          #= Instantiates a specific top level class in a Program. =#
-        function instClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -362,11 +362,11 @@
                   (_, _, _,  nil(), _, _)  => begin
                     (inCache, inEnv, inIH, DAE.emptyDae)
                   end
-                  
+
                   (_, _, _, _, Absyn.IDENT(name = ""), _)  => begin
                     (inCache, inEnv, inIH, DAE.emptyDae)
                   end
-                  
+
                   (_, _, _, _, Absyn.IDENT(name = name), _)  => begin
                       cls = InstUtil.lookupTopLevelClass(name, inProgram, true)
                       (cache, env, ih, _, dae, _, _, _, _, _) = instClass(inCache, inEnv, inIH, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(inEnv, name), cls, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
@@ -376,7 +376,7 @@
                       dae = DAE.DAE(list(DAE.COMP(name, elts, inSource, cmt)))
                     (cache, env, ih, dae)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("Inst.instClassInProgram failed\\n")
@@ -396,7 +396,7 @@
            o Initialize the class inference state machine
            o Instantiate all the elements and equations
            o Generate equations from the connection sets built during instantiation =#
-        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ClassInf.SMNode, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraphType} 
+        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ClassInf.SMNode, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local optDerAttr::Option{SCode.Attributes}
               local outState::ClassInf.SMNode
@@ -458,7 +458,7 @@
                       (cache, env, ih, store, dae, csets, ty, ci_state_1, oDA, graph) = instClass(inCache, inEnv, inIH, store, inMod, inPrefix, c, inInstDims, inBoolean, inCallingScope, inGraph, inSets)
                     (cache, env, ih, store, dae, csets, ty, ci_state_1, oDA, graph)
                   end
-                  
+
                   (cache, env, ih, store, mod, pre, c && SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r, partialPrefix = partialPrefix, info = info), inst_dims, impl, callscope, graph, _)  => begin
                       recursionDepthReached = listLength(FGraph.currentScope(env)) < Global.recursionDepthLimit
                       if ! recursionDepthReached
@@ -490,14 +490,14 @@
                       ty = InstUtil.fixInstClassType(ty, isPartialFn)
                     (cache, env_3, ih, store, dae, csets, ty, ci_state_1, oDA, graph)
                   end
-                  
+
                   (cache, _, _, _, _, _, SCode.CLASS(name = n, partialPrefix = SCode.PARTIAL(__), info = info), _, false, _, _, _)  => begin
                       if ! Config.getGraphicsExpMode()
                         Error.addSourceMessage(Error.INST_PARTIAL_CLASS, list(n), info)
                       end
                     fail()
                   end
-                  
+
                   (_, env, _, _, _, _, SCode.CLASS(name = n), _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Inst.instClass: " + n + " in env: " + FGraph.printGraphPathStr(env) + " failed\\n")
@@ -516,7 +516,7 @@
           extending from basic types. See instBasictypeBaseclass.
           NOTE: This function should only be called from instBasictypeBaseclass.
           This is new functionality in Modelica v 2.2. =#
-        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, List{DAE.Var}, ClassInf.SMNode} 
+        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, List{DAE.Var}, ClassInf.SMNode}
               local outState::ClassInf.SMNode
               local outTypeVars::List{DAE.Var} #= attributes of builtin types =#
               local outType::DAE.Type
@@ -566,7 +566,7 @@
                       ty = InstUtil.mktypeWithArrays(fq_class, ci_state_1, tys, bc_ty, c, InstUtil.extractComment(dae.elementLst))
                     (cache, env_3, ih, store, dae, csets, ty, tys, ci_state_1)
                   end
-                  
+
                   (_, _, _, _, _, _, SCode.CLASS(__), _, _, _, _)  => begin
                     fail()
                   end
@@ -578,7 +578,7 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outTypeVars #= attributes of builtin types =#, outState)
         end
 
-         #= 
+         #=
           This rule instantiates the contents of a class definition, with a new
           environment already setup.
           The *implicitInstantiation* boolean indicates if the class should be
@@ -588,7 +588,7 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -631,7 +631,7 @@
                       (cache, env, ih, store, ci_state, graph, csets, dae, tys, bc, oDA, equalityConstraint) = instClassIn2(inCache, inEnv, inIH, inStore, inMod, inPrefix, inState, inClass, inVisibility, inInstDims, implicitInstantiation, inCallingScope, inGraph, inSets, instSingleCref)
                     (cache, env, ih, store, dae, csets, ci_state, tys, bc, oDA, equalityConstraint, graph)
                   end
-                  
+
                   SCode.CLASS(name = n, restriction = r, encapsulatedPrefix = encflag, prefixes = SCode.PREFIXES(innerOuter = io))  => begin
                       @match true = boolOr(AbsynUtil.isInnerOuter(io), AbsynUtil.isOnlyOuter(io))
                       @match FCore.CL(status = FCore.CLS_INSTANCE(n)) = FNode.refData(FGraph.lastScopeRef(inEnv))
@@ -642,7 +642,7 @@
                       (cache, env, ih, store, ci_state, graph, csets, dae, tys, bc, oDA, equalityConstraint) = instClassIn2(inCache, env, inIH, inStore, inMod, inPrefix, ci_state, c, inVisibility, inInstDims, implicitInstantiation, inCallingScope, inGraph, inSets, instSingleCref)
                     (cache, env, ih, store, dae, csets, ci_state, tys, bc, oDA, equalityConstraint, graph)
                   end
-                  
+
                   SCode.CLASS(name = n, prefixes = SCode.PREFIXES(innerOuter = io))  => begin
                       @match true = boolOr(AbsynUtil.isInnerOuter(io), AbsynUtil.isOnlyOuter(io))
                       n = FGraph.getInstanceOriginalName(inEnv, n)
@@ -650,7 +650,7 @@
                       (cache, env, ih, store, ci_state, graph, csets, dae, tys, bc, oDA, equalityConstraint) = instClassIn2(inCache, inEnv, inIH, inStore, inMod, inPrefix, inState, c, inVisibility, inInstDims, implicitInstantiation, inCallingScope, inGraph, inSets, instSingleCref)
                     (cache, env, ih, store, dae, csets, ci_state, tys, bc, oDA, equalityConstraint, graph)
                   end
-                  
+
                   SCode.CLASS(name = n, prefixes = SCode.PREFIXES(innerOuter = io), info = info)  => begin
                       @match true = boolOr(AbsynUtil.isInnerOuter(io), AbsynUtil.isOnlyOuter(io))
                       if ! Config.getGraphicsExpMode()
@@ -675,7 +675,7 @@
          generation of functions in implicit instanitation (according to
          *implicitInstantiation* boolean) can cause circular dependencies
          (e.g. if a function uses a constant in its body) =#
-        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraphType, sets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType, Connect.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint} 
+        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraphType, sets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType, Connect.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint}
               local equalityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local ty::Option{DAE.Type}
@@ -755,7 +755,7 @@
           (cache, env, ih, store, state, graph, sets, dae, vars, ty, optDerAttr, equalityConstraint)
         end
 
-        function callingScopeCacheEq(inCallingScope1::InstTypes.CallingScope, inCallingScope2::InstTypes.CallingScope) ::Bool 
+        function callingScopeCacheEq(inCallingScope1::InstTypes.CallingScope, inCallingScope2::InstTypes.CallingScope) ::Bool
               local outIsEq::Bool
 
               outIsEq = begin
@@ -763,15 +763,15 @@
                   (InstTypes.TYPE_CALL(__), InstTypes.TYPE_CALL(__))  => begin
                     true
                   end
-                  
+
                   (InstTypes.TYPE_CALL(__), _)  => begin
                     false
                   end
-                  
+
                   (_, InstTypes.TYPE_CALL(__))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -789,7 +789,7 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -860,7 +860,7 @@
                       bc = arrayBasictypeBaseclass(inst_dims, ty)
                     (cache, env, ih, store, DAE.emptyDae, inSets, ci_state, tys, bc, NONE(), NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, c && SCode.CLASS(name = n, restriction = SCode.R_ENUMERATION(__), classDef = SCode.PARTS(elementLst = els), info = info), _, inst_dims, impl, callscope, graph, _, _)  => begin
                       names = SCodeUtil.componentNames(c)
                       Types.checkEnumDuplicateLiterals(names, info)
@@ -883,7 +883,7 @@
                       tys2 = listAppend(tys, tys1)
                     (cache, env_3, ih, store, DAE.emptyDae, csets, ci_state_1, tys2, bc, NONE(), NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, c && SCode.CLASS(name = n, restriction = r, classDef = d, cmt = comment, info = info, partialPrefix = partialPrefix, encapsulatedPrefix = encapsulatedPrefix), vis, inst_dims, impl, callscope, graph, _, _)  => begin
                       ErrorExt.setCheckpoint("instClassParts")
                       @match false = InstUtil.isBuiltInClass(n) #= If failed above, no need to try again =#
@@ -892,7 +892,7 @@
                           SCode.R_ENUMERATION(__)  => begin
                             fail()
                           end
-                          
+
                           _  => begin
                               ()
                           end
@@ -907,7 +907,7 @@
                       ErrorExt.delCheckpoint("instClassParts")
                     (cache, env_1, ih, store, dae, csets, ci_state_1, tys, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, _, _, ci_state, c && SCode.CLASS(__), _, _, impl, _, graph, _, _)  => begin
                       b = Flags.getConfigBool(Flags.CHECK_MODEL) && ! impl && SCodeUtil.isFunction(c)
                       if ! b
@@ -918,7 +918,7 @@
                       end
                     (cache, env, ih, store, DAE.emptyDae, inSets, ci_state, nil, NONE(), NONE(), NONE(), graph)
                   end
-                  
+
                   _  => begin
                       fail()
                   end
@@ -937,7 +937,7 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, outTypesTypeOption, optDerAttr, outEqualityConstraint, outGraph)
         end
 
-        function liftNonExpType(inType::DAE.Type, inInstDims::InstDims, inSplitArrays::Bool) ::DAE.Type 
+        function liftNonExpType(inType::DAE.Type, inInstDims::InstDims, inSplitArrays::Bool) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -946,7 +946,7 @@
                   (_, dims <| _, false)  => begin
                     Types.liftArrayListDims(inType, dims)
                   end
-                  
+
                   _  => begin
                       inType
                   end
@@ -955,7 +955,7 @@
           outType
         end
 
-        function getBasicTypeType(inName::String) ::DAE.Type 
+        function getBasicTypeType(inName::String) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -963,19 +963,19 @@
                   "Real"  => begin
                     DAE.T_REAL_DEFAULT
                   end
-                  
+
                   "Integer"  => begin
                     DAE.T_INTEGER_DEFAULT
                   end
-                  
+
                   "String"  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   "Boolean"  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   "Clock"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     DAE.T_CLOCK_DEFAULT
@@ -987,7 +987,7 @@
           outType
         end
 
-        function getBasicTypeAttrTyper(inName::String) ::BasicTypeAttrTyper 
+        function getBasicTypeAttrTyper(inName::String) ::BasicTypeAttrTyper
               local outTyper::BasicTypeAttrTyper
 
               outTyper = begin
@@ -995,19 +995,19 @@
                   "Real"  => begin
                     getRealAttributeType
                   end
-                  
+
                   "Integer"  => begin
                     getIntAttributeType
                   end
-                  
+
                   "String"  => begin
                     getStringAttributeType
                   end
-                  
+
                   "Boolean"  => begin
                     getBoolAttributeType
                   end
-                  
+
                   "Clock"  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     getClockAttributeType
@@ -1019,7 +1019,7 @@
           outTyper
         end
 
-        function getRealAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getRealAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1027,47 +1027,47 @@
                   ("quantity", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("unit", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("displayUnit", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("min", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("max", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("start", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("fixed", _, _)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   ("nominal", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("stateSelect", _, _)  => begin
                     InstBinding.stateSelectType
                   end
-                  
+
                   ("uncertain", _, _)  => begin
                     InstBinding.uncertaintyType
                   end
-                  
+
                   ("distribution", _, _)  => begin
                     InstBinding.distributionType
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(inAttrName, "Real"), inInfo)
                       fail()
@@ -1077,7 +1077,7 @@
           outType
         end
 
-        function getIntAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getIntAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1085,35 +1085,35 @@
                   ("quantity", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("min", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("max", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("start", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("fixed", _, _)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   ("nominal", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("uncertain", _, _)  => begin
                     InstBinding.uncertaintyType
                   end
-                  
+
                   ("distribution", _, _)  => begin
                     InstBinding.distributionType
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(inAttrName, "Integer"), inInfo)
                       fail()
@@ -1123,7 +1123,7 @@
           outType
         end
 
-        function getStringAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getStringAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1131,11 +1131,11 @@
                   ("quantity", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("start", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(inAttrName, "String"), inInfo)
                       fail()
@@ -1145,7 +1145,7 @@
           outType
         end
 
-        function getBoolAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getBoolAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1153,15 +1153,15 @@
                   ("quantity", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("start", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("fixed", _, _)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(inAttrName, "Boolean"), inInfo)
                       fail()
@@ -1171,11 +1171,11 @@
           outType
         end
 
-         #= 
+         #=
         Author: BTH
         This function is supposed to fail since clock variables don't have attributes.
          =#
-        function getClockAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getClockAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1188,7 +1188,7 @@
           outType
         end
 
-        function getEnumAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type 
+        function getEnumAttributeType(inAttrName::String, inBaseType::DAE.Type, inInfo::SourceInfo) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -1196,23 +1196,23 @@
                   ("quantity", _, _)  => begin
                     DAE.T_STRING_DEFAULT
                   end
-                  
+
                   ("min", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("max", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("start", _, _)  => begin
                     inBaseType
                   end
-                  
+
                   ("fixed", _, _)  => begin
                     DAE.T_BOOL_DEFAULT
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_MODIFIED_ELEMENT, list(inAttrName, "enumeration(:)"), inInfo)
                       fail()
@@ -1222,7 +1222,7 @@
           outType
         end
 
-        function instBasicTypeAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper, inPrefix::Prefix.PrefixType) ::List{DAE.Var} 
+        function instBasicTypeAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper, inPrefix::Prefix.PrefixType) ::List{DAE.Var}
               local outVars::List{DAE.Var}
 
               outVars = begin
@@ -1231,11 +1231,11 @@
                   DAE.MOD(subModLst = submods)  => begin
                     ListUtil.map4(submods, instBasicTypeAttributes2, inCache, inEnv, inBaseType, inTypeFunc)
                   end
-                  
+
                   DAE.NOMOD(__)  => begin
                     nil
                   end
-                  
+
                   DAE.REDECL(__)  => begin
                     nil
                   end
@@ -1244,7 +1244,7 @@
           outVars
         end
 
-        function instBasicTypeAttributes2(inSubMod::DAE.SubMod, inCache::FCore.Cache, inEnv::FCore.Graph, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper) ::DAE.Var 
+        function instBasicTypeAttributes2(inSubMod::DAE.SubMod, inCache::FCore.Cache, inEnv::FCore.Graph, inBaseType::DAE.Type, inTypeFunc::BasicTypeAttrTyper) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = begin
@@ -1259,7 +1259,7 @@
                       ty = getRealAttributeType(name, inBaseType, info)
                     instBuiltinAttribute(inCache, inEnv, name, val, exp, ty, p)
                   end
-                  
+
                   DAE.NAMEMOD(ident = name)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.instBasicTypeAttributes2 failed on " + name)
@@ -1271,7 +1271,7 @@
         end
 
          #= Help function to e.g. instRealClass, etc. =#
-        function instBuiltinAttribute(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, optVal::Option{<:Values.Value}, bind::DAE.Exp, inExpectedTp::DAE.Type, bindProp::DAE.Properties) ::DAE.Var 
+        function instBuiltinAttribute(inCache::FCore.Cache, inEnv::FCore.Graph, id::String, optVal::Option{<:Values.Value}, bind::DAE.Exp, inExpectedTp::DAE.Type, bindProp::DAE.Properties) ::DAE.Var
               local var::DAE.Var
 
               var = begin
@@ -1296,7 +1296,7 @@
                       v = ValuesUtil.expValue(vbind)
                     DAE.TYPES_VAR(id, DAE.dummyAttrParam, t_1, DAE.EQBOUND(bind1, SOME(v), DAE.C_PARAM(), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (_, _, _, SOME(v), _, expectedTp, DAE.PROP(bindTp && DAE.T_ARRAY(dims = d <|  nil()), c))  => begin
                       @match false = valueEq(c, DAE.C_VAR())
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
@@ -1306,14 +1306,14 @@
                       v = ValuesUtil.expValue(vbind)
                     DAE.TYPES_VAR(id, DAE.dummyAttrParam, t_1, DAE.EQBOUND(bind1, SOME(v), DAE.C_PARAM(), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (cache, env, _, _, _, expectedTp, DAE.PROP(bindTp, c))  => begin
                       @match false = valueEq(c, DAE.C_VAR())
                       (bind1, t_1) = Types.matchType(bind, bindTp, expectedTp, true)
                       (cache, v) = Ceval.ceval(cache, env, bind1, false, Absyn.NO_MSG(), 0)
                     DAE.TYPES_VAR(id, DAE.dummyAttrParam, t_1, DAE.EQBOUND(bind1, SOME(v), DAE.C_PARAM(), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (cache, env, _, _, _, expectedTp, DAE.PROP(bindTp && DAE.T_ARRAY(dims = d <|  nil()), c))  => begin
                       @match false = valueEq(c, DAE.C_VAR())
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
@@ -1322,7 +1322,7 @@
                       (cache, v) = Ceval.ceval(cache, env, bind1, false, Absyn.NO_MSG(), 0)
                     DAE.TYPES_VAR(id, DAE.dummyAttrParam, t_1, DAE.EQBOUND(bind1, SOME(v), DAE.C_PARAM(), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (_, _, _, _, _, expectedTp, DAE.PROP(bindTp, c))  => begin
                       if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
                         @match true = valueEq(c, DAE.C_VAR())
@@ -1332,14 +1332,14 @@
                       (bind1, t_1) = Types.matchType(bind, bindTp, expectedTp, true)
                     DAE.TYPES_VAR(id, DAE.dummyAttrParam, t_1, DAE.EQBOUND(bind1, NONE(), DAE.C_PARAM(), DAE.BINDING_FROM_DEFAULT_VALUE()), NONE())
                   end
-                  
+
                   (_, _, _, _, _, _, DAE.PROP(_, c))  => begin
                       @match true = valueEq(c, DAE.C_VAR())
                       s = ExpressionDump.printExpStr(bind)
                       Error.addMessage(Error.HIGHER_VARIABILITY_BINDING, list(id, "PARAM", s, "VAR"))
                     fail()
                   end
-                  
+
                   (_, _, _, _, _, expectedTp, DAE.PROP(bindTp, _))  => begin
                       @shouldFail (_, _) = Types.matchType(bind, bindTp, expectedTp, true)
                       s1 = "builtin attribute " + id + " of type " + Types.unparseType(bindTp)
@@ -1347,13 +1347,13 @@
                       Error.addMessage(Error.TYPE_ERROR, list(s1, s2))
                     fail()
                   end
-                  
+
                   (_, _, _, SOME(v), _, expectedTp, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("instBuiltinAttribute failed for: " + id + " value binding: " + ValuesUtil.printValStr(v) + " binding: " + ExpressionDump.printExpStr(bind) + " expected type: " + Types.printTypeStr(expectedTp) + " type props: " + Types.printPropStr(bindProp))
                     fail()
                   end
-                  
+
                   (_, _, _, _, _, expectedTp, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("instBuiltinAttribute failed for: " + id + " value binding: NONE()" + " binding: " + ExpressionDump.printExpStr(bind) + " expected type: " + Types.printTypeStr(expectedTp) + " type props: " + Types.printPropStr(bindProp))
@@ -1365,7 +1365,7 @@
         end
 
          #= author: PA =#
-        function arrayBasictypeBaseclass(inInstDims::List{<:List{<:DAE.Dimension}}, inType::DAE.Type) ::Option{DAE.Type} 
+        function arrayBasictypeBaseclass(inInstDims::List{<:List{<:DAE.Dimension}}, inType::DAE.Type) ::Option{DAE.Type}
               local outOptType::Option{DAE.Type}
 
               outOptType = begin
@@ -1375,7 +1375,7 @@
                   ( nil(), _)  => begin
                     NONE()
                   end
-                  
+
                   _  => begin
                         dims = ListUtil.last(inInstDims)
                         ty = Expression.liftArrayLeftList(inType, dims)
@@ -1389,7 +1389,7 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
+        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local vars::List{DAE.Var}
 
 
@@ -1455,7 +1455,7 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
+        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local outVars::List{DAE.Var} = nil
               local outState::ClassInf.SMNode = inState
               local outIH::InnerOuter.InstHierarchy = inIH
@@ -1469,28 +1469,28 @@
                   SCode.CLASS(name = "Real")  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(name = "Integer")  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(name = "String")  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(name = "Boolean")  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(name = "Clock") where (Flags.getConfigEnum(Flags.LANGUAGE_STANDARD) == 33)  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(__)  => begin
                       (outCache, outEnv, outIH, outState, outVars) = partialInstClassdef(inCache, inEnv, inIH, inMod, inPrefix, inState, inClass, inClass.classDef, inVisibility, inInstDims, numIter)
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1505,7 +1505,7 @@
           (outCache, outEnv, outIH, outState, outVars)
         end
 
-         #= 
+         #=
           There are two kinds of class definitions, either explicit
           definitions SCode.PARTS() or
           derived definitions SCode.DERIVED() or
@@ -1518,7 +1518,7 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1536,11 +1536,11 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, outTypesTypeOption, optDerAttr, outEqualityConstraint, outGraph)
         end
 
-         #= 
+         #=
         This function will try to instantiate the
         class definition as a it would extend a basic
         type =#
-        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1604,7 +1604,7 @@
                       dae = DAEUtil.joinDaes(dae1, dae2)
                     (cache, env3, ih, store, dae, csets, ci_state, tys, bc, NONE(), eqConstraint, graph)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, SCode.PARTS(normalEquationLst =  nil(), initialEquationLst =  nil(), normalAlgorithmLst =  nil(), initialAlgorithmLst =  nil()), _, _, _, _, _, _, _, _, _)  => begin
                       @match true = ErrorExt.isTopCheckpoint("instClassdefBasicType1")
                       ErrorExt.rollBack("instClassdefBasicType1")
@@ -1646,7 +1646,7 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, outTypesTypeOption, optDerAttr, outEqualityConstraint, outGraph)
         end
 
-         #= 
+         #=
           There are two kinds of class definitions, either explicit
           definitions SCode.PARTS() or
           derived definitions SCode.DERIVED() or
@@ -1659,7 +1659,7 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType} 
+        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{<:List{<:DAE.Dimension}}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1828,14 +1828,14 @@
                       (cache, env, ih, store, fdae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdefBasicType(cache, env, ih, store, mods, pre, ci_state, className, inClassDef6, re, vis, inst_dims, impl, graph, inSets, instSingleCref, info, stopInst)
                     (cache, env, ih, store, fdae, csets, ci_state, vars, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, _, ci_state, _, SCode.PARTS(elementLst = els), _, _, _, _, _, impl, _, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match true = SCodeUtil.isExternalObject(els)
                       (cache, env, ih, dae, ci_state) = InstFunction.instantiateExternalObject(cache, env, ih, els, mods, impl, comment, info)
                     (cache, env, ih, store, dae, inSets, ci_state, nil, NONE(), NONE(), NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.PARTS(elementLst = els, normalEquationLst = eqs, initialEquationLst = initeqs, normalAlgorithmLst = alg, initialAlgorithmLst = initalg, constraintLst = constrs, clsattrs = clsattrs, externalDecl = ed), re, _, _, _, inst_dims, impl, callscope, graph, csets, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match false = SCodeUtil.isExternalObject(els)
@@ -1867,7 +1867,7 @@
                                 convert other component elements to the same format, such that
                                 instElement can handle the new format uniformely. =#
                       cdefelts_1 = InstUtil.addNomod(cdefelts)
-                      compelts_1 = ListUtil.flatten(list(extcomps, compelts_1, cdefelts_1))
+                      compelts_1 = listAppend(listAppend(extcomps, compelts_1), cdefelts_1)
                       eqs_1 = joinExtEquations(eqs, eqs2, callscope)
                       initeqs_1 = joinExtEquations(initeqs, initeqs2, callscope)
                       alg_1 = joinExtAlgorithms(alg, alg2, callscope)
@@ -1932,7 +1932,7 @@
                               Error.addSourceMessage(Error.UNIONTYPE_MISSING_TYPEVARS, list(Types.unparseType(ty)), info)
                             fail()
                           end
-                          
+
                           _  => begin
                               ()
                           end
@@ -1940,7 +1940,7 @@
                       end
                     (cache, env5, ih, store, dae, csets5, ci_state6, vars, oty, NONE(), eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = (@match SCode.R_ENUMERATION() = r)) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
@@ -1958,7 +1958,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
@@ -1981,7 +1981,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match false = valueEq(re, SCode.R_TYPE())
@@ -1996,7 +1996,7 @@
                           SCode.Restriction.R_PACKAGE(__)  => begin
                             false
                           end
-                          
+
                           _  => begin
                               if SCodeUtil.restrictionEqual(r, re)
                                     Mod.isInvariantMod(mod) && Mod.isInvariantDAEMod(mods)
@@ -2022,7 +2022,7 @@
                       end
                     (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
@@ -2042,14 +2042,14 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
-                  
+
                   (_, _, _, _, mods, _, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(__), modifications = mod), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
                       Error.addSourceMessage(Error.META_COMPLEX_TYPE_MOD, nil, info)
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT("list"), tSpec <|  nil(), NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
@@ -2061,7 +2061,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_LIST(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT("Option"), tSpec <|  nil(), NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
@@ -2072,7 +2072,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_OPTION(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT("tuple"), tSpecs, NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
@@ -2083,7 +2083,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_TUPLE(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT("array"), tSpec <|  nil(), NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
@@ -2094,7 +2094,7 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_ARRAY(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT("polymorphic"), Absyn.TPATH(Absyn.IDENT("Any"), NONE()) <|  nil(), NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
@@ -2103,19 +2103,19 @@
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_POLYMORPHIC(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (_, _, _, _, mods, _, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(path = Absyn.IDENT("polymorphic")), modifications = mod), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
                       Error.addSourceMessage(Error.META_POLYMORPHIC, list(className), info)
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(Absyn.IDENT(str), tSpecs, NONE()), modifications = mod, attributes = DA), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       str = Util.assoc(str, list(("List", "list"), ("Tuple", "tuple"), ("Array", "array")))
                       (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, oty, optDerAttr, outEqualityConstraint, outGraph) = instClassdef2(cache, env, ih, store, mods, pre, ci_state, className, SCode.DERIVED(Absyn.TCOMPLEX(Absyn.IDENT(str), tSpecs, NONE()), mod, DA), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, inCallingScope, graph, inSets, instSingleCref, comment, info, stopInst)
                     (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, oty, optDerAttr, outEqualityConstraint, outGraph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TCOMPLEX(cn, tSpecs, NONE()), modifications = mod, attributes = DA), _, _, _, _, inst_dims, impl, _, graph, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
@@ -2136,14 +2136,14 @@
                       bc = SOME(ty)
                     (cache, env, ih, store, DAE.emptyDae, csets, new_ci_state, nil, bc, oDA, NONE(), graph)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, SCode.DERIVED(typeSpec = tSpec && Absyn.TCOMPLEX(arrayDim = SOME(_))), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       cns = Dump.unparseTypeSpec(tSpec)
                       Error.addSourceMessage(Error.META_INVALID_COMPLEX_TYPE, list(cns), info)
                     fail()
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, SCode.DERIVED(typeSpec = tSpec && Absyn.TCOMPLEX(path = cn, typeSpecs = tSpecs)), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = listMember((AbsynUtil.pathString(cn), listLength(tSpecs) == 1), list(("tuple", false), ("array", true), ("Option", true), ("list", true)))
@@ -2151,7 +2151,7 @@
                       Error.addSourceMessage(Error.META_INVALID_COMPLEX_TYPE, list(cns), info)
                     fail()
                   end
-                  
+
                   (cache, env, _, _, _, _, _, _, SCode.DERIVED(Absyn.TPATH(path = cn)), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @shouldFail (_, _, _) = Lookup.lookupClass(cache, env, cn)
@@ -2160,7 +2160,7 @@
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(cns, scope_str), info)
                     fail()
                   end
-                  
+
                   (cache, env, _, _, _, _, _, _, SCode.DERIVED(Absyn.TPATH(path = cn)), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       @shouldFail (_, _, _) = Lookup.lookupClass(cache, env, cn)
@@ -2170,7 +2170,7 @@
                       Debug.trace(FGraph.printGraphStr(env))
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Inst.instClassdef failed")
@@ -2187,7 +2187,7 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, oty, optDerAttr, outEqualityConstraint, outGraph)
         end
 
-        function joinExtEquations(inEq::List{<:SCode.Equation}, inExtEq::List{<:SCode.Equation}, inCallingScope::InstTypes.CallingScope) ::List{SCode.Equation} 
+        function joinExtEquations(inEq::List{<:SCode.Equation}, inExtEq::List{<:SCode.Equation}, inCallingScope::InstTypes.CallingScope) ::List{SCode.Equation}
               local outEq::List{SCode.Equation}
 
               outEq = begin
@@ -2195,7 +2195,7 @@
                   (_, _, InstTypes.TYPE_CALL(__))  => begin
                     nil
                   end
-                  
+
                   _  => begin
                       listAppend(inEq, inExtEq)
                   end
@@ -2204,7 +2204,7 @@
           outEq
         end
 
-        function joinExtAlgorithms(inAlg::List{<:SCode.AlgorithmSection}, inExtAlg::List{<:SCode.AlgorithmSection}, inCallingScope::InstTypes.CallingScope) ::List{SCode.AlgorithmSection} 
+        function joinExtAlgorithms(inAlg::List{<:SCode.AlgorithmSection}, inExtAlg::List{<:SCode.AlgorithmSection}, inCallingScope::InstTypes.CallingScope) ::List{SCode.AlgorithmSection}
               local outAlg::List{SCode.AlgorithmSection}
 
               outAlg = begin
@@ -2212,7 +2212,7 @@
                   InstTypes.TYPE_CALL(__)  => begin
                     nil
                   end
-                  
+
                   _  => begin
                       listAppend(inAlg, inExtAlg)
                   end
@@ -2223,7 +2223,7 @@
 
          #= Function: instClassDefHelper
          MetaModelica extension. KS TODO: Document this function!!!! =#
-        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.PrefixType, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::Connect.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Type}, Connect.Sets, Option{SCode.Attributes}} 
+        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.PrefixType, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::Connect.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Type}, Connect.Sets, Option{SCode.Attributes}}
               local outAttr::Option{SCode.Attributes}
               local outSets::Connect.Sets
               local outType::List{DAE.Type}
@@ -2253,7 +2253,7 @@
                   (cache, env, ih,  nil(), _, _, _, localAccTypes, _)  => begin
                     (cache, env, ih, listReverse(localAccTypes), inSets, NONE())
                   end
-                  
+
                   (cache, env, ih, Absyn.TPATH(cn, _) <| restTypeSpecs, pre, dims, impl, localAccTypes, _)  => begin
                       @match (cache, (@match SCode.CLASS() = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(inInfo))
                       @match false = SCodeUtil.isFunction(c)
@@ -2262,14 +2262,14 @@
                       (cache, env, ih, localAccTypes, csets, _) = instClassDefHelper(cache, env, ih, restTypeSpecs, pre, dims, impl, localAccTypes, csets, inInfo)
                     (cache, env, ih, localAccTypes, csets, oDA)
                   end
-                  
+
                   (cache, env, ih, Absyn.TPATH(cn, _) <| restTypeSpecs, pre, dims, impl, localAccTypes, _)  => begin
                       (cache, ty, _) = Lookup.lookupType(cache, env, cn, NONE()) #= For functions, etc =#
                       localAccTypes = _cons(ty, localAccTypes)
                       (cache, env, ih, localAccTypes, csets, _) = instClassDefHelper(cache, env, ih, restTypeSpecs, pre, dims, impl, localAccTypes, inSets, inInfo)
                     (cache, env, ih, localAccTypes, csets, NONE())
                   end
-                  
+
                   (cache, env, ih, tSpec && Absyn.TCOMPLEX(p, _, _) <| restTypeSpecs, pre, dims, impl, localAccTypes, _)  => begin
                       id = AbsynUtil.pathString(p)
                       c = SCode.CLASS(id, SCode.defaultPrefixes, SCode.NOT_ENCAPSULATED(), SCode.NOT_PARTIAL(), SCode.R_TYPE(), SCode.DERIVED(tSpec, SCode.NOMOD(), SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NONFIELD())), SCode.noComment, AbsynUtil.dummyInfo)
@@ -2291,7 +2291,7 @@
           end RealSignal;
           Such classes can not have any other components,
           and can only inherit one basic type. =#
-        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}} 
+        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}}
               local outTypeVars::List{DAE.Var}
               local outTypesTypeOption::Option{DAE.Type}
               local outDae::DAE.DAElist #= contain functions =#
@@ -2334,12 +2334,12 @@
                       ErrorExt.rollBack("instBasictypeBaseclass")
                     (cache, ih, store, dae, SOME(ty), tys)
                   end
-                  
+
                   (_, _, _, _, SCode.EXTENDS(baseClassPath = path) <|  nil(),  nil(), _, _, _, _, _)  => begin
                       rollbackCheck(path) #= only rollback errors affecting basic types =#
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, SCode.EXTENDS(__) <|  nil(), _, mods, inst_dims, _, _, _)  => begin
                       @match false = listEmpty(inSCodeElementLst3)
                       ErrorExt.setCheckpoint("instBasictypeBaseclass2") #= rolled back or deleted inside call below =#
@@ -2358,10 +2358,10 @@
           (outCache, outIH, outStore, outDae #= contain functions =#, outTypesTypeOption, outTypeVars)
         end
 
-         #= 
+         #=
         Author BZ 2009-08
         Rollsback errors on builtin classes and deletes checkpoint for other classes. =#
-        function rollbackCheck(p::Absyn.Path)  
+        function rollbackCheck(p::Absyn.Path)
               _ = begin
                   local n::String
                 @matchcontinue p begin
@@ -2371,7 +2371,7 @@
                       ErrorExt.rollBack("instBasictypeBaseclass")
                     ()
                   end
-                  
+
                   _  => begin
                       ErrorExt.rollBack("instBasictypeBaseclass")
                     ()
@@ -2382,11 +2382,11 @@
                =#
         end
 
-         #= 
+         #=
         Author: BZ, 2009-02
         Helper function for instBasictypeBaseClass
         Handles the fail case rollbacks/deleteCheckpoint of errors. =#
-        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, inInfo::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#)  
+        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{<:List{<:DAE.Dimension}}, className::String, inInfo::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#)
               _ = begin
                   local m_1::DAE.Mod
                   local mods::DAE.Mod
@@ -2422,7 +2422,7 @@
                       Mutable.update(stopInst, true)
                     ()
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("instBasictypeBaseclass2")
                       ()
@@ -2436,7 +2436,7 @@
 
          #= This function is used by partialInstClassIn for instantiating local class
            definitions and inherited class definitions only. =#
-        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}} 
+        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{<:List{<:DAE.Dimension}}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local outVars::List{DAE.Var}
               local outState::ClassInf.SMNode
               local outIH::InnerOuter.InstHierarchy
@@ -2512,7 +2512,7 @@
                       (outCache, outEnv, outIH, _, _, _, outState, outVars, _, _) = instElementList(outCache, outEnv, outIH, UnitAbsyn.noStore, mod, inPrefix, outState, const_els, inInstDims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, false)
                     (outCache, outEnv, outIH, outState, outVars)
                   end
-                  
+
                   SCode.DERIVED(typeSpec = Absyn.TPATH(path = class_path, arrayDim = class_dims), modifications = class_mod)  => begin
                       info = SCodeUtil.elementInfo(inClass)
                       has_dims = ! (isNone(class_dims) || valueEq(class_dims, SOME(nil)))
@@ -2564,7 +2564,7 @@
         end
 
          #= Instantiates a list of elements. =#
-        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldsLst} 
+        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldsLst}
               local domainFieldsListOut::InstUtil.DomainFieldsLst = nil
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var}
@@ -2644,7 +2644,7 @@
          #= Takes a list of unsorted elements and a list of sorted elements, and returns
            a list of the sorted elements indices in the unsorted list. E.g.:
             getSortedElementOrdering({a, b, c}, {b, c, a}) => {2, 3, 1} =#
-        function getSortedElementOrdering(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inSortedElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{ModelicaInteger} 
+        function getSortedElementOrdering(inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inSortedElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}) ::List{ModelicaInteger}
               local outIndices::List{ModelicaInteger} = nil
 
               local index_map::List{Tuple{SCode.Element, ModelicaInteger}} = nil
@@ -2675,12 +2675,12 @@
           outIndices
         end
 
-        function getSortedElementOrdering_comp(inElement1::SCode.Element, inElement2::Tuple{<:SCode.Element, ModelicaInteger}) ::Bool 
+        function getSortedElementOrdering_comp(inElement1::SCode.Element, inElement2::Tuple{<:SCode.Element, ModelicaInteger}) ::Bool
               local outEqual::Bool = SCodeUtil.elementNameEqual(inElement1, Util.tuple21(inElement2))
           outEqual
         end
 
-        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt} 
+        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var} = nil
@@ -2731,7 +2731,7 @@
          #= Checks if an element has a conditional expression that evaluates to false,
            and adds it to the set of deleted components if it does. Otherwise the
            function does nothing. =#
-        function isDeletedComponent(element::Tuple{<:SCode.Element, DAE.Mod}, prefix::Prefix.PrefixType, stopOnError::Bool, env::FCore.Graph, cache::FCore.Cache) ::Tuple{Bool, FCore.Graph, FCore.Cache} 
+        function isDeletedComponent(element::Tuple{<:SCode.Element, DAE.Mod}, prefix::Prefix.PrefixType, stopOnError::Bool, env::FCore.Graph, cache::FCore.Cache) ::Tuple{Bool, FCore.Graph, FCore.Cache}
 
 
               local isDeleted::Bool
@@ -2787,10 +2787,10 @@
           (isDeleted, env, cache)
         end
 
-         #= 
+         #=
           This monster function instantiates an element of a class definition.  An
           element is either a class definition, a variable, or an import clause. =#
-        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt} 
+        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{<:List{<:DAE.Dimension}}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outVars::List{DAE.Var}
@@ -2893,7 +2893,7 @@
                   (_, _, _, _, _, _, _, (SCode.IMPORT(__), _), _, _, _, _, _)  => begin
                     (inCache, inEnv, inIH, inUnitStore, DAE.emptyDae, inSets, inState, nil, inGraph)
                   end
-                  
+
                   (_, _, _, _, _, _, _, (cls && SCode.CLASS(__), cmod), _, _, _, _, _)  => begin
                       if ! Mod.isEmptyMod(cmod)
                         env = FGraph.updateClass(inEnv, cls, inPrefix, cmod, FCore.CLS_UNTYPED(), inEnv)
@@ -2902,7 +2902,7 @@
                       end
                     (inCache, env, inIH, inUnitStore, DAE.emptyDae, inSets, inState, nil, inGraph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, (el && SCode.COMPONENT(name = name, typeSpec = Absyn.TPATH(__)), cmod), inst_dims, impl, _, graph, csets)  => begin
                       @match SCode.COMPONENT(name = name, prefixes = (@match SCode.PREFIXES(finalPrefix = final_prefix, innerOuter = io) = prefixes), attributes = (@match SCode.ATTR(arrayDims = ad) = attr), typeSpec = (@match Absyn.TPATH(path = t) = ts), modifications = m, comment = comment, condition = cond, info = info) = el
                       @match true = if Config.acceptParModelicaGrammar()
@@ -3005,7 +3005,7 @@
                       (_, ih, graph) = InnerOuter.handleInnerOuterEquations(io, DAE.emptyDae, ih, graph_new, graph)
                     (cache, env, ih, store, dae, csets, ci_state, vars, graph)
                   end
-                  
+
                   (cache, env, ih, store, mods, pre, ci_state, (comp && SCode.COMPONENT(name, prefixes && SCode.PREFIXES(finalPrefix = final_prefix, innerOuter = io), attr && SCode.ATTR(arrayDims = ad, connectorType = ct), ts && Absyn.TCOMPLEX(path = type_name), m, comment, cond, info), cmod), inst_dims, impl, _, graph, csets)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       if SCodeUtil.finalBool(final_prefix)
@@ -3039,7 +3039,7 @@
                       (_, ih, graph) = InnerOuter.handleInnerOuterEquations(io, DAE.emptyDae, ih, graph_new, graph)
                     (cache, env, ih, store, dae, csets, ci_state, vars, graph)
                   end
-                  
+
                   (cache, env, _, _, _, pre, ci_state, (SCode.COMPONENT(name = name, attributes = SCode.ATTR(variability = vt), typeSpec = Absyn.TPATH(t, _), info = info), _), _, _, _, _, _)  => begin
                       @shouldFail (_, _, _) = Lookup.lookupClass(cache, env, t)
                       s = AbsynUtil.pathString(t)
@@ -3051,7 +3051,7 @@
                       Debug.traceln("Lookup class failed:" + AbsynUtil.pathString(t))
                     fail()
                   end
-                  
+
                   (_, env, _, _, _, _, _, (comp, _), _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.instElement failed: " + SCodeDump.unparseElementStr(comp, SCodeDump.defaultOptions))
@@ -3110,7 +3110,7 @@
          #= never fail and *NEVER* display any error messages as this function
          prints non-true error messages and even so instElementList dependency
          analysis might work fine and still instantiate. =#
-        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3124,7 +3124,7 @@
                       ErrorExt.rollBack("updateCompeltsMods") #= roll back any errors =#
                     (outCache, outEnv, outIH, outComponents)
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("updateCompeltsMods") #= roll back any errors =#
                       (inCache, inEnv, inIH, inComponents)
@@ -3144,7 +3144,7 @@
           This function updates component modifiers to typed modifiers.
           Typed modifiers are needed  to merge modifiers and to be able to
           fully instantiate a component. =#
-        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}} 
+        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3180,12 +3180,12 @@
                   (cache, env, ih, _,  nil(), _, _)  => begin
                     (cache, env, ih, nil)
                   end
-                  
+
                   (cache, env, ih, pre, elMod && (_, DAE.NOMOD(__)) <| xs, ci_state, impl)  => begin
                       (cache, env, ih, res) = updateCompeltsMods_dispatch(cache, env, ih, pre, xs, ci_state, impl)
                     (cache, env, ih, _cons(elMod, res))
                   end
-                  
+
                   (cache, env, ih, pre, (comp, cmod && DAE.REDECL(element = redComp)) <| xs, ci_state, impl)  => begin
                       info = SCodeUtil.elementInfo(redComp)
                       umod = Mod.unelabMod(cmod)
@@ -3203,7 +3203,7 @@
                       (cache, env3, ih, res) = updateCompeltsMods_dispatch(cache, env2, ih, pre, xs, ci_state, impl)
                     (cache, env3, ih, _cons((comp, cmod_1), res))
                   end
-                  
+
                   (cache, env, ih, pre, (comp, cmod && DAE.MOD(__)) <| xs, ci_state, impl)  => begin
                       @match false = Mod.isUntypedMod(cmod)
                       name = SCodeUtil.elementName(comp)
@@ -3213,7 +3213,7 @@
                       (cache, env3, ih, res) = updateCompeltsMods_dispatch(cache, env2, ih, pre, xs, ci_state, impl)
                     (cache, env3, ih, _cons((comp, cmod), res))
                   end
-                  
+
                   (cache, env, ih, pre, (comp, cmod && DAE.MOD(__)) <| xs, ci_state, impl)  => begin
                       info = SCodeUtil.elementInfo(comp)
                       umod = Mod.unelabMod(cmod)
@@ -3258,7 +3258,7 @@
          #= This function takes a DAE.Mod and an SCode.Element and if the modification
            contains a redeclare of that element, the type is changed and an updated
            element is returned. =#
-        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element, DAE.Mod} 
+        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element, DAE.Mod}
               local outMod::DAE.Mod = DAE.NOMOD()
               local outElement::SCode.Element = inElement
               local outIH::InnerOuter.InstHierarchy = inIH
@@ -3312,7 +3312,7 @@
                               m = Mod.merge(m, inCmod, redecl_name)
                             m
                           end
-                          
+
                           _  => begin
                                  #=  No constraining type on comp, throw away modifiers prior to redeclaration:
                                  =#
@@ -3327,7 +3327,7 @@
                       outElement = SCodeUtil.setComponentMod(outElement, mod)
                     (outElement, m)
                   end
-                  
+
                   (SCode.CLASS(__), SCode.CLASS(__))  => begin
                        #=  Redeclaration of class.
                        =#
@@ -3335,7 +3335,7 @@
                       (outCache, outEnv, outIH) = updateComponentsInEnv(inCache, inEnv, inIH, inPrefix, inMod, list(Absyn.CREF_IDENT(inElement.name, nil)), inState, inImpl)
                     (inElement, redecl_mod)
                   end
-                  
+
                   (SCode.CLASS(__), SCode.COMPONENT(__))  => begin
                        #=  Local redeclaration of class type path is an id.
                        =#
@@ -3344,7 +3344,7 @@
                       (outCache, outEnv, outIH) = updateComponentsInEnv(inCache, inEnv, inIH, inPrefix, inMod, list(Absyn.CREF_IDENT(name, nil)), inState, inImpl)
                     (inElement, redecl_mod)
                   end
-                  
+
                   (SCode.CLASS(__), SCode.COMPONENT(__))  => begin
                        #=  Local redeclaration of class, type is qualified.
                        =#
@@ -3353,7 +3353,7 @@
                       (outCache, outEnv, outIH) = updateComponentsInEnv(inCache, inEnv, inIH, inPrefix, inMod, list(Absyn.CREF_IDENT(name, nil)), inState, inImpl)
                     (inElement, redecl_mod)
                   end
-                  
+
                   _  => begin
                       (inElement, DAE.NOMOD())
                   end
@@ -3364,7 +3364,7 @@
 
          #= Helper function to redeclareType, propagates attributes from the old
            component to the new according to the rules for redeclare. =#
-        function propagateRedeclCompAttr(inCache::FCore.Cache, inEnv::FCore.Graph, inOldComponent::SCode.Element, inNewComponent::SCode.Element) ::Tuple{FCore.Cache, SCode.Element} 
+        function propagateRedeclCompAttr(inCache::FCore.Cache, inEnv::FCore.Graph, inOldComponent::SCode.Element, inNewComponent::SCode.Element) ::Tuple{FCore.Cache, SCode.Element}
               local outComponent::SCode.Element
               local outCache::FCore.Cache = inCache
 
@@ -3392,7 +3392,7 @@
           component can be instantiated fully and the type of the component can be
           determined. The type is added/updated to the environment such that other
           components can use it when they are instantiated. =#
-        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy} 
+        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = env
               local outCache::FCore.Cache = cache
@@ -3411,7 +3411,7 @@
         end
 
          #= Routine to lazily create the hashtable as it usually unused =#
-        function getUpdatedCompsHashTable(optHT::Option{<:HashTable5.HashTable}) ::HashTable5.HashTable 
+        function getUpdatedCompsHashTable(optHT::Option{<:HashTable5.HashTable}) ::HashTable5.HashTable
               local ht::HashTable5.HashTable
 
               ht = begin
@@ -3419,7 +3419,7 @@
                   SOME(ht)  => begin
                     ht
                   end
-                  
+
                   _  => begin
                       HashTable5.emptyHashTableSized(BaseHashTable.lowBucketSize)
                   end
@@ -3429,7 +3429,7 @@
         end
 
          #= Helper function to updateComponentsInEnv. Does the work for one variable. =#
-        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
+        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}}
               local outUpdatedComps::Option{HashTable5.HashTable}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3540,7 +3540,7 @@
                       (cache, env_1, ih, updatedComps) = updateComponentInEnv2(cache, env2, cenv, ih, pre, t, n, ad, cl, attr, pf, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, visibility), info, m, cmod, mods, cref, ci_state, impl, updatedComps)
                     (cache, env_1, ih, SOME(updatedComps))
                   end
-                  
+
                   (cache, env, ih, _, DAE.REDECL(element = SCode.CLASS(name = name)), _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match true = stringEq(name, id)
@@ -3550,14 +3550,14 @@
                       updatedComps = BaseHashTable.add((cref, 0), updatedComps)
                     (cache, env, ih, SOME(updatedComps))
                   end
-                  
+
                   (cache, env, ih, _, _, _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       (cache, _, _, _, is, _) = Lookup.lookupIdent(cache, env, id)
                       @match true = FCore.isTyped(is) #= If InstStatus is typed, return =#
                     (cache, env, ih, inUpdatedComps)
                   end
-                  
+
                   (cache, env, ih, _, mods, _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match (cache, _, SCode.COMPONENT(n, (@match SCode.PREFIXES(innerOuter = io, visibility = visibility) = pf), (@match SCode.ATTR(ad, ct, prl1, var1, dir) = attr), Absyn.TPATH(t, _), m, _, cond, info), cmod, _, idENV) = Lookup.lookupIdent(cache, env, id)
@@ -3573,11 +3573,11 @@
                       (cache, env_1, ih, updatedComps) = updateComponentInEnv2(cache, env2, cenv, ih, pre, t, n, ad, cl, attr, pf, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, visibility), info, m, cmod, mods, cref, ci_state, impl, updatedComps)
                     (cache, env_1, ih, SOME(updatedComps))
                   end
-                  
+
                   (cache, env, ih, _, _, _, _, _, _, _)  => begin
                     (cache, env, ih, inUpdatedComps)
                   end
-                  
+
                   (_, env, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.updateComponentInEnv failed, cref = " + Dump.printComponentRefStr(cref))
@@ -3586,7 +3586,7 @@
                       Debug.traceln(" prefix: " + PrefixUtil.printPrefixStr(pre))
                     fail()
                   end
-                  
+
                   _  => begin
                       (inCache, inEnv, inIH, inUpdatedComps)
                   end
@@ -3641,7 +3641,7 @@
 
          #=  Helper function, checks if the component was already instantiated.
           If it was, don't do it again. =#
-        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
+        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable}
               local outUpdatedComps::HashTable5.HashTable
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -3658,7 +3658,7 @@
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
-        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.SMNode, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable} 
+        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.SMNode, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable}
               local outUpdatedComps::HashTable5.HashTable = inUpdatedComps
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
@@ -3715,7 +3715,7 @@
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
-        function updateComponentInEnv3(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::SCode.Mod, inImpl::Bool, inModScope::Mod.ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod} 
+        function updateComponentInEnv3(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::SCode.Mod, inImpl::Bool, inModScope::Mod.ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -3732,7 +3732,7 @@
                                function will be accepted. =#
                     (cache, mod)
                   end
-                  
+
                   _  => begin
                         ErrorExt.rollBack("updateComponentInEnv3")
                       fail()
@@ -3755,7 +3755,7 @@
         end
 
          #= This function takes a SCode.Program and builds an environment. =#
-        function makeEnvFromProgram(prog::SCode.Program) ::Tuple{FCore.Cache, FCore.Graph} 
+        function makeEnvFromProgram(prog::SCode.Program) ::Tuple{FCore.Cache, FCore.Graph}
               local env_1::FCore.Graph
               local outCache::FCore.Cache
 
@@ -3774,7 +3774,7 @@
           Transforms a class name to its fully qualified name by investigating the environment.
           For instance, the model Resistor in Modelica.Electrical.Analog.Basic will given the
           correct environment have the fully qualified name: Modelica.Electrical.Analog.Basic.Resistor =#
-        function makeFullyQualified(cache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path) ::Tuple{FCore.Cache, Absyn.Path} 
+        function makeFullyQualified(cache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path) ::Tuple{FCore.Cache, Absyn.Path}
 
 
 
@@ -3786,11 +3786,11 @@
                       (cache, path) = makeFullyQualifiedIdent(cache, inEnv, path.name, path)
                     (cache, path)
                   end
-                  
+
                   Absyn.FULLYQUALIFIED(__)  => begin
                     (cache, path)
                   end
-                  
+
                   Absyn.QUALIFIED(__)  => begin
                        #=  do NOT fully quallify again a fully qualified path!
                        =#
@@ -3806,7 +3806,7 @@
           (cache, path)
         end
 
-        function makeFullyQualifiedFromQual(cache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path) ::Tuple{FCore.Cache, Absyn.Path} 
+        function makeFullyQualifiedFromQual(cache::FCore.Cache, inEnv::FCore.Graph, path::Absyn.Path) ::Tuple{FCore.Cache, Absyn.Path}
 
 
 
@@ -3828,21 +3828,21 @@
                       path_2 = makeFullyQualified2(env_1, name)
                     (cache, AbsynUtil.makeFullyQualified(path_2))
                   end
-                  
+
                   _  => begin
                       crPath = ComponentReference.pathToCref(path)
                       (cache, _, _, _, _, _, env, _, name) = Lookup.lookupVarInternal(cache, inEnv, crPath, InstTypes.SEARCH_ALSO_BUILTIN())
                       path3 = makeFullyQualified2(env, name)
                     (cache, AbsynUtil.makeFullyQualified(path3))
                   end
-                  
+
                   _  => begin
                       crPath = ComponentReference.pathToCref(path)
                       (cache, env, _, _, _, _, _, _, name) = Lookup.lookupVarInPackages(cache, inEnv, crPath, nil, Mutable.create(false))
                       path3 = makeFullyQualified2(env, name)
                     (cache, AbsynUtil.makeFullyQualified(path3))
                   end
-                  
+
                   _  => begin
                       (cache, path)
                   end
@@ -3855,7 +3855,7 @@
           Transforms a class name to its fully qualified name by investigating the environment.
           For instance, the model Resistor in Modelica.Electrical.Analog.Basic will given the
           correct environment have the fully qualified name: Modelica.Electrical.Analog.Basic.Resistor =#
-        function makeFullyQualifiedIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, inPath::Absyn.Path = Absyn.IDENT("")) ::Tuple{FCore.Cache, Absyn.Path} 
+        function makeFullyQualifiedIdent(inCache::FCore.Cache, inEnv::FCore.Graph, ident::String, inPath::Absyn.Path = Absyn.IDENT("")) ::Tuple{FCore.Cache, Absyn.Path}
               local outPath::Absyn.Path
               local outCache::FCore.Cache
 
@@ -3890,7 +3890,7 @@
                       path_2 = makeFullyQualified2(env_1, name)
                     (cache, AbsynUtil.makeFullyQualified(path_2))
                   end
-                  
+
                   (cache, env, s)  => begin
                       r = FGraph.lastScopeRef(env)
                       @match false = FNode.isRefTop(r)
@@ -3899,32 +3899,32 @@
                       @match SOME(path_2) = FGraph.getScopePath(env)
                     (cache, AbsynUtil.makeFullyQualified(path_2))
                   end
-                  
+
                   (cache, env, s)  => begin
                       (cache, _, env_1) = Lookup.lookupTypeIdent(cache, env, s, NONE())
                       path_2 = makeFullyQualified2(env_1, s, inPath)
                     (cache, AbsynUtil.makeFullyQualified(path_2))
                   end
-                  
+
                   (cache, env, _)  => begin
                       (cache, _, _, _, _, _, env, _, name) = Lookup.lookupVarInternalIdent(cache, env, ident, nil, InstTypes.SEARCH_ALSO_BUILTIN())
                       path3 = makeFullyQualified2(env, name)
                     (cache, AbsynUtil.makeFullyQualified(path3))
                   end
-                  
+
                   (cache, env, _)  => begin
                       (cache, env, _, _, _, _, _, _, name) = Lookup.lookupVarInPackagesIdent(cache, env, ident, nil, nil, Mutable.create(false))
                       path3 = makeFullyQualified2(env, name)
                     (cache, AbsynUtil.makeFullyQualified(path3))
                   end
-                  
+
                   _  => begin
                       (inCache, begin
                         @match inPath begin
                           Absyn.IDENT("")  => begin
                             Absyn.IDENT(ident)
                           end
-                          
+
                           _  => begin
                               inPath
                           end
@@ -3946,7 +3946,7 @@
           (outCache, outPath)
         end
 
-        function makeFullyQualifiedIdentCheckBuiltin(ident::String) ::Tuple{Absyn.Path, Bool} 
+        function makeFullyQualifiedIdentCheckBuiltin(ident::String) ::Tuple{Absyn.Path, Bool}
               local isKnownBuiltin::Bool = true
               local path::Absyn.Path
 
@@ -3955,35 +3955,35 @@
                   "Boolean"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("Boolean"))
                   end
-                  
+
                   "Integer"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("Integer"))
                   end
-                  
+
                   "Real"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("Real"))
                   end
-                  
+
                   "String"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("String"))
                   end
-                  
+
                   "EnumType"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("EnumType"))
                   end
-                  
+
                   "assert"  => begin
                     Absyn.IDENT("assert")
                   end
-                  
+
                   "reinit"  => begin
                     Absyn.IDENT("reinit")
                   end
-                  
+
                   "smooth"  => begin
                     Absyn.IDENT("smooth")
                   end
-                  
+
                   "list"  => begin
                        #=  Builtin functions are handled after lookup of class (in case it is shadowed)
                        =#
@@ -3994,27 +3994,27 @@
                       isKnownBuiltin = Config.acceptMetaModelicaGrammar()
                     Absyn.IDENT("list")
                   end
-                  
+
                   "Option"  => begin
                       isKnownBuiltin = Config.acceptMetaModelicaGrammar()
                     Absyn.IDENT("Option")
                   end
-                  
+
                   "tuple"  => begin
                       isKnownBuiltin = Config.acceptMetaModelicaGrammar()
                     Absyn.IDENT("tuple")
                   end
-                  
+
                   "polymorphic"  => begin
                       isKnownBuiltin = Config.acceptMetaModelicaGrammar()
                     Absyn.IDENT("polymorphic")
                   end
-                  
+
                   "array"  => begin
                       isKnownBuiltin = Config.acceptMetaModelicaGrammar()
                     Absyn.IDENT("array")
                   end
-                  
+
                   _  => begin
                         isKnownBuiltin = false
                       Absyn.IDENT("")
@@ -4026,7 +4026,7 @@
 
          #= This is a utility used to do instantiation of list
           of things, collecting the result in another list. =#
-        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType} 
+        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inState::ClassInf.SMNode, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, Connect.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outState::ClassInf.SMNode
               local outSets::Connect.Sets
@@ -4060,7 +4060,7 @@
                   (cache, env, ih, _, csets, ci_state, _,  nil(), _, _, graph)  => begin
                     (cache, env, ih, DAE.emptyDae, csets, ci_state, graph)
                   end
-                  
+
                   (cache, env, ih, pre, csets, ci_state, _, e <| es, impl, _, graph)  => begin
                       (cache, env_1, ih, dae1, csets_1, ci_state_1, graph) = instFunc(cache, env, ih, pre, csets, ci_state, e, impl, unrollForLoops, graph)
                       (cache, env_2, ih, dae2, csets_2, ci_state_2, graph) = instList(cache, env_1, ih, pre, csets_1, ci_state_1, instFunc, es, impl, unrollForLoops, graph)
@@ -4072,7 +4072,7 @@
           (outCache, outEnv, outIH, outDae, outSets, outState, outGraph)
         end
 
-        function instConstraints(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inConstraints::List{<:SCode.ConstraintSection}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.SMNode} 
+        function instConstraints(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inConstraints::List{<:SCode.ConstraintSection}, inImpl::Bool) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist, ClassInf.SMNode}
               local outState::ClassInf.SMNode
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
@@ -4092,14 +4092,14 @@
                   (_, _, _, _,  nil(), _)  => begin
                     (inCache, inEnv, DAE.emptyDae, inState)
                   end
-                  
+
                   (_, _, _, _, constr <| rest, _)  => begin
                       (cache, env1, constraints_1, ci_state) = InstSection.instConstraint(inCache, inEnv, inPrefix, inState, constr, inImpl)
                       (cache, env2, constraints_2, ci_state) = instConstraints(cache, env1, inPrefix, ci_state, rest, inImpl)
                       dae = DAEUtil.joinDaes(constraints_1, constraints_2)
                     (cache, env2, dae, ci_state)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Inst.instConstraints failed\\n")
@@ -4110,7 +4110,7 @@
           (outCache, outEnv, outDae, outState)
         end
 
-        function instClassAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
+        function instClassAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist}
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -4124,13 +4124,13 @@
                   (cache, env, _,  nil(), _, _)  => begin
                     (cache, env, DAE.emptyDae)
                   end
-                  
+
                   (_, _, _, _, _, _)  => begin
                       clsAttrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(NONE(), NONE(), NONE(), NONE()))))
                       (cache, env, dae) = instClassAttributes2(inCache, inEnv, inPrefix, inAttrs, inBoolean, inInfo, clsAttrs)
                     (cache, env, dae)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Inst.instClassAttributes failed\\n")
@@ -4141,7 +4141,7 @@
           (outCache, outEnv, outDae)
         end
 
-        function instClassAttributes2(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo, inClsAttrs::DAE.DAElist) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist} 
+        function instClassAttributes2(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inAttrs::List{<:Absyn.NamedArg}, inBoolean::Bool, inInfo::SourceInfo, inClsAttrs::DAE.DAElist) ::Tuple{FCore.Cache, FCore.Graph, DAE.DAElist}
               local outDae::DAE.DAElist
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -4163,7 +4163,7 @@
                   (cache, env, _,  nil(), _, _, clsAttrs)  => begin
                     (cache, env, clsAttrs)
                   end
-                  
+
                   (cache, env, pre, na <| rest, impl, _, clsAttrs)  => begin
                       @match Absyn.NAMEDARG(attrName, attrExp) = na
                       (cache, outExp, _) = Static.elabExp(cache, env, attrExp, impl, false, pre, inInfo)
@@ -4171,7 +4171,7 @@
                       (cache, env_2, clsAttrs) = instClassAttributes2(cache, env, pre, rest, impl, inInfo, clsAttrs)
                     (cache, env_2, clsAttrs)
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.OPTIMICA_ERROR, list("Class Attributes allowed only for Optimization classes."))
                       fail()
@@ -4182,7 +4182,7 @@
           (outCache, outEnv, outDae)
         end
 
-        function insertClassAttribute(inAttrs::DAE.DAElist, attrName::Absyn.Ident, inAttrExp::DAE.Exp) ::DAE.DAElist 
+        function insertClassAttribute(inAttrs::DAE.DAElist, attrName::Absyn.Ident, inAttrExp::DAE.Exp) ::DAE.DAElist
               local outAttrs::DAE.DAElist
 
               outAttrs = begin
@@ -4197,25 +4197,25 @@
                       attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(SOME(inAttrExp), objectiveIntegrandE, startTimeE, finalTimeE))))
                     attrs
                   end
-                  
+
                   (attrs, "objectiveIntegrand", _)  => begin
                       @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)))) = attrs
                       attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, SOME(inAttrExp), startTimeE, finalTimeE))))
                     attrs
                   end
-                  
+
                   (attrs, "startTime", _)  => begin
                       @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)))) = attrs
                       attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, SOME(inAttrExp), finalTimeE))))
                     attrs
                   end
-                  
+
                   (attrs, "finalTime", _)  => begin
                       @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)))) = attrs
                       attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, SOME(inAttrExp)))))
                     attrs
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Inst.insertClassAttribute failed\\n")
@@ -4226,12 +4226,12 @@
           outAttrs
         end
 
-         #= 
+         #=
         Author BZ 2008-06,
         Instantiate a class, but _allways_ as inner class. This due to that we do not want flow equations equal to zero.
         Called from Interactive.mo, boschsection.
          =#
-        function instantiateBoschClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instantiateBoschClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -4259,14 +4259,14 @@
                       Error.addMessage(Error.NO_CLASSES_LOADED, nil)
                     fail()
                   end
-                  
+
                   (cache, ih, cdecls && _ <| _, path && Absyn.IDENT(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
                       (cache, env_2, ih, dae) = instBoschClassInProgram(cache, env_1, ih, cdecls, path)
                     (cache, env_2, ih, dae)
                   end
-                  
+
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
@@ -4275,7 +4275,7 @@
                       _ = AbsynUtil.pathString(path)
                     (cache, env_2, ih, dae)
                   end
-                  
+
                   (_, _, _, path)  => begin
                       cname_str = AbsynUtil.pathString(path)
                       Error.addMessage(Error.ERROR_FLATTENING, list(cname_str))
@@ -4290,7 +4290,7 @@
         end
 
          #= Helper function for instantiateBoschClass =#
-        function instBoschClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist} 
+        function instBoschClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
               local outDae::DAE.DAElist
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -4313,13 +4313,13 @@
                       (cache, env_1, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                     (cache, env_1, ih, dae)
                   end
-                  
+
                   (cache, env, ih, SCode.CLASS(name = name1) <| cs, path && Absyn.IDENT(name = name2))  => begin
                       @match false = stringEq(name1, name2)
                       (cache, env, ih, dae) = instBoschClassInProgram(cache, env, ih, cs, path)
                     (cache, env, ih, dae)
                   end
-                  
+
                   (cache, env, ih,  nil(), _)  => begin
                     (cache, env, ih, DAE.emptyDae)
                   end
@@ -4336,7 +4336,7 @@
          - one (first output) to represent the redeclaration of
                               'current' class (class-name equal to path)
          - two (second output) to represent any other modifier. =#
-        function modifyInstantiateClass(inMod::DAE.Mod, path::Absyn.Path) ::Tuple{DAE.Mod, DAE.Mod} 
+        function modifyInstantiateClass(inMod::DAE.Mod, path::Absyn.Path) ::Tuple{DAE.Mod, DAE.Mod}
               local omod2::DAE.Mod
               local omod1::DAE.Mod
 
@@ -4350,7 +4350,7 @@
                           (DAE.NOMOD(), inMod)
                         end
                   end
-                  
+
                   _  => begin
                       (DAE.NOMOD(), inMod)
                   end
@@ -4365,7 +4365,7 @@
          But also instantiate the declared type, if any.
          If it fails (declarations of array dimensions using
          the size of itself) it will just remove the element. =#
-        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.SMNode, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{<:List{<:DAE.Dimension}}, pre::Prefix.PrefixType, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}} 
+        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.SMNode, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{<:List{<:DAE.Dimension}}, pre::Prefix.PrefixType, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}}
               local o1::List{Absyn.ComponentRef}
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -4410,7 +4410,7 @@
                       @match true = i1 == i2
                     (cache, env, ih, store, cl2)
                   end
-                  
+
                   (cache, env, ih, store, cl1, c1 && Absyn.CREF_IDENT(name = n), sty, state, attr && SCode.ATTR(arrayDims = ad, connectorType = ct, parallelism = prl1, variability = var1, direction = dir), _, _, inst_dims, _, _, _, _)  => begin
                       ErrorExt.setCheckpoint("Inst.removeSelfReferenceAndUpdate")
                       cl2 = InstUtil.removeCrefFromCrefs(cl1, c1)
@@ -4427,12 +4427,12 @@
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, cl1, c1 && Absyn.CREF_IDENT(name = n), sty, state, attr && SCode.ATTR(arrayDims = ad, connectorType = ct, parallelism = prl1, variability = var1, direction = dir), _, _, inst_dims, _, _, _, _)  => begin
                       ErrorExt.setCheckpoint("Inst.removeSelfReferenceAndUpdate")
                       cl2 = InstUtil.removeCrefFromCrefs(cl1, c1)
@@ -4449,12 +4449,12 @@
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, cl1, c1 && Absyn.CREF_IDENT(name = n), sty, state, attr && SCode.ATTR(arrayDims = ad, connectorType = ct, parallelism = prl1, variability = var1, direction = dir), _, _, inst_dims, _, _, _, _)  => begin
                       ErrorExt.setCheckpoint("Inst.removeSelfReferenceAndUpdate")
                       cl2 = InstUtil.removeCrefFromCrefs(cl1, c1)
@@ -4471,12 +4471,12 @@
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, cl1, c1 && Absyn.CREF_IDENT(name = n), sty, state, attr && SCode.ATTR(arrayDims = ad, connectorType = ct, parallelism = prl1, variability = var1, direction = dir), _, _, inst_dims, _, _, _, _)  => begin
                       ErrorExt.setCheckpoint("Inst.removeSelfReferenceAndUpdate")
                       cl2 = InstUtil.removeCrefFromCrefs(cl1, c1)
@@ -4492,12 +4492,12 @@
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, cl1, c1, _, _, _, _, _, _, _, _, _, _)  => begin
                       cl2 = InstUtil.removeCrefFromCrefs(cl1, c1)
                     (cache, env, ih, store, cl2)
@@ -4509,7 +4509,7 @@
 
          #= author: PA
           Help function to updateComponentsInEnv. =#
-        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}} 
+        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}}
               local outUpdatedComps::Option{HashTable5.HashTable} = inUpdatedComps
               local outIH::InnerOuter.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
@@ -4531,7 +4531,7 @@
         end
 
          #= help function to makeFullyQualified =#
-        function makeFullyQualified2(env::FCore.Graph, name::String, cachedPath::Absyn.Path = Absyn.IDENT("")) ::Absyn.Path 
+        function makeFullyQualified2(env::FCore.Graph, name::String, cachedPath::Absyn.Path = Absyn.IDENT("")) ::Absyn.Path
               local path::Absyn.Path
 
               local scope::Absyn.Path
@@ -4547,7 +4547,7 @@
                     Absyn.IDENT("")  => begin
                       Absyn.IDENT(name)
                     end
-                    
+
                     _  => begin
                         cachedPath
                     end
@@ -4558,7 +4558,7 @@
         end
 
          #= Lookup table to avoid memory allocation of common built-in function calls =#
-        function makeFullyQualified2Builtin(ident::String, cachedPath::Absyn.Path) ::Absyn.Path 
+        function makeFullyQualified2Builtin(ident::String, cachedPath::Absyn.Path) ::Absyn.Path
               local path::Absyn.Path
 
                #=  TODO: Have annotation asserting that this is a switch-statement
@@ -4568,322 +4568,322 @@
                   "abs"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("abs"))
                   end
-                  
+
                   "acos"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("acos"))
                   end
-                  
+
                   "activeState"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("activeState"))
                   end
-                  
+
                   "actualStream"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("actualStream"))
                   end
-                  
+
                   "asin"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("asin"))
                   end
-                  
+
                   "atan"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("atan"))
                   end
-                  
+
                   "atan2"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("atan2"))
                   end
-                  
+
                   "backSample"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("backSample"))
                   end
-                  
+
                   "cardinality"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("cardinality"))
                   end
-                  
+
                   "cat"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("cat"))
                   end
-                  
+
                   "ceil"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("ceil"))
                   end
-                  
+
                   "change"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("change"))
                   end
-                  
+
                   "classDirectory"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("classDirectory"))
                   end
-                  
+
                   "constrain"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("constrain"))
                   end
-                  
+
                   "cos"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("cos"))
                   end
-                  
+
                   "cosh"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("cosh"))
                   end
-                  
+
                   "cross"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("cross"))
                   end
-                  
+
                   "delay"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("delay"))
                   end
-                  
+
                   "der"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("der"))
                   end
-                  
+
                   "diagonal"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("diagonal"))
                   end
-                  
+
                   "div"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("div"))
                   end
-                  
+
                   "edge"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("edge"))
                   end
-                  
+
                   "exp"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("exp"))
                   end
-                  
+
                   "fill"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("fill"))
                   end
-                  
+
                   "firstTick"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("firstTick"))
                   end
-                  
+
                   "floor"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("floor"))
                   end
-                  
+
                   "getInstanceName"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("getInstanceName"))
                   end
-                  
+
                   "hold"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("hold"))
                   end
-                  
+
                   "homotopy"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("homotopy"))
                   end
-                  
+
                   "identity"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("identity"))
                   end
-                  
+
                   "inStream"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("inStream"))
                   end
-                  
+
                   "initial"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("initial"))
                   end
-                  
+
                   "initialState"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("initialState"))
                   end
-                  
+
                   "integer"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("integer"))
                   end
-                  
+
                   "interval"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("interval"))
                   end
-                  
+
                   "intAbs"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("intAbs"))
                   end
-                  
+
                   "linspace"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("linspace"))
                   end
-                  
+
                   "log"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("log"))
                   end
-                  
+
                   "log10"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("log10"))
                   end
-                  
+
                   "matrix"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("matrix"))
                   end
-                  
+
                   "max"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("max"))
                   end
-                  
+
                   "min"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("min"))
                   end
-                  
+
                   "mod"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("mod"))
                   end
-                  
+
                   "ndims"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("ndims"))
                   end
-                  
+
                   "noClock"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("noClock"))
                   end
-                  
+
                   "noEvent"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("noEvent"))
                   end
-                  
+
                   "ones"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("ones"))
                   end
-                  
+
                   "outerProduct"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("outerProduct"))
                   end
-                  
+
                   "pre"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("pre"))
                   end
-                  
+
                   "previous"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("previous"))
                   end
-                  
+
                   "print"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("print"))
                   end
-                  
+
                   "product"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("product"))
                   end
-                  
+
                   "realAbs"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("realAbs"))
                   end
-                  
+
                   "rem"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("rem"))
                   end
-                  
+
                   "rooted"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("rooted"))
                   end
-                  
+
                   "sample"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("sample"))
                   end
-                  
+
                   "scalar"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("scalar"))
                   end
-                  
+
                   "semilinear"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("semilinear"))
                   end
-                  
+
                   "shiftSample"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("shiftSample"))
                   end
-                  
+
                   "sign"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("sign"))
                   end
-                  
+
                   "sin"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("sin"))
                   end
-                  
+
                   "sinh"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("sinh"))
                   end
-                  
+
                   "size"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("size"))
                   end
-                  
+
                   "skew"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("skew"))
                   end
-                  
+
                   "smooth"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("smooth"))
                   end
-                  
+
                   "spatialDistribution"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("spatialDistribution"))
                   end
-                  
+
                   "sqrt"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("sqrt"))
                   end
-                  
+
                   "subSample"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("subSample"))
                   end
-                  
+
                   "symmetric"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("symmetric"))
                   end
-                  
+
                   "tan"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("tan"))
                   end
-                  
+
                   "tanh"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("tanh"))
                   end
-                  
+
                   "terminal"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("terminal"))
                   end
-                  
+
                   "ticksInState"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("ticksInState"))
                   end
-                  
+
                   "timeInState"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("timeInState"))
                   end
-                  
+
                   "transition"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("transition"))
                   end
-                  
+
                   "transpose"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("transpose"))
                   end
-                  
+
                   "vector"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("vector"))
                   end
-                  
+
                   "zeros"  => begin
                     Absyn.FULLYQUALIFIED(Absyn.IDENT("zeros"))
                   end
-                  
+
                   _  => begin
                       begin
                         @match cachedPath begin
                           Absyn.IDENT("")  => begin
                             Absyn.IDENT(ident)
                           end
-                          
+
                           _  => begin
                               cachedPath
                           end
@@ -4895,7 +4895,7 @@
           path
         end
 
-        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.MMRef) ::Tuple{FCore.Cache, FCore.Graph} 
+        function getCachedInstance(cache::FCore.Cache, env::FCore.Graph, name::String, ref::FCore.MMRef) ::Tuple{FCore.Cache, FCore.Graph}
 
 
 
@@ -4922,7 +4922,7 @@
           (cache, env)
         end
 
-        function generateCachePath(env::FCore.Graph, cls::SCode.Element, prefix::Prefix.PrefixType, callScope::InstTypes.CallingScope) ::Absyn.Path 
+        function generateCachePath(env::FCore.Graph, cls::SCode.Element, prefix::Prefix.PrefixType, callScope::InstTypes.CallingScope) ::Absyn.Path
               local cachePath::Absyn.Path
 
               local name::String
@@ -4932,7 +4932,7 @@
           cachePath
         end
 
-        function generatePrefixStr(inPrefix::Prefix.PrefixType) ::String 
+        function generatePrefixStr(inPrefix::Prefix.PrefixType) ::String
               local str::String
 
               try
@@ -4943,14 +4943,14 @@
           str
         end
 
-        function showCacheInfo(inMsg::String, inPath::Absyn.Path)  
+        function showCacheInfo(inMsg::String, inPath::Absyn.Path)
               if Flags.isSet(Flags.SHOW_INST_CACHE_INFO)
                 print(inMsg + AbsynUtil.pathString(inPath) + "\\n")
               end
         end
 
          #= Merges the function's comments from inherited classes =#
-        function instFunctionAnnotations(comments::List{<:SCode.Comment}, state::ClassInf.SMNode) ::DAE.DAElist 
+        function instFunctionAnnotations(comments::List{<:SCode.Comment}, state::ClassInf.SMNode) ::DAE.DAElist
               local dae::DAE.DAElist = DAE.emptyDae
 
               local comment::Option{String} = NONE()
@@ -4969,7 +4969,7 @@
                     SCode.COMMENT(annotation_ = SOME(SCode.ANNOTATION(modification = mod2)))  => begin
                       SCodeUtil.mergeModifiers(mod2, mod)
                     end
-                    
+
                     _  => begin
                         mod
                     end
@@ -4985,7 +4985,7 @@
                           DAE.DAE(list(DAE.COMMENT(SCode.COMMENT(NONE(), comment))))
                         end
                   end
-                  
+
                   _  => begin
                       DAE.DAE(list(DAE.COMMENT(SCode.COMMENT(SOME(SCode.ANNOTATION(mod)), comment))))
                   end
