@@ -300,7 +300,7 @@
                       env_2 = FGraph.openScope(env_1, encflag, id, SOME(FCore.CLASS_SCOPE()))
                       ci_state = ClassInf.start(r, FGraph.getGraphName(env_2))
                       mod = Mod.getClassModifier(env_1, id)
-                      (cache, env_3, _, _, _, _, _, types, _, _, _, _) = Inst.instClassIn(cache, env_2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, NONE())
+                      (cache, env_3, _, _, _, _, _, types, _, _, _, _) = Inst.instClassIn(cache, env_2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                       (_, names) = SCodeUtil.getClassComponents(c)
                       Types.checkEnumDuplicateLiterals(names, c.info)
                       path = FGraph.getGraphName(env_3)
@@ -336,7 +336,7 @@
 
                   (cache, env_1, c)  => begin
                       @match true = SCodeUtil.classIsExternalObject(c)
-                      (cache, env_1, _, _, _, _, _, _, _, _) = Inst.instClass(cache, env_1, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                      (cache, env_1, _, _, _, _, _, _, _, _) = Inst.instClass(cache, env_1, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       @match SCode.CLASS(name = id) = c
                       (env_1, _) = FGraph.stripLastScopeRef(env_1)
                       (cache, t, env_2) = lookupTypeInEnv(cache, env_1, id)
@@ -1591,7 +1591,7 @@
                                 env3 = FGraph.openScope(env2, encflag, n, FGraph.restrictionToScopeType(r))
                                 ci_state = ClassInf.start(r, FGraph.getGraphName(env3))
                                 mod = Mod.getClassModifier(env2, n)
-                                (cache, env5, _, _, _, _, _, _, _, _, _, _) = Inst.instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, NONE())
+                                (cache, env5, _, _, _, _, _, _, _, _, _, _) = Inst.instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                               end
                             ()
                           end
@@ -2395,7 +2395,7 @@
                     FCore.CL(e = cl) where (SCodeUtil.classIsExternalObject(cl))  => begin
                          #=  An external object.
                          =#
-                        (cache, env) = Inst.instClass(inCache, inEnv, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cl, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, Connect.emptySet)
+                        (cache, env) = Inst.instClass(inCache, inEnv, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cl, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                         (cache, ty) = lookupTypeInEnv(cache, env, inFuncName)
                       (cache, list(ty))
                     end
@@ -3576,7 +3576,7 @@
                =#
               (cache, utPath) = Inst.makeFullyQualified(inCache, env, utPath)
               path = AbsynUtil.joinPaths(utPath, Absyn.IDENT(id))
-              (outCache, outEnv, _, _, _, _, _, varlst, _, _) = Inst.instElementList(cache, env, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ClassInf.META_RECORD(Absyn.IDENT("")), ListUtil.map1(els, Util.makeTuple, DAE.NOMOD()), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, Connect.emptySet, true)
+              (outCache, outEnv, _, _, _, _, _, varlst, _, _) = Inst.instElementList(cache, env, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ClassInf.META_RECORD(Absyn.IDENT("")), ListUtil.map1(els, Util.makeTuple, DAE.NOMOD()), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
               varlst = Types.boxVarLst(varlst)
                #=  for v in varlst loop print(Types.unparseType(v.ty)+\"\\n\"); end for;
                =#

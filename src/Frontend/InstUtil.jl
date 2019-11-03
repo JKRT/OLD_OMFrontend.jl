@@ -125,24 +125,7 @@
         function scodeFlatten(inProgram::SCode.Program, inPath::Absyn.Path) ::SCode.Program
               local outProgram::SCode.Program
 
-              outProgram = begin
-                @matchcontinue (inProgram, inPath) begin
-                  (_, _)  => begin
-                      @match false = Flags.isSet(Flags.DO_SCODE_DEP)
-                    inProgram
-                  end
-
-                  (_, Absyn.IDENT(""))  => begin
-                      outProgram = scodeFlattenProgram(inProgram)
-                    outProgram
-                  end
-
-                  _  => begin
-                        outProgram = inProgram # NFSCodeFlatten.flattenClassInProgram(inPath, inProgram)
-                      outProgram
-                  end
-                end
-              end
+              outProgram = inProgram
           outProgram
         end
 

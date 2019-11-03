@@ -349,8 +349,8 @@ function addChildRef(inParentRef::MMRef, inName::Name, inChildRef::MMRef, checkD
   local parent::MMRef
 
   @match FCore.N(n, i, p, c, d) = fromRef(inParentRef)
-  @show RefTree.keyCompare
-  @show methods(RefTree.keyCompare)
+  #@show RefTree.keyCompare
+  #@show methods(RefTree.keyCompare)
   c = RefTree.add(c, inName, inChildRef, #= if checkDuplicate = =# printElementConflictError #= else RefTree.addConflictReplace end =#)
   parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
   FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))
@@ -712,7 +712,7 @@ function toStr(inNode::Node) ::String
     local d::Data
     @matchcontinue inNode begin
       FCore.N(_, i, p, _, d)  => begin
-        outStr = "[i:" + intString(i) + "] " + "[p:" + stringDelimitList(ListUtil.map(ListUtil.map(ListUtil.map(p, fromRef), id), intString), ", ") + "] " + "[n:" + name(inNode) + "] " + "[d:" + dataStr(d) + "]"
+        outStr = "[i:" + intString(i) + "] " + "[p:" + stringDelimitList(ListUtil.mymap(ListUtil.mymap(ListUtil.mymap(p, fromRef), id), intString), ", ") + "] " + "[n:" + name(inNode) + "] " + "[d:" + dataStr(d) + "]"
         outStr
       end
 
@@ -767,7 +767,7 @@ end
 function scopeStr(sc::Scope) ::String
   local s::String
 
-  s = stringDelimitList(ListUtil.map(listReverse(sc), refName), "/")
+  s = stringDelimitList(ListUtil.mymap(listReverse(sc), refName), "/")
   s
 end
 
@@ -1741,7 +1741,7 @@ function dfs(inRef::MMRef) ::Refs
       _  => begin
         c = children(fromRef(inRef))
         refs = RefTree.listValues(c)
-        refs = ListUtil.flatten(ListUtil.map(refs, dfs))
+        refs = ListUtil.flatten(ListUtil.mymap(refs, dfs))
         refs = _cons(inRef, refs)
         refs
       end
@@ -2081,10 +2081,11 @@ function copy(inNode::Node) ::MMRef
 
   outRef = begin
     @match node begin
-      FCore.N(__)  => begin
+      FCore.N(n, i, p, c, d)  => begin
         #=  copy children
         =#
-        node.children = RefTree.map(node.children, copyChild)
+        k = RefTree.mymap(c, copyChild)
+        node = FCore.N(n, i, p, k, d)
         toRef(node)
       end
     end

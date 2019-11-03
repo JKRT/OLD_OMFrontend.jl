@@ -37,6 +37,8 @@ using MetaModelica
 using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+using Setfield
+
 valueStr = Function
 ConflictFunc = Function
 EachFunc = Function
@@ -44,7 +46,7 @@ MapFunc = Function
 FoldFunc = Function
 MapFunc = Function
 
-function keyStr end 
+function keyStr end
 function keyCompare end
 
 import BaseAvlSet
@@ -357,7 +359,7 @@ function join(tree::Tree, treeToJoin::Tree, conflictFunc::ConflictFunc = addConf
 end
 
 #= Traverses the tree in depth-first pre-order and applies the given function to
-each node, but without constructing a new tree like with map. =#
+each node, but without constructing a new tree like with mymap. =#
 function forEach(tree::Tree, func::EachFunc)
     _ = begin
         @match tree begin
@@ -386,7 +388,7 @@ end
 
 #= Traverses the tree in depth-first pre-order and applies the given function to
 each node, constructing a new tree with the resulting nodes. =#
-function map(inTree::Tree, inFunc::MapFunc) ::Tree
+function mymap(inTree::Tree, inFunc::MapFunc) ::Tree
     local outTree::Tree = inTree
 
     outTree = begin
@@ -397,17 +399,17 @@ function map(inTree::Tree, inFunc::MapFunc) ::Tree
         local new_branch::Tree
         @match outTree begin
             NODE(key = key, value = value)  => begin
-                new_branch = map(outTree.left, inFunc)
+                new_branch = mymap(outTree.left, inFunc)
                 if ! referenceEq(new_branch, outTree.left)
-                    outTree.left = new_branch
+                    @set outTree.left = new_branch
                 end
                 new_value = inFunc(key, value)
                 if ! referenceEq(value, new_value)
-                    outTree.value = new_value
+                    @set outTree.value = new_value
                 end
-                new_branch = map(outTree.right, inFunc)
+                new_branch = mymap(outTree.right, inFunc)
                 if ! referenceEq(new_branch, outTree.right)
-                    outTree.right = new_branch
+                    @set outTree.right = new_branch
                 end
                 outTree
             end
@@ -415,7 +417,7 @@ function map(inTree::Tree, inFunc::MapFunc) ::Tree
             LEAF(key = key, value = value)  => begin
                 new_value = inFunc(key, value)
                 if ! referenceEq(value, new_value)
-                    outTree.value = new_value
+                    @set outTree.value = new_value
                 end
                 outTree
             end

@@ -41,6 +41,8 @@
          *
          */ =#
 
+        import Absyn
+        
         import SCode
 
         import DAE

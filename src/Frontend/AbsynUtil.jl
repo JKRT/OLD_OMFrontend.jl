@@ -2174,14 +2174,14 @@
         end
 
          #= strips the same prefix paths and returns the stripped path. e.g pathStripSamePrefix(P.M.A, P.M.B) => A =#
-        function pathStripSamePrefix(inPath1::Absyn.Path, inPath2::Absyn.Path) ::Absyn.Path
-              local outPath::Absyn.Path
+        function pathStripSamePrefix(inPath1::Path, inPath2::Path) ::Path
+              local outPath::Path
 
               outPath = begin
                   local ident1::Ident
                   local ident2::Ident
-                  local path1::Absyn.Path
-                  local path2::Absyn.Path
+                  local path1::Path
+                  local path2::Path
                 @matchcontinue (inPath1, inPath2) begin
                   (_, _)  => begin
                       ident1 = pathFirstIdent(inPath1)
@@ -6872,7 +6872,7 @@
         end
 
          #= For use with traverseExp =#
-        function isInvariantExpNoTraverse(e::Absyn.Exp, b::Bool) ::Tuple{Absyn.Exp, Bool}
+        function isInvariantExpNoTraverse(e::Exp, b::Bool) ::Tuple{Exp, Bool}
 
 
 
@@ -7002,14 +7002,14 @@
         function getAnnotationsFromItems(inComponentItems::List{<:ComponentItem}, ccAnnotations::List{<:ElementArg}) ::List{List{ElementArg}}
               local outLst::List{List{ElementArg}} = nil
 
-              local annotations::List{Absyn.ElementArg}
+              local annotations::List{ElementArg}
               local res::List{String}
               local str::String
 
               for comp in listReverse(inComponentItems)
                 annotations = begin
                   @match comp begin
-                    Absyn.COMPONENTITEM(comment = SOME(Absyn.COMMENT(annotation_ = SOME(Absyn.ANNOTATION(annotations)))))  => begin
+                    COMPONENTITEM(comment = SOME(COMMENT(annotation_ = SOME(ANNOTATION(annotations)))))  => begin
                       listAppend(annotations, ccAnnotations)
                     end
 
@@ -7026,15 +7026,15 @@
          #=  This function strips out the `graphics\\' modification from an ElementArg
            list and return two lists, one with the other modifications and the
            second with the `graphics\\' modification =#
-        function stripGraphicsAndInteractionModification(inAbsynElementArgLst::List{<:Absyn.ElementArg}) ::Tuple{List{Absyn.ElementArg}, List{Absyn.ElementArg}}
-              local outAbsynElementArgLst2::List{Absyn.ElementArg}
-              local outAbsynElementArgLst1::List{Absyn.ElementArg}
+        function stripGraphicsAndInteractionModification(inAbsynElementArgLst::List{<:ElementArg}) ::Tuple{List{ElementArg}, List{ElementArg}}
+              local outAbsynElementArgLst2::List{ElementArg}
+              local outAbsynElementArgLst1::List{ElementArg}
 
               (outAbsynElementArgLst1, outAbsynElementArgLst2) = begin
-                  local mod::Absyn.ElementArg
-                  local rest::List{Absyn.ElementArg}
-                  local l1::List{Absyn.ElementArg}
-                  local l2::List{Absyn.ElementArg}
+                  local mod::ElementArg
+                  local rest::List{ElementArg}
+                  local l1::List{ElementArg}
+                  local l2::List{ElementArg}
                    #=  handle empty
                    =#
                 @matchcontinue inAbsynElementArgLst begin
@@ -7042,22 +7042,22 @@
                     (nil, nil)
                   end
 
-                  Absyn.MODIFICATION(path = Absyn.IDENT(name = "interaction")) <| rest  => begin
+                  MODIFICATION(path = IDENT(name = "interaction")) <| rest  => begin
                       (l1, l2) = stripGraphicsAndInteractionModification(rest)
                     (l1, l2)
                   end
 
-                  Absyn.MODIFICATION(modification = NONE(), path = Absyn.IDENT(name = "graphics")) <| rest  => begin
+                  MODIFICATION(modification = NONE(), path = IDENT(name = "graphics")) <| rest  => begin
                       (l1, l2) = stripGraphicsAndInteractionModification(rest)
                     (l1, l2)
                   end
 
-                  mod && Absyn.MODIFICATION(modification = SOME(_), path = Absyn.IDENT(name = "graphics")) <| rest  => begin
+                  mod && MODIFICATION(modification = SOME(_), path = IDENT(name = "graphics")) <| rest  => begin
                       (l1, l2) = stripGraphicsAndInteractionModification(rest)
                     (l1, _cons(mod, l2))
                   end
 
-                  mod && Absyn.MODIFICATION(__) <| rest  => begin
+                  mod && MODIFICATION(__) <| rest  => begin
                       (l1, l2) = stripGraphicsAndInteractionModification(rest)
                     (_cons(mod, l1), l2)
                   end
@@ -7075,31 +7075,31 @@
         end
 
          #=  This function traverses all classes of a program and applies a function
-           to each class. The function takes the Absyn.Class, Absyn.Path option
+           to each class. The function takes the Class, Path option
            and an additional argument and returns an updated class and the
-           additional values. The Absyn.Path option contains the path to the class
+           additional values. The Path option contains the path to the class
            that is traversed.
-           inputs:  (Absyn.Program,
-                       Absyn.Path option,
-                       ((Absyn.Class  Absyn.Path option  \\'a) => (Absyn.Class  Absyn.Path option  \\'a)),  /* rel-ation to apply */
+           inputs:  (Program,
+                       Path option,
+                       ((Class  Path option  \\'a) => (Class  Path option  \\'a)),  /* rel-ation to apply */
                     \\'a, /* extra value passed to re-lation */
                     bool) /* true = traverse protected elements */
-           outputs: (Absyn.Program   Absyn.Path option  \\'a) =#
-        function traverseClasses(inProgram::Absyn.Program, inPath::Option{<:Absyn.Path}, inFunc::FuncType, inArg::Type_a, inVisitProtected::Bool) ::Tuple{Absyn.Program, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{Absyn.Program, Option{Absyn.Path}, Type_a}
+           outputs: (Program   Path option  \\'a) =#
+        function traverseClasses(inProgram::Program, inPath::Option{<:Path}, inFunc::FuncType, inArg::Type_a, inVisitProtected::Bool) ::Tuple{Program, Option{Path}, Type_a}
+              local outTpl::Tuple{Program, Option{Path}, Type_a}
 
               outTpl = begin
-                  local classes::List{Absyn.Class}
-                  local pa_1::Option{Absyn.Path}
-                  local pa::Option{Absyn.Path}
+                  local classes::List{Class}
+                  local pa_1::Option{Path}
+                  local pa::Option{Path}
                   local args_1::Type_a
                   local args::Type_a
-                  local within_::Absyn.Within
+                  local within_::Within
                   local visitor::FuncType
                   local traverse_prot::Bool
-                  local p::Absyn.Program
+                  local p::Program
                 @match (inProgram, inPath, inFunc, inArg, inVisitProtected) begin
-                  (p && Absyn.PROGRAM(__), pa, visitor, args, traverse_prot)  => begin
+                  (p && PROGRAM(__), pa, visitor, args, traverse_prot)  => begin
                       (classes, pa_1, args_1) = traverseClasses2(p.classes, pa, visitor, args, traverse_prot)
                       p.classes = classes
                     (p, pa_1, args_1)
@@ -7110,24 +7110,24 @@
         end
 
          #=  Helperfunction to traverseClasses. =#
-        function traverseClasses2(inClasses::List{<:Absyn.Class}, inPath::Option{<:Absyn.Path}, inFunc::FuncType, inArg::Type_a #= extra argument =#, inVisitProtected::Bool #= visit protected elements =#) ::Tuple{List{Absyn.Class}, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{List{Absyn.Class}, Option{Absyn.Path}, Type_a}
+        function traverseClasses2(inClasses::List{<:Class}, inPath::Option{<:Path}, inFunc::FuncType, inArg::Type_a #= extra argument =#, inVisitProtected::Bool #= visit protected elements =#) ::Tuple{List{Class}, Option{Path}, Type_a}
+              local outTpl::Tuple{List{Class}, Option{Path}, Type_a}
 
               outTpl = begin
-                  local pa::Option{Absyn.Path}
-                  local pa_1::Option{Absyn.Path}
-                  local pa_2::Option{Absyn.Path}
-                  local pa_3::Option{Absyn.Path}
+                  local pa::Option{Path}
+                  local pa_1::Option{Path}
+                  local pa_2::Option{Path}
+                  local pa_3::Option{Path}
                   local visitor::FuncType
                   local args::Type_a
                   local args_1::Type_a
                   local args_2::Type_a
                   local args_3::Type_a
-                  local class_1::Absyn.Class
-                  local class_2::Absyn.Class
-                  local class_::Absyn.Class
-                  local classes_1::List{Absyn.Class}
-                  local classes::List{Absyn.Class}
+                  local class_1::Class
+                  local class_2::Class
+                  local class_::Class
+                  local classes_1::List{Class}
+                  local classes::List{Class}
                   local traverse_prot::Bool
                 @matchcontinue (inClasses, inPath, inFunc, inArg, inVisitProtected) begin
                   ( nil(), pa, _, args, _)  => begin
@@ -7168,20 +7168,20 @@
         end
 
          #= Returns true if class contains a local class =#
-        function classHasLocalClasses(cl::Absyn.Class) ::Bool
+        function classHasLocalClasses(cl::Class) ::Bool
               local res::Bool
 
               res = begin
-                  local parts::List{Absyn.ClassPart}
+                  local parts::List{ClassPart}
                    #=  A class with parts.
                    =#
                 @match cl begin
-                  Absyn.CLASS(body = Absyn.PARTS(classParts = parts))  => begin
+                  CLASS(body = PARTS(classParts = parts))  => begin
                       res = partsHasLocalClass(parts)
                     res
                   end
 
-                  Absyn.CLASS(body = Absyn.CLASS_EXTENDS(parts = parts))  => begin
+                  CLASS(body = CLASS_EXTENDS(parts = parts))  => begin
                       res = partsHasLocalClass(parts)
                     res
                   end
@@ -7193,19 +7193,19 @@
         end
 
          #= Help function to classHasLocalClass =#
-        function partsHasLocalClass(inParts::List{<:Absyn.ClassPart}) ::Bool
+        function partsHasLocalClass(inParts::List{<:ClassPart}) ::Bool
               local res::Bool
 
               res = begin
-                  local elts::List{Absyn.ElementItem}
-                  local parts::List{Absyn.ClassPart}
+                  local elts::List{ElementItem}
+                  local parts::List{ClassPart}
                 @matchcontinue inParts begin
-                  Absyn.PUBLIC(elts) <| _  => begin
+                  PUBLIC(elts) <| _  => begin
                       @match true = eltsHasLocalClass(elts)
                     true
                   end
 
-                  Absyn.PROTECTED(elts) <| _  => begin
+                  PROTECTED(elts) <| _  => begin
                       @match true = eltsHasLocalClass(elts)
                     true
                   end
@@ -7223,13 +7223,13 @@
         end
 
          #= help function to partsHasLocalClass =#
-        function eltsHasLocalClass(inElts::List{<:Absyn.ElementItem}) ::Bool
+        function eltsHasLocalClass(inElts::List{<:ElementItem}) ::Bool
               local res::Bool
 
               res = begin
-                  local elts::List{Absyn.ElementItem}
+                  local elts::List{ElementItem}
                 @matchcontinue inElts begin
-                  Absyn.ELEMENTITEM(Absyn.ELEMENT(specification = Absyn.CLASSDEF(__))) <| _  => begin
+                  ELEMENTITEM(ELEMENT(specification = CLASSDEF(__))) <| _  => begin
                     true
                   end
 
@@ -7246,15 +7246,15 @@
         end
 
          #=  Helperfunction to traverseClasses2. This function traverses all inner classes of a class. =#
-        function traverseInnerClass(inClass::Absyn.Class, inPath::Option{<:Absyn.Path}, inFunc::FuncType, inArg::Type_a #= extra value =#, inVisitProtected::Bool #= if true, traverse protected elts =#) ::Tuple{Absyn.Class, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{Absyn.Class, Option{Absyn.Path}, Type_a}
+        function traverseInnerClass(inClass::Class, inPath::Option{<:Path}, inFunc::FuncType, inArg::Type_a #= extra value =#, inVisitProtected::Bool #= if true, traverse protected elts =#) ::Tuple{Class, Option{Path}, Type_a}
+              local outTpl::Tuple{Class, Option{Path}, Type_a}
 
               outTpl = begin
-                  local tmp_pa::Absyn.Path
-                  local pa::Absyn.Path
-                  local parts_1::List{Absyn.ClassPart}
-                  local parts::List{Absyn.ClassPart}
-                  local pa_1::Option{Absyn.Path}
+                  local tmp_pa::Path
+                  local pa::Path
+                  local parts_1::List{ClassPart}
+                  local parts::List{ClassPart}
+                  local pa_1::Option{Path}
                   local args_1::Type_a
                   local args::Type_a
                   local name::String
@@ -7263,48 +7263,48 @@
                   local f::Bool
                   local e::Bool
                   local visit_prot::Bool
-                  local r::Absyn.Restriction
+                  local r::Restriction
                   local str_opt::Option{String}
                   local file_info::SourceInfo
                   local visitor::FuncType
-                  local cl::Absyn.Class
-                  local modif::List{Absyn.ElementArg}
+                  local cl::Class
+                  local modif::List{ElementArg}
                   local typeVars::List{String}
-                  local classAttrs::List{Absyn.NamedArg}
-                  local cmt::Absyn.Comment
-                  local ann::List{Absyn.Annotation}
+                  local classAttrs::List{NamedArg}
+                  local cmt::Comment
+                  local ann::List{Annotation}
                    #= /* a class with parts */ =#
                 @matchcontinue (inClass, inPath, inFunc, inArg, inVisitProtected) begin
-                  (Absyn.CLASS(name, p, f, e, r, Absyn.PARTS(typeVars, classAttrs, parts, ann, str_opt), file_info), SOME(pa), visitor, args, visit_prot)  => begin
-                      tmp_pa = AbsynUtil.joinPaths(pa, Absyn.IDENT(name))
+                  (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts, ann, str_opt), file_info), SOME(pa), visitor, args, visit_prot)  => begin
+                      tmp_pa = AbsynUtil.joinPaths(pa, IDENT(name))
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(tmp_pa), visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
+                    (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
                   end
 
-                  (Absyn.CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = Absyn.PARTS(typeVars = typeVars, classAttrs = classAttrs, classParts = parts, ann = ann, comment = str_opt), info = file_info), NONE(), visitor, args, visit_prot)  => begin
-                      (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(Absyn.IDENT(name)), visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
+                  (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = PARTS(typeVars = typeVars, classAttrs = classAttrs, classParts = parts, ann = ann, comment = str_opt), info = file_info), NONE(), visitor, args, visit_prot)  => begin
+                      (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(IDENT(name)), visitor, args, visit_prot)
+                    (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
                   end
 
-                  (Absyn.CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = Absyn.PARTS(typeVars = typeVars, classAttrs = classAttrs, classParts = parts, ann = ann, comment = str_opt), info = file_info), pa_1, visitor, args, visit_prot)  => begin
+                  (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = PARTS(typeVars = typeVars, classAttrs = classAttrs, classParts = parts, ann = ann, comment = str_opt), info = file_info), pa_1, visitor, args, visit_prot)  => begin
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, pa_1, visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
+                    (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
                   end
 
-                  (Absyn.CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = Absyn.CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), SOME(pa), visitor, args, visit_prot)  => begin
-                      tmp_pa = AbsynUtil.joinPaths(pa, Absyn.IDENT(name))
+                  (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), SOME(pa), visitor, args, visit_prot)  => begin
+                      tmp_pa = AbsynUtil.joinPaths(pa, IDENT(name))
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(tmp_pa), visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
+                    (CLASS(name, p, f, e, r, CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
                   end
 
-                  (Absyn.CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = Absyn.CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), NONE(), visitor, args, visit_prot)  => begin
-                      (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(Absyn.IDENT(name)), visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
+                  (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), NONE(), visitor, args, visit_prot)  => begin
+                      (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(IDENT(name)), visitor, args, visit_prot)
+                    (CLASS(name, p, f, e, r, CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
                   end
 
-                  (Absyn.CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = Absyn.CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), pa_1, visitor, args, visit_prot)  => begin
+                  (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), pa_1, visitor, args, visit_prot)  => begin
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, pa_1, visitor, args, visit_prot)
-                    (Absyn.CLASS(name, p, f, e, r, Absyn.CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
+                    (CLASS(name, p, f, e, r, CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
                   end
 
                   (cl, pa_1, _, args, _)  => begin
@@ -7318,38 +7318,38 @@
         end
 
          #= Helper function to traverseInnerClass =#
-        function traverseInnerClassParts(inClassParts::List{<:Absyn.ClassPart}, inPath::Option{<:Absyn.Path}, inFunc::FuncType, inArg::Type_a #= extra argument =#, inVisitProtected::Bool #= visist protected elts =#) ::Tuple{List{Absyn.ClassPart}, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{List{Absyn.ClassPart}, Option{Absyn.Path}, Type_a}
+        function traverseInnerClassParts(inClassParts::List{<:ClassPart}, inPath::Option{<:Path}, inFunc::FuncType, inArg::Type_a #= extra argument =#, inVisitProtected::Bool #= visist protected elts =#) ::Tuple{List{ClassPart}, Option{Path}, Type_a}
+              local outTpl::Tuple{List{ClassPart}, Option{Path}, Type_a}
 
               outTpl = begin
-                  local pa::Option{Absyn.Path}
-                  local pa_1::Option{Absyn.Path}
-                  local pa_2::Option{Absyn.Path}
+                  local pa::Option{Path}
+                  local pa_1::Option{Path}
+                  local pa_2::Option{Path}
                   local args::Type_a
                   local args_1::Type_a
                   local args_2::Type_a
-                  local elts_1::List{Absyn.ElementItem}
-                  local elts::List{Absyn.ElementItem}
-                  local parts_1::List{Absyn.ClassPart}
-                  local parts::List{Absyn.ClassPart}
+                  local elts_1::List{ElementItem}
+                  local elts::List{ElementItem}
+                  local parts_1::List{ClassPart}
+                  local parts::List{ClassPart}
                   local visitor::FuncType
                   local visit_prot::Bool
-                  local part::Absyn.ClassPart
+                  local part::ClassPart
                 @matchcontinue (inClassParts, inPath, inFunc, inArg, inVisitProtected) begin
                   ( nil(), pa, _, args, _)  => begin
                     (nil, pa, args)
                   end
 
-                  (Absyn.PUBLIC(contents = elts) <| parts, pa, visitor, args, visit_prot)  => begin
+                  (PUBLIC(contents = elts) <| parts, pa, visitor, args, visit_prot)  => begin
                       (elts_1, _, args_1) = traverseInnerClassElements(elts, pa, visitor, args, visit_prot)
                       (parts_1, pa_2, args_2) = traverseInnerClassParts(parts, pa, visitor, args_1, visit_prot)
-                    (_cons(Absyn.PUBLIC(elts_1), parts_1), pa_2, args_2)
+                    (_cons(PUBLIC(elts_1), parts_1), pa_2, args_2)
                   end
 
-                  (Absyn.PROTECTED(contents = elts) <| parts, pa, visitor, args, true)  => begin
+                  (PROTECTED(contents = elts) <| parts, pa, visitor, args, true)  => begin
                       (elts_1, _, args_1) = traverseInnerClassElements(elts, pa, visitor, args, true)
                       (parts_1, pa_2, args_2) = traverseInnerClassParts(parts, pa, visitor, args_1, true)
-                    (_cons(Absyn.PROTECTED(elts_1), parts_1), pa_2, args_2)
+                    (_cons(PROTECTED(elts_1), parts_1), pa_2, args_2)
                   end
 
                   (part <| parts, pa, visitor, args, true)  => begin
@@ -7362,49 +7362,49 @@
         end
 
          #= Helper function to traverseInnerClassParts =#
-        function traverseInnerClassElements(inElements::List{<:Absyn.ElementItem}, inPath::Option{<:Absyn.Path}, inFuncType::FuncType, inArg::Type_a, inVisitProtected::Bool #= visit protected elts =#) ::Tuple{List{Absyn.ElementItem}, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{List{Absyn.ElementItem}, Option{Absyn.Path}, Type_a}
+        function traverseInnerClassElements(inElements::List{<:ElementItem}, inPath::Option{<:Path}, inFuncType::FuncType, inArg::Type_a, inVisitProtected::Bool #= visit protected elts =#) ::Tuple{List{ElementItem}, Option{Path}, Type_a}
+              local outTpl::Tuple{List{ElementItem}, Option{Path}, Type_a}
 
               outTpl = begin
-                  local pa::Option{Absyn.Path}
-                  local pa_1::Option{Absyn.Path}
-                  local pa_2::Option{Absyn.Path}
+                  local pa::Option{Path}
+                  local pa_1::Option{Path}
+                  local pa_2::Option{Path}
                   local args::Type_a
                   local args_1::Type_a
                   local args_2::Type_a
-                  local elt_spec_1::Absyn.ElementSpec
-                  local elt_spec::Absyn.ElementSpec
-                  local elts_1::List{Absyn.ElementItem}
-                  local elts::List{Absyn.ElementItem}
+                  local elt_spec_1::ElementSpec
+                  local elt_spec::ElementSpec
+                  local elts_1::List{ElementItem}
+                  local elts::List{ElementItem}
                   local f::Bool
                   local visit_prot::Bool
-                  local r::Option{Absyn.RedeclareKeywords}
-                  local io::Absyn.InnerOuter
+                  local r::Option{RedeclareKeywords}
+                  local io::InnerOuter
                   local info::SourceInfo
-                  local constr::Option{Absyn.ConstrainClass}
+                  local constr::Option{ConstrainClass}
                   local visitor::FuncType
-                  local elt::Absyn.ElementItem
+                  local elt::ElementItem
                   local repl::Bool
-                  local cl::Absyn.Class
+                  local cl::Class
                 @matchcontinue (inElements, inPath, inFuncType, inArg, inVisitProtected) begin
                   ( nil(), pa, _, args, _)  => begin
                     (nil, pa, args)
                   end
 
-                  (Absyn.ELEMENTITEM(element = Absyn.ELEMENT(finalPrefix = f, redeclareKeywords = r, innerOuter = io, specification = elt_spec, info = info, constrainClass = constr)) <| elts, pa, visitor, args, visit_prot)  => begin
+                  (ELEMENTITEM(element = ELEMENT(finalPrefix = f, redeclareKeywords = r, innerOuter = io, specification = elt_spec, info = info, constrainClass = constr)) <| elts, pa, visitor, args, visit_prot)  => begin
                       (elt_spec_1, _, args_1) = traverseInnerClassElementspec(elt_spec, pa, visitor, args, visit_prot)
                       (elts_1, pa_2, args_2) = traverseInnerClassElements(elts, pa, visitor, args_1, visit_prot)
-                    (_cons(Absyn.ELEMENTITEM(Absyn.ELEMENT(f, r, io, elt_spec_1, info, constr)), elts_1), pa_2, args_2)
+                    (_cons(ELEMENTITEM(ELEMENT(f, r, io, elt_spec_1, info, constr)), elts_1), pa_2, args_2)
                   end
 
-                  (Absyn.ELEMENTITEM(element = Absyn.ELEMENT(finalPrefix = f, redeclareKeywords = r, innerOuter = io, specification = Absyn.CLASSDEF(repl, cl), info = info, constrainClass = constr)) <| elts, pa, visitor, args, visit_prot)  => begin
+                  (ELEMENTITEM(element = ELEMENT(finalPrefix = f, redeclareKeywords = r, innerOuter = io, specification = CLASSDEF(repl, cl), info = info, constrainClass = constr)) <| elts, pa, visitor, args, visit_prot)  => begin
                       (cl, _, args_1) = traverseInnerClass(cl, pa, visitor, args, visit_prot)
                       @match true = classHasLocalClasses(cl)
                       (elts_1, pa_2, args_2) = traverseInnerClassElements(elts, pa, visitor, args_1, visit_prot)
-                    (_cons(Absyn.ELEMENTITEM(Absyn.ELEMENT(f, r, io, Absyn.CLASSDEF(repl, cl), info, constr)), elts_1), pa_2, args_2)
+                    (_cons(ELEMENTITEM(ELEMENT(f, r, io, CLASSDEF(repl, cl), info, constr)), elts_1), pa_2, args_2)
                   end
 
-                  (Absyn.ELEMENTITEM(element = Absyn.ELEMENT(__)) <| elts, pa, visitor, args, visit_prot)  => begin
+                  (ELEMENTITEM(element = ELEMENT(__)) <| elts, pa, visitor, args, visit_prot)  => begin
                       (elts_1, pa_2, args_2) = traverseInnerClassElements(elts, pa, visitor, args, visit_prot)
                     (elts_1, pa_2, args_2)
                   end
@@ -7421,39 +7421,39 @@
         end
 
          #=  Helperfunction to traverseInnerClassElements =#
-        function traverseInnerClassElementspec(inElementSpec::Absyn.ElementSpec, inPath::Option{<:Absyn.Path}, inFuncType::FuncType, inArg::Type_a, inVisitProtected::Bool #= visit protected elts =#) ::Tuple{Absyn.ElementSpec, Option{Absyn.Path}, Type_a}
-              local outTpl::Tuple{Absyn.ElementSpec, Option{Absyn.Path}, Type_a}
+        function traverseInnerClassElementspec(inElementSpec::ElementSpec, inPath::Option{<:Path}, inFuncType::FuncType, inArg::Type_a, inVisitProtected::Bool #= visit protected elts =#) ::Tuple{ElementSpec, Option{Path}, Type_a}
+              local outTpl::Tuple{ElementSpec, Option{Path}, Type_a}
 
               outTpl = begin
-                  local class_1::Absyn.Class
-                  local class_2::Absyn.Class
-                  local class_::Absyn.Class
-                  local pa_1::Option{Absyn.Path}
-                  local pa_2::Option{Absyn.Path}
-                  local pa::Option{Absyn.Path}
+                  local class_1::Class
+                  local class_2::Class
+                  local class_::Class
+                  local pa_1::Option{Path}
+                  local pa_2::Option{Path}
+                  local pa::Option{Path}
                   local args_1::Type_a
                   local args_2::Type_a
                   local args::Type_a
                   local repl::Bool
                   local visit_prot::Bool
                   local visitor::FuncType
-                  local elt_spec::Absyn.ElementSpec
+                  local elt_spec::ElementSpec
                 @match (inElementSpec, inPath, inFuncType, inArg, inVisitProtected) begin
-                  (Absyn.CLASSDEF(replaceable_ = repl, class_ = class_), pa, visitor, args, visit_prot)  => begin
+                  (CLASSDEF(replaceable_ = repl, class_ = class_), pa, visitor, args, visit_prot)  => begin
                       (class_1, _, args_1) = visitor((class_, pa, args))
                       (class_2, pa_2, args_2) = traverseInnerClass(class_1, pa, visitor, args_1, visit_prot)
-                    (Absyn.CLASSDEF(repl, class_2), pa_2, args_2)
+                    (CLASSDEF(repl, class_2), pa_2, args_2)
                   end
 
-                  (elt_spec && Absyn.EXTENDS(__), pa, _, args, _)  => begin
+                  (elt_spec && EXTENDS(__), pa, _, args, _)  => begin
                     (elt_spec, pa, args)
                   end
 
-                  (elt_spec && Absyn.IMPORT(__), pa, _, args, _)  => begin
+                  (elt_spec && IMPORT(__), pa, _, args, _)  => begin
                     (elt_spec, pa, args)
                   end
 
-                  (elt_spec && Absyn.COMPONENTS(__), pa, _, args, _)  => begin
+                  (elt_spec && COMPONENTS(__), pa, _, args, _)  => begin
                     (elt_spec, pa, args)
                   end
                 end
@@ -7463,20 +7463,20 @@
 
          #= @auhtor: johti
          Get the typespec path in an ElementItem if it has one =#
-        function getTypeSpecFromElementItemOpt(inElementItem::Absyn.ElementItem) ::Option{Absyn.TypeSpec}
-              local outTypeSpec::Option{Absyn.TypeSpec}
+        function getTypeSpecFromElementItemOpt(inElementItem::ElementItem) ::Option{TypeSpec}
+              local outTypeSpec::Option{TypeSpec}
 
               outTypeSpec = begin
-                  local typeSpec::Absyn.TypeSpec
-                  local specification::Absyn.ElementSpec
+                  local typeSpec::TypeSpec
+                  local specification::ElementSpec
                 @matchcontinue inElementItem begin
-                  Absyn.ELEMENTITEM(__)  => begin
+                  ELEMENTITEM(__)  => begin
                     begin
                       @match inElementItem.element begin
-                        Absyn.ELEMENT(specification = specification)  => begin
+                        ELEMENT(specification = specification)  => begin
                           begin
                             @match specification begin
-                              Absyn.COMPONENTS(typeSpec = typeSpec)  => begin
+                              COMPONENTS(typeSpec = typeSpec)  => begin
                                 SOME(typeSpec)
                               end
                             end
@@ -7496,17 +7496,17 @@
 
          #= @auhtor: johti
              Get a ComponentItem from an ElementItem if it has one =#
-        function getElementSpecificationFromElementItemOpt(inElementItem::Absyn.ElementItem) ::Option{Absyn.ElementSpec}
-              local outSpec::Option{Absyn.ElementSpec}
+        function getElementSpecificationFromElementItemOpt(inElementItem::ElementItem) ::Option{ElementSpec}
+              local outSpec::Option{ElementSpec}
 
               outSpec = begin
-                  local specification::Absyn.ElementSpec
-                  local element::Absyn.Element
+                  local specification::ElementSpec
+                  local element::Element
                 @matchcontinue inElementItem begin
-                  Absyn.ELEMENTITEM(element = element)  => begin
+                  ELEMENTITEM(element = element)  => begin
                     begin
                       @match element begin
-                        Absyn.ELEMENT(specification = specification)  => begin
+                        ELEMENT(specification = specification)  => begin
                           SOME(specification)
                         end
                       end
@@ -7523,13 +7523,13 @@
 
          #= @auhtor: johti
          Get the componentItems from a given elemSpec otherwise returns an empty list =#
-        function getComponentItemsFromElementSpec(elemSpec::Absyn.ElementSpec) ::List{Absyn.ComponentItem}
-              local componentItems::List{Absyn.ComponentItem}
+        function getComponentItemsFromElementSpec(elemSpec::ElementSpec) ::List{ComponentItem}
+              local componentItems::List{ComponentItem}
 
               componentItems = begin
-                  local components::List{Absyn.ComponentItem}
+                  local components::List{ComponentItem}
                 @match elemSpec begin
-                  Absyn.COMPONENTS(components = components)  => begin
+                  COMPONENTS(components = components)  => begin
                     components
                   end
 
@@ -7543,11 +7543,11 @@
 
          #= @author: johti
          Get the componentItems from a given elementItem =#
-        function getComponentItemsFromElementItem(inElementItem::Absyn.ElementItem) ::List{Absyn.ComponentItem}
-              local componentItems::List{Absyn.ComponentItem}
+        function getComponentItemsFromElementItem(inElementItem::ElementItem) ::List{ComponentItem}
+              local componentItems::List{ComponentItem}
 
               componentItems = begin
-                  local elementSpec::Absyn.ElementSpec
+                  local elementSpec::ElementSpec
                 @match getElementSpecificationFromElementItemOpt(inElementItem) begin
                   SOME(elementSpec)  => begin
                     getComponentItemsFromElementSpec(elementSpec)
@@ -7563,7 +7563,7 @@
 
          #= @author johti
           Get the direction if one exists otherwise returns BIDIR() =#
-        function getDirection(elementItem::Absyn.ElementItem) ::Direction
+        function getDirection(elementItem::ElementItem) ::Direction
               local oDirection::Direction
 
               oDirection = begin

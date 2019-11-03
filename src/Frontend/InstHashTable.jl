@@ -42,12 +42,12 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        
+
         import Absyn
         import Connect
         import ConnectionGraph
         import ClassInf
-        import DAE
+        # import DAE
         import FCore
         import InstTypes
         import Prefix
@@ -64,7 +64,7 @@
         CachedPartialInstItemInputs = Tuple
         CachedPartialInstItemOutputs = Tuple
         CachedInstItems = List
-        
+
         Key = Absyn.Path
         Value = CachedInstItems
 
