@@ -4,7 +4,6 @@
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
-
          #= /*
          * This file is part of OpenModelica.
          *
@@ -36,11 +35,13 @@
          *
          */ =#
 
-         #= saves and clears content of buffer and return a handle to the saved buffer so it can be restored by restorBuf later on =#
+  global print_buffer = ""
+  global error_string = ""
+  
+  #= saves and clears content of buffer and return a handle to the saved buffer so it can be restored by restorBuf later on =#
         function saveAndClearBuf() ::ModelicaInteger 
-              local handle::ModelicaInteger
-
-            #= TODO: Defined in the runtime =#
+          local handle::ModelicaInteger
+          #= TODO: Defined in the runtime =#
           handle
         end
 
@@ -64,19 +65,18 @@
         end
 
         function printBuf(inString::String)  
-            #= TODO: Defined in the runtime =#
+          #= TODO: Defined in the runtime =#
+          global print_buffer += inString
         end
 
         function clearBuf()  
-            #= TODO: Defined in the runtime =#
+          print_buffer = ""
         end
 
          #= Does not clear the buffer =#
         function getString() ::String 
-              local outString::String
-
             #= TODO: Defined in the runtime =#
-          outString
+          print_buffer
         end
 
          #= Writes the buffer to a file =#

@@ -326,7 +326,7 @@
           cl
         end
 
-        function mergeBefore(cp::Absyn.ClassPart, cps::List{<:Absyn.ClassPart}) ::List{Absyn.ClassPart} 
+        function myMergeBefore(cp::Absyn.ClassPart, cps::List{<:Absyn.ClassPart}) ::List{Absyn.ClassPart} 
               local ocp::List{Absyn.ClassPart}
 
               ocp = begin
@@ -367,17 +367,17 @@
                   local bDirectoryAndFileExists::Bool
                 @match po begin
                   CLASSPART(cp)  => begin
-                      cps = mergeBefore(cp, acc)
+                      cps = myMergeBefore(cp, acc)
                     cps
                   end
                   
                   ELEMENT(ei, true)  => begin
-                      cps = mergeBefore(Absyn.PUBLIC(list(ei)), acc)
+                      cps = myMergeBefore(Absyn.PUBLIC(list(ei)), acc)
                     cps
                   end
                   
                   ELEMENT(ei, false)  => begin
-                      cps = mergeBefore(Absyn.PROTECTED(list(ei)), acc)
+                      cps = myMergeBefore(Absyn.PROTECTED(list(ei)), acc)
                     cps
                   end
                   
@@ -392,7 +392,7 @@
                       if bDirectoryAndFileExists
                         cl = loadCompletePackageFromMp(id, id, mp, strategy, w1, Error.getNumErrorMessages(), encrypted)
                         ei = AbsynUtil.makeClassElement(cl)
-                        cps = mergeBefore(Absyn.PUBLIC(list(ei)), acc)
+                        cps = myMergeBefore(Absyn.PUBLIC(list(ei)), acc)
                       else
                         file = mp + pd + id + (if encrypted
                               ".moc"
@@ -405,7 +405,7 @@
                         end
                         cl = parsePackageFile(file, strategy, false, w1, id)
                         ei = AbsynUtil.makeClassElement(cl)
-                        cps = mergeBefore(Absyn.PUBLIC(list(ei)), acc)
+                        cps = myMergeBefore(Absyn.PUBLIC(list(ei)), acc)
                       end
                     cps
                   end

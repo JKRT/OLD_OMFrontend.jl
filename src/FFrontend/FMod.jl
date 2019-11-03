@@ -68,12 +68,12 @@ const Import = FCore.Import
 const ModScope = FCore.ModScope
 
 #= @author: adrpo
-merge 2 modifiers, one outer one inner =#
-function merge(inParentRef::Ref, inOuterModRef::Ref, inInnerModRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
-  local outMergedModRef::Ref
+myMerge 2 modifiers, one outer one inner =#
+function myMerge(inParentRef::Ref, inOuterModRef::Ref, inInnerModRef::Ref, inGraph::Graph) ::Tuple{Graph, Ref}
+  local outmyMergedModRef::Ref
   local outGraph::Graph
 
-  (outGraph, outMergedModRef) = begin
+  (outGraph, outmyMergedModRef) = begin
     local r::Ref
     local g::Graph
     @match (inParentRef, inOuterModRef, inInnerModRef, inGraph) begin
@@ -82,7 +82,7 @@ function merge(inParentRef::Ref, inOuterModRef::Ref, inInnerModRef::Ref, inGraph
       end
     end
   end
-  (outGraph, outMergedModRef)
+  (outGraph, outmyMergedModRef)
 end
 
 #= @author: adrpo
@@ -103,7 +103,7 @@ function apply(inTargetRef::Ref, inModRef::Ref, inGraph::Graph) ::Tuple{Graph, R
   (outGraph, outNodeRef)
 end
 
-#= This function merges the submodifiers in a modifier so that each submodifier
+#= This function myMerges the submodifiers in a modifier so that each submodifier
 only occurs once. Ex:
 
 compactMod({x.start = 2.0, y = 4.0, x(min = 1.0, max = 3.0)}) =>
@@ -120,7 +120,7 @@ function compactSubMods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) :
   outSubMods
 end
 
-#= Helper function to compactSubMods. Tries to merge the given modifier with an
+#= Helper function to compactSubMods. Tries to myMerge the given modifier with an
 existing modifier in the accumulation list. If a matching modifier is not
 found in the list it's added instead. =#
 function compactSubMod(inSubMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}, inAccumMods::List{<:SCode.SubMod}) ::List{SCode.SubMod}
@@ -136,7 +136,7 @@ function compactSubMod(inSubMod::SCode.SubMod, inModScope::ModScope, inName::Lis
   outSubMods
 end
 
-#= Helper function to compactSubMod. Merges the given modifier with the existing
+#= Helper function to compactSubMod. myMerges the given modifier with the existing
 modifier if they have the same name, otherwise does nothing. =#
 function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}) ::Tuple{SCode.SubMod, Bool}
   local outFound::Bool
@@ -153,7 +153,7 @@ function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inM
       end
 
       (SCode.NAMEMOD(ident = name1), _, _, _)  => begin
-        submod = mergeSubModsInSameScope(inExistingMod, inNewMod, _cons(name1, inName), inModScope)
+        submod = myMergeSubModsInSameScope(inExistingMod, inNewMod, _cons(name1, inName), inModScope)
         (submod, true)
       end
     end
@@ -161,9 +161,9 @@ function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inM
   (outMod, outFound)
 end
 
-#= Merges two submodifiers in the same scope, i.e. they have the same priority.
+#= myMerges two submodifiers in the same scope, i.e. they have the same priority.
 It's thus an error if the modifiers modify the same element. =#
-function mergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod
+function myMergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod
   local outMod::SCode.SubMod
 
   outMod = begin

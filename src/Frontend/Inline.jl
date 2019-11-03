@@ -889,7 +889,7 @@
                         (newExp1, assrtLst) = Expression.traverseExpBottomUp(newExp, (fns) -> inlineCall(fns = fns), assrtLst)
                       else
                         (crefs, lst_cr, stmts, repl) = getFunctionInputsOutputBody(fn, repl)
-                        (repl, assrtStmts) = mergeFunctionBody(stmts, repl, nil)
+                        (repl, assrtStmts) = myMergeFunctionBody(stmts, repl, nil)
                         if listEmpty(assrtStmts)
                           newExp = Expression.makeTuple(list(getReplacementCheckComplex(repl, cr, ty) for cr in lst_cr))
                           @match true = checkExpsTypeEquiv(e1, newExp)
@@ -1019,7 +1019,7 @@
                       (fn, comment) = getFunctionBody(p, fns)
                       (checkcr, repl) = getInlineHashTableVarTransform()
                       (crefs, lst_cr, stmts, repl) = getFunctionInputsOutputBody(fn, repl)
-                      (repl, _) = mergeFunctionBody(stmts, repl, nil)
+                      (repl, _) = myMergeFunctionBody(stmts, repl, nil)
                       newExp = Expression.makeTuple(list(VarTransform.getReplacement(repl, cr) for cr in lst_cr))
                       @match true = checkExpsTypeEquiv(e1, newExp)
                       argmap = ListUtil.threadTuple(crefs, args)
@@ -1044,7 +1044,7 @@
                =#
                #=  get inputs, body and output
                =#
-               #=  merge statements to one line
+               #=  myMerge statements to one line
                =#
                #= newExp = VarTransform.getReplacement(repl,cr);
                =#
@@ -1084,21 +1084,21 @@
                   (DAE.STMT_ASSIGN(exp1 = DAE.CREF(componentRef = cr), exp = exp) <| stmts, _, _)  => begin
                       (exp, _) = VarTransform.replaceExp(exp, iRepl, NONE())
                       repl = VarTransform.addReplacementNoTransitive(iRepl, cr, exp)
-                      (repl, assertStmts) = mergeFunctionBody(stmts, repl, assertStmtsIn)
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, repl, assertStmtsIn)
                     (repl, assertStmts)
                   end
 
                   (DAE.STMT_ASSIGN_ARR(lhs = DAE.CREF(componentRef = cr), exp = exp) <| stmts, _, _)  => begin
                       (exp, _) = VarTransform.replaceExp(exp, iRepl, NONE())
                       repl = VarTransform.addReplacementNoTransitive(iRepl, cr, exp)
-                      (repl, assertStmts) = mergeFunctionBody(stmts, repl, assertStmtsIn)
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, repl, assertStmtsIn)
                     (repl, assertStmts)
                   end
 
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = explst, exp = exp) <| stmts, _, _)  => begin
                       (exp, _) = VarTransform.replaceExp(exp, iRepl, NONE())
                       repl = addTplAssignToRepl(explst, 1, exp, iRepl)
-                      (repl, assertStmts) = mergeFunctionBody(stmts, repl, assertStmtsIn)
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, repl, assertStmtsIn)
                     (repl, assertStmts)
                   end
 
@@ -1107,7 +1107,7 @@
                       (exp1, _) = VarTransform.replaceExp(exp1, iRepl, NONE())
                       (exp2, _) = VarTransform.replaceExp(exp2, iRepl, NONE())
                       stmt = DAE.STMT_ASSERT(exp, exp1, exp2, source)
-                      (repl, assertStmts) = mergeFunctionBody(stmts, iRepl, _cons(stmt, assertStmtsIn))
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, iRepl, _cons(stmt, assertStmtsIn))
                     (repl, assertStmts)
                   end
 
@@ -1116,7 +1116,7 @@
                       (exp1, _) = VarTransform.replaceExp(exp1, iRepl, NONE())
                       (exp2, _) = VarTransform.replaceExp(exp2, iRepl, NONE())
                       repl = VarTransform.addReplacementNoTransitive(iRepl, cr1, DAE.IFEXP(exp, exp1, exp2))
-                      (repl, assertStmts) = mergeFunctionBody(stmts, repl, assertStmtsIn)
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, repl, assertStmtsIn)
                     (repl, assertStmts)
                   end
 
@@ -1125,7 +1125,7 @@
                       (exp1, _) = VarTransform.replaceExp(exp1, iRepl, NONE())
                       (exp2, _) = VarTransform.replaceExp(exp2, iRepl, NONE())
                       repl = VarTransform.addReplacementNoTransitive(iRepl, cr1, DAE.IFEXP(exp, exp1, exp2))
-                      (repl, assertStmts) = mergeFunctionBody(stmts, repl, assertStmtsIn)
+                      (repl, assertStmts) = myMergeFunctionBody(stmts, repl, assertStmtsIn)
                     (repl, assertStmts)
                   end
                 end

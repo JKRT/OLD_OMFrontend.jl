@@ -212,7 +212,7 @@
                =#
                #=  after line length.
                =#
-              gap_size = max(realInt(realMul(line_len, inRaggedness)), 0)
+              gap_size = max(realInt(realMul(intReal(line_len), inRaggedness)), 0.0)
                #=  Wrap each line separately.
                =#
               for line in lines

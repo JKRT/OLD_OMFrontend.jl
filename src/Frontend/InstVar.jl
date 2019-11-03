@@ -461,7 +461,7 @@
                 else
                   type_mods = liftUserTypeMod(type_mods, inDimensions)
                   dims = listAppend(inDimensions, dims)
-                  mod = Mod.merge(inMod, type_mods)
+                  mod = Mod.myMerge(inMod, type_mods)
                   attr = InstUtil.propagateClassPrefix(inAttributes, inPrefix)
                 end
                 (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outGraph) = instVar2(outCache, inEnv, inIH, inStore, inState, mod, inPrefix, inName, cls, attr, inPrefixes, dims, inIndices, inInstDims, inImpl, inComment, inInfo, inGraph, inSets)
@@ -1494,15 +1494,15 @@
                        #=  the derived from type not the actual type!!!
                        =#
                       (_, cls, _) = Lookup.lookupClass(outCache, outEnv, cls_path, SOME(c.info))
-                       #= /* adrpo: TODO: merge also the attributes, i.e.:
+                       #= /* adrpo: TODO: myMerge also the attributes, i.e.:
                                  type A = input discrete flow Integer[3];
                                  A x; <-- input discrete flow IS NOT propagated even if it should. FIXME!
                                */ =#
-                       #= SOME(attr3) = SCodeUtil.mergeAttributes(attr,SOME(absynAttr));
+                       #= SOME(attr3) = SCodeUtil.myMergeAttributes(attr,SOME(absynAttr));
                        =#
                       smod = InstUtil.chainRedeclares(inMod, smod)
                       (_, mod) = Mod.elabMod(outCache, outEnv, outIH, inPrefix, smod, inImpl, Mod.DERIVED(cls_path), inInfo)
-                      mod = Mod.merge(inMod, mod)
+                      mod = Mod.myMerge(inMod, mod)
                     (cls, mod, attr, nil)
                   end
 

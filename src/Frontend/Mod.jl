@@ -427,7 +427,7 @@
                           true = stringEq(cn, bcn);
                           (c, _) = Lookup.lookupClassLocal(inEnv, bcn);
                           tp = SCodeUtil.getDerivedTypeSpec(c);
-                          c = SCodeUtil.mergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
+                          c = SCodeUtil.myMergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
                           SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i) = c;
                           (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info);
                           (cache, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp);
@@ -445,7 +445,7 @@
                    =#
                 @matchcontinue inElt begin
                   SCode.CLASS(cn, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), enc, p, restr, SCode.DERIVED(tp, mod, attr1), cmt, i)  => begin
-                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp)
                       mod = unelabMod(emod)
@@ -461,7 +461,7 @@
                   end
 
                   SCode.COMPONENT(compname, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), attr, tp, mod, cmt, cond, i)  => begin
-                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, compname, tp)
                       mod = unelabMod(emod)
@@ -474,7 +474,7 @@
                   end
                 end
               end
-               #=  merge modifers from the component to the modifers from the constrained by
+               #=  myMerge modifers from the component to the modifers from the constrained by
                =#
                #=  unelab mod so we get constant evaluation of parameters
                =#
@@ -482,7 +482,7 @@
                =#
                #=  redeclare of component declaration
                =#
-               #=  merge modifers from the component to the modifers from the constrained by
+               #=  myMerge modifers from the component to the modifers from the constrained by
                =#
                #=  unelab mod so we get constant evaluation of parameters
                =#
@@ -774,7 +774,7 @@
           given to the modification. This is used when modifications of e.g.
           elements in base classes used. For instance,
           model test extends A(x=y); end test;  both x and y are defined in A
-          The modifier x=y must be merged with outer modifiers, thus it needs
+          The modifier x=y must be myMerged with outer modifiers, thus it needs
           to be converted to Mod.
           Notice that the correct type information must be updated later on. =#
         function elabUntypedMod(inMod::SCode.Mod, inModScope::ModScope) ::DAE.Mod
@@ -862,7 +862,7 @@
           (outCache, outSubMods)
         end
 
-         #= This function merges the submodifiers in a modifier so that each submodifier
+         #= This function myMerges the submodifiers in a modifier so that each submodifier
             only occurs once. Ex:
 
             compactMod({x.start = 2.0, y = 4.0, x(min = 1.0, max = 3.0)}) =>
@@ -879,7 +879,7 @@
           outSubMods
         end
 
-         #= Helper function to compactSubMods. Tries to merge the given modifier with an
+         #= Helper function to compactSubMods. Tries to myMerge the given modifier with an
            existing modifier in the accumulation list. If a matching modifier is not
            found in the list it's added instead. =#
         function compactSubMod(inSubMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}, inAccumMods::List{<:SCode.SubMod}) ::List{SCode.SubMod}
@@ -893,7 +893,7 @@
           outSubMods
         end
 
-         #= Helper function to compactSubMod. Merges the given modifier with the existing
+         #= Helper function to compactSubMod. myMerges the given modifier with the existing
             modifier if they have the same name, otherwise does nothing. =#
         function compactSubMod2(inExistingMod::SCode.SubMod, inNewMod::SCode.SubMod, inModScope::ModScope, inName::List{<:String}) ::Tuple{SCode.SubMod, Bool}
               local outFound::Bool
@@ -909,7 +909,7 @@
                   end
 
                   (SCode.NAMEMOD(ident = name1), _, _, _)  => begin
-                      submod = mergeSubModsInSameScope(inExistingMod, inNewMod, _cons(name1, inName), inModScope)
+                      submod = myMergeSubModsInSameScope(inExistingMod, inNewMod, _cons(name1, inName), inModScope)
                     (submod, true)
                   end
                 end
@@ -917,9 +917,9 @@
           (outMod, outFound)
         end
 
-         #= Merges two submodifiers in the same scope, i.e. they have the same priority.
+         #= myMerges two submodifiers in the same scope, i.e. they have the same priority.
            It's thus an error if the modifiers modify the same element. =#
-        function mergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod
+        function myMergeSubModsInSameScope(inMod1::SCode.SubMod, inMod2::SCode.SubMod, inElementName::List{<:String}, inModScope::ModScope) ::SCode.SubMod
               local outMod::SCode.SubMod
 
               outMod = begin
@@ -1115,12 +1115,12 @@
                 @matchcontinue (inMods, inName, inSMod) begin
                   (_, _, _)  => begin
                       m = lookupCompModification(inMods, inName)
-                      m = mergeModifiers(inMods, m, inSMod)
+                      m = myMergeModifiers(inMods, m, inSMod)
                     m
                   end
 
                   _  => begin
-                        m = mergeModifiers(inMods, DAE.NOMOD(), inSMod)
+                        m = myMergeModifiers(inMods, DAE.NOMOD(), inSMod)
                       m
                   end
                 end
@@ -1128,7 +1128,7 @@
           outMod
         end
 
-        function mergeModifiers(inMods::DAE.Mod, inMod::DAE.Mod, inSMod::SCode.Mod) ::DAE.Mod
+        function myMergeModifiers(inMods::DAE.Mod, inMod::DAE.Mod, inSMod::SCode.Mod) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1138,7 +1138,7 @@
                   local e::SCode.Each
                 @matchcontinue (inMods, inMod, inSMod) begin
                   (_, _, SCode.MOD(f, e, sl, _, _))  => begin
-                      m = mergeSubMods(inMods, inMod, f, e, sl)
+                      m = myMergeSubMods(inMods, inMod, f, e, sl)
                     m
                   end
 
@@ -1150,7 +1150,7 @@
           outMod
         end
 
-        function mergeSubMods(inMods::DAE.Mod, inMod::DAE.Mod, f::SCode.Final, e::SCode.Each, inSMods::List{<:SCode.SubMod}) ::DAE.Mod
+        function myMergeSubMods(inMods::DAE.Mod, inMod::DAE.Mod, f::SCode.Final, e::SCode.Each, inSMods::List{<:SCode.SubMod}) ::DAE.Mod
               local outMod::DAE.Mod
 
               outMod = begin
@@ -1167,13 +1167,13 @@
                   SCode.NAMEMOD(n, SCode.MOD(binding = SOME(Absyn.CREF(Absyn.CREF_IDENT(id, _))), info = info)) <| rest  => begin
                       m = lookupCompModification(inMods, id)
                       m = DAE.MOD(f, e, list(DAE.NAMEMOD(n, m)), NONE(), info)
-                      m = merge(inMod, m)
-                      m = mergeSubMods(inMods, m, f, e, rest)
+                      m = myMerge(inMod, m)
+                      m = myMergeSubMods(inMods, m, f, e, rest)
                     m
                   end
 
                   _ <| rest  => begin
-                      m = mergeSubMods(inMods, inMod, f, e, rest)
+                      m = myMergeSubMods(inMods, inMod, f, e, rest)
                     m
                   end
                 end
@@ -1292,11 +1292,11 @@
                   end
 
                   (DAE.REDECL(__), DAE.MOD(__))  => begin
-                    mergeRedeclareWithBinding(mod1, mod2)
+                    myMergeRedeclareWithBinding(mod1, mod2)
                   end
 
                   (DAE.MOD(__), DAE.REDECL(__))  => begin
-                    mergeRedeclareWithBinding(mod2, mod1)
+                    myMergeRedeclareWithBinding(mod2, mod1)
                   end
 
                   (DAE.MOD(binding = NONE()), DAE.MOD(__))  => begin
@@ -1340,20 +1340,20 @@
           outSubMods
         end
 
-         #= Merges two modifiers where the first is a redeclare and the second a binding
+         #= myMerges two modifiers where the first is a redeclare and the second a binding
            modifier. This is to handle the case where an extended record redeclares a
            component, and then the component gets a binding when the record type is used.
 
            E.g. record ER = R(redeclare SomeType x);
                 ER er = ER(1.0);
            =#
-        function mergeRedeclareWithBinding(inRedeclare::DAE.Mod, inBinding::DAE.Mod) ::DAE.Mod
+        function myMergeRedeclareWithBinding(inRedeclare::DAE.Mod, inBinding::DAE.Mod) ::DAE.Mod
               local outMod::DAE.Mod = inRedeclare
 
               outMod = begin
                 @match (outMod, inBinding) begin
                   (DAE.REDECL(__), DAE.MOD(subModLst =  nil(), binding = SOME(_)))  => begin
-                      outMod.mod = merge(inBinding, outMod.mod)
+                      outMod.mod = myMerge(inBinding, outMod.mod)
                     outMod
                   end
                 end
@@ -1475,10 +1475,10 @@
                   DAE.MOD(__)  => begin
                       (mod1, subs) = lookupIdxModification2(inMod.subModLst, inIndex)
                       mod2 = DAE.MOD(inMod.finalPrefix, inMod.eachPrefix, subs, NONE(), inMod.info)
-                      mod2 = merge(mod2, mod1)
+                      mod2 = myMerge(mod2, mod1)
                       eq = indexEqmod(inMod.binding, list(inIndex), inMod.info)
                       mod1 = DAE.MOD(SCode.NOT_FINAL(), inMod.eachPrefix, nil, eq, inMod.info)
-                      mod2 = merge(mod2, mod1)
+                      mod2 = myMerge(mod2, mod1)
                     mod2
                   end
 
@@ -1622,8 +1622,8 @@
           outBinding
         end
 
-         #= Merges two modifiers, where the outer modifiers overrides the inner one. =#
-        function merge(inModOuter::DAE.Mod #= The outer mod which should override the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inElementName::String = "", inCheckFinal::Bool = true) ::DAE.Mod
+         #= myMerges two modifiers, where the outer modifiers overrides the inner one. =#
+        function myMerge(inModOuter::DAE.Mod #= The outer mod which should override the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inElementName::String = "", inCheckFinal::Bool = true) ::DAE.Mod
               local outMod::DAE.Mod
 
               local mod_str::String
@@ -1632,17 +1632,17 @@
                 outMod = inModInner
               elseif isEmptyMod(inModInner)
                 outMod = inModOuter
-              elseif inCheckFinal && isFinalMod(inModInner) && ! merge_isEqual(inModOuter, inModInner) && ! isRedeclareMod(inModOuter)
+              elseif inCheckFinal && isFinalMod(inModInner) && ! myMerge_isEqual(inModOuter, inModInner) && ! isRedeclareMod(inModOuter)
                 mod_str = unparseModStr(inModOuter)
                 Error.addMultiSourceMessage(Error.FINAL_COMPONENT_OVERRIDE, list(inElementName, mod_str), list(getModInfo(inModInner), getModInfo(inModOuter)))
                 fail()
               else
-                outMod = doMerge(inModOuter, inModInner, inCheckFinal)
+                outMod = domyMerge(inModOuter, inModInner, inCheckFinal)
               end
           outMod
         end
 
-        function merge_isEqual(inMod1::DAE.Mod, inMod2::DAE.Mod) ::Bool
+        function myMerge_isEqual(inMod1::DAE.Mod, inMod2::DAE.Mod) ::Bool
               local outIsEqual::Bool
 
               local info1::SourceInfo
@@ -1680,9 +1680,9 @@
           outMod
         end
 
-         #= Merges two DAE.Mod into one. The first argument is the outer modification
+         #= myMerges two DAE.Mod into one. The first argument is the outer modification
            that should take precedence over the inner modification. =#
-        function doMerge(inModOuter::DAE.Mod #= The outer mod which should overwrite the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inCheckFinal::Bool) ::DAE.Mod
+        function domyMerge(inModOuter::DAE.Mod #= The outer mod which should overwrite the inner mod. =#, inModInner::DAE.Mod #= The inner mod. =#, inCheckFinal::Bool) ::DAE.Mod
               local outMod::DAE.Mod = inModOuter
 
               outMod = begin
@@ -1717,13 +1717,13 @@
                        #=  Redeclaration of component with constraining class on the inner modifier.
                        =#
                       smod1 = SCodeUtil.getConstrainedByModifiers(el1.prefixes)
-                      smod1 = SCodeUtil.mergeModifiers(el1.modifications, smod1)
+                      smod1 = SCodeUtil.myMergeModifiers(el1.modifications, smod1)
                       dmod1 = elabUntypedMod(smod1, COMPONENT(el1.name))
                       smod2 = SCodeUtil.getConstrainedByModifiers(el2.prefixes)
-                      smod2 = SCodeUtil.mergeModifiers(el2.modifications, smod2)
+                      smod2 = SCodeUtil.myMergeModifiers(el2.modifications, smod2)
                       dmod2 = elabUntypedMod(smod2, COMPONENT(el2.name))
-                      dmod = merge(dmod1, dmod2, el1.name, inCheckFinal)
-                      emod = merge(emod1, emod2, el1.name, inCheckFinal)
+                      dmod = myMerge(dmod1, dmod2, el1.name, inCheckFinal)
+                      emod = myMerge(emod1, emod2, el1.name, inCheckFinal)
                        #=  If we have a constraining class we don't need the mod.
                        =#
                       el1.modifications = unelabMod(dmod)
@@ -1745,11 +1745,11 @@
                        =#
                       smod1 = SCodeUtil.getConstrainedByModifiers(el1.prefixes)
                       dmod1 = elabUntypedMod(smod1, COMPONENT(el1.name))
-                      emod1 = merge(emod1, dmod1, el1.name, inCheckFinal)
+                      emod1 = myMerge(emod1, dmod1, el1.name, inCheckFinal)
                       smod2 = SCodeUtil.getConstrainedByModifiers(el2.prefixes)
                       dmod2 = elabUntypedMod(smod2, COMPONENT(el2.name))
-                      emod2 = merge(emod2, dmod2, el1.name, inCheckFinal)
-                      emod = merge(emod1, emod2, el1.name, inCheckFinal)
+                      emod2 = myMerge(emod2, dmod2, el1.name, inCheckFinal)
+                      emod = myMerge(emod1, emod2, el1.name, inCheckFinal)
                       el1.prefixes = SCodeUtil.propagatePrefixes(el2.prefixes, el2.prefixes)
                       (res, info) = SCodeUtil.checkSameRestriction(el1.restriction, el2.restriction, el1.info, el2.info)
                       el1.restriction = res
@@ -1760,14 +1760,14 @@
                   end
 
                   (DAE.REDECL(element = el1, mod = emod), DAE.MOD(__))  => begin
-                      emod = merge(emod, inModInner, "", inCheckFinal)
+                      emod = myMerge(emod, inModInner, "", inCheckFinal)
                       outMod.element = el1
                       outMod.mod = emod
                     outMod
                   end
 
                   (DAE.MOD(__), DAE.REDECL(element = el2, mod = emod))  => begin
-                      emod = merge(inModOuter, emod, "", inCheckFinal)
+                      emod = myMerge(inModOuter, emod, "", inCheckFinal)
                     DAE.REDECL(inModInner.finalPrefix, inModInner.eachPrefix, el2, emod)
                   end
 
@@ -1794,7 +1794,7 @@
                       val.orderd = listReverse(vals)
                       eqmod.modifierAsValue = SOME(val)
                       outMod.binding = SOME(eqmod)
-                       #=  Remove all submodifier bindings, they have been merged into the
+                       #=  Remove all submodifier bindings, they have been myMerged into the
                        =#
                        #=  record binding.
                        =#
@@ -1823,7 +1823,7 @@
                       val.orderd = listReverse(vals)
                       eqmod.modifierAsValue = SOME(val)
                       outMod.binding = SOME(eqmod)
-                       #=  Remove all submodifier bindings, they have been merged into the
+                       #=  Remove all submodifier bindings, they have been myMerged into the
                        =#
                        #=  record binding.
                        =#
@@ -1832,8 +1832,8 @@
                   end
 
                   (DAE.MOD(__), DAE.MOD(__))  => begin
-                      outMod.subModLst = mergeSubs(outMod.subModLst, inModInner.subModLst, inCheckFinal)
-                      outMod.binding = mergeEq(outMod.binding, inModInner.binding)
+                      outMod.subModLst = myMergeSubs(outMod.subModLst, inModInner.subModLst, inCheckFinal)
+                      outMod.binding = myMergeEq(outMod.binding, inModInner.binding)
                     outMod
                   end
                 end
@@ -1841,7 +1841,7 @@
           outMod
         end
 
-        function mergeSubs(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inCheckFinal::Bool) ::List{DAE.SubMod}
+        function myMergeSubs(inSubMods1::List{<:DAE.SubMod}, inSubMods2::List{<:DAE.SubMod}, inCheckFinal::Bool) ::List{DAE.SubMod}
               local outSubMods::List{DAE.SubMod} = nil
 
               local submods2::List{DAE.SubMod}
@@ -1863,7 +1863,7 @@
                     @match SOME(sm2) = osm2
                     @match DAE.NAMEMOD(ident = name, mod = m1) = sm1
                     @match DAE.NAMEMOD(mod = m2) = sm2
-                    m1 = merge(m1, m2, name, inCheckFinal)
+                    m1 = myMerge(m1, m2, name, inCheckFinal)
                     sm1 = DAE.NAMEMOD(name, m1)
                   end
                   outSubMods = _cons(sm1, outSubMods)
@@ -1875,7 +1875,7 @@
 
          #= The outer modification, given in the first argument, takes precedence over
            the inner modifications. =#
-        function mergeEq(inOuterEq::Option{<:DAE.EqMod}, inInnerEq::Option{<:DAE.EqMod}) ::Option{DAE.EqMod}
+        function myMergeEq(inOuterEq::Option{<:DAE.EqMod}, inInnerEq::Option{<:DAE.EqMod}) ::Option{DAE.EqMod}
               local outEqMod::Option{DAE.EqMod} = if isSome(inOuterEq)
                     inOuterEq
                   else

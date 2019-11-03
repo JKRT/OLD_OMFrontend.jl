@@ -24,16 +24,14 @@ function next(inext::Next) ::Next
 end
 
 #= returns an empty cache =#
-function emptyCache() ::Cache
+function emptyCache()::Cache
+  println("Empty cache hello")
   local cache::Cache
-
   local instFuncs::MutableType #= {DAE.FunctionTree} =#
   local ht::StructuralParameters
-
   instFuncs = Mutable.create(DAE.AvlTreePathFunction.EMPTY())
   ht = (AvlSetCR.EMPTY(), nil)
   cache = CACHE(NONE(), instFuncs, ht, Absyn.IDENT("##UNDEFINED##"))
-  cache
 end
 
 #= returns an empty cache =#

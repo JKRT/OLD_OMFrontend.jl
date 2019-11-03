@@ -316,7 +316,7 @@
                   end
                 end
               end
-               #=  Merge the types environment with it's enclosing scopes to get the
+               #=  myMerge the types environment with it's enclosing scopes to get the
                =#
                #=  enclosing scopes of the classes we need to replace.
                =#

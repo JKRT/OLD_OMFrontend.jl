@@ -4618,7 +4618,7 @@
                =#
                #=  to easier report errors later on and also to have DAE.ComponentRef and DAE.Type
                =#
-               #=  but unfortunately DAE depends on Values and they should probably be merged !
+               #=  but unfortunately DAE depends on Values and they should probably be myMerged !
                =#
                #=  Actually, at a second thought we SHOULD NOT HAVE VALUES AT ALL, WE SHOULD HAVE
                =#

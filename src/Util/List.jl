@@ -1144,7 +1144,7 @@
           lst
         end
 
-         #= Sorts a list given an ordering function with the mergesort algorithm.
+         #= Sorts a list given an ordering function with the myMergesort algorithm.
             Example:
               sort({2, 1, 3}, intGt) => {1, 2, 3}
               sort({2, 1, 3}, intLt) => {3, 2, 1} =#
@@ -1175,7 +1175,7 @@
                     (left, right) = split(inList, middle)
                     left = sort(left, inCompFunc)
                     right = sort(right, inCompFunc)
-                    outList = merge(left, right, inCompFunc, nil)
+                    outList = myMerge(left, right, inCompFunc, nil)
                   end
                 end
               end
@@ -1287,8 +1287,8 @@
           outDuplicateElements
         end
 
-         #= Helper function to sort, merges two sorted lists. =#
-        function merge(inLeft::List{T}, inRight::List{T}, inCompFunc::CompareFunc, acc::List{T})  where {T}
+         #= Helper function to sort, myMerges two sorted lists. =#
+        function myMerge(inLeft::List{T}, inRight::List{T}, inCompFunc::CompareFunc, acc::List{T})  where {T}
               local outList::List{T}
 
               outList = begin
@@ -1309,7 +1309,7 @@
                         l_rest = inLeft
                         el = r
                       end
-                    merge(l_rest, r_rest, inCompFunc, _cons(el, acc))
+                    myMerge(l_rest, r_rest, inCompFunc, _cons(el, acc))
                   end
                   
                   ( nil(),  nil())  => begin
@@ -1328,11 +1328,11 @@
           outList
         end
 
-         #= This function merges two sorted lists into one sorted list. It takes a
+         #= This function myMerges two sorted lists into one sorted list. It takes a
           comparison function that defines a strict weak ordering of the elements, i.e.
           that returns true if the first element should be placed before the second
           element in the sorted list. =#
-        function mergeSorted(inList1::List{T}, inList2::List{T}, inCompFunc::CompFunc)  where {T}
+        function myMergeSorted(inList1::List{T}, inList2::List{T}, inCompFunc::CompFunc)  where {T}
               local outList::List{T} = nil
 
               local l1::List{T}
