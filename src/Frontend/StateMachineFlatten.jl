@@ -1120,7 +1120,7 @@
         Author: BTH
         Transform an equation 'der(a.x) = e' to 'der(a.x) = if a.active then e else 0' (isResetEquation=false)
         TODO: Implement reset equations for continuous time. Should that be done in this function or somewhere else?
-        FIXME: Merge with wrapInStateActivationConditional(..)?
+        FIXME: myMerge with wrapInStateActivationConditional(..)?
          =#
         function wrapInStateActivationConditionalCT(inEqn::DAE.Element, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#) ::DAE.Element 
               local outEqn::DAE.Element

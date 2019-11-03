@@ -945,15 +945,15 @@
           outNode
         end
 
-         #= Merges the nodes of two different graphs. Needs an ordering function in order to be efficient. =#
-        function merge(graph1::List{<:Tuple{<:NodeType, List{<:NodeType}}}, graph2::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, compareFunc::CompareFunc) ::List{Tuple{NodeType, List{NodeType}}}
+         #= myMerges the nodes of two different graphs. Needs an ordering function in order to be efficient. =#
+        function myMerge(graph1::List{<:Tuple{<:NodeType, List{<:NodeType}}}, graph2::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, compareFunc::CompareFunc) ::List{Tuple{NodeType, List{NodeType}}}
               local graph::List{Tuple{NodeType, List{NodeType}}}
 
-              graph = merge2(ListUtil.sort(listAppend(graph1, graph2), compareFunc), eqFunc, nil)
+              graph = myMerge2(ListUtil.sort(listAppend(graph1, graph2), compareFunc), eqFunc, nil)
           graph
         end
 
-        function merge2(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, inAcc::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}}
+        function myMerge2(inGraph::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc, inAcc::List{<:Tuple{<:NodeType, List{<:NodeType}}}) ::List{Tuple{NodeType, List{NodeType}}}
               local graph::List{Tuple{NodeType, List{NodeType}}}
 
               graph = begin
@@ -975,15 +975,15 @@
 
                   ((n1, e1) <| (n2, e2) <| rest, _, _)  => begin
                       b = eqFunc(n1, n2)
-                      (node, rest) = merge3(b, n1, e1, n2, e2, rest, eqFunc)
-                    merge2(rest, eqFunc, _cons(node, inAcc))
+                      (node, rest) = myMerge3(b, n1, e1, n2, e2, rest, eqFunc)
+                    myMerge2(rest, eqFunc, _cons(node, inAcc))
                   end
                 end
               end
           graph
         end
 
-        function merge3(b::Bool, n1::NodeType, e1::List{<:NodeType}, n2::NodeType, e2::List{<:NodeType}, rest::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc) ::Tuple{Tuple{NodeType, List{NodeType}}, List{Tuple{NodeType, List{NodeType}}}}
+        function myMerge3(b::Bool, n1::NodeType, e1::List{<:NodeType}, n2::NodeType, e2::List{<:NodeType}, rest::List{<:Tuple{<:NodeType, List{<:NodeType}}}, eqFunc::EqualFunc) ::Tuple{Tuple{NodeType, List{NodeType}}, List{Tuple{NodeType, List{NodeType}}}}
               local outRest::List{Tuple{NodeType, List{NodeType}}}
               local elt::Tuple{NodeType, List{NodeType}}
 

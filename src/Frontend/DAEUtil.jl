@@ -8196,8 +8196,8 @@
          experimental merging of all algorithm sections into:
          - one for initial algorithms
          - one for normal algorithms
-         - only happens on a flag (-d=mergeAlgSections) =#
-        function mergeAlgorithmSections(inDae::DAE.DAElist) ::DAE.DAElist
+         - only happens on a flag (-d=myMergeAlgSections) =#
+        function myMergeAlgorithmSections(inDae::DAE.DAElist) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               local els::List{DAE.Element}
@@ -8213,7 +8213,7 @@
 
                #=  do nothing if the flag is not activated
                =#
-              if ! Flags.isSet(Flags.MERGE_ALGORITHM_SECTIONS)
+              if ! Flags.isSet(Flags.myMerge_ALGORITHM_SECTIONS)
                 outDae = inDae
                 return outDae
               end

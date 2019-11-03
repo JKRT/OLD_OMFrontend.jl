@@ -1321,8 +1321,8 @@ function getConnections(inGraph::ConnectionGraphType) ::DaeEdges
   outResult
 end
 
-#= merge two ConnectionGraphs =#
-function merge(inGraph1::ConnectionGraphType, inGraph2::ConnectionGraphType) ::ConnectionGraphType
+#= myMerge two ConnectionGraphs =#
+function myMerge(inGraph1::ConnectionGraphType, inGraph2::ConnectionGraphType) ::ConnectionGraphType
   local outGraph::ConnectionGraphType
 
   outGraph = begin
@@ -1362,7 +1362,7 @@ function merge(inGraph1::ConnectionGraphType, inGraph2::ConnectionGraphType) ::C
 
       (GRAPH(updateGraph = updateGraph1, definiteRoots = definiteRoots1, potentialRoots = potentialRoots1, uniqueRoots = uniqueRoots1, branches = branches1, connections = connections1), GRAPH(updateGraph = updateGraph2, definiteRoots = definiteRoots2, potentialRoots = potentialRoots2, uniqueRoots = uniqueRoots2, branches = branches2, connections = connections2))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.trace("- ConnectionGraph.merge()\\n")
+          Debug.trace("- ConnectionGraph.myMerge()\\n")
         end
         updateGraph = boolOr(updateGraph1, updateGraph2)
         definiteRoots = ListUtil.union(definiteRoots1, definiteRoots2)

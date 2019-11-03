@@ -432,7 +432,7 @@
                 @match (inPartName, inItem, inFoundEnv, inOriginEnv, inIsFirst, inFromExtends, inFullPath) begin
                   (_, SOME(item), SOME(env), _, _, _, _)  => begin
                       ep = checkExtendsPart(inIsFirst, inFromExtends, inPartName, item, inFullPath, env, inOriginEnv)
-                      env = NFSCodeEnv.mergeItemEnv(item, env)
+                      env = NFSCodeEnv.myMergeItemEnv(item, env)
                     (env, ep)
                   end
                   
@@ -484,7 +484,7 @@
                   end
                   
                   (_, _, _, NFSCodeEnv.VAR(__), _, _, _)  => begin
-                      part = NFSCodeEnv.mergePathWithEnvPath(inPartName, inFoundEnv)
+                      part = NFSCodeEnv.myMergePathWithEnvPath(inPartName, inFoundEnv)
                     makeExtendsError(inBaseClass, part, BASECLASS_IS_VAR_ERROR)
                   end
                   
@@ -752,7 +752,7 @@
                 @match (inName, inExtends, inEnv, inExtendsTable) begin
                   (_, SOME(NFSCodeEnv.EXTENDS(baseClass = Absyn.FULLYQUALIFIED(bc))), _, _)  => begin
                       (item, env) = lookupFullyQualified(bc, inEnv, inExtendsTable)
-                      env = NFSCodeEnv.mergeItemEnv(item, env)
+                      env = NFSCodeEnv.myMergeItemEnv(item, env)
                       env = NFSCodeEnv.setImportTableHidden(env, true)
                       (opt_item, _, opt_env, _) = lookupInLocalScope(inName, env, inExtendsTable)
                     (opt_item, opt_env)
@@ -820,7 +820,7 @@
                 @matchcontinue (inName, inImports, inEnv, inExtendsTable) begin
                   (_, Absyn.UNQUAL_IMPORT(path = path) <| _, _, _)  => begin
                       (item, env) = lookupFullyQualified(path, inEnv, inExtendsTable)
-                      env = NFSCodeEnv.mergeItemEnv(item, env)
+                      env = NFSCodeEnv.myMergeItemEnv(item, env)
                       (item, env) = lookupFullyQualified2(Absyn.IDENT(inName), env, inExtendsTable)
                       path = NFSCodeEnv.prefixIdentWithEnv(inName, env)
                       path = AbsynUtil.makeFullyQualified(path)
@@ -864,7 +864,7 @@
                   
                   (Absyn.QUALIFIED(name = name, path = rest_path), _, _)  => begin
                       @match (SOME(item), _, SOME(env), _) = lookupInLocalScope(name, inEnv, inExtendsTable)
-                      env = NFSCodeEnv.mergeItemEnv(item, env)
+                      env = NFSCodeEnv.myMergeItemEnv(item, env)
                       (item, env) = lookupFullyQualified2(rest_path, env, inExtendsTable)
                     (item, env)
                   end

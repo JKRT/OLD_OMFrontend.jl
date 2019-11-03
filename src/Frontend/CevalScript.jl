@@ -757,7 +757,7 @@
                   local includeConstants::Bool
                   local inputConnectors::Bool
                   local outputConnectors::Bool
-                  local mergeAST::Bool
+                  local myMergeAST::Bool
                   local includePartial::Bool
                   local qualified::Bool
                   local cache::FCore.Cache
@@ -768,7 +768,7 @@
                   local depstransitive::List{Tuple{String, List{String}}}
                   local depstransposed::List{Tuple{String, List{String}}}
                   local depstransposedtransitive::List{Tuple{String, List{String}}}
-                  local depsmerged::List{Tuple{String, List{String}}}
+                  local depsmyMerged::List{Tuple{String, List{String}}}
                   local depschanged::List{Tuple{String, List{String}}}
                   local codeNode::Absyn.CodeNode
                   local cvars::List{Values.Value}
@@ -1585,8 +1585,8 @@
                       depstransposedtransitive = Graph.buildGraph(namesPublic, buildTransitiveDependencyGraph, depstransposed)
                       depstransitive = Graph.transposeGraph(Graph.emptyGraph(names), depstransposedtransitive, stringEq)
                       depstransitive = ListUtil.sort(depstransitive, compareNumberOfDependencies)
-                      depsmerged = Graph.merge(deps, depstransitive, stringEq, compareDependencyNode)
-                      depschanged = ListUtil.select1(depsmerged, isChanged, hashSetString)
+                      depsmyMerged = Graph.myMerge(deps, depstransitive, stringEq, compareDependencyNode)
+                      depschanged = ListUtil.select1(depsmyMerged, isChanged, hashSetString)
                       names = ListUtil.map(depschanged, Util.tuple21)
                       fileNames = ListUtil.map1(names, stringAppend, suffix)
                       _ = ListUtil.map(fileNames, System.removeFile)
@@ -1888,14 +1888,14 @@
                     (cache, Values.BOOL(false))
                   end
                   
-                  (_, _, "loadString", Values.STRING(str) <| Values.STRING(name) <| Values.STRING(encoding) <| Values.BOOL(mergeAST) <| _, _)  => begin
+                  (_, _, "loadString", Values.STRING(str) <| Values.STRING(name) <| Values.STRING(encoding) <| Values.BOOL(myMergeAST) <| _, _)  => begin
                       str = if ! encoding == "UTF-8"
                             System.iconv(str, encoding, "UTF-8")
                           else
                             str
                           end
                       newp = Parser.parsestring(str, name)
-                      newp = Interactive.updateProgram(newp, SymbolTable.getAbsyn(), mergeAST)
+                      newp = Interactive.updateProgram(newp, SymbolTable.getAbsyn(), myMergeAST)
                       SymbolTable.setAbsyn(newp)
                     (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end

@@ -729,7 +729,7 @@
                   InstUtil.prefixEqualUnlessBasicType(prefix, pre, cls)
                   if valueEq(dims, instDims) && impl == implicitInst && valueEq(m, mod) && valueEq(csets, sets) && valueEq(st, state) && valueEq(e, cls) && valueEq(scr, instSingleCref) && callingScopeCacheEq(cs, callingScope)
                     (env, dae, sets, state, vars, ty, optDerAttr, equalityConstraint, cached_graph) = outputs
-                    graph = ConnectionGraph.merge(graph, cached_graph)
+                    graph = ConnectionGraph.myMerge(graph, cached_graph)
                     showCacheInfo("Full Inst Hit: ", cache_path)
                     return (cache, env, ih, store, state, graph, sets, dae, vars, ty, optDerAttr, equalityConstraint)
                   end
@@ -1877,7 +1877,7 @@
                       if intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.PDEMODELICA)
                         compelts_1 = InstUtil.addGhostCells(compelts_1, eqs_1)
                       end
-                      checkMods = Mod.merge(mods, emods, className)
+                      checkMods = Mod.myMerge(mods, emods, className)
                       mods = checkMods
                       (cache, env3, ih) = InstUtil.addComponentsToEnv(cache, env2, ih, mods, pre, ci_state, compelts_1, impl)
                       compelts_2_elem = ListUtil.map(compelts_1, Util.tuple21)
@@ -1950,13 +1950,13 @@
                       new_ci_state = ClassInf.start(r, FGraph.getGraphName(env3))
                       (cache, cenv_2, _, _, _, _, _, _, _, _, _, _) = instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ci_state2, c, SCode.PUBLIC(), nil, false, callscope, ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                       (cache, mod_1) = Mod.elabMod(cache, cenv_2, ih, pre, mod, impl, Mod.DERIVED(cn), info)
-                      mods_1 = Mod.merge(mods, mod_1, className)
+                      mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
                       (cache, dims) = InstUtil.elabArraydimOpt(cache, cenv_2, Absyn.CREF_IDENT("", nil), cn, ad, eq, impl, true, pre, info, inst_dims) #= owncref not valid here =#
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope. =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -1972,14 +1972,14 @@
                       mod = InstUtil.chainRedeclares(mods, mod)
                       (parentEnv, _) = FGraph.stripLastScopeRef(env)
                       (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, impl, Mod.DERIVED(cn), info)
-                      mods_1 = Mod.merge(mods, mod_1, className)
+                      mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
                       (cache, dims) = InstUtil.elabArraydimOpt(cache, parentEnv, Absyn.CREF_IDENT("", nil), cn, ad, eq, impl, true, pre, info, inst_dims) #= owncref not valid here =#
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       _ = AbsynUtil.getArrayDimOptAsList(ad)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2010,16 +2010,16 @@
                         mod = InstUtil.chainRedeclares(mods, mod)
                         (parentEnv, _) = FGraph.stripLastScopeRef(env)
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
-                        mods_1 = Mod.merge(mods, mod_1, className)
+                        mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, parentClassEnv, ih, store, mods_1, pre, ci_state, className, classDefParent, re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                       else
                         mod = InstUtil.chainRedeclares(mods, mod)
                         (parentEnv, _) = FGraph.stripLastScopeRef(env)
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
-                        mods_1 = Mod.merge(mods, mod_1, className)
+                        mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, env, ih, store, mods_1, pre, ci_state, className, SCode.PARTS(list(SCode.EXTENDS(cn, vis, SCode.NOMOD(), NONE(), info)), nil, nil, nil, nil, nil, nil, NONE()), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                       end
                     (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph)
                   end
@@ -2034,13 +2034,13 @@
                       mod = InstUtil.chainRedeclares(mods, mod)
                       (parentEnv, _) = FGraph.stripLastScopeRef(env)
                       (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, impl, Mod.DERIVED(cn), info)
-                      mods_1 = Mod.merge(mods, mod_1, className)
+                      mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
                       (cache, dims) = InstUtil.elabArraydimOpt(cache, parentEnv, Absyn.CREF_IDENT("", nil), cn, ad, eq, impl, true, pre, info, inst_dims) #= owncref not valid here =#
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2059,7 +2059,7 @@
                       ty = listHead(tys)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METALIST(ty))
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_LIST(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2070,7 +2070,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAOPTION(ty))
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_OPTION(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2081,7 +2081,7 @@
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = ListUtil.map(tys, Types.boxIfUnboxedType)
                       bc = SOME(DAE.T_METATUPLE(tys))
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_TUPLE(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2092,7 +2092,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAARRAY(ty))
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_ARRAY(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2101,7 +2101,7 @@
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
                       (cache, _, ih, _, csets, oDA) = instClassDefHelper(cache, env, ih, nil, pre, inst_dims, impl, nil, inSets, info)
                       bc = SOME(DAE.T_METAPOLYMORPHIC(className))
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_POLYMORPHIC(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2133,7 +2133,7 @@
                         fail()
                       end
                       ty = Types.setTypeVariables(ty, tys)
-                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
                       bc = SOME(ty)
                     (cache, env, ih, store, DAE.emptyDae, csets, new_ci_state, nil, bc, oDA, NONE(), graph)
                   end
@@ -2325,7 +2325,7 @@
                   (cache, env, ih, store, SCode.EXTENDS(baseClassPath = path, modifications = mod) <|  nil(),  nil(), mods, inst_dims, _, _, _)  => begin
                       ErrorExt.setCheckpoint("instBasictypeBaseclass")
                       (cache, m_1) = Mod.elabModForBasicType(cache, env, ih, Prefix.NOPRE(), mod, true, Mod.DERIVED(path), info)
-                      m_2 = Mod.merge(mods, m_1, className)
+                      m_2 = Mod.myMerge(mods, m_1, className)
                       (cache, cdef, cenv) = Lookup.lookupClass(cache, env, path, SOME(info))
                       (cache, _, ih, store, dae, _, ty, tys, _) = instClassBasictype(cache, cenv, ih, store, m_2, Prefix.NOPRE(), cdef, inst_dims, false, InstTypes.INNER_CALL(), DAE.emptySet)
                       b1 = Types.basicType(ty)
@@ -2502,7 +2502,7 @@
                        =#
                        #=  added to the environment here.
                        =#
-                      mod = Mod.merge(inMod, emods, class_name)
+                      mod = Mod.myMerge(inMod, emods, class_name)
                       (cdef_els, ext_comps) = InstUtil.classdefElts2(ext_comps, partial_prefix)
                       (outCache, outEnv, outIH) = InstUtil.addClassdefsToEnv(outCache, outEnv, outIH, inPrefix, cdef_els, true, SOME(mod))
                        #=  Add inherited classes to env.
@@ -2532,7 +2532,7 @@
                        =#
                       parent_env = FGraph.stripLastScopeRef(inEnv)
                       (outCache, mod) = Mod.elabMod(outCache, parent_env, inIH, inPrefix, smod, false, Mod.DERIVED(class_path), info)
-                      mod = Mod.merge(inMod, mod, class_name)
+                      mod = Mod.myMerge(inMod, mod, class_name)
                       if has_dims && ! is_basic_type
                         cls = SCodeUtil.setClassName(class_name, cls)
                         eq = Mod.modEquation(mod)
@@ -2927,7 +2927,7 @@
                           else
                             true
                           end
-                      m = SCodeUtil.mergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      m = SCodeUtil.myMergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
                       if SCodeUtil.finalBool(final_prefix)
                         m = InstUtil.traverseModAddFinal(m)
                       end
@@ -2962,22 +2962,20 @@
                       (cache, mm) = Mod.updateMod(cache, env2, ih, pre, mm, impl, info)
                       (var_class_mod, class_mod) = modifyInstantiateClass(class_mod, t)
                       (cache, m_1) = Mod.elabMod(cache, env2, ih, pre, m, impl, Mod.COMPONENT(name), info)
-                      mod = Mod.merge(mm, class_mod, name)
-                      mod = Mod.merge(mod, m_1, name, ! ClassInf.isRecord(ci_state))
-                      mod = Mod.merge(cmod, mod, name)
-                      mod = Mod.merge(mod, var_class_mod, name)
-                      @match (cache, env2, ih, SCode.COMPONENT(name, prefixes, attr, Absyn.TPATH(t, _), _, comment, _, _), mod_1) = redeclareType(cache, env2, ih, mod, comp, pre, ci_state, impl, DAE.NOMOD())
-                      @match SCode.ATTR(arrayDims = ad, direction = dir) = attr
-                      @match SCode.PREFIXES(innerOuter = io) = prefixes
+                      mod = Mod.myMerge(mm, class_mod, name)
+                      mod = Mod.myMerge(mod, m_1, name, ! ClassInf.isRecord(ci_state))
+                      mod = Mod.myMerge(cmod, mod, name)
+                      mod = Mod.myMerge(mod, var_class_mod, name)
+                      @match (cache, env2, ih, SCode.COMPONENT(name, (@match SCode.PREFIXES(innerOuter = io) = prefixes), (@match SCode.ATTR(arrayDims = ad, direction = dir) = attr), Absyn.TPATH(t, _), _, comment, _, _), mod_1) = redeclareType(cache, env2, ih, mod, comp, pre, ci_state, impl, DAE.NOMOD())
                       (cache, cls, cenv) = Lookup.lookupClass(cache, env2, t, SOME(info))
                       cls_mod = Mod.getClassModifier(cenv, SCodeUtil.className(cls))
                       if ! Mod.isEmptyMod(cls_mod)
                         if ! listEmpty(ad)
                           cls_mod = Mod.addEachIfNeeded(cls_mod, list(DAE.DIM_INTEGER(1)))
                         end
-                        mod_1 = Mod.merge(mod_1, cls_mod, name)
+                        mod_1 = Mod.myMerge(mod_1, cls_mod, name)
                       end
-                      attr = SCodeUtil.mergeAttributesFromClass(attr, cls)
+                      attr = SCodeUtil.myMergeAttributesFromClass(attr, cls)
                       inst_dims = ListUtil.appendElt(nil, inst_dims)
                       (cache, mod) = Mod.updateMod(cache, env2, ih, pre, mod, impl, info)
                       (cache, mod_1) = Mod.updateMod(cache, env2, ih, pre, mod_1, impl, info)
@@ -3161,7 +3159,7 @@
 
          #= author: PA
           This function updates component modifiers to typed modifiers.
-          Typed modifiers are needed  to merge modifiers and to be able to
+          Typed modifiers are needed  to myMerge modifiers and to be able to
           fully instantiate a component. =#
         function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
@@ -3214,7 +3212,7 @@
                       name = SCodeUtil.elementName(comp)
                       cref = Absyn.CREF_IDENT(name, nil)
                       ltmod = ListUtil.map1(crefs, InstUtil.getModsForDep, xs)
-                      cmod2 = ListUtil.fold2r(_cons(cmod, ltmod), Mod.merge, name, true, DAE.NOMOD())
+                      cmod2 = ListUtil.fold2r(_cons(cmod, ltmod), Mod.myMerge, name, true, DAE.NOMOD())
                       @match SCode.PREFIXES(finalPrefix = fprefix) = SCodeUtil.elementPrefixes(comp)
                       (cache, env2, ih) = updateComponentsInEnv(cache, env, ih, pre, cmod2, crefs, ci_state, impl)
                       (cache, env2, ih) = updateComponentsInEnv(cache, env2, ih, pre, DAE.MOD(fprefix, SCode.NOT_EACH(), list(DAE.NAMEMOD(name, cmod)), NONE(), info), list(cref), ci_state, impl)
@@ -3242,7 +3240,7 @@
                       name = SCodeUtil.elementName(comp)
                       cref = Absyn.CREF_IDENT(name, nil)
                       ltmod = ListUtil.map1(crefs, InstUtil.getModsForDep, xs)
-                      cmod2 = ListUtil.fold2r(ltmod, Mod.merge, name, true, DAE.NOMOD())
+                      cmod2 = ListUtil.fold2r(ltmod, Mod.myMerge, name, true, DAE.NOMOD())
                       @match SCode.PREFIXES(finalPrefix = fprefix) = SCodeUtil.elementPrefixes(comp)
                       (cache, env2, ih) = updateComponentsInEnv(cache, env, ih, pre, cmod2, crefs, ci_state, impl)
                       (cache, env2, ih) = updateComponentsInEnv(cache, env2, ih, pre, DAE.MOD(fprefix, SCode.NOT_EACH(), list(DAE.NAMEMOD(name, cmod)), NONE(), cmod.info), list(cref), ci_state, impl)
@@ -3298,7 +3296,7 @@
               local crefs::List{Absyn.ComponentRef}
 
               if ! Mod.isRedeclareMod(inMod)
-                outMod = Mod.merge(inMod, inCmod)
+                outMod = Mod.myMerge(inMod, inCmod)
                 return (outCache, outEnv, outIH, outElement, outMod)
               end
               @match DAE.REDECL(element = redecl_el, mod = redecl_mod) = inMod
@@ -3326,18 +3324,18 @@
                                =#
                               redecl_mod = InstUtil.keepConstrainingTypeModifersOnly(redecl_mod, cc_comps)
                               old_m = InstUtil.keepConstrainingTypeModifersOnly(old_m, cc_comps)
-                              m = Mod.merge(m, redecl_mod, redecl_name)
-                              m = Mod.merge(m, old_m, redecl_name)
-                              m = Mod.merge(m, inCmod, redecl_name)
+                              m = Mod.myMerge(m, redecl_mod, redecl_name)
+                              m = Mod.myMerge(m, old_m, redecl_name)
+                              m = Mod.myMerge(m, inCmod, redecl_name)
                             m
                           end
 
                           _  => begin
                                  #=  No constraining type on comp, throw away modifiers prior to redeclaration:
                                  =#
-                                m = Mod.merge(redecl_mod, m, redecl_name)
-                                m = Mod.merge(m, old_m, redecl_name)
-                                m = Mod.merge(inCmod, m, redecl_name)
+                                m = Mod.myMerge(redecl_mod, m, redecl_name)
+                                m = Mod.myMerge(m, old_m, redecl_name)
+                                m = Mod.myMerge(inCmod, m, redecl_name)
                               m
                           end
                         end
@@ -3564,7 +3562,7 @@
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match true = stringEq(name, id)
                       (cl, _) = Lookup.lookupClassLocal(env, name)
-                      env = FGraph.updateClass(env, SCodeUtil.mergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
+                      env = FGraph.updateClass(env, SCodeUtil.myMergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
                       updatedComps = getUpdatedCompsHashTable(inUpdatedComps)
                       updatedComps = BaseHashTable.add((cref, 0), updatedComps)
                     (cache, env, ih, SOME(updatedComps))
@@ -3707,11 +3705,11 @@
               try
                 @match 1 = BaseHashTable.get(inCref, inUpdatedComps)
               catch
-                smod = SCodeUtil.mergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
+                smod = SCodeUtil.myMergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
                 (outCache, mod1) = updateComponentInEnv3(outCache, outEnv, outIH, smod, inImpl, Mod.COMPONENT(inName), inInfo)
                 class_mod = Mod.lookupModificationP(inMod, inPath)
-                mod2 = Mod.merge(class_mod, mod1, inName)
-                mod2 = Mod.merge(inClsMod, mod2, inName)
+                mod2 = Mod.myMerge(class_mod, mod1, inName)
+                mod2 = Mod.myMerge(inClsMod, mod2, inName)
                 (outCache, mod2) = Mod.updateMod(outCache, outEnv, outIH, Prefix.NOPRE(), mod2, inImpl, inInfo)
                 mod = if InstUtil.redeclareBasicType(inClsMod)
                       mod1
@@ -3730,7 +3728,7 @@
               end
                #= comp_mod := Mod.lookupCompModification(inMod, inName);
                =#
-               #= mod2 := Mod.merge(class_mod, comp_mod, inName);
+               #= mod2 := Mod.myMerge(class_mod, comp_mod, inName);
                =#
                #=  Instantiate the component.
                =#
@@ -4973,7 +4971,7 @@
               end
         end
 
-         #= Merges the function's comments from inherited classes =#
+         #= myMerges the function's comments from inherited classes =#
         function instFunctionAnnotations(comments::List{<:SCode.Comment}, state::ClassInf.SMNode) ::DAE.DAElist
               local dae::DAE.DAElist = DAE.emptyDae
 
@@ -4991,7 +4989,7 @@
                 mod = begin
                   @match cmt begin
                     SCode.COMMENT(annotation_ = SOME(SCode.ANNOTATION(modification = mod2)))  => begin
-                      SCodeUtil.mergeModifiers(mod2, mod)
+                      SCodeUtil.myMergeModifiers(mod2, mod)
                     end
 
                     _  => begin

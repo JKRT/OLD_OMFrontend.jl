@@ -213,7 +213,7 @@
                         (outCache, cenv, outIH) = InstUtil.addClassdefsToEnv(outCache, cenv, outIH, inPrefix, cdef_els, inImpl, SOME(mod))
                         rest_els = SCodeInstUtil.addRedeclareAsElementsToExtends(rest_els, list(e for e in rest_els if SCodeUtil.isRedeclareElement(e)))
                         outMod = Mod.elabUntypedMod(emod, Mod.EXTENDS(el.baseClassPath))
-                        outMod = Mod.merge(mod, outMod, "", false)
+                        outMod = Mod.myMerge(mod, outMod, "", false)
                         (outCache, _, outIH, _, els2, eq2, ieq2, alg2, ialg2, comments2) = instExtendsAndClassExtendsList2(outCache, cenv, outIH, outMod, inPrefix, rest_els, clsext_els, els1, inState, inClassName, inImpl, inPartialInst)
                         tree = AvlSetString.new()
                         tree = getLocalIdentList(els2, tree, getLocalIdentElementTpl)
@@ -224,7 +224,7 @@
                         if htHasEntries
                           els2 = fixList(cacheArr, cenv, els2, tree, fixLocalIdent)
                         end
-                         #=  Update components with new merged modifiers.
+                         #=  Update components with new myMerged modifiers.
                          =#
                          #= (els2, outMod) := updateComponentsAndClassdefs(els2, outMod, inEnv);
                          =#
@@ -676,8 +676,8 @@
                       (cache, c, cenv) = Lookup.lookupClass(cache, env, tp, SOME(info))
                       dmod = InstUtil.chainRedeclares(mod, dmod)
                       (cache, daeDMOD) = Mod.elabMod(cache, env, ih, pre, dmod, impl, Mod.DERIVED(tp), info)
-                      mod = Mod.merge(mod, daeDMOD)
-                      (cache, env, ih, elt, eq, ieq, alg, ialg, mod, outComments) = instDerivedClassesWork(cache, cenv, ih, mod, pre, c, impl, info, numIter >= Global.recursionDepthLimit, numIter + 1) #= Mod.lookup_modification_p(mod, c) => innermod & We have to merge and apply modifications as well! =#
+                      mod = Mod.myMerge(mod, daeDMOD)
+                      (cache, env, ih, elt, eq, ieq, alg, ialg, mod, outComments) = instDerivedClassesWork(cache, cenv, ih, mod, pre, c, impl, info, numIter >= Global.recursionDepthLimit, numIter + 1) #= Mod.lookup_modification_p(mod, c) => innermod & We have to myMerge and apply modifications as well! =#
                     (cache, env, ih, elt, eq, ieq, alg, ialg, mod, _cons(inClass.cmt, outComments))
                   end
 
@@ -758,7 +758,7 @@
                 @matchcontinue el begin
                   SCode.COMPONENT(__)  => begin
                       cmod = Mod.lookupCompModificationFromEqu(inMod, el.name)
-                      cmod = Mod.merge(cmod, mod, el.name, false)
+                      cmod = Mod.myMerge(cmod, mod, el.name, false)
                       mod_rest = inMod
                     ((el, cmod, b), mod_rest)
                   end
@@ -774,8 +774,8 @@
                   SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(_)))  => begin
                       @match DAE.REDECL(element = comp, mod = cmod) = Mod.lookupCompModification(inMod, el.name)
                       mod_rest = inMod
-                      cmod = Mod.merge(cmod, mod, el.name, false)
-                      comp = SCodeUtil.mergeWithOriginal(comp, el)
+                      cmod = Mod.myMerge(cmod, mod, el.name, false)
+                      comp = SCodeUtil.myMergeWithOriginal(comp, el)
                     ((comp, cmod, b), mod_rest)
                   end
 

@@ -191,8 +191,8 @@
           set
         end
 
-         #= Merges the two sets that the given entry belong to. =#
-        function merge(entry1::Entry, entry2::Entry, sets::Sets) ::Sets 
+         #= myMerges the two sets that the given entry belong to. =#
+        function myMerge(entry1::Entry, entry2::Entry, sets::Sets) ::Sets 
 
 
               local set1::ModelicaInteger
@@ -253,7 +253,7 @@
           rootIndex
         end
 
-         #= Merges two sets into one. This is done by attaching one set-tree to the
+         #= myMerges two sets into one. This is done by attaching one set-tree to the
            other. The ranks are compared to determine which of the trees is the
            smallest, and that one is attached to the larger one to keep the trees as
            flat as possible. =#

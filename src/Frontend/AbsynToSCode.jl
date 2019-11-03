@@ -667,17 +667,17 @@ function translateAlternativeExternalAnnotation(decl::Option{<:SCode.ExternalDec
       end
 
       (SOME(SCode.EXTERNALDECL(name, l, out, a, ann1)), SCode.COMMENT(annotation_ = ann2))  => begin
-        ann = SCodeUtil.mergeSCodeOptAnn(ann1, ann2)
+        ann = SCodeUtil.myMergeSCodeOptAnn(ann1, ann2)
         SOME(SCode.EXTERNALDECL(name, l, out, a, ann))
       end
     end
   end
-  #=  Else, merge
+  #=  Else, myMerge
   =#
   outDecl
 end
 
-function mergeSCodeAnnotationsFromParts(part::Absyn.ClassPart, inMod::Option{<:SCode.Annotation}) ::Option{SCode.Annotation}
+function myMergeSCodeAnnotationsFromParts(part::Absyn.ClassPart, inMod::Option{<:SCode.Annotation}) ::Option{SCode.Annotation}
   local outMod::Option{SCode.Annotation}
 
   outMod = begin
@@ -687,16 +687,16 @@ function mergeSCodeAnnotationsFromParts(part::Absyn.ClassPart, inMod::Option{<:S
     @match (part, inMod) begin
       (Absyn.EXTERNAL(_, SOME(aann)), _)  => begin
         ann = translateAnnotation(aann)
-        ann = SCodeUtil.mergeSCodeOptAnn(ann, inMod)
+        ann = SCodeUtil.myMergeSCodeOptAnn(ann, inMod)
         ann
       end
 
       (Absyn.PUBLIC(_ <| rest), _)  => begin
-        mergeSCodeAnnotationsFromParts(Absyn.PUBLIC(rest), inMod)
+        myMergeSCodeAnnotationsFromParts(Absyn.PUBLIC(rest), inMod)
       end
 
       (Absyn.PROTECTED(_ <| rest), _)  => begin
-        mergeSCodeAnnotationsFromParts(Absyn.PROTECTED(rest), inMod)
+        myMergeSCodeAnnotationsFromParts(Absyn.PROTECTED(rest), inMod)
       end
 
       _  => begin
@@ -1845,7 +1845,7 @@ function translateCommentList(inAnns::List{<:Absyn.Annotation}, inString::Option
       end
 
       (absann <| anns, _)  => begin
-        absann = ListUtil.fold(anns, AbsynUtil.mergeAnnotations, absann)
+        absann = ListUtil.fold(anns, AbsynUtil.myMergeAnnotations, absann)
         ann = translateAnnotation(absann)
         ostr = Util.applyOption(inString, System.unescapedString)
         SCode.COMMENT(ann, ostr)

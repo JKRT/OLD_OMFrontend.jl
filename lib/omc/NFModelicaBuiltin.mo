@@ -1321,7 +1321,7 @@ external "builtin";
 annotation(preferredView="text");
 end checkSettings;
 
-function loadFile "load file (*.mo) and merge it with the loaded AST."
+function loadFile "load file (*.mo) and myMerge it with the loaded AST."
   input String fileName;
   input String encoding = "UTF-8";
   input Boolean uses = true;
@@ -1337,7 +1337,7 @@ annotation(Documentation(info="<html>
 </html>"), preferredView="text");
 end loadFile;
 
-function loadFiles "load files (*.mo) and merges them with the loaded AST."
+function loadFiles "load files (*.mo) and myMerges them with the loaded AST."
   input String[:] fileNames;
   input String encoding = "UTF-8";
   input Integer numThreads = OpenModelica.Scripting.numProcessors();
@@ -1362,16 +1362,16 @@ function reloadClass "reloads the file associated with the given (loaded class)"
   output Boolean success;
 external "builtin";
 annotation(preferredView="text",Documentation(info="<html>
-<p>Given an existing, loaded class in the compiler, compare the time stamp of the loaded class with the time stamp (mtime) of the file it was loaded from. If these differ, parse the file and merge it with the AST.</p>
+<p>Given an existing, loaded class in the compiler, compare the time stamp of the loaded class with the time stamp (mtime) of the file it was loaded from. If these differ, parse the file and myMerge it with the AST.</p>
 </html>"));
 end reloadClass;
 
-function loadString "Parses the data and merges the resulting AST with ithe
+function loadString "Parses the data and myMerges the resulting AST with ithe
   loaded AST.
   If a filename is given, it is used to provide error-messages as if the string
 was read in binary format from a file with the same name.
   The file is converted to UTF-8 from the given character set.
-  When merge is true the classes cNew in the file will be merged with the already loaded classes cOld in the following way:
+  When myMerge is true the classes cNew in the file will be myMerged with the already loaded classes cOld in the following way:
    1. get all the inner class definitions from cOld that were loaded from a different file than itself
    2. append all elements from step 1 to class cNew public list
 
@@ -1380,7 +1380,7 @@ was read in binary format from a file with the same name.
   input String data;
   input String filename = "<interactive>";
   input String encoding = "UTF-8";
-  input Boolean merge = false "if merge is true the parsed AST is merged with the existing AST, default to false which means that is replaced, not merged";
+  input Boolean myMerge = false "if myMerge is true the parsed AST is myMerged with the existing AST, default to false which means that is replaced, not myMerged";
   output Boolean success;
 external "builtin";
 annotation(preferredView="text");
@@ -2761,7 +2761,7 @@ function moveClass
  "Moves a class up or down depending on the given offset, where a positive
   offset moves the class down and a negative offset up. The offset is truncated
   if the resulting index is outside the class list. It retains the visibility of
-  the class by adding public/protected sections when needed, and merges sections
+  the class by adding public/protected sections when needed, and myMerges sections
   of the same type if the class is moved from a section it was alone in. Returns
   true if the move was successful, otherwise false."
  input TypeName className "the class that should be moved";

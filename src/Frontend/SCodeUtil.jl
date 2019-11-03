@@ -3598,7 +3598,7 @@
                   local attr::SCode.Attributes
                 @match (inAttributes, inClass) begin
                   (_, SCode.CLASS(classDef = SCode.DERIVED(attributes = cls_attr)))  => begin
-                      @match SOME(attr) = mergeAttributes(inAttributes, SOME(cls_attr))
+                      @match SOME(attr) = myMergeAttributes(inAttributes, SOME(cls_attr))
                     attr
                   end
 
@@ -5452,13 +5452,14 @@
         end
 
          #= @author: adrpo
-         this function merges the original declaration with the redeclared declaration, see 7.3.2 in Spec.
-         - modifiers from the constraining class on derived classes are merged into the new declaration
-         - modifiers from the original derived classes are merged into the new declaration
+         this function myMerges the original declaration with the redeclared declaration, see 7.3.2 in Spec.
+         - modifiers from the constraining class on derived classes are myMerged into the new declaration
+         - modifiers from the original derived classes are myMerged into the new declaration
          - if the original declaration has no constraining type the derived declaration is used
-         - prefixes and attributes are merged
+         - prefixes and attributes are myMerged
          same with components
          TODO! how about non-short class definitions with constrained by with modifications? =#
+
         function mergeWithOriginal(inNew::SCode.Element, inOld::SCode.Element) ::SCode.Element
               local outNew::SCode.Element
 
@@ -5508,7 +5509,7 @@
                   (SCode.CLASS(name1, prefixes1, en1, p1, restr1, cd1, cm, i), SCode.CLASS(_, prefixes2, _, _, _, cd2, _, _))  => begin
                       mCCNew = getConstrainedByModifiers(prefixes1)
                       mCCOld = getConstrainedByModifiers(prefixes2)
-                      cd1 = mergeClassDef(cd1, cd2, mCCNew, mCCOld)
+                      cd1 = myMergeClassDef(cd1, cd2, mCCNew, mCCOld)
                       prefixes1 = propagatePrefixes(prefixes2, prefixes1)
                       n = SCode.CLASS(name1, prefixes1, en1, p1, restr1, cd1, cm, i)
                     n
@@ -5541,6 +5542,7 @@
         end
 
          #= @author: adrpo
+
          see mergeWithOriginal =#
         function mergeClassDef(inNew::SCode.ClassDef, inOld::SCode.ClassDef, inCCModNew::SCode.Mod, inCCModOld::SCode.Mod) ::SCode.ClassDef
               local outNew::SCode.ClassDef
@@ -5556,9 +5558,9 @@
                   local a2::SCode.Attributes
                 @match (inNew, inOld, inCCModNew, inCCModOld) begin
                   (SCode.DERIVED(ts1, m1, a1), SCode.DERIVED(_, m2, a2), _, _)  => begin
-                      m2 = mergeModifiers(m2, inCCModOld)
-                      m1 = mergeModifiers(m1, inCCModNew)
-                      m2 = mergeModifiers(m1, m2)
+                      m2 = myMergeModifiers(m2, inCCModOld)
+                      m1 = myMergeModifiers(m1, inCCModNew)
+                      m2 = myMergeModifiers(m1, m2)
                       a2 = propagateAttributes(a2, a1)
                       n = SCode.DERIVED(ts1, m2, a2)
                     n
@@ -5567,6 +5569,7 @@
               end
           outNew
         end
+
 
         function mergeModifiers(inNewMod::SCode.Mod, inOldMod::SCode.Mod) ::SCode.Mod
               local outMod::SCode.Mod
@@ -5599,8 +5602,8 @@
                   end
 
                   (SCode.MOD(f1, e1, sl1, b1, i1), SCode.MOD(f2, e2, sl2, b2, _))  => begin
-                      b = mergeBindings(b1, b2)
-                      sl = mergeSubMods(sl1, sl2)
+                      b = myMergeBindings(b1, b2)
+                      sl = myMergeSubMods(sl1, sl2)
                       if referenceEq(b, b1) && referenceEq(sl, sl1)
                         m = inNewMod
                       elseif referenceEq(b, b2) && referenceEq(sl, sl2) && valueEq(f1, f2) && valueEq(e1, e2)
@@ -5619,7 +5622,9 @@
           outMod
         end
 
+
         function mergeBindings(inNew::Option{<:Absyn.Exp}, inOld::Option{<:Absyn.Exp}) ::Option{Absyn.Exp}
+
               local outBnd::Option{Absyn.Exp}
 
               outBnd = begin
@@ -5636,6 +5641,7 @@
           outBnd
         end
 
+
         function mergeSubMods(inNew::List{<:SCode.SubMod}, inOld::List{<:SCode.SubMod}) ::List{SCode.SubMod}
               local outSubs::List{SCode.SubMod}
 
@@ -5651,7 +5657,7 @@
 
                   (s <| rest, _)  => begin
                       old = removeSub(s, inOld)
-                      sl = mergeSubMods(rest, old)
+                      sl = myMergeSubMods(rest, old)
                     _cons(s, sl)
                   end
 
@@ -5692,6 +5698,7 @@
           outSubs
         end
 
+
         function mergeComponentModifiers(inNewComp::SCode.Element, inOldComp::SCode.Element) ::SCode.Element
               local outComp::SCode.Element
 
@@ -5716,7 +5723,7 @@
                   local c::SCode.Element
                 @match (inNewComp, inOldComp) begin
                   (SCode.COMPONENT(n1, p1, a1, t1, m1, c1, cnd1, i1), SCode.COMPONENT(_, _, _, _, m2, _, _, _))  => begin
-                      m = mergeModifiers(m1, m2)
+                      m = myMergeModifiers(m1, m2)
                       c = SCode.COMPONENT(n1, p1, a1, t1, m, c1, cnd1, i1)
                     c
                   end
@@ -6719,6 +6726,7 @@
           isElement
         end
 
+
         function mergeSCodeOptAnn(inModOuter::Option{<:SCode.Annotation}, inModInner::Option{<:SCode.Annotation}) ::Option{SCode.Annotation}
               local outMod::Option{SCode.Annotation}
 
@@ -6736,7 +6744,7 @@
                   end
 
                   (SOME(SCode.ANNOTATION(mod1)), SOME(SCode.ANNOTATION(mod2)))  => begin
-                      mod = SCodeUtil.mergeSCodeMods(mod1, mod2)
+                      mod = SCodeUtil.myMergeSCodeMods(mod1, mod2)
                     SOME(SCode.ANNOTATION(mod))
                   end
                 end
@@ -6744,7 +6752,9 @@
           outMod
         end
 
+
         function mergeSCodeMods(inModOuter::SCode.Mod, inModInner::SCode.Mod) ::SCode.Mod
+
               local outMod::SCode.Mod
 
               outMod = begin
