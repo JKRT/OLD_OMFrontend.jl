@@ -70,7 +70,7 @@
         import AvlSetString
         import BaseHashTable
         import ComponentReference
-        import Connect
+        # import Connect
         import DAEUtil
         import ElementSource
         import Expression

@@ -61,3 +61,10 @@ EvaluateSingletonTypeFunction = Function
 @UniontypeDecl ComponentRef
 @UniontypeDecl Subscript
 @UniontypeDecl Expand
+@UniontypeDecl Face
+@UniontypeDecl CConnectorType
+@UniontypeDecl ConnectorElement
+@UniontypeDecl SetTrieNode
+@UniontypeDecl OuterConnect
+@UniontypeDecl Sets
+@UniontypeDecl CSet

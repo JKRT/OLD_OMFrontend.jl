@@ -48,7 +48,7 @@ module InnerOuter
 
 
         import Absyn
-        import Connect
+        # import Connect
         import ConnectionGraph
         import DAE
         import FCore
@@ -107,7 +107,7 @@ module InnerOuter
                        outEnv::FCore.Graph
                        outStore::UnitAbsyn.InstStore
                        outDae::DAE.DAElist
-                       outSets::Connect.Sets
+                       outSets::DAE.Sets
                        outType::DAE.Type
                        outGraph::ConnectionGraph.ConnectionGraphType
               end
@@ -228,7 +228,7 @@ module InnerOuter
         end
 
          #= changes inner to outer and outer to inner where needed =#
-        function changeInnerOuterInOuterConnect(sets::Connect.Sets) ::Connect.Sets
+        function changeInnerOuterInOuterConnect(sets::DAE.Sets) ::DAE.Sets
 
 
               sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
@@ -237,8 +237,8 @@ module InnerOuter
 
          #= @author: adrpo
           changes inner to outer and outer to inner where needed =#
-        function changeInnerOuterInOuterConnect2(inOC::Connect.OuterConnect) ::Connect.OuterConnect
-              local outOC::Connect.OuterConnect
+        function changeInnerOuterInOuterConnect2(inOC::DAE.OuterConnect) ::DAE.OuterConnect
+              local outOC::DAE.OuterConnect
 
               outOC = begin
                   local cr1::DAE.ComponentRef
@@ -247,25 +247,25 @@ module InnerOuter
                   local ncr2::DAE.ComponentRef
                   local io1::Absyn.InnerOuter
                   local io2::Absyn.InnerOuter
-                  local f1::Connect.Face
-                  local f2::Connect.Face
+                  local f1::DAE.Face
+                  local f2::DAE.Face
                   local scope::Prefix.PrefixType
                   local source::DAE.ElementSource #= the origin of the element =#
                    #=  the left hand side is an outer!
                    =#
                 @matchcontinue inOC begin
-                  Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)  => begin
+                  DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)  => begin
                       @match (_, true) = innerOuterBooleans(io1)
                       ncr1 = PrefixUtil.prefixToCref(scope)
                       @match false = ComponentReference.crefFirstCrefLastCrefEqual(ncr1, cr1)
-                    Connect.OUTERCONNECT(scope, cr1, Absyn.INNER(), f1, cr2, io2, f2, source)
+                    DAE.OUTERCONNECT(scope, cr1, Absyn.INNER(), f1, cr2, io2, f2, source)
                   end
 
-                  Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)  => begin
+                  DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)  => begin
                       @match (_, true) = innerOuterBooleans(io2)
                       ncr2 = PrefixUtil.prefixToCref(scope)
                       @match false = ComponentReference.crefFirstCrefLastCrefEqual(ncr2, cr2)
-                    Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, Absyn.INNER(), f2, source)
+                    DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, Absyn.INNER(), f2, source)
                   end
 
                   _  => begin
@@ -481,14 +481,14 @@ module InnerOuter
          set, if a corresponding innner component can be found in the environment.
          If not, they are kept in the outerConnects for use higher up in the instance
          hierarchy. =#
-        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraphType}
+        function retrieveOuterConnections(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inSets::DAE.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{DAE.Sets, List{DAE.OuterConnect}, ConnectionGraph.ConnectionGraphType}
               local outCGraph::ConnectionGraph.ConnectionGraphType
-              local outInnerOuterConnects::List{Connect.OuterConnect}
-              local outSets::Connect.Sets
+              local outInnerOuterConnects::List{DAE.OuterConnect}
+              local outSets::DAE.Sets
 
-              local oc::List{Connect.OuterConnect}
+              local oc::List{DAE.OuterConnect}
 
-              @match Connect.SETS(outerConnects = oc) = inSets
+              @match DAE.SETS(outerConnects = oc) = inSets
               (oc, outSets, outInnerOuterConnects, outCGraph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, oc, inSets, inTopCall, inCGraph)
               outSets.outerConnects = oc
           (outSets, outInnerOuterConnects, outCGraph)
@@ -538,22 +538,22 @@ module InnerOuter
         end
 
          #= help function to retrieveOuterConnections =#
-        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inOuterConnects::List{<:Connect.OuterConnect}, inSets::Connect.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{List{Connect.OuterConnect}, Connect.Sets, List{Connect.OuterConnect}, ConnectionGraph.ConnectionGraphType}
+        function retrieveOuterConnections2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPrefix::Prefix.PrefixType, inOuterConnects::List{<:DAE.OuterConnect}, inSets::DAE.Sets, inTopCall::Bool, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{List{DAE.OuterConnect}, DAE.Sets, List{DAE.OuterConnect}, ConnectionGraph.ConnectionGraphType}
               local outCGraph::ConnectionGraph.ConnectionGraphType
-              local outInnerOuterConnects::List{Connect.OuterConnect}
-              local outSets::Connect.Sets
-              local outOuterConnects::List{Connect.OuterConnect}
+              local outInnerOuterConnects::List{DAE.OuterConnect}
+              local outSets::DAE.Sets
+              local outOuterConnects::List{DAE.OuterConnect}
 
               (outOuterConnects, outSets, outInnerOuterConnects, outCGraph) = begin
                   local cr1::DAE.ComponentRef
                   local cr2::DAE.ComponentRef
                   local io1::Absyn.InnerOuter
                   local io2::Absyn.InnerOuter
-                  local f1::Connect.Face
-                  local f2::Connect.Face
-                  local oc::Connect.OuterConnect
-                  local rest_oc::List{Connect.OuterConnect}
-                  local ioc::List{Connect.OuterConnect}
+                  local f1::DAE.Face
+                  local f2::DAE.Face
+                  local oc::DAE.OuterConnect
+                  local rest_oc::List{DAE.OuterConnect}
+                  local ioc::List{DAE.OuterConnect}
                   local inner1::Bool
                   local inner2::Bool
                   local outer1::Bool
@@ -562,7 +562,7 @@ module InnerOuter
                   local scope::Prefix.PrefixType
                   local source::DAE.ElementSource #= the origin of the element =#
                   local info::SourceInfo
-                  local sets::Connect.Sets
+                  local sets::DAE.Sets
                   local graph::ConnectionGraph.ConnectionGraphType
                    #=  handle empty
                    =#
@@ -571,7 +571,7 @@ module InnerOuter
                     (inOuterConnects, inSets, nil, inCGraph)
                   end
 
-                  (_, _, _, _, Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source && DAE.SOURCE(info = info)) <| rest_oc, sets, _, graph)  => begin
+                  (_, _, _, _, DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source && DAE.SOURCE(info = info)) <| rest_oc, sets, _, graph)  => begin
                       (inner1, outer1) = lookupVarInnerOuterAttr(inCache, inEnv, inIH, cr1, cr2)
                       @match true = inner1
                       @match false = outer1
@@ -581,14 +581,14 @@ module InnerOuter
                       (sets, graph) = addOuterConnectIfEmpty(inCache, inEnv, inIH, inPrefix, sets, added, cr1, io1, f1, cr2, io2, f2, info, graph)
                       (rest_oc, sets, ioc, graph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, rest_oc, sets, inTopCall, graph)
                       rest_oc = if outer1
-                            _cons(Connect.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source), rest_oc)
+                            _cons(DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source), rest_oc)
                           else
                             rest_oc
                           end
                     (rest_oc, sets, ioc, graph)
                   end
 
-                  (_, _, _, _, Connect.OUTERCONNECT(_, cr1, io1, f1, cr2, io2, f2, DAE.SOURCE(info = info)) <| rest_oc, sets, true, graph)  => begin
+                  (_, _, _, _, DAE.OUTERCONNECT(_, cr1, io1, f1, cr2, io2, f2, DAE.SOURCE(info = info)) <| rest_oc, sets, true, graph)  => begin
                       (inner1, outer1) = innerOuterBooleans(io1)
                       (inner2, outer2) = innerOuterBooleans(io2)
                       @match true = boolOr(inner1, inner2)
@@ -656,9 +656,9 @@ module InnerOuter
          inner component. In that is case the outer
          connection (from inside sub-components) forms
          a connection set of their own. =#
-        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.PrefixType, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{Connect.Sets, ConnectionGraph.ConnectionGraphType}
+        function addOuterConnectIfEmpty(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, pre::Prefix.PrefixType, inSets::DAE.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::DAE.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::DAE.Face, info::SourceInfo, inCGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{DAE.Sets, ConnectionGraph.ConnectionGraphType}
               local outCGraph::ConnectionGraph.ConnectionGraphType
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
 
               (outSets, outCGraph) = begin
                   local vt1::SCode.Variability
@@ -668,10 +668,10 @@ module InnerOuter
                   local ct::DAE.ConnectorType
                   local dae::DAE.DAElist
                   local ih::InstHierarchy
-                  local sets::Connect.SetTrie
+                  local sets::DAE.SetTrie
                   local sc::ModelicaInteger
-                  local cl::List{Connect.SetConnection}
-                  local oc::List{Connect.OuterConnect}
+                  local cl::List{DAE.SetConnection}
+                  local oc::List{DAE.OuterConnect}
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local io1::Absyn.InnerOuter
@@ -684,13 +684,13 @@ module InnerOuter
                     (inSets, inCGraph)
                   end
 
-                  (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _, graph)  => begin
+                  (cache, env, ih, _, DAE.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _, graph)  => begin
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt1), t1, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr1)
                       @match (cache, DAE.ATTR(variability = vt2), t2, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr2)
                       io1 = removeOuter(io1)
                       io2 = removeOuter(io2)
-                      @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, graph) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, graph, info)
-                    (Connect.SETS(sets, sc, cl, oc), graph)
+                      @match (cache, env, ih, DAE.SETS(sets = sets, setCount = sc, connections = cl), _, graph) = InstSection.connectComponents(cache, env, ih, DAE.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, graph, info)
+                    (DAE.SETS(sets, sc, cl, oc), graph)
                   end
 
                   _  => begin
@@ -722,8 +722,8 @@ module InnerOuter
          2008-12: This is an extension of addOuterConnectIfEmpty,
                   with the difference that we only need to find
                   one variable in the enviroment. =#
-        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.PrefixType, inSets::Connect.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::Connect.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::Connect.Face, info::SourceInfo) ::Connect.Sets
-              local outSets::Connect.Sets
+        function addOuterConnectIfEmptyNoEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InstHierarchy, inPre::Prefix.PrefixType, inSets::DAE.Sets, added::Bool #= if true, this function does nothing =#, cr1::DAE.ComponentRef, iio1::Absyn.InnerOuter, f1::DAE.Face, cr2::DAE.ComponentRef, iio2::Absyn.InnerOuter, f2::DAE.Face, info::SourceInfo) ::DAE.Sets
+              local outSets::DAE.Sets
 
               outSets = begin
                   local vt1::SCode.Variability
@@ -733,10 +733,10 @@ module InnerOuter
                   local ct::DAE.ConnectorType
                   local dae::DAE.DAElist
                   local ih::InstHierarchy
-                  local sets::Connect.SetTrie
+                  local sets::DAE.SetTrie
                   local sc::ModelicaInteger
-                  local cl::List{Connect.SetConnection}
-                  local oc::List{Connect.OuterConnect}
+                  local cl::List{DAE.SetConnection}
+                  local oc::List{DAE.OuterConnect}
                   local cache::FCore.Cache
                   local env::FCore.Graph
                   local io1::Absyn.InnerOuter
@@ -749,26 +749,26 @@ module InnerOuter
                     inSets
                   end
 
-                  (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
+                  (cache, env, ih, _, DAE.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt1), t1, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr1)
                       pre = Prefix.NOPRE()
                       t2 = t1
                       vt2 = vt1
                       io1 = removeOuter(io1)
                       io2 = removeOuter(io2)
-                      @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
-                    Connect.SETS(sets, sc, cl, oc)
+                      @match (cache, env, ih, DAE.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, DAE.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
+                    DAE.SETS(sets, sc, cl, oc)
                   end
 
-                  (cache, env, ih, _, Connect.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
+                  (cache, env, ih, _, DAE.SETS(sets, sc, cl, oc), false, _, io1, _, _, io2, _, _)  => begin
                       pre = Prefix.NOPRE()
                       @match (cache, DAE.ATTR(connectorType = ct, variability = vt2), t2, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr2)
                       t1 = t2
                       vt1 = vt2
                       io1 = removeOuter(io1)
                       io2 = removeOuter(io2)
-                      @match (cache, env, ih, Connect.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, Connect.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
-                    Connect.SETS(sets, sc, cl, oc)
+                      @match (cache, env, ih, DAE.SETS(sets = sets, setCount = sc, connections = cl), _, _) = InstSection.connectComponents(cache, env, ih, DAE.SETS(sets, sc, cl, nil), pre, cr1, f1, t1, vt1, cr2, f2, t2, vt2, ct, io1, io2, ConnectionGraph.EMPTY, info)
+                    DAE.SETS(sets, sc, cl, oc)
                   end
 
                   _  => begin

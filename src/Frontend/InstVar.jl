@@ -1,4 +1,4 @@
-  module InstVar 
+  module InstVar
 
 
     using MetaModelica
@@ -40,7 +40,7 @@
 
         import ClassInf
 
-        import Connect
+        # import Connect
 
         import ConnectionGraph
 
@@ -123,7 +123,7 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = List 
+        InstDims = List
 
          #= this function will look if a variable is inner/outer and depending on that will:
           - lookup for inner in the instanance hieararchy if we have ONLY outer
@@ -139,10 +139,10 @@
         the backend. The current implementation doesn't handle cases in which the
         'inner' is not (yet) set.
            =#
-        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -156,23 +156,23 @@
                   "Integer"  => begin
                     true
                   end
-                  
+
                   "Real"  => begin
                     true
                   end
-                  
+
                   "Boolean"  => begin
                     true
                   end
-                  
+
                   "String"  => begin
                     true
                   end
-                  
+
                   "time"  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -191,9 +191,9 @@
                   local dae::DAE.DAElist
                   local outerDAE::DAE.DAElist
                   local innerDAE::DAE.DAElist
-                  local csets::Connect.Sets
-                  local csetsInner::Connect.Sets
-                  local csetsOuter::Connect.Sets
+                  local csets::DAE.Sets
+                  local csetsInner::DAE.Sets
+                  local csetsOuter::DAE.Sets
                   local ty::DAE.Type
                   local ci_state::ClassInf.SMNode
                   local mod::DAE.Mod
@@ -245,7 +245,7 @@
                       ih = InnerOuter.updateInstHierarchy(ih, pre, io, InnerOuter.INST_INNER(pre, n, io, fullName, typePath, innerScope, SOME(InnerOuter.INST_RESULT(cache, outerCompEnv, store, outerDAE, csets, ty, graph)), nil, NONE()))
                     (cache, innerCompEnv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isOnlyOuter(io)
                       @match false = Mod.modEqual(mod, DAE.NOMOD())
@@ -257,7 +257,7 @@
                       (cache, compenv, ih, store, dae, csets, ty, graph) = instVar(cache, env, ih, store, ci_state, DAE.NOMOD(), pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets, componentDefinitionParentEnv)
                     (cache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr && SCode.ATTR(direction = Absyn.OUTPUT(__)), pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isOnlyOuter(io)
                       @match true = Mod.modEqual(mod, DAE.NOMOD())
@@ -270,7 +270,7 @@
                       (cache, compenv, ih, store, dae, csets, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (inCache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, _, mod, pre, n, _, _, _, _, _, _, _, _, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isOnlyOuter(io)
                       @match true = Mod.modEqual(mod, DAE.NOMOD())
@@ -283,7 +283,7 @@
                       outerDAE = DAE.emptyDae
                     (inCache, compenv, ih, store, outerDAE, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isOnlyOuter(io)
                       @match true = Mod.modEqual(mod, DAE.NOMOD())
@@ -301,7 +301,7 @@
                       (cache, compenv, ih, store, dae, _, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isOnlyOuter(io)
                       @match true = Mod.modEqual(mod, DAE.NOMOD())
@@ -319,7 +319,7 @@
                       (cache, compenv, ih, store, dae, _, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl && SCode.CLASS(name = typeName), attr && SCode.ATTR(direction = Absyn.OUTPUT(__)), pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isInnerOuter(io)
                       topInstance = listHead(ih)
@@ -338,7 +338,7 @@
                       (cache, compenv, ih, store, dae, _, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, DAE.NOMOD(), pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csetsInner, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl && SCode.CLASS(name = typeName), attr, pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isInnerOuter(io)
                       (cache, innerCompEnv, ih, store, dae, csetsInner, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
@@ -355,13 +355,13 @@
                       dae = DAEUtil.joinDaes(outerDAE, innerDAE)
                     (cache, compenv, ih, store, dae, csetsInner, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, _, graph, csets, _)  => begin
                       @match true = AbsynUtil.isNotInnerOuter(io)
                       (cache, compenv, ih, store, dae, csets, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, _, _, mod, pre, n, cl, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       (cache, cref) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, DAE.T_UNKNOWN_DEFAULT, nil))
@@ -430,10 +430,10 @@
           P.A: Most of the implementation is moved to instVar2. instVar collects
           dimensions for userdefined types, such that these can be correctly
           handled by instVar2 (using instArray) =#
-        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -484,7 +484,7 @@
              type T = Real[3](start = {1, 2, 3});
              T x[2];  Modifier from T must be lifted to become [2, 3].
            =#
-        function liftUserTypeMod(inMod::DAE.Mod, inDims::List{<:DAE.Dimension}) ::DAE.Mod 
+        function liftUserTypeMod(inMod::DAE.Mod, inDims::List{<:DAE.Dimension}) ::DAE.Mod
               local outMod::DAE.Mod = inMod
 
               if listEmpty(inDims)
@@ -501,7 +501,7 @@
                       end
                     outMod
                   end
-                  
+
                   _  => begin
                       outMod
                   end
@@ -510,7 +510,7 @@
           outMod
         end
 
-        function liftUserTypeSubMod(inSubMod::DAE.SubMod, inDims::List{<:DAE.Dimension}) ::DAE.SubMod 
+        function liftUserTypeSubMod(inSubMod::DAE.SubMod, inDims::List{<:DAE.Dimension}) ::DAE.SubMod
               local outSubMod::DAE.SubMod = inSubMod
 
               outSubMod = begin
@@ -524,7 +524,7 @@
           outSubMod
         end
 
-        function liftUserTypeEqMod(inEqMod::Option{<:DAE.EqMod}, inDims::List{<:DAE.Dimension}) ::Option{DAE.EqMod} 
+        function liftUserTypeEqMod(inEqMod::Option{<:DAE.EqMod}, inDims::List{<:DAE.Dimension}) ::Option{DAE.EqMod}
               local outEqMod::Option{DAE.EqMod}
 
               local eq::DAE.EqMod
@@ -544,7 +544,7 @@
                       eq.properties = Types.setPropType(eq.properties, Types.liftArrayListDims(ty, inDims))
                     eq
                   end
-                  
+
                   _  => begin
                       eq
                   end
@@ -554,7 +554,7 @@
           outEqMod
         end
 
-        function addArrayVarEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inState::ClassInf.SMNode, inDae::DAE.DAElist, inType::DAE.Type, mod::DAE.Mod, constVar::DAE.Const, pre::Prefix.PrefixType, n::String, source::DAE.ElementSource) ::Tuple{FCore.Cache, DAE.DAElist} 
+        function addArrayVarEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inState::ClassInf.SMNode, inDae::DAE.DAElist, inType::DAE.Type, mod::DAE.Mod, constVar::DAE.Const, pre::Prefix.PrefixType, n::String, source::DAE.ElementSource) ::Tuple{FCore.Cache, DAE.DAElist}
               local outDae::DAE.DAElist
               local outCache::FCore.Cache
 
@@ -573,7 +573,7 @@
                       @match true = Config.scalarizeBindings()
                     (inCache, inDae)
                   end
-                  
+
                   (DAE.DAE(dae), DAE.C_VAR(__))  => begin
                       @match false = ClassInf.isFunctionOrRecord(inState)
                       ty = Types.simplifyType(inType)
@@ -586,7 +586,7 @@
                       eq = DAE.ARRAY_EQUATION(dims, DAE.CREF(cr, ty), exp, source)
                     (cache, DAE.DAE(_cons(eq, dae)))
                   end
-                  
+
                   _  => begin
                       (inCache, inDae)
                   end
@@ -598,10 +598,10 @@
         end
 
          #= Helper function to instVar, does the main work. =#
-        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -618,7 +618,7 @@
                   local env_1::FCore.Graph
                   local env::FCore.Graph
                   local compenv::FCore.Graph
-                  local csets::Connect.Sets
+                  local csets::DAE.Sets
                   local ty::DAE.Type
                   local ty_1::DAE.Type
                   local arrty::DAE.Type
@@ -667,7 +667,7 @@
                    =#
                    #=  with the calculated modification, and an extended prefix.
                    =#
-                   #= 
+                   #=
                    =#
                    #=  mahge: Function variables with subMod modifications. This can happen for records with inline constructions (and maybe other stuff too???)
                    =#
@@ -704,7 +704,7 @@
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
                     (cache, env_1, ih, store, dae, csets, ty_1, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod && DAE.MOD(binding = SOME(_)), pre, n, cl, attr, pf, dims, _, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match true = ClassInf.isFunction(ci_state)
                       InstUtil.checkFunctionVar(n, attr, pf, info)
@@ -722,7 +722,7 @@
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
                     (cache, env_1, ih, store, dae, csets, ty_1, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl && SCode.CLASS(__), attr, pf, dims, _, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match true = ClassInf.isFunction(ci_state)
                       InstUtil.checkFunctionVar(n, attr, pf, info)
@@ -737,13 +737,13 @@
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
                     (cache, env_1, ih, store, dae, csets, arrty, graph)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _,  nil(), _, _, _, _, _, _, _)  => begin
                       @match false = ClassInf.isFunction(inState)
                       (cache, env, ih, store, dae, csets, ty, graph) = instScalar(inCache, inEnv, inIH, inStore, inState, inMod, inPrefix, inName, inClass, inAttributes, inPrefixes, inSubscripts, inInstDims, inImpl, SOME(inComment), inInfo, inGraph, inSets)
                     (cache, env, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod && DAE.MOD(binding = SOME(DAE.TYPED(__))), pre, n, cl, attr, pf, dim && DAE.DIM_UNKNOWN(__) <| dims, idxs, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match true = Config.splitArrays()
                       @match false = ClassInf.isFunction(ci_state)
@@ -753,7 +753,7 @@
                       ty_1 = InstUtil.liftNonBasicTypes(ty, dim2)
                     (cache, compenv, ih, store, dae, csets, ty_1, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod && DAE.MOD(binding = SOME(DAE.TYPED(__))), pre, n, cl, attr, pf, dim && DAE.DIM_UNKNOWN(__) <| dims, idxs, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match false = Config.splitArrays()
                       @match false = ClassInf.isFunction(ci_state)
@@ -764,7 +764,7 @@
                       ty_1 = InstUtil.liftNonBasicTypes(ty, dim2)
                     (cache, compenv, ih, store, dae, csets, ty_1, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dim <| dims, idxs, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match true = Config.splitArrays()
                       @match false = ClassInf.isFunction(ci_state)
@@ -773,7 +773,7 @@
                       ty_1 = InstUtil.liftNonBasicTypes(ty, dim)
                     (cache, compenv, ih, store, dae, csets, ty_1, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dim <| dims, idxs, inst_dims, impl, comment, info, graph, csets)  => begin
                       @match false = Config.splitArrays()
                       @match false = ClassInf.isFunction(ci_state)
@@ -782,12 +782,12 @@
                       (cache, compenv, ih, store, dae, csets, ty, graph) = instVar2(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, _cons(dime, idxs), inst_dims_1, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (_, _, _, _, _, DAE.NOMOD(__), _, n, _, _, _, DAE.DIM_UNKNOWN(__) <| _, _, _, _, _, info, _, _)  => begin
                       Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_NO_MOD, list(String(listLength(inSubscripts) + 1), n), info)
                     fail()
                   end
-                  
+
                   (_, env, _, _, _, mod, pre, n, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- InstVar.instVar2 failed: " + PrefixUtil.printPrefixStr(pre) + "." + n + "(" + Mod.prettyPrintMod(mod, 0) + ")\\n  Scope: " + FGraph.printGraphPathStr(env))
@@ -894,10 +894,10 @@
         end
 
          #= Instantiates a scalar variable. =#
-        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -911,7 +911,7 @@
                   local env_1::FCore.Graph
                   local ih::InstanceHierarchy
                   local store::UnitAbsyn.InstStore
-                  local csets::Connect.Sets
+                  local csets::DAE.Sets
                   local res::SCode.Restriction
                   local vt::SCode.Variability
                   local idxs::List{DAE.Subscript}
@@ -966,7 +966,7 @@
                       dae = instScalar2(cr, ty, vt, inMod, dae2, dae1, source, inImpl)
                     (cache, env_1, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Inst.instScalar failed on " + inName + " in scope " + PrefixUtil.printPrefixStr(inPrefix) + " env: " + FGraph.printGraphPathStr(inEnv) + "\\n")
@@ -987,7 +987,7 @@
 
          #= This function strips the input/output prefixes from components which are not
            top-level or inside a top-level connector or part of a state machine component. =#
-        function stripVarAttrDirection(inCref::DAE.ComponentRef, ih::InstanceHierarchy, inState::ClassInf.SMNode, inPrefix::Prefix.PrefixType, inAttributes::SCode.Attributes) ::SCode.Attributes 
+        function stripVarAttrDirection(inCref::DAE.ComponentRef, ih::InstanceHierarchy, inState::ClassInf.SMNode, inPrefix::Prefix.PrefixType, inAttributes::SCode.Attributes) ::SCode.Attributes
               local outAttributes::SCode.Attributes
 
               outAttributes = begin
@@ -1000,15 +1000,15 @@
                   (_, _, SCode.ATTR(direction = Absyn.BIDIR(__)))  => begin
                     inAttributes
                   end
-                  
+
                   (DAE.CREF_IDENT(__), _, _)  => begin
                     inAttributes
                   end
-                  
-                  (_, ClassInf.CONNECTOR(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inCref), Connect.OUTSIDE()))  => begin
+
+                  (_, ClassInf.CONNECTOR(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inCref), DAE.OUTSIDE()))  => begin
                     inAttributes
                   end
-                  
+
                   (_, _, _)  => begin
                       topInstance = listHead(ih)
                       @match InnerOuter.TOP_INSTANCE(sm = sm) = topInstance
@@ -1017,7 +1017,7 @@
                       @match true = BaseHashSet.has(cref, sm)
                     inAttributes
                   end
-                  
+
                   _  => begin
                       SCodeUtil.setAttributesDirection(inAttributes, Absyn.BIDIR())
                   end
@@ -1037,7 +1037,7 @@
          #= Helper function to instScalar. Some operations needed when instantiating a
           scalar depends on what kind of variable it is, i.e. constant, parameter or
           variable. This function does these operations to keep instScalar simple. =#
-        function instScalar2(inCref::DAE.ComponentRef, inType::DAE.Type, inVariability::SCode.Variability, inMod::DAE.Mod, inDae::DAE.DAElist, inClassDae::DAE.DAElist, inSource::DAE.ElementSource, inImpl::Bool) ::DAE.DAElist 
+        function instScalar2(inCref::DAE.ComponentRef, inType::DAE.Type, inVariability::SCode.Variability, inMod::DAE.Mod, inDae::DAE.DAElist, inClassDae::DAE.DAElist, inSource::DAE.ElementSource, inImpl::Bool) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -1050,28 +1050,28 @@
                       dae = DAEUtil.joinDaes(inClassDae, inDae)
                     dae
                   end
-                  
+
                   (_, DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), _, DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = DAE.CREF(_, _)))), _, _, _, _)  => begin
                       dae = InstBinding.instModEquation(inCref, inType, inMod, inSource, inImpl)
                       dae = InstUtil.moveBindings(dae, inClassDae)
                       dae = DAEUtil.joinDaes(dae, inDae)
                     dae
                   end
-                  
+
                   (_, DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), _, DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = DAE.CAST(exp = DAE.CREF(_, _))))), _, _, _, _)  => begin
                       dae = InstBinding.instModEquation(inCref, inType, inMod, inSource, inImpl)
                       dae = InstUtil.moveBindings(dae, inClassDae)
                       dae = DAEUtil.joinDaes(dae, inDae)
                     dae
                   end
-                  
+
                   (_, _, SCode.PARAM(__), DAE.MOD(binding = SOME(DAE.TYPED(__))), _, _, _, _)  => begin
                       dae = InstBinding.instModEquation(inCref, inType, inMod, inSource, inImpl)
                       dae = InstUtil.propagateBinding(inClassDae, dae)
                       dae = DAEUtil.joinDaes(dae, inDae)
                     dae
                   end
-                  
+
                   _  => begin
                         dae = if Types.isComplexType(inType)
                               InstBinding.instModEquation(inCref, inType, inMod, inSource, inImpl)
@@ -1125,7 +1125,7 @@
          #= This function removes bindings from record members for which a binding
            equation has already been generated. This is done because the record members
            otherwise get a binding from the default argument of the record too. =#
-        function stripRecordDefaultBindingsFromDAE(inClassDAE::DAE.DAElist, inType::DAE.Type, inEqDAE::DAE.DAElist) ::DAE.DAElist 
+        function stripRecordDefaultBindingsFromDAE(inClassDAE::DAE.DAElist, inType::DAE.Type, inEqDAE::DAE.DAElist) ::DAE.DAElist
               local outClassDAE::DAE.DAElist
 
               outClassDAE = begin
@@ -1140,7 +1140,7 @@
                       (els, _) = ListUtil.mapFold(els, stripRecordDefaultBindingsFromElement, eqs)
                     DAE.DAE(els)
                   end
-                  
+
                   _  => begin
                       inClassDAE
                   end
@@ -1151,7 +1151,7 @@
           outClassDAE
         end
 
-        function stripRecordDefaultBindingsFromElement(inVar::DAE.Element, inEqs::List{<:DAE.Element}) ::Tuple{DAE.Element, List{DAE.Element}} 
+        function stripRecordDefaultBindingsFromElement(inVar::DAE.Element, inEqs::List{<:DAE.Element}) ::Tuple{DAE.Element, List{DAE.Element}}
               local outEqs::List{DAE.Element}
               local outVar::DAE.Element
 
@@ -1163,11 +1163,11 @@
                   (DAE.VAR(componentRef = var_cr), DAE.EQUATION(exp = DAE.CREF(componentRef = eq_cr)) <| rest_eqs) where (ComponentReference.crefEqual(var_cr, eq_cr))  => begin
                     (DAEUtil.setElementVarBinding(inVar, NONE()), rest_eqs)
                   end
-                  
+
                   (DAE.VAR(componentRef = var_cr), DAE.COMPLEX_EQUATION(lhs = DAE.CREF(componentRef = eq_cr)) <| _) where (ComponentReference.crefPrefixOf(eq_cr, var_cr))  => begin
                     (DAEUtil.setElementVarBinding(inVar, NONE()), inEqs)
                   end
-                  
+
                   _  => begin
                       (inVar, inEqs)
                   end
@@ -1180,7 +1180,7 @@
           (outVar, outEqs)
         end
 
-        function checkDimensionGreaterThanZero(inDim::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, info::SourceInfo)  
+        function checkDimensionGreaterThanZero(inDim::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, info::SourceInfo)
               _ = begin
                   local dim_str::String
                   local cr_str::String
@@ -1195,7 +1195,7 @@
                       end
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1207,7 +1207,7 @@
            modified components dimension. Only the first dimension is checked, since
            this function is meant to be called in instArray which is called recursively
            for a component's dimensions. =#
-        function checkArrayModDimSize(mod::DAE.Mod, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo)  
+        function checkArrayModDimSize(mod::DAE.Mod, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo)
               _ = begin
                 @match mod begin
                   DAE.MOD(eachPrefix = SCode.NOT_EACH(__))  => begin
@@ -1216,7 +1216,7 @@
                       ListUtil.map4_0(mod.subModLst, checkArraySubModDimSize, inDimension, inPrefix, inIdent, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1224,7 +1224,7 @@
               end
         end
 
-        function checkArraySubModDimSize(inSubMod::DAE.SubMod, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo)  
+        function checkArraySubModDimSize(inSubMod::DAE.SubMod, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo)
               _ = begin
                   local name::String
                   local eqmod::Option{DAE.EqMod}
@@ -1236,13 +1236,13 @@
                   DAE.NAMEMOD(ident = "quantity")  => begin
                     ()
                   end
-                  
+
                   DAE.NAMEMOD(ident = name, mod = DAE.MOD(eachPrefix = SCode.NOT_EACH(__), binding = eqmod))  => begin
                       name = inIdent + "." + name
                       @match true = checkArrayModBindingDimSize(eqmod, inDimension, inPrefix, name, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1250,7 +1250,7 @@
               end
         end
 
-        function checkArrayModBindingDimSize(inBinding::Option{<:DAE.EqMod}, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo) ::Bool 
+        function checkArrayModBindingDimSize(inBinding::Option{<:DAE.EqMod}, inDimension::DAE.Dimension, inPrefix::Prefix.PrefixType, inIdent::String, inInfo::SourceInfo) ::Bool
               local outIsCorrect::Bool
 
               outIsCorrect = begin
@@ -1277,7 +1277,7 @@
                       Error.addMultiSourceMessage(Error.ARRAY_DIMENSION_MISMATCH, list(exp_str, exp_ty_str, dims_str), _cons(info, _cons(inInfo, nil)))
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -1295,10 +1295,10 @@
          #= When an array is instantiated by instVar, this function is used
           to go through all the array elements and instantiate each array
           element separately. =#
-        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
-              local outSets::Connect.Sets
+              local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
               local outIH::InnerOuter.InstHierarchy
@@ -1317,7 +1317,7 @@
                   local env_2::FCore.Graph
                   local env::FCore.Graph
                   local compenv::FCore.Graph
-                  local csets::Connect.Sets
+                  local csets::DAE.Sets
                   local ty::DAE.Type
                   local st::ClassInf.SMNode
                   local ci_state::ClassInf.SMNode
@@ -1375,7 +1375,7 @@
                       dae = InstSection.makeDaeEquation(lhs, rhs, source, SCode.NON_INITIAL())
                     (cache, env_1, ih, store, dae, inSets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, (cl, attr), pf, i, _, dims, idxs, inst_dims, impl, comment, _, graph, csets)  => begin
                       @match false = Expression.dimensionKnown(inDimension)
                       e = DAE.ICONST(i)
@@ -1384,7 +1384,7 @@
                       (cache, compenv, ih, store, daeLst, csets, ty, graph) = instVar2(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, dims, _cons(s, idxs), inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, daeLst, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, _, pre, n, (cl, attr), pf, _, DAE.DIM_INTEGER(0), dims, idxs, inst_dims, impl, comment, _, graph, csets)  => begin
                       ErrorExt.setCheckpoint("instArray Real[0]")
                       e = DAE.ICONST(0)
@@ -1395,21 +1395,21 @@
                       ErrorExt.rollBack("instArray Real[0]")
                     (cache, compenv, ih, store, DAE.emptyDae, csets, ty, graph)
                   end
-                  
+
                   (_, _, _, _, _, _, _, _, _, _, _, DAE.DIM_INTEGER(0), _, _, _, _, _, _, _, _)  => begin
                       ErrorExt.delCheckpoint("instArray Real[0]")
                     fail()
                   end
-                  
+
                   (cache, env, ih, store, ci_state, _, _, _, (_, _), _, _, DAE.DIM_INTEGER(integer = stop), _, _, _, _, _, _, graph, csets)  => begin
                       (cache, env, ih, store, dae, csets, ty, graph) = instArrayDimInteger(cache, env, ih, store, ci_state, inMod, inPrefix, inIdent, inElement, inPrefixes, stop, inDimensionLst, inIntegerLst, inInstDims, inBoolean, inComment, info, graph, csets)
                     (cache, env, ih, store, dae, csets, ty, graph)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, (cl, attr), pf, _, DAE.DIM_ENUM(__), dims, idxs, inst_dims, impl, comment, _, graph, csets)  => begin
                     instArrayDimEnum(cache, env, ih, store, ci_state, mod, pre, n, cl, attr, pf, inDimension, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                   end
-                  
+
                   (cache, env, ih, store, ci_state, mod, pre, n, (cl, attr), pf, _, DAE.DIM_BOOLEAN(__), dims, idxs, inst_dims, impl, comment, _, graph, csets)  => begin
                       mod_1 = Mod.lookupIdxModification(mod, DAE.BCONST(false))
                       mod_2 = Mod.lookupIdxModification(mod, DAE.BCONST(true))
@@ -1418,7 +1418,7 @@
                       daeLst = DAEUtil.joinDaes(dae1, dae2)
                     (cache, env_1, ih, store, daeLst, csets, ty, graph)
                   end
-                  
+
                   (_, _, _, _, ci_state, mod, pre, n, (_, _), _, i, _, _, idxs, _, _, _, _, _, _)  => begin
                       @shouldFail _ = Mod.lookupIdxModification(mod, DAE.ICONST(i))
                       str1 = PrefixUtil.printPrefixStrIgnoreNoPre(PrefixUtil.prefixAdd(n, nil, nil, pre, SCode.VAR(), ci_state, info))
@@ -1429,7 +1429,7 @@
                       Error.addSourceMessage(Error.MODIFICATION_INDEX_NOT_FOUND, list(str1, str4, str2, str3), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Inst.instArray failed: " + inIdent)
@@ -1462,10 +1462,10 @@
 
          #= When an array is instantiated by instVar, this function is used to go through all the array elements and instantiate each array element separately.
         Special case for DIM_INTEGER: tail-recursive implementation since the number of dimensions may grow arbitrarily large. =#
-        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
-              local outSets::Connect.Sets = inSets
+              local outSets::DAE.Sets = inSets
               local outDae::DAE.DAElist = DAE.emptyDae
               local outStore::UnitAbsyn.InstStore = inStore
               local outIH::InnerOuter.InstHierarchy = inIH
@@ -1503,7 +1503,7 @@
                       mod = Mod.merge(inMod, mod)
                     (cls, mod, attr, nil)
                   end
-                  
+
                   (cls, attr)  => begin
                     (cls, inMod, attr, inInstDims)
                   end
@@ -1519,10 +1519,10 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outGraph)
         end
 
-        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::Connect.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Connect.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
-              local outSets::Connect.Sets = inSets
+              local outSets::DAE.Sets = inSets
               local outDae::DAE.DAElist = DAE.emptyDae
               local outStore::UnitAbsyn.InstStore = inStore
               local outIH::InnerOuter.InstHierarchy = inIH

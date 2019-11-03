@@ -27,7 +27,7 @@
 
         import Flags
 
-        import Connect
+        # import Connect
 
         import AbsynDumpTpl
 

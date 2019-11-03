@@ -52,7 +52,7 @@ import HashTable3
 
 import HashTableCG
 
-import Connect
+# import Connect
 
 Edge = Tuple  #= an edge is a tuple with two component references =#
 
@@ -1658,15 +1658,15 @@ and keeps the CONNECTED ones.
 Basically is implmented like this:
 1. remove all the broken connects from the inConnects -> newConnects
 2. add all the connected connects BACK to newConnects =#
-function removeBrokenConnects(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges, inBroken::DaeEdges) ::List{List{Connect.ConnectorElement}}
-  local outConnects::List{List{Connect.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
+function removeBrokenConnects(inConnects::List{<:DAE.ConnectorElement}, inConnected::DaeEdges, inBroken::DaeEdges) ::List{List{DAE.ConnectorElement}}
+  local outConnects::List{List{DAE.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
 
   outConnects = begin
     local toRemove::List{DAE.ComponentRef}
     local toKeep::List{DAE.ComponentRef}
     local intersect::List{DAE.ComponentRef}
-    local cset::List{Connect.ConnectorElement}
-    local csets::List{List{Connect.ConnectorElement}}
+    local cset::List{DAE.ConnectorElement}
+    local csets::List{List{DAE.ConnectorElement}}
     #=  if we have no broken then we don't care!
     =#
     @match (inConnects, inConnected, inBroken) begin
@@ -1701,17 +1701,17 @@ function removeBrokenConnects(inConnects::List{<:Connect.ConnectorElement}, inCo
   outConnects #= we return a list of lists of elements as a particular connection set might be broken into several! =#
 end
 
-function splitSetByAllowed(inConnects::List{<:Connect.ConnectorElement}, inConnected::DaeEdges) ::List{List{Connect.ConnectorElement}}
-  local outConnects::List{List{Connect.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
+function splitSetByAllowed(inConnects::List{<:DAE.ConnectorElement}, inConnected::DaeEdges) ::List{List{DAE.ConnectorElement}}
+  local outConnects::List{List{DAE.ConnectorElement}} #= we return a list of lists of elements as a particular connection set might be broken into several! =#
 
-  local cset::List{Connect.ConnectorElement}
-  local csets::List{List{Connect.ConnectorElement}}
+  local cset::List{DAE.ConnectorElement}
+  local csets::List{List{DAE.ConnectorElement}}
   local e::DaeEdge
   local cr1::DAE.ComponentRef
   local cr2::DAE.ComponentRef
-  local ce::Connect.ConnectorElement
-  local ce1::Connect.ConnectorElement
-  local ce2::Connect.ConnectorElement
+  local ce::DAE.ConnectorElement
+  local ce1::DAE.ConnectorElement
+  local ce2::DAE.ConnectorElement
 
   csets = nil
   for e in inConnected
@@ -1735,7 +1735,7 @@ end
 
 #= @author: adrpo
 given an EQU set filter the given DaeEdges =#
-function filterFromSet(inConnects::List{<:Connect.ConnectorElement}, inFilter::DaeEdges, inAcc::List{<:DAE.ComponentRef}, msg::String) ::List{DAE.ComponentRef}
+function filterFromSet(inConnects::List{<:DAE.ConnectorElement}, inFilter::DaeEdges, inAcc::List{<:DAE.ComponentRef}, msg::String) ::List{DAE.ComponentRef}
   local filteredCrefs::List{DAE.ComponentRef}
 
   filteredCrefs = begin
@@ -1769,13 +1769,13 @@ function filterFromSet(inConnects::List{<:Connect.ConnectorElement}, inFilter::D
   filteredCrefs
 end
 
-function removeFromConnects(inConnects::List{<:Connect.ConnectorElement}, inToRemove::List{<:DAE.ComponentRef}) ::List{Connect.ConnectorElement}
-  local outConnects::List{Connect.ConnectorElement}
+function removeFromConnects(inConnects::List{<:DAE.ConnectorElement}, inToRemove::List{<:DAE.ComponentRef}) ::List{DAE.ConnectorElement}
+  local outConnects::List{DAE.ConnectorElement}
 
   outConnects = begin
     local c::DAE.ComponentRef
     local rest::List{DAE.ComponentRef}
-    local cset::List{Connect.ConnectorElement}
+    local cset::List{DAE.ConnectorElement}
     @match (inConnects, inToRemove) begin
       (_,  nil())  => begin
         inConnects

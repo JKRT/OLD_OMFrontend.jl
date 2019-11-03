@@ -64,7 +64,7 @@
 
         import Config
 
-        import Connect
+        # import Connect
 
         import ConnectionGraph
 

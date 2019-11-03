@@ -1,4 +1,4 @@
-  module DAEDump 
+  module DAEDump
 
 
     using MetaModelica
@@ -6,10 +6,6 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl splitElements 
-    @UniontypeDecl compWithSplitElements
-    @UniontypeDecl functionList 
-    
     Type_a = Any
 
     FuncTypeType_aToString = Function
@@ -63,6 +59,10 @@
 
         import DAEUtil
 
+        compWithSplitElements = DAEUtil.compWithSplitElements
+        functionList = DAEUtil.functionList
+        splitElements = DAEUtil.splitElements
+
         import ElementSource
 
         import Error
@@ -102,40 +102,9 @@
 
         import System
 
-         @Uniontype splitElements begin
-              @Record SPLIT_ELEMENTS begin
-
-                       v::List{DAE.Element}
-                       ie::List{DAE.Element}
-                       ia::List{DAE.Element}
-                       e::List{DAE.Element}
-                       a::List{DAE.Element}
-                       co::List{DAE.Element}
-                       o::List{DAE.Element}
-                       ca::List{DAE.Element}
-                       sm::List{compWithSplitElements}
-              end
-         end
-
-         @Uniontype compWithSplitElements begin
-              @Record COMP_WITH_SPLIT begin
-
-                       name::String
-                       spltElems::splitElements
-                       comment::Option{SCode.Comment}
-              end
-         end
-
-         @Uniontype functionList begin
-              @Record FUNCTION_LIST begin
-
-                       funcs::List{DAE.Function}
-              end
-         end
-
          #= This function prints the DAE in the standard output format to the Print buffer.
           For printing to the stdout use print(dumpStr(dae)) instead. =#
-        function dump(dae::DAE.DAElist, functionTree::DAE.FunctionTree)  
+        function dump(dae::DAE.DAElist, functionTree::DAE.FunctionTree)
               _ = begin
                   local daelist::List{DAE.Element}
                 @match (dae, functionTree) begin
@@ -150,7 +119,7 @@
         end
 
          #= return all function names in a string  (comma separated) =#
-        function dumpFunctionNamesStr(funcs::DAE.FunctionTree) ::String 
+        function dumpFunctionNamesStr(funcs::DAE.FunctionTree) ::String
               local str::String
 
               str = stringDelimitList(ListUtil.map(sortFunctions(DAEUtil.getFunctionList(funcs)), functionNameStr), ",")
@@ -158,7 +127,7 @@
         end
 
          #= return the name of a function, if element is not function return  empty string =#
-        function functionNameStr(inElement::DAE.Function) ::String 
+        function functionNameStr(inElement::DAE.Function) ::String
               local res::String
 
               res = begin
@@ -168,12 +137,12 @@
                       res = AbsynUtil.pathStringNoQual(fpath)
                     res
                   end
-                  
+
                   DAE.RECORD_CONSTRUCTOR(path = fpath)  => begin
                       res = AbsynUtil.pathStringNoQual(fpath)
                     res
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -183,7 +152,7 @@
         end
 
          #= sorts the functions and record constructors in alphabetical order =#
-        function sortFunctions(funcs::List{<:DAE.Function}) ::List{DAE.Function} 
+        function sortFunctions(funcs::List{<:DAE.Function}) ::List{DAE.Function}
               local sortedFuncs::List{DAE.Function}
 
               sortedFuncs = ListUtil.sort(funcs, funcGreaterThan)
@@ -191,7 +160,7 @@
         end
 
          #= sorting function for two DAE.Element that are functions or record constuctors =#
-        function funcGreaterThan(func1::DAE.Function, func2::DAE.Function) ::Bool 
+        function funcGreaterThan(func1::DAE.Function, func2::DAE.Function) ::Bool
               local res::Bool
 
               res = begin
@@ -200,7 +169,7 @@
                       res = stringCompare(functionNameStr(func1), functionNameStr(func2)) > 0
                     res
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -209,10 +178,10 @@
           res
         end
 
-         #= 
+         #=
         Author bz  printOperator
         Dump operator to a string. =#
-        function dumpOperatorString(op::DAE.Operator) ::String 
+        function dumpOperatorString(op::DAE.Operator) ::String
               local str::String
 
               str = begin
@@ -222,131 +191,131 @@
                   DAE.ADD(__)  => begin
                     " ADD "
                   end
-                  
+
                   DAE.SUB(__)  => begin
                     " SUB "
                   end
-                  
+
                   DAE.MUL(__)  => begin
                     " MUL "
                   end
-                  
+
                   DAE.DIV(__)  => begin
                     " DIV "
                   end
-                  
+
                   DAE.POW(__)  => begin
                     " POW "
                   end
-                  
+
                   DAE.UMINUS(__)  => begin
                     " UMINUS "
                   end
-                  
+
                   DAE.UMINUS_ARR(__)  => begin
                     " UMINUS_ARR "
                   end
-                  
+
                   DAE.ADD_ARR(__)  => begin
                     " ADD_ARR "
                   end
-                  
+
                   DAE.SUB_ARR(__)  => begin
                     " SUB_ARR "
                   end
-                  
+
                   DAE.MUL_ARR(__)  => begin
                     " MUL_ARR "
                   end
-                  
+
                   DAE.DIV_ARR(__)  => begin
                     " DIV_ARR "
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(__)  => begin
                     " MUL_ARRAY_SCALAR "
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(__)  => begin
                     " ADD_ARRAY_SCALAR "
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(__)  => begin
                     " SUB_SCALAR_ARRAY "
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(__)  => begin
                     " MUL_SCALAR_PRODUCT "
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(__)  => begin
                     " MUL_MATRIX_PRODUCT "
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(__)  => begin
                     " DIV_ARRAY_SCALAR "
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(__)  => begin
                     " DIV_SCALAR_ARRAY "
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(__)  => begin
                     " POW_ARRAY_SCALAR "
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(__)  => begin
                     " POW_SCALAR_ARRAY "
                   end
-                  
+
                   DAE.POW_ARR(__)  => begin
                     " POW_ARR "
                   end
-                  
+
                   DAE.POW_ARR2(__)  => begin
                     " POW_ARR2 "
                   end
-                  
+
                   DAE.OR(_)  => begin
                     " OR "
                   end
-                  
+
                   DAE.AND(_)  => begin
                     " AND "
                   end
-                  
+
                   DAE.NOT(_)  => begin
                     " NOT "
                   end
-                  
+
                   DAE.LESSEQ(__)  => begin
                     " LESSEQ "
                   end
-                  
+
                   DAE.GREATER(__)  => begin
                     " GREATER "
                   end
-                  
+
                   DAE.GREATEREQ(__)  => begin
                     " GREATEREQ "
                   end
-                  
+
                   DAE.LESS(__)  => begin
                     " LESS "
                   end
-                  
+
                   DAE.EQUAL(__)  => begin
                     " EQUAL "
                   end
-                  
+
                   DAE.NEQUAL(__)  => begin
                     " NEQUAL "
                   end
-                  
+
                   DAE.USERDEFINED(p)  => begin
                     " Userdefined:" + AbsynUtil.pathString(p) + " "
                   end
-                  
+
                   _  => begin
                       " --UNDEFINED-- "
                   end
@@ -355,10 +324,10 @@
           str
         end
 
-         #= 
+         #=
         Author bz  printOperator
         Dump operator to a string. =#
-        function dumpOperatorSymbol(op::DAE.Operator) ::String 
+        function dumpOperatorSymbol(op::DAE.Operator) ::String
               local str::String
 
               str = begin
@@ -367,131 +336,131 @@
                   DAE.ADD(_)  => begin
                     " + "
                   end
-                  
+
                   DAE.SUB(_)  => begin
                     " - "
                   end
-                  
+
                   DAE.MUL(_)  => begin
                     " .* "
                   end
-                  
+
                   DAE.DIV(_)  => begin
                     " / "
                   end
-                  
+
                   DAE.POW(_)  => begin
                     " ^ "
                   end
-                  
+
                   DAE.UMINUS(_)  => begin
                     " - "
                   end
-                  
+
                   DAE.UMINUS_ARR(_)  => begin
                     " - "
                   end
-                  
+
                   DAE.ADD_ARR(_)  => begin
                     " + "
                   end
-                  
+
                   DAE.SUB_ARR(_)  => begin
                     " - "
                   end
-                  
+
                   DAE.MUL_ARR(_)  => begin
                     " .* "
                   end
-                  
+
                   DAE.DIV_ARR(_)  => begin
                     " ./ "
                   end
-                  
+
                   DAE.MUL_ARRAY_SCALAR(_)  => begin
                     " * "
                   end
-                  
+
                   DAE.ADD_ARRAY_SCALAR(_)  => begin
                     " .+ "
                   end
-                  
+
                   DAE.SUB_SCALAR_ARRAY(_)  => begin
                     " .- "
                   end
-                  
+
                   DAE.MUL_SCALAR_PRODUCT(_)  => begin
                     " * "
                   end
-                  
+
                   DAE.MUL_MATRIX_PRODUCT(_)  => begin
                     " * "
                   end
-                  
+
                   DAE.DIV_ARRAY_SCALAR(_)  => begin
                     " / "
                   end
-                  
+
                   DAE.DIV_SCALAR_ARRAY(_)  => begin
                     " ./ "
                   end
-                  
+
                   DAE.POW_ARRAY_SCALAR(_)  => begin
                     " .^ "
                   end
-                  
+
                   DAE.POW_SCALAR_ARRAY(_)  => begin
                     " .^ "
                   end
-                  
+
                   DAE.POW_ARR(_)  => begin
                     " ^ "
                   end
-                  
+
                   DAE.POW_ARR2(_)  => begin
                     " .^ "
                   end
-                  
+
                   DAE.OR(_)  => begin
                     " or "
                   end
-                  
+
                   DAE.AND(_)  => begin
                     " and "
                   end
-                  
+
                   DAE.NOT(_)  => begin
                     " not "
                   end
-                  
+
                   DAE.LESSEQ(_)  => begin
                     " <= "
                   end
-                  
+
                   DAE.GREATER(_)  => begin
                     " > "
                   end
-                  
+
                   DAE.GREATEREQ(_)  => begin
                     " >= "
                   end
-                  
+
                   DAE.LESS(_)  => begin
                     " < "
                   end
-                  
+
                   DAE.EQUAL(_)  => begin
                     " == "
                   end
-                  
+
                   DAE.NEQUAL(_)  => begin
                     " <> "
                   end
-                  
+
                   DAE.USERDEFINED(p)  => begin
                     " Userdefined:" + AbsynUtil.pathString(p) + " "
                   end
-                  
+
                   _  => begin
                       " --UNDEFINED-- "
                   end
@@ -501,7 +470,7 @@
         end
 
          #= Dumps the StartValue for a variable. =#
-        function dumpStartValue(inStartValue::DAE.StartValue)  
+        function dumpStartValue(inStartValue::DAE.StartValue)
               _ = begin
                   local e::DAE.Exp
                 @matchcontinue inStartValue begin
@@ -511,7 +480,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -520,7 +489,7 @@
         end
 
          #= Dumps the start value for a variable to a string. =#
-        function dumpStartValueStr(inStartValue::DAE.StartValue) ::String 
+        function dumpStartValueStr(inStartValue::DAE.StartValue) ::String
               local outString::String
 
               outString = begin
@@ -533,7 +502,7 @@
                       res = stringAppendList(list("(start=", s, ")"))
                     res
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -543,7 +512,7 @@
         end
 
          #= Dumps the external declaration to a string. =#
-        function dumpExtDeclStr(inExternalDecl::DAE.ExternalDecl) ::String 
+        function dumpExtDeclStr(inExternalDecl::DAE.ExternalDecl) ::String
               local outString::String
 
               outString = begin
@@ -572,7 +541,7 @@
         end
 
          #= Helper function to dumpExtDeclStr =#
-        function dumpExtArgStr(inExtArg::DAE.ExtArg) ::String 
+        function dumpExtArgStr(inExtArg::DAE.ExtArg) ::String
               local outString::String
 
               outString = begin
@@ -591,17 +560,17 @@
                   DAE.NOEXTARG(__)  => begin
                     ""
                   end
-                  
+
                   DAE.EXTARG(componentRef = cr)  => begin
                       crstr = ComponentReference.printComponentRefStr(cr)
                     crstr
                   end
-                  
+
                   DAE.EXTARGEXP(exp = exp)  => begin
                       crstr = ExpressionDump.printExpStr(exp)
                     crstr
                   end
-                  
+
                   DAE.EXTARGSIZE(componentRef = cr, exp = dim)  => begin
                       crstr = ComponentReference.printComponentRefStr(cr)
                       dimstr = ExpressionDump.printExpStr(dim)
@@ -614,7 +583,7 @@
         end
 
          #= Dumps Component elements. =#
-        function dumpCompElement(inElement::DAE.Element)  
+        function dumpCompElement(inElement::DAE.Element)
               _ = begin
                   local n::String
                   local l::List{DAE.Element}
@@ -631,7 +600,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -641,7 +610,7 @@
         end
 
          #= Dump elements. =#
-        function dumpElements(l::List{<:DAE.Element})  
+        function dumpElements(l::List{<:DAE.Element})
               dumpVars(l, false)
               ListUtil.map_0(l, dumpExtObjectClass)
               Print.printBuf("initial equation\\n")
@@ -654,13 +623,13 @@
         end
 
          #= Dump function elements. =#
-        function dumpFunctionElements(l::List{<:DAE.Element})  
+        function dumpFunctionElements(l::List{<:DAE.Element})
               dumpVars(l, true)
               ListUtil.map_0(l, dumpAlgorithm)
         end
 
          #= Dump variables to Print buffer. =#
-        function dumpVars(lst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#)  
+        function dumpVars(lst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#)
               local str::String
               local myStream::IOStream.IOStreamType
 
@@ -671,24 +640,24 @@
         end
 
          #= Dump VarKind. =#
-        function dumpKind(inVarKind::DAE.VarKind)  
+        function dumpKind(inVarKind::DAE.VarKind)
               _ = begin
                 @match inVarKind begin
                   DAE.CONST(__)  => begin
                       Print.printBuf(" constant  ")
                     ()
                   end
-                  
+
                   DAE.PARAM(__)  => begin
                       Print.printBuf(" parameter ")
                     ()
                   end
-                  
+
                   DAE.DISCRETE(__)  => begin
                       Print.printBuf(" discrete  ")
                     ()
                   end
-                  
+
                   DAE.VARIABLE(__)  => begin
                       Print.printBuf("           ")
                     ()
@@ -698,7 +667,7 @@
         end
 
          #= Dump VarKind to a string. =#
-        function dumpKindStr(inVarKind::DAE.VarKind) ::String 
+        function dumpKindStr(inVarKind::DAE.VarKind) ::String
               local outString::String
 
               outString = begin
@@ -706,15 +675,15 @@
                   DAE.CONST(__)  => begin
                     "constant "
                   end
-                  
+
                   DAE.PARAM(__)  => begin
                     "parameter "
                   end
-                  
+
                   DAE.DISCRETE(__)  => begin
                     "discrete "
                   end
-                  
+
                   DAE.VARIABLE(__)  => begin
                     ""
                   end
@@ -724,19 +693,19 @@
         end
 
          #= Dump VarDirection. =#
-        function dumpDirection(inVarDirection::DAE.VarDirection)  
+        function dumpDirection(inVarDirection::DAE.VarDirection)
               _ = begin
                 @match inVarDirection begin
                   DAE.INPUT(__)  => begin
                       Print.printBuf(" input  ")
                     ()
                   end
-                  
+
                   DAE.OUTPUT(__)  => begin
                       Print.printBuf(" output ")
                     ()
                   end
-                  
+
                   DAE.BIDIR(__)  => begin
                       Print.printBuf("        ")
                     ()
@@ -746,19 +715,19 @@
         end
 
          #= Dump VarParallelism. =#
-        function dumpParallelism(inVarParallelism::DAE.VarParallelism)  
+        function dumpParallelism(inVarParallelism::DAE.VarParallelism)
               _ = begin
                 @match inVarParallelism begin
                   DAE.NON_PARALLEL(__)  => begin
                       Print.printBuf("        ")
                     ()
                   end
-                  
+
                   DAE.PARGLOBAL(__)  => begin
                       Print.printBuf(" parglobal ")
                     ()
                   end
-                  
+
                   DAE.PARLOCAL(__)  => begin
                       Print.printBuf(" parlocal ")
                     ()
@@ -768,7 +737,7 @@
         end
 
          #= Dump VarDirection to a string =#
-        function dumpDirectionStr(inVarDirection::DAE.VarDirection) ::String 
+        function dumpDirectionStr(inVarDirection::DAE.VarDirection) ::String
               local outString::String
 
               outString = begin
@@ -776,11 +745,11 @@
                   DAE.INPUT(__)  => begin
                     "input "
                   end
-                  
+
                   DAE.OUTPUT(__)  => begin
                     "output "
                   end
-                  
+
                   DAE.BIDIR(__)  => begin
                     ""
                   end
@@ -790,7 +759,7 @@
         end
 
          #= Dump StateSelect to a string. =#
-        function dumpStateSelectStr(inStateSelect::DAE.StateSelect) ::String 
+        function dumpStateSelectStr(inStateSelect::DAE.StateSelect) ::String
               local outString::String
 
               outString = begin
@@ -798,19 +767,19 @@
                   DAE.NEVER(__)  => begin
                     "StateSelect.never"
                   end
-                  
+
                   DAE.AVOID(__)  => begin
                     "StateSelect.avoid"
                   end
-                  
+
                   DAE.PREFER(__)  => begin
                     "StateSelect.prefer"
                   end
-                  
+
                   DAE.ALWAYS(__)  => begin
                     "StateSelect.always"
                   end
-                  
+
                   DAE.DEFAULT(__)  => begin
                     "StateSelect.default"
                   end
@@ -819,12 +788,12 @@
           outString
         end
 
-         #= 
+         #=
           Author: Daniel Hedberg 2011-01
 
           Dump Uncertainty to a string.
          =#
-        function dumpUncertaintyStr(uncertainty::DAE.Uncertainty) ::String 
+        function dumpUncertaintyStr(uncertainty::DAE.Uncertainty) ::String
               local out::String
 
               out = begin
@@ -832,11 +801,11 @@
                   DAE.GIVEN(__)  => begin
                     "Uncertainty.given"
                   end
-                  
+
                   DAE.SOUGHT(__)  => begin
                     "Uncertainty.sought"
                   end
-                  
+
                   DAE.REFINE(__)  => begin
                     "Uncertainty.refine"
                   end
@@ -845,12 +814,12 @@
           out
         end
 
-         #= 
+         #=
           Author: Peter Aronsson 2012
 
           Dump Distribution to a string.
          =#
-        function dumpDistributionStr(distribution::DAE.Distribution) ::String 
+        function dumpDistributionStr(distribution::DAE.Distribution) ::String
               local out::String
 
               out = begin
@@ -873,7 +842,7 @@
         end
 
          #= Dump VariableAttributes option. =#
-        function dumpVariableAttributes(attr::Option{<:DAE.VariableAttributes})  
+        function dumpVariableAttributes(attr::Option{<:DAE.VariableAttributes})
               local res::String
 
               res = dumpVariableAttributesStr(attr)
@@ -881,7 +850,7 @@
         end
 
          #= Dump VariableAttributes option to a string. =#
-        function dumpVariableAttributesStr(inVariableAttributesOption::Option{<:DAE.VariableAttributes}) ::String 
+        function dumpVariableAttributesStr(inVariableAttributesOption::Option{<:DAE.VariableAttributes}) ::String
               local outString::String
 
               outString = begin
@@ -934,7 +903,7 @@
                           end
                     res
                   end
-                  
+
                   SOME(DAE.VAR_ATTR_INT(quant, min, max, initialExp, fixed, uncertainty, dist, _, _, _, startOrigin))  => begin
                       quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
                       min_str = Dump.getOptionWithConcatStr(min, ExpressionDump.printExpStr, "min = ")
@@ -952,7 +921,7 @@
                           end
                     res
                   end
-                  
+
                   SOME(DAE.VAR_ATTR_BOOL(quant, initialExp, fixed, _, _, _, startOrigin))  => begin
                       quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
                       initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
@@ -966,7 +935,7 @@
                           end
                     res
                   end
-                  
+
                   SOME(DAE.VAR_ATTR_STRING(quant, initialExp, fixed, _, _, _, startOrigin))  => begin
                       quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
                       initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
@@ -980,7 +949,7 @@
                           end
                     res
                   end
-                  
+
                   SOME(DAE.VAR_ATTR_ENUMERATION(quant, min, max, initialExp, fixed, _, _, _, startOrigin))  => begin
                       quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
                       min_str = Dump.getOptionWithConcatStr(min, ExpressionDump.printExpStr, "min = ")
@@ -996,11 +965,11 @@
                           end
                     res
                   end
-                  
+
                   NONE()  => begin
                     ""
                   end
-                  
+
                   _  => begin
                       "(unknown VariableAttributes)"
                   end
@@ -1009,7 +978,7 @@
           outString
         end
 
-        function getStartOrigin(inStartOrigin::Option{<:DAE.Exp}) ::String 
+        function getStartOrigin(inStartOrigin::Option{<:DAE.Exp}) ::String
               local outStartOrigin::String
 
               outStartOrigin = begin
@@ -1018,7 +987,7 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   _  => begin
                       if Flags.isSet(Flags.SHOW_START_ORIGIN)
                         str = Dump.getOptionWithConcatStr(inStartOrigin, ExpressionDump.printExpStr, "startOrigin = ")
@@ -1033,7 +1002,7 @@
         end
 
          #= Prints 'protected' to a string for protected variables =#
-        function dumpVarVisibilityStr(prot::DAE.VarVisibility) ::String 
+        function dumpVarVisibilityStr(prot::DAE.VarVisibility) ::String
               local str::String
 
               str = begin
@@ -1041,7 +1010,7 @@
                   DAE.PUBLIC(__)  => begin
                     ""
                   end
-                  
+
                   DAE.PROTECTED(__)  => begin
                     "protected "
                   end
@@ -1051,7 +1020,7 @@
         end
 
          #= Dump VarParallelism to a string =#
-        function dumpVarParallelismStr(inVarParallelism::DAE.VarParallelism) ::String 
+        function dumpVarParallelismStr(inVarParallelism::DAE.VarParallelism) ::String
               local outString::String
 
               outString = begin
@@ -1059,11 +1028,11 @@
                   DAE.NON_PARALLEL(__)  => begin
                     ""
                   end
-                  
+
                   DAE.PARGLOBAL(__)  => begin
                     "parglobal "
                   end
-                  
+
                   DAE.PARLOCAL(__)  => begin
                     "parlocal "
                   end
@@ -1073,7 +1042,7 @@
         end
 
          #= Dumps a comment to a string. =#
-        function dumpCommentStr(inComment::Option{<:SCode.Comment}) ::String 
+        function dumpCommentStr(inComment::Option{<:SCode.Comment}) ::String
               local outString::String
 
               outString = begin
@@ -1083,7 +1052,7 @@
                       cmt = System.escapedString(cmt, false)
                     stringAppendList(list(" \\", cmt, "\\"))
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -1092,21 +1061,21 @@
           outString
         end
 
-        function dumpClassAnnotationStr(inComment::Option{<:SCode.Comment}) ::String 
+        function dumpClassAnnotationStr(inComment::Option{<:SCode.Comment}) ::String
               local outString::String
 
               outString = dumpAnnotationStr(inComment, "  ", ";\\n")
           outString
         end
 
-        function dumpCompAnnotationStr(inComment::Option{<:SCode.Comment}) ::String 
+        function dumpCompAnnotationStr(inComment::Option{<:SCode.Comment}) ::String
               local outString::String
 
               outString = dumpAnnotationStr(inComment, " ", "")
           outString
         end
 
-        function dumpAnnotationStr(inComment::Option{<:SCode.Comment}, inPrefix::String, inSuffix::String) ::String 
+        function dumpAnnotationStr(inComment::Option{<:SCode.Comment}, inPrefix::String, inSuffix::String) ::String
               local outString::String
 
               outString = begin
@@ -1126,7 +1095,7 @@
                       end
                     ann
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -1135,14 +1104,14 @@
           outString
         end
 
-        function filterStructuralMods(mod::SCode.Mod) ::SCode.Mod 
+        function filterStructuralMods(mod::SCode.Mod) ::SCode.Mod
 
 
               mod = SCodeUtil.filterSubMods(mod, filterStructuralMod)
           mod
         end
 
-        function filterStructuralMod(mod::SCode.SubMod) ::Bool 
+        function filterStructuralMod(mod::SCode.SubMod) ::Bool
               local keep::Bool
 
               keep = begin
@@ -1150,35 +1119,35 @@
                   "Evaluate"  => begin
                     true
                   end
-                  
+
                   "Inline"  => begin
                     true
                   end
-                  
+
                   "LateInline"  => begin
                     true
                   end
-                  
+
                   "derivative"  => begin
                     true
                   end
-                  
+
                   "inverse"  => begin
                     true
                   end
-                  
+
                   "smoothOrder"  => begin
                     true
                   end
-                  
+
                   "InlineAfterIndexReduction"  => begin
                     true
                   end
-                  
+
                   "GenerateEvents"  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1187,7 +1156,7 @@
           keep
         end
 
-        function dumpCommentAnnotationStr(inComment::Option{<:SCode.Comment}) ::String 
+        function dumpCommentAnnotationStr(inComment::Option{<:SCode.Comment}) ::String
               local outString::String
 
               outString = begin
@@ -1195,7 +1164,7 @@
                   NONE()  => begin
                     ""
                   end
-                  
+
                   _  => begin
                       dumpCommentStr(inComment) + dumpCompAnnotationStr(inComment)
                   end
@@ -1205,7 +1174,7 @@
         end
 
          #= Dump Comment option. =#
-        function dumpCommentOption(comment::Option{<:SCode.Comment})  
+        function dumpCommentOption(comment::Option{<:SCode.Comment})
               local str::String
 
               str = dumpCommentAnnotationStr(comment)
@@ -1213,7 +1182,7 @@
         end
 
          #= Dump equation. =#
-        function dumpEquation(inElement::DAE.Element)  
+        function dumpEquation(inElement::DAE.Element)
               _ = begin
                   local e1::DAE.Exp
                   local e2::DAE.Exp
@@ -1236,7 +1205,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       Print.printBuf("  ")
                       ComponentReference.printComponentRef(cr1)
@@ -1247,7 +1216,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       Print.printBuf("  ")
                       ExpressionDump.printExp(e1)
@@ -1258,7 +1227,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       Print.printBuf("  ")
                       ExpressionDump.printExp(e1)
@@ -1269,7 +1238,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.DEFINE(componentRef = c, exp = e, source = src)  => begin
                       Print.printBuf("  ")
                       ComponentReference.printComponentRef(c)
@@ -1280,7 +1249,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       Print.printBuf("assert(")
                       ExpressionDump.printExp(e1)
@@ -1292,7 +1261,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.NORETCALL(exp = e1, source = src)  => begin
                       ExpressionDump.printExp(e1)
                       sourceStr = getSourceInformationStr(src)
@@ -1300,7 +1269,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       Print.printBuf("/* FIXME: UNHANDLED_EQUATION in DAEDump.dumpEquation */;\\n")
                     ()
@@ -1310,7 +1279,7 @@
         end
 
          #= Dump initial equation. =#
-        function dumpInitialEquation(inElement::DAE.Element)  
+        function dumpInitialEquation(inElement::DAE.Element)
               _ = begin
                   local e1::DAE.Exp
                   local e2::DAE.Exp
@@ -1336,7 +1305,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.INITIALDEFINE(componentRef = c, exp = e)  => begin
                       Print.printBuf("  ")
                       ComponentReference.printComponentRef(c)
@@ -1345,7 +1314,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("  ")
                       ExpressionDump.printExp(e1)
@@ -1354,7 +1323,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("  ")
                       ExpressionDump.printExp(e1)
@@ -1363,7 +1332,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   DAE.INITIAL_IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| trueBranches, equations3 = xs2)  => begin
                       Print.printBuf("  if ")
                       ExpressionDump.printExp(e)
@@ -1377,7 +1346,7 @@
                       Print.printBuf("end if;\\n")
                     ()
                   end
-                  
+
                   DAE.INITIAL_ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1387,7 +1356,7 @@
                       Print.printBuf(s)
                     ()
                   end
-                  
+
                   DAE.INITIAL_TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1396,13 +1365,13 @@
                       Print.printBuf(s)
                     ()
                   end
-                  
+
                   DAE.INITIAL_NORETCALL(exp = e1)  => begin
                       ExpressionDump.printExp(e1)
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1411,7 +1380,7 @@
         end
 
          #= Dump equation to a string. =#
-        function dumpEquationStr(inElement::DAE.Element) ::String 
+        function dumpEquationStr(inElement::DAE.Element) ::String
               local outString::String
 
               outString = begin
@@ -1441,7 +1410,7 @@
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1450,7 +1419,7 @@
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1459,7 +1428,7 @@
                       str = "  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1468,7 +1437,7 @@
                       str = "  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.DEFINE(componentRef = c, exp = e, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1480,7 +1449,7 @@
                       str = stringAppend(s5, sourceStr + ";\\n")
                     str
                   end
-                  
+
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1489,7 +1458,7 @@
                       str = stringAppendList(list("  assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1497,7 +1466,7 @@
                       str = stringAppendList(list("  terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.NORETCALL(exp = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -1505,7 +1474,7 @@
                       str = stringAppendList(list("  ", s1, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   _  => begin
                       "#UNKNOWN_EQUATION#"
                   end
@@ -1517,7 +1486,7 @@
         end
 
          #= Dump algorithm. =#
-        function dumpAlgorithm(inElement::DAE.Element)  
+        function dumpAlgorithm(inElement::DAE.Element)
               _ = begin
                   local stmts::List{DAE.Statement}
                 @matchcontinue inElement begin
@@ -1526,7 +1495,7 @@
                       Dump.printList(stmts, ppStatement, "")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1535,7 +1504,7 @@
         end
 
          #= Dump initial algorithm. =#
-        function dumpInitialAlgorithm(inElement::DAE.Element)  
+        function dumpInitialAlgorithm(inElement::DAE.Element)
               _ = begin
                   local stmts::List{DAE.Statement}
                 @matchcontinue inElement begin
@@ -1544,7 +1513,7 @@
                       Dump.printList(stmts, ppStatement, "")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1553,7 +1522,7 @@
         end
 
          #= Dump External Object class =#
-        function dumpExtObjectClass(inElement::DAE.Element)  
+        function dumpExtObjectClass(inElement::DAE.Element)
               _ = begin
                   local fstr::String
                   local fpath::Absyn.Path
@@ -1568,7 +1537,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1576,10 +1545,10 @@
               end
         end
 
-         #= 
+         #=
           Author BZ
           Function for printing conditions =#
-        function derivativeCondStr(dc::DAE.derivativeCond) ::String 
+        function derivativeCondStr(dc::DAE.derivativeCond) ::String
               local str::String
 
               str = begin
@@ -1589,7 +1558,7 @@
                       str = "noDerivative(" + ExpressionDump.printExpStr(e) + ")"
                     str
                   end
-                  
+
                   DAE.ZERO_DERIVATIVE(__)  => begin
                     "zeroDerivative"
                   end
@@ -1599,7 +1568,7 @@
         end
 
          #= Dump function =#
-        function dumpFunction(inElement::DAE.Function)  
+        function dumpFunction(inElement::DAE.Function)
               _ = begin
                   local fstr::String
                   local inlineTypeStr::String
@@ -1640,11 +1609,11 @@
                       Print.printBuf(";\\n\\n")
                     ()
                   end
-                  
+
                   DAE.FUNCTION(functions = DAE.FUNCTION_EXT(externalDecl = DAE.EXTERNALDECL(language = "builtin")) <| _)  => begin
                     ()
                   end
-                  
+
                   DAE.FUNCTION(path = fpath, inlineType = inlineType, functions = DAE.FUNCTION_EXT(body = daeElts, externalDecl = ext_decl) <| _, isImpure = isImpure, comment = c)  => begin
                       impureStr = if isImpure
                             "impure "
@@ -1668,7 +1637,7 @@
                       Print.printBuf(";\\n\\n")
                     ()
                   end
-                  
+
                   DAE.RECORD_CONSTRUCTOR(path = fpath, type_ = t)  => begin
                       @match false = Flags.isSet(Flags.DISABLE_RECORD_CONSTRUCTOR_OUTPUT)
                       Print.printBuf("function ")
@@ -1682,7 +1651,7 @@
                       Print.printBuf(";\\n\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1690,7 +1659,7 @@
               end
         end
 
-        function dumpParallelismStr(inType::DAE.Type) ::String 
+        function dumpParallelismStr(inType::DAE.Type) ::String
               local outString::String
 
               outString = begin
@@ -1698,15 +1667,15 @@
                   DAE.T_FUNCTION(_, _, DAE.FUNCTION_ATTRIBUTES(functionParallelism = DAE.FP_NON_PARALLEL(__)), _)  => begin
                     ""
                   end
-                  
+
                   DAE.T_FUNCTION(_, _, DAE.FUNCTION_ATTRIBUTES(functionParallelism = DAE.FP_PARALLEL_FUNCTION(__)), _)  => begin
                     "parallel "
                   end
-                  
+
                   DAE.T_FUNCTION(_, _, DAE.FUNCTION_ATTRIBUTES(functionParallelism = DAE.FP_KERNEL_FUNCTION(__)), _)  => begin
                     "kernel "
                   end
-                  
+
                   _  => begin
                       "#dumpParallelismStr failed#"
                   end
@@ -1715,7 +1684,7 @@
           outString
         end
 
-        function dumpInlineTypeStr(inlineType::DAE.InlineType) ::String 
+        function dumpInlineTypeStr(inlineType::DAE.InlineType) ::String
               local str::String
 
               str = begin
@@ -1723,19 +1692,19 @@
                   DAE.NO_INLINE(__)  => begin
                     "\\Inline never\\"
                   end
-                  
+
                   DAE.AFTER_INDEX_RED_INLINE(__)  => begin
                     " \\Inline after index reduction\\"
                   end
-                  
+
                   DAE.NORM_INLINE(__)  => begin
                     " \\Inline before index reduction\\"
                   end
-                  
+
                   DAE.DEFAULT_INLINE(__)  => begin
                     "\\Inline if necessary\\"
                   end
-                  
+
                   _  => begin
                       "\\unknown\\"
                   end
@@ -1745,7 +1714,7 @@
         end
 
          #= Helper function to dumpFunction. Prints the inputs of a record constructor. =#
-        function printRecordConstructorInputsStr(itp::DAE.Type) ::String 
+        function printRecordConstructorInputsStr(itp::DAE.Type) ::String
               local str::String
 
               str = begin
@@ -1757,7 +1726,7 @@
                       var_strl = ListUtil.map(vars, printRecordConstructorInputStr)
                     stringAppendList(var_strl)
                   end
-                  
+
                   DAE.T_FUNCTION(funcResultType = tp)  => begin
                     printRecordConstructorInputsStr(tp)
                   end
@@ -1766,7 +1735,7 @@
           str
         end
 
-        function printRecordConstructorInputStr(inVar::DAE.Var) ::String 
+        function printRecordConstructorInputStr(inVar::DAE.Var) ::String
               local outString::String
 
               local name::String
@@ -1786,7 +1755,7 @@
           outString
         end
 
-        function printRecordConstructorInputAttrStr(inAttributes::DAE.Attributes) ::String 
+        function printRecordConstructorInputAttrStr(inAttributes::DAE.Attributes) ::String
               local outString::String
 
               outString = begin
@@ -1794,11 +1763,11 @@
                   DAE.ATTR(visibility = SCode.PROTECTED(__))  => begin
                     "protected "
                   end
-                  
+
                   DAE.ATTR(variability = SCode.CONST(__))  => begin
                     "constant "
                   end
-                  
+
                   _  => begin
                       "input "
                   end
@@ -1812,7 +1781,7 @@
         end
 
          #= prints the binding of a record constructor input =#
-        function printRecordConstructorBinding(binding::DAE.Binding) ::String 
+        function printRecordConstructorBinding(binding::DAE.Binding) ::String
               local str::String
 
               str = begin
@@ -1822,12 +1791,12 @@
                   DAE.UNBOUND(__)  => begin
                     ""
                   end
-                  
+
                   DAE.EQBOUND(exp = e, source = DAE.BINDING_FROM_DEFAULT_VALUE(__))  => begin
                       str = " = " + ExpressionDump.printExpStr(e)
                     str
                   end
-                  
+
                   DAE.VALBOUND(valBound = v, source = DAE.BINDING_FROM_DEFAULT_VALUE(__))  => begin
                       str = " = " + ValuesUtil.valString(v)
                     str
@@ -1838,12 +1807,12 @@
         end
 
          #= Prettyprint an algorithm statement =#
-        function ppStatement(alg::DAE.Statement)  
+        function ppStatement(alg::DAE.Statement)
               ppStmt(alg, 2)
         end
 
          #= Prettyprint an algorithm statement to a string. =#
-        function ppStatementStr(alg::DAE.Statement) ::String 
+        function ppStatementStr(alg::DAE.Statement) ::String
               local str::String
 
               str = ppStmtStr(alg, 2)
@@ -1851,7 +1820,7 @@
         end
 
          #= Helper function to ppStatement. =#
-        function ppStmt(inStatement::DAE.Statement, inInteger::ModelicaInteger)  
+        function ppStmt(inStatement::DAE.Statement, inInteger::ModelicaInteger)
               _ = begin
                   local c::DAE.ComponentRef
                   local e::DAE.Exp
@@ -1888,7 +1857,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_ASSIGN_ARR(lhs = e2, exp = e), i)  => begin
                       indent(i)
                       ExpressionDump.printExp(e2)
@@ -1897,7 +1866,7 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = expl, exp = e), i)  => begin
                       s1 = indentStr(i)
                       s2 = ExpressionDump.printExpStr(e)
@@ -1907,7 +1876,7 @@
                       Print.printBuf(str)
                     ()
                   end
-                  
+
                   (DAE.STMT_IF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       indent(i)
                       Print.printBuf("if ")
@@ -1920,7 +1889,7 @@
                       Print.printBuf("end if;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_FOR(iter = id, index = index, range = e, statementLst = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("for ")
@@ -1937,7 +1906,7 @@
                       Print.printBuf("end for;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_PARFOR(iter = id, index = index, range = e, statementLst = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("parfor ")
@@ -1954,7 +1923,7 @@
                       Print.printBuf("end parfor;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_WHILE(exp = e, statementLst = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("while ")
@@ -1966,7 +1935,7 @@
                       Print.printBuf("end while;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_NORETCALL(exp = e1), i)  => begin
                       indent(i)
                       _ = begin
@@ -1975,7 +1944,7 @@
                               Print.printBuf("return ")
                             ()
                           end
-                          
+
                           _  => begin
                               ()
                           end
@@ -1985,13 +1954,13 @@
                       Print.printBuf(";\\n")
                     ()
                   end
-                  
+
                   (stmt && DAE.STMT_WHEN(__), i)  => begin
                       indent(i)
                       Print.printBuf(ppWhenStmtStr(stmt, 1))
                     ()
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = cond, msg = msg), i)  => begin
                       indent(i)
                       Print.printBuf("assert(")
@@ -2001,19 +1970,19 @@
                       Print.printBuf(");\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_RETURN(__), i)  => begin
                       indent(i)
                       Print.printBuf("return;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_BREAK(__), i)  => begin
                       indent(i)
                       Print.printBuf("break;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_REINIT(var = e1, value = e2), i)  => begin
                       indent(i)
                       Print.printBuf("reinit(")
@@ -2023,7 +1992,7 @@
                       Print.printBuf(");\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_FAILURE(body = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("begin failure\\n")
@@ -2031,7 +2000,7 @@
                       Print.printBuf("end try;\\n")
                     ()
                   end
-                  
+
                   (DAE.STMT_ARRAY_INIT(name = name, ty = ty), i)  => begin
                       indent(i)
                       Print.printBuf("/* ")
@@ -2041,7 +2010,7 @@
                       Print.printBuf(") */;\\n")
                     ()
                   end
-                  
+
                   (_, i)  => begin
                       indent(i)
                       Print.printBuf("**ALGORITHM**;\\n")
@@ -2051,7 +2020,7 @@
               end
         end
 
-        function ppWhenStmtStr(inStatement::DAE.Statement, inInteger::ModelicaInteger) ::String 
+        function ppWhenStmtStr(inStatement::DAE.Statement, inInteger::ModelicaInteger) ::String
               local outString::String
 
               outString = begin
@@ -2081,7 +2050,7 @@
                       str = stringAppend(s9, "end when;\\n")
                     str
                   end
-                  
+
                   (DAE.STMT_WHEN(exp = e, statementLst = stmts, elseWhen = SOME(stmt)), i)  => begin
                       s3 = ExpressionDump.printExpStr(e)
                       s4 = stringAppend("when ", s3)
@@ -2101,7 +2070,7 @@
         end
 
          #= Helper function to ppStatementStr =#
-        function ppStmtStr(inStatement::DAE.Statement, inInteger::ModelicaInteger) ::String 
+        function ppStmtStr(inStatement::DAE.Statement, inInteger::ModelicaInteger) ::String
               local outString::String
 
               outString = begin
@@ -2146,7 +2115,7 @@
                       str = stringAppendList(list(s1, s2, " := ", s3, ";\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_ASSIGN_ARR(lhs = e2, exp = e), i)  => begin
                       s1 = indentStr(i)
                       s2 = ExpressionDump.printExpStr(e2)
@@ -2154,7 +2123,7 @@
                       str = stringAppendList(list(s1, s2, " := ", s3, ";\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = expl, exp = e), i)  => begin
                       s1 = indentStr(i)
                       s2 = ExpressionDump.printExpStr(e)
@@ -2163,7 +2132,7 @@
                       str = stringAppendList(list(s1, "(", s3, ") := ", s2, ";\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_IF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "if ")
@@ -2180,7 +2149,7 @@
                       str = stringAppend(s11, "end if;\\n")
                     str
                   end
-                  
+
                   (DAE.STMT_FOR(iter = id, index = index, range = e, statementLst = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = if index == (-1)
@@ -2195,7 +2164,7 @@
                       str = stringAppendList(list(s1, "for ", id, s2, " in ", s3, " loop\\n", s4, s5, "end for;\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_PARFOR(iter = id, index = index, range = e, statementLst = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = if index == (-1)
@@ -2210,7 +2179,7 @@
                       str = stringAppendList(list(s1, "parfor ", id, s2, " in ", s3, " loop\\n", s4, s5, "end for;\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_WHILE(exp = e, statementLst = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "while ")
@@ -2225,14 +2194,14 @@
                       str = stringAppend(s9, "end while;\\n")
                     str
                   end
-                  
+
                   (stmt && DAE.STMT_WHEN(__), i)  => begin
                       s1 = indentStr(i)
                       s2 = ppWhenStmtStr(stmt, i)
                       str = stringAppend(s1, s2)
                     str
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = cond, msg = msg), i)  => begin
                       s1 = indentStr(i)
                       cond_str = ExpressionDump.printExpStr(cond)
@@ -2240,14 +2209,14 @@
                       str = stringAppendList(list(s1, "assert(", cond_str, ", ", msg_str, ");\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_TERMINATE(msg = msg), i)  => begin
                       s1 = indentStr(i)
                       msg_str = ExpressionDump.printExpStr(msg)
                       str = stringAppendList(list(s1, "terminate(", msg_str, ");\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_NORETCALL(exp = e), i)  => begin
                       s1 = indentStr(i)
                       s2 = begin
@@ -2255,7 +2224,7 @@
                           DAE.CALL(attr = DAE.CALL_ATTR(tailCall = DAE.TAIL(__)))  => begin
                             "return "
                           end
-                          
+
                           _  => begin
                               ""
                           end
@@ -2265,19 +2234,19 @@
                       str = stringAppendList(list(s1, s2, s3, ";\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_RETURN(__), i)  => begin
                       s1 = indentStr(i)
                       str = stringAppend(s1, "return;\\n")
                     str
                   end
-                  
+
                   (DAE.STMT_BREAK(__), i)  => begin
                       s1 = indentStr(i)
                       str = stringAppend(s1, "break;\\n")
                     str
                   end
-                  
+
                   (DAE.STMT_REINIT(var = e1, value = e2), i)  => begin
                       s1 = indentStr(i)
                       e1_str = ExpressionDump.printExpStr(e1)
@@ -2285,20 +2254,20 @@
                       str = stringAppendList(list(s1, "reinit(", e1_str, ", ", e2_str, ");\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_FAILURE(body = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = ppStmtListStr(stmts, i + 2)
                       str = stringAppendList(list(s1, "failure(\\n", s2, s1, ");\\n"))
                     str
                   end
-                  
+
                   (DAE.STMT_ARRAY_INIT(name = s2), i)  => begin
                       s1 = indentStr(i)
                       str = stringAppendList(list(s1, "arrayInit(\\n", s2, s1, ");\\n"))
                     str
                   end
-                  
+
                   (_, i)  => begin
                       s1 = indentStr(i)
                       str = stringAppend(s1, "**ALGORITHM COULD NOT BE GENERATED(DAE.mo)**;\\n")
@@ -2309,10 +2278,10 @@
           outString
         end
 
-         #= 
+         #=
           Helper function to pp_stmt
          =#
-        function ppStmtList(inAlgorithmStatementLst::List{<:DAE.Statement}, inInteger::ModelicaInteger)  
+        function ppStmtList(inAlgorithmStatementLst::List{<:DAE.Statement}, inInteger::ModelicaInteger)
               _ = begin
                   local stmt::DAE.Statement
                   local stmts::List{DAE.Statement}
@@ -2321,7 +2290,7 @@
                   ( nil(), _)  => begin
                     ()
                   end
-                  
+
                   (stmt <| stmts, i)  => begin
                       ppStmt(stmt, i)
                       ppStmtList(stmts, i)
@@ -2331,10 +2300,10 @@
               end
         end
 
-         #= 
+         #=
           Helper function to pp_stmt_str
          =#
-        function ppStmtListStr(inAlgorithmStatementLst::List{<:DAE.Statement}, inInteger::ModelicaInteger = 0) ::String 
+        function ppStmtListStr(inAlgorithmStatementLst::List{<:DAE.Statement}, inInteger::ModelicaInteger = 0) ::String
               local outString::String
 
               outString = begin
@@ -2348,7 +2317,7 @@
                   ( nil(), _)  => begin
                     ""
                   end
-                  
+
                   (stmt <| stmts, i)  => begin
                       s1 = ppStmtStr(stmt, i)
                       s2 = ppStmtListStr(stmts, i)
@@ -2360,10 +2329,10 @@
           outString
         end
 
-         #= 
+         #=
           Helper function to pp_stmt
          =#
-        function ppElse(inElse::DAE.Else, inInteger::ModelicaInteger)  
+        function ppElse(inElse::DAE.Else, inInteger::ModelicaInteger)
               _ = begin
                   local i_1::ModelicaInteger
                   local i::ModelicaInteger
@@ -2375,7 +2344,7 @@
                   (DAE.NOELSE(__), _)  => begin
                     ()
                   end
-                  
+
                   (DAE.ELSEIF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       indent(i)
                       Print.printBuf("elseif ")
@@ -2386,7 +2355,7 @@
                       ppElse(else_, i)
                     ()
                   end
-                  
+
                   (DAE.ELSE(statementLst = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("else\\n")
@@ -2398,10 +2367,10 @@
               end
         end
 
-         #= 
+         #=
           Helper function to ppElseStr
          =#
-        function ppElseStr(inElse::DAE.Else, inInteger::ModelicaInteger) ::String 
+        function ppElseStr(inElse::DAE.Else, inInteger::ModelicaInteger) ::String
               local outString::String
 
               outString = begin
@@ -2424,7 +2393,7 @@
                   (DAE.NOELSE(__), _)  => begin
                     ""
                   end
-                  
+
                   (DAE.ELSEIF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "elseif ")
@@ -2438,7 +2407,7 @@
                       str = stringAppend(s7, s8)
                     str
                   end
-                  
+
                   (DAE.ELSE(statementLst = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "else\\n")
@@ -2452,10 +2421,10 @@
           outString
         end
 
-         #= 
+         #=
           Print an indentation, given an indent level.
          =#
-        function indent(inInteger::ModelicaInteger)  
+        function indent(inInteger::ModelicaInteger)
               _ = begin
                   local i_1::ModelicaInteger
                   local i::ModelicaInteger
@@ -2463,7 +2432,7 @@
                   0  => begin
                     ()
                   end
-                  
+
                   i  => begin
                       Print.printBuf(" ")
                       i_1 = i - 1
@@ -2474,10 +2443,10 @@
               end
         end
 
-         #= 
+         #=
           Print an indentation to a string, given an indent level.
          =#
-        function indentStr(inInteger::ModelicaInteger) ::String 
+        function indentStr(inInteger::ModelicaInteger) ::String
               local outString::String
 
               outString = begin
@@ -2489,7 +2458,7 @@
                   0  => begin
                     ""
                   end
-                  
+
                   i  => begin
                       i_1 = i - 1
                       s1 = indentStr(i_1)
@@ -2501,13 +2470,13 @@
           outString
         end
 
-         #= 
+         #=
 
          Dump the data structures in a
          paranthesised way
 
          =#
-        function dumpDebug(inDAElist::DAE.DAElist)  
+        function dumpDebug(inDAElist::DAE.DAElist)
               _ = begin
                   local elist::List{DAE.Element}
                 @match inDAElist begin
@@ -2521,10 +2490,10 @@
               end
         end
 
-         #= 
+         #=
           Helper function to dump_debug.
          =#
-        function dumpDebugElist(inElementLst::List{<:DAE.Element})  
+        function dumpDebugElist(inElementLst::List{<:DAE.Element})
               _ = begin
                   local first::DAE.Element
                   local rest::List{DAE.Element}
@@ -2532,7 +2501,7 @@
                    nil()  => begin
                     ()
                   end
-                  
+
                   first <| rest  => begin
                       dumpDebugElement(first)
                       Print.printBuf("\\n")
@@ -2544,7 +2513,7 @@
         end
 
          #=  =#
-        function dumpDebugDAE(dae::DAE.DAElist) ::String 
+        function dumpDebugDAE(dae::DAE.DAElist) ::String
               local str::String
 
               str = begin
@@ -2561,10 +2530,10 @@
           str
         end
 
-         #= 
+         #=
           Dump element using parenthesis.
          =#
-        function dumpDebugElement(inElement::DAE.Element)  
+        function dumpDebugElement(inElement::DAE.Element)
               _ = begin
                   local comment_str::String
                   local tmp_str::String
@@ -2595,7 +2564,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.VAR(componentRef = cr, kind = vk, binding = SOME(e), variableAttributesOption = dae_var_attr, comment = comment)  => begin
                       Print.printBuf("VAR(")
                       ComponentReference.printComponentRef(cr)
@@ -2611,7 +2580,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.DEFINE(componentRef = cr, exp = exp)  => begin
                       Print.printBuf("DEFINE(")
                       ComponentReference.printComponentRef(cr)
@@ -2620,7 +2589,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIALDEFINE(componentRef = cr, exp = exp)  => begin
                       Print.printBuf("INITIALDEFINE(")
                       ComponentReference.printComponentRef(cr)
@@ -2629,7 +2598,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.EQUATION(exp = e1, scalar = e2)  => begin
                       Print.printBuf("EQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2638,7 +2607,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2)  => begin
                       Print.printBuf("EQUATION(")
                       ComponentReference.printComponentRef(cr1)
@@ -2647,7 +2616,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2)  => begin
                       Print.printBuf("INITIALEQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2656,17 +2625,17 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.ALGORITHM(__)  => begin
                       Print.printBuf("ALGORITHM()")
                     ()
                   end
-                  
+
                   DAE.INITIALALGORITHM(__)  => begin
                       Print.printBuf("INITIALALGORITHM()")
                     ()
                   end
-                  
+
                   DAE.COMP(ident = n, dAElist = l)  => begin
                       Print.printBuf("COMP(")
                       Print.printBuf(n)
@@ -2675,7 +2644,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("ARRAY_EQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2684,7 +2653,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("INITIAL_ARRAY_EQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2693,7 +2662,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("COMPLEX_EQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2702,7 +2671,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("INITIAL_COMPLEX_EQUATION(")
                       ExpressionDump.printExp(e1)
@@ -2711,27 +2680,27 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.IF_EQUATION(__)  => begin
                       Print.printBuf("IF_EQUATION()")
                     ()
                   end
-                  
+
                   DAE.INITIAL_IF_EQUATION(__)  => begin
                       Print.printBuf("INITIAL_IF_EQUATION()")
                     ()
                   end
-                  
+
                   DAE.WHEN_EQUATION(__)  => begin
                       Print.printBuf("WHEN_EQUATION()")
                     ()
                   end
-                  
+
                   DAE.EXTOBJECTCLASS(__)  => begin
                       Print.printBuf("EXTOBJECTCLASS()")
                     ()
                   end
-                  
+
                   DAE.ASSERT(condition = e1, message = e2)  => begin
                       Print.printBuf("ASSERT(")
                       ExpressionDump.printExp(e1)
@@ -2740,7 +2709,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIAL_ASSERT(condition = e1, message = e2)  => begin
                       Print.printBuf("INITIAL_ASSERT(")
                       ExpressionDump.printExp(e1)
@@ -2749,31 +2718,31 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.TERMINATE(message = e1)  => begin
                       Print.printBuf("TERMINATE(")
                       ExpressionDump.printExp(e1)
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.INITIAL_TERMINATE(message = e1)  => begin
                       Print.printBuf("INITIAL_TERMINATE(")
                       ExpressionDump.printExp(e1)
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.REINIT(__)  => begin
                       Print.printBuf("REINIT()")
                     ()
                   end
-                  
+
                   DAE.NORETCALL(__)  => begin
                       Print.printBuf("NORETCALL()")
                     ()
                   end
-                  
+
                   DAE.SM_COMP(componentRef = cr, dAElist = l)  => begin
                       Print.printBuf("SM_COMP(")
                       ComponentReference.printComponentRef(cr)
@@ -2782,7 +2751,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   DAE.FLAT_SM(ident = n, dAElist = l)  => begin
                       Print.printBuf("FLAT_SM(")
                       Print.printBuf(n)
@@ -2791,7 +2760,7 @@
                       Print.printBuf(")")
                     ()
                   end
-                  
+
                   _  => begin
                       Print.printBuf("UNKNOWN ")
                     ()
@@ -2800,9 +2769,9 @@
               end
         end
 
-         #= 
+         #=
         Author BZ 2008-07, dump flow properties to string. =#
-        function dumpFlow(var::DAE.ConnectorType) ::String 
+        function dumpFlow(var::DAE.ConnectorType) ::String
               local flowString::String
 
               flowString = begin
@@ -2810,11 +2779,11 @@
                   DAE.FLOW(__)  => begin
                     "flow"
                   end
-                  
+
                   DAE.POTENTIAL(__)  => begin
                     "effort"
                   end
-                  
+
                   DAE.NON_CONNECTOR(__)  => begin
                     "non_connector"
                   end
@@ -2823,7 +2792,7 @@
           flowString
         end
 
-        function dumpConnectorType(inConnectorType::DAE.ConnectorType) ::String 
+        function dumpConnectorType(inConnectorType::DAE.ConnectorType) ::String
               local outString::String
 
               outString = begin
@@ -2831,11 +2800,11 @@
                   DAE.FLOW(__)  => begin
                     "flow"
                   end
-                  
+
                   DAE.STREAM(__)  => begin
                     "stream"
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -2844,21 +2813,21 @@
           outString
         end
 
-         #= 
+         #=
          Graphviz functions to visualize
          the dae
          =#
-        function dumpGraphviz(dae::DAE.DAElist)  
+        function dumpGraphviz(dae::DAE.DAElist)
               local r::Graphviz.Node
 
               r = buildGraphviz(dae)
               Graphviz.dump(r)
         end
 
-         #= 
+         #=
           Builds the graphviz node from a dae list.
          =#
-        function buildGraphviz(inDAElist::DAE.DAElist) ::Graphviz.Node 
+        function buildGraphviz(inDAElist::DAE.DAElist) ::Graphviz.Node
               local outNode::Graphviz.Node
 
               outNode = begin
@@ -2884,7 +2853,7 @@
 
          #= Helper function to build_graphviz.
          =#
-        function buildGrList(inElementLst::List{<:DAE.Element}) ::List{Graphviz.Node} 
+        function buildGrList(inElementLst::List{<:DAE.Element}) ::List{Graphviz.Node}
               local outGraphvizNodeLst::List{Graphviz.Node}
 
               outGraphvizNodeLst = begin
@@ -2896,7 +2865,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   el <| rest  => begin
                       node = buildGrElement(el)
                       nodelist = buildGrList(rest)
@@ -2909,7 +2878,7 @@
 
          #= Helper function to build_graphviz.
          =#
-        function buildGrVars(inElementLst::List{<:DAE.Element}) ::List{Graphviz.Node} 
+        function buildGrVars(inElementLst::List{<:DAE.Element}) ::List{Graphviz.Node}
               local outGraphvizNodeLst::List{Graphviz.Node}
 
               outGraphvizNodeLst = begin
@@ -2919,7 +2888,7 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   vars  => begin
                       (strlist, _) = buildGrStrlist(vars, buildGrVarStr, 10)
                     list(Graphviz.LNODE("VARS", strlist, list(Graphviz.box), nil))
@@ -2931,7 +2900,7 @@
 
          #= Helper function to build_graphviz.
          =#
-        function buildGrStrlist(inTypeALst::List{<:Type_a}, inFuncTypeTypeAToString::FuncTypeType_aToString, inInteger::ModelicaInteger) ::Tuple{List{String}, List{Type_a}} 
+        function buildGrStrlist(inTypeALst::List{<:Type_a}, inFuncTypeTypeAToString::FuncTypeType_aToString, inInteger::ModelicaInteger) ::Tuple{List{String}, List{Type_a}}
               local outTypeALst::List{Type_a}
               local outStringLst::List{String}
 
@@ -2948,14 +2917,14 @@
                   ( nil(), _, _)  => begin
                     (nil, nil)
                   end
-                  
+
                   (ignored, _, count)  => begin
                       if ! count <= 0
                         fail()
                       end
                     (list("..."), ignored)
                   end
-                  
+
                   (var <| rest, printer, count)  => begin
                       if ! count > 0
                         fail()
@@ -2972,7 +2941,7 @@
 
          #= Helper function to build_graphviz.
          =#
-        function buildGrVarStr(inElement::DAE.Element) ::String 
+        function buildGrVarStr(inElement::DAE.Element) ::String
               local outString::String
 
               outString = begin
@@ -2987,7 +2956,7 @@
                       str = ComponentReference.printComponentRefStr(cr)
                     str
                   end
-                  
+
                   DAE.VAR(componentRef = cr, binding = SOME(exp))  => begin
                       str = ComponentReference.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
@@ -3000,10 +2969,10 @@
           outString
         end
 
-         #= 
+         #=
           Prints an expression to a string suitable for graphviz.
          =#
-        function printExpStrSpecial(inExp::DAE.Exp) ::String 
+        function printExpStrSpecial(inExp::DAE.Exp) ::String
               local outString::String
 
               outString = begin
@@ -3018,7 +2987,7 @@
                       s_2 = stringAppend(s_1, "\\\\\\")
                     s_2
                   end
-                  
+
                   exp  => begin
                       str = ExpressionDump.printExpStr(exp)
                     str
@@ -3028,10 +2997,10 @@
           outString
         end
 
-         #= 
+         #=
           Builds a Graphviz.Node from an element.
          =#
-        function buildGrElement(inElement::DAE.Element) ::Graphviz.Node 
+        function buildGrElement(inElement::DAE.Element) ::Graphviz.Node
               local outNode::Graphviz.Node
 
               outNode = begin
@@ -3058,7 +3027,7 @@
                       vkstr = dumpKindStr(vk)
                     Graphviz.LNODE("VAR", list(crstr, vkstr), nil, nil)
                   end
-                  
+
                   DAE.VAR(componentRef = cr, kind = vk, binding = SOME(exp))  => begin
                       crstr = ComponentReference.printComponentRefStr(cr)
                       vkstr = dumpKindStr(vk)
@@ -3066,47 +3035,47 @@
                       expstr_1 = stringAppend("= ", expstr)
                     Graphviz.LNODE("VAR", list(crstr, vkstr, expstr_1), nil, nil)
                   end
-                  
+
                   DAE.DEFINE(componentRef = cr, exp = exp)  => begin
                       crstr = ComponentReference.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
                       expstr_1 = stringAppend("= ", expstr)
                     Graphviz.LNODE("DEFINE", list(crstr, expstr_1), nil, nil)
                   end
-                  
+
                   DAE.EQUATION(exp = e1, scalar = e2)  => begin
                       e1str = printExpStrSpecial(e1)
                       e2str = printExpStrSpecial(e2)
                     Graphviz.LNODE("EQUATION", list(e1str, "=", e2str), nil, nil)
                   end
-                  
+
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2)  => begin
                       e1str = printExpStrSpecial(Expression.crefExp(cr1))
                       e2str = printExpStrSpecial(Expression.crefExp(cr2))
                     Graphviz.LNODE("EQUEQUATION", list(e1str, "=", e2str), nil, nil)
                   end
-                  
+
                   DAE.ALGORITHM(__)  => begin
                     Graphviz.NODE("ALGORITHM", nil, nil)
                   end
-                  
+
                   DAE.INITIALDEFINE(componentRef = cr, exp = exp)  => begin
                       crstr = ComponentReference.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
                       expstr_1 = stringAppend("= ", expstr)
                     Graphviz.LNODE("INITIALDEFINE", list(crstr, expstr_1), nil, nil)
                   end
-                  
+
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2)  => begin
                       e1str = printExpStrSpecial(e1)
                       e2str = printExpStrSpecial(e2)
                     Graphviz.LNODE("INITIALEQUATION", list(e1str, "=", e2str), nil, nil)
                   end
-                  
+
                   DAE.INITIALALGORITHM(__)  => begin
                     Graphviz.NODE("INITIALALGORITHM", nil, nil)
                   end
-                  
+
                   DAE.COMP(ident = n, dAElist = elts)  => begin
                       nodes = buildGrList(elts)
                     Graphviz.LNODE("COMP", list(n), nil, nodes)
@@ -3117,7 +3086,7 @@
         end
 
          #= wrapper function for Types.unparseType, so records and enumerations can be output properly =#
-        function unparseType(tp::DAE.Type) ::String 
+        function unparseType(tp::DAE.Type) ::String
               local str::String
 
               str = begin
@@ -3132,7 +3101,7 @@
                       name = AbsynUtil.pathStringNoQual(path)
                     name
                   end
-                  
+
                   DAE.T_ARRAY(ty = ty)  => begin
                       @match DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path)) = Types.arrayElementType(ty)
                       dims = Types.getDimensions(tp)
@@ -3140,15 +3109,15 @@
                       dim_str = ListUtil.toString(dims, ExpressionDump.dimensionString, "", "[", ", ", "]", false)
                     name + dim_str
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = ty && DAE.T_SUBTYPE_BASIC(__))  => begin
                     unparseType(ty)
                   end
-                  
+
                   DAE.T_SUBTYPE_BASIC(complexType = bc_tp)  => begin
                     Types.unparseType(bc_tp)
                   end
-                  
+
                   _  => begin
                       Types.unparseType(tp)
                   end
@@ -3158,7 +3127,7 @@
         end
 
          #= prints dimensions to a string =#
-        function unparseDimensions(dims::DAE.InstDims, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#) ::String 
+        function unparseDimensions(dims::DAE.InstDims, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#) ::String
               local dimsStr::String
 
               dimsStr = begin
@@ -3169,11 +3138,11 @@
                   (_, false)  => begin
                     ""
                   end
-                  
+
                   ( nil(), true)  => begin
                     ""
                   end
-                  
+
                   (_, true)  => begin
                       str = "[" + stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ") + "]"
                     str
@@ -3188,7 +3157,7 @@
         end
 
          #= This function prints the DAE to a string. =#
-        function dumpStr(inDAElist::DAE.DAElist, functionTree::DAE.FunctionTree) ::String 
+        function dumpStr(inDAElist::DAE.DAElist, functionTree::DAE.FunctionTree) ::String
               local outString::String
 
               local daelist::List{DAE.Element}
@@ -3203,7 +3172,7 @@
         end
 
          #= This function prints the DAE to a string. =#
-        function dumpElementsStr(els::List{<:DAE.Element}) ::String 
+        function dumpElementsStr(els::List{<:DAE.Element}) ::String
               local outString::String
 
               outString = begin
@@ -3222,7 +3191,7 @@
         end
 
          #= This function prints the algorithms to a string. =#
-        function dumpAlgorithmsStr(algs::List{<:DAE.Element}) ::String 
+        function dumpAlgorithmsStr(algs::List{<:DAE.Element}) ::String
               local outString::String
 
               outString = begin
@@ -3241,7 +3210,7 @@
         end
 
          #= This function prints the constraints to a string. =#
-        function dumpConstraintsStr(constrs::List{<:DAE.Element}) ::String 
+        function dumpConstraintsStr(constrs::List{<:DAE.Element}) ::String
               local outString::String
 
               outString = begin
@@ -3265,7 +3234,7 @@
          #= /************ IOStream based implementation ***************/ =#
 
          #= This function prints the DAE to a stream. =#
-        function dumpStream(dae::DAE.DAElist, functionTree::DAE.FunctionTree, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpStream(dae::DAE.DAElist, functionTree::DAE.FunctionTree, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3288,7 +3257,7 @@
 
          #=  returns sorted functions and record constructors in alphabetical order
           (mainly important for template based DAE unparser). =#
-        function dumpFunctionList(functionTree::DAE.FunctionTree) ::functionList 
+        function dumpFunctionList(functionTree::DAE.FunctionTree) ::functionList
               local funList::functionList
 
               funList = begin
@@ -3298,7 +3267,7 @@
                       funcs = DAEUtil.getFunctionList(functionTree)
                       funcs = ListUtil.filter2OnTrue(funcs, isVisibleFunction, Flags.isSet(Flags.DISABLE_RECORD_CONSTRUCTOR_OUTPUT), Flags.isSet(Flags.INLINE_FUNCTIONS))
                       funcs = sortFunctions(funcs)
-                      funList = FUNCTION_LIST(funcs)
+                      funList = DAEUtil.FUNCTION_LIST(funcs)
                     funList
                   end
                 end
@@ -3307,7 +3276,7 @@
         end
 
          #= Returns true if the given function should be visible in the flattened output. =#
-        function isVisibleFunction(inFunc::DAE.Function, inHideRecordCons::Bool #= Hides record constructors if true. =#, inInliningEnabled::Bool #= Hides early inlined functions if true. =#) ::Bool 
+        function isVisibleFunction(inFunc::DAE.Function, inHideRecordCons::Bool #= Hides record constructors if true. =#, inInliningEnabled::Bool #= Hides early inlined functions if true. =#) ::Bool
               local outIsVisible::Bool
 
               outIsVisible = begin
@@ -3318,27 +3287,27 @@
                   (DAE.FUNCTION(functions = DAE.FUNCTION_EXT(externalDecl = DAE.EXTERNALDECL(language = "builtin")) <| _), _, _)  => begin
                     false
                   end
-                  
+
                   (DAE.FUNCTION(path = Absyn.FULLYQUALIFIED(Absyn.QUALIFIED(name = "OpenModelica"))), _, _)  => begin
                     false
                   end
-                  
+
                   (DAE.FUNCTION(inlineType = DAE.BUILTIN_EARLY_INLINE(__)), _, _)  => begin
                     false
                   end
-                  
+
                   (DAE.FUNCTION(inlineType = DAE.EARLY_INLINE(__)), _, true)  => begin
                     false
                   end
-                  
+
                   (DAE.FUNCTION(comment = cmt), _, _)  => begin
                     ! SCodeUtil.optCommentHasBooleanNamedAnnotation(cmt, "__OpenModelica_builtin")
                   end
-                  
+
                   (DAE.RECORD_CONSTRUCTOR(__), true, _)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -3358,7 +3327,7 @@
         end
 
          #= Dumps components to a stream. =#
-        function dumpCompElementStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpCompElementStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3379,7 +3348,7 @@
                       str = IOStream.append(str, ";\\n")
                     str
                   end
-                  
+
                   (_, str)  => begin
                     str
                   end
@@ -3390,7 +3359,7 @@
         end
 
          #= Dump elements to a stream =#
-        function dumpElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3436,7 +3405,7 @@
                           SCode.COMMENT(annotation_ = ann && SOME(_))  => begin
                             SCodeDump.printCommentStr(SCode.COMMENT(ann, NONE()))
                           end
-                          
+
                           _  => begin
                               ""
                           end
@@ -3456,7 +3425,7 @@
         end
 
          #= Dump components with split elements (e.g., state machines) to a stream. =#
-        function dumpCompWithSplitElementsStream(inCompLst::List{<:compWithSplitElements}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpCompWithSplitElementsStream(inCompLst::List{<:compWithSplitElements}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3479,15 +3448,15 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
-                  (COMP_WITH_SPLIT(name = name, spltElems = spltElems, comment = comment) <| xs, str)  => begin
+
+                  (DAEUtil.COMP_WITH_SPLIT(name = name, spltElems = spltElems, comment = comment) <| xs, str)  => begin
                       try
                         @match SOME(SCode.COMMENT(comment = SOME(cstr))) = comment
                         cstr = " \\" + cstr + "\\"
                       catch
                         cstr = ""
                       end
-                      @match SPLIT_ELEMENTS(v, ie, ia, e, a, co, _, _, sm) = spltElems
+                      @match DAEUtil.SPLIT_ELEMENTS(v, ie, ia, e, a, co, _, _, sm) = spltElems
                       str = IOStream.append(str, name + cstr + "\\n")
                       str = dumpCompWithSplitElementsStream(sm, str)
                       str = dumpVarsStream(v, false, str)
@@ -3521,7 +3490,7 @@
         end
 
          #= Dump algorithms to a stream. =#
-        function dumpAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3532,14 +3501,14 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
+
                   (DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(statementLst = stmts)) <| xs, str)  => begin
                       str = IOStream.append(str, "algorithm\\n")
                       str = IOStream.appendList(str, ListUtil.map(stmts, ppStatementStr))
                       str = dumpAlgorithmsStream(xs, str)
                     str
                   end
-                  
+
                   (_ <| xs, str)  => begin
                       str = dumpAlgorithmsStream(xs, str)
                     str
@@ -3550,7 +3519,7 @@
         end
 
          #= Dump initialalgorithms to a stream. =#
-        function dumpInitialAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpInitialAlgorithmsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3561,14 +3530,14 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
+
                   (DAE.INITIALALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(statementLst = stmts)) <| xs, str)  => begin
                       str = IOStream.append(str, "initial algorithm\\n")
                       str = IOStream.appendList(str, ListUtil.map(stmts, ppStatementStr))
                       str = dumpInitialAlgorithmsStream(xs, str)
                     str
                   end
-                  
+
                   (_ <| xs, str)  => begin
                       str = dumpInitialAlgorithmsStream(xs, str)
                     str
@@ -3579,7 +3548,7 @@
         end
 
          #= Dump equations to a stream. =#
-        function dumpEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3611,7 +3580,7 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
+
                   (DAE.EQUATION(exp = e1, scalar = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3620,14 +3589,14 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  " + ComponentReference.printComponentRefStr(cr1) + " = " + ComponentReference.printComponentRefStr(cr2) + sourceStr + ";\\n")
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.ARRAY_EQUATION(dimension = dims, exp = e1, array = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3646,7 +3615,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3655,7 +3624,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.DEFINE(componentRef = c, exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ComponentReference.printComponentRefStr(c)
@@ -3664,7 +3633,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.ASSERT(condition = e1, message = e2, level = DAE.ENUM_LITERAL(index = 1), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3673,7 +3642,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.TERMINATE(message = e1, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3681,7 +3650,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.FOR_EQUATION(iter = s, range = e1, equations = xs1, source = src) <| xs, str)  => begin
                       _ = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3691,11 +3660,11 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.IF_EQUATION(condition1 =  nil(), equations2 =  nil(), equations3 =  nil()) <| _, str)  => begin
                     str
                   end
-                  
+
                   (DAE.IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| tb, equations3 =  nil(), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  if ")
@@ -3708,7 +3677,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| tb, equations3 = xs2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  if ")
@@ -3722,7 +3691,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.WHEN_EQUATION(condition = e, equations = xs1, elsewhen_ = SOME(el), source = src) <| xs, str)  => begin
                       _ = getSourceInformationStr(src)
                       str = IOStream.append(str, "when ")
@@ -3733,7 +3702,7 @@
                       str = dumpEquationsStream(_cons(el, xs), str)
                     str
                   end
-                  
+
                   (DAE.WHEN_EQUATION(condition = e, equations = xs1, elsewhen_ = NONE(), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  when ")
@@ -3744,7 +3713,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.REINIT(componentRef = cr, exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s = ComponentReference.printComponentRefStr(cr)
@@ -3753,7 +3722,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.NORETCALL(exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e)
@@ -3761,7 +3730,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (_ <| xs, str)  => begin
                       str = IOStream.append(str, "  /* unhandled equation in DAEDump.dumpEquationsStream FIXME! */\\n")
                       str = dumpEquationsStream(xs, str)
@@ -3773,7 +3742,7 @@
         end
 
          #=  =#
-        function dumpIfEquationsStream(iconds::List{<:DAE.Exp}, itbs::List{<:List{<:DAE.Element}}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpIfEquationsStream(iconds::List{<:DAE.Exp}, itbs::List{<:List{<:DAE.Element}}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3786,7 +3755,7 @@
                   ( nil(),  nil(), str)  => begin
                     str
                   end
-                  
+
                   (c <| conds, tb <| tbs, str)  => begin
                       str = IOStream.append(str, "  elseif ")
                       str = IOStream.append(str, ExpressionDump.printExpStr(c))
@@ -3801,7 +3770,7 @@
         end
 
          #= Dump initial equations to a stream. =#
-        function dumpInitialEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpInitialEquationsStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3823,7 +3792,7 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
+
                   (DAE.INITIALEQUATION(exp1 = e1, exp2 = e2) <| xs, str)  => begin
                       s1 = ExpressionDump.printExpStr(e1)
                       s2 = ExpressionDump.printExpStr(e2)
@@ -3831,7 +3800,7 @@
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2) <| xs, str)  => begin
                       s1 = ExpressionDump.printExpStr(e1)
                       s2 = ExpressionDump.printExpStr(e2)
@@ -3839,7 +3808,7 @@
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2) <| xs, str)  => begin
                       s1 = ExpressionDump.printExpStr(e1)
                       s2 = ExpressionDump.printExpStr(e2)
@@ -3847,7 +3816,7 @@
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIALDEFINE(componentRef = c, exp = e) <| xs, str)  => begin
                       s1 = ComponentReference.printComponentRefStr(c)
                       s2 = ExpressionDump.printExpStr(e)
@@ -3855,7 +3824,7 @@
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| trueBranches, equations3 = xs2) <| xs, str)  => begin
                       str = IOStream.append(str, "  if ")
                       str = IOStream.append(str, ExpressionDump.printExpStr(e))
@@ -3868,14 +3837,14 @@
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_NORETCALL(exp = e) <| xs, str)  => begin
                       s1 = ExpressionDump.printExpStr(e)
                       str = IOStream.appendList(str, list("  ", s1, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_ASSERT(condition = e1, message = e2, level = DAE.ENUM_LITERAL(index = 1), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3884,7 +3853,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (DAE.INITIAL_TERMINATE(message = e1, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       s1 = ExpressionDump.printExpStr(e1)
@@ -3892,7 +3861,7 @@
                       str = dumpEquationsStream(xs, str)
                     str
                   end
-                  
+
                   (_ <| xs, str)  => begin
                       str = dumpInitialEquationsStream(xs, str)
                     str
@@ -3903,7 +3872,7 @@
         end
 
          #= Dump constraints to a stream. =#
-        function dumpConstraintStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpConstraintStream(inElementLst::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3914,7 +3883,7 @@
                   ( nil(), str)  => begin
                     str
                   end
-                  
+
                   (DAE.CONSTRAINT(constraints = DAE.CONSTRAINT_EXPS(constraintLst = exps)) <| xs, str)  => begin
                       str = IOStream.append(str, "  ")
                       str = IOStream.append(str, stringDelimitList(ListUtil.map(exps, ExpressionDump.printExpStr), ";\\n  "))
@@ -3922,7 +3891,7 @@
                       str = dumpConstraintStream(xs, str)
                     str
                   end
-                  
+
                   (_ <| xs, str)  => begin
                       str = dumpConstraintStream(xs, str)
                     str
@@ -3936,10 +3905,10 @@
           outStream
         end
 
-         #= 
+         #=
         Author BZ
         print a DAE.DAEList to a string =#
-        function dumpDAEElementsStr(d::DAE.DAElist) ::String 
+        function dumpDAEElementsStr(d::DAE.DAElist) ::String
               local str::String
 
               str = begin
@@ -3958,7 +3927,7 @@
         end
 
          #= Dump variables to a string. =#
-        function dumpVarsStream(inElementLst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpVarsStream(inElementLst::List{<:DAE.Element}, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -3971,7 +3940,7 @@
                   ( nil(), _, _)  => begin
                     inStream
                   end
-                  
+
                   (first <| rest, _, str)  => begin
                       str = dumpVarStream(first, printTypeDimension, str)
                       str = dumpVarsStream(rest, printTypeDimension, str)
@@ -3984,7 +3953,7 @@
           outStream
         end
 
-        function daeTypeStr(inType::DAE.Type) ::String 
+        function daeTypeStr(inType::DAE.Type) ::String
               local outTypeStr::String
 
               local typeAttrStr::String
@@ -3996,7 +3965,7 @@
           outTypeStr
         end
 
-        function printTypeStr(inType::DAE.Type) ::Tuple{String, String} 
+        function printTypeStr(inType::DAE.Type) ::Tuple{String, String}
               local outTypeAttrStr::String
               local outTypeStr::String
 
@@ -4010,7 +3979,7 @@
         end
 
          #= dumps the DAE.CallAttributes =#
-        function dumpCallAttr(ca::DAE.CallAttributes)  
+        function dumpCallAttr(ca::DAE.CallAttributes)
               local tpl::Bool
               local bi::Bool
               local impure_::Bool
@@ -4029,7 +3998,7 @@
               print("tuple_: " + boolString(tpl) + " builtin: " + boolString(bi) + " impure: " + boolString(impure_) + " isFunctionPointerCall: " + boolString(isFunc) + "\\n\\n")
         end
 
-        function dumpVarBindingStr(inBinding::Option{<:DAE.Exp}) ::String 
+        function dumpVarBindingStr(inBinding::Option{<:DAE.Exp}) ::String
               local outString::String
 
               outString = begin
@@ -4040,7 +4009,7 @@
                       bind_str = ExpressionDump.printExpStr(exp)
                     " = " + bind_str
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -4050,7 +4019,7 @@
         end
 
          #= Dump var to a stream. =#
-        function dumpVarStream(inElement::DAE.Element, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpVarStream(inElement::DAE.Element, printTypeDimension::Bool #= use true here when printing components in functions as these are not vectorized! Otherwise, use false =#, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -4098,7 +4067,7 @@
                       str = IOStream.appendList(str, list("  ", vis_str, final_str, par_str, kind_str, dir_str, ty_str, dim_str, " ", name_str, ty_vars_str, attr_str, binding_str, cmt_str, ";\\n"))
                     str
                   end
-                  
+
                   _  => begin
                       inStream
                   end
@@ -4108,7 +4077,7 @@
         end
 
          #= Dump algorithm to a stream =#
-        function dumpAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -4120,7 +4089,7 @@
                       str = ListUtil.fold(stmts, ppStatementStream, str)
                     str
                   end
-                  
+
                   (_, str)  => begin
                     str
                   end
@@ -4130,7 +4099,7 @@
         end
 
          #= Dump algorithm to a stream =#
-        function dumpInitialAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpInitialAlgorithmStream(inElement::DAE.Element, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -4142,7 +4111,7 @@
                       str = ListUtil.fold(stmts, ppStatementStream, str)
                     str
                   end
-                  
+
                   (_, str)  => begin
                     str
                   end
@@ -4152,7 +4121,7 @@
         end
 
          #= Prettyprint an algorithm statement to a string. =#
-        function ppStatementStream(alg::DAE.Statement, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function ppStatementStream(alg::DAE.Statement, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               local tmp::String
@@ -4165,7 +4134,7 @@
           outStream
         end
 
-        function dumpFunctionTree(inFunctionTree::DAE.FunctionTree, inHeading::String)  
+        function dumpFunctionTree(inFunctionTree::DAE.FunctionTree, inHeading::String)
               print("\\n" + inHeading + "\\n========================================\\n")
               for fnc in sortFunctions(DAEUtil.getFunctionList(inFunctionTree))
                 print(dumpFunctionStr(fnc))
@@ -4173,7 +4142,7 @@
         end
 
          #= Dump function to a string. =#
-        function dumpFunctionStr(inElement::DAE.Function) ::String 
+        function dumpFunctionStr(inElement::DAE.Function) ::String
               local outString::String
 
               outString = begin
@@ -4187,7 +4156,7 @@
                       Print.restoreBuf(hnd)
                     s
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -4197,7 +4166,7 @@
         end
 
          #= Dump external object class to a string. =#
-        function dumpExtObjClassStr(inElement::DAE.Element) ::String 
+        function dumpExtObjClassStr(inElement::DAE.Element) ::String
               local outString::String
 
               outString = begin
@@ -4211,7 +4180,7 @@
                       Print.restoreBuf(hnd)
                     s
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -4221,7 +4190,7 @@
         end
 
          #= Dump function to a stream =#
-        function dumpFunctionStream(inElement::DAE.Function, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpFunctionStream(inElement::DAE.Function, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = begin
@@ -4260,11 +4229,11 @@
                       str = IOStream.append(str, ";\\n\\n")
                     str
                   end
-                  
+
                   (DAE.FUNCTION(functions = DAE.FUNCTION_EXT(externalDecl = DAE.EXTERNALDECL(language = "builtin")) <| _), str)  => begin
                     str
                   end
-                  
+
                   (DAE.FUNCTION(path = fpath, inlineType = inlineType, functions = DAE.FUNCTION_EXT(body = daeElts, externalDecl = ext_decl) <| _, isImpure = isImpure, comment = c), str)  => begin
                       fstr = AbsynUtil.pathStringNoQual(fpath)
                       impureStr = if isImpure
@@ -4284,7 +4253,7 @@
                       str = IOStream.appendList(str, list("\\n  ", ext_decl_str, "\\n", ann_str, "end ", fstr, ";\\n\\n"))
                     str
                   end
-                  
+
                   (DAE.RECORD_CONSTRUCTOR(path = fpath, type_ = tp), str)  => begin
                       @match false = Flags.isSet(Flags.DISABLE_RECORD_CONSTRUCTOR_OUTPUT)
                       fstr = AbsynUtil.pathStringNoQual(fpath)
@@ -4298,7 +4267,7 @@
                       str = IOStream.append(str, ";\\n\\n")
                     str
                   end
-                  
+
                   (_, str)  => begin
                     str
                   end
@@ -4308,7 +4277,7 @@
         end
 
          #= Dump function elements to a stream. =#
-        function dumpFunctionElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType 
+        function dumpFunctionElementsStream(l::List{<:DAE.Element}, inStream::IOStream.IOStreamType) ::IOStream.IOStreamType
               local outStream::IOStream.IOStreamType
 
               outStream = dumpVarsStream(l, true, inStream)
@@ -4316,7 +4285,7 @@
           outStream
         end
 
-        function unparseVarKind(inVarKind::DAE.VarKind) ::String 
+        function unparseVarKind(inVarKind::DAE.VarKind) ::String
               local outString::String
 
               outString = begin
@@ -4324,15 +4293,15 @@
                   DAE.VARIABLE(__)  => begin
                     ""
                   end
-                  
+
                   DAE.PARAM(__)  => begin
                     "parameter"
                   end
-                  
+
                   DAE.CONST(__)  => begin
                     "const"
                   end
-                  
+
                   DAE.DISCRETE(__)  => begin
                     "discrete"
                   end
@@ -4341,7 +4310,7 @@
           outString
         end
 
-        function unparseVarDirection(inVarDirection::DAE.VarDirection) ::String 
+        function unparseVarDirection(inVarDirection::DAE.VarDirection) ::String
               local outString::String
 
               outString = begin
@@ -4349,11 +4318,11 @@
                   DAE.BIDIR(__)  => begin
                     ""
                   end
-                  
+
                   DAE.INPUT(__)  => begin
                     "input"
                   end
-                  
+
                   DAE.OUTPUT(__)  => begin
                     "output"
                   end
@@ -4362,7 +4331,7 @@
           outString
         end
 
-        function unparseVarInnerOuter(io::DAE.VarInnerOuter) ::String 
+        function unparseVarInnerOuter(io::DAE.VarInnerOuter) ::String
               local str::String
 
               str = begin
@@ -4370,15 +4339,15 @@
                   DAE.VarInnerOuter.INNER(__)  => begin
                     "inner"
                   end
-                  
+
                   DAE.VarInnerOuter.OUTER(__)  => begin
                     "outer"
                   end
-                  
+
                   DAE.VarInnerOuter.INNER_OUTER(__)  => begin
                     "inner outer"
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -4389,7 +4358,7 @@
 
          #= @author: adrpo
          display the source information as string =#
-        function getSourceInformationStr(inSource::DAE.ElementSource) ::String 
+        function getSourceInformationStr(inSource::DAE.ElementSource) ::String
               local outStr::String
 
               outStr = begin
@@ -4406,7 +4375,7 @@
                       @match false = Flags.isSet(Flags.SHOW_EQUATION_SOURCE)
                     ""
                   end
-                  
+
                   DAE.SOURCE(_, po, _, ceol, _, _, cmt)  => begin
                       str = cmtListToString(cmt)
                       str = str + " /* models: {" + stringDelimitList(ListUtil.map(po, withinString), ", ") + "}" + " connects: {" + stringDelimitList(connectsStr(ceol), ", ") + "} */"
@@ -4417,7 +4386,7 @@
           outStr
         end
 
-        function connectsStr(inLst::List{<:Tuple{<:DAE.ComponentRef, DAE.ComponentRef}}) ::List{String} 
+        function connectsStr(inLst::List{<:Tuple{<:DAE.ComponentRef, DAE.ComponentRef}}) ::List{String}
               local outStr::List{String}
 
               outStr = begin
@@ -4430,13 +4399,13 @@
                    nil()  => begin
                     nil
                   end
-                  
+
                   (c1, c2) <|  nil()  => begin
                       str = ComponentReference.printComponentRefStr(c1) + "," + ComponentReference.printComponentRefStr(c2)
                       str = "connect(" + str + ")"
                     list(str)
                   end
-                  
+
                   (c1, c2) <| rest  => begin
                       str = ComponentReference.printComponentRefStr(c1) + "," + ComponentReference.printComponentRefStr(c2)
                       str = "connect(" + str + ")"
@@ -4448,7 +4417,7 @@
           outStr
         end
 
-        function withinString(w::Absyn.Within) ::String 
+        function withinString(w::Absyn.Within) ::String
               local str::String
 
               str = begin
@@ -4457,7 +4426,7 @@
                   Absyn.TOP(__)  => begin
                     "TOP"
                   end
-                  
+
                   Absyn.WITHIN(p1)  => begin
                     AbsynUtil.pathString(p1)
                   end
@@ -4466,7 +4435,7 @@
           str
         end
 
-        function cmtListToString(inCmtLst::List{<:SCode.Comment}) ::String 
+        function cmtListToString(inCmtLst::List{<:SCode.Comment}) ::String
               local outStr::String
 
               outStr = begin
@@ -4477,18 +4446,18 @@
                    nil()  => begin
                     ""
                   end
-                  
+
                   c <|  nil()  => begin
                       str = dumpCommentAnnotationStr(SOME(c))
                     str
                   end
-                  
+
                   c <| rest  => begin
                       str = dumpCommentAnnotationStr(SOME(c))
                       str = str + " " + cmtListToString(rest)
                     str
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -4497,7 +4466,7 @@
           outStr
         end
 
-        function clockKindString(cK::DAE.ClockKind) ::String 
+        function clockKindString(cK::DAE.ClockKind) ::String
               local sOut::String
 
               sOut = begin
@@ -4507,19 +4476,19 @@
                   DAE.INFERRED_CLOCK(__)  => begin
                     "Inferred Clock"
                   end
-                  
+
                   DAE.INTEGER_CLOCK(intervalCounter = e1, resolution = e2)  => begin
                     "Integer Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
                   end
-                  
+
                   DAE.REAL_CLOCK(interval = e1)  => begin
                     "Real Clock(" + ExpressionDump.printExpStr(e1) + ")"
                   end
-                  
+
                   DAE.BOOLEAN_CLOCK(condition = e1, startInterval = e2)  => begin
                     "Boolean Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
                   end
-                  
+
                   DAE.SOLVER_CLOCK(c = e1, solverMethod = e2)  => begin
                     "Solver Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
                   end
@@ -4529,7 +4498,7 @@
         end
 
          #= Dump equation to a string.For debug purposes. =#
-        function dumpDebugElementStr(inElement::DAE.Element) ::String 
+        function dumpDebugElementStr(inElement::DAE.Element) ::String
               local outString::String
 
               outString = begin
@@ -4557,7 +4526,7 @@
                       str = stringAppendList(list("VAR:  ", s1, ";\\n"))
                     str
                   end
-                  
+
                   DAE.DEFINE(componentRef = c, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4565,7 +4534,7 @@
                       str = stringAppend(s1, sourceStr + ";\\n")
                     str
                   end
-                  
+
                   DAE.INITIALDEFINE(componentRef = c, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4573,7 +4542,7 @@
                       str = stringAppend(s1, sourceStr + ";\\n")
                     str
                   end
-                  
+
                   DAE.EQUATION(exp = e1, scalar = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4582,7 +4551,7 @@
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4591,7 +4560,7 @@
                       str = stringAppendList(list("EQUEQUATION  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4600,7 +4569,7 @@
                       str = "ARRAY_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4609,7 +4578,7 @@
                       str = "INITIAL_ARRAY_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4618,7 +4587,7 @@
                       str = "COMPLEX_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4627,7 +4596,7 @@
                       str = "INITIAL_COMPLEX_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
-                  
+
                   DAE.WHEN_EQUATION(condition = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4635,21 +4604,21 @@
                       str = stringAppendList(list("WHEN_EQUATION:  ", s1, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.IF_EQUATION(source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
                       str = stringAppendList(list("IF_EQUATION:  ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.INITIAL_IF_EQUATION(source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
                       str = stringAppendList(list("INITIAL_IF_EQUATION:  ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4658,21 +4627,21 @@
                       str = stringAppendList(list("INITIALEQUATION  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.ALGORITHM(source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
                       str = stringAppendList(list("ALGO  ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.INITIALALGORITHM(source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
                       str = stringAppendList(list("INITIALALGORITHM  ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.COMP(source = src, dAElist = elst)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4680,7 +4649,7 @@
                       str = stringAppendList(list("COMP  ", s1, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.EXTOBJECTCLASS(path = path, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4688,7 +4657,7 @@
                       str = stringAppendList(list("EXTOBJ  ", s1, "  ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4697,7 +4666,7 @@
                       str = stringAppendList(list("  assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.INITIAL_ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4706,7 +4675,7 @@
                       str = stringAppendList(list("  /* initial */ assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4714,7 +4683,7 @@
                       str = stringAppendList(list("  terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.INITIAL_TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4722,14 +4691,14 @@
                       str = stringAppendList(list("  /* initial */ terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.REINIT(source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
                       str = stringAppendList(list("  reinit(", ") ", sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   DAE.NORETCALL(exp = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
@@ -4737,7 +4706,7 @@
                       str = stringAppendList(list("  ", s1, sourceStr, ";\\n"))
                     str
                   end
-                  
+
                   _  => begin
                       "#UNKNOWN_EQUATION#"
                   end
