@@ -42,7 +42,7 @@
 
         import ClassInf
 
-        import Connect
+        # import Connect
 
         import ConnectionGraph
 

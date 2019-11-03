@@ -1918,9 +1918,124 @@ CREF_IDENT(..) is used for non-qualifed component names, e.g. x =#
   end
 end
 
-import Connect
 
-const emptySet = Connect.SETS(Connect.SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Connect.Sets
+const NEW_SET = -1 #= The index used for new sets which have not
+yet been assigned a set index. =#::ModelicaInteger
+
+#= This type indicates whether a connector is an inside or an outside connector.
+Note: this is not the same as inner and outer references.
+A connector is inside if it connects from the outside into a component and it
+is outside if it connects out from the component.  This is important when
+generating equations for flow variables, where outside connectors are
+multiplied with -1 (since flow is always into a component). =#
+@Uniontype Face begin
+  @Record INSIDE begin
+
+  end
+
+  @Record OUTSIDE begin
+
+  end
+
+  @Record NO_FACE begin
+
+  end
+end
+
+#= The type of a connector element. =#
+@Uniontype CConnectorType begin
+  @Record CEQU begin
+
+  end
+
+  @Record CFLOW begin
+
+  end
+
+  @Record CSTREAM begin
+
+    associatedFlow::Option{DAE.ComponentRef}
+  end
+
+  @Record CNO_TYPE begin
+
+  end
+end
+
+@Uniontype ConnectorElement begin
+  @Record CONNECTOR_ELEMENT begin
+
+    name::DAE.ComponentRef
+    face::Face
+    ty::CConnectorType
+    source::DAE.ElementSource
+    set #= Which set this element belongs to. =#::ModelicaInteger
+  end
+end
+
+@Uniontype SetTrieNode begin
+  @Record SET_TRIE_NODE begin
+
+    name::String
+    cref::DAE.ComponentRef
+    nodes::List{SetTrieNode}
+    connectCount::ModelicaInteger
+  end
+
+  @Record SET_TRIE_LEAF begin
+
+    name::String
+    insideElement #= The inside element. =#::Option{ConnectorElement}
+    outsideElement #= The outside element. =#::Option{ConnectorElement}
+    flowAssociation #= The name of the associated flow
+    variable, if the leaf represents a stream variable. =#::Option{DAE.ComponentRef}
+    connectCount #= How many times this connector has been connected. =#::ModelicaInteger
+  end
+end
+
+const SetTrie = SetTrieNode  #= A trie, a.k.a. prefix tree, that maps crefs to sets. =#
+
+const SetConnection = Tuple  #= A connection between two sets. =#
+
+@Uniontype OuterConnect begin
+  @Record OUTERCONNECT begin
+
+    scope #= the scope where this connect was created =#::Prefix.PrefixType
+    cr1 #= the lhs component reference =#::DAE.ComponentRef
+    io1 #= inner/outer attribute for cr1 component =#::Absyn.InnerOuter
+    f1 #= the face of the lhs component =#::Face
+    cr2 #= the rhs component reference =#::DAE.ComponentRef
+    io2 #= inner/outer attribute for cr2 component =#::Absyn.InnerOuter
+    f2 #= the face of the rhs component =#::Face
+    source #= the element origin =#::DAE.ElementSource
+  end
+end
+
+@Uniontype Sets begin
+  @Record SETS begin
+
+    sets::SetTrie
+    setCount #= How many sets the trie contains. =#::ModelicaInteger
+    connections::List{SetConnection}
+    outerConnects #= Connect statements to propagate upwards. =#::List{OuterConnect}
+  end
+end
+
+#= A set of connection elements. =#
+@Uniontype CSet begin
+  @Record SET begin
+
+    ty::CConnectorType
+    elements::List{ConnectorElement}
+  end
+
+  @Record SET_POINTER begin
+
+    index::ModelicaInteger
+  end
+end
+
+const emptySet = SETS(SET_TRIE_NODE("", WILD(), nil, 0), 0, nil, nil)::Sets
 
 @Uniontype Element begin
   @Record VAR begin
@@ -1987,9 +2102,9 @@ const emptySet = Connect.SETS(Connect.SET_TRIE_NODE("", WILD(), nil, 0), 0, nil,
   @Record CONNECT_EQUATION begin
 
     lhsElement::Element
-    lhsFace::Connect.Face
+    lhsFace::Face
     rhsElement::Element
-    rhsFace::Connect.Face
+    rhsFace::Face
     source #= the origin of the component/equation/algorithm =#::ElementSource
   end
 

@@ -57,8 +57,12 @@
     FuncExpType = Function
 
     FuncExpType = Function
-    
+
     Type_a = Any
+
+    @UniontypeDecl splitElements
+    @UniontypeDecl compWithSplitElements
+    @UniontypeDecl functionList
 
          #= /*
          * This file is part of OpenModelica.
@@ -118,7 +122,7 @@
         import ComponentReference
         import Config
         import ConnectUtil
-        import DAEDump
+        #import DAEDump
         import Debug
         import DoubleEnded
         import ElementSource
@@ -135,6 +139,38 @@
         import StateMachineFlatten
         import VarTransform
         import AvlSetCR
+
+        @Uniontype splitElements begin
+             @Record SPLIT_ELEMENTS begin
+
+                      v::List{DAE.Element}
+                      ie::List{DAE.Element}
+                      ia::List{DAE.Element}
+                      e::List{DAE.Element}
+                      a::List{DAE.Element}
+                      co::List{DAE.Element}
+                      o::List{DAE.Element}
+                      ca::List{DAE.Element}
+                      sm::List{compWithSplitElements}
+             end
+        end
+
+        @Uniontype compWithSplitElements begin
+             @Record COMP_WITH_SPLIT begin
+
+                      name::String
+                      spltElems::splitElements
+                      comment::Option{SCode.Comment}
+             end
+        end
+
+        @Uniontype functionList begin
+             @Record FUNCTION_LIST begin
+
+                      funcs::List{DAE.Function}
+             end
+        end
+
 
          #= return the DAE.Const as a string. (VAR|PARAM|CONST)
         Used for debugging. =#
@@ -236,7 +272,7 @@
                     true
                   end
 
-                  (DAE.INPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), Connect.OUTSIDE()))  => begin
+                  (DAE.INPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -260,7 +296,7 @@
                     true
                   end
 
-                  (DAE.OUTPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), Connect.OUTSIDE()))  => begin
+                  (DAE.OUTPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -765,7 +801,7 @@
                     end
 
                     _  => begin
-                          Error.addInternalError(getInstanceName() + " failed for " + DAEDump.dumpDAEElementsStr(DAE.DAE(list(elt))), sourceInfo())
+                          Error.addInternalError(getInstanceName() + " failed for " + " NO DAEDUMP " #= DAEDump.dumpDAEElementsStr(DAE.DAE(list(elt))) =#, sourceInfo())
                         fail()
                     end
                   end
@@ -3169,6 +3205,7 @@
           outExpComponentRefLst
         end
 
+         #=
          #= Transforms a list of elements into a record value.
           TODO: This does not work for records inside records.
           For a general approach we need to build an environment from the DAE and then
@@ -3210,7 +3247,7 @@
 
                   (_, _, _, el <| _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      str = DAEDump.dumpDebugDAE(DAE.DAE(list(el)))
+                      str = " NO DAEDUMP! "# DAEDump.dumpDebugDAE(DAE.DAE(list(el)))
                       Debug.traceln("- DAEUtil.daeToRecordValue failed on: " + str)
                     fail()
                   end
@@ -3221,6 +3258,7 @@
                =#
           (outCache, outValue)
         end
+        =#
 
          #= function toModelicaForm.
 
@@ -4140,7 +4178,7 @@
                   end
 
                   SOME(el)  => begin
-                      msg = "- DAEUtil.collectWhenEquationBranches failed on: " + DAEDump.dumpElementsStr(list(el))
+                      msg = "- DAEUtil.collectWhenEquationBranches failed on: " + "NO DAEDUMP! " # DAEDump.dumpElementsStr(list(el))
                       info = ElementSource.getElementSourceFileInfo(ElementSource.getElementSource(el))
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(msg), info)
                     fail()
@@ -4254,7 +4292,7 @@
                   end
 
                   el <| _  => begin
-                      msg = "- DAEUtil.verifyWhenEquationStatements failed on: " + DAEDump.dumpElementsStr(list(el))
+                      msg = "- DAEUtil.verifyWhenEquationStatements failed on: " + " NO DAEDUMP! " # DAEDump.dumpElementsStr(list(el))
                       info = ElementSource.getElementSourceFileInfo(ElementSource.getElementSource(el))
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(msg), info)
                     fail()
@@ -4343,6 +4381,7 @@
           (outrefs, matching)
         end
 
+         #=
          #= lochel: This is not used.
           evaluates the annotation Evaluate =#
         function evaluateAnnotation(inCache::FCore.Cache, env::FCore.Graph, inDAElist::DAE.DAElist) ::DAE.DAElist
@@ -4446,6 +4485,7 @@
               end
           outExp
         end
+
 
         function getParameterVars(dae::DAE.DAElist, ht::HashTable2.HashTable) ::HashTable2.HashTable
               local oht::HashTable2.HashTable
@@ -4735,6 +4775,7 @@
                =#
           (outExp, outHt, outCache)
         end
+        =#
 
          #= author: BZ, 2008-12
           Rename innerouter(the inner part of innerouter) variables that have been renamed to a.b.$unique$var
@@ -5468,7 +5509,7 @@
                   end
 
                   _  => begin
-                        Error.addMessage(Error.INTERNAL_ERROR, list("DAEUtil.traverseDAEElement not implemented correctly for element: " + DAEDump.dumpElementsStr(list(element))))
+                        Error.addMessage(Error.INTERNAL_ERROR, list("DAEUtil.traverseDAEElement not implemented correctly for element: " + " NO DAEDUMP! " #= DAEDump.dumpElementsStr(list(element)) =#))
                       fail()
                   end
                 end
@@ -5785,7 +5826,7 @@
                   end
 
                   (x, _, _, _)  => begin
-                      str = DAEDump.ppStatementStr(x)
+                      str = " NO DAEDUMP! "# DAEDump.ppStatementStr(x)
                       str = "DAEUtil.traverseDAEEquationsStmts not implemented correctly: " + str
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
                     fail()
@@ -6078,7 +6119,7 @@
                   end
 
                   (x <| _, _, _)  => begin
-                      str = DAEDump.ppStatementStr(x)
+                      str = " NO DAEDUMP! " # DAEDump.ppStatementStr(x)
                       str = "DAEUtil.traverseDAEStmts not implemented correctly: " + str
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
                     fail()
@@ -6429,9 +6470,9 @@
         end
 
          #= This functions splits DAE elements into multiple groups. =#
-        function splitElements(elements::List{<:DAE.Element}) ::Tuple{List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAEDump.compWithSplitElements}, List{SCode.Comment}}
+        function splitElements(elements::List{<:DAE.Element}) ::Tuple{List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{DAE.Element}, List{compWithSplitElements}, List{SCode.Comment}}
               local comments::List{SCode.Comment} = nil
-              local stateMachineComps::List{DAEDump.compWithSplitElements} = nil
+              local stateMachineComps::List{compWithSplitElements} = nil
               local externalObjects::List{DAE.Element} = nil
               local constraints::List{DAE.Element} = nil
               local classAttributes::List{DAE.Element} = nil
@@ -6441,7 +6482,7 @@
               local initialEquations::List{DAE.Element} = nil
               local variables::List{DAE.Element} = nil
 
-              local split_comp::DAEDump.compWithSplitElements
+              local split_comp::compWithSplitElements
 
               for e in elements
                 _ = begin
@@ -6618,8 +6659,8 @@
         end
 
          #= Transforms a DAE.COMP to a DAEDump.COMP_WITH_SPLIT. =#
-        function splitComponent(component::DAE.Element) ::DAEDump.compWithSplitElements
-              local splitComponent::DAEDump.compWithSplitElements
+        function splitComponent(component::DAE.Element) ::compWithSplitElements
+              local splitComponent::compWithSplitElements
 
               local v::List{DAE.Element}
               local ie::List{DAE.Element}
@@ -6629,16 +6670,16 @@
               local co::List{DAE.Element}
               local o::List{DAE.Element}
               local ca::List{DAE.Element}
-              local sm::List{DAEDump.compWithSplitElements}
+              local sm::List{compWithSplitElements}
 
-              local split_el::DAEDump.splitElements
+              local split_el::splitElements
 
               splitComponent = begin
                 @match component begin
                   DAE.COMP(__)  => begin
                       (v, ie, ia, e, a, co, o, ca, sm) = splitElements(component.dAElist)
-                      split_el = DAEDump.SPLIT_ELEMENTS(v, ie, ia, e, a, co, o, ca, sm)
-                    DAEDump.COMP_WITH_SPLIT(component.ident, split_el, component.comment)
+                      split_el = SPLIT_ELEMENTS(v, ie, ia, e, a, co, o, ca, sm)
+                    COMP_WITH_SPLIT(component.ident, split_el, component.comment)
                   end
                 end
               end

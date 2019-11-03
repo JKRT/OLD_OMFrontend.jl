@@ -4377,7 +4377,7 @@
           All this is accomplished by examining the two arguments separately
           and then using `complete_arraydime\\' or `compatible_arraydim\\' to
           check that that the dimension sizes are compatible and complete. =#
-        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{Any}#=List{<:List{<:DAE.Dimension}}=#) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 

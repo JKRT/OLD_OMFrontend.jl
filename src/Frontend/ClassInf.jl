@@ -1,4 +1,4 @@
-  module ClassInf 
+  module ClassInf
 
 
     using MetaModelica
@@ -6,8 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl SMNode 
-    @UniontypeDecl Event 
+    @UniontypeDecl SMNode
+    @UniontypeDecl Event
 
          #= /*
          * This file is part of OpenModelica.
@@ -43,7 +43,7 @@
         import SCode
 
         import Absyn
-        
+
         import AbsynUtil
 
         import Config
@@ -56,7 +56,7 @@
 
         import Print
 
-        import SCodeDump
+        # import SCodeDump
 
           #= - Machine states, the string contains the classname. =#
          @Uniontype SMNode begin
@@ -234,7 +234,7 @@
 
           The code is excluded from the report.
          =#
-        function printStateStr(inState::SMNode) ::String 
+        function printStateStr(inState::SMNode) ::String
               local outString::String
 
               outString = begin
@@ -246,67 +246,67 @@
                   UNKNOWN(__)  => begin
                     "unknown"
                   end
-                  
+
                   OPTIMIZATION(__)  => begin
                     "optimization"
                   end
-                  
+
                   MODEL(__)  => begin
                     "model"
                   end
-                  
+
                   RECORD(__)  => begin
                     "record"
                   end
-                  
+
                   BLOCK(__)  => begin
                     "block"
                   end
-                  
+
                   CONNECTOR(__)  => begin
                     "connector"
                   end
-                  
+
                   TYPE(__)  => begin
                     "type"
                   end
-                  
+
                   PACKAGE(__)  => begin
                     "package"
                   end
-                  
+
                   FUNCTION(isImpure = true)  => begin
                     "impure function"
                   end
-                  
+
                   FUNCTION(__)  => begin
                     "function"
                   end
-                  
+
                   TYPE_INTEGER(__)  => begin
                     "Integer"
                   end
-                  
+
                   TYPE_REAL(__)  => begin
                     "Real"
                   end
-                  
+
                   TYPE_STRING(__)  => begin
                     "String"
                   end
-                  
+
                   TYPE_BOOL(__)  => begin
                     "Boolean"
                   end
-                  
+
                   TYPE_CLOCK(__)  => begin
                     "Clock"
                   end
-                  
+
                   HAS_RESTRICTIONS(hasEquations = false, hasAlgorithms = false, hasConstraints = false)  => begin
                     "new def"
                   end
-                  
+
                   HAS_RESTRICTIONS(hasEquations = b1, hasAlgorithms = b2)  => begin
                     "has" + (if b1
                           " equations"
@@ -322,39 +322,39 @@
                           ""
                         end)
                   end
-                  
+
                   EXTERNAL_OBJ(__)  => begin
                     "ExternalObject"
                   end
-                  
+
                   META_TUPLE(__)  => begin
                     "tuple"
                   end
-                  
+
                   META_LIST(__)  => begin
                     "list"
                   end
-                  
+
                   META_OPTION(__)  => begin
                     "Option"
                   end
-                  
+
                   META_RECORD(__)  => begin
                     "meta_record"
                   end
-                  
+
                   META_POLYMORPHIC(__)  => begin
                     "polymorphic"
                   end
-                  
+
                   META_ARRAY(__)  => begin
                     "meta_array"
                   end
-                  
+
                   META_UNIONTYPE(__)  => begin
                     "uniontype"
                   end
-                  
+
                   _  => begin
                       "#printStateStr failed#"
                   end
@@ -365,7 +365,7 @@
           outString
         end
 
-        function printState(inState::SMNode)  
+        function printState(inState::SMNode)
               _ = begin
                   local p::Absyn.Path
                 @match inState begin
@@ -374,91 +374,91 @@
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   OPTIMIZATION(path = p)  => begin
                       Print.printBuf("OPTIMIZATION ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   MODEL(path = p)  => begin
                       Print.printBuf("MODEL ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   RECORD(path = p)  => begin
                       Print.printBuf("RECORD ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   BLOCK(path = p)  => begin
                       Print.printBuf("BLOCK ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   CONNECTOR(path = p)  => begin
                       Print.printBuf("CONNECTOR ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE(path = p)  => begin
                       Print.printBuf("TYPE ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   PACKAGE(path = p)  => begin
                       Print.printBuf("PACKAGE ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   FUNCTION(path = p, isImpure = true)  => begin
                       Print.printBuf("IMPURE FUNCTION ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   FUNCTION(path = p)  => begin
                       Print.printBuf("FUNCTION ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE_INTEGER(path = p)  => begin
                       Print.printBuf("TYPE_INTEGER ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE_REAL(path = p)  => begin
                       Print.printBuf("TYPE_REAL ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE_STRING(path = p)  => begin
                       Print.printBuf("TYPE_STRING ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE_BOOL(path = p)  => begin
                       Print.printBuf("TYPE_BOOL ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   TYPE_CLOCK(path = p)  => begin
                       Print.printBuf("TYPE_CLOCK ")
                       Print.printBuf(AbsynUtil.pathString(p))
                     ()
                   end
-                  
+
                   HAS_RESTRICTIONS(path = p)  => begin
                       Print.printBuf("HAS_RESTRICTIONS ")
                       Print.printBuf(AbsynUtil.pathString(p))
@@ -472,7 +472,7 @@
         end
 
          #= Returns the classname of the state. =#
-        function getStateName(inState::SMNode) ::Absyn.Path 
+        function getStateName(inState::SMNode) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -481,103 +481,103 @@
                   UNKNOWN(path = p)  => begin
                     p
                   end
-                  
+
                   OPTIMIZATION(path = p)  => begin
                     p
                   end
-                  
+
                   MODEL(path = p)  => begin
                     p
                   end
-                  
+
                   RECORD(path = p)  => begin
                     p
                   end
-                  
+
                   BLOCK(path = p)  => begin
                     p
                   end
-                  
+
                   CONNECTOR(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE(path = p)  => begin
                     p
                   end
-                  
+
                   PACKAGE(path = p)  => begin
                     p
                   end
-                  
+
                   FUNCTION(path = p)  => begin
                     p
                   end
-                  
+
                   ENUMERATION(path = p)  => begin
                     p
                   end
-                  
+
                   HAS_RESTRICTIONS(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_INTEGER(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_REAL(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_STRING(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_BOOL(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_CLOCK(path = p)  => begin
                     p
                   end
-                  
+
                   TYPE_ENUM(path = p)  => begin
                     p
                   end
-                  
+
                   EXTERNAL_OBJ(p)  => begin
                     p
                   end
-                  
+
                   META_TUPLE(p)  => begin
                     p
                   end
-                  
+
                   META_LIST(p)  => begin
                     p
                   end
-                  
+
                   META_OPTION(p)  => begin
                     p
                   end
-                  
+
                   META_RECORD(p)  => begin
                     p
                   end
-                  
+
                   META_UNIONTYPE(p)  => begin
                     p
                   end
-                  
+
                   META_ARRAY(p)  => begin
                     p
                   end
-                  
+
                   META_POLYMORPHIC(p)  => begin
                     p
                   end
-                  
+
                   _  => begin
                       Absyn.IDENT("#getStateName failed#")
                   end
@@ -588,7 +588,7 @@
           outPath
         end
 
-        function printEventStr(inEvent::Event) ::String 
+        function printEventStr(inEvent::Event) ::String
               local str::String
 
               str = begin
@@ -597,23 +597,23 @@
                   FOUND_EQUATION(__)  => begin
                     "equation"
                   end
-                  
+
                   FOUND_CONSTRAINT(__)  => begin
                     "constraint"
                   end
-                  
+
                   NEWDEF(__)  => begin
                     "new definition"
                   end
-                  
+
                   FOUND_COMPONENT(name)  => begin
                     "component " + name
                   end
-                  
+
                   FOUND_EXT_DECL(__)  => begin
                     "external function declaration"
                   end
-                  
+
                   _  => begin
                       "Unknown event"
                   end
@@ -622,9 +622,9 @@
           str
         end
 
-         #= 
+         #=
           This is the state machine initialization function. =#
-        function start(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode 
+        function start(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode
               local outState::SMNode
 
               outState = start_dispatch(inRestriction, AbsynUtil.makeFullyQualified(inPath))
@@ -634,9 +634,9 @@
          #=  Transitions
          =#
 
-         #= 
+         #=
           This is the state machine initialization function. =#
-        function start_dispatch(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode 
+        function start_dispatch(inRestriction::SCode.Restriction, inPath::Absyn.Path) ::SMNode
               local outState::SMNode
 
               outState = begin
@@ -647,84 +647,84 @@
                   (SCode.R_CLASS(__), p)  => begin
                     UNKNOWN(p)
                   end
-                  
+
                   (SCode.R_OPTIMIZATION(__), p)  => begin
                     OPTIMIZATION(p)
                   end
-                  
+
                   (SCode.R_MODEL(__), p)  => begin
                     MODEL(p)
                   end
-                  
+
                   (SCode.R_RECORD(_), p)  => begin
                     RECORD(p)
                   end
-                  
+
                   (SCode.R_BLOCK(__), p)  => begin
                     BLOCK(p)
                   end
-                  
+
                   (SCode.R_CONNECTOR(isExpandable), p)  => begin
                     CONNECTOR(p, isExpandable)
                   end
-                  
+
                   (SCode.R_TYPE(__), p)  => begin
                     TYPE(p)
                   end
-                  
+
                   (SCode.R_PACKAGE(__), p)  => begin
                     PACKAGE(p)
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_NORMAL_FUNCTION(isImpure)), p)  => begin
                     FUNCTION(p, isImpure)
                   end
-                  
+
                   (SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)), p)  => begin
                     FUNCTION(p, isImpure)
                   end
-                  
+
                   (SCode.R_FUNCTION(_), p)  => begin
                     FUNCTION(p, false)
                   end
-                  
+
                   (SCode.R_OPERATOR(__), p)  => begin
                     FUNCTION(p, false)
                   end
-                  
+
                   (SCode.R_ENUMERATION(__), p)  => begin
                     ENUMERATION(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_INTEGER(__), p)  => begin
                     TYPE_INTEGER(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_REAL(__), p)  => begin
                     TYPE_REAL(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_STRING(__), p)  => begin
                     TYPE_STRING(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_BOOLEAN(__), p)  => begin
                     TYPE_BOOL(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_CLOCK(__), p)  => begin
                       @match true = Config.synchronousFeaturesAllowed()
                     TYPE_CLOCK(p)
                   end
-                  
+
                   (SCode.R_PREDEFINED_ENUMERATION(__), p)  => begin
                     TYPE_ENUM(p)
                   end
-                  
+
                   (SCode.R_UNIONTYPE(__), p)  => begin
                     META_UNIONTYPE(p, inRestriction.typeVars)
                   end
-                  
+
                   (SCode.R_METARECORD(__), p)  => begin
                     META_RECORD(p)
                   end
@@ -736,11 +736,11 @@
           outState
         end
 
-         #= 
+         #=
           This is the state machine transition function.  It describes the
           transitions between states at different events.
          =#
-        function trans(inState::SMNode, inEvent::Event) ::SMNode 
+        function trans(inState::SMNode, inEvent::Event) ::SMNode
               local outState::SMNode
 
               outState = begin
@@ -759,99 +759,99 @@
                   (UNKNOWN(path = p), NEWDEF(__))  => begin
                     HAS_RESTRICTIONS(p, false, false, false)
                   end
-                  
+
                   (OPTIMIZATION(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (MODEL(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (RECORD(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (BLOCK(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (CONNECTOR(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE(path = p), NEWDEF(__))  => begin
                     TYPE(p)
                   end
-                  
+
                   (PACKAGE(path = p), NEWDEF(__))  => begin
                     PACKAGE(p)
                   end
-                  
+
                   (FUNCTION(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (ENUMERATION(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_INTEGER(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_REAL(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_STRING(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_BOOL(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_CLOCK(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_ENUM(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (META_UNIONTYPE(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (META_RECORD(__), NEWDEF(__))  => begin
                     inState
                   end
-                  
+
                   (UNKNOWN(path = p), FOUND_COMPONENT(__))  => begin
                     HAS_RESTRICTIONS(p, false, false, false)
                   end
-                  
+
                   (OPTIMIZATION(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (MODEL(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (RECORD(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (BLOCK(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (CONNECTOR(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE(path = p), FOUND_COMPONENT(name = s))  => begin
                       if ! isBasicTypeComponentName(s)
                         Error.addMessage(Error.TYPE_NOT_FROM_PREDEFINED, list(AbsynUtil.pathString(p)))
@@ -859,115 +859,115 @@
                       end
                     TYPE(p)
                   end
-                  
+
                   (PACKAGE(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (FUNCTION(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (ENUMERATION(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (HAS_RESTRICTIONS(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_INTEGER(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_REAL(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_STRING(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_BOOL(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_CLOCK(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (TYPE_ENUM(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (META_RECORD(__), FOUND_COMPONENT(__))  => begin
                     inState
                   end
-                  
+
                   (UNKNOWN(path = p), FOUND_EQUATION(__))  => begin
                     HAS_RESTRICTIONS(p, true, false, false)
                   end
-                  
+
                   (OPTIMIZATION(__), FOUND_EQUATION(__))  => begin
                     inState
                   end
-                  
+
                   (OPTIMIZATION(__), FOUND_CONSTRAINT(__))  => begin
                     inState
                   end
-                  
+
                   (OPTIMIZATION(__), FOUND_ALGORITHM(__))  => begin
                     inState
                   end
-                  
+
                   (MODEL(__), FOUND_EQUATION(__))  => begin
                     inState
                   end
-                  
+
                   (BLOCK(__), FOUND_EQUATION(__))  => begin
                     inState
                   end
-                  
+
                   (MODEL(__), FOUND_ALGORITHM(__))  => begin
                     inState
                   end
-                  
+
                   (BLOCK(__), FOUND_ALGORITHM(__))  => begin
                     inState
                   end
-                  
+
                   (FUNCTION(__), FOUND_ALGORITHM(__))  => begin
                     inState
                   end
-                  
+
                   (HAS_RESTRICTIONS(path = p, hasAlgorithms = b2, hasConstraints = b3), FOUND_EQUATION(__))  => begin
                     HAS_RESTRICTIONS(p, true, b2, b3)
                   end
-                  
+
                   (HAS_RESTRICTIONS(path = p, hasEquations = b1, hasAlgorithms = b2), FOUND_CONSTRAINT(__))  => begin
                     HAS_RESTRICTIONS(p, b1, b2, true)
                   end
-                  
+
                   (HAS_RESTRICTIONS(path = p, hasEquations = b1, hasConstraints = b3), FOUND_ALGORITHM(__))  => begin
                     HAS_RESTRICTIONS(p, b1, true, b3)
                   end
-                  
+
                   (FUNCTION(__), FOUND_EXT_DECL(__))  => begin
                     inState
                   end
-                  
+
                   (_, FOUND_EXT_DECL(__))  => begin
                     fail()
                   end
-                  
+
                   (_, FOUND_EQUATION(__))  => begin
                     fail()
                   end
-                  
+
                   (_, FOUND_CONSTRAINT(__))  => begin
                     fail()
                   end
-                  
+
                   (st, ev)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- ClassInf.trans failed: " + printStateStr(st) + ", " + printEventStr(ev))
@@ -984,7 +984,7 @@
           outState
         end
 
-         #= 
+         #=
           This is the validity function which determines if a state is valid
           according to one of the restrictions.  This means, that if a class
           definition is to be used as, say, a connector, the state of the
@@ -992,166 +992,166 @@
           restriction using this function to find out if it is an error to
           use this class definition as a connector.
          =#
-        function valid(inState::SMNode, inRestriction::SCode.Restriction)  
+        function valid(inState::SMNode, inRestriction::SCode.Restriction)
               _ = begin
                   local p::Absyn.Path
                 @match (inState, inRestriction) begin
                   (UNKNOWN(__), _)  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(__), SCode.R_CLASS(__))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(__), SCode.R_MODEL(__))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(__), SCode.R_OPTIMIZATION(__))  => begin
                     ()
                   end
-                  
+
                   (MODEL(__), SCode.R_MODEL(__))  => begin
                     ()
                   end
-                  
+
                   (RECORD(__), SCode.R_RECORD(_))  => begin
                     ()
                   end
-                  
+
                   (RECORD(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(hasEquations = false, hasConstraints = false, hasAlgorithms = false), SCode.R_RECORD(_))  => begin
                     ()
                   end
-                  
+
                   (BLOCK(__), SCode.R_BLOCK(__))  => begin
                     ()
                   end
-                  
+
                   (MODEL(__), SCode.R_MODEL(__))  => begin
                     ()
                   end
-                  
+
                   (CONNECTOR(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (CONNECTOR(isExpandable = false), SCode.R_CONNECTOR(false))  => begin
                     ()
                   end
-                  
+
                   (CONNECTOR(isExpandable = true), SCode.R_CONNECTOR(true))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(hasEquations = false, hasConstraints = false, hasAlgorithms = false), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_INTEGER(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_REAL(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_STRING(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_BOOL(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_CLOCK(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE_ENUM(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (ENUMERATION(__), SCode.R_CONNECTOR(_))  => begin
                     ()
                   end
-                  
+
                   (TYPE(__), SCode.R_CONNECTOR(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_INTEGER(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_REAL(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_STRING(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_BOOL(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_CLOCK(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (TYPE_ENUM(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (ENUMERATION(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (PACKAGE(__), SCode.R_PACKAGE(__))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(hasEquations = false, hasConstraints = false, hasAlgorithms = false), SCode.R_PACKAGE(__))  => begin
                     ()
                   end
-                  
+
                   (FUNCTION(__), SCode.R_FUNCTION(_))  => begin
                     ()
                   end
-                  
+
                   (HAS_RESTRICTIONS(hasEquations = false, hasConstraints = false), SCode.R_FUNCTION(_))  => begin
                     ()
                   end
-                  
+
                   (META_TUPLE(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (META_LIST(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (META_OPTION(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (META_RECORD(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (META_ARRAY(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
-                  
+
                   (META_UNIONTYPE(__), SCode.R_TYPE(__))  => begin
                     ()
                   end
@@ -1171,7 +1171,7 @@
 
          #= This function has the same semantical meaning as the function
           `valid\\'.  However, it prints an error message when it fails. =#
-        function assertValid(inState::SMNode, inRestriction::SCode.Restriction, info::SourceInfo)  
+        function assertValid(inState::SMNode, inRestriction::SCode.Restriction, info::SourceInfo)
               _ = begin
                   local st::SMNode
                   local re::SCode.Restriction
@@ -1183,11 +1183,11 @@
                       valid(st, re)
                     ()
                   end
-                  
+
                   (st, re, _)  => begin
                       str1 = AbsynUtil.pathString(getStateName(st))
                       str2 = printStateStr(st)
-                      str3 = SCodeDump.restrictionStringPP(re)
+                      str3 = "" # SCodeDump.restrictionStringPP(re)
                       Error.addSourceMessage(Error.RESTRICTION_VIOLATION, list(str1, str2, str3), info)
                     fail()
                   end
@@ -1197,7 +1197,7 @@
 
          #= This function has the same semantical meaning as the function
           `trans\\'.  However, it prints an error message when it fails. =#
-        function assertTrans(inState::SMNode, event::Event, info::SourceInfo) ::SMNode 
+        function assertTrans(inState::SMNode, event::Event, info::SourceInfo) ::SMNode
               local outState::SMNode
 
               outState = begin
@@ -1209,7 +1209,7 @@
                   (st, _, _)  => begin
                     trans(st, event)
                   end
-                  
+
                   (st, _, _)  => begin
                       str1 = AbsynUtil.pathString(getStateName(st))
                       str2 = printStateStr(st)
@@ -1222,11 +1222,11 @@
           outState
         end
 
-         #= 
+         #=
           Finds a SMNode in the list that matches the state given as first argument.
           NOTE: Currently not used anywhere.
          =#
-        function matchingState(inState::SMNode, inStateLst::List{<:SMNode}) ::Bool 
+        function matchingState(inState::SMNode, inStateLst::List{<:SMNode}) ::Bool
               local outBoolean::Bool
 
               outBoolean = begin
@@ -1236,67 +1236,67 @@
                   (_,  nil())  => begin
                     false
                   end
-                  
+
                   (UNKNOWN(__), UNKNOWN(__) <| _)  => begin
                     true
                   end
-                  
+
                   (MODEL(__), MODEL(__) <| _)  => begin
                     true
                   end
-                  
+
                   (RECORD(__), RECORD(__) <| _)  => begin
                     true
                   end
-                  
+
                   (BLOCK(__), BLOCK(__) <| _)  => begin
                     true
                   end
-                  
+
                   (CONNECTOR(__), CONNECTOR(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE(__), TYPE(__) <| _)  => begin
                     true
                   end
-                  
+
                   (PACKAGE(__), PACKAGE(__) <| _)  => begin
                     true
                   end
-                  
+
                   (FUNCTION(__), FUNCTION(__) <| _)  => begin
                     true
                   end
-                  
+
                   (ENUMERATION(__), ENUMERATION(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_INTEGER(__), TYPE_INTEGER(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_REAL(__), TYPE_REAL(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_STRING(__), TYPE_STRING(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_BOOL(__), TYPE_BOOL(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_CLOCK(__), TYPE_CLOCK(__) <| _)  => begin
                     true
                   end
-                  
+
                   (TYPE_ENUM(__), TYPE_ENUM(__) <| _)  => begin
                     true
                   end
-                  
+
                   (_, _ <| rest)  => begin
                       res = matchingState(inState, rest)
                     res
@@ -1309,7 +1309,7 @@
         end
 
          #= returns true if state is FUNCTION. =#
-        function isFunction(inState::SMNode) ::Bool 
+        function isFunction(inState::SMNode) ::Bool
               local b::Bool
 
               b = begin
@@ -1317,7 +1317,7 @@
                   FUNCTION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1327,7 +1327,7 @@
         end
 
          #= Fails for states that are not FUNCTION or RECORD. =#
-        function isFunctionOrRecord(inState::SMNode) ::Bool 
+        function isFunctionOrRecord(inState::SMNode) ::Bool
               local b::Bool
 
               b = begin
@@ -1335,11 +1335,11 @@
                   FUNCTION(__)  => begin
                     true
                   end
-                  
+
                   RECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1348,10 +1348,10 @@
           b
         end
 
-         #= 
+         #=
           Fails for states that are not CONNECTOR.
          =#
-        function isConnector(inState::SMNode)  
+        function isConnector(inState::SMNode)
               _ = begin
                 @match inState begin
                   CONNECTOR(__)  => begin
@@ -1368,14 +1368,14 @@
          =#
 
          #= Returns true if the name can be a component of a builtin type =#
-        function isBasicTypeComponentName(name::String) ::Bool 
+        function isBasicTypeComponentName(name::String) ::Bool
               local res::Bool
 
               res = listMember(name, basicTypeMods)
           res
         end
 
-        function isTypeOrRecord(inState::SMNode) ::Bool 
+        function isTypeOrRecord(inState::SMNode) ::Bool
               local outIsTypeOrRecord::Bool
 
               outIsTypeOrRecord = begin
@@ -1383,11 +1383,11 @@
                   TYPE(__)  => begin
                     true
                   end
-                  
+
                   RECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1396,7 +1396,7 @@
           outIsTypeOrRecord
         end
 
-        function isRecord(inState::SMNode) ::Bool 
+        function isRecord(inState::SMNode) ::Bool
               local outIsRecord::Bool
 
               outIsRecord = begin
@@ -1404,7 +1404,7 @@
                   RECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1413,7 +1413,7 @@
           outIsRecord
         end
 
-        function isMetaRecord(inState::SMNode) ::Bool 
+        function isMetaRecord(inState::SMNode) ::Bool
               local outIsRecord::Bool
 
               outIsRecord = begin
@@ -1421,7 +1421,7 @@
                   META_RECORD(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end

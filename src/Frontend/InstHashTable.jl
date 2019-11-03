@@ -44,7 +44,7 @@
          */ =#
 
         import Absyn
-        import Connect
+        # import Connect
         import ConnectionGraph
         import ClassInf
         # import DAE

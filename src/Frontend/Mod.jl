@@ -48,6 +48,8 @@
 
         import FCore
 
+        import FNode
+
         import FGraph
 
         import Prefix
@@ -747,20 +749,23 @@
 
          #=  =#
         function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
-              local outTypesSubModLst::List{DAE.SubMod}
+              local outTypesSubModLst::List{DAE.SubMod} = nil
               local outCache::FCore.Cache = inCache
+              local m_1::DAE.Mod
+              local m::DAE.Mod
+              local modif::DAE.SubMod
+              local i::String
 
-              outTypesSubModLst = list(begin
-                  local m_1::DAE.Mod
-                  local m::DAE.Mod
-                  local i::String
-                @match x begin
+              for x in inTypesSubModLst
+                modif = @match x begin
                   DAE.NAMEMOD(ident = i, mod = m)  => begin
                       (outCache, m_1) = updateMod(outCache, inEnv, inIH, inPrefix, m, inBoolean, info)
                     DAE.NAMEMOD(i, m_1)
                   end
                 end
-              end for x in inTypesSubModLst)
+                outTypesSubModLst = _cons(modif, outTypesSubModLst)
+              end
+              outTypesSubModLst = listReverse(outTypesSubModLst)
           (outCache, outTypesSubModLst)
         end
 

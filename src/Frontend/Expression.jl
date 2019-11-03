@@ -86,7 +86,7 @@
     FuncExpType = Function
 
     FuncExpType = Function
-    
+
     Argument = Any
     Type_a = Any
 
@@ -137,9 +137,9 @@
         Type = DAE.Type
         Subscript = DAE.Subscript
         Var = DAE.Var
-        
+
         Type_a = Any
-        
+
          #=  protected imports
          =#
 
@@ -17502,12 +17502,12 @@
               (outExp, outProp) = begin
                   local ty::DAE.Type
                 @match (exp, prop) begin
-                  (DAE.Exp.TUPLE(_ <| _), DAE.Properties.PROP_TUPLE(__))  => begin
+                  (DAE.TUPLE(_ <| _), DAE.PROP_TUPLE(__))  => begin
                     (listHead(exp.PR), Types.propTupleFirstProp(prop))
                   end
 
-                  (_, DAE.Properties.PROP_TUPLE(type_ = DAE.T_TUPLE(types = ty <| _)))  => begin
-                    (DAE.Exp.TSUB(exp, 1, ty), Types.propTupleFirstProp(prop))
+                  (_, DAE.PROP_TUPLE(type_ = DAE.T_TUPLE(types = ty <| _)))  => begin
+                    (DAE.TSUB(exp, 1, ty), Types.propTupleFirstProp(prop))
                   end
 
                   _  => begin

@@ -9,25 +9,23 @@
 
         import Absyn
 
-        import AbsynUtil
+        import DumpUtil
 
         import Util
 
         import Config
 
-        import Dump
-
         import System
 
         import Flags
 
-        function lm_9(in_txt::Tpl.Text, in_items::List{<:Absyn.Class}, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function lm_9(in_txt::Tpl.Text, in_items::List{<:Absyn.Class}, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local rest::List{Absyn.Class}
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_cls::Absyn.Class
                 @match (in_txt, in_items, in_a_options) begin
                   (txt,  nil(), _)  => begin
@@ -45,12 +43,12 @@
           out_txt
         end
 
-        function dump(in_txt::Tpl.Text, in_a_program::Absyn.Program, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dump(in_txt::Tpl.Text, in_a_program::Absyn.Program, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_classes::List{Absyn.Class}
                   local i_within__::Absyn.Within
                   local l_cls__str::Tpl.Text
@@ -79,7 +77,7 @@
           out_txt
         end
 
-        function dumpClass(txt::Tpl.Text, a_cls::Absyn.Class, a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpClass(txt::Tpl.Text, a_cls::Absyn.Class, a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = dumpClassElement(txt, a_cls, "", "", "", "", a_options)
@@ -145,7 +143,7 @@
           out_txt
         end
 
-        function dumpClassElement(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpClassElement(in_txt::Tpl.Text, in_a_cls::Absyn.Class, in_a_final__str::String, in_a_redecl__str::String, in_a_repl__str::String, in_a_io__str::String, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -154,7 +152,7 @@
                   local a_redecl__str::String
                   local a_repl__str::String
                   local a_io__str::String
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_name::Absyn.Ident
                   local i_body::Absyn.ClassDef
                   local i_cls::Absyn.Class
@@ -248,13 +246,13 @@
           out_txt
         end
 
-        function lm_18(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function lm_18(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local rest::List{Absyn.ClassPart}
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local x_idx::ModelicaInteger
                   local i_class__part::Absyn.ClassPart
                 @match (in_txt, in_items, in_a_options) begin
@@ -342,13 +340,13 @@
           out_txt
         end
 
-        function lm_22(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function lm_22(in_txt::Tpl.Text, in_items::List{<:Absyn.ClassPart}, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local rest::List{Absyn.ClassPart}
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local x_idx::ModelicaInteger
                   local i_class__part::Absyn.ClassPart
                 @match (in_txt, in_items, in_a_options) begin
@@ -505,13 +503,13 @@
           out_txt
         end
 
-        function dumpClassDef(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef, in_a_cls__name::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpClassDef(in_txt::Tpl.Text, in_a_cdef::Absyn.ClassDef, in_a_cls__name::String, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local a_cls__name::String
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_vars::List{Absyn.Ident}
                   local i_functionName::Absyn.Path
                   local i_functionNames::List{Absyn.Path}
@@ -1355,13 +1353,13 @@
           out_txt
         end
 
-        function dumpClassPart(in_txt::Tpl.Text, in_a_class__part::Absyn.ClassPart, in_a_idx::ModelicaInteger, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpClassPart(in_txt::Tpl.Text, in_a_class__part::Absyn.ClassPart, in_a_idx::ModelicaInteger, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local a_idx::ModelicaInteger
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_externalDecl::Absyn.ExternalDecl
                   local i_annotation__::Option{Absyn.Annotation}
                   local i_contents_3::List{Absyn.AlgorithmItem}
@@ -1521,14 +1519,14 @@
           out_txt
         end
 
-        function dumpElementItems(in_txt::Tpl.Text, in_a_items::List{<:Absyn.ElementItem}, in_a_prevSpacing::String, in_a_first::Bool, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpElementItems(in_txt::Tpl.Text, in_a_items::List{<:Absyn.ElementItem}, in_a_prevSpacing::String, in_a_first::Bool, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local a_prevSpacing::String
                   local a_first::Bool
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_rest__items::List{Absyn.ElementItem}
                   local i_item::Absyn.ElementItem
                   local l_post__spacing::Tpl.Text
@@ -1631,12 +1629,12 @@
           out_txt
         end
 
-        function dumpElementItem(in_txt::Tpl.Text, in_a_eitem::Absyn.ElementItem, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpElementItem(in_txt::Tpl.Text, in_a_eitem::Absyn.ElementItem, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_comment::String
                   local i_element::Absyn.Element
                   local ret_0::String
@@ -1720,13 +1718,13 @@
           out_txt
         end
 
-        function fun_68(in_txt::Tpl.Text, in_mArg::Bool, in_a_constrainClass::Option{<:Absyn.ConstrainClass}, in_a_options::Dump.DumpOptions, in_a_specification::Absyn.ElementSpec, in_a_innerOuter::Absyn.InnerOuter, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}, in_a_finalPrefix::Bool) ::Tpl.Text
+        function fun_68(in_txt::Tpl.Text, in_mArg::Bool, in_a_constrainClass::Option{<:Absyn.ConstrainClass}, in_a_options::DumpUtil.DumpOptions, in_a_specification::Absyn.ElementSpec, in_a_innerOuter::Absyn.InnerOuter, in_a_redeclareKeywords::Option{<:Absyn.RedeclareKeywords}, in_a_finalPrefix::Bool) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
                   local a_constrainClass::Option{Absyn.ConstrainClass}
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local a_specification::Absyn.ElementSpec
                   local a_innerOuter::Absyn.InnerOuter
                   local a_redeclareKeywords::Option{Absyn.RedeclareKeywords}
@@ -1855,12 +1853,12 @@
           out_txt
         end
 
-        function dumpElement(in_txt::Tpl.Text, in_a_elem::Absyn.Element, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpElement(in_txt::Tpl.Text, in_a_elem::Absyn.Element, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
                   local txt::Tpl.Text
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_string::String
                   local i_optName::Option{Absyn.Ident}
                   local i_name::Absyn.Ident
@@ -1880,8 +1878,8 @@
                   local ret_0::Bool
                 @match (in_txt, in_a_elem, in_a_options) begin
                   (txt, i_elem && Absyn.ELEMENT(info = i_info, finalPrefix = i_finalPrefix, redeclareKeywords = i_redeclareKeywords, innerOuter = i_innerOuter, specification = i_specification, constrainClass = i_constrainClass), a_options)  => begin
-                      ret_0 = Dump.boolUnparseFileFromInfo(i_info, a_options)
-                      ret_1 = AbsynUtil.isClassdef(i_elem)
+                      ret_0 = DumpUtil.boolUnparseFileFromInfo(i_info, a_options)
+                      ret_1 = DumpUtil.isClassdef(i_elem)
                       ret_2 = boolNot(ret_1)
                       ret_3 = boolOr(ret_0, ret_2)
                       txt = fun_68(txt, ret_3, i_constrainClass, a_options, i_specification, i_innerOuter, i_redeclareKeywords, i_finalPrefix)
@@ -1898,7 +1896,7 @@
                   end
 
                   (txt, Absyn.TEXT(info = i_info, optName = i_optName, string = i_string), a_options)  => begin
-                      ret_5 = Dump.boolUnparseFileFromInfo(i_info, a_options)
+                      ret_5 = DumpUtil.boolUnparseFileFromInfo(i_info, a_options)
                       txt = fun_72(txt, ret_5, i_string, i_info, i_optName)
                     txt
                   end
@@ -2197,7 +2195,7 @@
                       l_repl__str = dumpReplaceable(Tpl.emptyTxt, i_redeclareKeywords)
                       l_eredecl__str = Tpl.writeText(Tpl.emptyTxt, l_redecl__str)
                       l_eredecl__str = Tpl.writeText(l_eredecl__str, l_each__str)
-                      l_elem__str = dumpElementSpec(Tpl.emptyTxt, i_elementSpec, Tpl.textString(l_final__str), Tpl.textString(l_eredecl__str), Tpl.textString(l_repl__str), "", Dump.defaultDumpOptions)
+                      l_elem__str = dumpElementSpec(Tpl.emptyTxt, i_elementSpec, Tpl.textString(l_final__str), Tpl.textString(l_eredecl__str), Tpl.textString(l_repl__str), "", DumpUtil.defaultDumpOptions)
                       l_cc__str = fun_83(Tpl.emptyTxt, i_constrainClass)
                       txt = Tpl.writeText(txt, l_elem__str)
                       txt = Tpl.writeText(txt, l_cc__str)
@@ -2490,7 +2488,7 @@
           out_txt
         end
 
-        function dumpElementSpec(in_txt::Tpl.Text, in_a_elem::Absyn.ElementSpec, in_a_final::String, in_a_redecl::String, in_a_repl::String, in_a_io::String, in_a_options::Dump.DumpOptions) ::Tpl.Text
+        function dumpElementSpec(in_txt::Tpl.Text, in_a_elem::Absyn.ElementSpec, in_a_final::String, in_a_redecl::String, in_a_repl::String, in_a_io::String, in_a_options::DumpUtil.DumpOptions) ::Tpl.Text
               local out_txt::Tpl.Text
 
               out_txt = begin
@@ -2499,7 +2497,7 @@
                   local a_redecl::String
                   local a_repl::String
                   local a_io::String
-                  local a_options::Dump.DumpOptions
+                  local a_options::DumpUtil.DumpOptions
                   local i_import__::Absyn.Import
                   local i_components::List{Absyn.ComponentItem}
                   local i_attributes::Absyn.ElementAttributes
@@ -3830,7 +3828,7 @@
                   end
 
                   (txt, _)  => begin
-                      txt = errorMsg(txt, "SCodeDump.dumpPath: Unknown path.")
+                      txt = errorMsg(txt, "SCodeDumpUtil.dumpPath: Unknown path.")
                     txt
                   end
                 end
@@ -4482,7 +4480,7 @@
               local l_op__str::Tpl.Text
 
               l_op__str = dumpExp(Tpl.emptyTxt, a_operand)
-              ret_1 = Dump.shouldParenthesize(a_operand, a_operation, a_lhs)
+              ret_1 = DumpUtil.shouldParenthesize(a_operand, a_operation, a_lhs)
               out_txt = fun_152(txt, ret_1, l_op__str)
           out_txt
         end
@@ -4684,7 +4682,7 @@
                   end
 
                   (txt, Absyn.C_ELEMENT(element = i_element))  => begin
-                      txt = dumpElement(txt, i_element, Dump.defaultDumpOptions)
+                      txt = dumpElement(txt, i_element, DumpUtil.defaultDumpOptions)
                     txt
                   end
 
@@ -4814,7 +4812,7 @@
                   end
 
                   (txt, i_decl <| rest)  => begin
-                      txt = dumpElementItem(txt, i_decl, Dump.defaultDumpOptions)
+                      txt = dumpElementItem(txt, i_decl, DumpUtil.defaultDumpOptions)
                       txt = Tpl.nextIter(txt)
                       txt = lm_164(txt, rest)
                     txt

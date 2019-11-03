@@ -29,6 +29,8 @@
 #
 =#
 
+module OMCompiler
+
 #=TODO make it call the parserscript from OpenModelica home=#
 const UTIL = "src/Util/."
 const FRONTEND = "src/Frontend/."
@@ -53,6 +55,16 @@ println(LOAD_PATH)
 #include("../Frontend/InnerOuter.jl")
 #include("./SCodeUtil.jl")
 
+import Global
+import Flags
+import AbsynToSCode
+import SCode
+import Absyn
+import FCoreUtil
+import Inst
+import InstHashTable
+import InnerOuter
+
 module AbsynPrograms
   using Absyn
   using MetaModelica
@@ -69,48 +81,40 @@ module AbsynPrograms
   @show HelloWorld
 
 end
-import Global
-import Flags
-import AbsynToSCode
-import SCode
-import Absyn
-import FCoreUtil
-import Inst
-import InstHashTable
 
-# initialize globals
-Global.initialize()
-# make sure we have all the flags loaded!
-Flags.new(Flags.emptyFlags)
+function run()
 
-@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
-@show scode
+  # initialize globals
+  Global.initialize()
+  # make sure we have all the flags loaded!
+  Flags.new(Flags.emptyFlags)
 
-#= Try the bouncing ball =#
-#@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
-#@show scode
-#using Modelica_Standard_Library_AST
-#using BenchmarkTools
-#using Profile
-# P = Modelica_Standard_Library_AST.Program
-#@time AbsynToSCode.translateAbsyn2SCode(P)
-#@time AbsynToSCode.translateAbsyn2SCode(P)
+  @time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
+  @show scode
 
-println("*******************************")
-println("SCode done")
-println("*******************************")
+  #= Try the bouncing ball =#
+  #@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
+  #@show scode
+  #using Modelica_Standard_Library_AST
+  #using BenchmarkTools
+  #using Profile
+  # P = Modelica_Standard_Library_AST.Program
+  #@time AbsynToSCode.translateAbsyn2SCode(P)
+  #@time AbsynToSCode.translateAbsyn2SCode(P)
 
-InstHashTable.init()
-#= Creating a cache. At this point the SCode is the bouncing ball... =#
-println("empty cache")
-Flags.set(Flags.SCODE_INST, true)
-# Flags.set(Flags.EXEC_STAT, true) # not yet working!
-cache = FCoreUtil.emptyCache()
-println("after empty cache")
-import Absyn
-import InnerOuter
-className = Absyn.IDENT("HelloWorld")
-if false
+  println("*******************************")
+  println("SCode done")
+  println("*******************************")
+
+  InstHashTable.init()
+  #= Creating a cache. At this point the SCode is the bouncing ball... =#
+  println("empty cache")
+  # don't do this, it will load NFModelicaBuiltin.mo 
+  # Flags.set(Flags.SCODE_INST, true)
+  # Flags.set(Flags.EXEC_STAT, true) # not yet working!
+  cache = FCoreUtil.emptyCache()
+  println("after empty cache")
+  className = Absyn.IDENT("HelloWorld")
   println("dive in inst")
   (cache,_,_,dae) = Inst.instantiateClass(cache,InnerOuter.emptyInstHierarchy,scode,className)
   println("after inst")
@@ -119,4 +123,6 @@ if false
   println("DAE done")
   println("*******************************")
   println("Goodbye")
+end
+
 end

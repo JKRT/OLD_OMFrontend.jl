@@ -6295,20 +6295,7 @@
         end
 
         function constEqual(c1::DAE.Const, c2::DAE.Const) ::Bool
-              local b::Bool
-
-              b = begin
-                @matchcontinue (c1, c2) begin
-                  (_, _)  => begin
-                      equality(c1, c2)
-                    true
-                  end
-
-                  _  => begin
-                      false
-                  end
-                end
-              end
+              local b::Bool = valueEq(c1, c2)
           b
         end
 

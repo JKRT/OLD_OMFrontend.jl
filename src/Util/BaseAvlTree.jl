@@ -120,14 +120,14 @@ function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFun
                 key_comp = keyCompare(inKey, key)
                 if key_comp == (-1)
                     left = add(tree.left, inKey, inValue, conflictFunc)
-                    NODE(tree.key, tree.value, tree.height, left, tree.right)
+                    tree = NODE(tree.key, tree.value, tree.height, left, tree.right)
                 elseif key_comp == 1
                     right = add(tree.right, inKey, inValue, conflictFunc)
-                    NODE(tree.key, tree.value, tree.height, tree.left, right)
+                    tree = NODE(tree.key, tree.value, tree.height, tree.left, right)
                 else
                     value = conflictFunc(inValue, tree.value, key)
                     if ! referenceEq(tree.value, value)
-                        NODE(tree.key, value, tree.height, tree.left, tree.right)
+                        tree = NODE(tree.key, value, tree.height, tree.left, tree.right)
                     end
                 end
                 if key_comp == 0
@@ -140,20 +140,19 @@ function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFun
             LEAF(key = key)  => begin
                 key_comp = keyCompare(inKey, key)
                 if key_comp == (-1)
-                    outTree = NODE(tree.key, tree.value, 2, LEAF(inKey, inValue), EMPTY())
+                    tree = NODE(tree.key, tree.value, 2, LEAF(inKey, inValue), EMPTY())
                 elseif key_comp == 1
-                    outTree = NODE(tree.key, tree.value, 2, EMPTY(), LEAF(inKey, inValue))
+                    tree = NODE(tree.key, tree.value, 2, EMPTY(), LEAF(inKey, inValue))
                 else
                     value = conflictFunc(inValue, tree.value, key)
                     if ! referenceEq(tree.value, value)
-                        LEAF(value, tree.key)
+                        tree = LEAF(value, tree.key)
                     end
-                    outTree = tree
                 end
                 if key_comp == 0
-                    outTree
+                    tree
                 else
-                    balance(outTree)
+                    balance(tree)
                 end
             end
         end

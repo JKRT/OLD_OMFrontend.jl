@@ -111,7 +111,7 @@
         import Types
         import ValuesUtil
         import VarTransform
-        
+
         MutableType = Mutable.MutableType
 
          #= Expression elaboration of Absyn.Exp list, i.e. lists of expressions. =#
@@ -232,129 +232,13 @@
           (outCache, outExp, outProperties)
         end
 
-         #=
-        function: elabExp
-          Static analysis of expressions means finding out the properties of
-          the expression.  These properties are described by the
-          DAE.Properties type, and include the type and the variability of the
-          expression.  This function performs analysis, and returns an
-          DAE.Exp and the properties. =#
-        function elabExp()
-              local e::Absyn.Exp
-              local num_errmsgs::ModelicaInteger
-              local exp::DAE.Exp
-              local exp1::DAE.Exp
-              local exp2::DAE.Exp
-              local prop1::DAE.Properties
-              local prop2::DAE.Properties
-              local ty::DAE.Type
-              local c::DAE.Const
-              local elabfunc::PartialElabExpFunc
+        function elabExp_BuiltinType(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
 
-               #=  Apply any rewrite rules we have, if any.
-               =#
-              e = inExp #= if BackendInterface.noRewriteRulesFrontEnd()
-                    inExp
-                  else
-                    BackendInterface.rewriteFrontEnd(inExp)
-                  end =#
-              num_errmsgs = Error.getNumErrorMessages()
-              try
-                elabfunc = begin
-                  @match e begin
-                    Absyn.END(__)  => begin
-                        Error.addSourceMessage(Error.END_ILLEGAL_USE_ERROR, nil, inInfo)
-                      fail()
-                    end
+              println("elabExp_BuiltinType")
 
-                    Absyn.CREF(__)  => begin
-                      elabExp_Cref
-                    end
-
-                    Absyn.BINARY(__)  => begin
-                      elabExp_Binary
-                    end
-
-                    Absyn.UNARY(__)  => begin
-                      elabExp_Unary
-                    end
-
-                    Absyn.LBINARY(__)  => begin
-                      elabExp_Binary
-                    end
-
-                    Absyn.LUNARY(__)  => begin
-                      elabExp_LUnary
-                    end
-
-                    Absyn.RELATION(__)  => begin
-                      elabExp_Binary
-                    end
-
-                    Absyn.IFEXP(__)  => begin
-                      elabExp_If
-                    end
-
-                    Absyn.CALL(__)  => begin
-                      elabExp_Call
-                    end
-
-                    Absyn.PARTEVALFUNCTION(__)  => begin
-                      elabExp_PartEvalFunction
-                    end
-
-                    Absyn.TUPLE(__)  => begin
-                      elabExp_Tuple
-                    end
-
-                    Absyn.RANGE(__)  => begin
-                      elabExp_Range
-                    end
-
-                    Absyn.ARRAY(__)  => begin
-                      elabExp_Array
-                    end
-
-                    Absyn.MATRIX(__)  => begin
-                      elabExp_Matrix
-                    end
-
-                    Absyn.CODE(__)  => begin
-                      elabExp_Code
-                    end
-
-                    Absyn.CONS(__)  => begin
-                      elabExp_Cons
-                    end
-
-                    Absyn.LIST(__)  => begin
-                      elabExp_List
-                    end
-
-                    Absyn.MATCHEXP(__)  => begin
-                      Patternm.elabMatchExpression
-                    end
-
-                    Absyn.DOT(__)  => begin
-                      elabExp_Dot
-                    end
-
-                    _  => begin
-                        elabExp_BuiltinType
-                    end
-                  end
-                end
-                (outCache, outExp, outProperties) = elabfunc(inCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
-              catch
-                @match true = num_errmsgs == Error.getNumErrorMessages()
-                Error.addSourceMessage(Error.GENERIC_ELAB_EXPRESSION, list(Dump.printExpStr(e)), inInfo)
-                fail()
-              end
-        end
-
-
-
-        function elabExp_BuiltinType()
               (outExp, outProperties) = begin
                 @match inExp begin
                   Absyn.INTEGER(__)  => begin
@@ -380,9 +264,14 @@
                =#
                #=  that interesting to find out.
                =#
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Cref()
+        function elabExp_Cref(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local cr::Absyn.ComponentRef
               local ty::DAE.Type
               local c::DAE.Const
@@ -399,9 +288,14 @@
                       outProperties
                     end
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Binary()
+        function elabExp_Binary(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local e1::Absyn.Exp
               local e2::Absyn.Exp
               local op::Absyn.Operator
@@ -428,9 +322,14 @@
               (outCache, exp1, prop1) = elabExpInExpression(inCache, inEnv, e1, inImplicit, inDoVect, inPrefix, inInfo)
               (outCache, exp2, prop2) = elabExpInExpression(outCache, inEnv, e2, inImplicit, inDoVect, inPrefix, inInfo)
               (outCache, outExp, outProperties) = OperatorOverloading.binary(outCache, inEnv, op, prop1, exp1, prop2, exp2, inExp, e1, e2, inImplicit, inPrefix, inInfo)
+           (outCache, outExp, outProperties)
         end
 
-        function elabExp_Unary()
+        function elabExp_Unary(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local e::Absyn.Exp
               local op::Absyn.Operator
               local ty::DAE.Type
@@ -441,22 +340,32 @@
               if ! (valueEq(op, Absyn.UPLUS()) && Types.isIntegerOrRealOrSubTypeOfEither(Types.arrayElementType(ty)))
                 (outCache, outExp, outProperties) = OperatorOverloading.unary(outCache, inEnv, op, outProperties, outExp, inExp, e, inImplicit, inPrefix, inInfo)
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_LUnary()
+        function elabExp_LUnary(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local e::Absyn.Exp
               local op::Absyn.Operator
 
               @match Absyn.LUNARY(op = op, exp = e) = inExp
               (outCache, outExp, outProperties) = elabExpInExpression(outCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
               (outCache, outExp, outProperties) = OperatorOverloading.unary(outCache, inEnv, op, outProperties, outExp, inExp, e, inImplicit, inPrefix, inInfo)
+          (outCache, outExp, outProperties)
         end
 
          #= Elaborates an if-expression. If one of the branches can not be elaborated and
            the condition is parameter or constant; it is evaluated and the correct branch is selected.
            This is a dirty hack to make MSL CombiTable models work!
            Note: Because of this, the function has to rollback or delete an ErrorExt checkpoint. =#
-        function elabExp_If()
+        function elabExp_If(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local cond_e::Absyn.Exp
               local true_e::Absyn.Exp
               local false_e::Absyn.Exp
@@ -503,9 +412,14 @@
                   end
                 end
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Call()
+        function elabExp_Call(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local func_name::Absyn.ComponentRef
               local args::Absyn.FunctionArgs
               local arg::Absyn.Exp
@@ -526,9 +440,14 @@
                   end
                 end
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Dot()
+        function elabExp_Dot(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               (outExp, outProperties) = begin
                   local s::String
                   local ty::DAE.Type
@@ -573,10 +492,15 @@
                   end
                 end
               end
+          (outCache, outExp, outProperties)
         end
 
          #= turns an Absyn.PARTEVALFUNCTION into an DAE.PARTEVALFUNCTION =#
-        function elabExp_PartEvalFunction()
+        function elabExp_PartEvalFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local cref::Absyn.ComponentRef
               local pos_args::List{Absyn.Exp}
               local named_args::List{Absyn.NamedArg}
@@ -609,13 +533,23 @@
                 outExp = DAE.PARTEVALFUNCTION(path, args, ty, tty)
                 outProperties = DAE.PROP(tty2, c)
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Tuple()
+        function elabExp_Tuple(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               (outCache, outExp, outProperties) = elabExp_Tuple_LHS_RHS(inCache, inEnv, inExp, inImplicit, inDoVect, inPrefix, inInfo)
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Tuple_LHS_RHS(isLhs::Bool = false)
+        function elabExp_Tuple_LHS_RHS(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, isLhs::Bool = false) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local el::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -626,10 +560,15 @@
               (outCache, expl, props) = elabTuple(outCache, inEnv, el, inImplicit, inDoVect, inPrefix, inInfo, isLhs)
               (types, consts) = splitProps(props)
               (outExp, outProperties) = fixTupleMetaModelica(expl, types, consts)
+          (outCache, outExp, outProperties)
         end
 
          #= Special check for tuples, which only occur on the LHS =#
-        function elabExpLHS()
+        function elabExpLHS(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               (outCache, outExp, outProperties) = begin
                 @match inExp begin
                   Absyn.TUPLE(__)  => begin
@@ -643,10 +582,15 @@
                   end
                 end
               end
+          (outCache, outExp, outProperties)
         end
 
          #= Elaborates a range expression on the form start:stop or start:step:stop. =#
-        function elabExp_Range()
+        function elabExp_Range(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local start::Absyn.Exp
               local step::Absyn.Exp
               local stop::Absyn.Exp
@@ -691,9 +635,14 @@
               (outCache, ty) = elabRangeType(outCache, inEnv, start_exp, ostep_exp, stop_exp, start_ty, ety, c, inImplicit)
               outExp = DAE.RANGE(ety, start_exp, ostep_exp, stop_exp)
               outProperties = DAE.PROP(ty, c)
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Array()
+        function elabExp_Array(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local es::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -734,9 +683,14 @@
                   end
                 end
               end
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Matrix()
+        function elabExp_Matrix(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local ess::List{List{Absyn.Exp}}
               local dess::List{List{DAE.Exp}}
               local dess2::List{List{DAE.Exp}}
@@ -774,6 +728,7 @@
               ty = DAE.T_ARRAY(ty, list(dim2))
               ty = DAE.T_ARRAY(ty, list(dim1))
               outProperties = DAE.PROP(ty, c)
+          (outCache, outExp, outProperties)
         end
 
          #= Casts an expression and property to Real if it's current type is Integer. =#
@@ -796,7 +751,11 @@
           (outExp, outProperties)
         end
 
-        function elabExp_Code()
+        function elabExp_Code(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local ty::DAE.Type
               local ty2::DAE.Type
               local cn::Absyn.CodeNode
@@ -806,9 +765,14 @@
               ty2 = Types.simplifyType(ty)
               outExp = DAE.CODE(cn, ty2)
               outProperties = DAE.PROP(ty, DAE.C_CONST())
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_Cons()
+        function elabExp_ConselabExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
+
               local e1::Absyn.Exp
               local e2::Absyn.Exp
               local exp1::DAE.Exp
@@ -850,9 +814,13 @@
                =#
                #=  Make sure the operands have correct types.
                =#
+          (outCache, outExp, outProperties)
         end
 
-        function elabExp_List()
+        function elabExp_ListelabExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+              local outProperties::DAE.Properties
+              local outExp::DAE.Exp
+              local outCache::FCore.Cache = inCache
               local es::List{Absyn.Exp}
               local expl::List{DAE.Exp}
               local props::List{DAE.Properties}
@@ -879,7 +847,135 @@
                 outExp = DAE.LIST(expl)
                 outProperties = DAE.PROP(DAE.T_METALIST(ty), c)
               end
+
+          (outCache, outExp, outProperties)
         end
+
+        #=
+       function: elabExp
+         Static analysis of expressions means finding out the properties of
+         the expression.  These properties are described by the
+         DAE.Properties type, and include the type and the variability of the
+         expression.  This function performs analysis, and returns an
+         DAE.Exp and the properties. =#
+       function elabExp(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+             local outProperties::DAE.Properties
+             local outExp::DAE.Exp
+             local outCache::FCore.Cache = inCache
+
+             local e::Absyn.Exp
+             local num_errmsgs::ModelicaInteger
+             local exp::DAE.Exp
+             local exp1::DAE.Exp
+             local exp2::DAE.Exp
+             local prop1::DAE.Properties
+             local prop2::DAE.Properties
+             local ty::DAE.Type
+             local c::DAE.Const
+             local elabfunc::PartialElabExpFunc
+
+             println("elabExp")
+              #=  Apply any rewrite rules we have, if any.
+              =#
+             e = inExp #= if BackendInterface.noRewriteRulesFrontEnd()
+                   inExp
+                 else
+                   BackendInterface.rewriteFrontEnd(inExp)
+                 end =#
+             num_errmsgs = Error.getNumErrorMessages()
+             try
+               elabfunc = begin
+                 @match e begin
+                   Absyn.END(__)  => begin
+                       Error.addSourceMessage(Error.END_ILLEGAL_USE_ERROR, nil, inInfo)
+                     fail()
+                   end
+
+                   Absyn.CREF(__)  => begin
+                     elabExp_Cref
+                   end
+
+                   Absyn.BINARY(__)  => begin
+                     elabExp_Binary
+                   end
+
+                   Absyn.UNARY(__)  => begin
+                     elabExp_Unary
+                   end
+
+                   Absyn.LBINARY(__)  => begin
+                     elabExp_Binary
+                   end
+
+                   Absyn.LUNARY(__)  => begin
+                     elabExp_LUnary
+                   end
+
+                   Absyn.RELATION(__)  => begin
+                     elabExp_Binary
+                   end
+
+                   Absyn.IFEXP(__)  => begin
+                     elabExp_If
+                   end
+
+                   Absyn.CALL(__)  => begin
+                     elabExp_Call
+                   end
+
+                   Absyn.PARTEVALFUNCTION(__)  => begin
+                     elabExp_PartEvalFunction
+                   end
+
+                   Absyn.TUPLE(__)  => begin
+                     elabExp_Tuple
+                   end
+
+                   Absyn.RANGE(__)  => begin
+                     elabExp_Range
+                   end
+
+                   Absyn.ARRAY(__)  => begin
+                     elabExp_Array
+                   end
+
+                   Absyn.MATRIX(__)  => begin
+                     elabExp_Matrix
+                   end
+
+                   Absyn.CODE(__)  => begin
+                     elabExp_Code
+                   end
+
+                   Absyn.CONS(__)  => begin
+                     elabExp_Cons
+                   end
+
+                   Absyn.LIST(__)  => begin
+                     elabExp_List
+                   end
+
+                   Absyn.MATCHEXP(__)  => begin
+                     Patternm.elabMatchExpression
+                   end
+
+                   Absyn.DOT(__)  => begin
+                     elabExp_Dot
+                   end
+
+                   _  => begin
+                       elabExp_BuiltinType
+                   end
+                 end
+               end
+               (outCache, outExp, outProperties) = elabfunc(inCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
+             catch
+               @match true = num_errmsgs == Error.getNumErrorMessages()
+               Error.addSourceMessage(Error.GENERIC_ELAB_EXPRESSION, list(Dump.printExpStr(e)), inInfo)
+               fail()
+             end
+         (outCache, outExp, outProperties)
+       end
 
          #= Like elabExp but casts PROP_TUPLE to a PROP =#
         function elabExpInExpression(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}

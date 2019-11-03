@@ -104,7 +104,7 @@
 
         import Autoconf
         import ClockIndexes
-        import Config
+        # import Config
         import Global
         import ListUtil
         import Print
@@ -1568,7 +1568,7 @@
         function testsuiteFriendly(name::String) ::String
               local friendly::String
 
-              friendly = testsuiteFriendly2(Config.getRunningTestsuite(), Config.getRunningWSMTestsuite(), name)
+              friendly = testsuiteFriendly2(false, false,  name) # Config.getRunningTestsuite(), Config.getRunningWSMTestsuite(), name)
           friendly
         end
 
@@ -1614,7 +1614,7 @@
                   local path::String
                 @matchcontinue () begin
                   ()  => begin
-                      @match true = Config.getRunningTestsuite()
+                      @match true = false # Config.getRunningTestsuite()
                       @match false = System.directoryExists(inPath)
                       @match false = System.regularFileExists(inPath)
                       path = "../" + inPath

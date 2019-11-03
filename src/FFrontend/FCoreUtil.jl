@@ -10,7 +10,6 @@ using FCore
 import Absyn
 import SCode
 import DAE
-import DAEUtil
 import Mutable
 import AvlSetCR
 using Mutable: MutableType
@@ -212,6 +211,14 @@ function addCachedInstFuncGuard(cache::Cache, func::Absyn.Path #= fully qualifie
   outCache
 end
 
+function __addDaeFunction(functions::List{<:DAE.Function}, functionTree::DAE.FunctionTree) ::DAE.FunctionTree
+      for f in functions
+        functionTree = DAE.AvlTreePathFunction.add(functionTree, functionName(f), SOME(f))
+      end
+  functionTree
+end
+
+
 #= adds the list<DAE.Function> to the set of instantiated functions =#
 function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qualified function name =#) ::Cache
   local outCache::Cache
@@ -223,7 +230,7 @@ function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qua
     local p::Absyn.Path
     @match (inCache, funcs) begin
       (CACHE(_, ef, _, _), _)  => begin
-        Mutable.update(ef, DAEUtil.addDaeFunction(funcs, Mutable.access(ef)))
+        Mutable.update(ef, __addDaeFunction(funcs, Mutable.access(ef)))
         inCache
       end
 
@@ -233,6 +240,56 @@ function addDaeFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully qua
     end
   end
   outCache
+end
+
+#= returns true if element matches an external function =#
+function isExtFunction(elt::DAE.Function) ::Bool
+     local res::Bool
+
+     res = begin
+       @match elt begin
+         DAE.FUNCTION(functions = DAE.FUNCTION_EXT(__) <| _)  => begin
+           true
+         end
+
+         _  => begin
+             false
+         end
+       end
+     end
+ res
+end
+
+
+function __addDaeExtFunction(ifuncs::List{<:DAE.Function}, itree::DAE.FunctionTree) ::DAE.FunctionTree
+      local outTree::DAE.FunctionTree
+
+      outTree = begin
+          local func::DAE.Function
+          local funcs::List{DAE.Function}
+          local tree::DAE.FunctionTree
+          local msg::String
+        @matchcontinue (ifuncs, itree) begin
+          ( nil(), tree)  => begin
+            tree
+          end
+
+          (func <| funcs, tree)  => begin
+              @match true = isExtFunction(func)
+              tree = DAE.AvlTreePathFunction.add(tree, functionName(func), SOME(func))
+            __addDaeExtFunction(funcs, tree)
+          end
+
+          (_ <| funcs, tree)  => begin
+            __addDaeExtFunction(funcs, tree)
+          end
+        end
+      end
+       #= showCacheFuncs(tree);
+       =#
+       #=  print(\"Add ext to cache: \" + AbsynUtil.pathString(functionName(func)) + \"\\n\");
+       =#
+  outTree
 end
 
 #= adds the external functions in list<DAE.Function> to the set of instantiated functions =#
@@ -246,7 +303,7 @@ function addDaeExtFunction(inCache::Cache, funcs::List{<:DAE.Function} #= fully 
     local p::Absyn.Path
     @match (inCache, funcs) begin
       (CACHE(_, ef, _, _), _)  => begin
-        Mutable.update(ef, DAEUtil.addDaeExtFunction(funcs, Mutable.access(ef)))
+        Mutable.update(ef, __addDaeExtFunction(funcs, Mutable.access(ef)))
         inCache
       end
 

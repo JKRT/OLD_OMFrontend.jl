@@ -6,8 +6,6 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl SCodeDumpOptions
-
          #= /*
          * This file is part of OpenModelica.
          *
@@ -55,22 +53,7 @@
 
         import DAE
 
-         @Uniontype SCodeDumpOptions begin
-              @Record OPTIONS begin
-
-                       stripAlgorithmSections::Bool
-                       stripProtectedImports::Bool
-                       stripProtectedClasses::Bool
-                       stripProtectedComponents::Bool
-                       stripMetaRecords #= The automatically generated records that change scope from uniontype to the package =#::Bool
-                       stripGraphicalAnnotations::Bool
-                       stripStringComments::Bool
-                       stripExternalDecl::Bool
-                       stripOutputBindings::Bool
-              end
-         end
-
-         const defaultOptions = OPTIONS(false, false, false, false, true, true, false, false, false)::SCodeDumpOptions
+        using SCodeDumpUtil
 
         function programStr(inProgram::SCode.Program, options::SCodeDumpOptions = defaultOptions) ::String
               local outString::String
@@ -700,13 +683,6 @@
                 end
               end
           str
-        end
-
-        function filterElements(elements::List{<:SCode.Element}, options::SCodeDumpOptions) ::List{SCode.Element}
-              local outElements::List{SCode.Element}
-
-              outElements = ListUtil.select1(elements, filterElement, options)
-          outElements
         end
 
         function filterElement(element::SCode.Element, options::SCodeDumpOptions) ::Bool

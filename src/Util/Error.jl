@@ -47,8 +47,8 @@
          */ =#
 
         import Util
-        import Flags
-        import Config
+        # import Flags
+        # import Config
         import Global
         import System
 
@@ -1274,12 +1274,12 @@
               local isReadOnly::Bool
               local msg::Util.TranslatableContent
 
-              if ! Flags.getConfigBool(Flags.DEMO_MODE)
+              #if ! Flags.getConfigBool(Flags.DEMO_MODE)
                 (str, sline, scol, eline, ecol, isReadOnly, file) = getCurrentComponent()
                 @match MESSAGE(error_id, msg_type, severity, msg) = inErrorMsg
                 msg_str = Util.translateContent(msg)
                 ErrorExt.addSourceMessage(error_id, msg_type, severity, sline, scol, eline, ecol, isReadOnly, Util.testsuiteFriendly(file), str + msg_str, inMessageTokens)
-              end
+              #end
                #= print(\" adding message: \" + intString(error_id) + \"\\n\");
                =#
                #= print(\" succ add \" + msg_type_str + \" \" + severity_string + \",  \" + msg + \"\\n\");
@@ -1316,12 +1316,12 @@
         function addStrictMessage(errorMsg::Message, tokens::MessageTokens, info::SourceInfo)
               local msg::Message = errorMsg
 
-              if Flags.getConfigBool(Flags.STRICT)
-                msg.severity = Severity.ERROR()
-                addSourceMessageAndFail(msg, tokens, info)
-              else
+              #if Flags.getConfigBool(Flags.STRICT)
+              #  msg.severity = Severity.ERROR()
+              #  addSourceMessageAndFail(msg, tokens, info)
+              #else
                 addSourceMessage(msg, tokens, info)
-              end
+              #end
         end
 
          #= Same as addSourceMessage, but fails after adding the error. =#
@@ -1682,12 +1682,12 @@
         function addInternalError(message::String, info::SourceInfo)
               local filename::String
 
-              if Config.getRunningTestsuite()
-                @match SOURCEINFO(fileName = filename) = info
-                addSourceMessage(INTERNAL_ERROR, list(message), SOURCEINFO(filename, false, 0, 0, 0, 0, 0))
-              else
+              #if Config.getRunningTestsuite()
+              #  @match SOURCEINFO(fileName = filename) = info
+              #  addSourceMessage(INTERNAL_ERROR, list(message), SOURCEINFO(filename, false, 0, 0, 0, 0, 0))
+              #else
                 addSourceMessage(INTERNAL_ERROR, list(message), info)
-              end
+              #end
         end
 
          #= Prints out a message and terminates the execution. =#

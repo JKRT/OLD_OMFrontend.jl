@@ -6,8 +6,6 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl DumpOptions
-
   Type_a = Any
 
   Type_b = Any
@@ -66,7 +64,6 @@
          #=  public imports
          =#
         import Absyn
-        import AbsynUtil
         import File
         import File.Escape
          #=  protected imports
@@ -80,34 +77,7 @@
         import Tpl
         import Util
 
-         @Uniontype DumpOptions begin
-              @Record DUMPOPTIONS begin
-
-                       fileName::String
-              end
-         end
-
-         const defaultDumpOptions = DUMPOPTIONS("")::DumpOptions
-
-         #= Returns true if the filename in the SOURCEINFO should be unparsed =#
-        function boolUnparseFileFromInfo(info::SourceInfo, options::DumpOptions) ::Bool
-              local b::Bool
-
-              b = begin
-                @match (options, info) begin
-                  (DUMPOPTIONS(fileName = ""), _)  => begin
-                    true
-                  end
-
-                  (DUMPOPTIONS(__), SOURCEINFO(__))  => begin
-                    options.fileName == info.fileName
-                  end
-                end
-              end
-               #=  The default is to not filter
-               =#
-          b
-        end
+        using DumpUtil
 
         function dumpExpStr(exp::Absyn.Exp) ::String
               local str::String
@@ -2126,11 +2096,148 @@
           outString
         end
 
+         #= Makes a path not fully qualified unless it already is. =#
+        function makeNotFullyQualified(inPath::Absyn.Path) ::Path
+              local outPath::Absyn.Path
+
+              outPath = begin
+                  local path::Absyn.Path
+                @match inPath begin
+                  Absyn.FULLYQUALIFIED(path)  => begin
+                    path
+                  end
+
+                  _  => begin
+                      inPath
+                  end
+                end
+              end
+          outPath
+        end
+
+         #= This function simply converts a Path to a string. =#
+        function pathString(path::Absyn.Path, delimiter::String = ".", usefq::Bool = true, reverse::Bool = false) ::String
+              local s::String
+              local p1::Absyn.Path
+              local p2::Absyn.Path
+              local count::ModelicaInteger = 0
+              local len::ModelicaInteger = 0
+              local dlen::ModelicaInteger = stringLength(delimiter)
+              local b::Bool
+
+               #=  First, calculate the length of the string to be generated
+               =#
+              p1 = if usefq
+                    path
+                  else
+                    makeNotFullyQualified(path)
+                  end
+              _ = begin
+                @match p1 begin
+                  Absyn.IDENT(__)  => begin
+                       #=  Do not allocate memory if we're just going to copy the only identifier
+                       =#
+                      s = p1.name
+                      return s
+                    ()
+                  end
+
+                  _  => begin
+                      ()
+                  end
+                end
+              end
+              p2 = p1
+              b = true
+              while b
+                (p2, len, count, b) = begin
+                  @match p2 begin
+                    Absyn.IDENT(__)  => begin
+                      (p2, len + 1, count + stringLength(p2.name), false)
+                    end
+
+                    Absyn.QUALIFIED(__)  => begin
+                      (p2.path, len + 1, count + stringLength(p2.name), true)
+                    end
+
+                    Absyn.FULLYQUALIFIED(__)  => begin
+                      (p2.path, len + 1, count, true)
+                    end
+                  end
+                end
+              end
+              s = pathStringWork(p1, (len - 1) * dlen + count, delimiter, dlen, reverse)
+          s
+        end
+
+        function pathStringWork(inPath::Absyn.Path, len::ModelicaInteger, delimiter::String, dlen::ModelicaInteger, reverse::Bool) ::String
+              local s::String = ""
+
+              local p::Absyn.Path = inPath
+              local b::Bool = true
+              local count::ModelicaInteger = 0
+               #=  Allocate a string of the exact required length
+               =#
+              local sb::System.StringAllocator = System.StringAllocator(len)
+
+               #=  Fill the string
+               =#
+              while b
+                (p, count, b) = begin
+                  @match p begin
+                    Absyn.IDENT(__)  => begin
+                        System.stringAllocatorStringCopy(sb, p.name, if reverse
+                              len - count - stringLength(p.name)
+                            else
+                              count
+                            end)
+                      (p, count + stringLength(p.name), false)
+                    end
+
+                    Absyn.QUALIFIED(__)  => begin
+                        System.stringAllocatorStringCopy(sb, p.name, if reverse
+                              len - count - dlen - stringLength(p.name)
+                            else
+                              count
+                            end)
+                        System.stringAllocatorStringCopy(sb, delimiter, if reverse
+                              len - count - dlen
+                            else
+                              count + stringLength(p.name)
+                            end)
+                      (p.path, count + stringLength(p.name) + dlen, true)
+                    end
+
+                    Absyn.FULLYQUALIFIED(__)  => begin
+                        System.stringAllocatorStringCopy(sb, delimiter, if reverse
+                              len - count - dlen
+                            else
+                              count
+                            end)
+                      (p.path, count + dlen, true)
+                    end
+                  end
+                end
+              end
+               #=  Return the string
+               =#
+              s = System.stringAllocatorResult(sb, s)
+          s
+        end
+
+        @ExtendedFunction pathStringNoQual pathString(usefq = false)
+
+        function pathStringDefault(path::Absyn.Path) ::String
+              local s::String = pathString(path)
+          s
+        end
+
+
          #= Print a Path. =#
         function printPath(p::Absyn.Path)
               local s::String
 
-              s = AbsynUtil.pathString(p)
+              s = pathString(p)
               Print.printBuf(s)
         end
 
@@ -2163,7 +2270,7 @@
         function printPathStr(p::Absyn.Path) ::String
               local s::String
 
-              s = AbsynUtil.pathString(p)
+              s = pathString(p)
           s
         end
 

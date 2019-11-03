@@ -6,6 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    using Setfield
+
     @UniontypeDecl Tree
     keyStr = Function
     keyCompare = Function
@@ -326,7 +328,7 @@
               res = begin
                 @match (orig, left, right) begin
                   (NODE(__), EMPTY(__), EMPTY(__))  => begin
-                    LEAF(orig.key)
+                    LEAF(orig.key, orig.value)
                   end
 
                   (LEAF(__), EMPTY(__), EMPTY(__))  => begin
@@ -337,12 +339,12 @@
                     if referenceEqOrEmpty(orig.left, left) && referenceEqOrEmpty(orig.right, right)
                           orig
                         else
-                          NODE(orig.key, max(height(left), height(right)) + 1, left, right)
+                          NODE(orig.key, orig.value, max(height(left), height(right)) + 1, left, right)
                         end
                   end
 
                   (LEAF(__), _, _)  => begin
-                    NODE(orig.key, max(height(left), height(right)) + 1, left, right)
+                    NODE(orig.key, orig.value, max(height(left), height(right)) + 1, left, right)
                   end
                 end
               end
@@ -454,18 +456,18 @@
                       diff = lh - rh
                       if diff < (-1)
                         balanced_tree = if calculateBalance(outTree.right) > 0
-                              rotateLeft(setTreeLeftRight(outTree, left = outTree.left, right = rotateRight(outTree.right)))
+                              rotateLeft(setTreeLeftRight(outTree, outTree.left, rotateRight(outTree.right)))
                             else
                               rotateLeft(outTree)
                             end
                       elseif diff > 1
                         balanced_tree = if calculateBalance(outTree.left) < 0
-                              rotateRight(setTreeLeftRight(outTree, left = rotateLeft(outTree.left), right = outTree.right))
+                              rotateRight(setTreeLeftRight(outTree, rotateLeft(outTree.left), outTree.right))
                             else
                               rotateRight(outTree)
                             end
                       elseif outTree.height != max(lh, rh) + 1
-                        outTree.height = max(lh, rh) + 1
+                        @set outTree.height = max(lh, rh) + 1
                         balanced_tree = outTree
                       else
                         balanced_tree = outTree
@@ -528,13 +530,13 @@
                   local child::Tree
                 @match outNode begin
                   NODE(right = child && NODE(__))  => begin
-                      node = setTreeLeftRight(outNode, left = outNode.left, right = child.left)
-                    setTreeLeftRight(child, left = node, right = child.right)
+                      node = setTreeLeftRight(outNode, outNode.left, child.left)
+                    setTreeLeftRight(child, node, child.right)
                   end
 
                   NODE(right = child && LEAF(__))  => begin
-                      node = setTreeLeftRight(outNode, left = outNode.left, right = EMPTY())
-                    setTreeLeftRight(child, left = node, right = EMPTY())
+                      node = setTreeLeftRight(outNode, outNode.left, EMPTY())
+                    setTreeLeftRight(child, node, EMPTY())
                   end
 
                   _  => begin
@@ -554,13 +556,13 @@
                   local child::Tree
                 @match outNode begin
                   NODE(left = child && NODE(__))  => begin
-                      node = setTreeLeftRight(outNode, left = child.right, right = outNode.right)
-                    setTreeLeftRight(child, right = node, left = child.left)
+                      node = setTreeLeftRight(outNode, child.right, outNode.right)
+                    setTreeLeftRight(child, child.left, node)
                   end
 
                   NODE(left = child && LEAF(__))  => begin
-                      node = setTreeLeftRight(outNode, left = EMPTY(), right = outNode.right)
-                    setTreeLeftRight(child, right = node, left = EMPTY())
+                      node = setTreeLeftRight(outNode, EMPTY(), outNode.right)
+                    setTreeLeftRight(child, EMPTY(), node)
                   end
 
                   _  => begin
