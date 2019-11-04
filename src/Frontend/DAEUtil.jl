@@ -129,7 +129,7 @@
         import Error
         import Expression
         import ExpressionDump
-        import ExpressionSimplify
+        # import ExpressionSimplify
         import Flags
         import ListUtil
         import SCodeUtil
@@ -7977,6 +7977,7 @@
           obnd
         end
 
+         #= not used!
          #= pour man's constant evaluation =#
         function evaluateCref(icr::DAE.ComponentRef, iels::List{<:DAE.Element}) ::Option{DAE.Exp}
               local oexp::Option{DAE.Exp}
@@ -8044,6 +8045,7 @@
               end
           oexp
         end
+        =#
 
         function replaceCrefInDAEElements(inElements::List{<:DAE.Element}, inCref::DAE.ComponentRef, inExp::DAE.Exp) ::List{DAE.Element}
               local outElements::List{DAE.Element}

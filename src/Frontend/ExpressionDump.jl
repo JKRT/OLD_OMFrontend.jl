@@ -13,7 +13,7 @@
 
     printComponentRefStrFunc = Function
     printCallFunc = Function
-    
+
     Type_a = Any
 
          #= /*
@@ -58,8 +58,6 @@
         import Graphviz
          #=  protected imports
          =#
-
-        import ComponentReference
 
         import Config
 
@@ -669,6 +667,112 @@
         function printCrefsFromExpStr(e::DAE.Exp) ::String
         end
 
+        function printComponentRefStr(inComponentRef::DAE.ComponentRef) ::String
+              local outString::String
+
+              outString = begin
+                  local s::DAE.Ident
+                  local str::DAE.Ident
+                  local strrest::DAE.Ident
+                  local strseb::DAE.Ident
+                  local subs::List{DAE.Subscript}
+                  local cr::DAE.ComponentRef
+                  local b::Bool
+                  local ix::ModelicaInteger
+                   #=  Optimize -- a function call less
+                   =#
+                @match inComponentRef begin
+                  DAE.CREF_IDENT(ident = s, subscriptLst =  nil())  => begin
+                    s
+                  end
+
+                  DAE.CREF_IDENT(ident = s, subscriptLst = subs)  => begin
+                      str = printComponentRef2Str(s, subs)
+                    str
+                  end
+
+                  DAE.CREF_ITER(ident = s, index = ix, subscriptLst =  nil())  => begin
+                    s + "/* iter index " + intString(ix) + " */"
+                  end
+
+                  DAE.CREF_ITER(ident = s, index = ix, subscriptLst = subs)  => begin
+                      str = printComponentRef2Str(s, subs)
+                    str + "/* iter index " + intString(ix) + " */"
+                  end
+
+                  DAE.CREF_QUAL(ident = s, subscriptLst = subs, componentRef = cr)  => begin
+                      b = Config.modelicaOutput()
+                      str = printComponentRef2Str(s, subs)
+                      strrest = printComponentRefStr(cr)
+                      strseb = if b
+                            "__"
+                          else
+                            "."
+                          end
+                      str = stringAppendList(list(str, strseb, strrest))
+                    str
+                  end
+
+                  DAE.WILD(__)  => begin
+                    "_"
+                  end
+                end
+              end
+               #=  idents with subscripts
+               =#
+               #=  Optimize -- a function call less
+               =#
+               #=  idents with subscripts
+               =#
+               #=  Qualified - Modelica output - does not handle names with underscores
+               =#
+               #=  Qualified - non Modelica output
+               =#
+               #=  Wild
+               =#
+          outString
+        end
+
+
+        #= Helper function to printComponentRefStr. =#
+       function printComponentRef2Str(inIdent::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript}) ::String
+             local outString::String
+
+             outString = begin
+                 local s::DAE.Ident
+                 local str::DAE.Ident
+                 local strseba::DAE.Ident
+                 local strsebb::DAE.Ident
+                 local l::List{DAE.Subscript}
+                 local b::Bool
+                  #=  no subscripts
+                  =#
+               @match (inIdent, inSubscriptLst) begin
+                 (s,  nil())  => begin
+                   s
+                 end
+
+                 (s, l)  => begin
+                     b = Config.modelicaOutput()
+                     str = ExpressionDump.printListStr(l, ExpressionDump.printSubscriptStr, ",")
+                     (strseba, strsebb) = if b
+                           ("_L", "_R")
+                         else
+                           ("[", "]")
+                         end
+                     str = stringAppendList(list(s, strseba, str, strsebb))
+                   str
+                 end
+               end
+             end
+              #=  some subscripts, Modelica output
+              =#
+              #=  some subscripts, non Modelica output
+              =#
+         outString
+       end
+
+
          #= Helper function to printExpStr. =#
         function printExp2Str(inExp::DAE.Exp, stringDelimiter::String, opcreffunc::Option{<:Tuple{<:printComponentRefStrFunc, Type_a}} #= tuple of function that prints component references and an extra parameter passed through to the function =#, opcallfunc::Option{<:printCallFunc} #= function that prints function calls =#) ::String
               local outString::String
@@ -748,7 +852,7 @@
                   local tyStr::String
                 @matchcontinue (inExp, stringDelimiter, opcreffunc, opcallfunc) begin
                   (DAE.EMPTY(scope = scope, name = name, tyStr = tyStr), _, _, _)  => begin
-                    "<EMPTY(scope: " + scope + ", name: " + ComponentReference.printComponentRefStr(name) + ", ty: " + tyStr + ")>"
+                    "<EMPTY(scope: " + scope + ", name: " + printComponentRefStr(name) + ", ty: " + tyStr + ")>"
                   end
 
                   (DAE.ICONST(integer = i), _, _, _)  => begin
@@ -777,7 +881,7 @@
                   end
 
                   (DAE.CREF(componentRef = c), _, _, _)  => begin
-                      s = ComponentReference.printComponentRefStr(c)
+                      s = printComponentRefStr(c)
                     s
                   end
 
@@ -1572,7 +1676,7 @@
                   end
 
                   DAE.CREF(componentRef = c)  => begin
-                      s = ComponentReference.printComponentRefStr(c)
+                      s = printComponentRefStr(c)
                     Graphviz.LNODE("CREF", list(s), nil, nil)
                   end
 
@@ -1696,6 +1800,63 @@
           outNode
         end
 
+        #= Function: debugPrintComponentRefTypeStr
+       This function is equal to debugPrintComponentRefTypeStr with the extra feature that it
+       prints the base type of each ComponentRef.
+       NOTE Only used for debugging. =#
+       function debugPrintComponentRefTypeStr(inComponentRef::DAE.ComponentRef) ::String
+             local outString::String
+
+             outString = begin
+                 local s::DAE.Ident
+                 local str::DAE.Ident
+                 local str2::DAE.Ident
+                 local strrest::DAE.Ident
+                 local str_1::DAE.Ident
+                 local subs::List{DAE.Subscript}
+                 local cr::DAE.ComponentRef
+                 local ty::DAE.Type
+               @match inComponentRef begin
+                 DAE.WILD(__)  => begin
+                   "_"
+                 end
+
+                 DAE.CREF_IDENT(ident = s, identType = ty, subscriptLst = subs)  => begin
+                     str_1 = ExpressionDump.printListStr(subs, ExpressionDump.debugPrintSubscriptStr, ", ")
+                     str = s + (if stringLength(str_1) > 0
+                           "[" + str_1 + "]"
+                         else
+                           ""
+                         end)
+                     str2 = Types.unparseType(ty)
+                     str = stringAppendList(list(str, " [", str2, "]"))
+                   str
+                 end
+
+                 DAE.CREF_QUAL(ident = s, identType = ty, subscriptLst = subs, componentRef = cr)  => begin
+                     if Config.modelicaOutput()
+                       str = printComponentRef2Str(s, subs)
+                       str2 = Types.unparseType(ty)
+                       strrest = debugPrintComponentRefTypeStr(cr)
+                       str = stringAppendList(list(str, " [", str2, "] ", "__", strrest))
+                     else
+                       str_1 = ExpressionDump.printListStr(subs, ExpressionDump.debugPrintSubscriptStr, ", ")
+                       str = s + (if stringLength(str_1) > 0
+                             "[" + str_1 + "]"
+                           else
+                             ""
+                           end)
+                       str2 = Types.unparseType(ty)
+                       strrest = debugPrintComponentRefTypeStr(cr)
+                       str = stringAppendList(list(str, " [", str2, "] ", ".", strrest))
+                     end
+                   str
+                 end
+               end
+             end
+         outString
+       end
+
          #= Dumps expression to a string. =#
         function dumpExpStr(inExp::DAE.Exp, inInteger::ModelicaInteger) ::String
               local outString::String
@@ -1809,7 +1970,7 @@
 
                   (DAE.CREF(componentRef = c, ty = ty), level)  => begin
                       gen_str = genStringNTime("   |", level)
-                      s = ComponentReference.debugPrintComponentRefTypeStr(c)
+                      s = debugPrintComponentRefTypeStr(c)
                       tpStr = Types.unparseType(ty)
                       res_str = stringAppendList(list(gen_str, "CREF ", s, " CREFTYPE:", tpStr, "\\n"))
                     res_str
@@ -2051,7 +2212,7 @@
               end
                #=  BTH TODO
                =#
-               #= /*ComponentReference.printComponentRefStr*/ =#
+               #= /*printComponentRefStr*/ =#
           outString
         end
 
@@ -2150,7 +2311,7 @@
                   local expl::List{DAE.Exp}
                 @matchcontinue inExp begin
                   DAE.CREF(cr, _)  => begin
-                    ComponentReference.debugPrintComponentRefTypeStr(cr)
+                    debugPrintComponentRefTypeStr(cr)
                   end
 
                   DAE.ARRAY(_, _, expl)  => begin

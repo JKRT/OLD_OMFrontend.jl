@@ -2377,7 +2377,7 @@ module InnerOuter
                   local res::List{Tuple{Key, Value}}
                 @matchcontinue (inVarOptionArray1, inInteger2, inInteger3) begin
                   (arr, pos, lastpos)  => begin
-                      if ! pos == lastpos
+                      if !(pos == lastpos)
                         fail()
                       end
                       @match SOME(v) = arr[pos + 1]
@@ -2437,7 +2437,7 @@ module InnerOuter
                   local rexpandsize::ModelicaReal
                 @matchcontinue (valueArray, entry) begin
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
-                      if ! n < arrayLength(arr)
+                      if !(n < arrayLength(arr))
                         fail() #= Have space to add array elt. =#
                       end #= Have space to add array elt. =#
                       n_1 = n + 1
@@ -2447,7 +2447,7 @@ module InnerOuter
 
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
                       size = arrayLength(arr)
-                      if n < size
+                      if (n < size)
                         fail() #= Do NOT have splace to add array elt. Expand with factor 1.4 =#
                       end #= Do NOT have splace to add array elt. Expand with factor 1.4 =#
                       rsize = intReal(size)
@@ -2480,7 +2480,7 @@ module InnerOuter
                   local size::ModelicaInteger
                 @matchcontinue (valueArray, pos, entry) begin
                   (VALUE_ARRAY(_, arr), _, _)  => begin
-                      if ! pos < arrayLength(arr)
+                      if !(pos < arrayLength(arr))
                         fail()
                       end
                       arrayUpdate(arr, pos + 1, SOME(entry))
@@ -2507,7 +2507,7 @@ module InnerOuter
                   local size::ModelicaInteger
                 @matchcontinue (valueArray, pos) begin
                   (VALUE_ARRAY(_, arr), _)  => begin
-                      if ! pos < arrayLength(arr)
+                      if !(pos < arrayLength(arr))
                         fail()
                       end
                       arrayUpdate(arr, pos + 1, NONE())
@@ -2536,7 +2536,7 @@ module InnerOuter
                   local arr::Array{Option{Tuple{Key, Value}}}
                 @match (valueArray, pos) begin
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
-                      if ! pos < n
+                      if !(pos < n)
                         fail()
                       end
                       @match SOME((k, v)) = arr[pos + 1]

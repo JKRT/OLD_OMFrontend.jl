@@ -1,4 +1,4 @@
-  module BaseHashTable 
+  module BaseHashTable
 
 
     using MetaModelica
@@ -79,7 +79,7 @@
          =#
          #=       971 977 983 991 997 1013 2053 3023 4013 4999 5051 5087 24971
          =#
-         #= 
+         #=
          =#
          #=  You can also use Util.nextPrime if you know exactly how large the hash table
          =#
@@ -98,14 +98,14 @@
 
          const defaultBucketSize = avgBucketSize::ModelicaInteger
 
-        Key = Any 
-        Value = Any 
-        HashEntry = Tuple 
-        HashNode = List 
-        HashTable = Tuple 
-        HashVector = Array 
-        ValueArray = Tuple 
-        FuncsTuple = Tuple 
+        Key = Any
+        Value = Any
+        HashEntry = Tuple
+        HashNode = List
+        HashTable = Tuple
+        HashVector = Array
+        ValueArray = Tuple
+        FuncsTuple = Tuple
 
 
 
@@ -116,7 +116,7 @@
 
 
          #= calculate the values array size based on the bucket size =#
-        function bucketToValuesSize(szBucket::ModelicaInteger) ::ModelicaInteger 
+        function bucketToValuesSize(szBucket::ModelicaInteger) ::ModelicaInteger
               local szArr::ModelicaInteger
 
               szArr = realInt(realMul(intReal(szBucket), 0.6))
@@ -125,7 +125,7 @@
           szArr
         end
 
-        function emptyHashTableWork(szBucket::ModelicaInteger, fntpl::FuncsTuple) ::HashTable 
+        function emptyHashTableWork(szBucket::ModelicaInteger, fntpl::FuncsTuple) ::HashTable
               local hashTable::HashTable
 
               local arr::Array{List{Tuple{Key, ModelicaInteger}}}
@@ -147,7 +147,7 @@
 
          #= Add a Key-Value tuple to hashtable.
            If the Key-Value tuple already exists, the function updates the Value. =#
-        function add(entry::HashEntry, hashTable::HashTable) ::HashTable 
+        function add(entry::HashEntry, hashTable::HashTable) ::HashTable
               local outHashTable::HashTable
 
               local hashvec::HashVector
@@ -165,7 +165,8 @@
               local indices::HashNode
 
               (key, _) = entry
-              @match (hashvec, varr, bsize, (@match (hashFunc, keyEqual, _, _) = fntpl)) = hashTable
+              @match (hashvec, varr, bsize, fntpl) = hashTable
+              @match (hashFunc, keyEqual, _, _) = fntpl
               hash_idx = hashFunc(key, bsize) + 1
               indices = hashvec[hash_idx]
               for i in indices
@@ -183,10 +184,10 @@
           outHashTable
         end
 
-         #= 
+         #=
         author: PA.
         dump statistics on how many entries per hash value. Useful to see how hash function behaves =#
-        function dumpHashTableStatistics(hashTable::HashTable)  
+        function dumpHashTableStatistics(hashTable::HashTable)
               _ = begin
                   local hvec::HashVector
                 @match hashTable begin
@@ -206,7 +207,7 @@
          #= Add a Key-Value tuple to hashtable, without checking if it already exists.
            This function is thus more efficient than add if you already know that the
            Key-Value tuple doesn't already exist in the hashtable. =#
-        function addNoUpdCheck(entry::HashEntry, hashTable::HashTable) ::HashTable 
+        function addNoUpdCheck(entry::HashEntry, hashTable::HashTable) ::HashTable
               local outHashTable::HashTable
 
               outHashTable = begin
@@ -232,7 +233,7 @@
                       hashvec = arrayUpdate(hashvec, indx, _cons((key, newpos), indexes))
                     (hashvec, varr, bsize, fntpl)
                   end
-                  
+
                   _  => begin
                         print("- BaseHashTable.addNoUpdCheck failed\\n")
                       fail()
@@ -243,7 +244,7 @@
         end
 
          #= Add a Key-Value tuple to hashtable. If the Key is already used it fails. =#
-        function addUnique(entry::HashEntry, hashTable::HashTable) ::HashTable 
+        function addUnique(entry::HashEntry, hashTable::HashTable) ::HashTable
               local outHashTable::HashTable
 
               local indx::ModelicaInteger
@@ -271,7 +272,7 @@
 
          #= Updates an already existing value in the hashtable. Fails if the entry does
            not exist. =#
-        function update(entry::HashEntry, hashTable::HashTable)  
+        function update(entry::HashEntry, hashTable::HashTable)
               local varr::ValueArray
               local index::ModelicaInteger
               local key::Key
@@ -287,7 +288,7 @@
            Note: This function does not delete from the index table, only from the
            ValueArray. This means that a lot of deletions will not make the HashTable
            more compact, it will still contain a lot of incices information. =#
-        function delete(key::Key, hashTable::HashTable)  
+        function delete(key::Key, hashTable::HashTable)
               local indx::ModelicaInteger
               local varr::ValueArray
 
@@ -301,7 +302,7 @@
         end
 
          #= checks if the given key is in the hashTable =#
-        function hasKey(key::Key, hashTable::HashTable) ::Bool 
+        function hasKey(key::Key, hashTable::HashTable) ::Bool
               local b::Bool
 
               local varr::ValueArray
@@ -312,7 +313,7 @@
         end
 
          #= Returns true if any of the keys are present in the hashtable. Stops and returns true upon first occurence =#
-        function anyKeyInHashTable(keys::List{<:Key}, ht::HashTable) ::Bool 
+        function anyKeyInHashTable(keys::List{<:Key}, ht::HashTable) ::Bool
               local res::Bool
 
               for key in keys
@@ -326,7 +327,7 @@
         end
 
          #= Returns a Value given a Key and a HashTable. =#
-        function get(key::Key, hashTable::HashTable) ::Value 
+        function get(key::Key, hashTable::HashTable) ::Value
               local value::Value
 
               local i::ModelicaInteger
@@ -340,7 +341,7 @@
         end
 
          #= help function to get and hasKey =#
-        function hasKeyIndex(key::Key, hashTable::HashTable) ::ModelicaInteger 
+        function hasKeyIndex(key::Key, hashTable::HashTable) ::ModelicaInteger
               local indx::ModelicaInteger
 
               local hashindx::ModelicaInteger
@@ -358,7 +359,7 @@
         end
 
          #= Helper function to get =#
-        function hasKeyIndex2(key::Key, keyIndices::HashNode, keyEqual::FuncEq) ::ModelicaInteger 
+        function hasKeyIndex2(key::Key, keyIndices::HashNode, keyEqual::FuncEq) ::ModelicaInteger
               local index::ModelicaInteger #= Returns -1 on failure =#
 
               local key2::Key
@@ -373,7 +374,7 @@
           index #= Returns -1 on failure =#
         end
 
-        function dumpHashTable(t::HashTable)  
+        function dumpHashTable(t::HashTable)
               local printKey::FuncKeyString
               local printValue::FuncValString
               local k::Key
@@ -391,7 +392,7 @@
               end
         end
 
-        function debugDump(ht::HashTable)  
+        function debugDump(ht::HashTable)
               local printKey::FuncKeyString
               local printValue::FuncValString
               local k::Key
@@ -434,7 +435,7 @@
               end
         end
 
-        function dumpTuple(tpl::HashEntry, printKey::FuncKeyString, printValue::FuncValString) ::String 
+        function dumpTuple(tpl::HashEntry, printKey::FuncKeyString, printValue::FuncValString) ::String
               local str::String
 
               local k::Key
@@ -450,7 +451,7 @@
         end
 
          #= Returns the Value entries as a list of Values. =#
-        function hashTableValueList(hashTable::HashTable) ::List{Value} 
+        function hashTableValueList(hashTable::HashTable) ::List{Value}
               local valLst::List{Value}
 
               valLst = ListUtil.unzipSecond(hashTableList(hashTable))
@@ -458,7 +459,7 @@
         end
 
          #= Returns the Key entries as a list of Keys. =#
-        function hashTableKeyList(hashTable::HashTable) ::List{Key} 
+        function hashTableKeyList(hashTable::HashTable) ::List{Key}
               local valLst::List{Key}
 
               valLst = ListUtil.unzipFirst(hashTableList(hashTable))
@@ -466,7 +467,7 @@
         end
 
          #= Returns the entries in the hashTable as a list of HashEntries. =#
-        function hashTableList(hashTable::HashTable) ::List{HashEntry} 
+        function hashTableList(hashTable::HashTable) ::List{HashEntry}
               local outEntries::List{HashEntry}
 
               local varr::ValueArray
@@ -478,7 +479,7 @@
 
          #= Returns the entries in the hashTable as a list of HashEntries, in reverse
            order. =#
-        function hashTableListReversed(hashTable::HashTable) ::List{HashEntry} 
+        function hashTableListReversed(hashTable::HashTable) ::List{HashEntry}
               local entries::List{HashEntry}
 
               local varr::ValueArray
@@ -489,7 +490,7 @@
         end
 
          #= Transforms a ValueArray to a HashEntry list. =#
-        function valueArrayList(valueArray::ValueArray) ::List{HashEntry} 
+        function valueArrayList(valueArray::ValueArray) ::List{HashEntry}
               local outEntries::List{HashEntry}
 
               local arr::Array{Option{HashEntry}}
@@ -502,7 +503,7 @@
 
          #= Transforms a ValueArray to a HashEntry list, in reverse order compared to
            valueArrayList. =#
-        function valueArrayListReversed(valueArray::ValueArray) ::List{HashEntry} 
+        function valueArrayListReversed(valueArray::ValueArray) ::List{HashEntry}
               local entries::List{HashEntry}
 
               local arr::Array{Option{HashEntry}}
@@ -513,7 +514,7 @@
         end
 
          #= Returns the number of elements inserted into the table =#
-        function hashTableCurrentSize(hashTable::HashTable) ::ModelicaInteger 
+        function hashTableCurrentSize(hashTable::HashTable) ::ModelicaInteger
               local sz::ModelicaInteger
 
               local va::ValueArray
@@ -524,7 +525,7 @@
         end
 
          #= Returns the number of elements in the ValueArray =#
-        function valueArrayLength(valueArray::ValueArray) ::ModelicaInteger 
+        function valueArrayLength(valueArray::ValueArray) ::ModelicaInteger
               local sz::ModelicaInteger
 
               (sz, _, _) = valueArray
@@ -533,7 +534,7 @@
 
          #= Adds an entry last to the ValueArray, increasing array size if no space left
            by factor 1.4 =#
-        function valueArrayAdd(valueArray::ValueArray, entry::HashEntry) ::Tuple{ValueArray, ModelicaInteger} 
+        function valueArrayAdd(valueArray::ValueArray, entry::HashEntry) ::Tuple{ValueArray, ModelicaInteger}
               local newpos::ModelicaInteger
               local outValueArray::ValueArray
 
@@ -547,16 +548,16 @@
                   local rexpandsize::ModelicaReal
                 @matchcontinue (valueArray, entry) begin
                   ((n, size, arr), _)  => begin
-                      if ! n < size
+                      if !(n < size)
                         fail() #= Have space to add array elt. =#
                       end #= Have space to add array elt. =#
                       n = n + 1
                       arr = arrayUpdate(arr, n, SOME(entry))
                     ((n, size, arr), n)
                   end
-                  
+
                   ((n, size, arr), _)  => begin
-                      if n < size
+                      if (n < size)
                         fail() #= Do NOT have space to add array elt. Expand with factor 1.4 =#
                       end #= Do NOT have space to add array elt. Expand with factor 1.4 =#
                       rsize = intReal(size)
@@ -569,7 +570,7 @@
                       arr = arrayUpdate(arr, n, SOME(entry))
                     ((n, newsize, arr), n)
                   end
-                  
+
                   _  => begin
                         print("-HashTable.valueArrayAdd failed\\n")
                       fail()
@@ -580,7 +581,7 @@
         end
 
          #= Set the n:th variable in the ValueArray to value. =#
-        function valueArraySet(valueArray::ValueArray, pos::ModelicaInteger, entry::HashEntry) ::ValueArray 
+        function valueArraySet(valueArray::ValueArray, pos::ModelicaInteger, entry::HashEntry) ::ValueArray
               local outValueArray::ValueArray
 
               outValueArray = begin
@@ -593,7 +594,7 @@
                       arr = arrayUpdate(arr, pos, SOME(entry))
                     (n, size, arr)
                   end
-                  
+
                   ((_, size, arr), _, _)  => begin
                       Error.addInternalError("HashTable.valueArraySet(pos=" + String(pos) + ") size=" + String(size) + " arrSize=" + String(arrayLength(arr)) + " failed\\n", sourceInfo())
                     fail()
@@ -604,7 +605,7 @@
         end
 
          #= Clears the n:th variable in the ValueArray (set to NONE()). =#
-        function valueArrayClear(valueArray::ValueArray, pos::ModelicaInteger)  
+        function valueArrayClear(valueArray::ValueArray, pos::ModelicaInteger)
               local arr::Array{Option{HashEntry}}
               local size::ModelicaInteger
 
@@ -616,7 +617,7 @@
         end
 
          #= Retrieve the n:th Value from ValueArray, index from 1..n. =#
-        function getValueArray(valueArray::ValueArray, pos::ModelicaInteger) ::Tuple{Key, Value} 
+        function getValueArray(valueArray::ValueArray, pos::ModelicaInteger) ::Tuple{Key, Value}
               local value::Value
               local key::Key
 
@@ -632,7 +633,7 @@
         end
 
          #= Checks if the given index exists in the value array =#
-        function valueArrayKeyIndexExists(valueArray::ValueArray, pos::ModelicaInteger) ::Bool 
+        function valueArrayKeyIndexExists(valueArray::ValueArray, pos::ModelicaInteger) ::Bool
               local b::Bool
 
               b = begin
@@ -644,7 +645,7 @@
                   (_, #= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#)  => begin
                     false
                   end
-                  
+
                   ((n, _, arr), _)  => begin
                     if pos <= n
                           isSome(arr[pos])
@@ -658,7 +659,7 @@
         end
 
          #= Makes a copy of a hashtable. =#
-        function copy(inHashTable::HashTable) ::HashTable 
+        function copy(inHashTable::HashTable) ::HashTable
               local outCopy::HashTable
 
               local hv::HashVector
@@ -677,7 +678,7 @@
         end
 
          #= Clears the hashtable. =#
-        function clear(ht::HashTable) ::HashTable 
+        function clear(ht::HashTable) ::HashTable
 
 
               local hv::HashVector
@@ -701,7 +702,7 @@
                         arrayUpdate(vae, i, NONE())
                       ()
                     end
-                    
+
                     _  => begin
                         ()
                     end
@@ -713,7 +714,7 @@
         end
 
          #= Clears a HashTable that has not been properly stored, but was known to never delete an element (making the values sequential SOME() for as long as there are elements). NOTE: Does not handle arrays that were expanded? =#
-        function clearAssumeNoDelete(ht::HashTable)  
+        function clearAssumeNoDelete(ht::HashTable)
               local hv::HashVector
               local bs::ModelicaInteger
               local sz::ModelicaInteger
@@ -739,10 +740,10 @@
                         arrayUpdate(vae, i, NONE())
                       ()
                     end
-                    
+
                     _  => begin
                           if ! workaroundForBug
-                            return 
+                            return
                           end
                         ()
                     end

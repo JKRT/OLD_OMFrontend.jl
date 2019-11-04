@@ -90,7 +90,7 @@
           The functions daeDeclare2 and daeDeclare3 below are helper functions that perform parts of the task.
           Note: Currently, this function can only declare scalar variables, i.e. the element type of an array type is used. To indicate that the variable
           is an array, the InstDims attribute is used. This will need to be redesigned in the futurue, when array variables should not be flattened out in the frontend. =#
-        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.SMNode, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::List{<:List{<:DAE.Dimension}}, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist 
+        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.SMNode, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist 
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -184,7 +184,7 @@
         end
 
          #= Helper function to daeDeclare. =#
-        function daeDeclare2(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inConnectorType::DAE.ConnectorType, inVarKind::DAE.VarKind, inVarDirection::DAE.VarDirection, inParallelism::DAE.VarParallelism, protection::DAE.VarVisibility, inExpExpOption::Option{<:DAE.Exp}, inInstDims::List{<:List{<:DAE.Dimension}}, inStartValue::DAE.StartValue, inAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool) ::DAE.DAElist 
+        function daeDeclare2(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inConnectorType::DAE.ConnectorType, inVarKind::DAE.VarKind, inVarDirection::DAE.VarDirection, inParallelism::DAE.VarParallelism, protection::DAE.VarVisibility, inExpExpOption::Option{<:DAE.Exp}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inStartValue::DAE.StartValue, inAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool) ::DAE.DAElist 
               local outDAe::DAE.DAElist
 
               outDAe = begin

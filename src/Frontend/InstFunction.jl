@@ -264,7 +264,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
+        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -320,7 +320,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
+        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
               local funcs::List{DAE.Function}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph

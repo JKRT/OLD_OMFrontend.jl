@@ -6,6 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    using Setfield
 
     TypeFn = Function
 
@@ -7063,7 +7064,7 @@
                 try
                   @match false = subtype(inActualType, inExpectedType)
                   (outExp, outType) = typeConvert(inExp, inActualType, inExpectedType, inPrintFailtrace)
-                  outExp = ExpressionSimplify.simplify1(outExp)
+                  (outExp, _) = ExpressionSimplify.simplify1(outExp)
                 catch
                   printFailure(Flags.TYPES, "matchType", inExp, inActualType, inExpectedType)
                   fail()
@@ -9506,42 +9507,42 @@
               ty = begin
                 @match ty begin
                   DAE.T_REAL(__)  => begin
-                      ty.varLst = inVars
+                      @set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_INTEGER(__)  => begin
-                      ty.varLst = inVars
+                      @set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_STRING(__)  => begin
-                      ty.varLst = inVars
+                      @set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_BOOL(__)  => begin
-                      ty.varLst = inVars
+                      @set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_CLOCK(__)  => begin
-                      ty.varLst = inVars
+                      @set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_ENUMERATION(__)  => begin
-                      ty.attributeLst = inVars
+                      @set ty.attributeLst = inVars
                     ty
                   end
 
                   DAE.T_ARRAY(__)  => begin
-                      ty.ty = setTypeVars(ty.ty, inVars)
+                      @set ty.ty = setTypeVars(ty.ty, inVars)
                     ty
                   end
 
                   DAE.T_SUBTYPE_BASIC(__)  => begin
-                      ty.complexType = setTypeVars(ty.complexType, inVars)
+                      @set ty.complexType = setTypeVars(ty.complexType, inVars)
                     ty
                   end
                 end

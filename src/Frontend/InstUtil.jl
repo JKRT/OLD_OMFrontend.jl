@@ -2792,7 +2792,7 @@
          #= @author: adrpo
          add the record constructor to the cache if we have
          it as the type of an input component to a function =#
-        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
+        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2832,7 +2832,7 @@
 
          #= Check if variable is multiply declared and
          that all declarations are identical if so. =#
-        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.PrefixType, ciState::ClassInf.SMNode, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool
+        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.PrefixType, ciState::ClassInf.SMNode, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, impl::Bool) ::Bool
               local alreadyDeclared::Bool
 
               alreadyDeclared = begin
@@ -3562,7 +3562,7 @@
           The builtin types have no dimension, whereas a user defined type might
           have dimensions. For instance, type Point = Real[3];
           has one dimension of size 3 and the class to instantiate is Real =#
-        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod}
+        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod}
               local outMods::DAE.Mod #= modifications from base classes =#
               local classToInstantiate::SCode.Element
               local outDimensionLst::DAE.Dimensions
@@ -4337,7 +4337,7 @@
 
          #= Same functionality as elabArraydim, but takes an optional arraydim.
           In case of NONE(), empty DAE.Dimension list is returned. =#
-        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4377,7 +4377,7 @@
           All this is accomplished by examining the two arguments separately
           and then using `complete_arraydime\\' or `compatible_arraydim\\' to
           check that that the dimension sizes are compatible and complete. =#
-        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{Any}#=List{<:List{<:DAE.Dimension}}=#) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{Any}#=List{Any #= <:List{<:DAE.Dimension} =#}=#) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4543,7 +4543,7 @@
 
          #= Find out the dimension sizes of a type. The second argument is used to know
            how many dimensions should be extracted from the type. =#
-        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions
+        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               local flat_id::List{DAE.Dimension}
@@ -7028,7 +7028,7 @@
         end
 
          #= The function used to modify modifications for non-expanded arrays =#
-        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod
+        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -7544,14 +7544,14 @@
           v3
         end
 
-        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
+        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Type
               local outType::DAE.Type
 
               outType = Types.simplifyType(makeCrefBaseType2(inBaseType, inDimensions))
           outType
         end
 
-        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
+        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -9051,7 +9051,7 @@
           isValid
         end
 
-        function instDimsHasZeroDims(inInstDims::List{<:List{<:DAE.Dimension}}) ::Bool
+        function instDimsHasZeroDims(inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Bool
               local outHasZeroDims::Bool
 
               outHasZeroDims = begin
