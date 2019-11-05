@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    using Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -41,6 +43,7 @@
         import ClassInf
         import DAE
         import FCore
+        import FCoreUtil
         import InnerOuter
         import InstTypes
         import Mod
@@ -70,6 +73,7 @@
         import Flags
         import FGraph
         import FNode
+        import FCoreUtil
         import SCodeDump
         import SCodeUtil
         import Lookup
@@ -7685,7 +7689,7 @@
                   @matchcontinue v begin
                     v1 && DAE.VAR(__)  => begin
                         (e, i) = findCorrespondingBinding(v1.componentRef, equations)
-                        v1.binding = SOME(e)
+                        @set v1.binding = SOME(e)
                         is = _cons(i, is)
                       v1
                     end
@@ -7722,7 +7726,7 @@
                             DAE.VAR(binding = NONE()) where (ComponentReference.crefPrefixOf(cr, v.componentRef))  => begin
                                  #=  Moving parameter bindings into initial equation section means we need to force fixed=false...
                                  =#
-                                v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
+                                @set v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
                                 Error.addSourceMessage(Error.MOVING_PARAMETER_BINDING_TO_INITIAL_EQ_SECTION, list(ComponentReference.printComponentRefStr(v.componentRef)), eq.source.info)
                               v
                             end
@@ -8364,8 +8368,8 @@
                       if Flags.isSet(Flags.TAIL)
                         Error.addSourceMessage(Error.COMPILER_NOTIFICATION, list(str), ElementSource.getElementSourceFileInfo(source))
                       end
-                      attr.tailCall = DAE.TAIL(vars, lhsVars)
-                      call.attr = attr
+                      @set attr.tailCall = DAE.TAIL(vars, lhsVars)
+                      @set call.attr = attr
                     (call, true)
                   end
 

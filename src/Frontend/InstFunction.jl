@@ -49,6 +49,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import InnerOuter
 
@@ -824,7 +826,7 @@
                 @matchcontinue (inCache, inEnv, inPath) begin
                   (_, _, _)  => begin
                       path = AbsynUtil.makeFullyQualified(inPath)
-                      func = FCore.getCachedInstFunc(inCache, path)
+                      func = FCoreUtil.getCachedInstFunc(inCache, path)
                     (inCache, func)
                   end
 

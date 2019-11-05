@@ -2613,8 +2613,15 @@
                     domainFieldsListOut = InstUtil.optAppendField(domainFieldsListOut, fieldDomOpt)
                   end
                 end
-                outVars = listAppend(lst for lst in var_arr)
-                outDae = DAE.DAE_LIST(listAppend(lst for lst in dae_arr))
+                outVars = nil
+                for lst in var_arr
+                  outVars = listAppend(lst, outVars)
+                end
+                aaa = nil
+                for lst in dae_arr
+                  aaa = listAppend(lst, aaa)
+                end
+                outDae = DAE.DAE_LIST(aaa)
                 GC.free(var_arr)
                 GC.free(dae_arr)
               else
@@ -3001,7 +3008,7 @@
                       end
                       (cache, binding) = InstBinding.makeBinding(cache, env2, attr, mod, ty, pre, name, info)
                       dae_attr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefixes)
-                      ty = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
+                      (ty, _) = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
                       new_var = DAE.TYPES_VAR(name, dae_attr, ty, binding, NONE())
                       env = FGraph.updateComp(env2, new_var, FCore.VAR_DAE(), comp_env)
                       vars = if already_declared

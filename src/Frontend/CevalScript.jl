@@ -70,6 +70,7 @@
         import Expression
         import ExpressionDump
         import FBuiltin
+        import FCoreUtil
         import Flags
         import FGraph
         import FNode
@@ -2880,7 +2881,7 @@
                       @match (cache, (@match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc), env) = Lookup.lookupClass(cache, env, funcpath)
                       isCevaluableFunction(sc)
                       (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
-                      func = FCore.getCachedInstFunc(cache, funcpath)
+                      func = FCoreUtil.getCachedInstFunc(cache, funcpath)
                       (cache, newval) = CevalFunction.evaluate(cache, env, func, vallst)
                     (cache, newval)
                   end

@@ -53,6 +53,7 @@ module InnerOuter
         import ConnectionGraph
         import DAE
         import FCore
+        import FCoreUtil
         import FNode
         import Prefix
         import SCode

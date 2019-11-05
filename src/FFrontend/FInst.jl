@@ -43,6 +43,7 @@
         import SCode
         import DAE
         import FCore
+        import FCoreUtil
 
         import ClockIndexes
         import FBuiltin

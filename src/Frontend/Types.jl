@@ -6793,7 +6793,7 @@
                   end
 
                   t && DAE.T_ARRAY(__)  => begin
-                      t.ty = unboxedType(t.ty)
+                      @set t.ty = unboxedType(t.ty)
                     t
                   end
 
@@ -7531,7 +7531,7 @@
                   ty && DAE.T_TUPLE(tys)  => begin
                       (dummyExpList, dummyBoxedTypeList) = makeDummyExpAndTypeLists(tys)
                       (_, tys) = matchTypeTuple(dummyExpList, tys, dummyBoxedTypeList, false)
-                      ty.types = tys
+                      @set ty.types = tys
                     ty
                   end
 
@@ -9869,8 +9869,8 @@
                   local attr::DAE.FunctionAttributes
                 @match oty begin
                   DAE.T_FUNCTION(functionAttributes = attr && DAE.FUNCTION_ATTRIBUTES(isFunctionPointer = false))  => begin
-                      attr.isFunctionPointer = true
-                      oty.functionAttributes = attr
+                      @set attr.isFunctionPointer = true
+                      @set oty.functionAttributes = attr
                     oty
                   end
 
@@ -10509,12 +10509,12 @@
               oty = begin
                 @match ty begin
                   oty && DAE.T_METAUNIONTYPE(__)  => begin
-                      oty.typeVars = typeVars
+                      @set oty.typeVars = typeVars
                     oty
                   end
 
                   oty && DAE.T_METARECORD(__)  => begin
-                      oty.typeVars = typeVars
+                      @set oty.typeVars = typeVars
                     oty
                   end
 

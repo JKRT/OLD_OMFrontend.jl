@@ -520,102 +520,97 @@ function readFileNoNumeric(inString::String)::String
     outString
 end
 
+global gHasExpandableConnectors = false
+
 #= @author: adrpo
 sets the external flag that signals the
 presence of expandable connectors in a model =#
 function setHasExpandableConnectors(hasExpandable::Bool)
-    #= Defined in the runtime =#
+    gHasExpandableConnectors = hasExpandable
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of expandable connectors in a model =#
 function getHasExpandableConnectors()::Bool
-    local hasExpandable::Bool
-
-    #= Defined in the runtime =#
-    hasExpandable
+  gHasExpandableConnectors
 end
+
+global gHasOverconstrainedConnectors = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of overconstrained connectors in a model =#
 function setHasOverconstrainedConnectors(hasOverconstrained::Bool)
-    #= Defined in the runtime =#
+  gHasOverconstrainedConnectors = hasOverconstrained
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of overconstrained connectors in a model =#
 function getHasOverconstrainedConnectors()::Bool
-    local hasOverconstrained::Bool
-
-    #= Defined in the runtime =#
-    hasOverconstrained
+  gHasOverconstrainedConnectors
 end
+
+global gIsPartialInstantiation = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of expandable connectors in a model =#
 function setPartialInstantiation(isPartialInstantiation::Bool)
     #= Defined in the runtime =#
+    gIsPartialInstantiation = isPartialInstantiation
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of expandable connectors in a model =#
 function getPartialInstantiation()::Bool
-    local isPartialInstantiation::Bool
-
-    #= Defined in the runtime =#
-    isPartialInstantiation
+  gIsPartialInstantiation
 end
+
+global gHasStreamConnectors = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of stream connectors in a model =#
 function setHasStreamConnectors(hasStream::Bool)
-    #= Defined in the runtime =#
+  gHasStreamConnectors = hasStream
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of stream connectors in a model =#
 function getHasStreamConnectors()::Bool
-    local hasStream::Bool
-
-    #= Defined in the runtime =#
-    hasStream
+  gHasStreamConnectors
 end
+
+global gUsesCardinality = false
 
 #= Sets the external flag that signals the use of the cardinality operator. =#
 function setUsesCardinality(inUses::Bool)
-    #= Defined in the runtime =#
+  gUsesCardinality = inUses
 end
 
 #= Retrieves the external flag that signals the use of the cardinality operator. =#
 function getUsesCardinality()::Bool
-    local outUses::Bool = true
-
-    #= Defined in the runtime =#
-    outUses
+  gUsesCardinality
 end
+
+global gHasInnerOuterDefinitions = false
 
 #= @author: adrpo
 sets the external flag that signals the presence
 of inner/outer comoponent definitions in a model =#
 function setHasInnerOuterDefinitions(hasInnerOuterDefinitions::Bool)
-    #= Defined in the runtime =#
+  gHasInnerOuterDefinitions = hasInnerOuterDefinitions
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the presence
 of inner/outer comoponent definitions in a model =#
 function getHasInnerOuterDefinitions()::Bool
-    local hasInnerOuterDefinitions::Bool = true
-
-    #= Defined in the runtime =#
-    hasInnerOuterDefinitions
+  gHasInnerOuterDefinitions
 end
 
 global tickArray = zeros(1024)

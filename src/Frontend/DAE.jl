@@ -539,7 +539,55 @@ using BaseAvlTree
 import Absyn
 Key = Absyn.Path
 Value = Option
-addConflictDefault = addConflictReplace
+
+function get(tree, key::Key)::Value
+    local value::Value
+    local k::Key
+    k = begin
+        @match tree begin
+            NODE(__)  => begin
+                tree.key
+            end
+            LEAF(__)  => begin
+                tree.key
+            end
+        end
+    end
+    value = begin
+        @match (keyCompare(key, k), tree) begin
+            (0, LEAF(__))  => begin
+                tree.value
+            end
+
+            (0, NODE(__))  => begin
+                tree.value
+            end
+
+            (1, NODE(__))  => begin
+                get(tree.right, key)
+            end
+
+            (-1, NODE(__))  => begin
+                get(tree.left, key)
+            end
+        end
+    end
+    value
+end
+
+  function BaseAvlTree.keyStr(s::Absyn.Path)::String
+    Absyn.pathString(s)
+  end
+
+  function BaseAvlTree.keyCompare(key1::Absyn.Path, key2::Absyn.Path)
+    stringCompare(Absyn.pathString(key1), Absyn.pathString(key2))
+  end
+
+  function BaseAvlTree.valueStr(inValue::Value)::String
+    local s::String = "forget it"
+  end
+
+
 @exportAll()
 end
 
@@ -1173,7 +1221,7 @@ Used by split_props
 @Uniontype TupleConst begin
   @Record SINGLE_CONST begin
 
-    isConst::Const
+    constType::Const
   end
 
   @Record TUPLE_CONST begin

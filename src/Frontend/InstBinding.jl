@@ -558,7 +558,7 @@
                       aexp1 = Absyn.CREF(acr)
                       scode = SCode.EQ_EQUALS(aexp1, aexp2, SCode.noComment, info)
                       source = ElementSource.addSymbolicTransformation(inSource, DAE.FLATTEN(scode, NONE()))
-                      dae = InstSection.instEqEquation(lhs, DAE.PROP(inType, DAE.C_VAR()), e, prop2, source, SCode.NON_INITIAL(), inImpl, extraInfo = info)
+                      dae = InstSection.instEqEquation(lhs, DAE.PROP(inType, DAE.C_VAR()), e, prop2, source, SCode.NON_INITIAL(), inImpl, info)
                     dae
                   end
 

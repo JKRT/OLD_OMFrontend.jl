@@ -37,7 +37,7 @@
          */ =#
 
         import Absyn
-        
+
         import AbsynUtil
 
         import ClassInf
@@ -141,7 +141,7 @@
         the backend. The current implementation doesn't handle cases in which the
         'inner' is not (yet) set.
            =#
-        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -581,7 +581,7 @@
                       ty = Types.simplifyType(inType)
                       @match false = Types.isExternalObject(Types.arrayElementType(ty))
                       @match false = Types.isComplexType(Types.arrayElementType(ty))
-                      @match (@match _cons(_, _) = dims) = Types.getDimensions(ty)
+                      @match (dims && _ <| _) = Types.getDimensions(ty)
                       @match SOME(exp) = InstBinding.makeVariableBinding(ty, mod, constVar, pre, n)
                       cr = ComponentReference.makeCrefIdent(n, ty, nil)
                       (cache, cr) = PrefixUtil.prefixCref(inCache, inEnv, inIH, pre, cr)

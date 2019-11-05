@@ -64,6 +64,7 @@ module ConnectUtil
         # import Connect
         import DAE
         import FCore
+        import FCoreUtil
         import InnerOuter
         import Prefix
         import ConnectionGraph
