@@ -131,7 +131,7 @@
               local source::DAE.ElementSource #= the origin of the component/equation/algorithm =#
               local comment::Option{SCode.Comment}
 
-              @match DAE.DAE(elementLst = elementLst) = inDAElist
+              @match DAE.DAE_LIST(elementLst = elementLst) = inDAElist
               assert(listLength(elementLst) == 1, "Internal compiler error: Handling of elementLst != 1 not supported\\n")
               @match DAE.COMP(ident, dAElist, source, comment) = listHead(elementLst)
               if ! ListUtil.exist(dAElist, isFlatSm)
@@ -146,7 +146,7 @@
                 elementLst2 = wrapHack(cache, elementLst2)
               end
               elementLst3 = listAppend(otherLst, elementLst2)
-              outDAElist = DAE.DAE(list(DAE.COMP(ident, elementLst3, source, comment)))
+              outDAElist = DAE.DAE_LIST(list(DAE.COMP(ident, elementLst3, source, comment)))
                #=  print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist before global subs:\\n\" + DAEDump.dumpStr(outDAElist,FCore.getFunctionTree(cache)));
                =#
                #=  traverse dae expressions for making substitutions activeState(x) -> x.active
@@ -270,7 +270,7 @@
 
               @match DAE.SM_COMP(componentRef, dAElist1) = inSmComp
               emptyTree = DAE.AvlTreePathFunction.Tree.EMPTY()
-              @match (DAE.DAE(dAElist2), _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE(dAElist1), emptyTree, Expression.traverseSubexpressionsHelper, (traversingSubsTicksInState, (componentRef, 0)))
+              @match (DAE.DAE_LIST(dAElist2), _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist1), emptyTree, Expression.traverseSubexpressionsHelper, (traversingSubsTicksInState, (componentRef, 0)))
               outSmComp = DAE.SM_COMP(componentRef, dAElist2)
           outSmComp
         end

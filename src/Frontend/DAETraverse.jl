@@ -23,9 +23,9 @@
                    #=  just append lists
                    =#
                 @match (dae1, dae2) begin
-                  (DAE.DAE(elts1), DAE.DAE(elts2))  => begin
+                  (DAE.DAE_LIST(elts1), DAE.DAE_LIST(elts2))  => begin
                       elts = listAppend(elts1, elts2)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
                 end
               end

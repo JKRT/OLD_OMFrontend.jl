@@ -576,7 +576,7 @@
                     (inCache, inDae)
                   end
 
-                  (DAE.DAE(dae), DAE.C_VAR(__))  => begin
+                  (DAE.DAE_LIST(dae), DAE.C_VAR(__))  => begin
                       @match false = ClassInf.isFunctionOrRecord(inState)
                       ty = Types.simplifyType(inType)
                       @match false = Types.isExternalObject(Types.arrayElementType(ty))
@@ -586,7 +586,7 @@
                       cr = ComponentReference.makeCrefIdent(n, ty, nil)
                       (cache, cr) = PrefixUtil.prefixCref(inCache, inEnv, inIH, pre, cr)
                       eq = DAE.ARRAY_EQUATION(dims, DAE.CREF(cr, ty), exp, source)
-                    (cache, DAE.DAE(_cons(eq, dae)))
+                    (cache, DAE.DAE_LIST(_cons(eq, dae)))
                   end
 
                   _  => begin
@@ -1138,9 +1138,9 @@
                    #=  generated for the component's binding.
                    =#
                 @match (inClassDAE, inType, inEqDAE) begin
-                  (DAE.DAE(elementLst = els), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.DAE(elementLst = eqs && _ <| _))  => begin
+                  (DAE.DAE_LIST(elementLst = els), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.DAE_LIST(elementLst = eqs && _ <| _))  => begin
                       (els, _) = ListUtil.mapFold(els, stripRecordDefaultBindingsFromElement, eqs)
-                    DAE.DAE(els)
+                    DAE.DAE_LIST(els)
                   end
 
                   _  => begin

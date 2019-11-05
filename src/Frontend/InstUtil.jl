@@ -161,9 +161,9 @@
               odae = begin
                   local elems::List{DAE.Element}
                 @match (cache, env, dae, isTopCall) begin
-                  (_, _, DAE.DAE(elementLst = elems), true)  => begin
+                  (_, _, DAE.DAE_LIST(elementLst = elems), true)  => begin
                       elems = listReverse(ListUtil.fold2r(elems, reEvaluateInitialIfEqns2, cache, env, nil))
-                    DAE.DAE(elems)
+                    DAE.DAE_LIST(elems)
                   end
 
                   (_, _, _, false)  => begin
@@ -303,7 +303,7 @@
                   local path1::Absyn.Path
                   local path2::Absyn.Path
                 @matchcontinue (ty, isPartialFn) begin
-                  (DAE.T_COMPLEX(complexClassType = ClassInf.SMNode.TYPE(path = path1)), _)  => begin
+                  (DAE.T_COMPLEX(complexClassType = ClassInf.TYPE(path = path1)), _)  => begin
                       name = AbsynUtil.pathLastIdent(path1)
                       path2 = AbsynUtil.stripLast(path1)
                       @match "Code" = AbsynUtil.pathLastIdent(path2)
@@ -412,9 +412,9 @@
                   local elts::List{DAE.Element}
                    #= /* Only traverse on top scope */ =#
                 @match (callScope, store, dae) begin
-                  (true, UnitAbsyn.INSTSTORE(UnitAbsyn.STORE(vec, _), ht, _), DAE.DAE(elts))  => begin
+                  (true, UnitAbsyn.INSTSTORE(UnitAbsyn.STORE(vec, _), ht, _), DAE.DAE_LIST(elts))  => begin
                       elts = ListUtil.map2(elts, updateDeducedUnits2, vec, ht)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
 
                   _  => begin
@@ -826,7 +826,7 @@
                =#
                #= UnitAbsynBuilder.printInstStore(store);
                =#
-               #= print(\"dae1=\"+DAEDump.dumpDebugDAE(DAE.DAE(dae1))+\"\\n\");
+               #= print(\"dae1=\"+DAEDump.dumpDebugDAE(DAE.DAE_LIST(dae1))+\"\\n\");
                =#
           (outCache, outEnv, outStore)
         end
@@ -3297,11 +3297,11 @@
                 outVariables = inVariables
                 return outVariables
               end
-              @match DAE.DAE(elementLst = eqs) = inEquations
-              @match DAE.DAE(elementLst = vars) = inVariables
+              @match DAE.DAE_LIST(elementLst = eqs) = inEquations
+              @match DAE.DAE_LIST(elementLst = vars) = inVariables
               Error.assertion(intEq(listLength(eqs), listLength(vars)), "- InstUtil.moveBindings: Mismatched number of equations and variables.", AbsynUtil.dummyInfo)
               vars = ListUtil.threadMap(eqs, vars, moveBindings2)
-              outVariables = DAE.DAE(vars)
+              outVariables = DAE.DAE_LIST(vars)
           outVariables
         end
 
@@ -3889,9 +3889,9 @@
 
               local elts::List{DAE.Element}
 
-              @match DAE.DAE(elementLst = elts) = inDae
+              @match DAE.DAE_LIST(elementLst = elts) = inDae
               elts = ListUtil.map3(elts, propagateAllAttributes, inAttributes, inPrefixes, inInfo)
-              outDae = DAE.DAE(elts)
+              outDae = DAE.DAE_LIST(elts)
           outDae
         end
 
@@ -7672,8 +7672,8 @@
               local cr::DAE.ComponentRef
               local path::Absyn.Path
 
-              @match DAE.DAE(vars) = inVarsDae
-              @match DAE.DAE(equations) = inEquationsDae
+              @match DAE.DAE_LIST(vars) = inVarsDae
+              @match DAE.DAE_LIST(equations) = inEquationsDae
               if listEmpty(vars) || listEmpty(equations)
                 outVarsDae = inVarsDae
                 return outVarsDae
@@ -7744,7 +7744,7 @@
               end
                #= /* algorithm print(anyString(eq)); */ =#
               equations1 = ListUtil.deletePositions(equations1, is)
-              outVarsDae = DAE.DAE(listAppend(equations1, vars1))
+              outVarsDae = DAE.DAE_LIST(listAppend(equations1, vars1))
           outVarsDae
         end
 

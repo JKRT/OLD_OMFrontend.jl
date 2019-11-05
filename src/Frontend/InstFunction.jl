@@ -146,7 +146,7 @@
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       source = ElementSource.addCommentToSource(source, SOME(comment))
                       source = ElementSource.addElementSourceFileInfo(source, info)
-                    (cache, env, ih, DAE.DAE(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
+                    (cache, env, ih, DAE.DAE_LIST(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
 
                   (cache, _, ih, _, _, true, _, _)  => begin
@@ -380,7 +380,7 @@
                           else
                             InstTypes.INNER_CALL()
                           end
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, DAE.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE_LIST(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, false, info)
                       env_1 = env
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env_1, n)
@@ -402,7 +402,7 @@
                   end
 
                   (cache, env, ih, mod, pre, c && SCode.CLASS(partialPrefix = partialPrefix, prefixes = SCode.PREFIXES(visibility = visibility), name = n, restriction = restr && SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)), classDef = cd && parts && SCode.PARTS(externalDecl = SOME(scExtdecl)), info = info, encapsulatedPrefix = encapsulatedPrefix), inst_dims, _)  => begin
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE_LIST(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, true, info)
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env, n)
                       cmt = InstUtil.extractComment(daeElts)

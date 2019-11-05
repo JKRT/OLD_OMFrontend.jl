@@ -36,6 +36,7 @@ module InnerOuter
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
     @UniontypeDecl InstResult
     @UniontypeDecl InstInner
@@ -490,7 +491,7 @@ module InnerOuter
 
               @match DAE.SETS(outerConnects = oc) = inSets
               (oc, outSets, outInnerOuterConnects, outCGraph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, oc, inSets, inTopCall, inCGraph)
-              outSets.outerConnects = oc
+              @set outSets.outerConnects = oc
           (outSets, outInnerOuterConnects, outCGraph)
         end
 
@@ -895,8 +896,8 @@ module InnerOuter
                   end
 
                   (_, true)  => begin
-                      @match (DAE.DAE(innerVars), DAE.DAE(outerVars)) = DAEUtil.findAllMatchingElements(inDae, DAEUtil.isInnerVar, DAEUtil.isOuterVar)
-                      checkMissingInnerDecl1(DAE.DAE(innerVars), DAE.DAE(outerVars))
+                      @match (DAE.DAE_LIST(innerVars), DAE.DAE_LIST(outerVars)) = DAEUtil.findAllMatchingElements(inDae, DAEUtil.isInnerVar, DAEUtil.isOuterVar)
+                      checkMissingInnerDecl1(DAE.DAE_LIST(innerVars), DAE.DAE_LIST(outerVars))
                     ()
                   end
 

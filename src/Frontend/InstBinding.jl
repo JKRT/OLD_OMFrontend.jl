@@ -1,4 +1,4 @@
-  module InstBinding 
+  module InstBinding
 
 
     using MetaModelica
@@ -62,7 +62,7 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = List 
+        InstDims = List
 
         import Ceval
 
@@ -121,7 +121,7 @@
           Arg 2 are the type variables.
           Arg 3 is the expected type that the modification should have
           Arg 4 is the index list for the element: for T0{1,2} is {1,2} =#
-        function instBinding(inMod::DAE.Mod, inVarLst::List{<:DAE.Var}, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true use constant value present in TYPED (if present) =#) ::Option{DAE.Exp} 
+        function instBinding(inMod::DAE.Mod, inVarLst::List{<:DAE.Var}, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true use constant value present in TYPED (if present) =#) ::Option{DAE.Exp}
               local outExpExpOption::Option{DAE.Exp}
 
               outExpExpOption = begin
@@ -148,27 +148,27 @@
                       e_1 = InstUtil.checkUseConstValue(useConstValue, e_1, optVal)
                     SOME(e_1)
                   end
-                  
+
                   (mod, _, etype, index_list, bind_name)  => begin
                       mod2 = Mod.lookupCompModification(mod, bind_name)
                       result = instBinding2(mod2, etype, index_list, bind_name, useConstValue)
                     result
                   end
-                  
+
                   (mod, _, _,  nil(), bind_name)  => begin
                       @shouldFail _ = Mod.lookupCompModification(mod, bind_name)
                     NONE()
                   end
-                  
+
                   (_, DAE.TYPES_VAR(name = name, binding = binding) <| _, _, _, bind_name)  => begin
                       @match true = stringEq(name, bind_name)
                     DAEUtil.bindingExp(binding)
                   end
-                  
+
                   (mod, _ <| varLst, etype, index_list, bind_name)  => begin
                     instBinding(mod, varLst, etype, index_list, bind_name, useConstValue)
                   end
-                  
+
                   (_,  nil(), _, _, _)  => begin
                     NONE()
                   end
@@ -183,7 +183,7 @@
          #= This function investigates a modification and extracts the <...>
           modification if the modification is in array of components.
           Help-function to instBinding =#
-        function instBinding2(inMod::DAE.Mod, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Exp} 
+        function instBinding2(inMod::DAE.Mod, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Exp}
               local outExpExpOption::Option{DAE.Exp}
 
               outExpExpOption = begin
@@ -207,7 +207,7 @@
                       e_1 = InstUtil.checkUseConstValue(useConstValue, e_1, optVal)
                     SOME(e_1)
                   end
-                  
+
                   (mod, etype, index <| res, bind_name)  => begin
                       result = begin
                         @matchcontinue () begin
@@ -216,7 +216,7 @@
                               result = instBinding2(mod2, etype, res, bind_name, useConstValue)
                             result
                           end
-                          
+
                           _  => begin
                               NONE()
                           end
@@ -239,7 +239,7 @@
           Arg 1 is the start modification
           Arg 2 is the expected type that the modification should have
           Arg 3 is variability of the element =#
-        function instStartBindingExp(inMod::DAE.Mod, inExpectedType::DAE.Type, inVariability::SCode.Variability) ::DAE.StartValue 
+        function instStartBindingExp(inMod::DAE.Mod, inExpectedType::DAE.Type, inVariability::SCode.Variability) ::DAE.StartValue
               local outStartValue::DAE.StartValue
 
               if SCodeUtil.isConstant(inVariability)
@@ -255,7 +255,7 @@
         end
 
          #= This function investigates if the start value comes from the modification or the type =#
-        function instStartOrigin(inMod::DAE.Mod, inVarLst::List{<:DAE.Var}, inString::String) ::Option{DAE.Exp} 
+        function instStartOrigin(inMod::DAE.Mod, inVarLst::List{<:DAE.Var}, inString::String) ::Option{DAE.Exp}
               local outExpExpOption::Option{DAE.Exp}
 
               outExpExpOption = begin
@@ -271,16 +271,16 @@
                       @match SOME(_) = Mod.modEquation(mod2)
                     SOME(DAE.SCONST("binding"))
                   end
-                  
+
                   (_, DAE.TYPES_VAR(name = name) <| _, bind_name)  => begin
                       @match true = stringEq(name, bind_name)
                     SOME(DAE.SCONST("type"))
                   end
-                  
+
                   (mod, _ <| varLst, bind_name)  => begin
                     instStartOrigin(mod, varLst, bind_name)
                   end
-                  
+
                   (_,  nil(), _)  => begin
                     NONE()
                   end
@@ -292,7 +292,7 @@
          #= this function extracts the attributes from the modification
           It returns a DAE.VariableAttributes option because
           somtimes a varible does not contain the variable-attr. =#
-        function instDaeVariableAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}) ::Tuple{FCore.Cache, Option{DAE.VariableAttributes}} 
+        function instDaeVariableAttributes(inCache::FCore.Cache, inEnv::FCore.Graph, inMod::DAE.Mod, inType::DAE.Type, inIntegerLst::List{<:ModelicaInteger}) ::Tuple{FCore.Cache, Option{DAE.VariableAttributes}}
               local outDAEVariableAttributesOption::Option{DAE.VariableAttributes}
               local outCache::FCore.Cache
 
@@ -341,7 +341,7 @@
                       startOrigin = instStartOrigin(mod, varLst, "start")
                     (cache, SOME(DAE.VAR_ATTR_REAL(quantity_str, unit_str, displayunit_str, min_val, max_val, start_val, fixed_val, nominal_val, stateSelect_value, uncertainty_value, distribution_value, NONE(), NONE(), NONE(), startOrigin)))
                   end
-                  
+
                   (cache, _, mod, DAE.T_INTEGER(varLst = varLst), index_list)  => begin
                       quantity_str = instBinding(mod, varLst, DAE.T_STRING_DEFAULT, index_list, "quantity", false)
                       min_val = instBinding(mod, varLst, DAE.T_INTEGER_DEFAULT, index_list, "min", false)
@@ -354,7 +354,7 @@
                       startOrigin = instStartOrigin(mod, varLst, "start")
                     (cache, SOME(DAE.VAR_ATTR_INT(quantity_str, min_val, max_val, start_val, fixed_val, uncertainty_value, distribution_value, NONE(), NONE(), NONE(), startOrigin)))
                   end
-                  
+
                   (cache, _, mod, tp && DAE.T_BOOL(varLst = varLst), index_list)  => begin
                       quantity_str = instBinding(mod, varLst, DAE.T_STRING_DEFAULT, index_list, "quantity", false)
                       start_val = instBinding(mod, varLst, tp, index_list, "start", false)
@@ -362,11 +362,11 @@
                       startOrigin = instStartOrigin(mod, varLst, "start")
                     (cache, SOME(DAE.VAR_ATTR_BOOL(quantity_str, start_val, fixed_val, NONE(), NONE(), NONE(), startOrigin)))
                   end
-                  
+
                   (cache, _, _, DAE.T_CLOCK(__), _)  => begin
                     (cache, SOME(DAE.VAR_ATTR_CLOCK(NONE(), NONE())))
                   end
-                  
+
                   (cache, _, mod, tp && DAE.T_STRING(varLst = varLst), index_list)  => begin
                       quantity_str = instBinding(mod, varLst, tp, index_list, "quantity", false)
                       start_val = instBinding(mod, varLst, tp, index_list, "start", false)
@@ -374,7 +374,7 @@
                       startOrigin = instStartOrigin(mod, varLst, "start")
                     (cache, SOME(DAE.VAR_ATTR_STRING(quantity_str, start_val, fixed_val, NONE(), NONE(), NONE(), startOrigin)))
                   end
-                  
+
                   (cache, _, mod, enumtype && DAE.T_ENUMERATION(attributeLst = varLst), index_list)  => begin
                       quantity_str = instBinding(mod, varLst, DAE.T_STRING_DEFAULT, index_list, "quantity", false)
                       exp_bind_min = instBinding(mod, varLst, enumtype, index_list, "min", false)
@@ -384,7 +384,7 @@
                       startOrigin = instStartOrigin(mod, varLst, "start")
                     (cache, SOME(DAE.VAR_ATTR_ENUMERATION(quantity_str, exp_bind_min, exp_bind_max, exp_bind_start, fixed_val, NONE(), NONE(), NONE(), startOrigin)))
                   end
-                  
+
                   (cache, _, _, _, _)  => begin
                     (cache, NONE())
                   end
@@ -409,7 +409,7 @@
 
          #= author: LP
           instantiates a enumeration binding and retrieves the value. =#
-        function instEnumerationBinding(inMod::DAE.Mod, varLst::List{<:DAE.Var}, inIndices::List{<:ModelicaInteger}, inName::String, expected_type::DAE.Type, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Exp} 
+        function instEnumerationBinding(inMod::DAE.Mod, varLst::List{<:DAE.Var}, inIndices::List{<:ModelicaInteger}, inName::String, expected_type::DAE.Type, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Exp}
               local outBinding::Option{DAE.Exp}
 
               try
@@ -420,12 +420,12 @@
           outBinding
         end
 
-         #= 
+         #=
           Author:Peter Aronsson, 2012
 
           Instantiates a distribution binding and retrieves the value.
          =#
-        function instDistributionBinding(inMod::DAE.Mod, varLst::List{<:DAE.Var}, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Distribution} 
+        function instDistributionBinding(inMod::DAE.Mod, varLst::List{<:DAE.Var}, inIntegerLst::List{<:ModelicaInteger}, inString::String, useConstValue::Bool #= if true, use constant value in TYPED (if present) =#) ::Option{DAE.Distribution}
               local out::Option{DAE.Distribution}
 
               out = begin
@@ -446,21 +446,21 @@
                    =#
                 @matchcontinue (inMod, inIntegerLst, inString) begin
                   (mod, index_list, bind_name)  => begin
-                      @match SOME(DAE.CALL(path = path, expLst = list(name, params, paramNames))) = instBinding(mod, varLst, distributionType, index_list, bind_name, useConstValue)
+                      @match SOME(DAE.CALL(path = path, expLst = name <| params <| paramNames <| nil)) = instBinding(mod, varLst, distributionType, index_list, bind_name, useConstValue)
                       @match true = AbsynUtil.pathEqual(path, Absyn.IDENT("Distribution"))
                     SOME(DAE.DISTRIBUTION(name, params, paramNames))
                   end
-                  
+
                   (mod, index_list, bind_name)  => begin
-                      @match SOME(DAE.RECORD(path = path, exps = list(name, params, paramNames))) = instBinding(mod, varLst, distributionType, index_list, bind_name, useConstValue)
+                      @match SOME(DAE.RECORD(path = path, exps = name <| params <| paramNames <| nil)) = instBinding(mod, varLst, distributionType, index_list, bind_name, useConstValue)
                       @match true = AbsynUtil.pathEqual(path, Absyn.IDENT("Distribution"))
                     SOME(DAE.DISTRIBUTION(name, params, paramNames))
                   end
-                  
+
                   (mod, index_list, bind_name)  => begin
                       @match SOME(DAE.CREF(cr, ty)) = instBinding(mod, varLst, distributionType, index_list, bind_name, useConstValue)
                       @match true = Types.isRecord(ty)
-                      @match DAE.T_COMPLEX(varLst = _cons(_, _cons(DAE.TYPES_VAR(ty = DAE.T_ARRAY(dims = list(DAE.DIM_INTEGER(paramDim)))), _))) = ty
+                      @match DAE.T_COMPLEX(varLst = _ <| DAE.TYPES_VAR(ty = DAE.T_ARRAY(dims = DAE.DIM_INTEGER(paramDim) <| nil)) <| _) = ty
                       crName = ComponentReference.crefPrependIdent(cr, "name", nil, DAE.T_STRING_DEFAULT)
                       crParams = ComponentReference.crefPrependIdent(cr, "params", nil, DAE.T_ARRAY(DAE.T_REAL_DEFAULT, list(DAE.DIM_INTEGER(paramDim))))
                       name = Expression.makeCrefExp(crName, DAE.T_STRING_DEFAULT)
@@ -468,7 +468,7 @@
                       paramNames = Expression.makeCrefExp(crParams, DAE.T_ARRAY(DAE.T_STRING_DEFAULT, list(DAE.DIM_INTEGER(paramDim))))
                     SOME(DAE.DISTRIBUTION(name, params, paramNames))
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -479,12 +479,12 @@
           out
         end
 
-         #= 
+         #=
           Author: Daniel Hedberg 2011-01
 
           Extracts the uncertainty value, as defined in DAE, from a DAE.Exp.
          =#
-        function getUncertainFromExpOption(expOption::Option{<:DAE.Exp}) ::Option{DAE.Uncertainty} 
+        function getUncertainFromExpOption(expOption::Option{<:DAE.Exp}) ::Option{DAE.Uncertainty}
               local out::Option{DAE.Uncertainty}
 
               out = begin
@@ -492,15 +492,15 @@
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "Uncertainty", path = Absyn.IDENT("given"))))  => begin
                     SOME(DAE.GIVEN())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "Uncertainty", path = Absyn.IDENT("sought"))))  => begin
                     SOME(DAE.SOUGHT())
                   end
-                  
+
                   SOME(DAE.ENUM_LITERAL(name = Absyn.QUALIFIED(name = "Uncertainty", path = Absyn.IDENT("refine"))))  => begin
                     SOME(DAE.REFINE())
                   end
-                  
+
                   _  => begin
                       NONE()
                   end
@@ -511,7 +511,7 @@
 
          #= This function adds the equation in the declaration
           of a variable, if such an equation exists. =#
-        function instModEquation(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inMod::DAE.Mod, inSource::DAE.ElementSource #= the origin of the element =#, inImpl::Bool) ::DAE.DAElist 
+        function instModEquation(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inMod::DAE.Mod, inSource::DAE.ElementSource #= the origin of the element =#, inImpl::Bool) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -537,7 +537,7 @@
                   (DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), DAE.MOD(binding = SOME(DAE.TYPED(_, SOME(_), DAE.PROP(_, DAE.C_CONST(__)), _))))  => begin
                     DAE.emptyDae
                   end
-                  
+
                   (_, DAE.MOD(binding = SOME(DAE.TYPED(properties = prop2))))  => begin
                        #=  Special case if the dimensions of the expression is 0.
                        =#
@@ -545,10 +545,10 @@
                        =#
                        #=  will result in error messages (Real[0] is not Real), so we handle it here.
                        =#
-                      @match DAE.T_ARRAY(dims = list(DAE.DIM_INTEGER(0))) = Types.getPropType(prop2)
+                      @match DAE.T_ARRAY(dims = DAE.DIM_INTEGER(0) <| nil) = Types.getPropType(prop2)
                     DAE.emptyDae
                   end
-                  
+
                   (_, DAE.MOD(binding = SOME(DAE.TYPED(e, _, prop2, aexp2)), info = info))  => begin
                        #=  Regular cases
                        =#
@@ -561,19 +561,19 @@
                       dae = InstSection.instEqEquation(lhs, DAE.PROP(inType, DAE.C_VAR()), e, prop2, source, SCode.NON_INITIAL(), inImpl, extraInfo = info)
                     dae
                   end
-                  
+
                   (_, DAE.MOD(binding = NONE()))  => begin
                     DAE.emptyDae
                   end
-                  
+
                   (_, DAE.NOMOD(__))  => begin
                     DAE.emptyDae
                   end
-                  
+
                   (_, DAE.REDECL(__))  => begin
                     DAE.emptyDae
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- InstBinding.instModEquation failed\\n type: ")
@@ -591,7 +591,7 @@
 
          #= This function looks at the equation part of a modification, and
           if there is a declaration equation builds a DAE.Binding for it. =#
-        function makeBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inAttributes::SCode.Attributes, inMod::DAE.Mod, inType::DAE.Type, inPrefix::Prefix.PrefixType, componentName::String, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Binding} 
+        function makeBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inAttributes::SCode.Attributes, inMod::DAE.Mod, inType::DAE.Type, inPrefix::Prefix.PrefixType, componentName::String, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Binding}
               local outBinding::DAE.Binding
               local outCache::FCore.Cache
 
@@ -628,15 +628,15 @@
                       binding = makeRecordBinding(cache, inEnv, tpath, inType, complex_vars, nil, inInfo)
                     (cache, binding)
                   end
-                  
+
                   (cache, _, DAE.NOMOD(__), _)  => begin
                     (cache, DAE.UNBOUND())
                   end
-                  
+
                   (_, _, DAE.REDECL(__), _)  => begin
                     makeBinding(inCache, inEnv, inAttributes, inMod.mod, inType, inPrefix, componentName, inInfo)
                   end
-                  
+
                   (cache, SCode.ATTR(variability = SCode.PARAM(__)), DAE.MOD(binding = NONE()), tp)  => begin
                       @match true = Types.getFixedVarAttributeParameterOrConstant(tp)
                       startValueModification = Mod.lookupCompModification(inMod, "start")
@@ -645,17 +645,17 @@
                       binding = DAEUtil.setBindingSource(binding, DAE.BINDING_FROM_START_VALUE())
                     (cache, binding)
                   end
-                  
+
                   (cache, _, DAE.MOD(subModLst = sub_mods && _ <| _), _)  => begin
                       @match DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = tpath), varLst = complex_vars) = Types.arrayElementType(inType)
                       binding = makeRecordBinding(cache, inEnv, tpath, inType, complex_vars, sub_mods, inInfo)
                     (cache, binding)
                   end
-                  
+
                   (cache, _, DAE.MOD(binding = NONE()), _)  => begin
                     (cache, DAE.UNBOUND())
                   end
-                  
+
                   (cache, _, DAE.MOD(binding = SOME(DAE.TYPED(e, SOME(v), prop, _))), e_tp)  => begin
                       c = Types.propAllConst(prop)
                       tp = Types.getPropType(prop)
@@ -669,7 +669,7 @@
                       e_val = SOME(v)
                     (cache, DAE.EQBOUND(e_1, e_val, c, DAE.BINDING_FROM_DEFAULT_VALUE()))
                   end
-                  
+
                   (cache, _, DAE.MOD(binding = SOME(DAE.TYPED(e, e_val, prop, _))), e_tp)  => begin
                       c = Types.propAllConst(prop)
                       tp = Types.getPropType(prop)
@@ -677,7 +677,7 @@
                       (e_1, _) = ExpressionSimplify.simplify(e_1)
                     (cache, DAE.EQBOUND(e_1, e_val, c, DAE.BINDING_FROM_DEFAULT_VALUE()))
                   end
-                  
+
                   (_, _, DAE.MOD(binding = SOME(DAE.TYPED(e, _, prop, _)), info = info), tp)  => begin
                       e_tp = Types.getPropType(prop)
                       _ = Types.propAllConst(prop)
@@ -691,7 +691,7 @@
                       Error.addSourceMessage(Error.MODIFIER_TYPE_MISMATCH_ERROR, list(str, tp_str, e_str_1, e_tp_str), info)
                     fail()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Inst.makeBinding failed on component:" + PrefixUtil.printPrefixStr(inPrefix) + "." + componentName)
@@ -776,7 +776,7 @@
 
           This is needed when we assign a record to another record.
            =#
-        function makeRecordBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inRecordName::Absyn.Path, inRecordType::DAE.Type, inRecordVars::List{<:DAE.Var}, inMods::List{<:DAE.SubMod}, inInfo::SourceInfo) ::DAE.Binding 
+        function makeRecordBinding(inCache::FCore.Cache, inEnv::FCore.Graph, inRecordName::Absyn.Path, inRecordType::DAE.Type, inRecordVars::List{<:DAE.Var}, inMods::List{<:DAE.SubMod}, inInfo::SourceInfo) ::DAE.Binding
               local outBinding::DAE.Binding
 
               local accum_exps::List{DAE.Exp} = nil
@@ -842,7 +842,7 @@
 
          #= Helper function to makeRecordBinding2. Fetches the binding expression and
            value from an optional submod. =#
-        function makeRecordBinding3(inSubMod::Option{<:DAE.SubMod}, inType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, Values.Value} 
+        function makeRecordBinding3(inSubMod::Option{<:DAE.SubMod}, inType::DAE.Type, inInfo::SourceInfo) ::Tuple{DAE.Exp, Values.Value}
               local outValue::Values.Value
               local outExp::DAE.Exp
 
@@ -861,21 +861,21 @@
                   SOME(DAE.NAMEMOD(mod = DAE.MOD(eachPrefix = SCode.EACH(__), binding = SOME(DAE.TYPED(modifierAsExp = exp, modifierAsValue = SOME(val))))))  => begin
                     (exp, val)
                   end
-                  
+
                   SOME(DAE.NAMEMOD(mod = DAE.MOD(eachPrefix = SCode.NOT_EACH(__), binding = SOME(DAE.TYPED(modifierAsExp = exp, modifierAsValue = SOME(val), properties = DAE.PROP(type_ = ty))))))  => begin
                        #=  Scalar type and no each prefix => return the expression and value.
                        =#
                       (exp, ty) = Types.matchType(exp, ty, inType, true)
                     (exp, val)
                   end
-                  
+
                   SOME(DAE.NAMEMOD(mod = DAE.MOD(eachPrefix = SCode.NOT_EACH(__), binding = SOME(DAE.TYPED(modifierAsExp = exp, modifierAsValue = NONE(), properties = DAE.PROP(type_ = ty))))))  => begin
                        #=  Scalar type and no each prefix => bindings given by expressions myRecord(v1 = inV1, v2 = inV2)
                        =#
                       (exp, ty) = Types.matchType(exp, ty, inType, true)
                     (exp, Values.OPTION(NONE()))
                   end
-                  
+
                   SOME(DAE.NAMEMOD(ident = ident, mod = DAE.MOD(binding = SOME(DAE.TYPED(modifierAsExp = exp, properties = DAE.PROP(type_ = ty))))))  => begin
                       binding_str = ExpressionDump.printExpStr(exp)
                       expected_type_str = Types.unparseTypeNoAttr(inType)
@@ -890,7 +890,7 @@
         end
 
          #= Returns a variable's bound expression. =#
-        function makeVariableBinding(inType::DAE.Type, inMod::DAE.Mod, inConst::DAE.Const, inPrefix::Prefix.PrefixType, inName::String) ::Option{DAE.Exp} 
+        function makeVariableBinding(inType::DAE.Type, inMod::DAE.Mod, inConst::DAE.Const, inPrefix::Prefix.PrefixType, inName::String) ::Option{DAE.Exp}
               local outBinding::Option{DAE.Exp}
 
               local oeq_mod::Option{DAE.EqMod} = Mod.modEquation(inMod)

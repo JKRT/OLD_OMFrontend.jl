@@ -841,7 +841,7 @@
                       inExps = convertExpToPatterns(inExp)
                       (inExps, inputAliases, inputAliasesAndCrefs) = ListUtil.map_3(inExps, getInputAsBinding)
                       (cache, elabExps, elabProps) = Static.elabExpList(cache, env, inExps, impl, performVectorization, pre, info)
-                      @match (cache, SOME((env, DAE.DAE(matchDecls), declsTree))) = addLocalDecls(cache, env, decls, FCore.matchScopeName, impl, info)
+                      @match (cache, SOME((env, DAE.DAE_LIST(matchDecls), declsTree))) = addLocalDecls(cache, env, decls, FCore.matchScopeName, impl, info)
                       tys = ListUtil.map(elabProps, Types.getPropType)
                       env = addAliasesToEnv(env, tys, inputAliases, info)
                       (cache, elabCases, resType) = elabMatchCases(cache, env, cases, tys, inputAliasesAndCrefs, declsTree, impl, performVectorization, pre, info)
@@ -2338,7 +2338,7 @@
                   local useTree::AvlSetString.Tree
                 @match (inCache, inEnv, acase) begin
                   (cache, env, Absyn.CASE(pattern = pattern, patternGuard = patternGuard, patternInfo = patternInfo, localDecls = decls, classPart = cp, result = result, resultInfo = resultInfo, info = info))  => begin
-                      @match (cache, SOME((env, DAE.DAE(caseDecls), caseLocalTree))) = addLocalDecls(cache, env, decls, FCore.caseScopeName, impl, info)
+                      @match (cache, SOME((env, DAE.DAE_LIST(caseDecls), caseLocalTree))) = addLocalDecls(cache, env, decls, FCore.caseScopeName, impl, info)
                       patterns = convertExpToPatterns(pattern)
                       patterns = if listLength(tys) == 1
                             list(pattern)

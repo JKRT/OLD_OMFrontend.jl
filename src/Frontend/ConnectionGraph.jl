@@ -117,7 +117,7 @@ function handleOverconstrainedConnections(inGraph::ConnectionGraphType, modelNam
         (inDAE, nil, nil)
       end
 
-      (graph, _, DAE.DAE(elts))  => begin
+      (graph, _, DAE.DAE_LIST(elts))  => begin
         if Flags.isSet(Flags.CGRAPH)
           Debug.traceln("Summary: \\n\\t" + "Nr Roots:           " + intString(listLength(getDefiniteRoots(graph))) + "\\n\\t" + "Nr Potential Roots: " + intString(listLength(getPotentialRoots(graph))) + "\\n\\t" + "Nr Unique Roots:    " + intString(listLength(getUniqueRoots(graph))) + "\\n\\t" + "Nr Branches:        " + intString(listLength(getBranches(graph))) + "\\n\\t" + "Nr Connections:     " + intString(listLength(getConnections(graph))))
         end
@@ -128,7 +128,7 @@ function handleOverconstrainedConnections(inGraph::ConnectionGraphType, modelNam
           Debug.traceln("Allowed connections: " + stringDelimitList(ListUtil.map1(connected, printConnectionStr, "allowed"), ", "))
         end
         elts = evalConnectionsOperators(roots, graph, elts)
-        (DAE.DAE(elts), connected, broken)
+        (DAE.DAE_LIST(elts), connected, broken)
       end
 
       _  => begin
@@ -1806,7 +1806,7 @@ function addBrokenEqualityConstraintEquations(inDAE::DAE.DAElist, inBroken::DaeE
 
       _  => begin
         equalityConstraintElements = ListUtil.flatten(ListUtil.map(inBroken, Util.tuple33))
-        dae = DAEUtil.joinDaes(DAE.DAE(equalityConstraintElements), inDAE)
+        dae = DAEUtil.joinDaes(DAE.DAE_LIST(equalityConstraintElements), inDAE)
         dae
       end
     end

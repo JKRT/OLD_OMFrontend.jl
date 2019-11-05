@@ -156,7 +156,7 @@
                       sstr = ClassInf.printStateStr(inState)
                       sstr = "'" + sstr + "'"
                       comp = DAE.COMP(sstr, els, DAE.emptyElementSource, NONE())
-                      dae = DAE.DAE(list(comp))
+                      dae = DAE.DAE_LIST(list(comp))
                       str = if System.getPartialInstantiation()
                             " partial"
                           else
@@ -214,27 +214,27 @@
                 @matchcontinue (inComponentRef, inType, inConnectorType, inVarKind, inVarDirection, inParallelism, protection, inExpExpOption, inInstDims, inStartValue, inAttr, inComment, io, source, declareComplexVars) begin
                   (vn, DAE.T_INTEGER(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_INTEGER_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_INTEGER_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, DAE.T_REAL(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_REAL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_REAL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, DAE.T_BOOL(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_BOOL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_BOOL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, DAE.T_CLOCK(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_CLOCK_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_CLOCK_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, DAE.T_STRING(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_STRING_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_STRING_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (_, DAE.T_ENUMERATION(index = SOME(_)), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
@@ -243,12 +243,12 @@
                   
                   (vn, ty && DAE.T_ENUMERATION(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, ty && DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(_)), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, DAE.T_SUBTYPE_BASIC(complexType = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
@@ -278,21 +278,21 @@
                   
                   (vn, ty && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, true)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, tty && DAE.T_FUNCTION(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                       path = ComponentReference.crefToPath(vn)
                       tty.path = path
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, tty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, tty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   (vn, ty, ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match true = Types.isBoxedType(ty)
                       finst_dims = ListUtil.flatten(inst_dims)
-                    DAE.DAE(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
+                    DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
                   
                   _  => begin

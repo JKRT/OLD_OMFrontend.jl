@@ -221,7 +221,7 @@
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cdef)
-                      dae = DAE.DAE(list(DAE.COMP(pathstr, daeElts, source, cmt)))
+                      dae = DAE.DAE_LIST(list(DAE.COMP(pathstr, daeElts, source, cmt)))
                       InstHashTable.release()
                     (cache, env, ih, dae)
                   end
@@ -309,7 +309,7 @@
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cdef)
-                      dae = DAE.DAE(list(DAE.COMP(pathstr, daeElts, source, cmt)))
+                      dae = DAE.DAE_LIST(list(DAE.COMP(pathstr, daeElts, source, cmt)))
                     (cache, env_2, ih, dae)
                   end
 
@@ -374,7 +374,7 @@
                       dae = InstUtil.reEvaluateInitialIfEqns(cache, env, dae, true)
                       elts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cls)
-                      dae = DAE.DAE(list(DAE.COMP(name, elts, inSource, cmt)))
+                      dae = DAE.DAE_LIST(list(DAE.COMP(name, elts, inSource, cmt)))
                     (cache, env, ih, dae)
                   end
 
@@ -724,10 +724,8 @@
                =#
               if Flags.isSet(Flags.CACHE)
                 try
-                  tableResult = InstHashTable.get(cache_path)
-                  @match SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)) <| _ = tableResult
-                  @match (m, pre, csets, st, e, dims, impl, scr, cs) = inputs
-                  @match SCode.CLASS() = e
+                  @match list(SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)), _) = InstHashTable.get(cache_path)
+                  @match (m, pre, csets, st, (@match SCode.CLASS() = e), dims, impl, scr, cs) = inputs
                   InstUtil.prefixEqualUnlessBasicType(prefix, pre, cls)
                   if valueEq(dims, instDims) && impl == implicitInst && valueEq(m, mod) && valueEq(csets, sets) && valueEq(st, state) && valueEq(e, cls) && valueEq(scr, instSingleCref) && callingScopeCacheEq(cs, callingScope)
                     (env, dae, sets, state, vars, ty, optDerAttr, equalityConstraint, cached_graph) = outputs
@@ -903,7 +901,7 @@
                       end
                       (cache, env_1, ih, store, dae, csets, ci_state_1, tys, bc, oDA, eqConstraint, graph) = instClassdef(cache, env, ih, store, mods, pre, ci_state, n, d, r, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info)
                       dae = if SCodeUtil.isFunction(c) && ! impl
-                            DAE.DAE(nil)
+                            DAE.DAE_LIST(nil)
                           else
                             dae
                           end
@@ -1416,8 +1414,7 @@
                =#
               if Flags.isSet(Flags.CACHE)
                 try
-                  tableResult = InstHashTable.get(cache_path)
-                  @match list(_, SOME(InstHashTable.FUNC_partialInstClassIn(inputs, outputs))) = tableResult
+                  @match list(_, SOME(InstHashTable.FUNC_partialInstClassIn(inputs, outputs))) = InstHashTable.get(cache_path)
                   @match (m, pre, st, (@match SCode.CLASS() = e), dims) = inputs
                   InstUtil.prefixEqualUnlessBasicType(pre, prefix, cls)
                   if valueEq(dims, instDims) && valueEq(m, mod) && valueEq(st, state) && valueEq(e, cls)
@@ -2617,7 +2614,7 @@
                   end
                 end
                 outVars = listAppend(lst for lst in var_arr)
-                outDae = DAE.DAE(listAppend(lst for lst in dae_arr))
+                outDae = DAE.DAE_LIST(listAppend(lst for lst in dae_arr))
                 GC.free(var_arr)
                 GC.free(dae_arr)
               else
@@ -2627,7 +2624,7 @@
                   dael = _cons(dae, dael)
                 end
                 outVars = ListUtil.flattenReverse(varsl)
-                outDae = DAE.DAE(ListUtil.flattenReverse(dael))
+                outDae = DAE.DAE_LIST(ListUtil.flattenReverse(dael))
               end
                #=  Figure out the ordering of the sorted elements, see getSortedElementOrdering.
                =#
@@ -2714,7 +2711,7 @@
                 @match (outCache, outEnv, outIH, elts) = updateCompeltsMods(inCache, outEnv, outIH, inPrefix, list(inElement), outState, inImplicit)
                 elt = listHead(elts)
                 @match (outCache, outEnv, outIH, outStore, zzz, outSets, outState, outVars, outGraph, outFieldDomOpt) = instElement(outCache, outEnv, outIH, outStore, inMod, inPrefix, outState, elt, inInstDims, inImplicit, inCallingScope, outGraph, inSets)
-                @match DAE.DAE(outDae) = zzz
+                @match DAE.DAE_LIST(outDae) = zzz
                 Error.clearCurrentComponent()
                 ErrorExt.delCheckpoint("instElement2")
               catch
@@ -2999,8 +2996,8 @@
                       end
                       (cache, comp_env, ih, store, dae, csets, ty, graph_new) = InstVar.instVar(cache, cenv, ih, store, ci_state, mod_1, pre, name, cls, attr, prefixes, dims, nil, inst_dims, impl, comment, info, graph, csets, env2)
                       if isInSM
-                        @match DAE.DAE(elementLst = elems) = dae
-                        dae = DAE.DAE(list(DAE.SM_COMP(cref2, elems)))
+                        @match DAE.DAE_LIST(elementLst = elems) = dae
+                        dae = DAE.DAE_LIST(list(DAE.SM_COMP(cref2, elems)))
                       end
                       (cache, binding) = InstBinding.makeBinding(cache, env2, attr, mod, ty, pre, name, info)
                       dae_attr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefixes)
@@ -4146,7 +4143,7 @@
                   end
 
                   (_, _, _, _, _, _)  => begin
-                      clsAttrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(NONE(), NONE(), NONE(), NONE()))))
+                      clsAttrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(NONE(), NONE(), NONE(), NONE()))))
                       (cache, env, dae) = instClassAttributes2(inCache, inEnv, inPrefix, inAttrs, inBoolean, inInfo, clsAttrs)
                     (cache, env, dae)
                   end
@@ -4213,26 +4210,26 @@
                   local attrs::DAE.DAElist
                 @match (inAttrs, attrName, inAttrExp) begin
                   (attrs, "objective", _)  => begin
-                      @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)))) = attrs
-                      attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(SOME(inAttrExp), objectiveIntegrandE, startTimeE, finalTimeE))))
+                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)))) = attrs
+                      attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(SOME(inAttrExp), objectiveIntegrandE, startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "objectiveIntegrand", _)  => begin
-                      @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)))) = attrs
-                      attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, SOME(inAttrExp), startTimeE, finalTimeE))))
+                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)))) = attrs
+                      attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, SOME(inAttrExp), startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "startTime", _)  => begin
-                      @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)))) = attrs
-                      attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, SOME(inAttrExp), finalTimeE))))
+                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)))) = attrs
+                      attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, SOME(inAttrExp), finalTimeE))))
                     attrs
                   end
 
                   (attrs, "finalTime", _)  => begin
-                      @match DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)))) = attrs
-                      attrs = DAE.DAE(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, SOME(inAttrExp)))))
+                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)))) = attrs
+                      attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, SOME(inAttrExp)))))
                     attrs
                   end
 
@@ -5002,12 +4999,12 @@
                     if isNone(comment)
                           dae
                         else
-                          DAE.DAE(list(DAE.COMMENT(SCode.COMMENT(NONE(), comment))))
+                          DAE.DAE_LIST(list(DAE.COMMENT(SCode.COMMENT(NONE(), comment))))
                         end
                   end
 
                   _  => begin
-                      DAE.DAE(list(DAE.COMMENT(SCode.COMMENT(SOME(SCode.ANNOTATION(mod)), comment))))
+                      DAE.DAE_LIST(list(DAE.COMMENT(SCode.COMMENT(SOME(SCode.ANNOTATION(mod)), comment))))
                   end
                 end
               end

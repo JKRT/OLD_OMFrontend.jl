@@ -139,7 +139,7 @@
                 smNodeToFlatSMGroup = HashTableCG.emptyHashTableSized(1)
                 return smNodeToFlatSMGroup
               end
-              @match DAE.DAE(elementLst = elementLst) = inDae
+              @match DAE.DAE_LIST(elementLst = elementLst) = inDae
               smNodeTable = getSMNodeTable(elementLst)
               nStates = BaseHashTable.hashTableCurrentSize(smNodeTable)
               if nStates > 0
@@ -218,11 +218,11 @@
                =#
                #= print(\"InstStateMachineUtil.wrapSMCompsInFlatSMs: smNodeToFlatSMGroup:\\n\"); BaseHashTable.dumpHashTable(smNodeToFlatSMGroup);
                =#
-              @match DAE.DAE(elementLst = elementLst1) = inDae1
+              @match DAE.DAE_LIST(elementLst = elementLst1) = inDae1
                #=  extract SM_COMPs
                =#
               (smCompsLst, otherLst1) = ListUtil.extractOnTrue(elementLst1, isSMComp)
-              @match DAE.DAE(elementLst = elementLst2) = inDae2
+              @match DAE.DAE_LIST(elementLst = elementLst2) = inDae2
                #=  extract transition and initialState statements
                =#
               (smTransitionsLst, otherLst2) = ListUtil.extractOnTrue(elementLst2, isSMStatement2)
@@ -234,8 +234,8 @@
                #=  Merge variable definitions in flat state machine and create elements list containing FLAT_SMs and merging equations
                =#
               flatSMsAndMergingEqns = ListUtil.fold1(flatSmLst, mergeVariableDefinitions, inIH, nil)
-              outDae1 = DAE.DAE(listAppend(flatSMsAndMergingEqns, otherLst1))
-              outDae2 = DAE.DAE(otherLst2)
+              outDae1 = DAE.DAE_LIST(listAppend(flatSMsAndMergingEqns, otherLst1))
+              outDae2 = DAE.DAE_LIST(otherLst2)
           (outDae1, outDae2)
         end
 
@@ -292,12 +292,12 @@
                #=  Substitute occurrences of previous(outerCref) by previous(innerCref)
                =#
               emptyTree = DAE.AvlTreePathFunction.Tree.EMPTY()
-              @match (DAE.DAE(dAElist), _, _) = DAEUtil.traverseDAE(DAE.DAE(dAElist), emptyTree, traverserHelperSubsOuterByInnerExp, outerOutputCrefToInnerCref)
+              @match (DAE.DAE_LIST(dAElist), _, _) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist), emptyTree, traverserHelperSubsOuterByInnerExp, outerOutputCrefToInnerCref)
               if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
                 crefs = BaseHashTable.hashTableKeyList(outerOutputCrefToSMCompCref)
                 for cref in crefs
                   nOfHits = 0
-                  (_, _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE(dAElist), emptyTree, Expression.traverseSubexpressionsHelper, (traversingCountDer, (cref, 0)))
+                  (_, _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist), emptyTree, Expression.traverseSubexpressionsHelper, (traversingCountDer, (cref, 0)))
                   if nOfHits > 0
                     derCrefsAcc = _cons(cref, derCrefsAcc)
                   end
