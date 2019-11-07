@@ -61,6 +61,8 @@
         import DAEDump
 
         import Error
+        
+        import BaseHashTable
 
         import HashTableCrToExpOption
 

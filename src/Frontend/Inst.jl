@@ -1820,7 +1820,7 @@
                       @match false = SCodeUtil.isFunctionRestriction(re)
                       @match false = valueEq(SCode.R_RECORD(true), re)
                       @match false = valueEq(SCode.R_RECORD(false), re)
-                      @match (cdefelts, extendsclasselts, (@match _cons(_, _) = extendselts), nil) = InstUtil.splitElts(els)
+                      @match (cdefelts, extendsclasselts, extendselts && _ <| _, nil) = InstUtil.splitElts(els)
                       extendselts = SCodeInstUtil.addRedeclareAsElementsToExtends(extendselts, ListUtil.select(els, SCodeUtil.isRedeclareElement))
                       (cache, env1, ih) = InstUtil.addClassdefsToEnv(cache, env, ih, pre, cdefelts, impl, SOME(mods))
                       @match (cache, _, _, _, extcomps, nil, nil, nil, nil, _) = InstExtends.instExtendsAndClassExtendsList(cache, env1, ih, mods, pre, extendselts, extendsclasselts, els, ci_state, className, impl, false)

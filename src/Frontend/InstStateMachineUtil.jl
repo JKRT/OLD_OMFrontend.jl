@@ -54,6 +54,8 @@
         import ListUtil
 
         import ComponentReference
+        
+        import BaseHashTable
 
         import HashTable
 

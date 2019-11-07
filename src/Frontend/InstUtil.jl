@@ -2619,7 +2619,7 @@
                         ty_path = AbsynUtil.typeSpecPath(comp.typeSpec)
                         local_mod = Mod.lookupModificationP(mod, ty_path)
                         if SCodeUtil.finalBool(SCodeUtil.prefixesFinal(prefs))
-                          comp.modifications = traverseModAddFinal(comp.modifications)
+                          @set comp.modifications = traverseModAddFinal(comp.modifications)
                         end
                         (cache, env, ih, comp2, mod2) = Inst.redeclareType(cache, env, ih, local_mod, comp, prefix, state, impl, cmod)
                         comp_mod = Mod.lookupCompModification(mod, comp.name)
@@ -4956,7 +4956,7 @@
                   local tp::DAE.Type
                 @match inType begin
                   resType && DAE.T_FUNCTION(__)  => begin
-                      resType.path = path
+                      @set resType.path = path
                     resType
                   end
 
@@ -7832,8 +7832,7 @@
                 _ = begin
                   @match elt begin
                     DAE.COMMENT(cmt = cmt)  => begin
-                        return
-                      fail()
+                      return cmt
                     end
 
                     _  => begin

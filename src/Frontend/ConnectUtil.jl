@@ -5,6 +5,7 @@ module ConnectUtil
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
 
     UpdateFunc = Function
@@ -623,9 +624,9 @@ module ConnectUtil
               try
                 setTrieGetElement(cref, DAE.INSIDE(), sets.sets)
               catch
-                sets.setCount = sets.setCount + 1
+                @set sets.setCount = sets.setCount + 1
                 e = newElement(cref, DAE.INSIDE(), DAE.FLOW(), source, sets.setCount)
-                sets.sets = setTrieAdd(e, sets.sets)
+                @set sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
                =#
@@ -678,7 +679,7 @@ module ConnectUtil
                =#
               if ! ListUtil.exist2(sets.outerConnects, outerConnectionMatches, cr1, cr2)
                 new_oc = DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
-                sets.outerConnects = _cons(new_oc, sets.outerConnects)
+                @set sets.outerConnects = _cons(new_oc, sets.outerConnects)
               end
           sets
         end
@@ -1060,8 +1061,8 @@ module ConnectUtil
               e2 = setElementSetIndex(element2, sc)
               node = sets.sets
               node = setTrieAdd(e1, node)
-              sets.sets = setTrieAdd(e2, node)
-              sets.setCount = sc
+              @set sets.sets = setTrieAdd(e2, node)
+              @set sets.setCount = sc
           sets
         end
 
@@ -1090,7 +1091,7 @@ module ConnectUtil
                #=  Add a new connection if the elements don't belong to the same set already.
                =#
               if set1 != set2
-                sets.connections = _cons((set1, set2), sets.connections)
+                @set sets.connections = _cons((set1, set2), sets.connections)
               end
           sets
         end
@@ -1169,9 +1170,7 @@ module ConnectUtil
 
          #= Updates a trie leaf in the sets with the given update function. =#
         function updateSetLeaf(sets::Sets, cref::DAE.ComponentRef, arg::Arg, updateFunc::UpdateFunc)  where {Arg}
-
-
-              sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
+          @set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
           sets
         end
 
@@ -1280,7 +1279,7 @@ module ConnectUtil
               local node::SetTrieNode
 
               (node, arg) = setTrieTraverseLeaves(sets.sets, updateFunc, arg)
-              sets.sets = node
+              @set sets.sets = node
           (sets, arg)
         end
 

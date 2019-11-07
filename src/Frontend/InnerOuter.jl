@@ -231,9 +231,7 @@ module InnerOuter
 
          #= changes inner to outer and outer to inner where needed =#
         function changeInnerOuterInOuterConnect(sets::DAE.Sets) ::DAE.Sets
-
-
-              sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
+          @set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
           sets
         end
 

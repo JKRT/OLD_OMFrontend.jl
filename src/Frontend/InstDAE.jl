@@ -1,4 +1,4 @@
-  module InstDAE 
+  module InstDAE
 
 
     using MetaModelica
@@ -43,7 +43,7 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import FGraph
@@ -85,14 +85,14 @@
 
         InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
 
-        InstDims = List 
+        InstDims = List
 
          #= Given a global component name, a type, and a set of attributes, this function declares a component for the DAE result.
           Altough this function returns a list of DAE.Element, only one component is actually declared.
           The functions daeDeclare2 and daeDeclare3 below are helper functions that perform parts of the task.
           Note: Currently, this function can only declare scalar variables, i.e. the element type of an array type is used. To indicate that the variable
           is an array, the InstDims attribute is used. This will need to be redesigned in the futurue, when array variables should not be flattened out in the frontend. =#
-        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.SMNode, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist 
+        function daeDeclare(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inComponentRef::DAE.ComponentRef, inState::ClassInf.SMNode, inType::DAE.Type, inAttributes::SCode.Attributes, visibility::SCode.Visibility, inBinding::Option{<:DAE.Exp}, inInstDims::Any #= List{<:List{<:DAE.Dimension}}=#, inStartValue::DAE.StartValue, inVarAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, finalPrefix::SCode.Final, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool #= if true, declare variables for complex variables, e.g. record vars in functions =#) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               outDae = begin
@@ -129,7 +129,7 @@
                       showDAE(inCache, inParentEnv, inClassEnv, inState, dae)
                     dae
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- Inst.daeDeclare failed\\n")
@@ -140,7 +140,7 @@
           outDae
         end
 
-        function showDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inState::ClassInf.SMNode, inDAE::DAE.DAElist)  
+        function showDAE(inCache::FCore.Cache, inParentEnv::FCore.Graph, inClassEnv::FCore.Graph, inState::ClassInf.SMNode, inDAE::DAE.DAElist)
               _ = begin
                   local str::String
                   local sstr::String
@@ -152,7 +152,7 @@
                       @match false = Flags.isSet(Flags.SHOW_DAE_GENERATION)
                     ()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       els = DAEUtil.daeElements(inDAE)
                       sstr = ClassInf.printStateStr(inState)
@@ -167,7 +167,7 @@
                       print("DAE: parent: " + FGraph.getGraphNameStr(inParentEnv) + " class: " + FGraph.getGraphNameStr(inClassEnv) + " state: " + sstr + str + "\\n" + DAEDump.dumpStr(dae, DAE.AvlTreePathFunction.Tree.EMPTY()) + "\\n")
                     ()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       str = if System.getPartialInstantiation()
                             " partial"
@@ -177,7 +177,7 @@
                       print("DAE: " + ClassInf.printStateStr(inState) + str + " - could not print\\n")
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -186,7 +186,7 @@
         end
 
          #= Helper function to daeDeclare. =#
-        function daeDeclare2(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inConnectorType::DAE.ConnectorType, inVarKind::DAE.VarKind, inVarDirection::DAE.VarDirection, inParallelism::DAE.VarParallelism, protection::DAE.VarVisibility, inExpExpOption::Option{<:DAE.Exp}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inStartValue::DAE.StartValue, inAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool) ::DAE.DAElist 
+        function daeDeclare2(inComponentRef::DAE.ComponentRef, inType::DAE.Type, inConnectorType::DAE.ConnectorType, inVarKind::DAE.VarKind, inVarDirection::DAE.VarDirection, inParallelism::DAE.VarParallelism, protection::DAE.VarVisibility, inExpExpOption::Option{<:DAE.Exp}, inInstDims::Any #=List{<:List{<:DAE.Dimension}} =#, inStartValue::DAE.StartValue, inAttr::Option{<:DAE.VariableAttributes}, inComment::Option{<:SCode.Comment}, io::Absyn.InnerOuter, source::DAE.ElementSource #= the origin of the element =#, declareComplexVars::Bool) ::DAE.DAElist
               local outDAe::DAE.DAElist
 
               outDAe = begin
@@ -218,58 +218,58 @@
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_INTEGER_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, DAE.T_REAL(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_REAL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, DAE.T_BOOL(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_BOOL_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, DAE.T_CLOCK(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_CLOCK_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, DAE.T_STRING(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, DAE.T_STRING_DEFAULT, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (_, DAE.T_ENUMERATION(index = SOME(_)), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                     DAE.emptyDae
                   end
-                  
+
                   (vn, ty && DAE.T_ENUMERATION(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, ty && DAE.T_COMPLEX(complexClassType = ClassInf.EXTERNAL_OBJ(_)), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, DAE.T_SUBTYPE_BASIC(complexType = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
                       (_, dae_var_attr) = InstBinding.instDaeVariableAttributes(FCoreUtil.emptyCache(), FGraph.empty(), DAE.NOMOD(), tp, nil)
                       dae = daeDeclare2(vn, tp, ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, io, source, declareComplexVars)
                     dae
                   end
-                  
+
                   (vn, DAE.T_ARRAY(dims = DAE.DIM_INTEGER(__) <|  nil(), ty = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
                       dae = daeDeclare2(vn, tp, ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, io, source, declareComplexVars)
                     dae
                   end
-                  
+
                   (vn, DAE.T_ARRAY(ty = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
                       @match false = Config.splitArrays()
                       dae = daeDeclare2(vn, tp, ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, io, source, declareComplexVars)
                     dae
                   end
-                  
+
                   (vn, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, _, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Config.splitArrays()
                       s = ComponentReference.printComponentRefStr(vn)
@@ -277,26 +277,26 @@
                       Error.addSourceMessage(Error.DIMENSION_NOT_KNOWN, list(s), info)
                     fail()
                   end
-                  
+
                   (vn, ty && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(_)), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, true)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, tty && DAE.T_FUNCTION(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                       path = ComponentReference.crefToPath(vn)
                       tty.path = path
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, tty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   (vn, ty, ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match true = Types.isBoxedType(ty)
                       finst_dims = ListUtil.flatten(inst_dims)
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, ty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
-                  
+
                   _  => begin
                       DAE.emptyDae
                   end

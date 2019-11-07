@@ -7256,7 +7256,9 @@
               local isFunctionPointer::Bool
 
               onlyOneFunction = listLength(typelist) == 1
-              @match (cache, args_1, constlist, restype, (@match DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isOpenModelicaPure = isPure, isImpure = isImpure, inline = inlineType, isFunctionPointer = isFunctionPointer, functionParallelism = funcParal)) = functype), vect_dims, slots) = elabTypes(inCache, inEnv, args, nargs, typelist, onlyOneFunction, true, impl, pre, info) #= The constness of a function depends on the inputs. If all inputs are constant the call itself is constant. =#
+              @match (cache, args_1, constlist, restype, functype, vect_dims, slots) =
+                elabTypes(inCache, inEnv, args, nargs, typelist, onlyOneFunction, true, impl, pre, info) #= The constness of a function depends on the inputs. If all inputs are constant the call itself is constant. =#
+              @match DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isOpenModelicaPure = isPure, isImpure = isImpure, inline = inlineType, isFunctionPointer = isFunctionPointer, functionParallelism = funcParal)) = functype
                #= /* Check types*/ =#
               (fn_1, functype) = deoverloadFuncname(fn, functype, inEnv)
               tuple_ = Types.isTuple(restype)
