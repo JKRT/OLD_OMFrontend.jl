@@ -38,8 +38,6 @@ using MetaModelica
 
 
 ForkFunction = Function
-#=Reimplement me :(=#
-StringAllocator = Any
 
 import Autoconf
 
@@ -1206,17 +1204,27 @@ function dladdr(symbol::T)::Tuple{String, String, String}
     (name, file, info)
 end
 
+
+#=Reimplement me :(=#
+struct StringAllocator
+  sz::ModelicaInteger
+  s::Array{String,1}
+  StringAllocator(sz) = new(sz,fill(" ", sz))
+end
+
 function stringAllocatorStringCopy(dest::StringAllocator, source::String, destOffset::ModelicaInteger)
-    #= Defined in the runtime =#
+  for i in 1:length(source)
+   dest.s[destOffset+i] = string(source[i])
+  end
 end
 
 function stringAllocatorResult(sa::StringAllocator, dummy #= This is just added so we do not make an extra allocation for the string =# #= annotation(
-    __OpenModelica_UnusedVariable = true) =#::T)::T
-    T = Any
-    local res::T
-
-    #= Defined in the runtime =#
-    res
+    __OpenModelica_UnusedVariable = true) =#::Any)::String
+    s::String = ""
+    for e in sa.s
+      s = s + e
+    end
+    s
 end
 
 function relocateFunctions(fileName #= shared object =#::String, names #= tuple of names to relocate; first is the local name and second is the name in the shared object =#::List)::Bool

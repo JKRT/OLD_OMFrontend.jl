@@ -1592,7 +1592,7 @@
                =#
                #=  If they are equal we can just return anyone of them.
                =#
-              @match _cons(outRange, ranges) = ranges
+              @match outRange <| ranges = ranges
               idx = 2
               for r in ranges
                 if ! Expression.expEqual(r, outRange)
@@ -2773,19 +2773,19 @@
               local ty::DAE.Type
               local rest_tys::List{DAE.Type}
 
-              @match _cons(outType, rest_tys) = inTypes
+              @match outType <| rest_tys = inTypes
                #=  If the first element is a Real, search for an Integer.
                =#
               if Types.isReal(outType)
                 while ! listEmpty(rest_tys)
-                  @match _cons(ty, rest_tys) = rest_tys
+                  @match ty <| rest_tys = rest_tys
                   if Types.isInteger(ty)
                     return (outType, outIsMixed)
                   end
                 end
               elseif Types.isInteger(outType)
                 while ! listEmpty(rest_tys)
-                  @match _cons(outType, rest_tys) = rest_tys
+                  @match outType <| rest_tys = rest_tys
                   if Types.isReal(outType)
                     return (outType, outIsMixed)
                   end
@@ -2816,7 +2816,7 @@
               local rest_expl::List{DAE.Exp} = inExpl
 
               for ty in inTypes
-                @match _cons(exp, rest_expl) = rest_expl
+                @match exp <| rest_expl = rest_expl
                 if ! Types.equivtypes(ty, inExpectedType)
                   exp = Types.matchType(exp, ty, inExpectedType, true)
                 end
@@ -2843,12 +2843,12 @@
               local ty1_str::String
               local ty2_str::String
 
-              @match _cons(exp1, rest_expl) = inExpl
-              @match _cons(outType, rest_tys) = inTypes
+              @match exp1 <| rest_expl = inExpl
+              @match outType <| rest_tys = inTypes
               outExpl = list(exp1)
               outType = Types.getUniontypeIfMetarecordReplaceAllSubtypes(outType)
               for exp2 in rest_expl
-                @match _cons(ty2, rest_tys) = rest_tys
+                @match ty2 <| rest_tys = rest_tys
                 ty2 = Types.getUniontypeIfMetarecordReplaceAllSubtypes(ty2)
                 if ! Types.equivtypes(outType, ty2)
                   try
@@ -2917,17 +2917,19 @@
               local dim2::DAE.Dimension
 
               try
-                @match _cons(exp, rest_expl) = inExpl
-                @match _cons(prop, rest_props) = inProps
-                @match (exp, (@match DAE.PROP(type_ = ty) = outProperties)) = promoteExp(exp, prop, inDims)
+                @match exp <| rest_expl = inExpl
+                @match prop <| rest_props = inProps
+                @match (exp, outProperties) = promoteExp(exp, prop, inDims)
+                @match DAE.PROP(type_ = ty) = outProperties
                 accum_expl = _cons(exp, accum_expl)
-                @match _cons(outDim1, _cons(outDim2, _)) = Types.getDimensions(ty)
+                @match outDim1 <| outDim2 <| _ = Types.getDimensions(ty)
                 while ! listEmpty(rest_expl)
-                  @match _cons(exp, rest_expl) = rest_expl
-                  @match _cons(prop, rest_props) = rest_props
-                  @match (exp, (@match DAE.PROP(type_ = ty) = prop)) = promoteExp(exp, prop, inDims)
+                  @match exp <| rest_expl = rest_expl
+                  @match prop <| rest_props = rest_props
+                  @match (exp, prop) = promoteExp(exp, prop, inDims)
+                  @match DAE.PROP(type_ = ty) = prop
                   accum_expl = _cons(exp, accum_expl)
-                  @match _cons(dim1, _cons(dim2, _)) = Types.getDimensions(ty)
+                  @match dim1 <| dim2 <| _ = Types.getDimensions(ty)
                   if ! Expression.dimensionsEqual(dim1, outDim1)
                     Error.addSourceMessageAndFail(Error.COMMA_OPERATOR_DIFFERENT_SIZES, list(ExpressionDump.printExpStr(listHead(inExpl)), ExpressionDump.dimensionString(outDim1), ExpressionDump.printExpStr(exp), ExpressionDump.dimensionString(dim1)), inInfo)
                   end
@@ -3055,8 +3057,8 @@
               local expl1::List{DAE.Exp}
               local expl2::List{DAE.Exp}
 
-              @match DAE.ARRAY(DAE.T_ARRAY(ety, _cons(dim1, dim_rest)), at, expl1) = inArray1
-              @match DAE.ARRAY(ty = DAE.T_ARRAY(dims = _cons(dim2, _)), array = expl2) = inArray2
+              @match DAE.ARRAY(DAE.T_ARRAY(ety, dim1 <| dim_rest), at, expl1) = inArray1
+              @match DAE.ARRAY(ty = DAE.T_ARRAY(dims = dim2 <| _), array = expl2) = inArray2
               expl = listAppend(expl1, expl2)
               dim = Expression.dimensionsAdd(dim1, dim2)
               outExp = DAE.ARRAY(DAE.T_ARRAY(ety, _cons(dim, dim_rest)), at, expl)
@@ -3108,15 +3110,15 @@
 
                #=  Elaborate the first row so we have something to compare against.
                =#
-              @match _cons(expl, rest_expl) = inMatrix
-              @match _cons(props, rest_props) = inProperties
+              @match expl <| rest_expl = inMatrix
+              @match props <| rest_props = inProperties
               (outExp, outProperties, outDim1, outDim2) = elabMatrixComma(expl, props, inHaveReal, inDims, inInfo)
               outExp = elabMatrixCatTwoExp(outExp)
                #=  Elaborate the rest of the rows (if any).
                =#
               while ! listEmpty(rest_expl)
-                @match _cons(expl, rest_expl) = rest_expl
-                @match _cons(props, rest_props) = rest_props
+                @match expl <| rest_expl = rest_expl
+                @match props <| rest_props = rest_props
                 (exp, prop, dim1, dim2) = elabMatrixComma(expl, props, inHaveReal, inDims, inInfo)
                 if ! Expression.dimensionsEqual(dim2, outDim2)
                   dim1_str = ExpressionDump.dimensionString(dim1)
@@ -4194,7 +4196,7 @@
                   end
 
                   _  => begin
-                        @match _cons(exp, _) = Expression.flattenArrayExpToList(inExp)
+                        @match exp <| _ = Expression.flattenArrayExpToList(inExp)
                         validateBuiltinStreamOperator(inCache, inEnv, exp, inType, inOperator, inInfo)
                         et = Types.simplifyType(inType)
                         exp = Expression.makePureBuiltinCall(inOperator, list(exp), et)
@@ -4321,7 +4323,7 @@
               local rest_props::List{DAE.Properties} = inPropertiesLst
 
               for e in inExpl
-                @match _cons(prop, rest_props) = rest_props
+                @match prop <| rest_props = rest_props
                 e = Types.matchProp(e, prop, inProperties, true)
                 outExpl = _cons(e, outExpl)
               end
@@ -5560,7 +5562,7 @@
                #=  will concatenate along is equal.
                =#
               arr_tys = list(Types.getPropType(p) for p in arr_props)
-              @match _cons(ty, tys) = list(Types.makeNthDimUnknown(t, dim_int) for t in arr_tys)
+              @match ty <| tys = list(Types.makeNthDimUnknown(t, dim_int) for t in arr_tys)
               result_ty = ListUtil.fold1(tys, Types.arraySuperType, inInfo, ty)
               try
                 (arr_expl, arr_tys) = Types.matchTypes(arr_expl, arr_tys, result_ty, false)
@@ -7041,7 +7043,7 @@
                       @match (cache, (@match SCode.CLASS(restriction = SCode.R_PACKAGE()) = cl), _) = Lookup.lookupClassIdent(cache, env, "GraphicalAnnotationsProgram____")
                       @match (cache, (@match SCode.CLASS(restriction = SCode.R_RECORD(_)) = cl), env_1) = Lookup.lookupClass(cache, env, fn)
                       (cache, cl, env_2) = Lookup.lookupRecordConstructorClass(cache, env_1, fn)
-                      (_, _cons(_, names)) = SCodeUtil.getClassComponents(cl)
+                      (_, _ <| names) = SCodeUtil.getClassComponents(cl)
                       fargs = ListUtil.map(names, createDummyFarg)
                       slots = makeEmptySlots(fargs)
                       (cache, _, newslots, _, _) = elabInputArgs(cache, env, args, nargs, slots, true, false, impl, pre, info, DAE.T_UNKNOWN_DEFAULT, fn, true)
@@ -7080,7 +7082,7 @@
                       (cache, recordCl, recordEnv) = Lookup.lookupClass(cache, recordEnv, fn_1)
                       @match true = SCodeUtil.isOperator(recordCl)
                       operNames = AbsynToSCode.getListofQualOperatorFuncsfromOperator(recordCl)
-                      @match (cache, (@match _cons(_, _) = typelist)) = Lookup.lookupFunctionsListInEnv(cache, recordEnv, operNames, info, nil)
+                      @match (cache, typelist && _ <| _) = Lookup.lookupFunctionsListInEnv(cache, recordEnv, operNames, info, nil)
                       Mutable.update(stopElab, true)
                       (cache, expProps) = elabCallArgs3(cache, env, typelist, fn_1, args, nargs, impl, pre, info)
                       ErrorExt.rollBack("RecordConstructor")
@@ -7091,7 +7093,8 @@
                       ErrorExt.delCheckpoint("RecordConstructor")
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopElab)
-                      @match (cache, (@match DAE.T_METARECORD() = t), _) = Lookup.lookupType(cache, env, fn, NONE())
+                      @match (cache, t, _) = Lookup.lookupType(cache, env, fn, NONE())
+                      @match DAE.T_METARECORD() = t
                       Mutable.update(stopElab, true)
                       (cache, expProps) = elabCallArgsMetarecord(cache, env, t, args, nargs, impl, stopElab, pre, info)
                     (cache, expProps)
@@ -7100,7 +7103,7 @@
                   (cache, env, fn, args, nargs, impl, pre)  => begin
                       ErrorExt.setCheckpoint("elabCallArgs2FunctionLookup")
                       @match false = Mutable.access(stopElab)
-                      @match (cache, (@match _cons(_, _) = typelist)) = Lookup.lookupFunctionsInEnv(cache, env, fn, info) #= PR. A function can have several types. Taking an array with
+                      @match (cache, typelist && _ <| _) = Lookup.lookupFunctionsInEnv(cache, env, fn, info) #= PR. A function can have several types. Taking an array with
                                different dimensions as parameter for example. Because of this we
                                cannot just lookup the function name and trust that it
                                returns the correct function. It returns just one
@@ -7114,7 +7117,7 @@
                   end
 
                   (cache, env, fn, args, nargs, impl, pre)  => begin
-                      @match (cache, (@match list(tp1) = typelist)) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
+                      @match (cache, typelist && tp1 <| _) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
                       (cache, args_1, _, _, functype, _, _) = elabTypes(cache, env, args, nargs, typelist, true, false, impl, pre, info)
                       argStr = ExpressionDump.printExpListStr(args_1)
                       pre_str = PrefixUtil.printPrefixStr3(pre)
@@ -7136,7 +7139,7 @@
                   end
 
                   (cache, env, fn, _, _, _, pre)  => begin
-                      @match (cache, (@match _cons(_, _cons(_, _)) = typelist)) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
+                      @match (cache, typelist && _ <| _ <| _) = Lookup.lookupFunctionsInEnv(cache, env, fn, info)
                       t_lst = ListUtil.map(typelist, Types.unparseType)
                       fn_str = AbsynUtil.pathString(fn)
                       pre_str = PrefixUtil.printPrefixStr3(pre)
@@ -8165,7 +8168,7 @@
               local name::String
 
               for e in inEs
-                @match _cons(SLOT(dims = dims, defaultArg = DAE.FUNCARG(ty = ty)), rest_slots) = rest_slots
+                @match SLOT(dims = dims, defaultArg = DAE.FUNCARG(ty = ty)) <| rest_slots = rest_slots
                 if listEmpty(dims)
                   oes = _cons(e, oes)
                 else
@@ -8275,7 +8278,7 @@
               local dims::List{DAE.Dimension}
 
               for e in inExpl
-                @match _cons(SLOT(dims = dims), rest_slots) = rest_slots
+                @match SLOT(dims = dims) <| rest_slots = rest_slots
                 if ! listEmpty(dims)
                   e = Expression.makeASUB(e, list(DAE.ICONST(inIndex)))
                   e = ExpressionSimplify.simplify1(e)
@@ -8366,7 +8369,7 @@
                #=  look at overloaded functions with the wrong number of arguments (getting weird error-messages)
                =#
               while ! success
-                @match _cons(func_ty, rest_tys) = rest_tys
+                @match func_ty <| rest_tys = rest_tys
                 @match DAE.T_FUNCTION(funcArg = params, funcResultType = res_ty, functionAttributes = func_attr, path = path) = func_ty
                 if debug
                   print("elabTypes, try: " + Types.unparseType(func_ty) + "\\n")
@@ -9481,7 +9484,7 @@
               local position::ModelicaInteger = 1
 
               for arg in inPosArgs
-                @match _cons(farg, farg_rest) = farg_rest
+                @match farg <| farg_rest = farg_rest
                 (outCache, outSlots, c, outPolymorphicBindings) = elabPositionalInputArg(outCache, inEnv, arg, farg, position, outSlots, inOnlyOneFunction, inCheckTypes, inImplicit, outPolymorphicBindings, inPrefix, inInfo, inPath, isGraphicsExp)
                 position = position + 1
                 outConsts = _cons(c, outConsts)
@@ -9822,7 +9825,7 @@
 
               @match DAE.FUNCARG(name = fa1, ty = ty1, constType = c1) = inFuncArg
               while ! listEmpty(rest_slots)
-                @match _cons(slot, rest_slots) = rest_slots
+                @match slot <| rest_slots = rest_slots
                 @match SLOT(defaultArg = DAE.FUNCARG(name = fa2)) = slot
                 if stringEq(fa1, fa2) || stringEq("in_" + fa1, fa2)
                   @match SLOT(defaultArg = DAE.FUNCARG(constType = c2, par = prl, defaultBinding = binding), slotFilled = filled, idx = idx, evalStatus = ses) = slot
@@ -10200,7 +10203,7 @@
                       a = Types.isArray(ty)
                       sc = boolNot(a)
                       et = Types.simplifyType(ty)
-                      @match (@match _cons(_, _) = ss) = ComponentReference.crefLastSubs(cr)
+                      @match (ss && _ <| _) = ComponentReference.crefLastSubs(cr)
                       exp = DAE.ARRAY(et, sc, nil)
                       exp = Expression.makeASUB(exp, ListUtil.map(ss, Expression.getSubscriptExp))
                     (exp, c)
@@ -11495,7 +11498,7 @@
                   diml_str = intString(listLength(inDimensions))
                   Error.addSourceMessageAndFail(Error.WRONG_NUMBER_OF_SUBSCRIPTS, list(cref_str, subl_str, diml_str), inInfo)
                 else
-                  @match _cons(dim, rest_dims) = rest_dims
+                  @match dim <| rest_dims = rest_dims
                 end
                 (outCache, dsub, constType, prop) = elabSubscript(outCache, inEnv, asub, inImpl, inPrefix, inInfo)
                 outConst = Types.constAnd(constType, outConst)
@@ -12479,7 +12482,7 @@
 
                #= print(\"Before replace: \" + Dump.printComponentRefStr(inCref) + \"\\n\");
                =#
-              @match _cons(outCref, cr_parts) = AbsynUtil.crefExplode(inCref)
+              @match outCref <| cr_parts = AbsynUtil.crefExplode(inCref)
               if ! AbsynUtil.crefIsIdent(outCref)
                 outCref = inCref
                 return outCref

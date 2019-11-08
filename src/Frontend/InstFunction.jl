@@ -493,15 +493,15 @@
                       _ = begin
                         @matchcontinue () begin
                           ()  => begin
-                              FCore.checkCachedInstFuncGuard(cache, p)
+                              FCoreUtil.checkCachedInstFuncGuard(cache, p)
                             ()
                           end
 
                           _  => begin
-                                cache = FCore.addCachedInstFuncGuard(cache, p)
+                                cache = FCoreUtil.addCachedInstFuncGuard(cache, p)
                                 (cache, _, ih, funcs) = implicitFunctionInstantiation2(cache, cenv, ih, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false)
                                 funcs = InstUtil.addNameToDerivativeMapping(funcs, path)
-                                cache = FCore.addDaeFunction(cache, funcs)
+                                cache = FCoreUtil.addDaeFunction(cache, funcs)
                               ()
                           end
                         end
@@ -573,7 +573,7 @@
                 @matchcontinue (inCache, inEnv, inIH, inClass) begin
                   (cache, env, ih, SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(_)), classDef = SCode.PARTS(__)))  => begin
                       (cache, env_1, ih, funs) = implicitFunctionInstantiation2(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), inClass, nil, true)
-                      cache = FCore.addDaeExtFunction(cache, funs)
+                      cache = FCoreUtil.addDaeExtFunction(cache, funs)
                     (cache, env_1, ih)
                   end
 
@@ -619,7 +619,7 @@
                =#
                #=  Only external functions are valid without an algorithm section...
                =#
-               #=  cache = FCore.addDaeExtFunction(cache, funs);
+               #=  cache = FCoreUtil.addDaeExtFunction(cache, funs);
                =#
                #=  Short class definitions.
                =#
