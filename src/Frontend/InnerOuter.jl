@@ -49,6 +49,7 @@ module InnerOuter
 
 
         import Absyn
+        import AbsynUtil
         # import Connect
         import ConnectionGraph
         import DAE

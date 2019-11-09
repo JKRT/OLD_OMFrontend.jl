@@ -576,11 +576,11 @@ function get(tree, key::Key)::Value
 end
 
   function BaseAvlTree.keyStr(s::Absyn.Path)::String
-    Absyn.pathString(s)
+    AbsynUtil.pathString(s)
   end
 
   function BaseAvlTree.keyCompare(key1::Absyn.Path, key2::Absyn.Path)
-    stringCompare(Absyn.pathString(key1), Absyn.pathString(key2))
+    stringCompare(AbsynUtil.pathString(key1), AbsynUtil.pathString(key2))
   end
 
   function BaseAvlTree.valueStr(inValue::Value)::String

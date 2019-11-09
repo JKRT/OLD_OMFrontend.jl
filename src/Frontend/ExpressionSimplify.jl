@@ -52,6 +52,8 @@
         Type_a = Any
 
         import Absyn
+        
+        import AbsynUtil
 
         import ClassInf
 

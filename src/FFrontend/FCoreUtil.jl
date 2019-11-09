@@ -8,6 +8,7 @@ using ExportAll
 
 using FCore
 import Absyn
+import AbsynUtil
 import SCode
 import DAE
 import Mutable

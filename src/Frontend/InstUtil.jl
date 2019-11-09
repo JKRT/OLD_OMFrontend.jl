@@ -7930,7 +7930,7 @@
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)))  => begin
                       inVars = ListUtil.select(vl, Types.isInputVar)
                       outVars = ListUtil.select(vl, Types.isOutputVar)
-                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName), ListUtil.map(outVars, Types.varName))
+                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName, String), ListUtil.map(outVars, Types.varName, String))
                       inlineType = commentIsInlineFunc(inheritedComment)
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
                       isImpure = if isImpure
@@ -7945,7 +7945,7 @@
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__)))  => begin
                       inVars = ListUtil.select(vl, Types.isInputVar)
                       outVars = ListUtil.select(vl, Types.isOutputVar)
-                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName), ListUtil.map(outVars, Types.varName))
+                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName, String), ListUtil.map(outVars, Types.varName, String))
                       inlineType = commentIsInlineFunc(inheritedComment)
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
                       unboxArgs = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_UnboxArguments")

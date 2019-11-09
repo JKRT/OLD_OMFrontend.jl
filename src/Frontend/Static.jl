@@ -9198,7 +9198,7 @@
         function makeEmptySlots(inArgs::List{<:DAE.FuncArg}) ::List{Slot}
               local outSlots::List{Slot}
 
-              outSlots = ListUtil.mapFold(inArgs, makeEmptySlot, 1)
+              outSlots = ListUtil.mapFold(inArgs, makeEmptySlot, 1, Slot)
           outSlots
         end
 
