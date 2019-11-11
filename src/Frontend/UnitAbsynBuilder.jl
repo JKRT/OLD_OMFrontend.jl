@@ -43,6 +43,8 @@
         import MMath
 
         import FCore
+        
+        import FCoreUtil
 
         import HashTable
 
@@ -1351,7 +1353,7 @@
                   local store::UnitAbsyn.Store
                 @match (env, path, funcCallExp, expl, divOrMul, ht, istore) begin
                   (_, _, _, _, _, _, store)  => begin
-                      (_, functp, _) = Lookup.lookupType(FCore.noCache(), env, path, NONE())
+                      (_, functp, _) = Lookup.lookupType(FCoreUtil.noCache(), env, path, NONE())
                       funcInstId = tick()
                       (store, formalParamIndxs) = buildFuncTypeStores(functp, funcInstId, store)
                       (actTermLst, extraTerms, store) = buildTermExpList(env, expl, ht, store)

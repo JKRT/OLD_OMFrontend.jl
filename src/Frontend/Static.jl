@@ -50,6 +50,7 @@
         import Absyn
         import DAE
         import FCore
+        import FCoreUtil
         import Prefix
         import SCode
         import Values
@@ -8480,7 +8481,7 @@
               used_slots = list(s for s in inSlots if isSlotUsed(s, used_args))
                #=  Create DAE.Vars from the slots.
                =#
-              cache = FCore.noCache()
+              cache = FCoreUtil.noCache()
               vars = list(makeVarFromSlot(s, inEnv, cache) for s in used_slots)
                #=  Use a dummy SCode.Element, because we're only interested in the DAE.Vars.
                =#
@@ -8497,7 +8498,7 @@
               env = makeDummyFuncEnv(env, vars, dummy_var)
                #=  Evaluate the dimensions in the types.
                =#
-              outParameters = list(@do_threaded_for evaluateFuncParamDimAndMatchTypes(s, p, env, cache, inInfo) (s, p) (inSlots, inParameters))
+              outParameters = list(@do_threaded_for evaluateFuncParamDimAndMatchTypes(s, p, @nospecialize(env), cache, inInfo) (s, p) (inSlots, inParameters))
               outResultType = evaluateFuncArgTypeDims(inResultType, env, cache)
           (outParameters, outResultType)
         end

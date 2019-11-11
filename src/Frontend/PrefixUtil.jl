@@ -43,6 +43,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import FGraph
 
@@ -457,7 +459,7 @@
         function prefixCrefNoContext(inPre::Prefix.PrefixType, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
-              (_, outCref) = prefixToCref2(FCore.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, inPre, SOME(inCref))
+              (_, outCref) = prefixToCref2(FCoreUtil.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, inPre, SOME(inCref))
           outCref
         end
 
@@ -465,7 +467,7 @@
         function prefixToCref(pre::Prefix.PrefixType) ::DAE.ComponentRef
               local cref_1::DAE.ComponentRef
 
-              (_, cref_1) = prefixToCref2(FCore.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, pre, NONE())
+              (_, cref_1) = prefixToCref2(FCoreUtil.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, pre, NONE())
           cref_1
         end
 
