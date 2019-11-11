@@ -1185,7 +1185,7 @@ end
 
     name::String
     ty::Type
-    isConst::Const
+    constType::Const
     par::VarParallelism
     defaultBinding::Option{Exp}
   end

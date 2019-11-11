@@ -748,16 +748,16 @@
                #= /* default */ =#
                #=  Handle bindings of the type Boolean b[Boolean]={true,false}, enumerations, and similar
                =#
-               #=  tp = Types.traverseType(tp, 1, Types.makeKnownDimensionsInteger);
+               #=  (tp, _) = Types.traverseType(tp, 1, Types.makeKnownDimensionsInteger);
                =#
-               #=  e_tp = Types.traverseType(e_tp, 1, Types.makeKnownDimensionsInteger);
+               #=  (e_tp, _) = Types.traverseType(e_tp, 1, Types.makeKnownDimensionsInteger);
                =#
                #= /* default */ =#
                #=  Handle bindings of the type Boolean b[Boolean]={true,false}, enumerations, and similar
                =#
-               #=  tp = Types.traverseType(tp, 1, Types.makeKnownDimensionsInteger);
+               #=  (tp, _) = Types.traverseType(tp, 1, Types.makeKnownDimensionsInteger);
                =#
-               #=  e_tp = Types.traverseType(e_tp, 1, Types.makeKnownDimensionsInteger);
+               #=  (e_tp, _) = Types.traverseType(e_tp, 1, Types.makeKnownDimensionsInteger);
                =#
           (outCache, outBinding)
         end

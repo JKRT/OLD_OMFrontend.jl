@@ -3042,7 +3042,7 @@
                       (cache, comp_env, ih, store, dae, csets, ty, graph_new) = InstVar.instVar(cache, env, ih, store, ci_state, m_1, pre, name, cls, attr, prefixes, dims, nil, inst_dims, impl, comment, info, graph, csets, env)
                       (cache, binding) = InstBinding.makeBinding(cache, env, attr, m_1, ty, pre, name, info)
                       dae_attr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefixes)
-                      ty = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
+                      (ty, _) = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
                       new_var = DAE.TYPES_VAR(name, dae_attr, ty, binding, NONE())
                       env = FGraph.updateComp(env, new_var, FCore.VAR_DAE(), comp_env)
                       vars = if already_declared

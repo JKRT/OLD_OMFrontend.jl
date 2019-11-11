@@ -2079,10 +2079,10 @@
                   end
 
                   (DAE.T_FUNCTION(funcArg = farg1, funcResultType = t1), DAE.T_FUNCTION(funcArg = farg2, funcResultType = t2))  => begin
-                      tList1 = list(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper) for t in farg1)
-                      tList2 = list(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper) for t in farg2)
-                      t1 = traverseType(t1, 1, unboxedTypeTraverseHelper)
-                      t2 = traverseType(t2, 1, unboxedTypeTraverseHelper)
+                      tList1 = list(Util.tuple12(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper)) for t in farg1)
+                      tList2 = list(Util.tuple12(traverseType(funcArgType(t), 1, unboxedTypeTraverseHelper)) for t in farg2)
+                      (t1, _) = traverseType(t1, 1, unboxedTypeTraverseHelper)
+                      (t2, _) = traverseType(t2, 1, unboxedTypeTraverseHelper)
                       @match true = subtypeTypelist(tList1, tList2, requireRecordNamesEqual)
                       @match true = subtype(t1, t2, requireRecordNamesEqual)
                     true
@@ -8931,7 +8931,7 @@
                   (ty1, _, ty2)  => begin
                       @match true = isInteger(arrayElementType(ty1))
                       @match true = isReal(arrayElementType(ty2))
-                      ty1 = traverseType(ty1, -1, replaceIntegerTypeWithReal)
+                      (ty1, _) = traverseType(ty1, -1, replaceIntegerTypeWithReal)
                       @match true = subtype(ty1, ty2)
                     ty1
                   end
@@ -8939,7 +8939,7 @@
                   (ty1, _, ty2)  => begin
                       @match true = isInteger(arrayElementType(ty2))
                       @match true = isReal(arrayElementType(ty1))
-                      ty2 = traverseType(ty2, -1, replaceIntegerTypeWithReal)
+                      (ty2, _) = traverseType(ty2, -1, replaceIntegerTypeWithReal)
                       @match true = subtype(ty1, ty2)
                     ty1
                   end

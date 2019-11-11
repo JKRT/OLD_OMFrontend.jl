@@ -5,6 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
     @UniontypeDecl Slot
     PartialElabExpFunc = Function
@@ -8385,7 +8386,7 @@
                         (ListUtil.map(outArgs, Expression.unboxExp), list(begin
                           @match slot begin
                             SLOT(arg = SOME(arg))  => begin
-                                slot.arg = SOME(Expression.unboxExp(arg))
+                                @set slot.arg = SOME(Expression.unboxExp(arg))
                               slot
                             end
 
@@ -8396,7 +8397,7 @@
                         end for slot in outSlots), list(begin
                           @match p begin
                             funcarg  => begin
-                                funcarg.ty = Types.unboxedType(Types.fixPolymorphicRestype(p.ty, pb, inInfo))
+                                @set funcarg.ty = Types.unboxedType(Types.fixPolymorphicRestype(p.ty, pb, inInfo))
                               funcarg
                             end
                           end
@@ -9543,7 +9544,7 @@
                   (cache, env, e, DAE.FUNCARG(name = id, ty = vt, par = pr), _, slots, _, true, _, polymorphicBindings, pre)  => begin
                       (cache, e_1, props) = elabExpInExpression(cache, env, e, impl, true, pre, info)
                       t = Types.getPropType(props)
-                      vt = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
+                      (vt, _) = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
                       c1 = Types.propAllConst(props)
                       (e_2, _, polymorphicBindings) = Types.matchTypePolymorphic(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env), polymorphicBindings, false)
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, nil, slots, pre, info, path) #= no vectorized dim =#
@@ -9553,7 +9554,7 @@
                   (cache, env, e, DAE.FUNCARG(name = id, ty = vt, par = pr), _, slots, _, true, _, polymorphicBindings, pre)  => begin
                       (cache, e_1, props) = elabExpInExpression(cache, env, e, impl, true, pre, info)
                       t = Types.getPropType(props)
-                      vt = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
+                      (vt, _) = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
                       c1 = Types.propAllConst(props)
                       (e_2, _, ds, polymorphicBindings) = Types.vectorizableType(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env))
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, ds, slots, pre, info, path)
@@ -9691,7 +9692,7 @@
                   local s4::String
                 @matchcontinue (inCache, inEnv, inNamedArg, inTypesFuncArgLst, inSlotLst, onlyOneFunction, checkTypes, impl, inPolymorphicBindings, inPrefix) begin
                   (cache, env, Absyn.NAMEDARG(argName = id, argValue = e), farg, slots, _, true, _, polymorphicBindings, pre)  => begin
-                      @match (@match DAE.T_CODE(ty = ct) = vt) = findNamedArgType(id, farg)
+                      @match (vt && DAE.T_CODE(ty = ct)) = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
                       e_1 = elabCodeExp(e, cache, env, ct, info)
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, DAE.C_VAR(), pr, NONE()), e_1, nil, slots, pre, info, path)
