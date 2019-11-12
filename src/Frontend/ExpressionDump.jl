@@ -65,8 +65,6 @@
 
         import Dump
 
-        import Expression
-
         import ListUtil
 
         import Patternm
@@ -1981,7 +1979,7 @@
                       new_level1 = level + 1
                       new_level2 = level + 1
                       sym = debugBinopSymbol(op)
-                      tp = Expression.typeof(exp)
+                      tp = ExpressionUtil.typeof(exp)
                       str = Types.unparseType(tp)
                       lt = dumpExpStr(e1, new_level1)
                       rt = dumpExpStr(e2, new_level2)
@@ -1994,7 +1992,7 @@
                       new_level1 = level + 1
                       sym = unaryopSymbol(op)
                       ct = dumpExpStr(e, new_level1)
-                      str = "expType:" + Types.unparseType(Expression.typeof(e)) + " optype:" + Types.unparseType(Expression.typeofOp(op))
+                      str = "expType:" + Types.unparseType(ExpressionUtil.typeof(e)) + " optype:" + Types.unparseType(ExpressionUtil.typeofOp(op))
                       res_str = stringAppendList(list(gen_str, "UNARY ", sym, " ", str, "\\n", ct, ""))
                     res_str
                   end
@@ -2248,7 +2246,7 @@
         function printExpIfDiff(e1::DAE.Exp, e2::DAE.Exp) ::String
               local s::String
 
-              s = if Expression.expEqual(e1, e2)
+              s = if ExpressionUtil.expEqual(e1, e2)
                     ""
                   else
                     printExpStr(e1) + " =!= " + printExpStr(e2) + "\\n"
@@ -2292,7 +2290,7 @@
 
               local ty::DAE.Type
 
-              ty = Expression.typeof(inExp)
+              ty = ExpressionUtil.typeof(inExp)
               str = Types.unparseType(ty)
           str
         end
