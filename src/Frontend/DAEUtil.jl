@@ -129,7 +129,7 @@
         import Error
         import Expression
         import ExpressionDump
-        import ExpressionSimplify
+        # import ExpressionSimplify
         import Flags
         import ListUtil
         import SCodeUtil
@@ -647,7 +647,7 @@
               local vars::DoubleEnded.MutableList{DAE.Element}
               local eqs::DoubleEnded.MutableList{DAE.Element}
 
-              @match DAE.DAE(rest) = inDae
+              @match DAE.DAE_LIST(rest) = inDae
               vars = DoubleEnded.fromList(nil)
               eqs = DoubleEnded.fromList(nil)
               for elt in rest
@@ -673,7 +673,7 @@
                     DAE.COMP(id, elts1, source, cmt)  => begin
                          #=  adrpo: TODO! FIXME! a DAE.COMP SHOULD NOT EVER BE HERE!
                          =#
-                        @match (DAE.DAE(elts11), DAE.DAE(elts3)) = splitDAEIntoVarsAndEquations(DAE.DAE(elts1))
+                        @match (DAE.DAE_LIST(elts11), DAE.DAE_LIST(elts3)) = splitDAEIntoVarsAndEquations(DAE.DAE_LIST(elts1))
                         DoubleEnded.push_back(vars, DAE.COMP(id, elts11, source, cmt))
                         DoubleEnded.push_list_back(eqs, elts3)
                       ()
@@ -801,14 +801,14 @@
                     end
 
                     _  => begin
-                          Error.addInternalError(getInstanceName() + " failed for " + " NO DAEDUMP " #= DAEDump.dumpDAEElementsStr(DAE.DAE(list(elt))) =#, sourceInfo())
+                          Error.addInternalError(getInstanceName() + " failed for " + " NO DAEDUMP " #= DAEDump.dumpDAEElementsStr(DAE.DAE_LIST(list(elt))) =#, sourceInfo())
                         fail()
                     end
                   end
                 end
               end
-              allVars = DAE.DAE(DoubleEnded.toListAndClear(vars))
-              allEqs = DAE.DAE(DoubleEnded.toListAndClear(eqs))
+              allVars = DAE.DAE_LIST(DoubleEnded.toListAndClear(vars))
+              allEqs = DAE.DAE_LIST(DoubleEnded.toListAndClear(eqs))
           (allVars, allEqs)
         end
 
@@ -831,9 +831,9 @@
                     dae
                   end
 
-                  (DAE.DAE(elements), _)  => begin
+                  (DAE.DAE_LIST(elements), _)  => begin
                       elements = removeVariablesFromElements(elements, vars)
-                    DAE.DAE(elements)
+                    DAE.DAE_LIST(elements)
                   end
                 end
               end
@@ -901,24 +901,24 @@
                   local source::DAE.ElementSource #= the origin of the element =#
                   local cmt::Option{SCode.Comment}
                 @matchcontinue (var, dae) begin
-                  (_, DAE.DAE( nil()))  => begin
-                    DAE.DAE(nil)
+                  (_, DAE.DAE_LIST( nil()))  => begin
+                    DAE.DAE_LIST(nil)
                   end
 
-                  (_, DAE.DAE(DAE.VAR(componentRef = cr) <| elist))  => begin
+                  (_, DAE.DAE_LIST(DAE.VAR(componentRef = cr) <| elist))  => begin
                       @match true = ComponentReference.crefEqualNoStringCompare(var, cr)
-                    DAE.DAE(elist)
+                    DAE.DAE_LIST(elist)
                   end
 
-                  (_, DAE.DAE(DAE.COMP(id, elist, source, cmt) <| elist2))  => begin
-                      @match DAE.DAE(elist) = removeVariable(var, DAE.DAE(elist))
-                      @match DAE.DAE(elist2) = removeVariable(var, DAE.DAE(elist2))
-                    DAE.DAE(_cons(DAE.COMP(id, elist, source, cmt), elist2))
+                  (_, DAE.DAE_LIST(DAE.COMP(id, elist, source, cmt) <| elist2))  => begin
+                      @match DAE.DAE_LIST(elist) = removeVariable(var, DAE.DAE_LIST(elist))
+                      @match DAE.DAE_LIST(elist2) = removeVariable(var, DAE.DAE_LIST(elist2))
+                    DAE.DAE_LIST(_cons(DAE.COMP(id, elist, source, cmt), elist2))
                   end
 
-                  (_, DAE.DAE(e <| elist))  => begin
-                      @match DAE.DAE(elist) = removeVariable(var, DAE.DAE(elist))
-                    DAE.DAE(_cons(e, elist))
+                  (_, DAE.DAE_LIST(e <| elist))  => begin
+                      @match DAE.DAE_LIST(elist) = removeVariable(var, DAE.DAE_LIST(elist))
+                    DAE.DAE_LIST(_cons(e, elist))
                   end
                 end
               end
@@ -963,32 +963,32 @@
                   local prot::DAE.VarVisibility
                   local source::DAE.ElementSource #= the origin of the element =#
                 @match (var, dae) begin
-                  (_, DAE.DAE( nil()))  => begin
-                    DAE.DAE(nil)
+                  (_, DAE.DAE_LIST( nil()))  => begin
+                    DAE.DAE_LIST(nil)
                   end
 
-                  (_, DAE.DAE(DAE.VAR(oldVar, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, Absyn.INNER_OUTER(__)) <| elist)) where (compareUniquedVarWithNonUnique(var, oldVar))  => begin
+                  (_, DAE.DAE_LIST(DAE.VAR(oldVar, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, Absyn.INNER_OUTER(__)) <| elist)) where (compareUniquedVarWithNonUnique(var, oldVar))  => begin
                       newVar = nameInnerouterUniqueCref(oldVar)
                       o = DAE.VAR(oldVar, kind, dir, prl, prot, tp, NONE(), dim, ct, source, attr, cmt, Absyn.OUTER()) #= intact =#
                       u = DAE.VAR(newVar, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, Absyn.NOT_INNER_OUTER()) #=  unique'ified =#
                       elist = _cons(u, _cons(o, elist))
-                    DAE.DAE(elist)
+                    DAE.DAE_LIST(elist)
                   end
 
-                  (_, DAE.DAE(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io) <| elist)) where (ComponentReference.crefEqualNoStringCompare(var, cr))  => begin
+                  (_, DAE.DAE_LIST(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io) <| elist)) where (ComponentReference.crefEqualNoStringCompare(var, cr))  => begin
                       io2 = removeInnerAttribute(io)
-                    DAE.DAE(_cons(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io2), elist))
+                    DAE.DAE_LIST(_cons(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io2), elist))
                   end
 
-                  (_, DAE.DAE(DAE.COMP(id, elist, source, cmt) <| elist2))  => begin
-                      @match DAE.DAE(elist) = removeInnerAttr(var, DAE.DAE(elist))
-                      @match DAE.DAE(elist2) = removeInnerAttr(var, DAE.DAE(elist2))
-                    DAE.DAE(_cons(DAE.COMP(id, elist, source, cmt), elist2))
+                  (_, DAE.DAE_LIST(DAE.COMP(id, elist, source, cmt) <| elist2))  => begin
+                      @match DAE.DAE_LIST(elist) = removeInnerAttr(var, DAE.DAE_LIST(elist))
+                      @match DAE.DAE_LIST(elist2) = removeInnerAttr(var, DAE.DAE_LIST(elist2))
+                    DAE.DAE_LIST(_cons(DAE.COMP(id, elist, source, cmt), elist2))
                   end
 
-                  (_, DAE.DAE(e <| elist))  => begin
-                      @match DAE.DAE(elist) = removeInnerAttr(var, DAE.DAE(elist))
-                    DAE.DAE(_cons(e, elist))
+                  (_, DAE.DAE_LIST(e <| elist))  => begin
+                      @match DAE.DAE_LIST(elist) = removeInnerAttr(var, DAE.DAE_LIST(elist))
+                    DAE.DAE_LIST(_cons(e, elist))
                   end
                 end
               end
@@ -2103,10 +2103,10 @@
               local el1::List{DAE.Element}
               local el2::List{DAE.Element}
 
-              @match DAE.DAE(elementLst = elements) = dae
+              @match DAE.DAE_LIST(elementLst = elements) = dae
               (el1, el2) = findAllMatchingElements2(elements, cond1, cond2)
-              firstList = DAE.DAE(MetaModelica.Dangerous.listReverseInPlace(el1))
-              secondList = DAE.DAE(MetaModelica.Dangerous.listReverseInPlace(el2))
+              firstList = DAE.DAE_LIST(MetaModelica.Dangerous.listReverseInPlace(el1))
+              secondList = DAE.DAE_LIST(MetaModelica.Dangerous.listReverseInPlace(el2))
           (firstList, secondList)
         end
 
@@ -3247,7 +3247,7 @@
 
                   (_, _, _, el <| _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      str = " NO DAEDUMP! "# DAEDump.dumpDebugDAE(DAE.DAE(list(el)))
+                      str = " NO DAEDUMP! "# DAEDump.dumpDebugDAE(DAE.DAE_LIST(list(el)))
                       Debug.traceln("- DAEUtil.daeToRecordValue failed on: " + str)
                     fail()
                   end
@@ -3271,9 +3271,9 @@
                   local elts_1::List{DAE.Element}
                   local elts::List{DAE.Element}
                 @match inDAElist begin
-                  DAE.DAE(elts)  => begin
+                  DAE.DAE_LIST(elts)  => begin
                       elts_1 = toModelicaFormElts(elts)
-                    DAE.DAE(elts_1)
+                    DAE.DAE_LIST(elts_1)
                   end
                 end
               end
@@ -4057,7 +4057,7 @@
               local el::DAE.Element
               local info::SourceInfo
 
-              @match DAE.DAE(dae_elts) = dae
+              @match DAE.DAE_LIST(dae_elts) = dae
               for el in dae_elts
                 () = begin
                   @match el begin
@@ -4397,12 +4397,12 @@
                   local elts2::List{DAE.Element}
                   local cache::FCore.Cache
                 @matchcontinue (inCache, env, inDAElist) begin
-                  (_, _, dae && DAE.DAE(elts))  => begin
+                  (_, _, dae && DAE.DAE_LIST(elts))  => begin
                       pv = getParameterVars(dae, HashTable2.emptyHashTable())
                       @match (ht, true) = evaluateAnnotation1(dae, pv, HashTable2.emptyHashTable())
                       (_, ht1, _) = evaluateAnnotation2_loop(inCache, env, dae, ht, BaseHashTable.hashTableCurrentSize(ht))
                       (elts2, _) = traverseDAEElementList(elts, Expression.traverseSubexpressionsHelper, (evaluateAnnotationTraverse, (ht1, 0, 0)))
-                    DAE.DAE(elts2)
+                    DAE.DAE_LIST(elts2)
                   end
 
                   _  => begin
@@ -4492,7 +4492,7 @@
 
               local elts::List{DAE.Element}
 
-              @match DAE.DAE(elts) = dae
+              @match DAE.DAE_LIST(elts) = dae
               oht = ListUtil.fold(elts, getParameterVars2, ht)
           oht
         end
@@ -4534,7 +4534,7 @@
 
               local elts::List{DAE.Element}
 
-              @match DAE.DAE(elts) = dae
+              @match DAE.DAE_LIST(elts) = dae
               (oht, hasEvaluate) = ListUtil.fold1r(elts, evaluateAnnotation1Fold, pv, (ht, false))
           (oht, hasEvaluate)
         end
@@ -4621,7 +4621,7 @@
 
               (outDAElist, outHt, outCache) = evaluateAnnotation2(cache, env, inDAElist, inHt)
               newsize = BaseHashTable.hashTableCurrentSize(outHt)
-              (outDAElist, outHt, outCache) = evaluateAnnotation2_loop1(intEq(newsize, sizeBefore), outCache, env, DAE.DAE(outDAElist), outHt, newsize)
+              (outDAElist, outHt, outCache) = evaluateAnnotation2_loop1(intEq(newsize, sizeBefore), outCache, env, DAE.DAE_LIST(outDAElist), outHt, newsize)
           (outDAElist, outHt, outCache)
         end
 
@@ -4635,7 +4635,7 @@
                   local elst::List{DAE.Element}
                   local cache::FCore.Cache
                 @match (finish, inCache, env, inDAElist, inHt, sizeBefore) begin
-                  (true, _, _, DAE.DAE(elst), _, _)  => begin
+                  (true, _, _, DAE.DAE_LIST(elst), _, _)  => begin
                     (elst, inHt, inCache)
                   end
 
@@ -4661,11 +4661,11 @@
                   local ht1::HashTable2.HashTable
                   local cache::FCore.Cache
                 @matchcontinue (inCache, env, inDAElist, inHt) begin
-                  (_, _, DAE.DAE( nil()), ht)  => begin
+                  (_, _, DAE.DAE_LIST( nil()), ht)  => begin
                     (nil, ht, inCache)
                   end
 
-                  (_, _, DAE.DAE(elementLst = elementLst), ht)  => begin
+                  (_, _, DAE.DAE_LIST(elementLst = elementLst), ht)  => begin
                       (elementLst1, (ht1, cache, _)) = ListUtil.mapFold(elementLst, evaluateAnnotation3, (ht, inCache, env))
                     (elementLst1, ht1, cache)
                   end
@@ -6313,9 +6313,9 @@
               dae = begin
                   local elts::List{DAE.Element}
                 @match dae begin
-                  DAE.DAE(elts)  => begin
+                  DAE.DAE_LIST(elts)  => begin
                       elts = ListUtil.map1(elts, addComponentType2, newtype)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
                 end
               end
@@ -6410,7 +6410,7 @@
 
               elts = begin
                 @match dae begin
-                  DAE.DAE(elts)  => begin
+                  DAE.DAE_LIST(elts)  => begin
                     elts
                   end
                 end
@@ -6429,9 +6429,9 @@
                    #=  just append lists
                    =#
                 @match (dae1, dae2) begin
-                  (DAE.DAE(elts1), DAE.DAE(elts2))  => begin
+                  (DAE.DAE_LIST(elts1), DAE.DAE_LIST(elts2))  => begin
                       elts = listAppend(elts1, elts2)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
                 end
               end
@@ -6934,16 +6934,16 @@
                =#
               dAElist = StateMachineFlatten.stateMachineToDataFlow(cache, env, inDAElist)
               if Flags.isSet(Flags.SCODE_INST)
-                @match DAE.DAE(elts) = dAElist
-                outDAElist = DAE.DAE(elts)
+                @match DAE.DAE_LIST(elts) = dAElist
+                outDAElist = DAE.DAE_LIST(elts)
               else
-                @match DAE.DAE(elts) = dAElist
+                @match DAE.DAE_LIST(elts) = dAElist
                 ht = FCore.getEvaluatedParams(cache)
                 elts = ListUtil.map1(elts, makeEvaluatedParamFinal, ht)
                 if Flags.isSet(Flags.PRINT_STRUCTURAL)
                   transformationsBeforeBackendNotification(ht)
                 end
-                outDAElist = DAE.DAE(elts)
+                outDAElist = DAE.DAE_LIST(elts)
               end
                #=  This is stupid, but `outDAElist := dAElist` causes crashes for some reason. GC bug?
                =#
@@ -7528,7 +7528,7 @@
         function getElements(inDAE::DAE.DAElist) ::List{DAE.Element}
               local outElements::List{DAE.Element}
 
-              @match DAE.DAE(outElements) = inDAE
+              @match DAE.DAE_LIST(outElements) = inDAE
           outElements
         end
 
@@ -7555,9 +7555,9 @@
                     inDae
                   end
 
-                  (true, _, DAE.DAE(els))  => begin
+                  (true, _, DAE.DAE_LIST(els))  => begin
                       els = sortDAEElementsInModelicaCodeOrder(inElements, els)
-                    DAE.DAE(els)
+                    DAE.DAE_LIST(els)
                   end
                 end
               end
@@ -7636,7 +7636,7 @@
 
               local elts::List{DAE.Element}
 
-              @match DAE.DAE(elts) = inDAE
+              @match DAE.DAE_LIST(elts) = inDAE
               (_, (_, outCrefs)) = traverseDAEElementList(elts, Expression.traverseSubexpressionsHelper, (collectAllExpandableCrefsInExp, nil))
           outCrefs
         end
@@ -7666,7 +7666,7 @@
 
               comment = begin
                 @match inDAE begin
-                  DAE.DAE(elementLst = DAE.COMP(comment = SOME(SCode.COMMENT(comment = SOME(comment)))) <| _)  => begin
+                  DAE.DAE_LIST(elementLst = DAE.COMP(comment = SOME(SCode.COMMENT(comment = SOME(comment)))) <| _)  => begin
                     comment
                   end
 
@@ -7977,6 +7977,7 @@
           obnd
         end
 
+         #= not used!
          #= pour man's constant evaluation =#
         function evaluateCref(icr::DAE.ComponentRef, iels::List{<:DAE.Element}) ::Option{DAE.Exp}
               local oexp::Option{DAE.Exp}
@@ -8044,6 +8045,7 @@
               end
           oexp
         end
+        =#
 
         function replaceCrefInDAEElements(inElements::List{<:DAE.Element}, inCref::DAE.ComponentRef, inExp::DAE.Exp) ::List{DAE.Element}
               local outElements::List{DAE.Element}
@@ -8215,12 +8217,12 @@
                 outDae = inDae
                 return outDae
               end
-              @match DAE.DAE(els) = inDae
+              @match DAE.DAE_LIST(els) = inDae
               for e in els
                 _ = begin
                   @match e begin
                     DAE.COMP(ident, dAElist, src, comment)  => begin
-                        @match DAE.DAE(dAElist) = mergeAlgorithmSections(DAE.DAE(dAElist))
+                        @match DAE.DAE_LIST(dAElist) = mergeAlgorithmSections(DAE.DAE_LIST(dAElist))
                         newEls = _cons(DAE.COMP(ident, dAElist, src, comment), newEls)
                       ()
                     end
@@ -8249,7 +8251,7 @@
               if ! listEmpty(stmts)
                 newEls = listAppend(newEls, list(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(stmts), source)))
               end
-              outDae = DAE.DAE(newEls)
+              outDae = DAE.DAE_LIST(newEls)
           outDae
         end
 

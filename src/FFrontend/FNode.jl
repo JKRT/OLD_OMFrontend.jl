@@ -351,7 +351,12 @@ function addChildRef(inParentRef::MMRef, inName::Name, inChildRef::MMRef, checkD
   @match FCore.N(n, i, p, c, d) = fromRef(inParentRef)
   #@show RefTree.keyCompare
   #@show methods(RefTree.keyCompare)
-  c = RefTree.add(c, inName, inChildRef, #= if checkDuplicate = =# printElementConflictError #= else RefTree.addConflictReplace end =#)
+  c = RefTree.add(c, inName, inChildRef,
+        if checkDuplicate
+          printElementConflictError
+        else
+         RefTree.addConflictReplace
+       end)
   parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
   FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))
 end
@@ -543,8 +548,6 @@ function child(inParentRef::MMRef, inName::Name)::MMRef
 end
 
 function childFromNode(inNode::Node, inName::Name)::MMRef
-  println("Here we are!")
-  methods(RefTree.get)
   RefTree.get(children(inNode), inName)
 end
 

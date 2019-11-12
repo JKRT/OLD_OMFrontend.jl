@@ -38,8 +38,6 @@ using MetaModelica
 
 
 ForkFunction = Function
-#=Reimplement me :(=#
-StringAllocator = Any
 
 import Autoconf
 
@@ -520,102 +518,97 @@ function readFileNoNumeric(inString::String)::String
     outString
 end
 
+global gHasExpandableConnectors = false
+
 #= @author: adrpo
 sets the external flag that signals the
 presence of expandable connectors in a model =#
 function setHasExpandableConnectors(hasExpandable::Bool)
-    #= Defined in the runtime =#
+    gHasExpandableConnectors = hasExpandable
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of expandable connectors in a model =#
 function getHasExpandableConnectors()::Bool
-    local hasExpandable::Bool
-
-    #= Defined in the runtime =#
-    hasExpandable
+  gHasExpandableConnectors
 end
+
+global gHasOverconstrainedConnectors = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of overconstrained connectors in a model =#
 function setHasOverconstrainedConnectors(hasOverconstrained::Bool)
-    #= Defined in the runtime =#
+  gHasOverconstrainedConnectors = hasOverconstrained
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of overconstrained connectors in a model =#
 function getHasOverconstrainedConnectors()::Bool
-    local hasOverconstrained::Bool
-
-    #= Defined in the runtime =#
-    hasOverconstrained
+  gHasOverconstrainedConnectors
 end
+
+global gIsPartialInstantiation = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of expandable connectors in a model =#
 function setPartialInstantiation(isPartialInstantiation::Bool)
     #= Defined in the runtime =#
+    gIsPartialInstantiation = isPartialInstantiation
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of expandable connectors in a model =#
 function getPartialInstantiation()::Bool
-    local isPartialInstantiation::Bool
-
-    #= Defined in the runtime =#
-    isPartialInstantiation
+  gIsPartialInstantiation
 end
+
+global gHasStreamConnectors = false
 
 #= @author: adrpo
 sets the external flag that signals the
 presence of stream connectors in a model =#
 function setHasStreamConnectors(hasStream::Bool)
-    #= Defined in the runtime =#
+  gHasStreamConnectors = hasStream
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the
 presence of stream connectors in a model =#
 function getHasStreamConnectors()::Bool
-    local hasStream::Bool
-
-    #= Defined in the runtime =#
-    hasStream
+  gHasStreamConnectors
 end
+
+global gUsesCardinality = false
 
 #= Sets the external flag that signals the use of the cardinality operator. =#
 function setUsesCardinality(inUses::Bool)
-    #= Defined in the runtime =#
+  gUsesCardinality = inUses
 end
 
 #= Retrieves the external flag that signals the use of the cardinality operator. =#
 function getUsesCardinality()::Bool
-    local outUses::Bool = true
-
-    #= Defined in the runtime =#
-    outUses
+  gUsesCardinality
 end
+
+global gHasInnerOuterDefinitions = false
 
 #= @author: adrpo
 sets the external flag that signals the presence
 of inner/outer comoponent definitions in a model =#
 function setHasInnerOuterDefinitions(hasInnerOuterDefinitions::Bool)
-    #= Defined in the runtime =#
+  gHasInnerOuterDefinitions = hasInnerOuterDefinitions
 end
 
 #= @author: adrpo
 retrieves the external flag that signals the presence
 of inner/outer comoponent definitions in a model =#
 function getHasInnerOuterDefinitions()::Bool
-    local hasInnerOuterDefinitions::Bool = true
-
-    #= Defined in the runtime =#
-    hasInnerOuterDefinitions
+  gHasInnerOuterDefinitions
 end
 
 global tickArray = zeros(1024)
@@ -1211,17 +1204,27 @@ function dladdr(symbol::T)::Tuple{String, String, String}
     (name, file, info)
 end
 
+
+#=Reimplement me :(=#
+struct StringAllocator
+  sz::ModelicaInteger
+  s::Array{String,1}
+  StringAllocator(sz) = new(sz,fill(" ", sz))
+end
+
 function stringAllocatorStringCopy(dest::StringAllocator, source::String, destOffset::ModelicaInteger)
-    #= Defined in the runtime =#
+  for i in 1:length(source)
+   dest.s[destOffset+i] = string(source[i])
+  end
 end
 
 function stringAllocatorResult(sa::StringAllocator, dummy #= This is just added so we do not make an extra allocation for the string =# #= annotation(
-    __OpenModelica_UnusedVariable = true) =#::T)::T
-    T = Any
-    local res::T
-
-    #= Defined in the runtime =#
-    res
+    __OpenModelica_UnusedVariable = true) =#::Any)::String
+    s::String = ""
+    for e in sa.s
+      s = s + e
+    end
+    s
 end
 
 function relocateFunctions(fileName #= shared object =#::String, names #= tuple of names to relocate; first is the local name and second is the name in the shared object =#::List)::Bool

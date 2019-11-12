@@ -50,6 +50,8 @@
 
         import FCore
 
+        import FCoreUtil
+
         import FGraph
 
         import InnerOuter
@@ -376,11 +378,11 @@
                         if SCodeUtil.isInitial(inInitial)
                           (outCache, outEnv, outIH, outState, ell) = instInitialIfEqBranches(outCache, inEnv, inIH, inPrefix, inState, branches, inImpl)
                           (outCache, outEnv, outIH, outState, el) = instInitialIfEqBranch(outCache, outEnv, outIH, inPrefix, outState, else_branch, inImpl)
-                          outDae = DAE.DAE(list(DAE.INITIAL_IF_EQUATION(expl, ell, el, source)))
+                          outDae = DAE.DAE_LIST(list(DAE.INITIAL_IF_EQUATION(expl, ell, el, source)))
                         else
                           (outCache, outEnv, outIH, outState, ell) = instIfEqBranches(outCache, inEnv, inIH, inPrefix, inState, branches, inImpl)
                           (outCache, outEnv, outIH, outState, el) = instIfEqBranch(outCache, outEnv, outIH, inPrefix, outState, else_branch, inImpl)
-                          outDae = DAE.DAE(list(DAE.IF_EQUATION(expl, ell, el, source)))
+                          outDae = DAE.DAE_LIST(list(DAE.IF_EQUATION(expl, ell, el, source)))
                         end
                       end
                        #=  Go through each condition and select the first branch whose
@@ -418,7 +420,7 @@
                         else_when = SOME(DAE.WHEN_EQUATION(exp, el2, else_when, source))
                       end
                       outState = instEquationCommonCiTrans(inState, inInitial)
-                      outDae = DAE.DAE(list(DAE.WHEN_EQUATION(cond_exp, el, else_when, source)))
+                      outDae = DAE.DAE_LIST(list(DAE.WHEN_EQUATION(cond_exp, el, else_when, source)))
                     (outDae, outState)
                   end
 
@@ -472,9 +474,9 @@
                       (outCache, level_exp) = instOperatorArg(outCache, inEnv, inIH, inPrefix, inEEquation.level, inImpl, DAE.T_ASSERTIONLEVEL, "assert", "level", 3, info)
                       source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
                       if SCodeUtil.isInitial(inInitial)
-                        outDae = DAE.DAE(list(DAE.INITIAL_ASSERT(cond_exp, msg_exp, level_exp, source)))
+                        outDae = DAE.DAE_LIST(list(DAE.INITIAL_ASSERT(cond_exp, msg_exp, level_exp, source)))
                       else
-                        outDae = DAE.DAE(list(DAE.ASSERT(cond_exp, msg_exp, level_exp, source)))
+                        outDae = DAE.DAE_LIST(list(DAE.ASSERT(cond_exp, msg_exp, level_exp, source)))
                       end
                     (outDae, inState)
                   end
@@ -483,9 +485,9 @@
                       (outCache, msg_exp) = instOperatorArg(outCache, inEnv, inIH, inPrefix, inEEquation.message, inImpl, DAE.T_STRING_DEFAULT, "terminate", "message", 1, info)
                       source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
                       if SCodeUtil.isInitial(inInitial)
-                        outDae = DAE.DAE(list(DAE.INITIAL_TERMINATE(msg_exp, source)))
+                        outDae = DAE.DAE_LIST(list(DAE.INITIAL_TERMINATE(msg_exp, source)))
                       else
-                        outDae = DAE.DAE(list(DAE.TERMINATE(msg_exp, source)))
+                        outDae = DAE.DAE_LIST(list(DAE.TERMINATE(msg_exp, source)))
                       end
                     (outDae, inState)
                   end
@@ -506,9 +508,9 @@
                       (outCache, cr_exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, cr_exp, inPrefix)
                       (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
                       source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
-                      @match DAE.DAE(el) = instEqEquation(cr_exp, cr_prop, exp, prop, source, inInitial, inImpl)
+                      @match DAE.DAE_LIST(el) = instEqEquation(cr_exp, cr_prop, exp, prop, source, inInitial, inImpl)
                       el = list(makeDAEArrayEqToReinitForm(e) for e in el)
-                      outDae = DAE.DAE(el)
+                      outDae = DAE.DAE_LIST(el)
                     (outDae, inState)
                   end
 
@@ -963,11 +965,11 @@
               dae = begin
                 @match initial_ begin
                   SCode.NON_INITIAL(__)  => begin
-                    DAE.DAE(list(DAE.NORETCALL(exp, source)))
+                    DAE.DAE_LIST(list(DAE.NORETCALL(exp, source)))
                   end
 
                   SCode.INITIAL(__)  => begin
-                    DAE.DAE(list(DAE.INITIAL_NORETCALL(exp, source)))
+                    DAE.DAE_LIST(list(DAE.INITIAL_NORETCALL(exp, source)))
                   end
                 end
               end
@@ -1505,13 +1507,13 @@
                   (e1, e2, source, SCode.NON_INITIAL(__))  => begin
                       elt = DAE.EQUATION(e1, e2, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.EQUATION(e1, e2, source)))
+                    DAE.DAE_LIST(list(DAE.EQUATION(e1, e2, source)))
                   end
 
                   (e1, e2, source, SCode.INITIAL(__))  => begin
                       elt = DAE.INITIALEQUATION(e1, e2, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.INITIALEQUATION(e1, e2, source)))
+                    DAE.DAE_LIST(list(DAE.INITIALEQUATION(e1, e2, source)))
                   end
                 end
               end
@@ -1527,11 +1529,11 @@
                   local e2::DAE.Exp
                 @match (inComponentRef, inExp, source, inInitial) begin
                   (cr, e2, _, SCode.NON_INITIAL(__))  => begin
-                    DAE.DAE(list(DAE.DEFINE(cr, e2, source)))
+                    DAE.DAE_LIST(list(DAE.DEFINE(cr, e2, source)))
                   end
 
                   (cr, e2, _, SCode.INITIAL(__))  => begin
-                    DAE.DAE(list(DAE.INITIALDEFINE(cr, e2, source)))
+                    DAE.DAE_LIST(list(DAE.INITIALDEFINE(cr, e2, source)))
                   end
                 end
               end
@@ -1567,7 +1569,7 @@
                       ds = Types.getDimensions(tp)
                       elt = DAE.INITIAL_ARRAY_EQUATION(ds, lhs, rhs, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.INITIAL_ARRAY_EQUATION(ds, lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.INITIAL_ARRAY_EQUATION(ds, lhs, rhs, source)))
                   end
 
                   (_, _, _, _, source, SCode.NON_INITIAL(__))  => begin
@@ -1577,7 +1579,7 @@
                       ds = Types.getDimensions(tp)
                       elt = DAE.ARRAY_EQUATION(ds, lhs, rhs, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.ARRAY_EQUATION(ds, lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.ARRAY_EQUATION(ds, lhs, rhs, source)))
                   end
 
                   (_, _, DAE.T_ARRAY(ty = t, dims = _ <|  nil()), _, _, _)  => begin
@@ -1618,7 +1620,7 @@
                           else
                             DAE.ARRAY_EQUATION(ds, lhs, rhs, source)
                           end
-                    DAE.DAE(list(elt))
+                    DAE.DAE_LIST(list(elt))
                   end
 
                   (_, _, DAE.T_ARRAY(ty = t, dims = dim <|  nil()), _, _, _)  => begin
@@ -1638,7 +1640,7 @@
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                       elt = DAE.INITIAL_ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.INITIAL_ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.INITIAL_ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
                   end
 
                   (_, _, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, source, SCode.NON_INITIAL(__))  => begin
@@ -1646,7 +1648,7 @@
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
                       elt = DAE.ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)
                       source = ElementSource.addSymbolicTransformationFlattenedEqs(source, elt)
-                    DAE.DAE(list(DAE.ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.ARRAY_EQUATION(list(DAE.DIM_INTEGER(1)), lhs, rhs, source)))
                   end
 
                   (_, _, DAE.T_ARRAY(dims = DAE.DIM_UNKNOWN(__) <|  nil()), _, _, _)  => begin
@@ -1877,11 +1879,11 @@
               dae = begin
                 @match (lhs, rhs, source, initial_) begin
                   (_, _, _, SCode.NON_INITIAL(__))  => begin
-                    DAE.DAE(list(DAE.COMPLEX_EQUATION(lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.COMPLEX_EQUATION(lhs, rhs, source)))
                   end
 
                   (_, _, _, SCode.INITIAL(__))  => begin
-                    DAE.DAE(list(DAE.INITIAL_COMPLEX_EQUATION(lhs, rhs, source)))
+                    DAE.DAE_LIST(list(DAE.INITIAL_COMPLEX_EQUATION(lhs, rhs, source)))
                   end
                 end
               end
@@ -1923,7 +1925,7 @@
                       source = ElementSource.createElementSource(AbsynUtil.dummyInfo, FGraph.getScopePath(env), pre)
                       (cache, statements_1) = instStatements(cache, env, ih, pre, ci_state, statements, source, SCode.NON_INITIAL(), impl, unrollForLoops)
                       (statements_1, _) = DAEUtil.traverseDAEEquationsStmts(statements_1, Expression.traverseSubexpressionsHelper, (ExpressionSimplify.simplifyWork, ExpressionSimplifyTypes.optionSimplifyOnly))
-                      dae = DAE.DAE(list(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
+                      dae = DAE.DAE_LIST(list(DAE.ALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
                     (cache, env, ih, dae, csets, ci_state, graph)
                   end
 
@@ -1978,7 +1980,7 @@
                       source = ElementSource.createElementSource(AbsynUtil.dummyInfo, FGraph.getScopePath(env), pre)
                       (cache, statements_1) = instStatements(cache, env, ih, pre, ci_state, statements, source, SCode.INITIAL(), impl, unrollForLoops)
                       (statements_1, _) = DAEUtil.traverseDAEEquationsStmts(statements_1, Expression.traverseSubexpressionsHelper, (ExpressionSimplify.simplifyWork, ExpressionSimplifyTypes.optionSimplifyOnly))
-                      dae = DAE.DAE(list(DAE.INITIALALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
+                      dae = DAE.DAE_LIST(list(DAE.INITIALALGORITHM(DAE.ALGORITHM_STMTS(statements_1), source)))
                     (cache, env, ih, dae, csets, ci_state, graph)
                   end
 
@@ -2016,7 +2018,7 @@
                       ci_state = ClassInf.trans(ci_state, ClassInf.FOUND_ALGORITHM())
                       source = ElementSource.createElementSource(AbsynUtil.dummyInfo, FGraph.getScopePath(env), pre)
                       (cache, constraints_1, _) = Static.elabExpList(cache, env, constraints, impl, true, pre, AbsynUtil.dummyInfo)
-                      dae = DAE.DAE(list(DAE.CONSTRAINT(DAE.CONSTRAINT_EXPS(constraints_1), source)))
+                      dae = DAE.DAE_LIST(list(DAE.CONSTRAINT(DAE.CONSTRAINT_EXPS(constraints_1), source)))
                     (cache, env, dae, ci_state)
                   end
 
@@ -2454,7 +2456,7 @@
               local outCache::FCore.Cache
 
               checkForConnectInIfBranch(inEquations)
-              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
+              @match (outCache, outEnv, outIH, DAE.DAE_LIST(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
@@ -2509,7 +2511,7 @@
               local outCache::FCore.Cache
 
               checkForConnectInIfBranch(inEquations)
-              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEInitialEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
+              @match (outCache, outEnv, outIH, DAE.DAE_LIST(outEquations), _, outState, _) = Inst.instList(inCache, inEnv, inIH, inPrefix, DAE.emptySet, inState, instEInitialEquation, inEquations, inImpl, alwaysUnroll, ConnectionGraph.EMPTY)
           (outCache, outEnv, outIH, outState, outEquations)
         end
 
@@ -2673,7 +2675,7 @@
               end
                #=  Instantiate the when body.
                =#
-              @match (outCache, outEnv, outIH, DAE.DAE(outEquations), _, _, outGraph) = Inst.instList(outCache, inEnv, inIH, inPrefix, inSets, inState, instEEquation, body, inImpl, alwaysUnroll, inGraph)
+              @match (outCache, outEnv, outIH, DAE.DAE_LIST(outEquations), _, _, outGraph) = Inst.instList(outCache, inEnv, inIH, inPrefix, inSets, inState, instEEquation, body, inImpl, alwaysUnroll, inGraph)
           (outCache, outEnv, outIH, outCondition, outEquations, outGraph)
         end
 
@@ -3950,7 +3952,7 @@
                       lhsl = Expression.arrayElements(crefExp1)
                       rhsl = Expression.arrayElements(crefExp2)
                       elts = ListUtil.threadMap1(lhsl, rhsl, generateConnectAssert, source)
-                    (cache, env, ih, sets, DAE.DAE(elts), graph)
+                    (cache, env, ih, sets, DAE.DAE_LIST(elts), graph)
                   end
 
                   (cache, env, ih, sets, pre, c1, f1, t1, _, c2, f2, t2, _, _, _, _, graph, _)  => begin
@@ -4010,7 +4012,7 @@
                       graph = ConnectionGraph.addConnection(graph, c1_1, c2_1, breakDAEElements)
                       (cache, equalityConstraintFunction, env) = Lookup.lookupClass(cache, env, fpath1)
                       (cache, fpath1) = Inst.makeFullyQualified(cache, env, fpath1)
-                      cache = FCore.addCachedInstFuncGuard(cache, fpath1)
+                      cache = FCoreUtil.addCachedInstFuncGuard(cache, fpath1)
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
@@ -4029,7 +4031,7 @@
                       graph = ConnectionGraph.addConnection(graph, ComponentReference.crefStripLastSubs(c1_1), ComponentReference.crefStripLastSubs(c2_1), breakDAEElements)
                       (cache, equalityConstraintFunction, env) = Lookup.lookupClass(cache, env, fpath1)
                       (cache, fpath1) = Inst.makeFullyQualified(cache, env, fpath1)
-                      cache = FCore.addCachedInstFuncGuard(cache, fpath1)
+                      cache = FCoreUtil.addCachedInstFuncGuard(cache, fpath1)
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
@@ -4339,7 +4341,7 @@
                   end
 
                   (DAE.DIM_BOOLEAN(__), _)  => begin
-                      expl = list(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(false)))), ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(true)))))
+                      expl = list(Util.tuple21(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(false))))), Util.tuple21(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(true))))))
                     expl
                   end
 

@@ -118,9 +118,9 @@
                   local funcs::DAE.FunctionTree
                   local funcLst::List{Tuple{DAE.AvlTreePathFunction.Key, DAE.AvlTreePathFunction.Value}}
                 @match (dae, repl, condExpFunc) begin
-                  (DAE.DAE(elementLst = elts), _, _)  => begin
+                  (DAE.DAE_LIST(elementLst = elts), _, _)  => begin
                       elts = applyReplacementsDAEElts(elts, repl, condExpFunc)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
                 end
               end

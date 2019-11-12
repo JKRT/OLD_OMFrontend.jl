@@ -70,6 +70,7 @@
         import Expression
         import ExpressionDump
         import FBuiltin
+        import FCoreUtil
         import Flags
         import FGraph
         import FNode
@@ -2282,7 +2283,7 @@
               local dependencies::List{Absyn.Path} #= the dependencies as paths =#
               local mainFunction::DAE.Function #= the main function =#
 
-              funcs = FCore.getFunctionTree(cache)
+              funcs = FCoreUtil.getFunctionTree(cache)
                #=  First check if the main function exists... If it does not it might be an interactive function...
                =#
               mainFunction = DAEUtil.getNamedFunction(functionName, funcs)
@@ -2344,7 +2345,7 @@
                   (cache, _, _, path)  => begin
                       @match true = Flags.isSet(Flags.GEN)
                       @match true = Flags.isSet(Flags.GENERATE_CODE_CHEAT)
-                      funcs = FCore.getFunctionTree(cache)
+                      funcs = FCoreUtil.getFunctionTree(cache)
                       pathstr = generateFunctionName(path)
                       fileName = generateFunctionFileName(path)
                       d = DAEUtil.getFunctionList(funcs)
@@ -2548,7 +2549,7 @@
                         metarecords = _cons(t, metarecords)
                       end
                       cache = instantiateDaeFunctions(cache, env, paths)
-                      funcs = FCore.getFunctionTree(cache)
+                      funcs = FCoreUtil.getFunctionTree(cache)
                       d = ListUtil.map2(paths, DAEUtil.getNamedFunctionWithError, funcs, info)
                       (_, (_, dependencies)) = DAEUtil.traverseDAEFunctions(d, Expression.traverseSubexpressionsHelper, (matchQualifiedCalls, nil))
                        #=  print(name + \" has dependencies: \" + stringDelimitList(dependencies,\",\") + \"\\n\");
@@ -2880,7 +2881,7 @@
                       @match (cache, (@match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc), env) = Lookup.lookupClass(cache, env, funcpath)
                       isCevaluableFunction(sc)
                       (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
-                      func = FCore.getCachedInstFunc(cache, funcpath)
+                      func = FCoreUtil.getCachedInstFunc(cache, funcpath)
                       (cache, newval) = CevalFunction.evaluate(cache, env, func, vallst)
                     (cache, newval)
                   end

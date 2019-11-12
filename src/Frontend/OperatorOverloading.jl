@@ -37,6 +37,7 @@ using ExportAll
 import AbsynUtil
 import DAE
 import FCore
+import FCoreUtil
 import Prefix
 import SCode
 import Util
@@ -117,8 +118,8 @@ function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Ope
         =#
         if Types.isRecord(Types.arrayElementType(type1)) || Types.isRecord(Types.arrayElementType(type2))
           (cache, exp, _, otype) = binaryUserdef(cache, env, aboper, inExp1, inExp2, type1, type2, inImpl, inPre, inInfo)
-          functionTree = FCore.getFunctionTree(cache)
-          exp = ExpressionSimplify.simplify1(exp)
+          functionTree = FCoreUtil.getFunctionTree(cache)
+          (exp, _) = ExpressionSimplify.simplify1(exp)
           (exp, _, didInline, _) = Inline.inlineExp(exp, (SOME(functionTree), list(DAE.BUILTIN_EARLY_INLINE(), DAE.EARLY_INLINE())), DAE.emptyElementSource)
           exp = ExpressionSimplify.condsimplify(didInline, exp)
           constVar = Types.constAnd(const1, const2)

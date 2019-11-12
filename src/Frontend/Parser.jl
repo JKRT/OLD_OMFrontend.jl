@@ -39,6 +39,7 @@ using ExportAll
 @UniontypeDecl ParserResult
 
 import Absyn
+import BaseHashTable
 import HashTableStringToProgram
 import Config
 import ErrorExt

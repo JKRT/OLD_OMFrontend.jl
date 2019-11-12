@@ -374,7 +374,7 @@ end
     equationBound::Option{Exp}
     isProtected::Option{Bool}
     finalPrefix::Option{Bool}
-    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+    startOrigin #= where did start=X came from? NONE()|SOME(SCONST binding|type|undefined) =#::Option{Exp}
   end
 
   @Record VAR_ATTR_INT begin
@@ -391,7 +391,7 @@ end
     #=  ,eb,ip
     =#
     finalPrefix::Option{Bool}
-    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+    startOrigin #= where did start=X came from? NONE()|SOME(SCONST binding|type|undefined) =#::Option{Exp}
   end
 
   @Record VAR_ATTR_BOOL begin
@@ -402,7 +402,7 @@ end
     equationBound::Option{Exp}
     isProtected::Option{Bool}
     finalPrefix::Option{Bool}
-    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+    startOrigin #= where did start=X came from? NONE()|SOME(SCONST binding|type|undefined) =#::Option{Exp}
   end
 
   @Record VAR_ATTR_CLOCK begin
@@ -419,7 +419,7 @@ end
     equationBound::Option{Exp}
     isProtected::Option{Bool}
     finalPrefix::Option{Bool}
-    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+    startOrigin #= where did start=X came from? NONE()|SOME(SCONST binding|type|undefined) =#::Option{Exp}
   end
 
   @Record VAR_ATTR_ENUMERATION begin
@@ -432,7 +432,7 @@ end
     equationBound::Option{Exp}
     isProtected::Option{Bool}
     finalPrefix::Option{Bool}
-    startOrigin #= where did start=X came from? NONE()|SOME(DAE.SCONST binding|type|undefined) =#::Option{Exp}
+    startOrigin #= where did start=X came from? NONE()|SOME(SCONST binding|type|undefined) =#::Option{Exp}
   end
 end
 
@@ -539,7 +539,55 @@ using BaseAvlTree
 import Absyn
 Key = Absyn.Path
 Value = Option
-addConflictDefault = addConflictReplace
+
+function get(tree, key::Key)::Value
+    local value::Value
+    local k::Key
+    k = begin
+        @match tree begin
+            NODE(__)  => begin
+                tree.key
+            end
+            LEAF(__)  => begin
+                tree.key
+            end
+        end
+    end
+    value = begin
+        @match (keyCompare(key, k), tree) begin
+            (0, LEAF(__))  => begin
+                tree.value
+            end
+
+            (0, NODE(__))  => begin
+                tree.value
+            end
+
+            (1, NODE(__))  => begin
+                get(tree.right, key)
+            end
+
+            (-1, NODE(__))  => begin
+                get(tree.left, key)
+            end
+        end
+    end
+    value
+end
+
+  function BaseAvlTree.keyStr(s::Absyn.Path)::String
+    AbsynUtil.pathString(s)
+  end
+
+  function BaseAvlTree.keyCompare(key1::Absyn.Path, key2::Absyn.Path)
+    stringCompare(AbsynUtil.pathString(key1), AbsynUtil.pathString(key2))
+  end
+
+  function BaseAvlTree.valueStr(inValue::Value)::String
+    local s::String = "forget it"
+  end
+
+
 @exportAll()
 end
 
@@ -1137,7 +1185,7 @@ end
 
     name::String
     ty::Type
-    isConst::Const
+    constType::Const
     par::VarParallelism
     defaultBinding::Option{Exp}
   end
@@ -1173,7 +1221,7 @@ Used by split_props
 @Uniontype TupleConst begin
   @Record SINGLE_CONST begin
 
-    isConst::Const
+    constType::Const
   end
 
   @Record TUPLE_CONST begin
@@ -1954,7 +2002,7 @@ end
 
   @Record CSTREAM begin
 
-    associatedFlow::Option{DAE.ComponentRef}
+    associatedFlow::Option{ComponentRef}
   end
 
   @Record CNO_TYPE begin
@@ -1965,10 +2013,10 @@ end
 @Uniontype ConnectorElement begin
   @Record CONNECTOR_ELEMENT begin
 
-    name::DAE.ComponentRef
+    name::ComponentRef
     face::Face
     ty::CConnectorType
-    source::DAE.ElementSource
+    source::ElementSource
     set #= Which set this element belongs to. =#::ModelicaInteger
   end
 end
@@ -1977,7 +2025,7 @@ end
   @Record SET_TRIE_NODE begin
 
     name::String
-    cref::DAE.ComponentRef
+    cref::ComponentRef
     nodes::List{SetTrieNode}
     connectCount::ModelicaInteger
   end
@@ -1988,7 +2036,7 @@ end
     insideElement #= The inside element. =#::Option{ConnectorElement}
     outsideElement #= The outside element. =#::Option{ConnectorElement}
     flowAssociation #= The name of the associated flow
-    variable, if the leaf represents a stream variable. =#::Option{DAE.ComponentRef}
+    variable, if the leaf represents a stream variable. =#::Option{ComponentRef}
     connectCount #= How many times this connector has been connected. =#::ModelicaInteger
   end
 end
@@ -2001,13 +2049,13 @@ const SetConnection = Tuple  #= A connection between two sets. =#
   @Record OUTERCONNECT begin
 
     scope #= the scope where this connect was created =#::Prefix.PrefixType
-    cr1 #= the lhs component reference =#::DAE.ComponentRef
+    cr1 #= the lhs component reference =#::ComponentRef
     io1 #= inner/outer attribute for cr1 component =#::Absyn.InnerOuter
     f1 #= the face of the lhs component =#::Face
-    cr2 #= the rhs component reference =#::DAE.ComponentRef
+    cr2 #= the rhs component reference =#::ComponentRef
     io2 #= inner/outer attribute for cr2 component =#::Absyn.InnerOuter
     f2 #= the face of the rhs component =#::Face
-    source #= the element origin =#::DAE.ElementSource
+    source #= the element origin =#::ElementSource
   end
 end
 

@@ -132,29 +132,30 @@
 
                   (_, SOME(_), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
-                      instHash = BaseHashTable.add((fullEnvPathPlusClass, list(fullInstOpt, partialInstOpt)), instHash)
+                      instHash = BaseHashTable.add((fullEnvPathPlusClass, _cons(fullInstOpt, _cons(partialInstOpt, nil))), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
 
                   (_, NONE(), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
-                      @match list(opt, _) = BaseHashTable.get(fullEnvPathPlusClass, instHash)
-                      instHash = BaseHashTable.add((fullEnvPathPlusClass, list(opt, partialInstOpt)), instHash)
+                      @match opt <| _ = BaseHashTable.get(fullEnvPathPlusClass, instHash)
+                      instHash = BaseHashTable.add((fullEnvPathPlusClass, _cons(opt, _cons(partialInstOpt, nil))), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
 
                   (_, NONE(), SOME(_))  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
-                      instHash = BaseHashTable.add((fullEnvPathPlusClass, list(NONE(), partialInstOpt)), instHash)
+                      instHash = BaseHashTable.add((fullEnvPathPlusClass, _cons(NONE(), _cons(partialInstOpt, nil))), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end
 
                   (_, SOME(_), NONE())  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
-                      @match _cons(_, (@match list(SOME(_)) = lst)) = BaseHashTable.get(fullEnvPathPlusClass, instHash)
+                      @match (_ <| lst) = BaseHashTable.get(fullEnvPathPlusClass, instHash)
+                      @match SOME(_) <| nil = lst
                       instHash = BaseHashTable.add((fullEnvPathPlusClass, _cons(fullInstOpt, lst)), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
@@ -162,7 +163,7 @@
 
                   (_, SOME(_), NONE())  => begin
                       instHash = getGlobalRoot(Global.instHashIndex)
-                      instHash = BaseHashTable.add((fullEnvPathPlusClass, list(fullInstOpt, NONE())), instHash)
+                      instHash = BaseHashTable.add((fullEnvPathPlusClass, _cons(fullInstOpt, _cons(NONE(), nil))), instHash)
                       setGlobalRoot(Global.instHashIndex, instHash)
                     ()
                   end

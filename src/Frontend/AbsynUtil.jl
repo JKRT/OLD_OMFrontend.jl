@@ -7155,7 +7155,7 @@
 
                   (class_ <| _, _, _, _, _)  => begin
                       print("-traverse_classes2 failed on class:")
-                      print(AbsynUtil.pathString(AbsynUtil.className(class_)))
+                      print(pathString(className(class_)))
                       print("\\n")
                     fail()
                   end
@@ -7276,7 +7276,7 @@
                    #= /* a class with parts */ =#
                 @matchcontinue (inClass, inPath, inFunc, inArg, inVisitProtected) begin
                   (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts, ann, str_opt), file_info), SOME(pa), visitor, args, visit_prot)  => begin
-                      tmp_pa = AbsynUtil.joinPaths(pa, IDENT(name))
+                      tmp_pa = joinPaths(pa, IDENT(name))
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(tmp_pa), visitor, args, visit_prot)
                     (CLASS(name, p, f, e, r, PARTS(typeVars, classAttrs, parts_1, ann, str_opt), file_info), pa_1, args_1)
                   end
@@ -7292,7 +7292,7 @@
                   end
 
                   (CLASS(name = name, partialPrefix = p, finalPrefix = f, encapsulatedPrefix = e, restriction = r, body = CLASS_EXTENDS(baseClassName = bcname, comment = str_opt, modifications = modif, parts = parts, ann = ann), info = file_info), SOME(pa), visitor, args, visit_prot)  => begin
-                      tmp_pa = AbsynUtil.joinPaths(pa, IDENT(name))
+                      tmp_pa = joinPaths(pa, IDENT(name))
                       (parts_1, pa_1, args_1) = traverseInnerClassParts(parts, SOME(tmp_pa), visitor, args, visit_prot)
                     (CLASS(name, p, f, e, r, CLASS_EXTENDS(bcname, modif, str_opt, parts_1, ann), file_info), pa_1, args_1)
                   end

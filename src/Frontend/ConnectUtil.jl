@@ -1,10 +1,11 @@
-  module ConnectUtil
+module ConnectUtil
 
 
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
 
     UpdateFunc = Function
@@ -64,6 +65,7 @@
         # import Connect
         import DAE
         import FCore
+        import FCoreUtil
         import InnerOuter
         import Prefix
         import ConnectionGraph
@@ -363,7 +365,7 @@
               local vars::List{DAE.Element}
 
               if System.getHasExpandableConnectors()
-                @match DAE.DAE(vars) = DAE
+                @match DAE.DAE_LIST(vars) = DAE
                 hasExpandable = ListUtil.exist(vars, isVarExpandable)
               else
                 hasExpandable = false
@@ -622,9 +624,9 @@
               try
                 setTrieGetElement(cref, DAE.INSIDE(), sets.sets)
               catch
-                sets.setCount = sets.setCount + 1
+                @set sets.setCount = sets.setCount + 1
                 e = newElement(cref, DAE.INSIDE(), DAE.FLOW(), source, sets.setCount)
-                sets.sets = setTrieAdd(e, sets.sets)
+                @set sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
                =#
@@ -677,7 +679,7 @@
                =#
               if ! ListUtil.exist2(sets.outerConnects, outerConnectionMatches, cr1, cr2)
                 new_oc = DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
-                sets.outerConnects = _cons(new_oc, sets.outerConnects)
+                @set sets.outerConnects = _cons(new_oc, sets.outerConnects)
               end
           sets
         end
@@ -1059,8 +1061,8 @@
               e2 = setElementSetIndex(element2, sc)
               node = sets.sets
               node = setTrieAdd(e1, node)
-              sets.sets = setTrieAdd(e2, node)
-              sets.setCount = sc
+              @set sets.sets = setTrieAdd(e2, node)
+              @set sets.setCount = sc
           sets
         end
 
@@ -1089,7 +1091,7 @@
                #=  Add a new connection if the elements don't belong to the same set already.
                =#
               if set1 != set2
-                sets.connections = _cons((set1, set2), sets.connections)
+                @set sets.connections = _cons((set1, set2), sets.connections)
               end
           sets
         end
@@ -1168,9 +1170,7 @@
 
          #= Updates a trie leaf in the sets with the given update function. =#
         function updateSetLeaf(sets::Sets, cref::DAE.ComponentRef, arg::Arg, updateFunc::UpdateFunc)  where {Arg}
-
-
-              sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
+          @set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
           sets
         end
 
@@ -1279,7 +1279,7 @@
               local node::SetTrieNode
 
               (node, arg) = setTrieTraverseLeaves(sets.sets, updateFunc, arg)
-              sets.sets = node
+              @set sets.sets = node
           (sets, arg)
         end
 
@@ -1431,7 +1431,7 @@
 
          #= Generates equations from a connection set and evaluates stream operators if
           called from the top scope, otherwise does nothing. =#
-        function equations(topScope::Bool, sets::Sets, DAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraphType, modelNameQualified::String) ::DAE.DAElist
+        function equations(topScope::Bool, sets::Sets, inDAE::DAE.DAElist, connectionGraph::ConnectionGraph.ConnectionGraphType, modelNameQualified::String) ::DAE.DAElist
 
 
               local set_list::List{CSet}
@@ -1446,7 +1446,7 @@
 
               setGlobalRoot(Global.isInStream, NONE())
               if ! topScope
-                return DAE
+                return inDAE
               end
                #= print(printSetsStr(inSets) + \"\\n\");
                =#
@@ -1456,10 +1456,10 @@
                =#
                #= print(stringDelimitList(List.map(sets, printSetStr), \"\\n\") + \"\\n\");
                =#
-              if daeHasExpandableConnectors(DAE)
-                (set_list, dae) = removeUnusedExpandableVariablesAndConnections(set_list, DAE)
+              if daeHasExpandableConnectors(inDAE)
+                (set_list, dae) = removeUnusedExpandableVariablesAndConnections(set_list, inDAE)
               else
-                dae = DAE
+                dae = inDAE
               end
                #=  send in the connection graph and build the connected/broken connects
                =#
@@ -1471,12 +1471,12 @@
                #=  updates sets further
                =#
               dae2 = equationsDispatch(listReverse(set_list), connected, broken)
-              DAE = DAEUtil.joinDaes(dae, dae2)
-              DAE = evaluateConnectionOperators(sets, set_array, DAE)
+              inDAE = DAEUtil.joinDaes(dae, dae2)
+              inDAE = evaluateConnectionOperators(sets, set_array, inDAE)
                #=  add the equality constraint equations to the dae.
                =#
-              DAE = ConnectionGraph.addBrokenEqualityConstraintEquations(DAE, broken)
-          DAE
+              inDAE = ConnectionGraph.addBrokenEqualityConstraintEquations(inDAE, broken)
+          inDAE
         end
 
          #= @author: adrpo
@@ -1983,7 +1983,7 @@
                   e1 = e2
                 end
               end
-              DAE = DAE.DAE(listReverse(eql))
+              DAE = DAE.DAE_LIST(listReverse(eql))
           DAE
         end
 
@@ -2027,7 +2027,7 @@
                 sum = Expression.makeRealAdd(sum, makeFlowExp(e))
                 src = ElementSource.mergeSources(src, e.source)
               end
-              DAE = DAE.DAE(list(DAE.EQUATION(sum, DAE.RCONST(0.0), src)))
+              DAE = DAE.DAE_LIST(list(DAE.EQUATION(sum, DAE.RCONST(0.0), src)))
           DAE
         end
 
@@ -2127,7 +2127,7 @@
                       e1 = makeInStreamCall(cref2)
                       e2 = makeInStreamCall(cref1)
                       src = ElementSource.mergeSources(src1, src2)
-                      dae = DAE.DAE(list(DAE.EQUATION(cref1, e1, src), DAE.EQUATION(cref2, e2, src)))
+                      dae = DAE.DAE_LIST(list(DAE.EQUATION(cref1, e1, src), DAE.EQUATION(cref2, e2, src)))
                     dae
                   end
 
@@ -2139,7 +2139,7 @@
                       src = ElementSource.mergeSources(src1, src2)
                       e1 = Expression.crefExp(cr1)
                       e2 = Expression.crefExp(cr2)
-                      dae = DAE.DAE(list(DAE.EQUATION(e1, e2, src)))
+                      dae = DAE.DAE_LIST(list(DAE.EQUATION(e1, e2, src)))
                     dae
                   end
 
@@ -2227,7 +2227,7 @@
                 src = ElementSource.addAdditionalComment(e.source, " equation generated by stream handling")
                 eql = _cons(DAE.EQUATION(cref_exp, res, src), eql)
               end
-              DAE = DAE.DAE(eql)
+              DAE = DAE.DAE_LIST(eql)
           DAE
         end
 
@@ -2712,7 +2712,7 @@
 
 
               if hasCardinality
-                DAE = DAE.DAE(ListUtil.mapFlat(DAE.elementLst, simplifyDAEElement))
+                DAE = DAE.DAE_LIST(ListUtil.mapFlat(DAE.elementLst, simplifyDAEElement))
               end
           DAE
         end
@@ -3396,7 +3396,7 @@
               local dae::DAE.DAElist
               local setsAsCrefs::List{List{DAE.ComponentRef}}
 
-              @match DAE.DAE(elems) = DAE
+              @match DAE.DAE_LIST(elems) = DAE
                #=  1 - get all expandable crefs
                =#
               expandableVars = getExpandableVariablesWithNoBinding(elems)

@@ -51,6 +51,8 @@ import SCode
 
 import FCore
 
+import FCoreUtil
+
 import FGraph
 
 import ClassInf

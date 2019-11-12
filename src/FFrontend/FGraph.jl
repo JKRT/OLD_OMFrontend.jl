@@ -44,6 +44,7 @@ import DAE
 import Prefix
 import ClassInf
 import FCore
+import FCoreUtil
 
 const Name = FCore.Name
 const Id = FCore.Id
@@ -1423,7 +1424,7 @@ import SCodeUtil
         function isImplicitScope(inName::Name) ::Bool
               local isImplicit::Bool
 
-              isImplicit = FCore.isImplicitScope(inName)
+              isImplicit = FCoreUtil.isImplicitScope(inName)
           isImplicit
         end
 

@@ -36,6 +36,7 @@ module InnerOuter
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
     @UniontypeDecl InstResult
     @UniontypeDecl InstInner
@@ -48,10 +49,12 @@ module InnerOuter
 
 
         import Absyn
+        import AbsynUtil
         # import Connect
         import ConnectionGraph
         import DAE
         import FCore
+        import FCoreUtil
         import FNode
         import Prefix
         import SCode
@@ -229,9 +232,7 @@ module InnerOuter
 
          #= changes inner to outer and outer to inner where needed =#
         function changeInnerOuterInOuterConnect(sets::DAE.Sets) ::DAE.Sets
-
-
-              sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
+          @set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
           sets
         end
 
@@ -490,7 +491,7 @@ module InnerOuter
 
               @match DAE.SETS(outerConnects = oc) = inSets
               (oc, outSets, outInnerOuterConnects, outCGraph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, oc, inSets, inTopCall, inCGraph)
-              outSets.outerConnects = oc
+              @set outSets.outerConnects = oc
           (outSets, outInnerOuterConnects, outCGraph)
         end
 
@@ -895,8 +896,8 @@ module InnerOuter
                   end
 
                   (_, true)  => begin
-                      @match (DAE.DAE(innerVars), DAE.DAE(outerVars)) = DAEUtil.findAllMatchingElements(inDae, DAEUtil.isInnerVar, DAEUtil.isOuterVar)
-                      checkMissingInnerDecl1(DAE.DAE(innerVars), DAE.DAE(outerVars))
+                      @match (DAE.DAE_LIST(innerVars), DAE.DAE_LIST(outerVars)) = DAEUtil.findAllMatchingElements(inDae, DAEUtil.isInnerVar, DAEUtil.isOuterVar)
+                      checkMissingInnerDecl1(DAE.DAE_LIST(innerVars), DAE.DAE_LIST(outerVars))
                     ()
                   end
 
@@ -2377,7 +2378,7 @@ module InnerOuter
                   local res::List{Tuple{Key, Value}}
                 @matchcontinue (inVarOptionArray1, inInteger2, inInteger3) begin
                   (arr, pos, lastpos)  => begin
-                      if ! pos == lastpos
+                      if !(pos == lastpos)
                         fail()
                       end
                       @match SOME(v) = arr[pos + 1]
@@ -2437,7 +2438,7 @@ module InnerOuter
                   local rexpandsize::ModelicaReal
                 @matchcontinue (valueArray, entry) begin
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
-                      if ! n < arrayLength(arr)
+                      if !(n < arrayLength(arr))
                         fail() #= Have space to add array elt. =#
                       end #= Have space to add array elt. =#
                       n_1 = n + 1
@@ -2447,7 +2448,7 @@ module InnerOuter
 
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
                       size = arrayLength(arr)
-                      if n < size
+                      if (n < size)
                         fail() #= Do NOT have splace to add array elt. Expand with factor 1.4 =#
                       end #= Do NOT have splace to add array elt. Expand with factor 1.4 =#
                       rsize = intReal(size)
@@ -2480,7 +2481,7 @@ module InnerOuter
                   local size::ModelicaInteger
                 @matchcontinue (valueArray, pos, entry) begin
                   (VALUE_ARRAY(_, arr), _, _)  => begin
-                      if ! pos < arrayLength(arr)
+                      if !(pos < arrayLength(arr))
                         fail()
                       end
                       arrayUpdate(arr, pos + 1, SOME(entry))
@@ -2507,7 +2508,7 @@ module InnerOuter
                   local size::ModelicaInteger
                 @matchcontinue (valueArray, pos) begin
                   (VALUE_ARRAY(_, arr), _)  => begin
-                      if ! pos < arrayLength(arr)
+                      if !(pos < arrayLength(arr))
                         fail()
                       end
                       arrayUpdate(arr, pos + 1, NONE())
@@ -2536,7 +2537,7 @@ module InnerOuter
                   local arr::Array{Option{Tuple{Key, Value}}}
                 @match (valueArray, pos) begin
                   (VALUE_ARRAY(numberOfElements = n, valueArray = arr), _)  => begin
-                      if ! pos < n
+                      if !(pos < n)
                         fail()
                       end
                       @match SOME((k, v)) = arr[pos + 1]

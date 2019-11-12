@@ -43,6 +43,8 @@
         import MMath
 
         import FCore
+        
+        import FCoreUtil
 
         import HashTable
 
@@ -96,7 +98,7 @@
                     ()
                   end
 
-                  (_, _, DAE.DAE(elementLst = elts))  => begin
+                  (_, _, DAE.DAE_LIST(elementLst = elts))  => begin
                       paths = ListUtil.unionList(ListUtil.map(elts, DAEUtil.getClassList))
                       du = ListUtil.unionList(ListUtil.map1(paths, retrieveUnitsFromEnv, (cache, env)))
                       registerUnitWeightDefineunits(du)
@@ -1098,48 +1100,48 @@
                   local elts::List{DAE.Element}
                   local store::UnitAbsyn.Store
                 @matchcontinue (env, dae, ht, istore) begin
-                  (_, DAE.DAE(elementLst =  nil()), _, store)  => begin
+                  (_, DAE.DAE_LIST(elementLst =  nil()), _, store)  => begin
                     (nil, store)
                   end
 
-                  (_, DAE.DAE(elementLst = DAE.EQUATION(e1, e2, _) <| elts), _, store)  => begin
+                  (_, DAE.DAE_LIST(elementLst = DAE.EQUATION(e1, e2, _) <| elts), _, store)  => begin
                       (ut1, terms1, store) = buildTermExp(env, e1, false, ht, store)
                       (ut2, terms2, store) = buildTermExp(env, e2, false, ht, store)
-                      (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
+                      (terms, store) = buildTerms(env, DAE.DAE_LIST(elts), ht, store)
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(e1, DAE.SUB(DAE.T_REAL_DEFAULT), e2)), terms), store)
                   end
 
-                  (_, DAE.DAE(elementLst = DAE.EQUEQUATION(cr1, cr2, _) <| elts), _, store)  => begin
+                  (_, DAE.DAE_LIST(elementLst = DAE.EQUEQUATION(cr1, cr2, _) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       crefExp2 = Expression.crefExp(cr2)
                       (ut1, terms1, store) = buildTermExp(env, crefExp1, false, ht, store)
                       (ut2, terms2, store) = buildTermExp(env, crefExp2, false, ht, store)
-                      (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
+                      (terms, store) = buildTerms(env, DAE.DAE_LIST(elts), ht, store)
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), crefExp2)), terms), store)
                   end
 
-                  (_, DAE.DAE(elementLst = DAE.VAR(componentRef = cr1 && DAE.CREF_IDENT(_, _, _), binding = SOME(e1)) <| elts), _, store)  => begin
+                  (_, DAE.DAE_LIST(elementLst = DAE.VAR(componentRef = cr1 && DAE.CREF_IDENT(_, _, _), binding = SOME(e1)) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       (ut1, terms1, store) = buildTermExp(env, crefExp1, false, ht, store)
                       (ut2, terms2, store) = buildTermExp(env, e1, false, ht, store)
-                      (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
+                      (terms, store) = buildTerms(env, DAE.DAE_LIST(elts), ht, store)
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), e1)), terms), store)
                   end
 
-                  (_, DAE.DAE(elementLst = DAE.DEFINE(cr1, e1, _) <| elts), _, store)  => begin
+                  (_, DAE.DAE_LIST(elementLst = DAE.DEFINE(cr1, e1, _) <| elts), _, store)  => begin
                       crefExp1 = Expression.crefExp(cr1)
                       (ut1, terms1, store) = buildTermExp(env, crefExp1, false, ht, store)
                       (ut2, terms2, store) = buildTermExp(env, e1, false, ht, store)
-                      (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
+                      (terms, store) = buildTerms(env, DAE.DAE_LIST(elts), ht, store)
                       terms = listAppend(terms1, listAppend(terms2, terms))
                     (_cons(UnitAbsyn.EQN(ut1, ut2, DAE.BINARY(crefExp1, DAE.SUB(DAE.T_REAL_DEFAULT), e1)), terms), store)
                   end
 
-                  (_, DAE.DAE(elementLst = _ <| elts), _, store)  => begin
-                      (terms, store) = buildTerms(env, DAE.DAE(elts), ht, store)
+                  (_, DAE.DAE_LIST(elementLst = _ <| elts), _, store)  => begin
+                      (terms, store) = buildTerms(env, DAE.DAE_LIST(elts), ht, store)
                     (terms, store)
                   end
                 end
@@ -1351,7 +1353,7 @@
                   local store::UnitAbsyn.Store
                 @match (env, path, funcCallExp, expl, divOrMul, ht, istore) begin
                   (_, _, _, _, _, _, store)  => begin
-                      (_, functp, _) = Lookup.lookupType(FCore.noCache(), env, path, NONE())
+                      (_, functp, _) = Lookup.lookupType(FCoreUtil.noCache(), env, path, NONE())
                       funcInstId = tick()
                       (store, formalParamIndxs) = buildFuncTypeStores(functp, funcInstId, store)
                       (actTermLst, extraTerms, store) = buildTermExpList(env, expl, ht, store)
@@ -1698,27 +1700,27 @@
                   local store::UnitAbsyn.Store
                   local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
-                  (DAE.DAE(elementLst =  nil()), _, _)  => begin
+                  (DAE.DAE_LIST(elementLst =  nil()), _, _)  => begin
                     (inStore, inHt)
                   end
 
-                  (DAE.DAE(elementLst = DAE.VAR(componentRef = cr, variableAttributesOption = attropt) <| elts), _, _)  => begin
+                  (DAE.DAE_LIST(elementLst = DAE.VAR(componentRef = cr, variableAttributesOption = attropt) <| elts), _, _)  => begin
                       @match DAE.SCONST(unitStr) = DAEUtil.getUnitAttr(attropt)
                       unit = str2unit(unitStr, NONE())
                       (store, indx) = add(unit, inStore)
                       ht = BaseHashTable.add((cr, indx), inHt)
-                      (store, ht) = buildStores2(DAE.DAE(elts), store, ht)
+                      (store, ht) = buildStores2(DAE.DAE_LIST(elts), store, ht)
                     (store, ht)
                   end
 
-                  (DAE.DAE(elementLst = DAE.VAR(componentRef = cr) <| _), _, _)  => begin
+                  (DAE.DAE_LIST(elementLst = DAE.VAR(componentRef = cr) <| _), _, _)  => begin
                       (store, indx) = add(UnitAbsyn.UNSPECIFIED(), inStore)
                       ht = BaseHashTable.add((cr, indx), inHt)
                     (store, ht)
                   end
 
-                  (DAE.DAE(elementLst = _ <| elts), _, _)  => begin
-                      (store, ht) = buildStores2(DAE.DAE(elts), inStore, inHt)
+                  (DAE.DAE_LIST(elementLst = _ <| elts), _, _)  => begin
+                      (store, ht) = buildStores2(DAE.DAE_LIST(elts), inStore, inHt)
                     (store, ht)
                   end
                 end
@@ -1748,19 +1750,19 @@
                   local store::UnitAbsyn.Store
                   local ht::HashTable.HashTableType
                 @matchcontinue (dae, inStore, inHt) begin
-                  (DAE.DAE( nil()), store, ht)  => begin
+                  (DAE.DAE_LIST( nil()), store, ht)  => begin
                     (store, ht)
                   end
 
-                  (DAE.DAE(DAE.EQUATION(e1, e2, _) <| elts), store, ht)  => begin
+                  (DAE.DAE_LIST(DAE.EQUATION(e1, e2, _) <| elts), store, ht)  => begin
                       (store, ht) = buildStoreExp(e1, store, ht, NONE())
                       (store, ht) = buildStoreExp(e2, store, ht, NONE())
-                      (store, ht) = buildStores3(DAE.DAE(elts), store, ht)
+                      (store, ht) = buildStores3(DAE.DAE_LIST(elts), store, ht)
                     (store, ht)
                   end
 
-                  (DAE.DAE(_ <| elts), store, ht)  => begin
-                      (store, ht) = buildStores3(DAE.DAE(elts), store, ht)
+                  (DAE.DAE_LIST(_ <| elts), store, ht)  => begin
+                      (store, ht) = buildStores3(DAE.DAE_LIST(elts), store, ht)
                     (store, ht)
                   end
                 end

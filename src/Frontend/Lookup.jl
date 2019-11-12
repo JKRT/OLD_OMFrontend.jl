@@ -114,10 +114,10 @@
         import ValuesUtil
 
         import Values
-        
+
         MutableType = Mutable.MutableType
-        
-        
+
+
          #= /*   - Lookup functions
 
           These functions look up class and variable names in the environment.
@@ -2057,7 +2057,7 @@
                   end
 
                   (cache, env, id <| ids, _, acc)  => begin
-                      @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInEnv(cache, env, id, info)
+                      @match (cache, res && _ <| _) = lookupFunctionsInEnv(cache, env, id, info)
                       (cache, acc) = lookupFunctionsListInEnv(cache, env, ids, info, listAppend(res, acc))
                     (cache, acc)
                   end
@@ -2106,22 +2106,25 @@
                   (cache, FCore.G(scope = r <| _), Absyn.IDENT(name = str), _, _)  => begin
                       ht = FNode.children(FNode.fromRef(r))
                       httypes = getHtTypes(r)
-                      @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInFrame(cache, ht, httypes, inEnv, str, info)
+                      @match (cache, res && _ <| _) = lookupFunctionsInFrame(cache, ht, httypes, inEnv, str, info)
                     (cache, res)
                   end
 
                   (cache, FCore.G(scope = r <| _), id && Absyn.IDENT(__), _, _)  => begin
-                      @match (cache, (@match SCode.CLASS(name = str, restriction = restr) = c), env_1) = lookupClass(cache, inEnv, id)
+                      @match (cache, c, env_1) = lookupClass(cache, inEnv, id)
+                      @match SCode.CLASS(name = str, restriction = restr) = c
                       @match true = SCodeUtil.isFunctionRestriction(restr)
-                      @match (cache, (@match FCore.G(scope = _cons(r, _)) = env_2), _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuter.emptyInstHierarchy, c)
+                      @match (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuter.emptyInstHierarchy, c)
+                      @match FCore.G(scope = r <| _) = env_2
                       ht = FNode.children(FNode.fromRef(r))
                       httypes = getHtTypes(r)
-                      @match (cache, (@match _cons(_, _) = res)) = lookupFunctionsInFrame(cache, ht, httypes, env_2, str, info)
+                      @match (cache, res && _ <| _) = lookupFunctionsInFrame(cache, ht, httypes, env_2, str, info)
                     (cache, res)
                   end
 
                   (cache, FCore.G(scope = r <| _), Absyn.QUALIFIED(name = pack, path = path), _, _)  => begin
-                      @match (cache, (@match SCode.CLASS(name = str, encapsulatedPrefix = encflag, restriction = restr) = c), env_1) = lookupClass(cache, inEnv, Absyn.IDENT(pack))
+                      @match (cache, c, env_1) = lookupClass(cache, inEnv, Absyn.IDENT(pack))
+                      @match SCode.CLASS(name = str, encapsulatedPrefix = encflag, restriction = restr) = c
                       r = FNode.child(FGraph.lastScopeRef(env_1), str)
                       if FNode.isRefInstance(r)
                         (cache, env2) = Inst.getCachedInstance(cache, env_1, str, r)

@@ -48,10 +48,12 @@
          */ =#
          #=  public imports
          =#
-         
+
         Type_a = Any
 
         import Absyn
+
+        import AbsynUtil
 
         import ClassInf
 
@@ -82,6 +84,8 @@
         import Debug
 
         import FCore
+        
+        import FCoreUtil
 
         import FGraph
 
@@ -1592,7 +1596,7 @@
 
                   DAE.CALL(path = Absyn.IDENT("fill"), expLst = e <| expl)  => begin
                       valueLst = ListUtil.map(expl, ValuesUtil.expValue)
-                      (_, outExp, _) = Static.elabBuiltinFill2(FCore.noCache(), FGraph.empty(), e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
+                      (_, outExp, _) = Static.elabBuiltinFill2(FCoreUtil.noCache(), FGraph.empty(), e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
                     outExp
                   end
 

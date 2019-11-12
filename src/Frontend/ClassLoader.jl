@@ -40,6 +40,7 @@
          *
          */ =#
         import Absyn
+        import AbsynUtil
 
         import Autoconf
         import BaseHashTable

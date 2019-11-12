@@ -37,6 +37,7 @@
          */ =#
         
         import Absyn
+        import AbsynUtil
         import ClassInf
         import DAE
         import FCore

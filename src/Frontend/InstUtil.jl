@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    using Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -41,6 +43,7 @@
         import ClassInf
         import DAE
         import FCore
+        import FCoreUtil
         import InnerOuter
         import InstTypes
         import Mod
@@ -70,6 +73,7 @@
         import Flags
         import FGraph
         import FNode
+        import FCoreUtil
         import SCodeDump
         import SCodeUtil
         import Lookup
@@ -161,9 +165,9 @@
               odae = begin
                   local elems::List{DAE.Element}
                 @match (cache, env, dae, isTopCall) begin
-                  (_, _, DAE.DAE(elementLst = elems), true)  => begin
+                  (_, _, DAE.DAE_LIST(elementLst = elems), true)  => begin
                       elems = listReverse(ListUtil.fold2r(elems, reEvaluateInitialIfEqns2, cache, env, nil))
-                    DAE.DAE(elems)
+                    DAE.DAE_LIST(elems)
                   end
 
                   (_, _, _, false)  => begin
@@ -303,7 +307,7 @@
                   local path1::Absyn.Path
                   local path2::Absyn.Path
                 @matchcontinue (ty, isPartialFn) begin
-                  (DAE.T_COMPLEX(complexClassType = ClassInf.SMNode.TYPE(path = path1)), _)  => begin
+                  (DAE.T_COMPLEX(complexClassType = ClassInf.TYPE(path = path1)), _)  => begin
                       name = AbsynUtil.pathLastIdent(path1)
                       path2 = AbsynUtil.stripLast(path1)
                       @match "Code" = AbsynUtil.pathLastIdent(path2)
@@ -412,9 +416,9 @@
                   local elts::List{DAE.Element}
                    #= /* Only traverse on top scope */ =#
                 @match (callScope, store, dae) begin
-                  (true, UnitAbsyn.INSTSTORE(UnitAbsyn.STORE(vec, _), ht, _), DAE.DAE(elts))  => begin
+                  (true, UnitAbsyn.INSTSTORE(UnitAbsyn.STORE(vec, _), ht, _), DAE.DAE_LIST(elts))  => begin
                       elts = ListUtil.map2(elts, updateDeducedUnits2, vec, ht)
-                    DAE.DAE(elts)
+                    DAE.DAE_LIST(elts)
                   end
 
                   _  => begin
@@ -826,7 +830,7 @@
                =#
                #= UnitAbsynBuilder.printInstStore(store);
                =#
-               #= print(\"dae1=\"+DAEDump.dumpDebugDAE(DAE.DAE(dae1))+\"\\n\");
+               #= print(\"dae1=\"+DAEDump.dumpDebugDAE(DAE.DAE_LIST(dae1))+\"\\n\");
                =#
           (outCache, outEnv, outStore)
         end
@@ -2615,7 +2619,7 @@
                         ty_path = AbsynUtil.typeSpecPath(comp.typeSpec)
                         local_mod = Mod.lookupModificationP(mod, ty_path)
                         if SCodeUtil.finalBool(SCodeUtil.prefixesFinal(prefs))
-                          comp.modifications = traverseModAddFinal(comp.modifications)
+                          @set comp.modifications = traverseModAddFinal(comp.modifications)
                         end
                         (cache, env, ih, comp2, mod2) = Inst.redeclareType(cache, env, ih, local_mod, comp, prefix, state, impl, cmod)
                         comp_mod = Mod.lookupCompModification(mod, comp.name)
@@ -2792,7 +2796,7 @@
          #= @author: adrpo
          add the record constructor to the cache if we have
          it as the type of an input component to a function =#
-        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
+        function addRecordConstructorsToTheCache(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inDirection::Absyn.Direction, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -2832,7 +2836,7 @@
 
          #= Check if variable is multiply declared and
          that all declarations are identical if so. =#
-        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.PrefixType, ciState::ClassInf.SMNode, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{<:List{<:DAE.Dimension}}, impl::Bool) ::Bool
+        function checkMultiplyDeclared(cache::FCore.Cache, env::FCore.Graph, mod::DAE.Mod, prefix::Prefix.PrefixType, ciState::ClassInf.SMNode, compTuple::Tuple{<:SCode.Element, DAE.Mod}, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, impl::Bool) ::Bool
               local alreadyDeclared::Bool
 
               alreadyDeclared = begin
@@ -3297,11 +3301,11 @@
                 outVariables = inVariables
                 return outVariables
               end
-              @match DAE.DAE(elementLst = eqs) = inEquations
-              @match DAE.DAE(elementLst = vars) = inVariables
+              @match DAE.DAE_LIST(elementLst = eqs) = inEquations
+              @match DAE.DAE_LIST(elementLst = vars) = inVariables
               Error.assertion(intEq(listLength(eqs), listLength(vars)), "- InstUtil.moveBindings: Mismatched number of equations and variables.", AbsynUtil.dummyInfo)
               vars = ListUtil.threadMap(eqs, vars, moveBindings2)
-              outVariables = DAE.DAE(vars)
+              outVariables = DAE.DAE_LIST(vars)
           outVariables
         end
 
@@ -3562,7 +3566,7 @@
           The builtin types have no dimension, whereas a user defined type might
           have dimensions. For instance, type Point = Real[3];
           has one dimension of size 3 and the class to instantiate is Real =#
-        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod}
+        function getUsertypeDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool) ::Tuple{FCore.Cache, DAE.Dimensions, SCode.Element, DAE.Mod}
               local outMods::DAE.Mod #= modifications from base classes =#
               local classToInstantiate::SCode.Element
               local outDimensionLst::DAE.Dimensions
@@ -3889,9 +3893,9 @@
 
               local elts::List{DAE.Element}
 
-              @match DAE.DAE(elementLst = elts) = inDae
+              @match DAE.DAE_LIST(elementLst = elts) = inDae
               elts = ListUtil.map3(elts, propagateAllAttributes, inAttributes, inPrefixes, inInfo)
-              outDae = DAE.DAE(elts)
+              outDae = DAE.DAE_LIST(elts)
           outDae
         end
 
@@ -4337,7 +4341,7 @@
 
          #= Same functionality as elabArraydim, but takes an optional arraydim.
           In case of NONE(), empty DAE.Dimension list is returned. =#
-        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArraydimOpt(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inAbsynArrayDimOption::Option{<:Absyn.ArrayDim}, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, inPrefix::Prefix.PrefixType, info::SourceInfo, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4377,7 +4381,7 @@
           All this is accomplished by examining the two arguments separately
           and then using `complete_arraydime\\' or `compatible_arraydim\\' to
           check that that the dimension sizes are compatible and complete. =#
-        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{Any}#=List{<:List{<:DAE.Dimension}}=#) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function elabArraydim(inCache::FCore.Cache, inEnv::FCore.Graph, inComponentRef::Absyn.ComponentRef, path::Absyn.Path #= Class of declaration =#, inArrayDim::Absyn.ArrayDim, inTypesEqModOption::Option{<:DAE.EqMod}, inBoolean::Bool, performVectorization::Bool, isFunctionInput::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo, inInstDims::List{Any}#=List{Any #= <:List{<:DAE.Dimension} =#}=#) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDimensionLst::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -4543,7 +4547,7 @@
 
          #= Find out the dimension sizes of a type. The second argument is used to know
            how many dimensions should be extracted from the type. =#
-        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{<:List{<:DAE.Dimension}}) ::DAE.Dimensions
+        function elabArraydimType(inType::DAE.Type, inArrayDim::Absyn.ArrayDim, inExp::DAE.Exp #= User for error messages. =#, inPath::Absyn.Path #= Class of declaration, used for error messages. =#, inPrefix::Prefix.PrefixType, inCref::Absyn.ComponentRef, inInfo::SourceInfo, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Dimensions
               local outDimensions::DAE.Dimensions
 
               local flat_id::List{DAE.Dimension}
@@ -4952,7 +4956,7 @@
                   local tp::DAE.Type
                 @match inType begin
                   resType && DAE.T_FUNCTION(__)  => begin
-                      resType.path = path
+                      @set resType.path = path
                     resType
                   end
 
@@ -7028,7 +7032,7 @@
         end
 
          #= The function used to modify modifications for non-expanded arrays =#
-        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inInstDims::List{<:List{<:DAE.Dimension}}) ::SCode.Mod
+        function traverseModAddDims(inCache::FCore.Cache, inEnv::FCore.Graph, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -7544,14 +7548,14 @@
           v3
         end
 
-        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
+        function makeCrefBaseType(inBaseType::DAE.Type, inDimensions::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Type
               local outType::DAE.Type
 
               outType = Types.simplifyType(makeCrefBaseType2(inBaseType, inDimensions))
           outType
         end
 
-        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{<:List{<:DAE.Dimension}}) ::DAE.Type
+        function makeCrefBaseType2(inBaseType::DAE.Type, inDimensions::List{Any #= <:List{<:DAE.Dimension} =#}) ::DAE.Type
               local outType::DAE.Type
 
               outType = begin
@@ -7672,8 +7676,8 @@
               local cr::DAE.ComponentRef
               local path::Absyn.Path
 
-              @match DAE.DAE(vars) = inVarsDae
-              @match DAE.DAE(equations) = inEquationsDae
+              @match DAE.DAE_LIST(vars) = inVarsDae
+              @match DAE.DAE_LIST(equations) = inEquationsDae
               if listEmpty(vars) || listEmpty(equations)
                 outVarsDae = inVarsDae
                 return outVarsDae
@@ -7685,7 +7689,7 @@
                   @matchcontinue v begin
                     v1 && DAE.VAR(__)  => begin
                         (e, i) = findCorrespondingBinding(v1.componentRef, equations)
-                        v1.binding = SOME(e)
+                        @set v1.binding = SOME(e)
                         is = _cons(i, is)
                       v1
                     end
@@ -7722,7 +7726,7 @@
                             DAE.VAR(binding = NONE()) where (ComponentReference.crefPrefixOf(cr, v.componentRef))  => begin
                                  #=  Moving parameter bindings into initial equation section means we need to force fixed=false...
                                  =#
-                                v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
+                                @set v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
                                 Error.addSourceMessage(Error.MOVING_PARAMETER_BINDING_TO_INITIAL_EQ_SECTION, list(ComponentReference.printComponentRefStr(v.componentRef)), eq.source.info)
                               v
                             end
@@ -7744,7 +7748,7 @@
               end
                #= /* algorithm print(anyString(eq)); */ =#
               equations1 = ListUtil.deletePositions(equations1, is)
-              outVarsDae = DAE.DAE(listAppend(equations1, vars1))
+              outVarsDae = DAE.DAE_LIST(listAppend(equations1, vars1))
           outVarsDae
         end
 
@@ -7828,8 +7832,7 @@
                 _ = begin
                   @match elt begin
                     DAE.COMMENT(cmt = cmt)  => begin
-                        return
-                      fail()
+                      return cmt
                     end
 
                     _  => begin
@@ -7927,7 +7930,7 @@
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)))  => begin
                       inVars = ListUtil.select(vl, Types.isInputVar)
                       outVars = ListUtil.select(vl, Types.isOutputVar)
-                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName), ListUtil.map(outVars, Types.varName))
+                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName, String), ListUtil.map(outVars, Types.varName, String))
                       inlineType = commentIsInlineFunc(inheritedComment)
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
                       isImpure = if isImpure
@@ -7942,7 +7945,7 @@
                   SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_PARALLEL_FUNCTION(__)))  => begin
                       inVars = ListUtil.select(vl, Types.isInputVar)
                       outVars = ListUtil.select(vl, Types.isOutputVar)
-                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName), ListUtil.map(outVars, Types.varName))
+                      name = SCodeUtil.isBuiltinFunction(cl, ListUtil.map(inVars, Types.varName, String), ListUtil.map(outVars, Types.varName, String))
                       inlineType = commentIsInlineFunc(inheritedComment)
                       isOpenModelicaPure = ! SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_Impure")
                       unboxArgs = SCodeUtil.commentHasBooleanNamedAnnotation(inheritedComment, "__OpenModelica_UnboxArguments")
@@ -8364,8 +8367,8 @@
                       if Flags.isSet(Flags.TAIL)
                         Error.addSourceMessage(Error.COMPILER_NOTIFICATION, list(str), ElementSource.getElementSourceFileInfo(source))
                       end
-                      attr.tailCall = DAE.TAIL(vars, lhsVars)
-                      call.attr = attr
+                      @set attr.tailCall = DAE.TAIL(vars, lhsVars)
+                      @set call.attr = attr
                     (call, true)
                   end
 
@@ -9051,7 +9054,7 @@
           isValid
         end
 
-        function instDimsHasZeroDims(inInstDims::List{<:List{<:DAE.Dimension}}) ::Bool
+        function instDimsHasZeroDims(inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Bool
               local outHasZeroDims::Bool
 
               outHasZeroDims = begin

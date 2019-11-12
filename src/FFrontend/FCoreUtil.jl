@@ -8,6 +8,7 @@ using ExportAll
 
 using FCore
 import Absyn
+import AbsynUtil
 import SCode
 import DAE
 import Mutable
@@ -209,6 +210,24 @@ function addCachedInstFuncGuard(cache::Cache, func::Absyn.Path #= fully qualifie
   #=  print(\"Func quard [unqual]: \" + AbsynUtil.pathString(func) + \"\\n\");
   =#
   outCache
+end
+
+ #= returns the name of a FUNCTION or RECORD_CONSTRUCTOR =#
+function functionName(elt::DAE.Function) ::Absyn.Path
+      local name::Absyn.Path
+
+      name = begin
+        @match elt begin
+          DAE.FUNCTION(path = name)  => begin
+            name
+          end
+
+          DAE.RECORD_CONSTRUCTOR(path = name)  => begin
+            name
+          end
+        end
+      end
+  name
 end
 
 function __addDaeFunction(functions::List{<:DAE.Function}, functionTree::DAE.FunctionTree) ::DAE.FunctionTree

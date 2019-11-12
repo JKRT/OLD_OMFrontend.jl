@@ -36,6 +36,7 @@
          *
          */ =#
         import Absyn
+        import AbsynUtil
         import SCode
 
         import ListUtil

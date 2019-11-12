@@ -47,6 +47,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import ListUtil
 
@@ -61,6 +63,8 @@
         import DAEDump
 
         import Error
+        
+        import BaseHashTable
 
         import HashTableCrToExpOption
 
@@ -131,7 +135,7 @@
               local source::DAE.ElementSource #= the origin of the component/equation/algorithm =#
               local comment::Option{SCode.Comment}
 
-              @match DAE.DAE(elementLst = elementLst) = inDAElist
+              @match DAE.DAE_LIST(elementLst = elementLst) = inDAElist
               assert(listLength(elementLst) == 1, "Internal compiler error: Handling of elementLst != 1 not supported\\n")
               @match DAE.COMP(ident, dAElist, source, comment) = listHead(elementLst)
               if ! ListUtil.exist(dAElist, isFlatSm)
@@ -146,22 +150,22 @@
                 elementLst2 = wrapHack(cache, elementLst2)
               end
               elementLst3 = listAppend(otherLst, elementLst2)
-              outDAElist = DAE.DAE(list(DAE.COMP(ident, elementLst3, source, comment)))
-               #=  print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist before global subs:\\n\" + DAEDump.dumpStr(outDAElist,FCore.getFunctionTree(cache)));
+              outDAElist = DAE.DAE_LIST(list(DAE.COMP(ident, elementLst3, source, comment)))
+               #=  print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist before global subs:\\n\" + DAEDump.dumpStr(outDAElist,FCoreUtil.getFunctionTree(cache)));
                =#
                #=  traverse dae expressions for making substitutions activeState(x) -> x.active
                =#
-              (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsActiveState, 0))
+              (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsActiveState, 0))
               if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
-                (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsPreForPrevious, 0))
+                (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsPreForPrevious, 0))
               end
                #=  HACK2 traverse dae expressions for making substitutions previous(x) -> pre(x)
                =#
                #=  FIXME not needed any more? HACK3 traverse dae expressions for making substitutions sample(x, _) -> x
                =#
-               #=  (outDAElist, _, (_,nOfSubstitutions)) := DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsXForSampleX, 0));
+               #=  (outDAElist, _, (_,nOfSubstitutions)) := DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsXForSampleX, 0));
                =#
-               #= print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist:\\n\" + DAEDump.dumpStr(outDAElist,FCore.getFunctionTree(cache)));
+               #= print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist:\\n\" + DAEDump.dumpStr(outDAElist,FCoreUtil.getFunctionTree(cache)));
                =#
           outDAElist
         end
@@ -270,7 +274,7 @@
 
               @match DAE.SM_COMP(componentRef, dAElist1) = inSmComp
               emptyTree = DAE.AvlTreePathFunction.Tree.EMPTY()
-              @match (DAE.DAE(dAElist2), _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE(dAElist1), emptyTree, Expression.traverseSubexpressionsHelper, (traversingSubsTicksInState, (componentRef, 0)))
+              @match (DAE.DAE_LIST(dAElist2), _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist1), emptyTree, Expression.traverseSubexpressionsHelper, (traversingSubsTicksInState, (componentRef, 0)))
               outSmComp = DAE.SM_COMP(componentRef, dAElist2)
           outSmComp
         end

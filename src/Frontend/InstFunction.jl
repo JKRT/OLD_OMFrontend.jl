@@ -49,6 +49,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import InnerOuter
 
@@ -146,7 +148,7 @@
                       source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
                       source = ElementSource.addCommentToSource(source, SOME(comment))
                       source = ElementSource.addElementSourceFileInfo(source, info)
-                    (cache, env, ih, DAE.DAE(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
+                    (cache, env, ih, DAE.DAE_LIST(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
 
                   (cache, _, ih, _, _, true, _, _)  => begin
@@ -264,7 +266,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
+        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -320,7 +322,7 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{<:List{<:DAE.Dimension}}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
+        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
               local funcs::List{DAE.Function}
               local outIH::InnerOuter.InstHierarchy
               local outEnv::FCore.Graph
@@ -380,7 +382,7 @@
                           else
                             InstTypes.INNER_CALL()
                           end
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, DAE.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE_LIST(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, cs, ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, false, info)
                       env_1 = env
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env_1, n)
@@ -402,7 +404,7 @@
                   end
 
                   (cache, env, ih, mod, pre, c && SCode.CLASS(partialPrefix = partialPrefix, prefixes = SCode.PREFIXES(visibility = visibility), name = n, restriction = restr && SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(isImpure)), classDef = cd && parts && SCode.PARTS(externalDecl = SOME(scExtdecl)), info = info, encapsulatedPrefix = encapsulatedPrefix), inst_dims, _)  => begin
-                      @match (cache, cenv, ih, _, DAE.DAE(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
+                      @match (cache, cenv, ih, _, DAE.DAE_LIST(daeElts), _, ty, _, _, _) = Inst.instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), mod, pre, c, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       ListUtil.map2_0(daeElts, InstUtil.checkFunctionElement, true, info)
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env, n)
                       cmt = InstUtil.extractComment(daeElts)
@@ -491,15 +493,15 @@
                       _ = begin
                         @matchcontinue () begin
                           ()  => begin
-                              FCore.checkCachedInstFuncGuard(cache, p)
+                              FCoreUtil.checkCachedInstFuncGuard(cache, p)
                             ()
                           end
 
                           _  => begin
-                                cache = FCore.addCachedInstFuncGuard(cache, p)
+                                cache = FCoreUtil.addCachedInstFuncGuard(cache, p)
                                 (cache, _, ih, funcs) = implicitFunctionInstantiation2(cache, cenv, ih, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false)
                                 funcs = InstUtil.addNameToDerivativeMapping(funcs, path)
-                                cache = FCore.addDaeFunction(cache, funcs)
+                                cache = FCoreUtil.addDaeFunction(cache, funcs)
                               ()
                           end
                         end
@@ -571,7 +573,7 @@
                 @matchcontinue (inCache, inEnv, inIH, inClass) begin
                   (cache, env, ih, SCode.CLASS(restriction = SCode.R_FUNCTION(SCode.FR_EXTERNAL_FUNCTION(_)), classDef = SCode.PARTS(__)))  => begin
                       (cache, env_1, ih, funs) = implicitFunctionInstantiation2(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), inClass, nil, true)
-                      cache = FCore.addDaeExtFunction(cache, funs)
+                      cache = FCoreUtil.addDaeExtFunction(cache, funs)
                     (cache, env_1, ih)
                   end
 
@@ -617,7 +619,7 @@
                =#
                #=  Only external functions are valid without an algorithm section...
                =#
-               #=  cache = FCore.addDaeExtFunction(cache, funs);
+               #=  cache = FCoreUtil.addDaeExtFunction(cache, funs);
                =#
                #=  Short class definitions.
                =#
@@ -824,7 +826,7 @@
                 @matchcontinue (inCache, inEnv, inPath) begin
                   (_, _, _)  => begin
                       path = AbsynUtil.makeFullyQualified(inPath)
-                      func = FCore.getCachedInstFunc(inCache, path)
+                      func = FCoreUtil.getCachedInstFunc(inCache, path)
                     (inCache, func)
                   end
 

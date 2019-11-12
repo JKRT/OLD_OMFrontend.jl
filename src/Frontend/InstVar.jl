@@ -38,6 +38,8 @@
 
         import Absyn
 
+        import AbsynUtil
+
         import ClassInf
 
         # import Connect
@@ -139,7 +141,7 @@
         the backend. The current implementation doesn't handle cases in which the
         'inner' is not (yet) set.
            =#
-        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType} 
+        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -430,7 +432,7 @@
           P.A: Most of the implementation is moved to instVar2. instVar collects
           dimensions for userdefined types, such that these can be correctly
           handled by instVar2 (using instArray) =#
-        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -574,17 +576,17 @@
                     (inCache, inDae)
                   end
 
-                  (DAE.DAE(dae), DAE.C_VAR(__))  => begin
+                  (DAE.DAE_LIST(dae), DAE.C_VAR(__))  => begin
                       @match false = ClassInf.isFunctionOrRecord(inState)
                       ty = Types.simplifyType(inType)
                       @match false = Types.isExternalObject(Types.arrayElementType(ty))
                       @match false = Types.isComplexType(Types.arrayElementType(ty))
-                      @match (@match _cons(_, _) = dims) = Types.getDimensions(ty)
+                      @match (dims && _ <| _) = Types.getDimensions(ty)
                       @match SOME(exp) = InstBinding.makeVariableBinding(ty, mod, constVar, pre, n)
                       cr = ComponentReference.makeCrefIdent(n, ty, nil)
                       (cache, cr) = PrefixUtil.prefixCref(inCache, inEnv, inIH, pre, cr)
                       eq = DAE.ARRAY_EQUATION(dims, DAE.CREF(cr, ty), exp, source)
-                    (cache, DAE.DAE(_cons(eq, dae)))
+                    (cache, DAE.DAE_LIST(_cons(eq, dae)))
                   end
 
                   _  => begin
@@ -598,7 +600,7 @@
         end
 
          #= Helper function to instVar, does the main work. =#
-        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -894,7 +896,7 @@
         end
 
          #= Instantiates a scalar variable. =#
-        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -1136,9 +1138,9 @@
                    #=  generated for the component's binding.
                    =#
                 @match (inClassDAE, inType, inEqDAE) begin
-                  (DAE.DAE(elementLst = els), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.DAE(elementLst = eqs && _ <| _))  => begin
+                  (DAE.DAE_LIST(elementLst = els), DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.DAE_LIST(elementLst = eqs && _ <| _))  => begin
                       (els, _) = ListUtil.mapFold(els, stripRecordDefaultBindingsFromElement, eqs)
-                    DAE.DAE(els)
+                    DAE.DAE_LIST(els)
                   end
 
                   _  => begin
@@ -1295,7 +1297,7 @@
          #= When an array is instantiated by instVar, this function is used
           to go through all the array elements and instantiate each array
           element separately. =#
-        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
@@ -1462,7 +1464,7 @@
 
          #= When an array is instantiated by instVar, this function is used to go through all the array elements and instantiate each array element separately.
         Special case for DIM_INTEGER: tail-recursive implementation since the number of dimensions may grow arbitrarily large. =#
-        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
               local outSets::DAE.Sets = inSets
@@ -1519,7 +1521,7 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outGraph)
         end
 
-        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{<:List{<:DAE.Dimension}}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
               local outSets::DAE.Sets = inSets

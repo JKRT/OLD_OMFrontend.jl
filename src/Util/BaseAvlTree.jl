@@ -146,7 +146,7 @@ function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFun
                 else
                     value = conflictFunc(inValue, tree.value, key)
                     if ! referenceEq(tree.value, value)
-                        tree = LEAF(value, tree.key)
+                        tree = LEAF(tree.key, value)
                     end
                 end
                 if key_comp == 0

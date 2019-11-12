@@ -108,7 +108,7 @@
               _ = begin
                   local daelist::List{DAE.Element}
                 @match (dae, functionTree) begin
-                  (DAE.DAE(daelist), _)  => begin
+                  (DAE.DAE_LIST(daelist), _)  => begin
                       ListUtil.map_0(sortFunctions(DAEUtil.getFunctionList(functionTree)), dumpFunction)
                       ListUtil.map_0(daelist, dumpExtObjectClass)
                       ListUtil.map_0(daelist, dumpCompElement)
@@ -2480,7 +2480,7 @@
               _ = begin
                   local elist::List{DAE.Element}
                 @match inDAElist begin
-                  DAE.DAE(elementLst = elist)  => begin
+                  DAE.DAE_LIST(elementLst = elist)  => begin
                       Print.printBuf("DAE(")
                       dumpDebugElist(elist)
                       Print.printBuf(")")
@@ -2519,7 +2519,7 @@
               str = begin
                   local elems::List{DAE.Element}
                 @match dae begin
-                  DAE.DAE(elementLst = elems)  => begin
+                  DAE.DAE_LIST(elementLst = elems)  => begin
                       Print.clearBuf()
                       dumpDebugElist(elems)
                       str = Print.getString()
@@ -2838,7 +2838,7 @@
                   local varnodes::List{Graphviz.Node}
                   local nodelist::List{Graphviz.Node}
                 @match inDAElist begin
-                  DAE.DAE(elementLst = els)  => begin
+                  DAE.DAE_LIST(elementLst = els)  => begin
                       vars = DAEUtil.getMatchingElements(els, DAEUtil.isVar)
                       nonvars = DAEUtil.getMatchingElements(els, DAEUtil.isNotVar)
                       nonvarnodes = buildGrList(nonvars)
@@ -3164,7 +3164,7 @@
               local funList::functionList
               local fixedDae::List{compWithSplitElements}
 
-              @match DAE.DAE(elementLst = daelist) = inDAElist
+              @match DAE.DAE_LIST(elementLst = daelist) = inDAElist
               funList = dumpFunctionList(functionTree)
               fixedDae = ListUtil.map(daelist, DAEUtil.splitComponent)
               outString = Tpl.tplString2(DAEDumpTpl.dumpDAE, fixedDae, funList)
@@ -3242,7 +3242,7 @@
                   local funcs::List{DAE.Function}
                   local str::IOStream.IOStreamType
                 @match (dae, functionTree, inStream) begin
-                  (DAE.DAE(daelist), _, str)  => begin
+                  (DAE.DAE_LIST(daelist), _, str)  => begin
                       funcs = DAEUtil.getFunctionList(functionTree)
                       funcs = sortFunctions(funcs)
                       str = ListUtil.fold(funcs, dumpFunctionStream, str)
@@ -3915,7 +3915,7 @@
                   local l::List{DAE.Element}
                   local myStream::IOStream.IOStreamType
                 @match d begin
-                  DAE.DAE(elementLst = l)  => begin
+                  DAE.DAE_LIST(elementLst = l)  => begin
                       myStream = IOStream.create("", IOStream.LIST())
                       myStream = dumpElementsStream(l, myStream)
                       str = IOStream.string(myStream)
