@@ -130,7 +130,7 @@ function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Ope
             (exp2, type2) = Types.matchType(exp2, type2, Types.unboxedType(type2), true)
           end
           (opList, type1, exp1, type2, exp2) = operatorsBinary(aboper, type1, exp1, type2, exp2)
-          @match (oper, list(exp1, exp2), otype) = deoverload(opList, list((exp1, type1), (exp2, type2)), AbExp, inPre, inInfo)
+          @match (oper, exp1 <| exp2, otype) = deoverload(opList, list((exp1, type1), (exp2, type2)), AbExp, inPre, inInfo)
           constVar = Types.constAnd(const1, const2)
           exp = replaceOperatorWithFcall(AbExp, exp1, oper, SOME(exp2), constVar)
           exp = ExpressionSimplify.simplify(exp)
@@ -947,10 +947,10 @@ Therefore, in order for the builtin type conversion from Integer to
 Real to work, operators that work on both Integers and Reals must
 return the Integer type -before- the Real type in the list. =#
 function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, t2::DAE.Type, e2::DAE.Exp) ::Tuple{List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp}
-  local oe2::DAE.Exp
-  local oty2::DAE.Type
-  local oe1::DAE.Exp
-  local oty1::DAE.Type
+  local oe2::DAE.Exp = e2
+  local oty2::DAE.Type = t2
+  local oe1::DAE.Exp = e1
+  local oty1::DAE.Type = t1
   local ops::List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}
   local t::DAE.Type
   local e::DAE.Exp
@@ -1042,6 +1042,7 @@ function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, 
         end
 
         Absyn.MUL(__)  => begin
+          println("MUL!")
           OperatorsBinary.mulTypes
         end
 

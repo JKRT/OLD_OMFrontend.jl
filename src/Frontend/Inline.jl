@@ -688,6 +688,9 @@
               local outSource::DAE.ElementSource
               local outExp::DAE.Exp
 
+              # TODO! FIXME! adrpo: disable inlining for now
+              return (inExp, inSource, true, nil)
+
               (outExp, outSource, inlined, assrtLstOut) = begin
                   local fns::Functiontuple
                   local e::DAE.Exp
