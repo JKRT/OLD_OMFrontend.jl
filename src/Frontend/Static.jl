@@ -7322,9 +7322,7 @@
                =#
               cache = instantiateImplicitRecordConstructors(cache, inEnv, args_1)
               functionTree = FCoreUtil.getFunctionTree(cache)
-              # TODO! FIXME! adrpo: disable inlining for now
-              # (call_exp, _, didInline, _) = Inline.inlineExp(call_exp, (SOME(functionTree), list(DAE.BUILTIN_EARLY_INLINE(), DAE.EARLY_INLINE())), DAE.emptyElementSource)
-              didInline = true
+              (call_exp, _, didInline, _) = Inline.inlineExp(call_exp, (SOME(functionTree), list(DAE.BUILTIN_EARLY_INLINE(), DAE.EARLY_INLINE())), DAE.emptyElementSource)
               (call_exp, _) = ExpressionSimplify.condsimplify(didInline, call_exp)
               didInline = didInline && ! Config.acceptMetaModelicaGrammar()
                #= /* Some weird errors when inlining. Becomes boxed even if it shouldn't... */ =#
