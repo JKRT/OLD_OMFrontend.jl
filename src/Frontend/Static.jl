@@ -306,18 +306,18 @@
               local exp1::DAE.Exp
               local exp2::DAE.Exp
 
-              _ = begin
+              (e1, op, e2) = begin
                 @match inExp begin
                   Absyn.BINARY(exp1 = e1, op = op, exp2 = e2)  => begin
-                    ()
+                    (e1, op, e2)
                   end
 
                   Absyn.LBINARY(exp1 = e1, op = op, exp2 = e2)  => begin
-                    ()
+                    (e1, op, e2)
                   end
 
                   Absyn.RELATION(exp1 = e1, op = op, exp2 = e2)  => begin
-                    ()
+                    (e1, op, e2)
                   end
                 end
               end
@@ -338,7 +338,8 @@
               local c::DAE.Const
 
               @match Absyn.UNARY(op = op, exp = e) = inExp
-              @match (outCache, outExp, (@match DAE.PROP(ty, c) = outProperties)) = elabExpInExpression(inCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
+              @match (outCache, outExp, outProperties) = elabExpInExpression(inCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
+              @match DAE.PROP(ty, c) = outProperties
               if ! (valueEq(op, Absyn.UPLUS()) && Types.isIntegerOrRealOrSubTypeOfEither(Types.arrayElementType(ty)))
                 (outCache, outExp, outProperties) = OperatorOverloading.unary(outCache, inEnv, op, outProperties, outExp, inExp, e, inImplicit, inPrefix, inInfo)
               end
@@ -971,7 +972,7 @@
                  end
                end
                (outCache, outExp, outProperties) = elabfunc(inCache, inEnv, e, inImplicit, inDoVect, inPrefix, inInfo)
-             catch
+             catch ex
                @match true = num_errmsgs == Error.getNumErrorMessages()
                Error.addSourceMessage(Error.GENERIC_ELAB_EXPRESSION, list(Dump.printExpStr(e)), inInfo)
                fail()
