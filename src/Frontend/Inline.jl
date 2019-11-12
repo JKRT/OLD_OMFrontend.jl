@@ -675,6 +675,10 @@
           (outExpOption, outSource, inlined)
         end
 
+        function fixFNS(fns)
+          inlineCall(fns = fns)
+        end
+
          #=
         function: inlineExp
           inlines calls in a DAE.Exp =#
@@ -700,7 +704,7 @@
                   end
 
                   (e, fns, source)  => begin
-                      (e_1, assrtLst) = Expression.traverseExpBottomUp(e, (fns) -> inlineCall(fns = fns), nil)
+                      (e_1, assrtLst) = Expression.traverseExpBottomUp(e, fixFNS(fns), nil)
                       @match false = referenceEq(e, e_1)
                       if Flags.isSet(Flags.INFO_XML_OPERATIONS)
                         source = ElementSource.addSymbolicTransformation(source, DAE.OP_INLINE(DAE.PARTIAL_EQUATION(e), DAE.PARTIAL_EQUATION(e_1)))
@@ -744,7 +748,7 @@
                   end
 
                   (e, fns, source)  => begin
-                      (e_1, _) = Expression.traverseExpBottomUp(e, fn -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), nil)
+                      (e_1, _) = Expression.traverseExpBottomUp(e, (fns, visitedPaths) -> forceInlineCall(fns = fns, visitedPaths = AvlSetPath.Tree.EMPTY()), nil)
                       b = ! referenceEq(e, e_1)
                       if b
                         source = ElementSource.addSymbolicTransformation(source, DAE.OP_INLINE(DAE.PARTIAL_EQUATION(e), DAE.PARTIAL_EQUATION(e_1)))
@@ -929,6 +933,8 @@
               end
           (exp, assrtLst)
         end
+
+        inlineCall(exp, assrtLst; fns) = inlineCall(exp, assrtLst, fns)
 
          #= inlines an assert.
         author:Waurich TUD 2013-10 =#

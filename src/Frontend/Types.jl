@@ -1601,7 +1601,7 @@
                   end
 
                   Values.META_TUPLE(valueLst = vs)  => begin
-                      ts = ListUtil.mapMap(vs, typeOfValue, boxIfUnboxedType)
+                      ts = ListUtil.mapMap(vs, typeOfValue, boxIfUnboxedType, DAE.Type)
                     DAE.T_METATUPLE(ts)
                   end
 
@@ -5653,7 +5653,7 @@
                   end
 
                   (DAE.TUPLE(elist), DAE.T_TUPLE(types = tys1), DAE.T_METATUPLE(tys2), _) where (Config.acceptMetaModelicaGrammar())  => begin
-                      tys2 = ListUtil.map(tys2, boxIfUnboxedType)
+                      tys2 = ListUtil.map(tys2, boxIfUnboxedType, DAE.Type)
                       (elist_1, tys_1) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                     (DAE.META_TUPLE(elist_1), DAE.T_METATUPLE(tys_1))
                   end
@@ -5668,7 +5668,7 @@
                   end
 
                   (DAE.META_TUPLE(elist), DAE.T_METATUPLE(types = tys1), DAE.T_METATUPLE(tys2), _)  => begin
-                      tys2 = ListUtil.map(tys2, boxIfUnboxedType)
+                      tys2 = ListUtil.map(tys2, boxIfUnboxedType, DAE.Type)
                       (elist_1, tys_1) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                     (DAE.META_TUPLE(elist_1), DAE.T_METATUPLE(tys_1))
                   end
@@ -5756,8 +5756,8 @@
                       @match true = AbsynUtil.pathEqual(path1, path2)
                       t2 = DAE.T_METABOXED(t1)
                       l = ListUtil.map(v, getVarName)
-                      tys1 = ListUtil.map(v, getVarType)
-                      tys2 = ListUtil.map(tys1, boxIfUnboxedType)
+                      tys1 = ListUtil.map(v, getVarType, DAE.Type)
+                      tys2 = ListUtil.map(tys1, boxIfUnboxedType, DAE.Type)
                       (elist, _) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                       e_1 = DAE.METARECORDCALL(path1, elist, l, -1, nil)
                     (e_1, t2)
@@ -5768,8 +5768,8 @@
                       @match true = AbsynUtil.pathEqual(path1, path2)
                       t2 = DAE.T_METABOXED(t1)
                       l = ListUtil.map(v, getVarName)
-                      tys1 = ListUtil.map(v, getVarType)
-                      tys2 = ListUtil.map(tys1, boxIfUnboxedType)
+                      tys1 = ListUtil.map(v, getVarType, DAE.Type)
+                      tys2 = ListUtil.map(tys1, boxIfUnboxedType, DAE.Type)
                       (elist, _) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                       e_1 = DAE.METARECORDCALL(path1, elist, l, -1, nil)
                     (e_1, t2)
@@ -5779,8 +5779,8 @@
                       @match true = subtype(t1, t2)
                       t2 = DAE.T_METABOXED(t1)
                       l = ListUtil.map(v, getVarName)
-                      tys1 = ListUtil.map(v, getVarType)
-                      tys2 = ListUtil.map(tys1, boxIfUnboxedType)
+                      tys1 = ListUtil.map(v, getVarType, DAE.Type)
+                      tys2 = ListUtil.map(tys1, boxIfUnboxedType, DAE.Type)
                       expTypes = ListUtil.map(tys1, simplifyType)
                       pathList = ListUtil.map(l, AbsynUtil.makeIdentPathFromString)
                       crefList = ListUtil.map(pathList, ComponentReference.pathToCref)
@@ -6739,7 +6739,7 @@
                   local tys::List{DAE.Type}
                 @matchcontinue ty begin
                   DAE.T_TUPLE(__)  => begin
-                      tys = ListUtil.map(ty.types, boxIfUnboxedType)
+                      tys = ListUtil.map(ty.types, boxIfUnboxedType, DAE.Type)
                     DAE.T_METATUPLE(tys)
                   end
 
@@ -6905,30 +6905,30 @@
                   end
 
                   (DAE.T_TUPLE(types = type_list1), DAE.T_TUPLE(types = type_list2))  => begin
-                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
-                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
-                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
+                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType, DAE.Type)
+                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType, DAE.Type)
+                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType, DAE.Type)
                     DAE.T_METATUPLE(type_list1)
                   end
 
                   (DAE.T_TUPLE(types = type_list1), DAE.T_METATUPLE(types = type_list2))  => begin
-                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
-                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
-                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
+                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType, DAE.Type)
+                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType, DAE.Type)
+                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType, DAE.Type)
                     DAE.T_METATUPLE(type_list1)
                   end
 
                   (DAE.T_METATUPLE(types = type_list1), DAE.T_TUPLE(types = type_list2))  => begin
-                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
-                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
-                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
+                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType, DAE.Type)
+                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType, DAE.Type)
+                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType, DAE.Type)
                     DAE.T_METATUPLE(type_list1)
                   end
 
                   (DAE.T_METATUPLE(types = type_list1), DAE.T_METATUPLE(types = type_list2))  => begin
-                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType)
-                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType)
-                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType)
+                      type_list1 = ListUtil.map(type_list1, boxIfUnboxedType, DAE.Type)
+                      type_list2 = ListUtil.map(type_list2, boxIfUnboxedType, DAE.Type)
+                      type_list1 = ListUtil.threadMap(type_list1, type_list2, superType, DAE.Type)
                     DAE.T_METATUPLE(type_list1)
                   end
 
@@ -7086,7 +7086,7 @@
               else
                 try
                   (outExp, outType) = typeConvert(inExp, inActualType, inExpectedType, false)
-                  outExp = ExpressionSimplify.simplify1(outExp)
+                  (outExp, _) = ExpressionSimplify.simplify1(outExp)
                   outMatch = true
                 catch
                   outExp = inExp
@@ -7223,7 +7223,7 @@
                   local singletonType::DAE.EvaluateSingletonType
                 @matchcontinue (ty, prefix, bindings, info) begin
                   (DAE.T_METAPOLYMORPHIC(name = id), _, _, _)  => begin
-                      @match list(t1) = polymorphicBindingsLookup(prefix + id, bindings)
+                      @match t1 <| nil = polymorphicBindingsLookup(prefix + id, bindings)
                       t1 = fixPolymorphicRestype2(t1, "", bindings, info)
                     t1
                   end
@@ -7251,8 +7251,8 @@
                   end
 
                   (DAE.T_METAUNIONTYPE(typeVars = tys), _, _, _)  => begin
-                      tys = ListUtil.map3(tys, fixPolymorphicRestype2, prefix, bindings, info)
-                      tys = ListUtil.map(tys, boxIfUnboxedType)
+                      tys = ListUtil.map3(tys, fixPolymorphicRestype2, prefix, bindings, info, DAE.Type)
+                      tys = ListUtil.map(tys, boxIfUnboxedType, )
                     DAE.T_METAUNIONTYPE(ty.paths, tys, ty.knownSingleton, ty.singletonType, ty.path)
                   end
 
@@ -7263,12 +7263,12 @@
                   end
 
                   (t1 && DAE.T_ARRAY(__), _, _, _)  => begin
-                      t1.ty = fixPolymorphicRestype2(t1.ty, prefix, bindings, info)
+                      @set t1.ty = fixPolymorphicRestype2(t1.ty, prefix, bindings, info)
                     t1
                   end
 
                   (t1 && DAE.T_TUPLE(__), _, _, _)  => begin
-                      t1.types = ListUtil.map3(t1.types, fixPolymorphicRestype2, prefix, bindings, info)
+                      @set t1.types = ListUtil.map3(t1.types, fixPolymorphicRestype2, prefix, bindings, info)
                     t1
                   end
 

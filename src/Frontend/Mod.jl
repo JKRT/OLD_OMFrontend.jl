@@ -1588,7 +1588,7 @@
                           return
                         end
                         ty = Types.unliftArray(ty)
-                        exp = ExpressionSimplify.simplify1(Expression.makeASUB(exp, list(i)))
+                        (exp, _) = ExpressionSimplify.simplify1(Expression.makeASUB(exp, list(i)))
                       end
                        #=  Check that we're not trying to apply a non-array modifier to an
                        =#

@@ -50,6 +50,8 @@
 
         import FCore
 
+        import FCoreUtil
+
         import FGraph
 
         import InnerOuter
@@ -4010,7 +4012,7 @@
                       graph = ConnectionGraph.addConnection(graph, c1_1, c2_1, breakDAEElements)
                       (cache, equalityConstraintFunction, env) = Lookup.lookupClass(cache, env, fpath1)
                       (cache, fpath1) = Inst.makeFullyQualified(cache, env, fpath1)
-                      cache = FCore.addCachedInstFuncGuard(cache, fpath1)
+                      cache = FCoreUtil.addCachedInstFuncGuard(cache, fpath1)
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
@@ -4029,7 +4031,7 @@
                       graph = ConnectionGraph.addConnection(graph, ComponentReference.crefStripLastSubs(c1_1), ComponentReference.crefStripLastSubs(c2_1), breakDAEElements)
                       (cache, equalityConstraintFunction, env) = Lookup.lookupClass(cache, env, fpath1)
                       (cache, fpath1) = Inst.makeFullyQualified(cache, env, fpath1)
-                      cache = FCore.addCachedInstFuncGuard(cache, fpath1)
+                      cache = FCoreUtil.addCachedInstFuncGuard(cache, fpath1)
                       (cache, env, ih) = InstFunction.implicitFunctionInstantiation(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), equalityConstraintFunction, nil)
                     (cache, env, ih, sets_1, dae, graph)
                   end
@@ -4339,7 +4341,7 @@
                   end
 
                   (DAE.DIM_BOOLEAN(__), _)  => begin
-                      expl = list(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(false)))), ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(true)))))
+                      expl = list(Util.tuple21(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(false))))), Util.tuple21(ExpressionSimplify.simplify1(Expression.makeASUB(inArray, list(DAE.BCONST(true))))))
                     expl
                   end
 

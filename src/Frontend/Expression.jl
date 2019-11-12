@@ -4628,7 +4628,7 @@
         import DoubleEnded
 
         import FCore
-        
+
         import FCoreUtil
 
         import FGraph
@@ -21259,7 +21259,7 @@
               local outExp::DAE.Exp
 
               outExp = DAE.CAST(inType, inExp)
-              outExp = ExpressionSimplify.simplify1(outExp)
+              (outExp, _) = ExpressionSimplify.simplify1(outExp)
           outExp
         end
 

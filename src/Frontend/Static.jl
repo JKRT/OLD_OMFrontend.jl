@@ -432,7 +432,7 @@
                 @match args begin
                   Absyn.FUNCTIONARGS(__)  => begin
                       (outCache, outExp, outProperties) = elabCall(inCache, inEnv, func_name, args.args, args.argNames, inImplicit, inPrefix, inInfo)
-                      outExp = ExpressionSimplify.simplify1(outExp)
+                      (outExp, _) = ExpressionSimplify.simplify1(outExp)
                     ()
                   end
 
@@ -531,7 +531,7 @@
                 tty2 = Types.makeFunctionPolymorphicReference(tty2)
                 ty = Types.simplifyType(tty2)
                 tty = Types.simplifyType(tty)
-                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST())
+                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST(), DAE.Const)
                 outExp = DAE.PARTEVALFUNCTION(path, args, ty, tty)
                 outProperties = DAE.PROP(tty2, c)
               end
@@ -745,7 +745,7 @@
                 ty = Types.setArrayElementType(ty, DAE.T_REAL_DEFAULT)
                 outProperties = Types.setPropType(inProperties, ty)
                 ty = Types.simplifyType(ty)
-                outExp = ExpressionSimplify.simplify1(DAE.CAST(ty, inExp))
+                (outExp, _) = ExpressionSimplify.simplify1(DAE.CAST(ty, inExp))
               else
                 outExp = inExp
                 outProperties = inProperties
@@ -843,7 +843,7 @@
                 (outCache, expl, props) = elabExpList(inCache, inEnv, es, inImplicit, inDoVect, inPrefix, inInfo)
                 types = list(Types.getPropType(p) for p in props)
                 consts = Types.getConstList(props)
-                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST())
+                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST(), DAE.Const)
                 ty = Types.boxIfUnboxedType(ListUtil.reduce(types, Types.superType))
                 expl = Types.matchTypes(expl, types, ty, true)
                 outExp = DAE.LIST(expl)
@@ -5798,7 +5798,7 @@
               if ! listEmpty(dims)
                 outExp = Expression.makePureBuiltinCall("scalar", list(outExp), scalar_ty)
               end
-              outExp = ExpressionSimplify.simplify1(outExp)
+              (outExp, _) = ExpressionSimplify.simplify1(outExp)
               outProperties = DAE.PROP(scalar_ty, c)
           (outCache, outExp, outProperties)
         end
@@ -5861,7 +5861,7 @@
                   end
                   (outCache, args, _, consts) = elabInputArgs(outCache, inEnv, inPosArgs, inNamedArgs, slots, false, true, inImplicit, inPrefix, inInfo, DAE.T_UNKNOWN_DEFAULT, Absyn.IDENT("String"))
                 end
-                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST())
+                c = ListUtil.fold(consts, Types.constAnd, DAE.C_CONST(), DAE.Const)
                 outExp = Expression.makePureBuiltinCall("String", args, DAE.T_STRING_DEFAULT)
                 outProperties = DAE.PROP(DAE.T_STRING_DEFAULT, c)
               end
@@ -7065,7 +7065,7 @@
                       (args_2, newslots2) = addDefaultArgs(newslots, info)
                       vect_dims = slotsVectorizable(newslots2, info)
                       constlist = constInputArgs
-                      constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
+                      constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST(), DAE.Const)
                       tyconst = elabConsts(outtype, constType)
                       prop = getProperties(outtype, tyconst)
                       callExp = DAE.CALL(path, args_2, DAE.CALL_ATTR(outtype, false, false, false, false, DAE.NO_INLINE(), DAE.NO_TAIL()))
@@ -7272,7 +7272,7 @@
                #= check the env to see if a call to a parallel or kernel function is a valid one.
                =#
               @match true = isValidWRTParallelScope(fn, builtin, funcParal, inEnv, info)
-              constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST())
+              constType = ListUtil.fold(constlist, Types.constAnd, DAE.C_CONST(), DAE.Const)
               constType = if Flags.isSet(Flags.RML) && ! builtin || ! isPure
                     DAE.C_VAR()
                   else
@@ -7320,8 +7320,10 @@
                #=  Instantiate any implicit record constructors needed and add them to the dae function tree
                =#
               cache = instantiateImplicitRecordConstructors(cache, inEnv, args_1)
-              functionTree = FCore.getFunctionTree(cache)
-              (call_exp, _, didInline, _) = Inline.inlineExp(call_exp, (SOME(functionTree), list(DAE.BUILTIN_EARLY_INLINE(), DAE.EARLY_INLINE())), DAE.emptyElementSource)
+              functionTree = FCoreUtil.getFunctionTree(cache)
+              # TODO! FIXME! adrpo: disable inlining for now
+              # (call_exp, _, didInline, _) = Inline.inlineExp(call_exp, (SOME(functionTree), list(DAE.BUILTIN_EARLY_INLINE(), DAE.EARLY_INLINE())), DAE.emptyElementSource)
+              didInline = true
               (call_exp, _) = ExpressionSimplify.condsimplify(didInline, call_exp)
               didInline = didInline && ! Config.acceptMetaModelicaGrammar()
                #= /* Some weird errors when inlining. Becomes boxed even if it shouldn't... */ =#
@@ -7584,7 +7586,7 @@
                       fargs = list(@do_threaded_for Types.makeDefaultFuncArg(n, t) (n, t) (field_names, tys))
                       slots = makeEmptySlots(fargs)
                       (outCache, _, slots, const_lst, bindings) = elabInputArgs(inCache, inEnv, inPosArgs, inNamedArgs, slots, true, true, inImplicit, inPrefix, inInfo, inType, inType.utPath)
-                      constType = ListUtil.fold(const_lst, Types.constAnd, DAE.C_CONST())
+                      constType = ListUtil.fold(const_lst, Types.constAnd, DAE.C_CONST(), DAE.Const)
                       ty_const = elabConsts(inType, constType)
                       @match true = ListUtil.fold(slots, slotAnd, true)
                       args = slotListArgs(slots)
@@ -7732,7 +7734,7 @@
                        #=  Recursive calls (by looking in cache) skipped
                        =#
                       (outCache, _, _, name) = lookupAndFullyQualify(inCache, inEnv, inName)
-                      FCore.checkCachedInstFuncGuard(outCache, name)
+                      FCoreUtil.checkCachedInstFuncGuard(outCache, name)
                     (outCache, Util.SUCCESS())
                   end
 
@@ -7740,7 +7742,7 @@
                        #=  class must be looked up
                        =#
                       (outCache, env, cl, name) = lookupAndFullyQualify(inCache, inEnv, inName)
-                      outCache = FCore.addCachedInstFuncGuard(outCache, name)
+                      outCache = FCoreUtil.addCachedInstFuncGuard(outCache, name)
                       outCache = InstFunction.implicitFunctionInstantiation(outCache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (outCache, Util.SUCCESS())
                   end
@@ -8283,7 +8285,7 @@
                 @match SLOT(dims = dims) <| rest_slots = rest_slots
                 if ! listEmpty(dims)
                   e = Expression.makeASUB(e, list(DAE.ICONST(inIndex)))
-                  e = ExpressionSimplify.simplify1(e)
+                  (e, _) = ExpressionSimplify.simplify1(e)
                 end
                 outExpl = _cons(e, outExpl)
               end
@@ -8306,7 +8308,7 @@
                   local tty::DAE.Type
                 @match inType begin
                   tty && DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isBuiltin = DAE.FUNCTION_BUILTIN(SOME(name))))  => begin
-                      tty.path = Absyn.IDENT(name)
+                      @set tty.path = Absyn.IDENT(name)
                     (tty.path, tty)
                   end
 
@@ -8498,7 +8500,16 @@
               env = makeDummyFuncEnv(env, vars, dummy_var)
                #=  Evaluate the dimensions in the types.
                =#
-              outParameters = list(@do_threaded_for evaluateFuncParamDimAndMatchTypes(s, p, @nospecialize(env), cache, inInfo) (s, p) (inSlots, inParameters))
+              # outParameters = list(@do_threaded_for evaluateFuncParamDimAndMatchTypes(s, p, @nospecialize(env), cache, inInfo) (s, p) (inSlots, inParameters))
+
+              outParameters = nil
+              for (s, p) in zip(inSlots, inParameters)
+                local x::DAE.FuncArg
+                x = evaluateFuncParamDimAndMatchTypes(s, p, env, cache, inInfo)
+                outParameters = _cons(x, outParameters)
+             end
+             outParameters = listReverse(outParameters)
+
               outResultType = evaluateFuncArgTypeDims(inResultType, env, cache)
           (outParameters, outResultType)
         end

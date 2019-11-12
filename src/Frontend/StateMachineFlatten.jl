@@ -47,6 +47,8 @@
         import DAE
 
         import FCore
+        
+        import FCoreUtil
 
         import ListUtil
 
@@ -149,21 +151,21 @@
               end
               elementLst3 = listAppend(otherLst, elementLst2)
               outDAElist = DAE.DAE_LIST(list(DAE.COMP(ident, elementLst3, source, comment)))
-               #=  print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist before global subs:\\n\" + DAEDump.dumpStr(outDAElist,FCore.getFunctionTree(cache)));
+               #=  print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist before global subs:\\n\" + DAEDump.dumpStr(outDAElist,FCoreUtil.getFunctionTree(cache)));
                =#
                #=  traverse dae expressions for making substitutions activeState(x) -> x.active
                =#
-              (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsActiveState, 0))
+              (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsActiveState, 0))
               if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
-                (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsPreForPrevious, 0))
+                (outDAElist, _, (_, nOfSubstitutions)) = DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsPreForPrevious, 0))
               end
                #=  HACK2 traverse dae expressions for making substitutions previous(x) -> pre(x)
                =#
                #=  FIXME not needed any more? HACK3 traverse dae expressions for making substitutions sample(x, _) -> x
                =#
-               #=  (outDAElist, _, (_,nOfSubstitutions)) := DAEUtil.traverseDAE(outDAElist, FCore.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsXForSampleX, 0));
+               #=  (outDAElist, _, (_,nOfSubstitutions)) := DAEUtil.traverseDAE(outDAElist, FCoreUtil.getFunctionTree(cache), Expression.traverseSubexpressionsHelper, (traversingSubsXForSampleX, 0));
                =#
-               #= print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist:\\n\" + DAEDump.dumpStr(outDAElist,FCore.getFunctionTree(cache)));
+               #= print(\"StateMachineFlatten.stateMachineToDataFlow: outDAElist:\\n\" + DAEDump.dumpStr(outDAElist,FCoreUtil.getFunctionTree(cache)));
                =#
           outDAElist
         end
