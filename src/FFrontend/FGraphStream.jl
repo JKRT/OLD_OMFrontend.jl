@@ -29,14 +29,12 @@
 *
 */ =#
 
-module FGraphStream 
-
+module FGraphStream
 
 using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
-
-  @importDBG FCore
+  
+@importDBG FCore
 @importDBG FNodeUtil
 @importDBG Flags
 @importDBG GraphStream
@@ -132,10 +130,8 @@ function edge(name::Name, source::Node, target::Node)
       end
     end
   end
-  #=  filter basic types, builtins and things in sections, modifers or dimensions
-  =#
 end
-
+end
 
 
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
