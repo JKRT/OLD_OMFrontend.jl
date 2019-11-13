@@ -62,7 +62,7 @@
         import Error
         import Util
         import ComponentReference
-        import Patternm
+        import InstInterface
         import DAEUtil
         import DAEDump
         import Types
@@ -8868,7 +8868,7 @@
                   end
 
                   (DAE.PATTERN(pattern = pattern), unbound)  => begin
-                      (_, unbound) = Patternm.traversePattern(pattern, patternFiltering, unbound)
+                      (_, unbound) = InstInterface.traversePattern(pattern, patternFiltering, unbound)
                     unbound
                   end
 
@@ -9010,7 +9010,7 @@
                   local body::List{DAE.Statement}
                 @match (case_, inUnbound) begin
                   (DAE.CASE(patterns = patterns, patternGuard = patternGuard, body = body, result = result, info = info, resultInfo = resultInfo), unbound)  => begin
-                      (_, unbound) = Patternm.traversePatternList(patterns, patternFiltering, unbound)
+                      (_, unbound) = InstInterface.traversePatternList(patterns, patternFiltering, unbound)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(DAE.META_OPTION(patternGuard), findUnboundVariableUse, (unbound, info))
                       (_, _, unbound) = ListUtil.fold1(body, checkFunctionDefUseStmt, true, (false, false, unbound))
                       (_, (unbound, _)) = Expression.traverseExpTopDown(DAE.META_OPTION(result), findUnboundVariableUse, (unbound, resultInfo))

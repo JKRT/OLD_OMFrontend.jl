@@ -31,27 +31,23 @@
 */ =#
 
 module FGraphBuildEnv
-
-
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-        import Absyn
+        @importDBG Absyn
 
-        import AbsynUtil
+        @importDBG AbsynUtil
 
-        import SCode
+        @importDBG SCode
 
-        import FCore
+        @importDBG FCore
 
-        import FNode
+        @importDBG FNode
 
-        import FGraph
+        @importDBG DAE
 
-        import DAE
-
-        import Prefix
+        @importDBG Prefix
 
         Name = FCore.Name
         Id = FCore.Id
@@ -71,18 +67,30 @@ module FGraphBuildEnv
         Graph = FCore.Graph
         Scope = FCore.Scope
 
-        import ListUtil
-        import AbsynToSCode
-        import SCodeDump
-        import SCodeInstUtil
-        import SCodeUtil
-        import Util
+        @importDBG ListUtil
+        @importDBG AbsynToSCode
+        @importDBG SCodeDump
+        @importDBG SCodeInstUtil
+        @importDBG SCodeUtil
+        @importDBG Util
+
+         #= get the top node ref from the graph =#
+        function top(inGraph::Graph) ::MMRef
+              local outRef::MMRef
+              outRef = begin
+                @match inGraph begin
+                  FCore.G(__)  => begin
+                    inGraph.top.node
+                  end
+                end
+              end
+          outRef
+
 
          #= builds nodes out of classes =#
         function mkProgramGraph(inProgram::SCode.Program, inKind::Kind, graph::Graph)::Graph
             local topRef::MMRef
-            println(methods(FGraph.top))
-            topRef = FGraph.top(graph)
+            topRef = top(graph)
             for cls in inProgram
                 graph = mkClassGraph(cls, topRef, inKind, graph, true)
             end
@@ -125,7 +133,7 @@ module FGraphBuildEnv
                   (_, _, _, _, _, g)  => begin
                       cls = SCodeInstUtil.expandEnumerationClass(inClass)
                       @match SCode.CLASS(name = name) = cls
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.CL(cls, inPrefix, inMod, inKind, FCore.CLS_UNTYPED()))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.CL(cls, inPrefix, inMod, inKind, FCore.CLS_UNTYPED()))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr, checkDuplicate)
                     g
@@ -147,14 +155,14 @@ module FGraphBuildEnv
                   local cc::SCode.ConstrainClass
                 @matchcontinue (inElement, inParentRef, inKind, inGraph) begin
                   (SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(SOME(cc)))), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
+                      (g, n) = FNode.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.ccNodeName, nr)
                     g
                   end
 
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(SOME(cc)))), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
+                      (g, n) = FNode.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.ccNodeName, nr)
                     g
@@ -193,7 +201,7 @@ module FGraphBuildEnv
                   end
 
                   (name, SCode.MOD(subModLst =  nil(), binding = b && SOME(_)), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkBindingNode(b, nr, inKind, g)
@@ -201,7 +209,7 @@ module FGraphBuildEnv
                   end
 
                   (name, SCode.MOD(subModLst = sm, binding = b), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkSubMods(sm, nr, inKind, g)
@@ -210,7 +218,7 @@ module FGraphBuildEnv
                   end
 
                   (name, SCode.REDECL(element = e), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkElementNode(e, nr, inKind, g)
@@ -387,7 +395,7 @@ module FGraphBuildEnv
 
                   (SCode.EXTENDS(baseClassPath = p, modifications = m), _, _, g)  => begin
                       name = FNode.mkExtendsName(p)
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.EX(inElement, DAE.NOMOD()))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.EX(inElement, DAE.NOMOD()))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkModNode(FNode.modNodeName, m, nr, inKind, g)
@@ -434,7 +442,7 @@ module FGraphBuildEnv
                   end
 
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.duNodeName, list(inParentRef), FCore.DU(list(inElement)))
+                      (g, n) = FNode.node(g, FNode.duNodeName, list(inParentRef), FCore.DU(list(inElement)))
                       r = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.duNodeName, r)
                     g
@@ -467,7 +475,7 @@ module FGraphBuildEnv
                   end
 
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.imNodeName, list(inParentRef), FCore.IM(FCore.emptyImportTable))
+                      (g, n) = FNode.node(g, FNode.imNodeName, list(inParentRef), FCore.IM(FCore.emptyImportTable))
                       r = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.imNodeName, r)
                       FNode.addImportToRef(r, inElement)
@@ -499,7 +507,7 @@ module FGraphBuildEnv
                   end
 
                   (_, SOME(a && _ <| _), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.DIMS(inName, a))
+                      (g, n) = FNode.node(g, inName, list(inParentRef), FCore.DIMS(inName, a))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = mkDimsNode_helper(0, a, nr, inKind, g)
@@ -571,7 +579,7 @@ module FGraphBuildEnv
 
               @match SCode.COMPONENT(name = name, attributes = SCode.ATTR(arrayDims = ad), typeSpec = ts, modifications = m, condition = cnd) = inComp
               (nd, i) = FNode.element2Data(inComp, inKind)
-              (g, n) = FGraph.node(inGraph, name, list(inParentRef), nd)
+              (g, n) = FNode.node(inGraph, name, list(inParentRef), nd)
               nr = FNode.toRef(n)
               FNode.addChildRef(inParentRef, name, nr)
                #=  add instance node
@@ -592,7 +600,7 @@ module FGraphBuildEnv
               local n::Node
               local g::Graph
 
-              (g, n) = FGraph.node(inGraph, FNode.itNodeName, list(inParentRef), FCore.IT(inVar))
+              (g, n) = FNode.node(inGraph, FNode.itNodeName, list(inParentRef), FCore.IT(inVar))
               nr = FNode.toRef(n)
               FNode.addChildRef(inParentRef, FNode.itNodeName, nr)
               outGraph = g
@@ -636,7 +644,7 @@ module FGraphBuildEnv
                   local g::Graph
                 @match (inName, inExp, inParentRef, inKind, inGraph) begin
                   (_, e, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.EXP(inName, e))
+                      (g, n) = FNode.node(g, inName, list(inParentRef), FCore.EXP(inName, e))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = analyseExp(e, nr, inKind, g)
@@ -691,7 +699,7 @@ module FGraphBuildEnv
                 @match (inCref, inParentRef, inKind, inGraph) begin
                   (_, _, _, g)  => begin
                       name = AbsynUtil.printComponentRefStr(inCref)
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.CR(inCref))
+                      (g, n) = FNode.node(g, name, list(inParentRef), FCore.CR(inCref))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkDimsNode(FNode.subsNodeName, ListUtil.mkOption(AbsynUtil.getSubsFromCref(inCref, true, true)), nr, inKind, g)
@@ -726,10 +734,10 @@ module FGraphBuildEnv
 
                   (_, _, _, g)  => begin
                       @shouldFail _ = FNode.child(inParentRef, FNode.tyNodeName)
-                      (g, n) = FGraph.node(g, FNode.tyNodeName, list(inParentRef), FCore.ND(NONE()))
+                      (g, n) = FNode.node(g, FNode.tyNodeName, list(inParentRef), FCore.ND(NONE()))
                       pr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.tyNodeName, pr)
-                      (g, n) = FGraph.node(g, inName, list(pr), FCore.FT(inTypes))
+                      (g, n) = FNode.node(g, inName, list(pr), FCore.FT(inTypes))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(pr, inName, nr)
                     g
@@ -738,7 +746,7 @@ module FGraphBuildEnv
                   (_, _, _, g)  => begin
                       pr = FNode.child(inParentRef, FNode.tyNodeName)
                       @shouldFail _ = FNode.child(pr, inName)
-                      (g, n) = FGraph.node(g, inName, list(pr), FCore.FT(inTypes))
+                      (g, n) = FNode.node(g, inName, list(pr), FCore.FT(inTypes))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(pr, inName, nr)
                     g
@@ -1285,59 +1293,6 @@ module FGraphBuildEnv
                =#
           outGraph
         end
-
-         #= /*
-        public function mkCloneNode
-        \"@author: adrpo
-         clone the target ref
-         ignore basic types\"
-          input Name inName;
-          input MMRef inTargetRef;
-          input MMRef inParentRef;
-          input Graph inGraph;
-          output Graph outGraph;
-          output MMRef outCloneRef;
-        algorithm
-          (outGraph, outCloneRef) := matchcontinue(inName, inTargetRef, inParentRef, inGraph)
-            local
-              Node n;
-              MMRef rn, rc;
-              Graph g;
-              Children kids;
-
-             not in section (eq or alg), modifiers or dimensions/subscripts
-            case (_, _, _, g)
-              equation
-                false = FNode.isRefIn(inParentRef, FNode.isRefSection);
-                false = FNode.isRefIn(inParentRef, FNode.isRefMod);
-                false = FNode.isRefIn(inParentRef, FNode.isRefDims);
-                false = FNode.isRefIn(inParentRef, FNode.isRefDerived);
-                false = FNode.isRefIn(inParentRef, FNode.isRefFunction);
-                true = not FNode.isRefBasicType(inTargetRef) and
-                       not FNode.isRefBuiltin(inTargetRef) and
-                       not FNode.isRefComponent(inTargetRef) and
-                       not FNode.isRefConstrainClass(inTargetRef) and
-                       not FNode.isRefFunction(inTargetRef);
-
-                print(\"Cloning: \" + FNode.toPathStr(FNode.fromRef(inTargetRef)) + \"/\" + FNode.toStr(FNode.fromRef(inTargetRef)) + \"\\n\\t\" +
-                      \"Scope: \" + FNode.toPathStr(FNode.fromRef(inParentRef)) + \"/\" + FNode.toStr(FNode.fromRef(inParentRef)) + \"\\n\");
-                (g, n) = FGraph.node(g, inName, {inParentRef}, FCore.CLONE(inTargetRef));
-                 make a ref
-                rn = FNode.toRef(n);
-                 add the ref node
-                FNode.addChildRef(inParentRef, inName, rn);
-                 clone ref target node children
-                (g, kids) = FNode.cloneTree(FNode.children(FNode.fromRef(inTargetRef)), rn, g);
-                rn = FNode.updateRef(rn, FNode.setChildren(n, kids));
-              then
-                (g, rn);
-
-            else (inGraph, inTargetRef);
-
-          end matchcontinue;
-        end mkCloneNode;
-        */ =#
-
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()
-  end
+end

@@ -1,4 +1,16 @@
-  module Types
+
+module TypesInterface
+
+import Patternm
+
+function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp}
+  Patternm.resultExps(inCases)
+end
+
+@exportAll
+end
+
+module Types
 
 
     using MetaModelica
@@ -103,8 +115,6 @@
 
         import ListUtil
 
-        import Patternm
-
         import Print
 
         import Util
@@ -118,6 +128,8 @@
         import SCodeDump
 
         import MetaModelica.Dangerous.listReverseInPlace
+
+import TypesInterface
 
          #= Succeeds for all the discrete types, Integer, String, Boolean and enumeration. =#
         function discreteType(inType::DAE.Type)
@@ -5660,9 +5672,9 @@
 
                   (DAE.MATCHEXPRESSION(matchTy, inputs, aliases, localDecls, cases, et), _, _, _)  => begin
                       @match true = Config.acceptMetaModelicaGrammar()
-                      elist = Patternm.resultExps(cases)
+                      elist = TypesInterface.resultExps(cases)
                       (elist_1, _) = matchTypeList(elist, actual, expected, printFailtrace)
-                      cases = Patternm.fixCaseReturnTypes2(cases, elist_1, AbsynUtil.dummyInfo)
+                      cases = TypesInterface.fixCaseReturnTypes2(cases, elist_1, AbsynUtil.dummyInfo)
                       et = simplifyType(expected)
                     (DAE.MATCHEXPRESSION(matchTy, inputs, aliases, localDecls, cases, et), expected)
                   end
