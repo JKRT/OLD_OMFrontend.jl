@@ -539,7 +539,7 @@
                       analyseTypeSpec(ty, nore_env, inInfo)
                       (ty_item, _, ty_env) = NFSCodeLookup.lookupTypeSpec(ty, env, inInfo)
                       (ty_item, ty_env, _) = NFSCodeEnv.resolveRedeclaredItem(ty_item, ty_env)
-                      ty_env = NFSCodeEnv.mergeItemEnv(ty_item, ty_env)
+                      ty_env = NFSCodeEnv.myMergeItemEnv(ty_item, ty_env)
                       redecls = NFSCodeFlattenRedeclare.extractRedeclaresFromModifier(mods)
                       (ty_item, ty_env, repls) = NFSCodeFlattenRedeclare.replaceRedeclaredElementsInEnv(redecls, ty_item, ty_env, inEnv, NFInstPrefix.emptyPrefix)
                       analyseItemIfRedeclares(repls, ty_item, ty_env)
@@ -844,7 +844,7 @@
                   (SCode.EXTENDS(modifications = mods, info = info), _, NFSCodeEnv.EXTENDS(baseClass = bc) <| exts, _)  => begin
                       (ty_item, _, ty_env) = NFSCodeLookup.lookupBaseClassName(bc, inEnv, info)
                       analyseExtends(bc, inEnv, info)
-                      ty_env = NFSCodeEnv.mergeItemEnv(ty_item, ty_env)
+                      ty_env = NFSCodeEnv.myMergeItemEnv(ty_item, ty_env)
                       analyseModifier(mods, inEnv, ty_env, info)
                     exts
                   end
@@ -855,7 +855,7 @@
                       analyseTypeSpec(ty, inEnv, info)
                       (ty_item, _, ty_env) = NFSCodeLookup.lookupTypeSpec(ty, inEnv, info)
                       (ty_item, ty_env, _) = NFSCodeEnv.resolveRedeclaredItem(ty_item, ty_env)
-                      ty_env = NFSCodeEnv.mergeItemEnv(ty_item, ty_env)
+                      ty_env = NFSCodeEnv.myMergeItemEnv(ty_item, ty_env)
                       NFSCodeCheck.checkRecursiveComponentDeclaration(name, info, ty_env, ty_item, inEnv)
                       redecls = NFSCodeFlattenRedeclare.extractRedeclaresFromModifier(mods)
                       (ty_item, ty_env, _) = NFSCodeFlattenRedeclare.replaceRedeclaredElementsInEnv(redecls, ty_item, ty_env, inEnv, NFInstPrefix.emptyPrefix)
@@ -1155,7 +1155,7 @@
                   (_, SOME(item), SOME(env), _, _, _, _)  => begin
                       NFSCodeCheck.checkModifierIfRedeclare(item, inModifier, inInfo)
                       analyseItem(item, env)
-                      env = NFSCodeEnv.mergeItemEnv(item, env)
+                      env = NFSCodeEnv.myMergeItemEnv(item, env)
                       analyseModifier(inModifier, inEnv, env, inInfo)
                     ()
                   end

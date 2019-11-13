@@ -162,7 +162,7 @@
                   (SCode.EXTENDS(baseClassPath, visibility, mod, ann, info) <| rest, redecls)  => begin
                       submods = makeElementsIntoSubMods(SCode.NOT_FINAL(), SCode.NOT_EACH(), redecls)
                       redeclareMod = SCode.MOD(SCode.NOT_FINAL(), SCode.NOT_EACH(), submods, NONE(), info)
-                      mod = SCodeUtil.mergeSCodeMods(redeclareMod, mod)
+                      mod = SCodeUtil.myMergeSCodeMods(redeclareMod, mod)
                       out = addRedeclareAsElementsToExtends(rest, redecls)
                     _cons(SCode.EXTENDS(baseClassPath, visibility, mod, ann, info), out)
                   end

@@ -95,50 +95,49 @@
          *
          */ =#
 
-        import Absyn
+        @importDBG Absyn
 
-        import AbsynUtil
+        @importDBG AbsynUtil
 
-        import ClassInf
+        @importDBG ClassInf
 
-        import DAE
+        @importDBG DAE
 
-        import FCore
+        @importDBG FCore
 
-        import SCode
+        @importDBG SCode
 
-        import Values
+        @importDBG Values
 
-        import ValuesUtil
+        @importDBG ValuesUtil
 
-        import HashTable
+        @importDBG HashTable
 
-        import HashTable2
-
-        import Algorithm
-        import BaseHashTable
-        import Ceval
-        import DAE.AvlTreePathFunction
-        import ComponentReference
-        import Config
-        import ConnectUtil
-        #import DAEDump
-        import Debug
-        import DoubleEnded
-        import ElementSource
-        import Error
-        import Expression
-        import ExpressionDump
-        # import ExpressionSimplify
-        import Flags
-        import ListUtil
-        import SCodeUtil
-        import System
-        import Types
-        import Util
-        import StateMachineFlatten
-        import VarTransform
-        import AvlSetCR
+        @importDBG HashTable2
+        @importDBG Algorithm
+        @importDBG BaseHashTable
+        @importDBG Ceval
+        @importDBG DAE.AvlTreePathFunction
+        @importDBG ComponentReference
+        @importDBG Config
+        @importDBG ConnectUtil
+        #@importDBG DAEDump
+        @importDBG Debug
+        @importDBG DoubleEnded
+        @importDBG ElementSource
+        @importDBG Error
+        @importDBG Expression
+        @importDBG ExpressionDump
+        # @importDBG ExpressionSimplify
+        @importDBG Flags
+        @importDBG ListUtil
+        @importDBG SCodeUtil
+        @importDBG System
+        @importDBG Types
+        @importDBG Util
+        @importDBG StateMachineFlatten
+        @importDBG VarTransform
+        @importDBG AvlSetCR
 
         @Uniontype splitElements begin
              @Record SPLIT_ELEMENTS begin
@@ -8196,8 +8195,8 @@
          experimental merging of all algorithm sections into:
          - one for initial algorithms
          - one for normal algorithms
-         - only happens on a flag (-d=mergeAlgSections) =#
-        function mergeAlgorithmSections(inDae::DAE.DAElist) ::DAE.DAElist
+         - only happens on a flag (-d=myMergeAlgSections) =#
+        function myMergeAlgorithmSections(inDae::DAE.DAElist) ::DAE.DAElist
               local outDae::DAE.DAElist
 
               local els::List{DAE.Element}
@@ -8213,7 +8212,7 @@
 
                #=  do nothing if the flag is not activated
                =#
-              if ! Flags.isSet(Flags.MERGE_ALGORITHM_SECTIONS)
+              if ! Flags.isSet(Flags.myMerge_ALGORITHM_SECTIONS)
                 outDae = inDae
                 return outDae
               end

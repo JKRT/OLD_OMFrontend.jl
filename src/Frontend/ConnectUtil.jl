@@ -112,7 +112,7 @@ module ConnectUtil
           crefs from the old set. This is done because we don't need to propagate
           connections down in the instance hierarchy, but the list of connection crefs
           needs to be propagated to be able to evaluate the cardinality operator. See
-          comments in addSet below for how the sets are merged later. =#
+          comments in addSet below for how the sets are myMerged later. =#
         function newSet(prefix::Prefix.PrefixType, sets::Sets) ::Sets
 
 
@@ -172,7 +172,7 @@ module ConnectUtil
                   (DAE.SETS(node && DAE.SET_TRIE_NODE(__), _, c1, o1), DAE.SETS(_, sc, c2, o2))  => begin
                        #=  In the normal case we add the trie on the child sets to the parent, and
                        =#
-                       #=  also merge their lists of outer connects.
+                       #=  also myMerge their lists of outer connects.
                        =#
                       c1 = listAppend(c2, c1)
                       o1 = listAppend(o2, o1)
@@ -214,7 +214,7 @@ module ConnectUtil
               ty = makeConnectorType(connectorType)
               e1 = findElement(cref1, face1, ty, source, sets)
               e2 = findElement(cref2, face2, ty, source, sets)
-              sets = mergeSets(e1, e2, sets)
+              sets = myMergeSets(e1, e2, sets)
           sets
         end
 
@@ -764,7 +764,7 @@ module ConnectUtil
                 outer_els = collectOuterElements(node, outerFace)
                 inner_els = list(findInnerElement(oe, innerCref, innerFace, sets) for oe in outer_els)
                 sc = sets.setCount
-                sets = ListUtil.threadFold(outer_els, inner_els, mergeSets, sets)
+                sets = ListUtil.threadFold(outer_els, inner_els, myMergeSets, sets)
                 added = sc != sets.setCount
               catch
                 added = false
@@ -775,7 +775,7 @@ module ConnectUtil
                =#
                #=  Find or create inner elements corresponding to the outer elements.
                =#
-               #=  Merge the inner and outer sets pairwise from the two lists.
+               #=  myMerge the inner and outer sets pairwise from the two lists.
                =#
                #=  Check if the number of sets changed.
                =#
@@ -995,8 +995,8 @@ module ConnectUtil
           name
         end
 
-         #= Merges two sets. =#
-        function mergeSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets
+         #= myMerges two sets. =#
+        function myMergeSets(element1::ConnectorElement, element2::ConnectorElement, sets::Sets) ::Sets
 
 
               local new1::Bool
@@ -1004,13 +1004,13 @@ module ConnectUtil
 
               new1 = isNewElement(element1)
               new2 = isNewElement(element2)
-              sets = mergeSets2(element1, element2, new1, new2, sets)
+              sets = myMergeSets2(element1, element2, new1, new2, sets)
           sets
         end
 
-         #= Helper function to mergeSets, dispatches to the correct function based on if
+         #= Helper function to myMergeSets, dispatches to the correct function based on if
            the elements are new or not. =#
-        function mergeSets2(element1::ConnectorElement, element2::ConnectorElement, isNew1::Bool, isNew2::Bool, sets::Sets) ::Sets
+        function myMergeSets2(element1::ConnectorElement, element2::ConnectorElement, isNew1::Bool, isNew2::Bool, sets::Sets) ::Sets
 
 
               sets = begin
@@ -1525,7 +1525,7 @@ module ConnectUtil
           isInSet
         end
 
-        function mergeEquSetsAsCrefs(setsAsCrefs::List{<:List{<:DAE.ComponentRef}}) ::List{List{DAE.ComponentRef}}
+        function myMergeEquSetsAsCrefs(setsAsCrefs::List{<:List{<:DAE.ComponentRef}}) ::List{List{DAE.ComponentRef}}
 
 
               setsAsCrefs = begin
@@ -1542,8 +1542,8 @@ module ConnectUtil
                   end
 
                   set <| rest  => begin
-                      (set, rest) = mergeWithRest(set, rest)
-                      sets = mergeEquSetsAsCrefs(rest)
+                      (set, rest) = myMergeWithRest(set, rest)
+                      sets = myMergeEquSetsAsCrefs(rest)
                     _cons(set, sets)
                   end
                 end
@@ -1551,7 +1551,7 @@ module ConnectUtil
           setsAsCrefs
         end
 
-        function mergeWithRest(set::List{<:DAE.ComponentRef}, sets::List{<:List{<:DAE.ComponentRef}}, acc::List{<:List{<:DAE.ComponentRef}} = nil) ::Tuple{List{DAE.ComponentRef}, List{List{DAE.ComponentRef}}}
+        function myMergeWithRest(set::List{<:DAE.ComponentRef}, sets::List{<:List{<:DAE.ComponentRef}}, acc::List{<:List{<:DAE.ComponentRef}} = nil) ::Tuple{List{DAE.ComponentRef}, List{List{DAE.ComponentRef}}}
 
 
 
@@ -1574,7 +1574,7 @@ module ConnectUtil
                           else
                             set1
                           end
-                      (set, rest) = mergeWithRest(set, rest, ListUtil.consOnTrue(b, set2, acc))
+                      (set, rest) = myMergeWithRest(set, rest, ListUtil.consOnTrue(b, set2, acc))
                     (set, rest)
                   end
                 end
@@ -1623,7 +1623,7 @@ module ConnectUtil
         end
 
          #= The connection set maintains a list of connections, but when we generate the
-          set array which is used to generate the equations we want to merge these sets.
+          set array which is used to generate the equations we want to myMerge these sets.
           This function adds pointers to the array, so that when we fill it with
           generateSetArray2 we can follow the pointers to the correct sets. I.e. if sets
           1 and 2 are connected we might add a pointer from 2 to 1, so that all elements
@@ -1845,7 +1845,7 @@ module ConnectUtil
                 @match (set, element) begin
                   (DAE.SET(__), DAE.CONNECTOR_ELEMENT(__))  => begin
                       if Config.orderConnections() && isEquType(element.ty)
-                        el = ListUtil.mergeSorted(list(element), set.elements, equSetElementLess)
+                        el = ListUtil.myMergeSorted(list(element), set.elements, equSetElementLess)
                       else
                         el = _cons(element, set.elements)
                       end
@@ -1970,14 +1970,14 @@ module ConnectUtil
               e1 = listHead(elements)
               if Config.orderConnections()
                 for e2 in listRest(elements)
-                  src = ElementSource.mergeSources(e1.source, e2.source)
+                  src = ElementSource.myMergeSources(e1.source, e2.source)
                   src = ElementSource.addElementSourceConnect(src, (e1.name, e2.name))
                   eql = _cons(DAE.EQUEQUATION(e1.name, e2.name, src), eql)
                 end
               else
                 for e2 in listRest(elements)
                   (x, y) = Util.swap(shouldFlipEquEquation(e1.name, e1.source), e1.name, e2.name)
-                  src = ElementSource.mergeSources(e1.source, e2.source)
+                  src = ElementSource.myMergeSources(e1.source, e2.source)
                   src = ElementSource.addElementSourceConnect(src, (x, y))
                   eql = _cons(DAE.EQUEQUATION(x, y, src), eql)
                   e1 = e2
@@ -2025,7 +2025,7 @@ module ConnectUtil
               src = getElementSource(listHead(elements))
               for e in listRest(elements)
                 sum = Expression.makeRealAdd(sum, makeFlowExp(e))
-                src = ElementSource.mergeSources(src, e.source)
+                src = ElementSource.myMergeSources(src, e.source)
               end
               DAE = DAE.DAE_LIST(list(DAE.EQUATION(sum, DAE.RCONST(0.0), src)))
           DAE
@@ -2136,7 +2136,7 @@ module ConnectUtil
                        =#
                        #=  cr1 = cr2;
                        =#
-                      src = ElementSource.mergeSources(src1, src2)
+                      src = ElementSource.myMergeSources(src1, src2)
                       e1 = Expression.crefExp(cr1)
                       e2 = Expression.crefExp(cr2)
                       dae = DAE.DAE_LIST(list(DAE.EQUATION(e1, e2, src)))
@@ -3413,10 +3413,10 @@ module ConnectUtil
                #=  3 - get all expandable crefs that are connected ONLY with expandable
                =#
               setsAsCrefs = getExpandableEquSetsAsCrefs(sets)
-              setsAsCrefs = mergeEquSetsAsCrefs(setsAsCrefs)
+              setsAsCrefs = myMergeEquSetsAsCrefs(setsAsCrefs)
                #=  TODO! FIXME! maybe we should do fixpoint here??
                =#
-              setsAsCrefs = mergeEquSetsAsCrefs(setsAsCrefs)
+              setsAsCrefs = myMergeEquSetsAsCrefs(setsAsCrefs)
               onlyExpandableConnected = getOnlyExpandableConnectedCrefs(setsAsCrefs)
                #=  print(\"All expandable - expandable connected (3):\\n  \" + stringDelimitList(List.map(onlyExpandableConnected, ComponentReference.printComponentRefStr), \"\\n  \") + \"\\n\");
                =#

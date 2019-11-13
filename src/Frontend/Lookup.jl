@@ -2615,12 +2615,12 @@
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f && SCode.FINAL(__), io, repl), SCode.ATTR(d, ct, prl, var, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
-                      mod_1 = Mod.merge(mods, mod_1)
+                      mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
                       (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
-                      selectedMod = Mod.merge(cmod, selectedMod)
+                      selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
                       dir = Absyn.BIDIR()
@@ -2630,12 +2630,12 @@
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, _, io, repl), SCode.ATTR(d, ct, prl, SCode.CONST(__), _, isf), tp, mod && SCode.NOMOD(__), comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
-                      mod_1 = Mod.merge(mods, mod_1)
+                      mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
                       (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
-                      selectedMod = Mod.merge(cmod, selectedMod)
+                      selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
                       var = SCode.VAR()
@@ -2647,12 +2647,12 @@
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var && SCode.CONST(__), _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
-                      mod_1 = Mod.merge(mods, mod_1)
+                      mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
                       (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
-                      selectedMod = Mod.merge(cmod, selectedMod)
+                      selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
                       dir = Absyn.BIDIR()
@@ -2662,12 +2662,12 @@
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, _, io, repl), SCode.ATTR(d, ct, prl, _, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
                       (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
-                      mod_1 = Mod.merge(mods, mod_1)
+                      mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
                       (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
-                      selectedMod = Mod.merge(cmod, selectedMod)
+                      selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
                       var = SCode.VAR()

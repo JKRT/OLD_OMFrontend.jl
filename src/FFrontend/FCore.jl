@@ -32,7 +32,7 @@
 module FCore
 
 using MetaModelica
-#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each functixon :( =#
 using ExportAll
   #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
@@ -124,8 +124,7 @@ end
   @exportAll()
 end
 
-println("FCore Hello2")
-import Absyn
+@importDBG Absyn
 const Import = Absyn.Import
 const Id = ModelicaInteger
 const Seq = ModelicaInteger
@@ -134,19 +133,16 @@ const Refs = List
 const Parents = Refs
 const Scope = Refs
 const Children = RefTree.Tree
-println("FCore Hello3")
-import AbsynUtil
-println("FCore Hello4")
-import AvlSetCR
-println("FCore Before DAE1")
-import DAE
-println("FCore After DAE2")
-import Mutable
+
+@importDBG AbsynUtil
+@importDBG AvlSetCR
+@importDBG DAE
+@importDBG Mutable
 using Mutable: MutableType
-import SCode
-import Prefix
-import Config
-println("FCore Hello3")
+@importDBG SCode
+@importDBG Prefix
+@importDBG Config
+
 @Uniontype ImportTable begin
   @Record IMPORT_TABLE begin
 

@@ -1262,7 +1262,7 @@
               end
                #=  Neither of the paths are fully qualified, just join them.
                =#
-               #=  The first path is fully qualified, merge it with the second path and
+               #=  The first path is fully qualified, myMerge it with the second path and
                =#
                #=  return the result as a fully qualified path.
                =#
@@ -1639,7 +1639,7 @@
                   
                   (_, _, _, _)  => begin
                       (_, path, env) = lookupName(inPath, inEnv, NO_BUILTIN_TYPES(), inInfo, inErrorType)
-                      path = NFSCodeEnv.mergePathWithEnvPath(path, env)
+                      path = NFSCodeEnv.myMergePathWithEnvPath(path, env)
                       path = AbsynUtil.makeFullyQualified(path)
                     path
                   end

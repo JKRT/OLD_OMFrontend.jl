@@ -5738,12 +5738,12 @@
         end
 
          #=  This function takes an old annotation as first argument and a new
-           annotation as  second argument and merges the two.
+           annotation as  second argument and myMerges the two.
            Annotation \\\"parts\\\" that exist in both the old and the new annotation
            will be changed according to the new definition. For instance,
-           merge_annotations(annotation(x=1,y=2),annotation(x=3))
+           myMerge_annotations(annotation(x=1,y=2),annotation(x=3))
            => annotation(x=3,y=2) =#
-        function mergeAnnotations(inAnnotation1::Annotation, inAnnotation2::Annotation) ::Annotation
+        function myMergeAnnotations(inAnnotation1::Annotation, inAnnotation2::Annotation) ::Annotation
               local outAnnotation::Annotation
 
               outAnnotation = begin
@@ -5756,14 +5756,14 @@
                   end
 
                   (ANNOTATION(elementArgs = oldmods), ANNOTATION(elementArgs = newmods))  => begin
-                    ANNOTATION(mergeAnnotations2(oldmods, newmods))
+                    ANNOTATION(myMergeAnnotations2(oldmods, newmods))
                   end
                 end
               end
           outAnnotation
         end
 
-        function mergeAnnotations2(oldmods::List{<:ElementArg}, newmods::List{<:ElementArg}) ::List{ElementArg}
+        function myMergeAnnotations2(oldmods::List{<:ElementArg}, newmods::List{<:ElementArg}) ::List{ElementArg}
               local res::List{ElementArg} = listReverse(oldmods)
 
               local mods::List{ElementArg}
@@ -5786,8 +5786,8 @@
           res
         end
 
-         #= Merges an annotation into a Comment option. =#
-        function mergeCommentAnnotation(inAnnotation::Annotation, inComment::Option{<:Comment}) ::Option{Comment}
+         #= myMerges an annotation into a Comment option. =#
+        function myMergeCommentAnnotation(inAnnotation::Annotation, inComment::Option{<:Comment}) ::Option{Comment}
               local outComment::Option{Comment}
 
               outComment = begin
@@ -5805,13 +5805,13 @@
                   end
 
                   SOME(COMMENT(annotation_ = SOME(ann), comment = cmt))  => begin
-                    SOME(COMMENT(SOME(mergeAnnotations(ann, inAnnotation)), cmt))
+                    SOME(COMMENT(SOME(myMergeAnnotations(ann, inAnnotation)), cmt))
                   end
                 end
               end
                #=  A comment without annotation, insert the annotation.
                =#
-               #=  A comment with annotation, merge the annotations.
+               #=  A comment with annotation, myMerge the annotations.
                =#
           outComment
         end
@@ -5871,9 +5871,9 @@
                         end
                       end
                       res = listReverse(res)
-                       #=  Merge the annotations
+                       #=  myMerge the annotations
                        =#
-                      res = mergeAnnotations2(res, args2)
+                      res = myMergeAnnotations2(res, args2)
                       arg2.modification = SOME(CLASSMOD(res, eq2))
                     arg2
                   end

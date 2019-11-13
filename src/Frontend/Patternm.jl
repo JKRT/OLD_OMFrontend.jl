@@ -51,47 +51,47 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        import Absyn
-        import AbsynUtil
-        import Ceval
-        import ClassInf
-        import ConnectionGraph
-        import DAE
-        import FCore
-        import HashTableStringToPath
-        import SCode
-        import Dump
-        import InnerOuter
-        import Prefix
-        import Types
-        import UnitAbsyn
+        @importDBG Absyn
+        @importDBG AbsynUtil
+        @importDBG Ceval
+        @importDBG ClassInf
+        @importDBG ConnectionGraph
+        @importDBG DAE
+        @importDBG FCore
+        @importDBG HashTableStringToPath
+        @importDBG SCode
+        @importDBG Dump
+        @importDBG InnerOuter
+        @importDBG Prefix
+        @importDBG Types
+        @importDBG UnitAbsyn
 
-        import Algorithm
-        import AvlSetString
-        import BaseHashTable
-        import ComponentReference
-        # import Connect
-        import DAEUtil
-        import ElementSource
-        import Expression
-        import ExpressionDump
-        import Error
-        import ErrorExt
-        import Flags
-        import FGraph
-        import Inst
-        import InstSection
-        import InstTypes
-        import InstUtil
-        import ListUtil
-        import Lookup
-        import MetaModelica.Dangerous
-        import AbsynToSCode
-        import SCodeUtil
-        import Static
-        import System
-        import Util
-        import SCodeDump
+        @importDBG Algorithm
+        @importDBG AvlSetString
+        @importDBG BaseHashTable
+        @importDBG ComponentReference
+        # @importDBG Connect
+        @importDBG DAEUtil
+        @importDBG ElementSource
+        @importDBG Expression
+        #@importDBG ExpressionDump
+        @importDBG Error
+        @importDBG ErrorExt
+        @importDBG Flags
+        @importDBG FGraph
+        @importDBG Inst
+        @importDBG InstSection
+        @importDBG InstTypes
+        @importDBG InstUtil
+        @importDBG ListUtil
+        @importDBG Lookup
+        @importDBG MetaModelica.Dangerous
+        @importDBG AbsynToSCode
+        @importDBG SCodeUtil
+        @importDBG Static
+        @importDBG System
+        @importDBG Util
+        @importDBG SCodeDump
 
          #= author: KS
           This function is used in the following cases:
@@ -782,7 +782,9 @@
                   end
 
                   DAE.PAT_CONSTANT(exp = exp)  => begin
-                    ExpressionDump.printExpStr(exp)
+                    #TODO
+                    #ExpressionDump.printExpStr(exp)
+                    throw("TODO error")
                   end
 
                   DAE.PAT_AS(id = id, pat = pat)  => begin
@@ -883,7 +885,9 @@
         function checkConstantMatchInputs(inputs::List{<:DAE.Exp}, info::SourceInfo)
               for i in inputs
                 if Expression.isConstValue(i)
-                  Error.addSourceMessage(Error.META_MATCH_CONSTANT, list(ExpressionDump.printExpStr(i)), info)
+                  #TODO
+                  #Error.addSourceMessage(Error.META_MATCH_CONSTANT, list(ExpressionDump.printExpStr(i)), info)
+                  Error.addSourceMessage(Error.META_MATCH_CONSTANT, list(string()), info)
                 end
               end
         end

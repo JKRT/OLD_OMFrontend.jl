@@ -106,7 +106,7 @@
 
         import Lookup
 
-        import Patternm
+        import InstInterface
 
         import PrefixUtil
         import SCodeUtil
@@ -4810,7 +4810,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                       ty = Types.getPropType(prop)
                       (e_1, ty) = Types.convertTupleToMetaTuple(e_1, ty)
-                      (cache, pattern) = Patternm.elabPatternCheckDuplicateBindings(cache, inEnv, left, ty, info)
+                      (cache, pattern) = InstInterface.elabPatternCheckDuplicateBindings(cache, inEnv, left, ty, info)
                       source = ElementSource.addElementSourceFileInfo(inSource, info)
                       stmt = if Types.isEmptyOrNoRetcall(ty)
                             DAE.STMT_NORETCALL(e_1, source)

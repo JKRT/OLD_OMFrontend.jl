@@ -152,10 +152,7 @@ function tolower(inString::String)::String
 end
 
 function strtok(string::String, token::String)::List
-    local strings::List
-
-    #= Defined in the runtime =#
-    strings
+  arrayList(split(string, token))
 end
 
 #= as strtok but also includes *all* delimiters
@@ -1091,10 +1088,7 @@ function getSimulationHelpText(detailed::Bool, sphinx::Bool)::String
 end
 
 function getTerminalWidth()::ModelicaInteger
-    local width::ModelicaInteger
-
-    #= Defined in the runtime =#
-    width
+  displaysize(stdout)[2]
 end
 
 function fileIsNewerThan(file1::String, file2::String)::Bool

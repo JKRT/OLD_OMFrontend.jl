@@ -62,7 +62,7 @@
         import Error
         import Util
         import ComponentReference
-        import Patternm
+        import InstInterface
         import DAEUtil
         import DAEDump
         import Types
@@ -2623,7 +2623,7 @@
                         end
                         (cache, env, ih, comp2, mod2) = Inst.redeclareType(cache, env, ih, local_mod, comp, prefix, state, impl, cmod)
                         comp_mod = Mod.lookupCompModification(mod, comp.name)
-                        cmod = Mod.merge(comp_mod, cmod)
+                        cmod = Mod.myMerge(comp_mod, cmod)
                         dattr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefs)
                         env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(comp.name, dattr, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE()), comp, cmod, FCore.VAR_UNTYPED(), FGraph.empty())
                       false
@@ -3641,7 +3641,7 @@
                       (cache, dim1, cl, type_mods) = getUsertypeDimensions(cache, cenv, ih, pre, cl, dims, impl)
                       (cache, dim2) = elabArraydim(cache, env, owncref, cn, ad_1, eq, impl, true, false, pre, info, dims)
                       type_mods = Mod.addEachIfNeeded(type_mods, dim2)
-                      type_mods = Mod.merge(mod_1, type_mods)
+                      type_mods = Mod.myMerge(mod_1, type_mods)
                       res = listAppend(dim2, dim1)
                     (cache, res, cl, type_mods)
                   end
@@ -3651,7 +3651,7 @@
                       (cache, mod_1) = Mod.elabModForBasicType(cache, env, ih, pre, mod, impl, Mod.EXTENDS(path), info)
                       (cache, cl, _) = Lookup.lookupClass(cache, env, path)
                       (cache, res, cl, type_mods) = getUsertypeDimensions(cache, env, ih, pre, cl, nil, impl)
-                      type_mods = Mod.merge(mod_1, type_mods)
+                      type_mods = Mod.myMerge(mod_1, type_mods)
                     (cache, res, cl, type_mods)
                   end
 
@@ -4290,7 +4290,7 @@
                       cmod_1 = Mod.stripSubmod(cmod)
                       m_1 = SCodeUtil.stripSubmod(m)
                       (cache, m_2) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), m_1, false, Mod.COMPONENT(id), info)
-                      mod_2 = Mod.merge(cmod_1, m_2)
+                      mod_2 = Mod.myMerge(cmod_1, m_2)
                       @match SOME(eq) = Mod.modEquation(mod_2)
                       (cache, dims) = elabComponentArraydimFromEnv2(cache, eq, env)
                     (cache, dims)
@@ -7514,7 +7514,7 @@
 
          #=
         Author BZ 2008-05
-        This function merged derived SCode.Attributes with the current input SCode.Attributes. =#
+        This function myMerged derived SCode.Attributes with the current input SCode.Attributes. =#
         function propagateAbSCDirection2(v1::Absyn.Direction, optDerAttr::Option{<:SCode.Attributes}, inInfo::SourceInfo) ::Absyn.Direction
               local v3::Absyn.Direction
 
@@ -7844,10 +7844,10 @@
           cmt
         end
 
-         #= This function merges two comments together. The rule is that the string
+         #= This function myMerges two comments together. The rule is that the string
           comment is taken from the first comment, and the annotations from both
-          comments are merged. =#
-        function mergeClassComments(comment1::SCode.Comment, comment2::SCode.Comment) ::SCode.Comment
+          comments are myMerged. =#
+        function myMergeClassComments(comment1::SCode.Comment, comment2::SCode.Comment) ::SCode.Comment
               local outComment::SCode.Comment
 
               outComment = begin
@@ -8827,7 +8827,7 @@
                   end
                 end
               end
-               #= /* Merge the state of the two branches. Either they can break/return or not */ =#
+               #= /* myMerge the state of the two branches. Either they can break/return or not */ =#
           outUnbound
         end
 
@@ -8868,7 +8868,7 @@
                   end
 
                   (DAE.PATTERN(pattern = pattern), unbound)  => begin
-                      (_, unbound) = Patternm.traversePattern(pattern, patternFiltering, unbound)
+                      (_, unbound) = InstInterface.traversePattern(pattern, patternFiltering, unbound)
                     unbound
                   end
 
@@ -9010,7 +9010,7 @@
                   local body::List{DAE.Statement}
                 @match (case_, inUnbound) begin
                   (DAE.CASE(patterns = patterns, patternGuard = patternGuard, body = body, result = result, info = info, resultInfo = resultInfo), unbound)  => begin
-                      (_, unbound) = Patternm.traversePatternList(patterns, patternFiltering, unbound)
+                      (_, unbound) = InstInterface.traversePatternList(patterns, patternFiltering, unbound)
                       (_, (unbound, _)) = Expression.traverseExpTopDown(DAE.META_OPTION(patternGuard), findUnboundVariableUse, (unbound, info))
                       (_, _, unbound) = ListUtil.fold1(body, checkFunctionDefUseStmt, true, (false, false, unbound))
                       (_, (unbound, _)) = Expression.traverseExpTopDown(DAE.META_OPTION(result), findUnboundVariableUse, (unbound, resultInfo))

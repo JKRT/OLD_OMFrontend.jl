@@ -37,14 +37,14 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 
-import Absyn
-import AbsynUtil
-import SCode
-import DAE
-import Prefix
-import ClassInf
-import FCore
-import FCoreUtil
+@importDBG Absyn
+@importDBG AbsynUtil
+@importDBG SCode
+@importDBG DAE
+@importDBG Prefix
+@importDBG ClassInf
+@importDBG FCore
+@importDBG FCoreUtil
 
 const Name = FCore.Name
 const Id = FCore.Id
@@ -61,37 +61,33 @@ const Parents = FCore.Parents
 const Scope = FCore.Scope
 const Top = FCore.Top
 const Graph = FCore.Graph
-println("Graph = FCore.Graph")
 const Extra = FCore.Extra
 const Visited = FCore.Visited
 const Status = FCore.Status
 const emptyGraph = FCore.EG("empty")
 
-import FNode
-import InnerOuter
-
-import ListUtil
-import Util
-import System
-import Debug
-import FGraphStream
-import FGraphBuildEnv
-import Global
-import Config
-import PrefixUtil
-import Flags
-import SCodeDump
-import MetaModelica.Dangerous
-import Mod
-import Error
-import ComponentReference
-import Types
-import SCodeUtil
+@importDBG Config
+@importDBG Debug
+@importDBG Error
+@importDBG FGraphBuildEnv
+@importDBG FGraphStream
+@importDBG FNode
+@importDBG Flags
+@importDBG Global
+@importDBG InnerOuter
+@importDBG ListUtil
+@importDBG MetaModelica.Dangerous
+@importDBG Mod
+@importDBG PrefixUtil
+@importDBG SCodeDump
+@importDBG SCodeUtil
+@importDBG System
+@importDBG Types
+@importDBG Util
 
          #= get the top node ref from the graph =#
         function top(inGraph::Graph) ::MMRef
               local outRef::MMRef
-
               outRef = begin
                 @match inGraph begin
                   FCore.G(__)  => begin
@@ -236,32 +232,7 @@ import SCodeUtil
 
          #= make a new node in the graph =#
         function node(inGraph::Graph, inName::Name, inParents::Parents, inData::Data) ::Tuple{Graph, Node}
-              local outNode::Node
-              local outGraph::Graph
-
-              (outGraph, outNode) = begin
-                  local i::ModelicaInteger
-                  local b::Bool
-                  local id::Id
-                  local g::Graph
-                  local n::Node
-                @match (inGraph, inName, inParents, inData) begin
-                  (g, _, _, _)  => begin
-                      i = System.tmpTickIndex(Global.fgraph_nextId)
-                      n = FNode.new(inName, i, inParents, inData)
-                      FGraphStream.node(n)
-                    (g, n)
-                  end
-                end
-              end
-               #=  uncomment this if unique node id's are not unique!
-               =#
-               #= /*
-                      b = (id == i);
-                      Debug.bcall1(true, print, \"Next: \" + intString(id) + \" <-> \" + intString(i) + \" node: \" + FNode.toStr(n) + \"\\n\");
-                       true = b;
-                      */ =#
-          (outGraph, outNode)
+          FNode.node(inGraph, inName, inParents, inData)
         end
 
          #= @author: adrpo

@@ -16,10 +16,10 @@
         import SCode
         import Flags
 
-        function mergeSources(src1::DAE.ElementSource, src2::DAE.ElementSource) ::DAE.ElementSource 
-              local mergedSrc::DAE.ElementSource
+        function myMergeSources(src1::DAE.ElementSource, src2::DAE.ElementSource) ::DAE.ElementSource 
+              local myMergedSrc::DAE.ElementSource
 
-              mergedSrc = begin
+              myMergedSrc = begin
                   local info::SourceInfo
                   local partOfLst1::List{Absyn.Within}
                   local partOfLst2::List{Absyn.Within}
@@ -62,7 +62,7 @@
                 end
               end
                #= /* Discard */ =#
-          mergedSrc
+          myMergedSrc
         end
 
         function addCommentToSource(source::DAE.ElementSource, commentIn::Option{<:SCode.Comment}) ::DAE.ElementSource 

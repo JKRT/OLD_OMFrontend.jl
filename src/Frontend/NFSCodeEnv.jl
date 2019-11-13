@@ -1563,8 +1563,8 @@ function setItemEnv(inItem::Item, inNewEnv::Env) ::Item
   outItem
 end
 
-#= Merges an environment item's environment with the given environment. =#
-function mergeItemEnv(inItem::Item, inEnv::Env) ::Env
+#= myMerges an environment item's environment with the given environment. =#
+function myMergeItemEnv(inItem::Item, inEnv::Env) ::Env
   local outEnv::Env
 
   outEnv = begin
@@ -1576,7 +1576,7 @@ function mergeItemEnv(inItem::Item, inEnv::Env) ::Env
       end
 
       (REDECLARED_ITEM(item = item), _)  => begin
-        mergeItemEnv(item, inEnv)
+        myMergeItemEnv(item, inEnv)
       end
 
       _  => begin
@@ -1587,8 +1587,8 @@ function mergeItemEnv(inItem::Item, inEnv::Env) ::Env
   outEnv
 end
 
-#= Merges an environment item's environment with the given environment. =#
-function unmergeItemEnv(inItem::Item, inEnv::Env) ::Env
+#= myMerges an environment item's environment with the given environment. =#
+function unmyMergeItemEnv(inItem::Item, inEnv::Env) ::Env
   local outEnv::Env
 
   outEnv = begin
@@ -1731,14 +1731,14 @@ function setEnvClsAndVars(inTree::EnvTree.Tree, inEnv::Env) ::Env
   outEnv
 end
 
-#= Merges a path with the environment path. =#
-function mergePathWithEnvPath(inPath::Absyn.Path, inEnv::Env) ::Absyn.Path
+#= myMerges a path with the environment path. =#
+function myMergePathWithEnvPath(inPath::Absyn.Path, inEnv::Env) ::Absyn.Path
   local outPath::Absyn.Path
 
   outPath = begin
     local env_path::Absyn.Path
     local id::Absyn.Ident
-    #=  Try to merge the last identifier in the path with the environment path.
+    #=  Try to myMerge the last identifier in the path with the environment path.
     =#
     @matchcontinue (inPath, inEnv) begin
       (_, _)  => begin
@@ -1759,15 +1759,15 @@ function mergePathWithEnvPath(inPath::Absyn.Path, inEnv::Env) ::Absyn.Path
   outPath
 end
 
-#= Merges a path with the environment path. =#
-function mergeTypeSpecWithEnvPath(inTS::Absyn.TypeSpec, inEnv::Env) ::Absyn.TypeSpec
+#= myMerges a path with the environment path. =#
+function myMergeTypeSpecWithEnvPath(inTS::Absyn.TypeSpec, inEnv::Env) ::Absyn.TypeSpec
   local outTS::Absyn.TypeSpec
 
   outTS = begin
     local path::Absyn.Path
     local id::Absyn.Ident
     local ad::Option{Absyn.ArrayDim}
-    #=  Try to merge the last identifier in the path with the environment path.
+    #=  Try to myMerge the last identifier in the path with the environment path.
     =#
     @matchcontinue (inTS, inEnv) begin
       (Absyn.TPATH(path, ad), _)  => begin

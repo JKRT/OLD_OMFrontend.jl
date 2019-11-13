@@ -1,4 +1,9 @@
-  module Static
+
+module StaticInterface
+import Patternm
+end
+
+module Static
 
 
     using MetaModelica
@@ -104,7 +109,6 @@
         import Lookup
         import Mutable
         import OperatorOverloading
-        import Patternm
         import PrefixUtil
         import Print
         import SCodeDump
@@ -959,7 +963,7 @@
                    end
 
                    Absyn.MATCHEXP(__)  => begin
-                     Patternm.elabMatchExpression
+                     StaticInterface.elabMatchExpression
                    end
 
                    Absyn.DOT(__)  => begin
@@ -10758,7 +10762,7 @@
                   (DAE.CREF_QUAL(ident = id, identType = prety, subscriptLst = ssl, componentRef = child), ety)  => begin
                       childExp = elabCrefSlice(child, ety)
                       exp1 = flattenSubscript(ssl, id, prety)
-                      exp1 = mergeQualWithRest(exp1, childExp, ety)
+                      exp1 = myMergeQualWithRest(exp1, childExp, ety)
                     exp1
                   end
                 end
@@ -10766,10 +10770,10 @@
           outCref
         end
 
-         #= Incase we have a qual with child references, this function merges them.
+         #= Incase we have a qual with child references, this function myMerges them.
           The input should be an array, or just one CREF_QUAL, of arrays...of arrays
           of CREF_QUALS and the same goes for 'rest'. Also the flat type as input. =#
-        function mergeQualWithRest(qual::DAE.Exp, rest::DAE.Exp, inType::DAE.Type) ::DAE.Exp
+        function myMergeQualWithRest(qual::DAE.Exp, rest::DAE.Exp, inType::DAE.Type) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10783,11 +10787,11 @@
                    =#
                 @match (qual, rest, inType) begin
                   (exp1 && DAE.CREF(_, _), exp2, _)  => begin
-                    mergeQualWithRest2(exp2, exp1)
+                    myMergeQualWithRest2(exp2, exp1)
                   end
 
                   (DAE.ARRAY(_, _, expl1), exp2, ety)  => begin
-                      expl1 = ListUtil.map2(expl1, mergeQualWithRest, exp2, ety)
+                      expl1 = ListUtil.map2(expl1, myMergeQualWithRest, exp2, ety)
                       exp2 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
                       (iLst, scalar) = extractDimensionOfChild(exp2)
                       ety = Expression.arrayEltType(ety)
@@ -10801,9 +10805,9 @@
           outExp
         end
 
-         #= Helper to mergeQualWithRest, handles the case
+         #= Helper to myMergeQualWithRest, handles the case
           when the child-qual is arrays of arrays. =#
-        function mergeQualWithRest2(rest::DAE.Exp, qual::DAE.Exp) ::DAE.Exp
+        function myMergeQualWithRest2(rest::DAE.Exp, qual::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -10827,7 +10831,7 @@
                   end
 
                   (exp1 && DAE.ARRAY(ety, _, expl1), exp2 && DAE.CREF(DAE.CREF_IDENT(_, _, _), _))  => begin
-                      expl1 = ListUtil.map1(expl1, mergeQualWithRest2, exp2)
+                      expl1 = ListUtil.map1(expl1, myMergeQualWithRest2, exp2)
                       exp1 = DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, expl1)
                       (_, scalar) = extractDimensionOfChild(exp1)
                     DAE.ARRAY(ety, scalar, expl1)
