@@ -48,58 +48,56 @@ module InnerOuter
     const emptyInstHierarchy = nil #= an empty instance hierarchy =#::InstHierarchy
 
 
-        import Absyn
-        import AbsynUtil
+        @importDBG Absyn
+        @importDBG AbsynUtil
         # import Connect
-        import ConnectionGraph
-        import DAE
-        import FCore
-        import FCoreUtil
-        import FNode
-        import Prefix
-        import SCode
-        import UnitAbsyn
-        import HashSet
+        @importDBG ConnectionGraph
+        @importDBG DAE
+        @importDBG FCore
+        @importDBG FCoreUtil
+        @importDBG FNode
+        @importDBG Prefix
+        @importDBG SCode
+        @importDBG UnitAbsyn
+        @importDBG HashSet
 
-        import ArrayUtil
+        @importDBG ArrayUtil
 
-        import ComponentReference
+        @importDBG ComponentReference
 
-        import ConnectUtil
+        @importDBG ConnectUtil
 
-        import DAEUtil
+        @importDBG DAEUtil
 
-        import Debug
+        @importDBG Debug
 
-        import Dump
+        @importDBG Dump
 
-        import ElementSource
+        @importDBG ElementSource
 
-        import Error
+        @importDBG Error
 
-        import ErrorExt
+        @importDBG ErrorExt
 
-        import Expression
+        @importDBG Expression
 
-        import Flags
+        @importDBG Flags
 
-        import InstSection
+        @importDBG InstSection
 
-        import ListUtil
+        @importDBG ListUtil
 
-        import Lookup
+        @importDBG Lookup
 
-        import PrefixUtil
+        @importDBG PrefixUtil
 
-        import System
+        @importDBG System
 
-        import Util
+        @importDBG Util
 
-        import VarTransform
+        @importDBG VarTransform
 
-        import BaseHashSet
-
-        import FGraph
+        @importDBG BaseHashSet
 
         Cache = FCore.Cache
 
@@ -1095,14 +1093,14 @@ module InnerOuter
 
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
-                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
                       instInner = get(cref, ht)
                     instInner
                   end
 
                   (TOP_INSTANCE(_, ht, _, _), _, name)  => begin
                       prefix = PrefixUtil.prefixStripLast(inPrefix)
-                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, prefix, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
                       @shouldFail _ = get(cref, ht)
                       instInner = lookupInnerInIH(inTIH, prefix, name)
                     instInner
@@ -1240,7 +1238,7 @@ module InnerOuter
                   end
 
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = Absyn.INNER(__)) <| r, _, _)  => begin
-                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, pre, cr)
+                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, pre, cr)
                       r_1 = switchInnerToOuterAndPrefix(r, io, pre)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
@@ -1304,7 +1302,7 @@ module InnerOuter
                   end
 
                   (DAE.VAR(componentRef = cr, kind = vk, direction = dir, parallelism = prl, protection = prot, ty = t, binding = e, dims = id, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = io) <| r, _)  => begin
-                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, crefPrefix, cr)
+                      (_, cr) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, crefPrefix, cr)
                       r_1 = prefixOuterDaeVars(r, crefPrefix)
                     _cons(DAE.VAR(cr, vk, dir, prl, prot, t, e, id, ct, source, dae_var_attr, comment, io), r_1)
                   end
@@ -1332,8 +1330,11 @@ module InnerOuter
         function switchInnerToOuterInGraph
           switches the inner to outer attributes of a component in the Env. =#
         function switchInnerToOuterInGraph(inEnv::FCore.Graph, inCr::DAE.ComponentRef) ::FCore.Graph
-              local outEnv::FCore.Graph
-
+          function lastScopeRef(inGraph::FCore.Graph)::MMRef
+            outRef = listHead(currentScope(inGraph))
+          end
+          
+          local outEnv::FCore.Graph
               outEnv = begin
                   local envIn::FCore.Graph
                   local envRest::FCore.Graph
@@ -1352,7 +1353,7 @@ module InnerOuter
                   end
 
                   (_, cr)  => begin
-                      r = FGraph.lastScopeRef(inEnv)
+                      r = lastScopeRef(inEnv)
                       n = FNode.fromRef(r)
                       n = switchInnerToOuterInNode(n, cr)
                       r = FNode.updateRef(r, n)
@@ -1563,7 +1564,7 @@ module InnerOuter
 
                   (TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm) <| restIH, _, _, INST_INNER(name = name))  => begin
                       cref_ = ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil)
-                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, cref_)
+                      (_, cref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, inPrefix, cref_)
                       ht = add((cref, inInstInner), ht)
                     _cons(TOP_INSTANCE(pathOpt, ht, outerPrefixes, sm), restIH)
                   end
@@ -1651,9 +1652,24 @@ module InnerOuter
           outIH
         end
 
-        function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
-              local outIH::InstHierarchy
+function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
+  function getGraphNameStr(inGraph::FCore.Graph) ::String
+    local outString::String
+    outString = begin
+      @matchcontinue inGraph begin
+        _  => begin
+          AbsynUtil.pathString(getGraphName(inGraph))
+        end
+        _  => begin
+          "."
+        end
+      end
+    end
+    outString
+  end
 
+  
+              local outIH::InstHierarchy
               outIH = begin
                   local name::String
                   local scopeName::String
@@ -1663,7 +1679,7 @@ module InnerOuter
                 @matchcontinue (inClass, inPrefix, inScope, inIH) begin
                   (SCode.CLASS(name = name, prefixes = SCode.PREFIXES(innerOuter = io)), _, _, _)  => begin
                       @match true = AbsynUtil.isInner(io)
-                      scopeName = FGraph.getGraphNameStr(inScope)
+                      scopeName = getGraphNameStr(inScope)
                       outIH = updateInstHierarchy(inIH, inPrefix, io, INST_INNER(inPrefix, name, io, name, Absyn.IDENT(name), scopeName, NONE(), nil, SOME(inClass)))
                     outIH
                   end
@@ -1754,7 +1770,7 @@ module InnerOuter
                   end
 
                   (TOP_INSTANCE(_, _, outerPrefixes && _ <| _, _) <|  nil(), _, _)  => begin
-                      (_, fullCref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FGraph.empty(), emptyInstHierarchy, inPrefix, inOuterComponentRef)
+                      (_, fullCref) = PrefixUtil.prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, inPrefix, inOuterComponentRef)
                       (outerCrefPrefix, innerCrefPrefix) = searchForInnerPrefix(fullCref, inOuterComponentRef, outerPrefixes)
                       innerCref = changeOuterReferenceToInnerReference(fullCref, outerCrefPrefix, innerCrefPrefix)
                     innerCref
@@ -1918,7 +1934,7 @@ module InnerOuter
                    =#
                 @match (inIH, inEnv) begin
                   ( nil(), _)  => begin
-                    "There are no 'inner' components defined in the model in any of the parent scopes of 'outer' component's scope: " + FGraph.printGraphPathStr(inEnv) + "."
+                    "There are no 'inner' components defined in the model in any of the parent scopes of 'outer' component's scope: " + "FGraph.printGraphPathStr(inEnv)" + "."
                   end
 
                   (TOP_INSTANCE(_, ht, _, _) <| _, _)  => begin

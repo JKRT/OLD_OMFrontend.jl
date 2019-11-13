@@ -46,12 +46,10 @@ Apply = Function
 @importDBG Absyn
 @importDBG AbsynUtil
 @importDBG DAE
-@importDBG DAEUtil
 @importDBG SCode
 @importDBG FCore
 @importDBG Error
 @importDBG ListUtil
-@importDBG FGraphStream
 @importDBG Config
 @importDBG Flags
 @importDBG SCodeUtil
@@ -254,6 +252,27 @@ function addImport(inImport::SCode.Element, inImportTable::ImportTable) ::Import
   outImportTable
 end
 
+function toConnectorTypeNoState(scodeConnectorType::SCode.ConnectorType, flowName::Option{<:DAE.ComponentRef} = NONE()) ::DAE.ConnectorType
+  local daeConnectorType::DAE.ConnectorType
+
+  daeConnectorType = begin
+    @match scodeConnectorType begin
+      SCode.FLOW(__)  => begin
+        DAE.FLOW()
+      end
+
+      SCode.STREAM(__)  => begin
+        DAE.STREAM(flowName)
+      end
+
+      _  => begin
+        DAE.POTENTIAL()
+      end
+    end
+  end
+  daeConnectorType
+end
+
 #= Translates a qualified import to a named import. =#
 function translateQualifiedImportToNamed(inImport::Import) ::Import
   local outImport::Import
@@ -354,7 +373,6 @@ function addChildRef(inParentRef::MMRef, inName::Name, inChildRef::MMRef, checkD
          RefTree.addConflictReplace
        end)
   parent = updateRef(inParentRef, FCore.N(n, i, p, c, d))
-  FGraphStream.edge(inName, fromRef(parent), fromRef(inChildRef))
 end
 
 function addImportToRef(ref::MMRef, imp::SCode.Element)
@@ -576,7 +594,7 @@ function element2Data(inElement::SCode.Element, inKind::Kind)::Tuple{Data, DAE.V
     @match (inElement, inKind) begin
       (SCode.COMPONENT(n, SCode.PREFIXES(vis, _, _, io, _), SCode.ATTR(_, ct, prl, var, dir), _, _, _, _, _), _)  => begin
         nd = FCore.CO(inElement, DAE.NOMOD(), inKind, FCore.VAR_UNTYPED())
-        i = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl, var, dir, io, vis), DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE())
+        i = DAE.TYPES_VAR(n, DAE.ATTR(toConnectorTypeNoState(ct), prl, var, dir, io, vis), DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE())
         (nd, i)
       end
     end
@@ -1772,7 +1790,6 @@ function node(inGraph::Graph, inName::Name, inParents::Parents, inData::Data) ::
       (g, _, _, _)  => begin
         i = System.tmpTickIndex(Global.fgraph_nextId)
                       n = FNode.new(inName, i, inParents, inData)
-        FGraphStream.node(n)
         (g, n)
       end
     end
