@@ -70,7 +70,6 @@ const emptyGraph = FCore.EG("empty")
 @importDBG Debug
 @importDBG Error
 #@importDBG FGraphBuildEnv
-@importDBG FGraphStream
 @importDBG FNode
 @importDBG Flags
 @importDBG Global
@@ -133,7 +132,6 @@ const emptyGraph = FCore.EG("empty")
          #= get the last ref from the current scope the graph =#
         function lastScopeRef(inGraph::Graph) ::MMRef
               local outRef::MMRef
-
               outRef = listHead(currentScope(inGraph))
           outRef
         end
@@ -226,7 +224,6 @@ const emptyGraph = FCore.EG("empty")
                #=  Creates a cycle, but faster to get the initial environment
                =#
               arrayUpdate(ag, 1, FCore.G(top, list(nr)))
-              FGraphStream.node(n)
           outGraph
         end
 
