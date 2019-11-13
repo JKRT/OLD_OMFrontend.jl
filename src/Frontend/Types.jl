@@ -1,6 +1,8 @@
 
 module TypesInterface
 
+import DAE
+
 import Patternm
 
 function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp}

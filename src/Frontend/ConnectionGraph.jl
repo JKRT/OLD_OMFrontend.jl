@@ -44,7 +44,7 @@ import Absyn
 
 import DAE
 
-import DAEUtil
+import DAETraverse
 
 import HashTable
 
@@ -978,7 +978,7 @@ function evalConnectionsOperators(inRoots::List{<:DAE.ComponentRef}, graph::Conn
         connections = getConnections(graph)
         table = ListUtil.fold(connections, addConnectionsRooted, table)
         rooted = setRootDistance(inRoots, table, 0, nil, HashTable.emptyHashTable())
-        (outDae, _) = DAEUtil.traverseDAEElementList(inDae, evalConnectionsOperatorsHelper, (rooted, inRoots, graph))
+        (outDae, _) = DAETraverse.traverseDAEElementList(inDae, evalConnectionsOperatorsHelper, (rooted, inRoots, graph))
         outDae
       end
     end
@@ -1806,7 +1806,7 @@ function addBrokenEqualityConstraintEquations(inDAE::DAE.DAElist, inBroken::DaeE
 
       _  => begin
         equalityConstraintElements = ListUtil.flatten(ListUtil.map(inBroken, Util.tuple33))
-        dae = DAEUtil.joinDaes(DAE.DAE_LIST(equalityConstraintElements), inDAE)
+        dae = DAETraverse.joinDaes(DAE.DAE_LIST(equalityConstraintElements), inDAE)
         dae
       end
     end

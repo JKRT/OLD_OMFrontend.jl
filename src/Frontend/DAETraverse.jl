@@ -1,3 +1,4 @@
+
   module DAETraverse
 
 
@@ -5,11 +6,351 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield
 
+    FuncExpType = Function
+    Type_a = Any
 
+    import Absyn
+    import ClassInf
     import DAE
-    
-    import Expression
+    import Config
+
+
+    function local_flattenArrayType(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimensions}
+          local outDimensions::DAE.Dimensions
+          local outType::DAE.Type
+
+          (outType, outDimensions) = begin
+              local ty::Type
+              local dims::DAE.Dimensions
+              local dim::DAE.Dimension
+               #=  Array type
+               =#
+            @match inType begin
+              DAE.T_ARRAY(__)  => begin
+                  (ty, dims) = local_flattenArrayType(inType.ty)
+                  dims = listAppend(inType.dims, dims)
+                (ty, dims)
+              end
+
+              DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
+                (inType, nil)
+              end
+
+              DAE.T_SUBTYPE_BASIC(__)  => begin
+                local_flattenArrayType(inType.complexType)
+              end
+
+              _  => begin
+                  (inType, nil)
+              end
+            end
+          end
+           #=  Complex type extending basetype with equality constraint
+           =#
+           #=  Complex type extending basetype.
+           =#
+           #=  Element type
+           =#
+      (outType, outDimensions)
+    end
+
+    #= @author: adrpo
+     simplifies the given type, to be used in an expression or component reference =#
+   function local_simplifyType(inType::DAE.Type) ::DAE.Type
+         local outExpType::DAE.Type
+
+         outExpType = begin
+             local str::String
+             local t::Type
+             local t_1::DAE.Type
+             local dims::DAE.Dimensions
+             local tys::List{DAE.Type}
+             local varLst::List{DAE.Var}
+             local CIS::ClassInf.SMNode
+             local ec::DAE.EqualityConstraint
+           @matchcontinue inType begin
+             DAE.T_FUNCTION(__)  => begin
+               DAE.T_FUNCTION_REFERENCE_VAR(inType)
+             end
+
+             DAE.T_METAUNIONTYPE(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METARECORD(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METAPOLYMORPHIC(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METALIST(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METAARRAY(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METAOPTION(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_METATUPLE(__)  => begin
+               DAE.T_METATYPE(inType)
+             end
+
+             DAE.T_UNKNOWN(__)  => begin
+               DAE.T_UNKNOWN_DEFAULT
+             end
+
+             DAE.T_ANYTYPE(__)  => begin
+               DAE.T_UNKNOWN_DEFAULT
+             end
+
+             t && DAE.T_ARRAY(__)  => begin
+                 (t, dims) = local_flattenArrayType(t)
+                 t_1 = local_simplifyType(t)
+               DAE.T_ARRAY(t_1, dims)
+             end
+
+             DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
+               inType
+             end
+
+             DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
+               local_simplifyType(t)
+             end
+
+             DAE.T_INTEGER(__)  => begin
+               DAE.T_INTEGER_DEFAULT
+             end
+
+             DAE.T_REAL(__)  => begin
+               DAE.T_REAL_DEFAULT
+             end
+
+             DAE.T_BOOL(__)  => begin
+               DAE.T_BOOL_DEFAULT
+             end
+
+             DAE.T_CLOCK(__)  => begin
+               DAE.T_CLOCK_DEFAULT
+             end
+
+             DAE.T_STRING(__)  => begin
+               DAE.T_STRING_DEFAULT
+             end
+
+             DAE.T_NORETCALL(__)  => begin
+               DAE.T_NORETCALL_DEFAULT
+             end
+
+             DAE.T_TUPLE(types = tys)  => begin
+                 tys = ListUtil.map(tys, local_simplifyType)
+               DAE.T_TUPLE(tys, inType.names)
+             end
+
+             DAE.T_ENUMERATION(__)  => begin
+               inType
+             end
+
+             DAE.T_COMPLEX(CIS, varLst, ec)  => begin
+                 @match true = Config.acceptMetaModelicaGrammar()
+                 varLst = list(local_simplifyVar(v) for v in varLst)
+               DAE.T_COMPLEX(CIS, varLst, ec)
+             end
+
+             DAE.T_COMPLEX(CIS && ClassInf.RECORD(__), varLst, ec)  => begin
+                 varLst = list(local_simplifyVar(v) for v in varLst)
+               DAE.T_COMPLEX(CIS, varLst, ec)
+             end
+
+             DAE.T_COMPLEX(__)  => begin
+               inType
+             end
+
+             DAE.T_METABOXED(ty = t)  => begin
+                 t_1 = local_simplifyType(t)
+               DAE.T_METABOXED(t_1)
+             end
+
+             _  => begin
+               DAE.T_UNKNOWN_DEFAULT
+             end
+
+             _  => begin
+                   println("DAETraverse.local_simplifyType failed!")
+                 fail()
+             end
+           end
+         end
+          #=  do NOT simplify out equality constraint
+          =#
+          #=  BTH watch out: Due to simplification some type info is lost here
+          =#
+          #=  for metamodelica we need this for some reson!
+          =#
+          #=  do this for records too, otherwise:
+          =#
+          #=  frame.R = Modelica.Mechanics.MultiBody.Frames.Orientation({const_matrix);
+          =#
+          #=  does not get expanded into the component equations.
+          =#
+          #=  otherwise just return the same!
+          =#
+          #=  This is the case when the type is currently UNTYPED
+          =#
+          #= /*
+                 print(\" untyped \");
+                 print(unparseType(inType));
+                 print(\"\\n\");
+                 */ =#
+     outExpType
+   end
+
+   function local_simplifyVar(inVar::DAE.Var) ::DAE.Var
+         local outVar::DAE.Var = inVar
+
+         outVar = begin
+           @match outVar begin
+             DAE.TYPES_VAR(__)  => begin
+                 @set outVar.ty = local_simplifyType(outVar.ty)
+               outVar
+             end
+           end
+         end
+     outVar
+   end
+
+
+    function local_unliftArray(inType::DAE.Type) ::DAE.Type
+          local outType::DAE.Type
+
+          outType = begin
+              local tp::Type
+              local t::Type
+              local d::DAE.Dimension
+              local ds::DAE.Dimensions
+            @match inType begin
+              DAE.T_ARRAY(ty = tp, dims = _ <|  nil())  => begin
+                tp
+              end
+
+              DAE.T_ARRAY(ty = tp, dims = _ <| ds)  => begin
+                DAE.T_ARRAY(tp, ds)
+              end
+
+              DAE.T_METATYPE(ty = tp)  => begin
+                Types.simplifyType(local_unliftArray(tp))
+              end
+
+              DAE.T_METAARRAY(ty = tp)  => begin
+                tp
+              end
+
+              _  => begin
+                  inType
+              end
+            end
+          end
+      outType
+    end
+
+    function local_unliftArrayTypeWithSubs(subs::List{<:DAE.Subscript}, ity::DAE.Type) ::DAE.Type
+          local oty::DAE.Type
+
+          oty = begin
+              local rest::List{DAE.Subscript}
+              local ty::Type
+            @match (subs, ity) begin
+              ( nil(), ty)  => begin
+                ty
+              end
+
+              (_ <| rest, ty)  => begin
+                  ty = local_unliftArray(ty)
+                  ty = local_unliftArrayTypeWithSubs(rest, ty)
+                ty
+              end
+            end
+          end
+      oty
+    end
+
+
+    function local_crefLastSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript}
+          local outSubscriptLst::List{DAE.Subscript}
+
+          outSubscriptLst = begin
+              local id::DAE.Ident
+              local subs::List{DAE.Subscript}
+              local cr::DAE.ComponentRef
+            @match inComponentRef begin
+              DAE.CREF_IDENT(subscriptLst = subs)  => begin
+                subs
+              end
+
+              DAE.CREF_QUAL(componentRef = cr)  => begin
+                local_crefLastSubs(cr)
+              end
+            end
+          end
+      outSubscriptLst
+    end
+
+    function local_crefLastType(inRef::DAE.ComponentRef) ::DAE.Type
+          local res::DAE.Type
+
+          res = begin
+              local t2::DAE.Type
+              local cr::DAE.ComponentRef
+            @match inRef begin
+              DAE.CREF_IDENT(_, t2, _)  => begin
+                t2
+              end
+
+              DAE.CREF_QUAL(_, _, _, cr)  => begin
+                local_crefLastType(cr)
+              end
+            end
+          end
+      res
+    end
+
+
+    function local_crefExp(cr::DAE.ComponentRef) ::DAE.Exp
+          local cref::DAE.Exp
+
+          cref = begin
+              local ty1::Type
+              local ty2::Type
+              local subs::List{DAE.Subscript}
+            @match cr begin
+              _  => begin
+                  ty1 = local_crefLastType(cr)
+                  cref = begin
+                    @match ty1 begin
+                      DAE.T_ARRAY(__)  => begin
+                          subs = local_crefLastSubs(cr)
+                          ty2 = local_unliftArrayTypeWithSubs(subs, ty1)
+                        DAE.CREF(cr, ty2)
+                      end
+
+                      _  => begin
+                          DAE.CREF(cr, ty1)
+                      end
+                    end
+                  end
+                cref
+              end
+            end
+          end
+      cref
+    end
 
 
          #= joins two daes by appending the element lists and joining the function trees =#
@@ -92,9 +433,9 @@
                   local new_ty::DAE.Type
                 @match element begin
                   DAE.VAR(componentRef = cr1, binding = binding, variableAttributesOption = attr)  => begin
-                      (e1, arg) = func(Expression.crefExp(cr1), arg)
-                      if Expression.isCref(e1)
-                        new_cr1 = Expression.expCref(e1)
+                      (e1, arg) = func(local_crefExp(cr1), arg)
+                      if local_isCref(e1)
+                        new_cr1 = local_expCref(e1)
                         if ! referenceEq(cr1, new_cr1)
                           element.componentRef = new_cr1
                         end
@@ -178,7 +519,7 @@
                       if ! referenceEq(e1, new_e1)
                         element.exp = new_e1
                       end
-                      @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
+                      @match (DAE.CREF(new_cr1), arg) = func(local_crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
                         element.componentRef = new_cr1
                       end
@@ -190,7 +531,7 @@
                       if ! referenceEq(e1, new_e1)
                         element.exp = new_e1
                       end
-                      @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
+                      @match (DAE.CREF(new_cr1), arg) = func(local_crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
                         element.componentRef = new_cr1
                       end
@@ -198,11 +539,11 @@
                   end
 
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2)  => begin
-                      @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
+                      @match (DAE.CREF(new_cr1), arg) = func(local_crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
                         element.cr1 = new_cr1
                       end
-                      @match (DAE.CREF(new_cr2), arg) = func(Expression.crefExp(cr2), arg)
+                      @match (DAE.CREF(new_cr2), arg) = func(local_crefExp(cr2), arg)
                       if ! referenceEq(cr2, new_cr2)
                         element.cr2 = new_cr2
                       end
@@ -393,7 +734,7 @@
                       if ! referenceEq(e1, new_e1)
                         element.exp = new_e1
                       end
-                      @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
+                      @match (DAE.CREF(new_cr1), arg) = func(local_crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
                         element.componentRef = new_cr1
                       end
@@ -1249,7 +1590,7 @@
                =#
           (traversedDaeList, oextraArg)
         end
-         
+
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()
   end
