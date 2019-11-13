@@ -38,7 +38,7 @@ using ExportAll
 @importDBG FNodeUtil
 @importDBG Flags
 @importDBG GraphStream
-@importDBG FGraphDump
+#@importDBG FGraphDump
 @importDBG Values
 
 Name = FCore.Name 
@@ -86,7 +86,7 @@ function node(n::Node)
         @match false = FNodeUtil.isIn(n, FNodeUtil.isRefMod)
         @match false = FNodeUtil.isIn(n, FNodeUtil.isRefDims)
         id = intString(FNodeUtil.id(n))
-        (_, _, nds) = FGraphDump.graphml(n, false)
+        (_, _, nds) = "someNodeName" #Must be a smart way to get this crap FGraphDump.graphml(n, false)
         GraphStream.addNode("default", "omc", -1, id)
         GraphStream.addNodeAttribute("default", "omc", -1, id, "ui.label", Values.STRING(nds))
         ()
@@ -131,8 +131,6 @@ function edge(name::Name, source::Node, target::Node)
     end
   end
 end
-end
-
 
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()

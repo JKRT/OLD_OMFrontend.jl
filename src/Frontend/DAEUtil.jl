@@ -96,23 +96,14 @@
          */ =#
 
         @importDBG Absyn
-
         @importDBG AbsynUtil
-
         @importDBG ClassInf
-
         @importDBG DAE
-
         @importDBG FCore
-
         @importDBG SCode
-
         @importDBG Values
-
         @importDBG ValuesUtil
-
         @importDBG HashTable
-
         @importDBG HashTable2
         @importDBG Algorithm
         @importDBG BaseHashTable
