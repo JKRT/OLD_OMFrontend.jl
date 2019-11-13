@@ -29,6 +29,15 @@
 #
 =#
 
+macro importDBG(moduleName)
+  quote
+    import $moduleName
+    x = string(@__MODULE__)
+    y = string($(esc(moduleName)))
+    println("Importing " * y  * " in " * x)
+  end
+end
+
 module OMCompiler
 
 #=TODO make it call the parserscript from OpenModelica home=#
