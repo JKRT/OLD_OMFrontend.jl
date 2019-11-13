@@ -34,23 +34,20 @@
 
 
 module Expression
-
-
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    FuncCrefTypeA = Function
-    FuncExpType = Function
-    FuncExpType2 = Function
-    FuncType = Function
-    MapFunc = Function
+FuncCrefTypeA = Function
+FuncExpType = Function
+FuncExpType2 = Function
+FuncType = Function
+MapFunc = Function
+Argument = Any
+Type_a = Any
 
-    Argument = Any
-    Type_a = Any
-
-    module CREF_LOCAL
+  module CREF_LOCAL
 
       using MetaModelica
       #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
@@ -59,46 +56,29 @@ module Expression
 
       Type_a = Any
 
-      FuncType = Function
-    println("CREF_LOCAL.jl 0")
-          import Absyn
+  FuncType = Function
+    @importDBG Absyn
+    @importDBG DAE
+    @importDBG File
+    #=  protected imports
+    =#
+    @importDBG ClassInf
+    @importDBG Config
+    @importDBG Debug
+    @importDBG Dump
+    @importDBG Error
+    @importDBG ExpressionDump
+    @importDBG ExpressionUtil
+    @importDBG Flags
+    @importDBG ListUtil
+    @importDBG MetaModelica.Dangerous
+    @importDBG Print
+    @importDBG System
+    @importDBG Types
+    @importDBG Util
+    #=  do not make this public. instead use the function below.
+    =#
 
-          import DAE
-
-          import File
-           #=  protected imports
-           =#
-    println("CREF_LOCAL.jl 1")
-
-          import ClassInf
-
-          import Config
-
-          import Debug
-
-          import Dump
-    println("CREF_LOCAL.jl 2")
-          import Error
-
-          import ExpressionDump
-          import ExpressionUtil
-    
-          import Flags
-    println("CREF_LOCAL.jl 3")
-          import ListUtil
-
-          import MetaModelica.Dangerous
-
-          import Print
-    println("CREF_LOCAL.jl 4")
-          import System
-
-          import Types
-
-          import Util
-           #=  do not make this public. instead use the function below.
-           =#
-  println("CREF_LOCAL.jl 5")
            const dummyCref = DAE.CREF_IDENT("dummy", DAE.T_UNKNOWN_DEFAULT, nil)::DAE.ComponentRef
 
            const preNamePrefix = DAE.preNamePrefix
@@ -125,6 +105,8 @@ module Expression
             res
           end
 
+  
+  
     function typeof(inExp::DAE.Exp) ::DAE.Type
       ExpressionUtil.typeof(inExp)
     end
@@ -4492,7 +4474,7 @@ module Expression
 
       #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
       @exportAll()
-    end
+    end #=End of CREF_LOCAL=#
 
          #= /*
          * This file is part of OpenModelica.
@@ -4527,13 +4509,11 @@ module Expression
          #=  public imports
          =#
 
-        import Absyn
+        @importDBG Absyn
 
-        import AbsynUtil
+        @importDBG AbsynUtil
 
-        import DAE
-
-        # import DAEDump
+        @importDBG DAE
 
         ComponentRef = DAE.ComponentRef
         Exp = DAE.Exp
@@ -4541,57 +4521,32 @@ module Expression
         Type = DAE.Type
         Subscript = DAE.Subscript
         Var = DAE.Var
-
         Type_a = Any
 
-         #=  protected imports
-         =#
-
-        import ArrayUtil
-
-        import ClassInf
-
-        import .CREF_LOCAL
-
-        import Config
-
-        import Debug
-
-        import DoubleEnded
-
-        import FCore
-
-        import FCoreUtil
-
-        import FGraph
-
-        import Error
-
-        import ExpressionDump
-
-        import ExpressionDump.printExpStr
-
-        import ExpressionSimplify
-
-        import Dump
-
-        import Flags
-
-        import ListUtil
-
-        import Patternm
-
-        import Prefix
-
-        import Static
-
-        import System
          #=  stringReal
          =#
+        @importDBG CREF_LOCAL
+        @importDBG ArrayUtil
+        @importDBG ClassInf
+        @importDBG Config
+        @importDBG Debug
+        @importDBG DoubleEnded
+        @importDBG Dump
+        @importDBG Error
+        @importDBG ExpressionDump
+        @importDBG ExpressionDump.printExpStr
+        @importDBG ExpressionSimplify
+        @importDBG FCore
+        @importDBG FCoreUtil
+        @importDBG FGraph
+        @importDBG Flags
+        @importDBG ListUtil
+        @importDBG Prefix
+        @importDBG Static
+        @importDBG System
+        @importDBG Types
+        @importDBG Util
 
-        import Types
-
-        import Util
          #= /***************************************************/ =#
          #= /* transform to other types */ =#
          #= /***************************************************/ =#
@@ -10857,7 +10812,7 @@ module Expression
 
                   DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
-                      (cases_1, ext_arg) = Patternm.traverseCases(cases, inFunc, ext_arg)
+                      (cases_1, ext_arg) = ExpressionUtil.traverseCases(cases, inFunc, ext_arg)
                       e = if referenceEq(expl, expl_1) && referenceEq(cases, cases_1)
                             inExp
                           else
@@ -11498,7 +11453,7 @@ module Expression
 
                   (_, DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), rel, ext_arg)  => begin
                       (expl, ext_arg) = traverseExpListTopDown(expl, rel, ext_arg)
-                      (cases, ext_arg) = Patternm.traverseCasesTopDown(cases, rel, ext_arg)
+                      (cases, ext_arg) = ExpressionUtil.traverseCasesTopDown(cases, rel, ext_arg)
                     (DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), ext_arg)
                   end
 
@@ -19879,7 +19834,7 @@ module Expression
 
                   (DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
-                      (cases_1, ext_arg) = Patternm.traverseCases(cases, rel, ext_arg)
+                      (cases_1, ext_arg) = ExpressionUtil.traverseCases(cases, rel, ext_arg)
                       e = if referenceEq(expl, expl_1) && referenceEq(cases, cases_1)
                             inExp
                           else

@@ -1,4 +1,9 @@
-  module Static
+
+module StaticInterface
+import Patternm
+end
+
+module Static
 
 
     using MetaModelica
@@ -104,7 +109,6 @@
         import Lookup
         import Mutable
         import OperatorOverloading
-        import Patternm
         import PrefixUtil
         import Print
         import SCodeDump
@@ -959,7 +963,7 @@
                    end
 
                    Absyn.MATCHEXP(__)  => begin
-                     Patternm.elabMatchExpression
+                     StaticInterface.elabMatchExpression
                    end
 
                    Absyn.DOT(__)  => begin

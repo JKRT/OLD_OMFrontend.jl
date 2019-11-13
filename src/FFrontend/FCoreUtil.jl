@@ -7,12 +7,12 @@ using ExportAll
 
 
 using FCore
-import Absyn
-import AbsynUtil
-import SCode
-import DAE
-import Mutable
-import AvlSetCR
+@importDBG Absyn
+@importDBG AbsynUtil
+@importDBG SCode
+@importDBG DAE
+@importDBG Mutable
+@importDBG AvlSetCR
 using Mutable: MutableType
 
 

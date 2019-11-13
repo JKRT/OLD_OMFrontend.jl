@@ -46,78 +46,78 @@
          *
          */ =#
 
-        import Absyn
+        @importDBG Absyn
 
-        import AbsynUtil
+        @importDBG AbsynUtil
 
-        import DAE
+        @importDBG DAE
 
-        import FCore
+        @importDBG FCore
         
-        import FCoreUtil
+        @importDBG FCoreUtil
 
-        import FGraph
+        @importDBG FGraph
 
-        import FNode
+        @importDBG FNode
 
-        import InstTypes
+        @importDBG InstTypes
 
-        import Values
+        @importDBG Values
 
-        import Lookup
-         #=  protected imports
+        @importDBG Lookup
+         #=  protected @importDBGs
          =#
 
-        import AvlTreeStringString
+        @importDBG AvlTreeStringString
 
-        #import BackendInterface
+        #@importDBG BackendInterface
 
-        import ComponentReference
+        @importDBG ComponentReference
 
-        import Config
+        @importDBG Config
 
-        import Debug
+        @importDBG Debug
 
-        import Error
+        @importDBG Error
 
-        import Expression
+        @importDBG Expression
 
-        import ExpressionDump
+        @importDBG ExpressionDump
 
-        import ExpressionSimplify
+        @importDBG ExpressionSimplify
 
-        import Flags
+        @importDBG Flags
 
-        import InstBinding
+        @importDBG InstBinding
 
-        import InstUtil
+        @importDBG InstUtil
 
-        import ListUtil
+        @importDBG ListUtil
 
-        import ModelicaExternalC
+        @importDBG ModelicaExternalC
 
-        import Prefix
+        @importDBG Prefix
 
-        import Print
+        @importDBG Print
 
-        import SCode
-        import SCodeUtil
+        @importDBG SCode
+        @importDBG SCodeUtil
 
-        import Static
+        @importDBG Static
 
-        import System
+        @importDBG System
 
-        import Types
+        @importDBG Types
 
-        import Util
+        @importDBG Util
 
-        import ValuesUtil
+        @importDBG ValuesUtil
 
-        import ClassInf
+        @importDBG ClassInf
 
-        import Global
+        @importDBG Global
 
-        import MetaModelica.Dangerous.listReverseInPlace
+        @importDBG MetaModelica.Dangerous.listReverseInPlace
 
          #=
           This function is used when the value of a constant expression is

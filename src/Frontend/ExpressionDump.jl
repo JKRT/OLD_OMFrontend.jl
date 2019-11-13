@@ -49,33 +49,33 @@
          #=  public imports
          =#
 
-        import Absyn
+        @importDBG Absyn
+  
+        @importDBG AbsynUtil
 
-        import AbsynUtil
+        @importDBG DAE
 
-        import DAE
-
-        import Graphviz
-         #=  protected imports
+        @importDBG Graphviz
+         #=  protected @importDBGs
          =#
 
-        import Config
+        @importDBG Config
 
-        import DAEDump
+        @importDBG Dump
 
-        import Dump
+        @importDBG ExpressionUtil
+  
+        @importDBG ListUtil
 
-        import ListUtil
+        @importDBG Patternm
 
-        import Patternm
+        @importDBG Print
 
-        import Print
+        @importDBG System
 
-        import System
+        @importDBG Tpl
 
-        import Tpl
-
-        import Types
+        @importDBG Types
          #= /*
          * - Printing expressions
          *   This module provides some functions to print data to the standard
@@ -1376,13 +1376,13 @@
                   DAE.CASE(patterns = patterns, body = body, result = SOME(result))  => begin
                       patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
                       resultStr = printExpStr(result)
-                      bodyStr = stringAppendList(ListUtil.map1(body, DAEDump.ppStmtStr, 8))
+                      bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then ", resultStr, ";\\n"))
                   end
 
                   DAE.CASE(patterns = patterns, body = body, result = NONE())  => begin
                       patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
-                      bodyStr = stringAppendList(ListUtil.map1(body, DAEDump.ppStmtStr, 8))
+                      bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then fail();\\n"))
                   end
                 end
