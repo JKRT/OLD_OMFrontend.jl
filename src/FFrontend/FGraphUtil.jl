@@ -206,7 +206,7 @@ import MetaModelica.Dangerous
               n = FNode.new(FNode.topNodeName, id, nil, FCore.TOP())
               nr = FNode.toRef(n)
               s = list(nr)
-              ag = Dangerous.arrayCreateNoInit(1, emptyGraph)
+              ag = Dangerous.arrayCreateNoInit(1, FCore.emptyGraph)
               top = FCore.GTOP(ag, inGraphName, nr, FCore.EXTRA(inPath))
               outGraph = FCore.G(top, s)
                #=  Creates a cycle, but faster to get the initial environment
@@ -240,7 +240,7 @@ import MetaModelica.Dangerous
                       nt = FNode.toRef(FNode.fromRef(t.node))
                       (g, nt) = FNode.copyRef(nt, inGraph)
                       s = ListUtil.map1r(s, FNode.lookupRefFromRef, nt)
-                      ag = arrayCreate(1, emptyGraph)
+                      ag = arrayCreate(1, FCore.emptyGraph)
                       t = FCore.GTOP(ag, t.name, nt, t.extra)
                       g = FCore.G(t, s)
                       arrayUpdate(ag, 1, g)
