@@ -9,7 +9,6 @@
         import Prefix
 
         import Absyn
-        import Algorithm
         import Error
         import CrefForHashTable
         import ListUtil
@@ -392,6 +391,13 @@
           source
         end
 
+        function getAssertCond(stmt::DAE.Statement) ::DAE.Exp
+              local cond::DAE.Exp
+
+              @match DAE.STMT_ASSERT(cond = cond) = stmt
+          cond
+        end
+
         function addSymbolicTransformationSolve(add::Bool, source::DAE.ElementSource, cr::DAE.ComponentRef, exp1::DAE.Exp, exp2::DAE.Exp, exp::DAE.Exp, asserts::List{<:DAE.Statement}) ::DAE.ElementSource
 
 
@@ -402,7 +408,7 @@
               if ! (add && Flags.isSet(Flags.INFO_XML_OPERATIONS))
                 return source
               end
-              op1 = DAE.SOLVE(cr, exp1, exp2, exp, list(Algorithm.getAssertCond(ass) for ass in asserts))
+              op1 = DAE.SOLVE(cr, exp1, exp2, exp, list(getAssertCond(ass) for ass in asserts))
               op2 = DAE.SOLVED(cr, exp2) #= If it was already on solved form =#
               op = if CrefForHashTable.expEqual(exp2, exp)
                     op2

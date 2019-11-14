@@ -1,4 +1,4 @@
-  module StateMachineFlatten 
+  module StateMachineFlatten
 
 
     using MetaModelica
@@ -6,8 +6,8 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Transition 
-    @UniontypeDecl FlatSmSemantics 
+    @UniontypeDecl Transition
+    @UniontypeDecl FlatSmSemantics
 
          #= /*
          * This file is part of OpenModelica.
@@ -41,13 +41,13 @@
          */ =#
 
         import Absyn
-        
+
         import SCode
 
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import ListUtil
@@ -60,17 +60,15 @@
 
         import Util
 
-        import DAEDump
-
         import Error
-        
+
         import BaseHashTable
 
         import HashTableCrToExpOption
 
         import Flags
 
-          #= 
+          #=
          Properties of a transition =#
          @Uniontype Transition begin
               @Record TRANSITION begin
@@ -85,7 +83,7 @@
               end
          end
 
-          #= 
+          #=
          Structure that combines states of flat state machine in
          canonical order with governing semantic equations. =#
          @Uniontype FlatSmSemantics begin
@@ -112,11 +110,11 @@
 
          const SMS_PRE = "smOf" #= prefix for crefs of fresh SMNode Machine Semantics variables/knowns =#::String
 
-         #= 
+         #=
         Author: BTH
           Transform state machines to data-flow equations
          =#
-        function stateMachineToDataFlow(cache::FCore.Cache, env::FCore.Graph, inDAElist::DAE.DAElist) ::DAE.DAElist 
+        function stateMachineToDataFlow(cache::FCore.Cache, env::FCore.Graph, inDAElist::DAE.DAElist) ::DAE.DAElist
               local outDAElist::DAE.DAElist
 
               local elementLst::List{DAE.Element}
@@ -170,11 +168,11 @@
           outDAElist
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to traverse subexpressions
         Substitutes 'activeState(x)' by 'x.active'  =#
-        function traversingSubsActiveState(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function traversingSubsActiveState(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local outHitCount::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -184,7 +182,7 @@
                   DAE.CALL(path = Absyn.IDENT("activeState"), expLst = DAE.CREF(componentRef = componentRef) <|  nil())  => begin
                     (DAE.CREF(ComponentReference.crefPrependIdent(componentRef, "active", nil, DAE.T_BOOL_DEFAULT), DAE.T_BOOL_DEFAULT), inHitCount + 1)
                   end
-                  
+
                   _  => begin
                       (inExp, inHitCount)
                   end
@@ -193,11 +191,11 @@
           (outExp, outHitCount)
         end
 
-         #= 
+         #=
           Author: BTH
           Transform a flat state machine to data-flow equations
          =#
-        function flatSmToDataFlow(inFlatSm::DAE.Element #= flat state machine that is to be transformed to data-flow equations =#, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#, inEnclosingFlatSmSemanticsOption::Option{<:FlatSmSemantics} #= The flat state machine semantics structure governing the enclosing state (NONE() if at top hierarchy) =#, accElems::List{<:DAE.Element}) ::List{DAE.Element} 
+        function flatSmToDataFlow(inFlatSm::DAE.Element #= flat state machine that is to be transformed to data-flow equations =#, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#, inEnclosingFlatSmSemanticsOption::Option{<:FlatSmSemantics} #= The flat state machine semantics structure governing the enclosing state (NONE() if at top hierarchy) =#, accElems::List{<:DAE.Element}) ::List{DAE.Element}
               local outElems::List{DAE.Element} = accElems
 
               local ident::DAE.Ident
@@ -259,11 +257,11 @@
           outElems
         end
 
-         #= 
+         #=
         Author: BTH
           For continuous-time state machines, support ticksInState() operators in state components
          =#
-        function elabXInStateOps_CT(inSmComp::DAE.Element) ::DAE.Element 
+        function elabXInStateOps_CT(inSmComp::DAE.Element) ::DAE.Element
               local outSmComp::DAE.Element
 
               local nOfHits::ModelicaInteger = 0
@@ -279,12 +277,12 @@
           outSmComp
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabXInStateOps_CT for traversing subexpressions
         Substitutes ticksInState() by enclosingStateComponent.$ticksInState '
          =#
-        function traversingSubsTicksInState(inExp::DAE.Exp, inCref_HitCount::Tuple{<:DAE.ComponentRef, ModelicaInteger} #= tuple of cref of enclosing state component and substitution hit counter =#) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, ModelicaInteger}} 
+        function traversingSubsTicksInState(inExp::DAE.Exp, inCref_HitCount::Tuple{<:DAE.ComponentRef, ModelicaInteger} #= tuple of cref of enclosing state component and substitution hit counter =#) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, ModelicaInteger}}
               local outCref_HitCount::Tuple{DAE.ComponentRef, ModelicaInteger}
               local outExp::DAE.Exp
 
@@ -300,7 +298,7 @@
                       crefTicksInState = ComponentReference.joinCrefs(cref, DAE.CREF_IDENT("ticksInState", ty, nil))
                     (DAE.CREF(crefTicksInState, ty), (cref, hitCount + 1))
                   end
-                  
+
                   _  => begin
                       (inExp, inCref_HitCount)
                   end
@@ -309,11 +307,11 @@
           (outExp, outCref_HitCount)
         end
 
-         #= 
+         #=
         Author: BTH
           Transform ticksInState() and timeInState() operators to data-flow equations
          =#
-        function elabXInStateOps(inFlatSmSemantics::FlatSmSemantics, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#) ::FlatSmSemantics 
+        function elabXInStateOps(inFlatSmSemantics::FlatSmSemantics, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#) ::FlatSmSemantics
               local outFlatSmSemantics::FlatSmSemantics
 
               local i::ModelicaInteger
@@ -411,13 +409,13 @@
           outFlatSmSemantics
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabXInStateOps.
         Replace 'xInState()' in RHS of semantic equations by 'substExp', but only within the transition
         condition specified by the remaining function arguments.
          =#
-        function smeqsSubsXInState(inSmeqs::DAE.Element #= SMS equation =#, initialStateComp::DAE.Element #= Initial state component of governing flat state machine =#, i::ModelicaInteger #= Index of transition =#, nTransitions::ModelicaInteger, substExp::DAE.Exp, xInState::String #= Name of function that is to be replaced, e.g., 'timeInState', or 'tickInState' =#) ::DAE.Element 
+        function smeqsSubsXInState(inSmeqs::DAE.Element #= SMS equation =#, initialStateComp::DAE.Element #= Initial state component of governing flat state machine =#, i::ModelicaInteger #= Index of transition =#, nTransitions::ModelicaInteger, substExp::DAE.Exp, xInState::String #= Name of function that is to be replaced, e.g., 'timeInState', or 'tickInState' =#) ::DAE.Element
               local outSmeqs::DAE.Element #= SMS equation =#
 
               local preRef::DAE.ComponentRef
@@ -456,12 +454,12 @@
           outSmeqs #= SMS equation =#
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to elabXInStateOps and smeqsSubsXInState.
         Replace 'XInState()' operators (first element of inXSubstHit) by expression given in second element of inXSubstHit tuple.
          =#
-        function traversingSubsXInState(inExp::DAE.Exp, inXSubstHit::Tuple{<:String, DAE.Exp, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{String, DAE.Exp, Bool}} 
+        function traversingSubsXInState(inExp::DAE.Exp, inXSubstHit::Tuple{<:String, DAE.Exp, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{String, DAE.Exp, Bool}}
               local outXSubstHit::Tuple{String, DAE.Exp, Bool}
               local cont::Bool = true
               local outExp::DAE.Exp
@@ -475,7 +473,7 @@
                   (DAE.CALL(path = Absyn.IDENT(name)), (xInState, subsExp, _)) where (name == xInState)  => begin
                     (subsExp, (xInState, subsExp, true))
                   end
-                  
+
                   _  => begin
                       (inExp, inXSubstHit)
                   end
@@ -484,11 +482,11 @@
           (outExp, cont, outXSubstHit)
         end
 
-         #= 
+         #=
         Author: BTH
           Transform state machine component to data-flow equations
          =#
-        function smCompToDataFlow(inSMComp::DAE.Element, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, accElems::List{<:DAE.Element}) ::List{DAE.Element} 
+        function smCompToDataFlow(inSMComp::DAE.Element, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, accElems::List{<:DAE.Element}) ::List{DAE.Element}
               local outElems::List{DAE.Element} = accElems
 
               local varLst1::List{DAE.Element}
@@ -551,12 +549,12 @@
           outElems
         end
 
-         #= 
+         #=
         Author: BTH
         The real work is done in helper function addStateActivationAndReset1.
         This top-level function just handles the recursive descent if inEqn is a DAE.WHEN_EQUATION().
          =#
-        function addStateActivationAndReset(inEqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, inEnclosingSMComp::DAE.Element #= The state component enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#, accEqnsVars::Tuple{<:List{<:DAE.Element}, List{<:DAE.Element}} #= Tuple for accumulating equations and variable definitions =#) ::Tuple{List{DAE.Element}, List{DAE.Element}} 
+        function addStateActivationAndReset(inEqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, inEnclosingSMComp::DAE.Element #= The state component enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#, accEqnsVars::Tuple{<:List{<:DAE.Element}, List{<:DAE.Element}} #= Tuple for accumulating equations and variable definitions =#) ::Tuple{List{DAE.Element}, List{DAE.Element}}
               local outEqnsVars::Tuple{List{DAE.Element}, List{DAE.Element}}
 
               local equations1::List{DAE.Element}
@@ -572,17 +570,17 @@
                   DAE.EQUATION(__)  => begin
                     addStateActivationAndReset1(inEqn, inEnclosingSMComp, inEnclosingFlatSmSemantics, crToExpOpt, accEqnsVars)
                   end
-                  
+
                   DAE.WHEN_EQUATION(condition, equations, NONE(), source)  => begin
                       (equations1, vars1) = ListUtil.fold3(equations, addStateActivationAndReset, inEnclosingSMComp, inEnclosingFlatSmSemantics, crToExpOpt, (nil, nil))
                     (_cons(DAE.WHEN_EQUATION(condition, equations1, NONE(), source), Util.tuple21(accEqnsVars)), listAppend(vars1, Util.tuple22(accEqnsVars)))
                   end
-                  
+
                   DAE.WHEN_EQUATION(elsewhen_ = SOME(_))  => begin
                       Error.addCompilerError("Encountered elsewhen part in a when clause of a clocked state machine.\\n")
                     fail()
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("Internal compiler error: StateMachineFlatten.addStateActivationAndReset(..) called with unexpected argument.\\n")
                       fail()
@@ -592,7 +590,7 @@
           outEqnsVars
         end
 
-         #= 
+         #=
         Author: BTH
         The function has following purpose:
         1. Make equations conditional so that they are only active if enclosing state is active
@@ -613,7 +611,7 @@
         transformation to standard clocked synchronous equations in the front-end. Probably one could add a dedicated internal marker/operator
         which is then handled specially in the back-end.
          =#
-        function addStateActivationAndReset1(inEqn::DAE.Element, inEnclosingSMComp::DAE.Element #= The state component enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#, accEqnsVars::Tuple{<:List{<:DAE.Element}, List{<:DAE.Element}} #= Tuple for accumulating equations and variable definitions =#) ::Tuple{List{DAE.Element}, List{DAE.Element}} 
+        function addStateActivationAndReset1(inEqn::DAE.Element, inEnclosingSMComp::DAE.Element #= The state component enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#, accEqnsVars::Tuple{<:List{<:DAE.Element}, List{<:DAE.Element}} #= Tuple for accumulating equations and variable definitions =#) ::Tuple{List{DAE.Element}, List{DAE.Element}}
               local outEqnsVars::Tuple{List{DAE.Element}, List{DAE.Element}}
 
               local stateVarCrefs::List{DAE.ComponentRef}
@@ -718,11 +716,11 @@
           outEqnsVars
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if variable appears as LHS assignment in a scalar equation or in the body of a when equation.
          =#
-        function isVarAtLHS(eqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, var::DAE.Element #= Expects DAE.VAR()) =#) ::Bool 
+        function isVarAtLHS(eqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, var::DAE.Element #= Expects DAE.VAR()) =#) ::Bool
               local res::Bool
 
               local cref::DAE.ComponentRef
@@ -753,16 +751,16 @@
                        =#
                     res
                   end
-                  
+
                   DAE.WHEN_EQUATION(equations = equations, elsewhen_ = NONE())  => begin
                     ListUtil.exist1(equations, isVarAtLHS, var)
                   end
-                  
+
                   DAE.WHEN_EQUATION(elsewhen_ = SOME(_))  => begin
                       Error.addCompilerError("Encountered elsewhen part in a when clause of a clocked state machine.\\n")
                     fail()
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("Internal compiler error: StateMachineFlatten.isVarAtLHS(..) called with unexpected argument.\\n")
                       fail()
@@ -772,11 +770,11 @@
           res
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if variable x appears as previous(x) in the RHS of a scalar equation or in the body of a when equation.
          =#
-        function isPreviousAppliedToVar(eqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, var::DAE.Element #= Expects DAE.VAR()) =#) ::Bool 
+        function isPreviousAppliedToVar(eqn::DAE.Element #= Expects DAE.EQUATION() or DAE.WHEN_EQUATION() =#, var::DAE.Element #= Expects DAE.VAR()) =#) ::Bool
               local found::Bool = false
 
               local cref::DAE.ComponentRef
@@ -798,16 +796,16 @@
                       (_, (_, found)) = Expression.traverseExpTopDown(scalar, traversingFindPreviousCref, (cref, false))
                     found
                   end
-                  
+
                   DAE.WHEN_EQUATION(equations = equations, elsewhen_ = NONE())  => begin
                     ListUtil.exist1(equations, isPreviousAppliedToVar, var)
                   end
-                  
+
                   DAE.WHEN_EQUATION(elsewhen_ = SOME(_))  => begin
                       Error.addCompilerError("Encountered elsewhen part in a when clause of a clocked state machine.\\n")
                     fail()
                   end
-                  
+
                   _  => begin
                         Error.addCompilerError("Internal compiler error: StateMachineFlatten.isPreviousAppliedToVar(..) called with unexpected argument.\\n")
                       fail()
@@ -817,11 +815,11 @@
           found
         end
 
-         #= 
+         #=
         Author: BTH
         Given a cref 'x', find if the expression has subexpressions 'previous(x)' and indicate success.
          =#
-        function traversingFindPreviousCref(inExp::DAE.Exp, inCrefHit::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingFindPreviousCref(inExp::DAE.Exp, inCrefHit::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outCrefHit::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool = true
               local outExp::DAE.Exp
@@ -833,7 +831,7 @@
                   (DAE.CALL(Absyn.IDENT("previous"), DAE.CREF(cr, _) <|  nil(), _), (cref, _)) where (ComponentReference.crefEqual(cr, cref))  => begin
                     (inExp, (cref, true))
                   end
-                  
+
                   _  => begin
                       (inExp, inCrefHit)
                   end
@@ -842,12 +840,12 @@
           (outExp, cont, outCrefHit)
         end
 
-         #= 
+         #=
         Author: BTH
         Given LHS 'a.x' and its start value 'x_start', as well as its enclosing state component 'a' with index 'i' in its governing FLAT_SM 'fsm_of_a' return eqn
         'when a.active and (smOf.a.activeReset or smOf.fsm_of_a.activeResetStates[i]) then reinit(a.x, a.x_start) end when'
          =#
-        function createResetEquationCT(inLHSCref::DAE.ComponentRef #= LHS cref =#, inLHSty::DAE.Type #= LHS type =#, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#) ::DAE.Element 
+        function createResetEquationCT(inLHSCref::DAE.ComponentRef #= LHS cref =#, inLHSty::DAE.Type #= LHS type =#, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local activeExp::DAE.Exp
@@ -914,22 +912,22 @@
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=0.\\n")
                       DAE.ICONST(0)
                     end
-                    
+
                     DAE.T_REAL(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=0.\\n")
                       DAE.RCONST(0)
                     end
-                    
+
                     DAE.T_BOOL(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=false.\\n")
                       DAE.BCONST(false)
                     end
-                    
+
                     DAE.T_STRING(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=\\\\.\\n")
                       DAE.SCONST("")
                     end
-                    
+
                     _  => begin
                           Error.addCompilerError("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value.\\n")
                         fail()
@@ -946,10 +944,10 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is a VAR containing the cref, otherwise false =#
-        function isCrefInVar(inElement::DAE.Element, inCref::DAE.ComponentRef) ::Bool 
+        function isCrefInVar(inElement::DAE.Element, inCref::DAE.ComponentRef) ::Bool
               local result::Bool
 
               result = begin
@@ -958,7 +956,7 @@
                   DAE.VAR(componentRef = cref) where (ComponentReference.crefEqual(cref, inCref))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -967,12 +965,12 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Given LHS 'a.x' and its start value 'x_start', as well as its enclosing state component 'a' with index 'i' in its governing FLAT_SM 'fsm_of_a' return eqn
         'a.x_previous = if a.active and (smOf.a.activeReset or smOf.fsm_of_a.activeResetStates[i] then x_start else previous(a.x)'
          =#
-        function createResetEquation(inLHSCref::DAE.ComponentRef #= LHS cref =#, inLHSty::DAE.Type #= LHS type =#, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#) ::DAE.Element 
+        function createResetEquation(inLHSCref::DAE.ComponentRef #= LHS cref =#, inLHSty::DAE.Type #= LHS type =#, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, inEnclosingFlatSmSemantics::FlatSmSemantics #= The flat state machine semantics structure governing the state component =#, crToExpOpt::HashTableCrToExpOption.HashTable #= Table mapping variable declaration in the enclosing state to start values =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local activeExp::DAE.Exp
@@ -1036,22 +1034,22 @@
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=0.\\n")
                       DAE.ICONST(0)
                     end
-                    
+
                     DAE.T_REAL(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=0.\\n")
                       DAE.RCONST(0)
                     end
-                    
+
                     DAE.T_BOOL(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=false.\\n")
                       DAE.BCONST(false)
                     end
-                    
+
                     DAE.T_STRING(__)  => begin
                         Error.addCompilerWarning("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value. Defaulting to start=\\\\.\\n")
                       DAE.SCONST("")
                     end
-                    
+
                     _  => begin
                           Error.addCompilerError("Variable " + ComponentReference.crefStr(inLHSCref) + " lacks start value.\\n")
                         fail()
@@ -1071,12 +1069,12 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Transform an equation 'a.x = e' to 'a.x = if a.active then e else previous(a.x)' (isResetEquation=false)
         Transform an equation 'a.x = e' to 'a.x = if a.active then e else x_previous' (isResetEquation=true)
          =#
-        function wrapInStateActivationConditional(inEqn::DAE.Element, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, isResetEquation::Bool #= Reset equations =#) ::DAE.Element 
+        function wrapInStateActivationConditional(inEqn::DAE.Element, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#, isResetEquation::Bool #= Reset equations =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local exp::DAE.Exp
@@ -1116,13 +1114,13 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Transform an equation 'der(a.x) = e' to 'der(a.x) = if a.active then e else 0' (isResetEquation=false)
         TODO: Implement reset equations for continuous time. Should that be done in this function or somewhere else?
         FIXME: myMerge with wrapInStateActivationConditional(..)?
          =#
-        function wrapInStateActivationConditionalCT(inEqn::DAE.Element, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#) ::DAE.Element 
+        function wrapInStateActivationConditionalCT(inEqn::DAE.Element, inStateCref::DAE.ComponentRef #= Component reference of state enclosing the equation =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local exp::DAE.Exp
@@ -1154,12 +1152,12 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Given a cref 'x', find if the expression has subexpressions 'previous(x)' and replace them by 'x_previous'
         and return an indication if any substitutions took place.
          =#
-        function traversingSubsPreviousCref(inExp::DAE.Exp, inCrefHit::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}} 
+        function traversingSubsPreviousCref(inExp::DAE.Exp, inCrefHit::Tuple{<:DAE.ComponentRef, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{DAE.ComponentRef, Bool}}
               local outCrefHit::Tuple{DAE.ComponentRef, Bool}
               local cont::Bool = true
               local outExp::DAE.Exp
@@ -1177,7 +1175,7 @@
                       substituteRef = ComponentReference.appendStringLastIdent("_previous", cref)
                     (DAE.CREF(substituteRef, ty), (cref, true))
                   end
-                  
+
                   _  => begin
                       (inExp, inCrefHit)
                   end
@@ -1186,12 +1184,12 @@
           (outExp, cont, outCrefHit)
         end
 
-         #= 
+         #=
         Author: BTH
         Given a list of crefs '{x1,x2,...}', find if the expression has subexpressions 'previous(x)' and replace them by 'x_previous'
         and return an indication if any substitutions took place.
          =#
-        function traversingSubsPreviousCrefs(inExp::DAE.Exp, inCrefsHit::Tuple{<:List{<:DAE.ComponentRef}, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{List{DAE.ComponentRef}, Bool}} 
+        function traversingSubsPreviousCrefs(inExp::DAE.Exp, inCrefsHit::Tuple{<:List{<:DAE.ComponentRef}, Bool}) ::Tuple{DAE.Exp, Bool, Tuple{List{DAE.ComponentRef}, Bool}}
               local outCrefsHit::Tuple{List{DAE.ComponentRef}, Bool}
               local cont::Bool = true
               local outExp::DAE.Exp
@@ -1210,7 +1208,7 @@
                       substituteRef = ComponentReference.appendStringLastIdent("_previous", cr)
                     (DAE.CREF(substituteRef, ty), (crefs, true))
                   end
-                  
+
                   _  => begin
                       (inExp, inCrefsHit)
                   end
@@ -1219,10 +1217,10 @@
           (outExp, cont, outCrefsHit)
         end
 
-         #= 
+         #=
         Helper function to smCompToDataFlow
          =#
-        function getStartAttrOption(inVarAttrOpt::Option{<:DAE.VariableAttributes}) ::Option{DAE.Exp} 
+        function getStartAttrOption(inVarAttrOpt::Option{<:DAE.VariableAttributes}) ::Option{DAE.Exp}
               local outExpOpt::Option{DAE.Exp}
 
               local start::DAE.Exp
@@ -1236,11 +1234,11 @@
           outExpOpt
         end
 
-         #= 
+         #=
         Author: BTH
         Add activation and reset propagation related equation and variables to flat state machine
          =#
-        function addPropagationEquations(inFlatSmSemantics::FlatSmSemantics, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#, inEnclosingFlatSmSemanticsOption::Option{<:FlatSmSemantics} #= The flat state machine semantics structure governing the enclosing state (NONE() if at top hierarchy) =#) ::FlatSmSemantics 
+        function addPropagationEquations(inFlatSmSemantics::FlatSmSemantics, inEnclosingStateCrefOption::Option{<:DAE.ComponentRef} #= Cref of state that encloses the flat state machiene (NONE() if at top hierarchy) =#, inEnclosingFlatSmSemanticsOption::Option{<:FlatSmSemantics} #= The flat state machine semantics structure governing the enclosing state (NONE() if at top hierarchy) =#) ::FlatSmSemantics
               local outFlatSmSemantics::FlatSmSemantics
 
               local preRef::DAE.ComponentRef
@@ -1398,11 +1396,11 @@
           outFlatSmSemantics
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to addPropagationEquations.
         Create variable that indicates the time duration since a transition was made to the currently active state =#
-        function createTimeInStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which timeInState variable shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#, timeEnteredStateVar::DAE.Element #= Auxiliary variable generated in createTimeEnteredStateIndicator(..) =#) ::Tuple{DAE.Element, DAE.Element} 
+        function createTimeInStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which timeInState variable shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#, timeEnteredStateVar::DAE.Element #= Auxiliary variable generated in createTimeEnteredStateIndicator(..) =#) ::Tuple{DAE.Element, DAE.Element}
               local timeInStateEqn::DAE.Element
               local timeInStateVar::DAE.Element
 
@@ -1446,11 +1444,11 @@
           (timeInStateVar, timeInStateEqn)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to addPropagationEquations.
         Create auxiliary variable that remembers the time in which a state is entered =#
-        function createTimeEnteredStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which timeEnteredState variable shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#) ::Tuple{DAE.Element, DAE.Element} 
+        function createTimeEnteredStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which timeEnteredState variable shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#) ::Tuple{DAE.Element, DAE.Element}
               local timeEnteredStateEqn::DAE.Element
               local timeEnteredStateVar::DAE.Element
 
@@ -1491,11 +1489,11 @@
           (timeEnteredStateVar, timeEnteredStateEqn)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to addPropagationEquations.
         Create variable that counts ticks within a state =#
-        function createTicksInStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which ticksInState counter shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#) ::Tuple{DAE.Element, DAE.Element} 
+        function createTicksInStateIndicator(stateRef::DAE.ComponentRef #= cref of state to which ticksInState counter shall be added =#, stateActiveRef::DAE.ComponentRef #= cref of active indicator corresponding to stateRef =#) ::Tuple{DAE.Element, DAE.Element}
               local ticksInStateEqn::DAE.Element
               local ticksInStateVar::DAE.Element
 
@@ -1522,11 +1520,11 @@
           (ticksInStateVar, ticksInStateEqn)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to addPropagationEquations.
         Create indication (e.g., for plotting) whether a state is active or not =#
-        function createActiveIndicator(stateRef::DAE.ComponentRef #= cref of state to which activation indication shall be added =#, preRef::DAE.ComponentRef #= cref of prefix where variables of governing semantic equations for stateRef are located =#, i::ModelicaInteger #= index of state within flat state machine state array =#) ::Tuple{DAE.Element, DAE.Element} 
+        function createActiveIndicator(stateRef::DAE.ComponentRef #= cref of state to which activation indication shall be added =#, preRef::DAE.ComponentRef #= cref of prefix where variables of governing semantic equations for stateRef are located =#, i::ModelicaInteger #= index of state within flat state machine state array =#) ::Tuple{DAE.Element, DAE.Element}
               local eqn::DAE.Element
               local activePlotIndicatorVar::DAE.Element
 
@@ -1556,11 +1554,11 @@
           (activePlotIndicatorVar, eqn)
         end
 
-         #= 
+         #=
         Author: BTH
         Set a fixed start value to a variable
          =#
-        function setVarFixedStartValue(inVar::DAE.Element, inExp::DAE.Exp) ::DAE.Element 
+        function setVarFixedStartValue(inVar::DAE.Element, inExp::DAE.Exp) ::DAE.Element
               local outVar::DAE.Element
 
               local vao::Option{DAE.VariableAttributes}
@@ -1572,12 +1570,12 @@
           outVar
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to flatSmToDataFlow.
         Create variables/parameters and equations for defining the state machine semantic (SMS) equations.
          =#
-        function basicFlatSmSemantics(ident::DAE.Ident, q::List{<:DAE.Element} #= state components =#, inTransitions::List{<:DAE.Element}) ::FlatSmSemantics 
+        function basicFlatSmSemantics(ident::DAE.Ident, q::List{<:DAE.Element} #= state components =#, inTransitions::List{<:DAE.Element}) ::FlatSmSemantics
               local flatSmSemantics::FlatSmSemantics
 
               local crefInitialState::DAE.ComponentRef
@@ -2073,20 +2071,20 @@
           flatSmSemantics
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to basicFlatSmSemantics =#
-        function qCref(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}, componentRef::DAE.ComponentRef) ::DAE.ComponentRef 
+        function qCref(ident::DAE.Ident, identType::DAE.Type #= type of the identifier, without considering the subscripts =#, subscriptLst::List{<:DAE.Subscript}, componentRef::DAE.ComponentRef) ::DAE.ComponentRef
               local outQual::DAE.ComponentRef
 
               outQual = ComponentReference.joinCrefs(componentRef, DAE.CREF_IDENT(ident, identType, subscriptLst))
           outQual
         end
 
-         #= 
+         #=
         Author: BTH
         Create a DAE.VAR with some defaults =#
-        function createVarWithDefaults(componentRef::DAE.ComponentRef, kind::DAE.VarKind, ty::DAE.Type, dims::DAE.InstDims) ::DAE.Element 
+        function createVarWithDefaults(componentRef::DAE.ComponentRef, kind::DAE.VarKind, ty::DAE.Type, dims::DAE.InstDims) ::DAE.Element
               local var::DAE.Element
 
               var = DAE.VAR(componentRef, kind, DAE.BIDIR(), DAE.NON_PARALLEL(), DAE.PUBLIC(), ty, NONE(), dims, DAE.NON_CONNECTOR(), DAE.emptyElementSource, NONE(), NONE(), Absyn.NOT_INNER_OUTER())
@@ -2094,10 +2092,10 @@
           var
         end
 
-         #= 
+         #=
         Author: BTH
         Create a DAE.VAR with fixed start value and some defaults =#
-        function createVarWithStartValue(componentRef::DAE.ComponentRef, kind::DAE.VarKind, ty::DAE.Type, startExp::DAE.Exp, dims::DAE.InstDims) ::DAE.Element 
+        function createVarWithStartValue(componentRef::DAE.ComponentRef, kind::DAE.VarKind, ty::DAE.Type, startExp::DAE.Exp, dims::DAE.InstDims) ::DAE.Element
               local outVar::DAE.Element
 
               local var::DAE.Element
@@ -2108,10 +2106,10 @@
           outVar
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to basicFlatSmSemantics =#
-        function createTandC(inSMComps::List{<:DAE.Element}, inTransitions::List{<:DAE.Element}) ::Tuple{List{Transition}, List{DAE.Exp}} 
+        function createTandC(inSMComps::List{<:DAE.Element}, inTransitions::List{<:DAE.Element}) ::Tuple{List{Transition}, List{DAE.Exp}}
               local c::List{DAE.Exp}
               local t::List{Transition}
 
@@ -2133,17 +2131,17 @@
           (t, c)
         end
 
-        function extractCondtionFromTransition(trans::Transition) ::DAE.Exp 
+        function extractCondtionFromTransition(trans::Transition) ::DAE.Exp
               local condition::DAE.Exp
 
               @match TRANSITION(condition = condition) = trans
           condition
         end
 
-         #= 
+         #=
         Compare priority of transitions
          =#
-        function priorityLt(inTrans1::Transition, inTrans2::Transition) ::Bool 
+        function priorityLt(inTrans1::Transition, inTrans2::Transition) ::Bool
               local res::Bool
 
               local priority1::ModelicaInteger
@@ -2155,11 +2153,11 @@
           res
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to flatSmToDataFlow
          =#
-        function createTransition(transitionElem::DAE.Element, states::List{<:DAE.Element}) ::Transition 
+        function createTransition(transitionElem::DAE.Element, states::List{<:DAE.Element}) ::Transition
               local trans::Transition
 
               local crefFrom::DAE.ComponentRef
@@ -2181,11 +2179,11 @@
           trans
         end
 
-         #= 
+         #=
         Author: BTH
         Check if element is a FLAT_SM.
          =#
-        function isFlatSm(inElement::DAE.Element) ::Bool 
+        function isFlatSm(inElement::DAE.Element) ::Bool
               local outResult::Bool
 
               outResult = begin
@@ -2193,7 +2191,7 @@
                   DAE.FLAT_SM(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2202,11 +2200,11 @@
           outResult
         end
 
-         #= 
+         #=
         Author: BTH
         Check if element is a SM_COMP.
          =#
-        function isSMComp(inElement::DAE.Element) ::Bool 
+        function isSMComp(inElement::DAE.Element) ::Bool
               local outResult::Bool
 
               outResult = begin
@@ -2214,7 +2212,7 @@
                   DAE.SM_COMP(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2223,10 +2221,10 @@
           outResult
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is a transition, otherwise false =#
-        function isTransition(inElement::DAE.Element) ::Bool 
+        function isTransition(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2234,7 +2232,7 @@
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("transition")))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2243,10 +2241,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is an initialState, otherwise false =#
-        function isInitialState(inElement::DAE.Element) ::Bool 
+        function isInitialState(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2254,7 +2252,7 @@
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("initialState")))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2263,10 +2261,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is an EQUATION, otherwise false =#
-        function isEquation(inElement::DAE.Element) ::Bool 
+        function isEquation(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2274,7 +2272,7 @@
                   DAE.EQUATION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2283,10 +2281,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is an EQUATION or WHEN_EQUATION, otherwise false =#
-        function isEquationOrWhenEquation(inElement::DAE.Element) ::Bool 
+        function isEquationOrWhenEquation(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2294,11 +2292,11 @@
                   DAE.EQUATION(__)  => begin
                     true
                   end
-                  
+
                   DAE.WHEN_EQUATION(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2307,10 +2305,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is an EQUATION with at least one pre(..) or previous(..) expression, otherwise false =#
-        function isPreOrPreviousEquation(inElement::DAE.Element) ::Bool 
+        function isPreOrPreviousEquation(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2320,7 +2318,7 @@
                   DAE.EQUATION(exp, scalar, _)  => begin
                     Expression.expHasPre(exp) || Expression.expHasPre(scalar) || Expression.expHasPrevious(exp) || Expression.expHasPrevious(scalar)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2329,10 +2327,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is an VAR, otherwise false =#
-        function isVar(inElement::DAE.Element) ::Bool 
+        function isVar(inElement::DAE.Element) ::Bool
               local result::Bool
 
               result = begin
@@ -2340,7 +2338,7 @@
                   DAE.VAR(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2349,11 +2347,11 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if the componentRef of the second argument equals the componentRef of the SMComp (first argument)
          =#
-        function sMCompEqualsRef(inElement::DAE.Element, inCref::DAE.ComponentRef) ::Bool 
+        function sMCompEqualsRef(inElement::DAE.Element, inCref::DAE.ComponentRef) ::Bool
               local result::Bool
 
               result = begin
@@ -2362,7 +2360,7 @@
                   DAE.SM_COMP(cref) where (ComponentReference.crefEqual(cref, inCref))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2371,10 +2369,10 @@
           result
         end
 
-         #= 
+         #=
         Author: BTH
         Dump transition to string. =#
-        function dumpTransitionStr(transition::Transition) ::String 
+        function dumpTransitionStr(transition::Transition) ::String
               local transitionStr::String
 
               local from::ModelicaInteger
@@ -2390,10 +2388,10 @@
           transitionStr
         end
 
-         #= 
+         #=
         Author: BTH
         Wrap equations in when-clauses as long as Synchronous Features are not supported =#
-        function wrapHack(cache::FCore.Cache, inElementLst::List{<:DAE.Element}) ::List{DAE.Element} 
+        function wrapHack(cache::FCore.Cache, inElementLst::List{<:DAE.Element}) ::List{DAE.Element}
               local outElementLst::List{DAE.Element}
 
               local nOfSubstitutions::ModelicaInteger
@@ -2428,10 +2426,10 @@
           outElementLst
         end
 
-         #= 
+         #=
         Hack for extracting DAE.CREFs from flat state machine semantics equations.
          =#
-        function extractSmOfExps(inElem::DAE.Element, inLastIdent::DAE.Ident) ::DAE.Exp 
+        function extractSmOfExps(inElem::DAE.Element, inLastIdent::DAE.Ident) ::DAE.Exp
               local outExp::DAE.Exp
 
               outExp = begin
@@ -2454,11 +2452,11 @@
           outExp
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to traverse subexpressions
         Substitutes 'previous(x)' by 'pre(x)'  =#
-        function traversingSubsPreForPrevious(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function traversingSubsPreForPrevious(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local outHitCount::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -2469,7 +2467,7 @@
                   DAE.CALL(Absyn.IDENT("previous"), expLst, attr)  => begin
                     (DAE.CALL(Absyn.IDENT("pre"), expLst, attr), inHitCount + 1)
                   end
-                  
+
                   _  => begin
                       (inExp, inHitCount)
                   end
@@ -2478,11 +2476,11 @@
           (outExp, outHitCount)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to traverse subexpressions
         Substitutes 'sample(x, _)' by 'x'  =#
-        function traversingSubsXForSampleX(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger} 
+        function traversingSubsXForSampleX(inExp::DAE.Exp, inHitCount::ModelicaInteger) ::Tuple{DAE.Exp, ModelicaInteger}
               local outHitCount::ModelicaInteger
               local outExp::DAE.Exp
 
@@ -2493,7 +2491,7 @@
                   DAE.CALL(Absyn.IDENT("sample"), expX <| DAE.CLKCONST(DAE.INFERRED_CLOCK(__)) <|  nil(), _)  => begin
                     (expX, inHitCount + 1)
                   end
-                  
+
                   _  => begin
                       (inExp, inHitCount)
                   end

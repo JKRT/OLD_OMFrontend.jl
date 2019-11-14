@@ -1,4 +1,4 @@
-  module Ceval
+module Ceval
 
 
     using MetaModelica
@@ -56,7 +56,7 @@
 
         @importDBG FCoreUtil
 
-        @importDBG FGraph
+        @importDBG FGraphUtil
 
         @importDBG FNode
 
@@ -81,8 +81,6 @@
         @importDBG Error
 
         @importDBG Expression
-
-        @importDBG ExpressionDump
 
         @importDBG ExpressionSimplify
 
@@ -152,7 +150,7 @@
 
                   (_, _, _, _, Absyn.MSG(info = info), _, true)  => begin
                       str1 = intString(Global.recursionDepthLimit)
-                      str2 = ExpressionDump.printExpStr(inExp)
+                      str2 = CrefForHashTable.printExpStr(inExp)
                       Error.addSourceMessage(Error.RECURSION_DEPTH_WARNING, list(str1, str2, FGraphUtil.printGraphPathStr(inEnv)), info)
                     fail()
                   end
@@ -279,7 +277,7 @@
                    =#
                    #=  case (cache,env,inExp,_,_,_)
                    =#
-                   #=    equation print(\"Ceval.ceval: \" + ExpressionDump.printExpStr(inExp) + \" in env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
+                   #=    equation print(\"Ceval.ceval: \" + CrefForHashTable.printExpStr(inExp) + \" in env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                    =#
                    #=    then fail();
                    =#
@@ -445,7 +443,7 @@
                   (_, _, e && DAE.CALL(__), _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Ceval.ceval DAE.CALL failed: ")
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                       Debug.traceln(str)
                     fail()
                   end
@@ -611,8 +609,8 @@
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV(__), exp2 = rh), impl, msg && Absyn.MSG(info = info), _)  => begin
                       (_, lhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       @match true = ValuesUtil.isZero(lhvVal)
-                      lhvStr = ExpressionDump.printExpStr(lh)
-                      rhvStr = ExpressionDump.printExpStr(rh)
+                      lhvStr = CrefForHashTable.printExpStr(lh)
+                      rhvStr = CrefForHashTable.printExpStr(rh)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lhvStr, rhvStr), info)
                     fail()
                   end
@@ -842,7 +840,7 @@
                        =#
                        #=  print(\"After:\\n\");print(stringDelimitList(List.map1(List.mapList(valMatrix, ValuesUtil.valString), stringDelimitList, \",\"), \"\\n\") + \"\\n\");
                        =#
-                       #=  print(\"Start cevalReduction: \" + AbsynUtil.pathString(path) + \" \" + ExpressionDump.printExpStr(daeExp) + \"\\n\");
+                       #=  print(\"Start cevalReduction: \" + AbsynUtil.pathString(path) + \" \" + CrefForHashTable.printExpStr(daeExp) + \"\\n\");
                        =#
                       s = CrefForHashTable.printComponentRefStr(inExp.name)
                       v = Types.typeToValue(inExp.ty)
@@ -852,12 +850,12 @@
                   (_, _, _, _, _, _) where (Config.getGraphicsExpMode())  => begin
                       ty = Expression.typeof(inExp)
                       v = Types.typeToValue(ty)
-                    (inCache, Values.EMPTY("#graphicsExp#", ExpressionDump.printExpStr(inExp), v, Types.unparseType(ty)))
+                    (inCache, Values.EMPTY("#graphicsExp#", CrefForHashTable.printExpStr(inExp), v, Types.unparseType(ty)))
                   end
 
                   (_, env, e, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
-                      Debug.traceln("- Ceval.ceval failed: " + ExpressionDump.printExpStr(e))
+                      Debug.traceln("- Ceval.ceval failed: " + CrefForHashTable.printExpStr(e))
                       Debug.traceln("  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
@@ -1768,14 +1766,14 @@
                       (_, _, tp, binding, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr) #= If dimensions not known and impl=false, error message =#
                       if ! Types.dimensionsKnown(tp)
                         cr_str = CrefForHashTable.printComponentRefStr(cr)
-                        dim_str = ExpressionDump.printExpStr(dimExp)
+                        dim_str = CrefForHashTable.printExpStr(dimExp)
                         size_str = stringAppendList(list("size(", cr_str, ", ", dim_str, ")"))
                         Error.addSourceMessage(Error.DIMENSION_NOT_KNOWN, list(size_str), info)
                       else
                         _ = begin
                           @match binding begin
                             DAE.UNBOUND(__)  => begin
-                                expstr = ExpressionDump.printExpStr(inExp2)
+                                expstr = CrefForHashTable.printExpStr(inExp2)
                                 Error.addSourceMessage(Error.UNBOUND_VALUE, list(expstr), info)
                               fail()
                             end
@@ -1822,7 +1820,7 @@
                   (_, _, exp, _, _, Absyn.MSG(__), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Print.printErrorBuf("#-- Ceval.cevalBuiltinSize failed: ")
-                      expstr = ExpressionDump.printExpStr(exp)
+                      expstr = CrefForHashTable.printExpStr(exp)
                       Print.printErrorBuf(expstr)
                       Print.printErrorBuf("\\n")
                     fail()
@@ -3454,8 +3452,8 @@
                       if ! rv2 == 0.0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -3473,8 +3471,8 @@
                       if ! ri2 == 0
                         fail()
                       end
-                      lh_str = ExpressionDump.printExpStr(exp1)
-                      rh_str = ExpressionDump.printExpStr(exp2)
+                      lh_str = CrefForHashTable.printExpStr(exp1)
+                      rh_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lh_str, rh_str), info)
                     fail()
                   end
@@ -3532,15 +3530,15 @@
                   end
 
                   (_, Values.REAL(rv2), Absyn.MSG(info = info)) where (rv2 == 0.0)  => begin
-                      lhs_str = ExpressionDump.printExpStr(exp1)
-                      rhs_str = ExpressionDump.printExpStr(exp2)
+                      lhs_str = CrefForHashTable.printExpStr(exp1)
+                      rhs_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.MODULO_BY_ZERO, list(lhs_str, rhs_str), info)
                     fail()
                   end
 
                   (_, Values.INTEGER(0), Absyn.MSG(info = info))  => begin
-                      lhs_str = ExpressionDump.printExpStr(exp1)
-                      rhs_str = ExpressionDump.printExpStr(exp2)
+                      lhs_str = CrefForHashTable.printExpStr(exp1)
+                      rhs_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.MODULO_BY_ZERO, list(lhs_str, rhs_str), info)
                     fail()
                   end
@@ -3835,8 +3833,8 @@
                       if ! rv2 == 0.0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.REM_ARG_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -3846,8 +3844,8 @@
                       if ! ri2 == 0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.REM_ARG_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -4040,7 +4038,7 @@
                   end
 
                   (_, _, _, _, Absyn.MSG(info = info), _)  => begin
-                      str = "cross" + ExpressionDump.printExpStr(DAE.TUPLE(inExpExpLst))
+                      str = "cross" + CrefForHashTable.printExpStr(DAE.TUPLE(inExpExpLst))
                       Error.addSourceMessage(Error.FAILED_TO_EVALUATE_EXPRESSION, list(str), info)
                     fail()
                   end
@@ -4221,7 +4219,7 @@
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
-                        Debug.traceln("- Ceval.cevalRelation failed on: " + ValuesUtil.printValStr(inValue1) + ExpressionDump.relopSymbol(inOperator) + ValuesUtil.printValStr(inValue2))
+                        Debug.traceln("- Ceval.cevalRelation failed on: " + ValuesUtil.printValStr(inValue1) + CrefForHashTable.relopSymbol(inOperator) + ValuesUtil.printValStr(inValue2))
                       fail()
                   end
                 end
@@ -4732,7 +4730,7 @@
                   (_, _, _, DAE.EQBOUND(exp = exp, constant_ = DAE.C_VAR(__)), _, Absyn.MSG(_), _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.trace("#- Ceval.cevalCrefBinding failed (nonconstant EQBOUND(")
-                      expstr = ExpressionDump.printExpStr(exp)
+                      expstr = CrefForHashTable.printExpStr(exp)
                       Debug.trace(expstr)
                       Debug.traceln("))")
                     fail()
@@ -4869,7 +4867,7 @@
                       true = Flags.isSet(Flags.FAILTRACE);
                       Debug.traceln(\"- Ceval.cevalSubscriptValue failed on:\" +
                         \"\\n env: \" + FGraphUtil.printGraphPathStr(env) +
-                        \"\\n subs: \" + stringDelimitList(List.map(subs, ExpressionDump.printSubscriptStr), \", \") +
+                        \"\\n subs: \" + stringDelimitList(List.map(subs, CrefForHashTable.printSubscriptStr), \", \") +
                         \"\\n value: \" + ValuesUtil.printValStr(inValue) +
                         \"\\n dim sizes: \" + stringDelimitList(List.map(dims, intString), \", \")
                       );
@@ -5140,7 +5138,7 @@
                   end
                 end
               end
-               #=  print(\"cevalReductionEval: \" + ExpressionDump.printExpStr(exp) + \" => \" + ValuesUtil.valString(value) + \"\\n\");
+               #=  print(\"cevalReductionEval: \" + CrefForHashTable.printExpStr(exp) + \" => \" + ValuesUtil.valString(value) + \"\\n\");
                =#
                #=  print(\"cevalReductionEval => \" + Util.applyOptionOrDefault(result, ValuesUtil.valString, \"\") + \"\\n\");
                =#

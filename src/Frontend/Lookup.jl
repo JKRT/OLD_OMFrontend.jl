@@ -60,7 +60,7 @@
 
         import Builtin
 
-        import ComponentReference
+        import CrefForHashTable
 
         import Config
 
@@ -791,12 +791,12 @@
                   (Absyn.QUAL_IMPORT(path = path) <| _, _)  => begin
                       id = AbsynUtil.pathLastIdent(path)
                       @match true = id == ident
-                    ComponentReference.pathToCref(path)
+                    CrefForHashTable.pathToCref(path)
                   end
 
                   (Absyn.NAMED_IMPORT(name = id, path = path) <| _, _)  => begin
                       @match true = id == ident
-                    ComponentReference.pathToCref(path)
+                    CrefForHashTable.pathToCref(path)
                   end
 
                   (_ <| rest, _)  => begin
@@ -830,8 +830,8 @@
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| _, env, ident)  => begin
                       @match _cons(f, prevFrames) = listReverse(FGraphUtil.currentScope(env))
-                      cref = ComponentReference.pathToCref(path)
-                      cref = ComponentReference.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
+                      cref = CrefForHashTable.pathToCref(path)
+                      cref = CrefForHashTable.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
                       env = FGraphUtil.setScope(env, list(f))
                       (cache, _, _, _, _, _, _, _, _) = lookupVarInPackages(cache, env, cref, prevFrames, Mutable.create(false))
                     (cache, true)
@@ -890,8 +890,8 @@
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| rest, env, ident)  => begin
                       @match _cons(f, prevFrames) = listReverse(FGraphUtil.currentScope(env))
-                      cref = ComponentReference.pathToCref(path)
-                      cref = ComponentReference.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
+                      cref = CrefForHashTable.pathToCref(path)
+                      cref = CrefForHashTable.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
                       env2 = FGraphUtil.setScope(env, list(f))
                       (cache, classEnv, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env2, cref, prevFrames, Mutable.create(false))
                       (cache, more) = moreLookupUnqualifiedImportedVarInFrame(cache, rest, env, ident)
@@ -1254,7 +1254,7 @@
                    #= /*/ debugging
                       case (cache,env,cref)
                         equation
-                          print(\"CO: \" + ComponentReference.printComponentRefStr(cref) + \" env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
+                          print(\"CO: \" + CrefForHashTable.printComponentRefStr(cref) + \" env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                         then
                           fail();*/ =#
                    #=  try the old lookupVarInternal
@@ -1284,7 +1284,7 @@
                   case (_,env,cref)
                     equation
                       fprintln(Flags.FAILTRACE,  \"- Lookup.lookupVar failed:\\n\" +
-                        ComponentReference.printComponentRefStr(cref) + \" in:\\n\" +
+                        CrefForHashTable.printComponentRefStr(cref) + \" in:\\n\" +
                         FGraphUtil.printGraphPathStr(env));
                     then fail();*/ =#
           (outCache, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, outSplicedExpData, outClassEnv #= only used for package constants =#, outComponentEnv #= only used for package constants =#, name #= so the FQ path can be constructed =#)
@@ -1322,7 +1322,7 @@
                   end
 
                   (cache, env)  => begin
-                      cref = ComponentReference.makeCrefIdent(ident, DAE.T_UNKNOWN_DEFAULT, ss)
+                      cref = CrefForHashTable.makeCrefIdent(ident, DAE.T_UNKNOWN_DEFAULT, ss)
                       (cache, classEnv, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cref, nil, Mutable.create(false))
                       checkPackageVariableConstant(env, classEnv, componentEnv, attr, ty, cref)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name)
@@ -1354,7 +1354,7 @@
                   end
 
                   _  => begin
-                        s1 = ComponentReference.printComponentRefStr(cref)
+                        s1 = CrefForHashTable.printComponentRefStr(cref)
                         s2 = FGraphUtil.printGraphPathStr(classEnv)
                         Error.addMessage(Error.PACKAGE_VARIABLE_NOT_CONSTANT, list(s1, s2))
                         @match true = Flags.isSet(Flags.FAILTRACE)
@@ -1368,7 +1368,7 @@
                     equation
                       FCore.CL(e = cl) = FNode.refData(FGraphUtil.lastScopeRef(classEnv));
                       false = SCodeUtil.isPackage(cl);
-                       print(\"cref:  \" + ComponentReference.printComponentRefStr(cref) + \"\\nprenv: \" + FGraphUtil.getGraphNameStr(parentEnv) + \"\\nclenv: \" + FGraphUtil.getGraphNameStr(classEnv) + \"\\ncoenv: \" + FGraphUtil.getGraphNameStr(componentEnv) + \"\\n\");
+                       print(\"cref:  \" + CrefForHashTable.printComponentRefStr(cref) + \"\\nprenv: \" + FGraphUtil.getGraphNameStr(parentEnv) + \"\\nclenv: \" + FGraphUtil.getGraphNameStr(classEnv) + \"\\ncoenv: \" + FGraphUtil.getGraphNameStr(componentEnv) + \"\\n\");
                     then
                       ();*/ =#
                #=  fail if is not a constant
@@ -1598,7 +1598,7 @@
                         end
                       end
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env5, cref, prevFrames, inState)
-                      splicedExpData = prefixSplicedExp(ComponentReference.crefFirstCref(inComponentRef), splicedExpData)
+                      splicedExpData = prefixSplicedExp(CrefForHashTable.crefFirstCref(inComponentRef), splicedExpData)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
 
@@ -1637,7 +1637,7 @@
                =#
                #= true = Flags.isSet(Flags.FAILTRACE);
                =#
-               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + ComponentReference.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
+               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + CrefForHashTable.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
                =#
           (outCache, outClassEnv, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData #= currently not relevant for constants, but might be used in the future =#, outComponentEnv, name #= We only return the environment the component was found in; not its FQ name. =#)
         end
@@ -1723,8 +1723,8 @@
                           (_ <| _, _)  => begin
                               cr = lookupQualifiedImportedVarInFrame(qimports, id)
                               Mutable.update(inState, true)
-                              cr = if FNode.name(FNode.fromRef(FGraphUtil.lastScopeRef(env))) == ComponentReference.crefFirstIdent(cr)
-                                    ComponentReference.crefStripFirstIdent(cr)
+                              cr = if FNode.name(FNode.fromRef(FGraphUtil.lastScopeRef(env))) == CrefForHashTable.crefFirstIdent(cr)
+                                    CrefForHashTable.crefStripFirstIdent(cr)
                                   else
                                     cr
                                   end
@@ -1771,7 +1771,7 @@
                =#
                #= true = Flags.isSet(Flags.FAILTRACE);
                =#
-               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + ComponentReference.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
+               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + CrefForHashTable.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
                =#
           (outCache, outClassEnv, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData #= currently not relevant for constants, but might be used in the future =#, outComponentEnv, name #= We only return the environment the component was found in; not its FQ name. =#)
         end
@@ -3178,7 +3178,7 @@
                                         ty = sliceDimensionType(ty1, tyChild)
                                         ty2_2 = Types.simplifyType(tyParent)
                                         ss = addArrayDimensions(ty2_2, ss)
-                                        xCref = ComponentReference.makeCrefQual(id, ty2_2, ss, tCref)
+                                        xCref = CrefForHashTable.makeCrefQual(id, ty2_2, ss, tCref)
                                         eType = Types.simplifyType(ty)
                                         splicedExp = Expression.makeCrefExp(xCref, eType)
                                       SOME(splicedExp)
@@ -3229,7 +3229,7 @@
               ty_1 = checkSubscripts(ty, ss)
               tty = Types.simplifyType(ty)
               ss_1 = addArrayDimensions(tty, ss)
-              splicedExpData = InstTypes.SPLICEDEXPDATA(SOME(Expression.makeCrefExp(ComponentReference.makeCrefIdent(ident, tty, ss_1), tty)), ty)
+              splicedExpData = InstTypes.SPLICEDEXPDATA(SOME(Expression.makeCrefExp(CrefForHashTable.makeCrefIdent(ident, tty, ss_1), tty)), ty)
           (cache, attr, ty_1, bind, cnstForRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData, componentEnv, name)
         end
 
@@ -3330,9 +3330,9 @@
                   end
                 end
               end
-               #=  print(\"CREF EB: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
+               #=  print(\"CREF EB: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
                =#
-               #=  print(\"CREF EB RESULT: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
+               #=  print(\"CREF EB RESULT: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
                =#
                #= /*
                   case (DAE.CREF_QUAL(id, _, ss, DAE.CREF_IDENT(cId, _, {})), _, _, DAE.EQBOUND(e, ov, c, s), _)
@@ -3344,9 +3344,9 @@
                        b = DAE.EQBOUND(e, NONE(), c, s);
                     then
                       inChildBinding;*/ =#
-               #=  print(\"CREF VB: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
+               #=  print(\"CREF VB: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
                =#
-               #=  print(\"CREF VB RESULT: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
+               #=  print(\"CREF VB RESULT: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
                =#
                #= /*
                   case (DAE.CREF_QUAL(id, _, ss, DAE.CREF_IDENT(cId, _, {})), _, _, DAE.VALBOUND(v, s), _)
@@ -3615,7 +3615,7 @@
                        =#
                        #=  it exists and if it's an iterator or not.
                        =#
-                      id = ComponentReference.crefFirstIdent(inCref)
+                      id = CrefForHashTable.crefFirstIdent(inCref)
                       @match (DAE.TYPES_VAR(constOfForIteratorRange = ic), _, _, _, _) = lookupVar2(ht, id, inEnv)
                       b = isSome(ic)
                     (SOME(b), cache)
@@ -3678,7 +3678,7 @@
                   local cref::DAE.ComponentRef
                 @match inSplicedExp begin
                   InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(cref, ety)), ty)  => begin
-                      cref = ComponentReference.joinCrefs(inCref, cref)
+                      cref = CrefForHashTable.joinCrefs(inCref, cref)
                     InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(cref, ety)), ty)
                   end
 

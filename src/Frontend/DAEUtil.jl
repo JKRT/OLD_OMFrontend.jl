@@ -111,7 +111,7 @@
         import DAE.AvlTreePathFunction
         @importDBG CrefForHashTable
         @importDBG Config
-        @importDBG ConnectUtil
+        @importDBG ConnectUtilMinimal
         #@importDBG DAEDump
         @importDBG Debug
         @importDBG DoubleEnded
@@ -125,8 +125,8 @@
         @importDBG System
         @importDBG Types
         @importDBG Util
-        @importDBG StateMachineFlatten
-        @importDBG VarTransform
+        # @importDBG StateMachineFlatten
+        # @importDBG VarTransform
         @importDBG AvlSetCR
 
         @Uniontype splitElements begin
@@ -261,7 +261,7 @@
                     true
                   end
 
-                  (DAE.INPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
+                  (DAE.INPUT(__), _) where (ConnectUtilMinimal.faceEqual(ConnectUtilMinimal.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -285,7 +285,7 @@
                     true
                   end
 
-                  (DAE.OUTPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
+                  (DAE.OUTPUT(__), _) where (ConnectUtilMinimal.faceEqual(ConnectUtilMinimal.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -6921,7 +6921,8 @@
 
                #=  Transform Modelica state machines to flat data-flow equations
                =#
-              dAElist = StateMachineFlatten.stateMachineToDataFlow(cache, env, inDAElist)
+               # TODO! FIXME! activate this back!
+              dAElist = inDAElist # StateMachineFlatten.stateMachineToDataFlow(cache, env, inDAElist)
               if Flags.isSet(Flags.SCODE_INST)
                 @match DAE.DAE_LIST(elts) = dAElist
                 outDAElist = DAE.DAE_LIST(elts)
@@ -7639,7 +7640,7 @@
                   local cr::DAE.ComponentRef
                 @match (exp, acc) begin
                   (DAE.CREF(componentRef = cr), _)  => begin
-                    (exp, ListUtil.consOnTrue(ConnectUtil.isExpandable(cr), cr, acc))
+                    (exp, ListUtil.consOnTrue(ConnectUtilMinimal.isExpandable(cr), cr, acc))
                   end
 
                   _  => begin
@@ -8036,6 +8037,7 @@
         end
         =#
 
+        #=
         function replaceCrefInDAEElements(inElements::List{<:DAE.Element}, inCref::DAE.ComponentRef, inExp::DAE.Exp) ::List{DAE.Element}
               local outElements::List{DAE.Element}
 
@@ -8064,6 +8066,7 @@
               (outExp, _) = VarTransform.replaceExp(inExp, replIn, NONE())
           (outExp, replOut)
         end
+        =#
 
         function connectorTypeStr(connectorType::DAE.ConnectorType) ::String
               local string::String

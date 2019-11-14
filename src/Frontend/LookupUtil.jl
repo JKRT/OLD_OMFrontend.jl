@@ -46,34 +46,11 @@
 
         import SCode
 
-        import Util
-
         import CrefForHashTable
-
-        import Config
-
-        import Flags
 
         import FGraphUtil
 
         import FNode
-
-        import Prefix
-
-        import SCodeUtil
-
-        import Static
-
-        import UnitAbsyn
-
-        import SCodeDump
-
-        import ErrorExt
-
-        import ValuesUtil
-
-        import Values
-
 
         #= returns true if the frame is a for-loop scope or a valueblock scope.
        This is indicated by the name of the frame. =#

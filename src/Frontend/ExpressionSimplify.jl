@@ -1,4 +1,4 @@
-  module ExpressionSimplify
+module ExpressionSimplify
 
 
     using MetaModelica
@@ -75,16 +75,14 @@
          #=  protected imports
          =#
 
-        import ComponentReference
-
         import Config
 
-        import DAEUtil
+        import DAEUtilMinimal
 
         import Debug
 
         import FCore
-        
+
         import FCoreUtil
 
         import FGraphUtil
@@ -95,7 +93,7 @@
 
         import Expression
 
-        import ExpressionDump
+        import CrefForHashTable
 
         import Flags
 
@@ -210,17 +208,17 @@
               end
                #=  Basic local simplifications
                =#
-               #= print(\"SIMPLIFY BEFORE->\" + ExpressionDump.printExpStr(e) + \"\\n\");
+               #= print(\"SIMPLIFY BEFORE->\" + CrefForHashTable.printExpStr(e) + \"\\n\");
                =#
                #=  Basic local simplifications
                =#
-               #= print(\"SIMPLIFY INTERMEDIATE->\" + ExpressionDump.printExpStr(eNew) + \"\\n\");
+               #= print(\"SIMPLIFY INTERMEDIATE->\" + CrefForHashTable.printExpStr(eNew) + \"\\n\");
                =#
                #=  Advanced (global) simplifications
                =#
                #=  Basic local simplifications
                =#
-               #= print(\"SIMPLIFY FINAL->\" + ExpressionDump.printExpStr(eNew) + \"\\n\");
+               #= print(\"SIMPLIFY FINAL->\" + CrefForHashTable.printExpStr(eNew) + \"\\n\");
                =#
           (outExp, hasChanged)
         end
@@ -254,7 +252,7 @@
               (outE, _) = simplify1(e)
               t2 = clock()
               print(if t2 - t1 > 0.01
-                    "simplify1 took " + realString(t2 - t1) + " seconds for exp: " + ExpressionDump.printExpStr(e) + " \\nsimplified to :" + ExpressionDump.printExpStr(outE) + "\\n"
+                    "simplify1 took " + realString(t2 - t1) + " seconds for exp: " + CrefForHashTable.printExpStr(e) + " \\nsimplified to :" + CrefForHashTable.printExpStr(outE) + "\\n"
                   else
                     ""
                   end)
@@ -410,7 +408,7 @@
                       true = Flags.isSet(Flags.CHECK_SIMPLIFY);
                       true = Expression.isConst(e);
                       false = Expression.isConstValue(e);
-                      str = ExpressionDump.printExpStr(e);
+                      str = CrefForHashTable.printExpStr(e);
                       Error.addSourceMessage(Error.SIMPLIFY_CONSTANT_ERROR, {str}, AbsynUtil.dummyInfo);
                     then fail(); */ =#
                #=  anything else
@@ -432,7 +430,7 @@
                   local vars::List{DAE.Var}
                 @match e begin
                   DAE.RSUB(exp = DAE.CREF(componentRef = cr), ix = -1)  => begin
-                    DAE.CREF(ComponentReference.joinCrefs(cr, ComponentReference.makeCrefIdent(e.fieldName, e.ty, nil)), e.ty)
+                    DAE.CREF(CrefForHashTable.joinCrefs(cr, CrefForHashTable.makeCrefIdent(e.fieldName, e.ty, nil)), e.ty)
                   end
 
                   DAE.RSUB(exp = DAE.CALL(path = p1, expLst = exps, attr = DAE.CALL_ATTR(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = p2), varLst = vars))), ix = -1) where (AbsynUtil.pathEqual(p1, p2))  => begin
@@ -958,8 +956,8 @@
                       ty2 = Expression.typeof(after)
                       b = valueEq(ty1, ty2)
                       if ! b
-                        s1 = ExpressionDump.printExpStr(before)
-                        s2 = ExpressionDump.printExpStr(after)
+                        s1 = CrefForHashTable.printExpStr(before)
+                        s2 = CrefForHashTable.printExpStr(after)
                         s3 = Types.unparseType(ty1)
                         s4 = Types.unparseType(ty2)
                         Error.addMessage(Error.SIMPLIFICATION_TYPE, list(s1, s2, s3, s4))
@@ -971,8 +969,8 @@
                       if b
                         s1 = intString(c2)
                         s2 = intString(c1)
-                        s3 = ExpressionDump.printExpStr(before)
-                        s4 = ExpressionDump.printExpStr(after)
+                        s3 = CrefForHashTable.printExpStr(before)
+                        s4 = CrefForHashTable.printExpStr(after)
                         Error.addMessage(Error.SIMPLIFICATION_COMPLEXITY, list(s1, s2, s3, s4))
                         fail()
                       end
@@ -1000,9 +998,9 @@
                   end
 
                   (exp, options, 0, _, _)  => begin
-                      str1 = ExpressionDump.printExpStr(exp)
+                      str1 = CrefForHashTable.printExpStr(exp)
                       (exp, _) = Expression.traverseExpBottomUp(exp, simplifyWork, options)
-                      str2 = ExpressionDump.printExpStr(exp)
+                      str2 = CrefForHashTable.printExpStr(exp)
                       Error.addMessage(Error.SIMPLIFY_FIXPOINT_MAXIMUM, list(str1, str2))
                     (exp, hasChanged)
                   end
@@ -1021,7 +1019,7 @@
                   end
                 end
               end
-               #=  print(\"simplify1 iter: \" + ExpressionDump.printExpStr(expAfterSimplify) + \"\\n\");
+               #=  print(\"simplify1 iter: \" + CrefForHashTable.printExpStr(expAfterSimplify) + \"\\n\");
                =#
           (outExp, outHasChanged)
         end
@@ -1804,17 +1802,17 @@
                        =#
                        #=  To calculate sums, first try matrix concatenation
                        =#
-                       #=  print(\"Matrix sum: \" + boolString(sc) + Types.unparseType(tp1) + \" \" + ExpressionDump.printExpStr(e) + \"\\n\");
+                       #=  print(\"Matrix sum: \" + boolString(sc) + Types.unparseType(tp1) + \" \" + CrefForHashTable.printExpStr(e) + \"\\n\");
                        =#
                        #=  Then try array concatenation
                        =#
-                       #=  print(\"Array sum: \" + boolString(sc) + Types.unparseType(tp1) + \" \" + ExpressionDump.printExpStr(e) + \"\\n\");
+                       #=  print(\"Array sum: \" + boolString(sc) + Types.unparseType(tp1) + \" \" + CrefForHashTable.printExpStr(e) + \"\\n\");
                        =#
                        #=  Try to reduce the number of dimensions
                        =#
                        #=  The sum of a single array is simply the sum of its elements
                        =#
-                      (es, dims) = evalCat(i, es, getArrayContents = Expression.getArrayOrMatrixContents, toString = ExpressionDump.printExpStr)
+                      (es, dims) = evalCat(i, es, getArrayContents = Expression.getArrayOrMatrixContents, toString = CrefForHashTable.printExpStr)
                       e = Expression.listToArray(es, list(DAE.DIM_INTEGER(d) for d in dims))
                     e
                   end
@@ -2525,14 +2523,14 @@
                   local index::ModelicaInteger
                 @matchcontinue inCREF begin
                   DAE.CREF_IDENT(idn, t2, ssl && DAE.SLICE(DAE.ARRAY(_, _, _)) <| _)  => begin
-                      cr = ComponentReference.makeCrefIdent(idn, t2, nil)
+                      cr = CrefForHashTable.makeCrefIdent(idn, t2, nil)
                       expCref = Expression.makeCrefExp(cr, inType)
                       exp = simplifyCref2(expCref, ssl)
                     exp
                   end
 
                   DAE.CREF_IDENT(subscriptLst = DAE.SLICE(exp = DAE.RANGE(__)) <| _)  => begin
-                      cr = ComponentReference.crefStripSubs(inCREF)
+                      cr = CrefForHashTable.crefStripSubs(inCREF)
                       expCref = Expression.makeCrefExp(cr, inType)
                     simplifyCref2(expCref, inCREF.subscriptLst)
                   end
@@ -2580,7 +2578,7 @@
 
                   (DAE.CREF(cr && DAE.CREF_IDENT(_, _, _), t), DAE.SLICE(DAE.ARRAY(_, _, expl_1)) <| ssl)  => begin
                       subs = ListUtil.map(expl_1, Expression.makeIndexSubscript)
-                      crefs = ListUtil.map1r(ListUtil.map(subs, ListUtil.create), ComponentReference.subscriptCref, cr)
+                      crefs = ListUtil.map1r(ListUtil.map(subs, ListUtil.create), CrefForHashTable.subscriptCref, cr)
                       t = Types.unliftArray(t)
                       expl = ListUtil.map1(crefs, Expression.makeCrefExp, t)
                       dim = listLength(expl)
@@ -2590,7 +2588,7 @@
 
                   (DAE.CREF(cr && DAE.CREF_IDENT(__), t), ss && DAE.SLICE(exp = DAE.RANGE(__)) <| ssl)  => begin
                       subs = Expression.expandSliceExp(ss.exp)
-                      crefs = list(ComponentReference.subscriptCref(cr, ListUtil.create(s)) for s in subs)
+                      crefs = list(CrefForHashTable.subscriptCref(cr, ListUtil.create(s)) for s in subs)
                       t = Types.unliftArray(t)
                       expl = list(Expression.makeCrefExp(cr, t) for cr in crefs)
                       dim = listLength(expl)
@@ -2976,7 +2974,7 @@
                =#
                #=  v1 + -v2 => v1 - v2
                =#
-               #=  print(\"simplifyMatrixBinary: \" + ExpressionDump.printExpStr(e1) + \"=>\" + ExpressionDump.printExpStr(a1) + \"\\n\");
+               #=  print(\"simplifyMatrixBinary: \" + CrefForHashTable.printExpStr(e1) + \"=>\" + CrefForHashTable.printExpStr(a1) + \"\\n\");
                =#
           outExp
         end
@@ -4058,25 +4056,25 @@
                 @matchcontinue (cr, sub) begin
                   (DAE.CREF_IDENT(idn, t2, s), _)  => begin
                       s_1 = Expression.subscriptsAppend(s, sub)
-                      c_1 = ComponentReference.makeCrefIdent(idn, t2, s_1)
+                      c_1 = CrefForHashTable.makeCrefIdent(idn, t2, s_1)
                     c_1
                   end
 
                   (DAE.CREF_QUAL(idn, t2 && DAE.T_ARRAY(dims = dims), s, c), _)  => begin
                       @match true = listLength(dims) > listLength(s)
                       s_1 = Expression.subscriptsAppend(s, sub)
-                      c_1 = ComponentReference.makeCrefQual(idn, t2, s_1, c)
+                      c_1 = CrefForHashTable.makeCrefQual(idn, t2, s_1, c)
                     c_1
                   end
 
                   (DAE.CREF_QUAL(idn, t2, s, c), _)  => begin
                       s = Expression.subscriptsReplaceSlice(s, DAE.INDEX(sub))
-                    ComponentReference.makeCrefQual(idn, t2, s, c)
+                    CrefForHashTable.makeCrefQual(idn, t2, s, c)
                   end
 
                   (DAE.CREF_QUAL(idn, t2, s, c), _)  => begin
                       c_1 = simplifyAsubCref(c, sub)
-                      c_1 = ComponentReference.makeCrefQual(idn, t2, s, c_1)
+                      c_1 = CrefForHashTable.makeCrefQual(idn, t2, s, c_1)
                     c_1
                   end
                 end
@@ -4124,7 +4122,7 @@
                   (DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e), sub)  => begin
                       e_1 = simplifyAsub(e, sub)
                       t2 = Expression.typeof(e_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.UMINUS_ARR(t2)
                           else
@@ -4145,7 +4143,7 @@
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.SUB_ARR(t2)
                           else
@@ -4158,7 +4156,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.MUL_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.MUL_ARRAY_SCALAR(t2)
                           else
@@ -4171,7 +4169,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.ADD_ARRAY_SCALAR(t2)
                           else
@@ -4184,7 +4182,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e2_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.SUB_SCALAR_ARRAY(t2)
                           else
@@ -4203,7 +4201,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e2_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.DIV_SCALAR_ARRAY(t2)
                           else
@@ -4216,7 +4214,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.DIV_ARRAY_SCALAR(t2)
                           else
@@ -4229,7 +4227,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.POW_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e2_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.POW_SCALAR_ARRAY(t2)
                           else
@@ -4242,7 +4240,7 @@
                   (DAE.BINARY(exp1 = e1, operator = DAE.POW_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.POW_ARRAY_SCALAR(t2)
                           else
@@ -4256,7 +4254,7 @@
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.ADD_ARR(t2)
                           else
@@ -4270,7 +4268,7 @@
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.MUL_ARR(t2)
                           else
@@ -4284,7 +4282,7 @@
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.DIV_ARR(t2)
                           else
@@ -4298,7 +4296,7 @@
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
                       t2 = Expression.typeof(e1_1)
-                      b = DAEUtil.expTypeArray(t2)
+                      b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.POW_ARR2(t2)
                           else
@@ -5777,12 +5775,12 @@
                   end
 
                   (_, DAE.EQUAL(_), DAE.CREF(cr1, _), DAE.CREF(cr2, _))  => begin
-                      @match true = ComponentReference.crefEqual(cr1, cr2)
+                      @match true = CrefForHashTable.crefEqual(cr1, cr2)
                     DAE.BCONST(true)
                   end
 
                   (_, DAE.NEQUAL(_), DAE.CREF(cr1, _), DAE.CREF(cr2, _))  => begin
-                      @match true = ComponentReference.crefEqual(cr1, cr2)
+                      @match true = CrefForHashTable.crefEqual(cr1, cr2)
                     DAE.BCONST(false)
                   end
 
@@ -6095,7 +6093,7 @@
                 @match inop begin
                   DAE.ADD_ARR(ty = ty1)  => begin
                       ty2 = Expression.unliftArray(ty1)
-                      b = DAEUtil.expTypeArray(ty2)
+                      b = DAEUtilMinimal.expTypeArray(ty2)
                       op = if b
                             DAE.ADD_ARR(ty2)
                           else
@@ -6106,7 +6104,7 @@
 
                   DAE.SUB_ARR(ty = ty1)  => begin
                       ty2 = Expression.unliftArray(ty1)
-                      b = DAEUtil.expTypeArray(ty2)
+                      b = DAEUtilMinimal.expTypeArray(ty2)
                       op = if b
                             DAE.SUB_ARR(ty2)
                           else
@@ -6117,7 +6115,7 @@
 
                   DAE.DIV_ARR(ty = ty1)  => begin
                       ty2 = Expression.unliftArray(ty1)
-                      b = DAEUtil.expTypeArray(ty2)
+                      b = DAEUtilMinimal.expTypeArray(ty2)
                       op = if b
                             DAE.DIV_ARR(ty2)
                           else
@@ -6128,7 +6126,7 @@
 
                   DAE.MUL_ARR(ty = ty1)  => begin
                       ty2 = Expression.unliftArray(ty1)
-                      b = DAEUtil.expTypeArray(ty2)
+                      b = DAEUtilMinimal.expTypeArray(ty2)
                       op = if b
                             DAE.MUL_ARR(ty2)
                           else
@@ -6139,7 +6137,7 @@
 
                   DAE.POW_ARR2(ty = ty1)  => begin
                       ty2 = Expression.unliftArray(ty1)
-                      b = DAEUtil.expTypeArray(ty2)
+                      b = DAEUtilMinimal.expTypeArray(ty2)
                       op = if b
                             DAE.POW_ARR2(ty2)
                           else
@@ -6405,7 +6403,7 @@
                       @match true = stringEq(name, id)
                       @match true = AbsynUtil.pathEqual(callPath, recordPath)
                       @match true = listLength(varLst) == listLength(exps)
-                      i = ListUtil.position1OnTrue(varLst, DAEUtil.typeVarIdentEqual, id2)
+                      i = ListUtil.position1OnTrue(varLst, DAEUtilMinimal.typeVarIdentEqual, id2)
                       exp = listGet(exps, i)
                     (exp, tpl)
                   end

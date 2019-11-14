@@ -1,7 +1,7 @@
 
-module StaticInterface
-import Patternm
-end
+#module StaticInterface
+#import Patternm
+#end
 
 module Static
 
@@ -645,6 +645,15 @@ module Static
           (outCache, outExp, outProperties)
         end
 
+        #= Checks that an array type is valid. =#
+       function checkArrayType(inType::DAE.Type)
+             local el_ty::DAE.Type
+
+             el_ty = Types.arrayElementType(inType)
+             @match false = ! Types.isString(el_ty) && Types.isBoxedType(el_ty) || Flags.isSet(Flags.RML)
+       end
+
+
         function elabExp_Array(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::Absyn.Exp, inImplicit::Bool, inDoVect::Bool, inPrefix::Prefix.PrefixType, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
               local outProperties::DAE.Properties
               local outExp::DAE.Exp
@@ -677,7 +686,7 @@ module Static
                        =#
                       arr_ty = DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(listLength(expl))))
                       exp = DAE.ARRAY(Types.simplifyType(arr_ty), ! Types.isArray(ty), expl)
-                      InstMeta.checkArrayType(ty)
+                      checkArrayType(ty)
                       exp = elabMatrixToMatrixExp(exp)
                     (exp, DAE.PROP(arr_ty, c))
                   end
@@ -962,9 +971,9 @@ module Static
                      elabExp_List
                    end
 
-                   Absyn.MATCHEXP(__)  => begin
-                     StaticInterface.elabMatchExpression
-                   end
+                   #Absyn.MATCHEXP(__)  => begin
+                    # StaticInterface.elabMatchExpression
+                   #end
 
                    Absyn.DOT(__)  => begin
                      elabExp_Dot

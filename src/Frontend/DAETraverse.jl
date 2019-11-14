@@ -822,7 +822,7 @@
                   end
 
                   _  => begin
-                        Error.addMessage(Error.INTERNAL_ERROR, list("DAEUtil.traverseDAEElement not implemented correctly for element: " + " NO DAEDUMP! " #= DAEDump.dumpElementsStr(list(element)) =#))
+                        Error.addMessage(Error.INTERNAL_ERROR, list("traverseDAEElement not implemented correctly for element: " + " NO DAEDUMP! " #= DAEDump.dumpElementsStr(list(element)) =#))
                       fail()
                   end
                 end
@@ -852,7 +852,7 @@
                   local ext_arg_1::Type_a
                 @match (inAlgorithm, func, inTypeA) begin
                   (DAE.ALGORITHM_STMTS(statementLst = stmts), _, _)  => begin
-                      (_, ext_arg_1) = DAEUtil.traverseDAEEquationsStmts(stmts, func, inTypeA)
+                      (_, ext_arg_1) = traverseDAEEquationsStmts(stmts, func, inTypeA)
                     ext_arg_1
                   end
                 end
@@ -1140,7 +1140,7 @@
 
                   (x, _, _, _)  => begin
                       str = " NO DAEDUMP! "# DAEDump.ppStatementStr(x)
-                      str = "DAEUtil.traverseDAEEquationsStmts not implemented correctly: " + str
+                      str = "traverseDAEEquationsStmts not implemented correctly: " + str
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
                     fail()
                   end
@@ -1149,7 +1149,7 @@
                #= /* We need to pass this through because simplify/etc may scalarize the cref...
                                true = Flags.isSet(Flags.FAILTRACE);
                                print(DAEDump.ppStatementStr(x));
-                               print(\"Warning, not allowed to set the componentRef to a expression in DAEUtil.traverseDAEEquationsStmts\\n\");
+                               print(\"Warning, not allowed to set the componentRef to a expression in traverseDAEEquationsStmts\\n\");
                             */ =#
                #=  MetaModelica extension. KS
                =#
@@ -1433,7 +1433,7 @@
 
                   (x <| _, _, _)  => begin
                       str = " NO DAEDUMP! " # DAEDump.ppStatementStr(x)
-                      str = "DAEUtil.traverseDAEStmts not implemented correctly: " + str
+                      str = "traverseDAEStmts not implemented correctly: " + str
                       Error.addMessage(Error.INTERNAL_ERROR, list(str))
                     fail()
                   end

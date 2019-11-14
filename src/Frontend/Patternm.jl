@@ -69,9 +69,9 @@
         @importDBG Algorithm
         @importDBG AvlSetString
         @importDBG BaseHashTable
-        @importDBG ComponentReference
+        @importDBG CrefForHashTable
         # @importDBG Connect
-        @importDBG DAEUtil
+        # @importDBG DAEUtil
         @importDBG ElementSource
         @importDBG Expression
         #@importDBG ExpressionDump
@@ -672,7 +672,7 @@
                   local ty2::DAE.Type
                 @matchcontinue (inTy1, inTy2, lhs, info) begin
                   (DAE.T_METABOXED(ty = ty1), ty2, _, _)  => begin
-                      cr = ComponentReference.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
+                      cr = CrefForHashTable.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cr)
                       (_, ty1) = Types.matchType(crefExp, ty1, ty2, true)
                       et = Types.simplifyType(ty1)
@@ -680,7 +680,7 @@
                   end
 
                   (ty1, ty2, _, _)  => begin
-                      cr = ComponentReference.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
+                      cr = CrefForHashTable.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cr)
                       (_, _) = Types.matchType(crefExp, ty1, ty2, true)
                     NONE()
@@ -1414,7 +1414,7 @@
                   local extra::Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}
                 @matchcontinue (inExp, inTpl) begin
                   (DAE.CREF(componentRef = cr, ty = ty), extra && (localsTree, useTree, info))  => begin
-                      name = ComponentReference.crefFirstIdent(cr)
+                      name = CrefForHashTable.crefFirstIdent(cr)
                       if AvlSetString.hasKey(localsTree, name) && ! AvlSetString.hasKey(useTree, name)
                         Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_UNUSED_ASSIGNMENT, list(name), info)
                         outExp = DAE.CREF(DAE.WILD(), ty)

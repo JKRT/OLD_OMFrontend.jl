@@ -57,7 +57,7 @@
         import ClassInf
 
         InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
-        import ComponentReference
+        import CrefForHashTable
         import Config
         import Debug
         import Error
@@ -509,7 +509,7 @@
 
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), NONE())  => begin
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
-                      cref_ = ComponentReference.makeCrefIdent(i, ident_ty, s)
+                      cref_ = CrefForHashTable.makeCrefIdent(i, ident_ty, s)
                       (cache, cref_1) = prefixToCref2(cache, env, inIH, Prefix.PREFIX(xs, cp), SOME(cref_))
                     (cache, cref_1)
                   end
@@ -517,7 +517,7 @@
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), SOME(cref))  => begin
                       (cache, cref) = prefixSubscriptsInCref(cache, env, inIH, inPrefix, cref)
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
-                      cref_2 = ComponentReference.makeCrefQual(i, ident_ty, s, cref)
+                      cref_2 = CrefForHashTable.makeCrefQual(i, ident_ty, s, cref)
                       (cache, cref_1) = prefixToCref2(cache, env, inIH, Prefix.PREFIX(xs, cp), SOME(cref_2))
                     (cache, cref_1)
                   end
@@ -561,13 +561,13 @@
                   end
 
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), NONE())  => begin
-                      cref_ = ComponentReference.makeCrefIdent(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s)
+                      cref_ = CrefForHashTable.makeCrefIdent(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
                     cref_1
                   end
 
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), SOME(cref))  => begin
-                      cref_ = ComponentReference.makeCrefQual(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s, cref)
+                      cref_ = CrefForHashTable.makeCrefQual(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s, cref)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
                     cref_1
                   end
@@ -586,12 +586,12 @@
                   local c::DAE.ComponentRef
                 @matchcontinue pre begin
                   Prefix.NOPRE(__)  => begin
-                      c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
+                      c = CrefForHashTable.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
 
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
-                      c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
+                      c = CrefForHashTable.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
 
@@ -629,13 +629,13 @@
                 @match (inCache, inEnv, inIH, pre, inCr, acc) begin
                   (cache, env, _, _, DAE.CREF_IDENT(id, tp, subs), _)  => begin
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
-                      cr = ComponentReference.makeCrefIdent(id, tp, subs)
-                    (cache, ComponentReference.implode_reverse(_cons(cr, acc)))
+                      cr = CrefForHashTable.makeCrefIdent(id, tp, subs)
+                    (cache, CrefForHashTable.implode_reverse(_cons(cr, acc)))
                   end
 
                   (cache, env, _, _, DAE.CREF_QUAL(id, tp, subs, cr), _)  => begin
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
-                      crid = ComponentReference.makeCrefIdent(id, tp, subs)
+                      crid = CrefForHashTable.makeCrefIdent(id, tp, subs)
                       (cache, cr) = prefixSubscriptsInCrefWork(cache, env, inIH, pre, cr, _cons(crid, acc))
                     (cache, cr)
                   end
@@ -1561,6 +1561,7 @@
           outPrefix
         end
 
+        #=
         function writeComponentPrefix(file::File.FILE, pre::Prefix.ComponentPrefix, escape::File.Escape = File.Escape.None)
               _ = begin
                 @match pre begin
@@ -1585,6 +1586,7 @@
                 end
               end
         end
+        =#
 
          #= Function: crefHaveSubs
           Checks whether Prefix has any subscripts, recursive  =#

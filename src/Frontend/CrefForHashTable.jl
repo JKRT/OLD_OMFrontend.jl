@@ -6702,4 +6702,137 @@ function crefLexicalCompareSubsAtEnd2(inSubs1::List{<:ModelicaInteger}, inSubs2:
   res
 end
 
+#= The subscriptCref function adds a subscript to the ComponentRef
+ For instance a.b with subscript 10 becomes a.b[10] and c.d[1,2]
+ with subscript 3,4 becomes c.d[1,2,3,4] =#
+function subscriptCref(inComponentRef::DAE.ComponentRef, inSubscriptLst::List{<:DAE.Subscript}) ::DAE.ComponentRef
+     local outComponentRef::DAE.ComponentRef
+
+     outComponentRef = begin
+         local newsub_1::List{DAE.Subscript}
+         local sub::List{DAE.Subscript}
+         local newsub::List{DAE.Subscript}
+         local id::DAE.Ident
+         local cref_1::DAE.ComponentRef
+         local cref::DAE.ComponentRef
+         local t2::DAE.Type
+       @match (inComponentRef, inSubscriptLst) begin
+         (DAE.CREF_IDENT(ident = id, subscriptLst = sub, identType = t2), newsub)  => begin
+             newsub_1 = listAppend(sub, newsub)
+           makeCrefIdent(id, t2, newsub_1)
+         end
+
+         (DAE.CREF_QUAL(ident = id, subscriptLst = sub, componentRef = cref, identType = t2), newsub)  => begin
+             cref_1 = subscriptCref(cref, newsub)
+           makeCrefQual(id, t2, sub, cref_1)
+         end
+       end
+     end
+ outComponentRef
+end
+
+#= Removes all subscript of a componentref =#
+function crefStripSubs(inCref::DAE.ComponentRef) ::DAE.ComponentRef
+      local outCref::DAE.ComponentRef
+
+      outCref = begin
+          local id::DAE.Ident
+          local cr::DAE.ComponentRef
+          local ty::DAE.Type
+        @match inCref begin
+          DAE.CREF_IDENT(ident = id, identType = ty)  => begin
+            makeCrefIdent(id, ty, nil)
+          end
+
+          DAE.CREF_QUAL(componentRef = cr, identType = ty, ident = id)  => begin
+              outCref = crefStripSubs(cr)
+            makeCrefQual(id, ty, nil, outCref)
+          end
+        end
+      end
+  outCref
+end
+
+#= Strips the first part of a component reference,
+i.e the identifier and eventual subscripts =#
+function crefStripFirstIdent(inCr::DAE.ComponentRef) ::DAE.ComponentRef
+     local outCr::DAE.ComponentRef
+
+     outCr = begin
+         local cr::DAE.ComponentRef
+       @match inCr begin
+         DAE.CREF_QUAL(componentRef = cr)  => begin
+           cr
+         end
+       end
+     end
+ outCr
+end
+
+#= Returns true if the given expression is a record,
+  otherwise false. =#
+function isRecord(inExp::DAE.Exp) ::Bool
+     local outIsRecord::Bool
+
+     outIsRecord = begin
+       @match inExp begin
+         DAE.RECORD(__)  => begin
+           true
+         end
+
+         _  => begin
+             false
+         end
+       end
+     end
+ outIsRecord
+end
+
+#= Constructs a cref from a list of CREF_IDENTs. =#
+function implode(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef
+     local outCref::DAE.ComponentRef
+
+     local first::DAE.ComponentRef
+     local rest::List{DAE.ComponentRef}
+
+     outCref = implode_reverse(listReverse(inParts))
+ outCref
+end
+
+#= Constructs a cref from a reversed list of CREF_IDENTs. =#
+function implode_reverse(inParts::List{<:DAE.ComponentRef}) ::DAE.ComponentRef
+     local outCref::DAE.ComponentRef
+
+     local first::DAE.ComponentRef
+     local rest::List{DAE.ComponentRef}
+
+     @match _cons(first, rest) = inParts
+     outCref = implode_tail(rest, first)
+ outCref
+end
+
+function implode_tail(inParts::List{<:DAE.ComponentRef}, inAccumCref::DAE.ComponentRef) ::DAE.ComponentRef
+     local outCref::DAE.ComponentRef
+
+     outCref = begin
+         local id::DAE.Ident
+         local ty::DAE.Type
+         local subs::List{DAE.Subscript}
+         local rest::List{DAE.ComponentRef}
+         local cr::DAE.ComponentRef
+       @match (inParts, inAccumCref) begin
+         (DAE.CREF_IDENT(id, ty, subs) <| rest, _)  => begin
+             cr = DAE.CREF_QUAL(id, ty, subs, inAccumCref)
+           implode_tail(rest, cr)
+         end
+
+         ( nil(), _)  => begin
+           inAccumCref
+         end
+       end
+     end
+ outCref
+end
+
+    @exportAll()
 end
