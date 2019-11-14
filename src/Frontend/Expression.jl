@@ -4512,7 +4512,7 @@ Type_a = Any
         @importDBG Flags
         @importDBG ListUtil
         @importDBG Prefix
-        @importDBG Static
+        # @importDBG Static
         @importDBG System
         @importDBG Types
         @importDBG Util
@@ -5136,6 +5136,7 @@ Type_a = Any
           outExp
         end
 
+        #=
         function CodeVarToCref(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
@@ -5159,6 +5160,7 @@ Type_a = Any
               end
           outExp
         end
+        =#
 
          #= converts to ICONST if possible. If it does
          not fit, a RCONST is returned instead. =#
