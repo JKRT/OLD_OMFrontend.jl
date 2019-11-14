@@ -99,6 +99,8 @@ module InnerOuter
 
         @importDBG BaseHashSet
 
+        @importDBG FGraphUtil
+
         Cache = FCore.Cache
 
          @Uniontype InstResult begin

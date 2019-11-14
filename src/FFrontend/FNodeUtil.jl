@@ -33,7 +33,7 @@ module FNodeUtil
 #= anything that is not top, class or a component is an implicit scope! =#
 using MetaModelica
 using ExportAll
-  
+
 @importDBG FCore
 
 FunctionRefIs = Function
@@ -597,7 +597,7 @@ module FNodeUtil
 #= anything that is not top, class or a component is an implicit scope! =#
 using MetaModelica
 using ExportAll
-  
+
 import FCore
 
 FunctionRefIs = Function
@@ -740,40 +740,6 @@ function isUserDefined(inNode::Node) ::Bool
   end
   #=  any parent is userdefined?
   =#
-  b
-end
-
-function isTop(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.TOP(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
-function isExtends(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.EX(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
   b
 end
 

@@ -427,7 +427,7 @@
                           true = stringEq(cn, bcn);
                           (c, _) = Lookup.lookupClassLocal(inEnv, bcn);
                           tp = SCodeUtil.getDerivedTypeSpec(c);
-                          c = SCodeUtil.myMergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
+                          c = SCodeUtil.mergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
                           SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i) = c;
                           (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info);
                           (cache, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp);
@@ -445,7 +445,7 @@
                    =#
                 @matchcontinue inElt begin
                   SCode.CLASS(cn, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), enc, p, restr, SCode.DERIVED(tp, mod, attr1), cmt, i)  => begin
-                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp)
                       mod = unelabMod(emod)
@@ -461,7 +461,7 @@
                   end
 
                   SCode.COMPONENT(compname, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), attr, tp, mod, cmt, cond, i)  => begin
-                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, compname, tp)
                       mod = unelabMod(emod)
@@ -1717,10 +1717,10 @@
                        #=  Redeclaration of component with constraining class on the inner modifier.
                        =#
                       smod1 = SCodeUtil.getConstrainedByModifiers(el1.prefixes)
-                      smod1 = SCodeUtil.myMergeModifiers(el1.modifications, smod1)
+                      smod1 = SCodeUtil.mergeModifiers(el1.modifications, smod1)
                       dmod1 = elabUntypedMod(smod1, COMPONENT(el1.name))
                       smod2 = SCodeUtil.getConstrainedByModifiers(el2.prefixes)
-                      smod2 = SCodeUtil.myMergeModifiers(el2.modifications, smod2)
+                      smod2 = SCodeUtil.mergeModifiers(el2.modifications, smod2)
                       dmod2 = elabUntypedMod(smod2, COMPONENT(el2.name))
                       dmod = myMerge(dmod1, dmod2, el1.name, inCheckFinal)
                       emod = myMerge(emod1, emod2, el1.name, inCheckFinal)

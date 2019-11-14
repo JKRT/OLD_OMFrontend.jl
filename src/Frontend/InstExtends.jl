@@ -775,7 +775,7 @@
                       @match DAE.REDECL(element = comp, mod = cmod) = Mod.lookupCompModification(inMod, el.name)
                       mod_rest = inMod
                       cmod = Mod.myMerge(cmod, mod, el.name, false)
-                      comp = SCodeUtil.myMergeWithOriginal(comp, el)
+                      comp = SCodeUtil.mergeWithOriginal(comp, el)
                     ((comp, cmod, b), mod_rest)
                   end
 

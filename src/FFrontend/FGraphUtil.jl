@@ -67,7 +67,7 @@ const Status = FCore.Status
 @importDBG Config
 @importDBG Debug
 @importDBG Error
-#@importDBG FGraphBuildEnv
+@importDBG FGraphBuild
 @importDBG FNode
 @importDBG Flags
 @importDBG Global
@@ -513,7 +513,7 @@ import MetaModelica.Dangerous
                       c = SCode.COMPONENT(name, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.CONST(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo)
                       v = DAE.TYPES_VAR(name, DAE.ATTR(DAE.NON_CONNECTOR(), SCode.NON_PARALLEL(), variability, Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC()), ty, binding, constOfForIteratorRange)
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkCompNode(c, r, FCore.BUILTIN(), g)
+                      g = FGraphBuild.mkCompNode(c, r, FCore.BUILTIN(), g)
                       g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), empty())
                     g
                   end
@@ -1046,7 +1046,7 @@ import MetaModelica.Dangerous
                   (g, v && DAE.TYPES_VAR(name = n), c, m, i, cg)  => begin
                       @match true = stringEq(n, SCodeUtil.elementName(c))
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkCompNode(c, r, FCore.USERDEFINED(), g)
+                      g = FGraphBuild.mkCompNode(c, r, FCore.USERDEFINED(), g)
                       g = updateVarAndMod(g, v, m, i, cg)
                     g
                   end
@@ -1084,7 +1084,7 @@ import MetaModelica.Dangerous
 
                   (g, SCode.CLASS(__), _, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
+                      g = FGraphBuild.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
                     g
                   end
                 end
@@ -1104,7 +1104,7 @@ import MetaModelica.Dangerous
                 @match (inGraph, inName, inType) begin
                   (g, _, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkTypeNode(list(inType), r, inName, g)
+                      g = FGraphBuild.mkTypeNode(list(inType), r, inName, g)
                     g
                   end
                 end
@@ -1124,7 +1124,7 @@ import MetaModelica.Dangerous
                 @match (inGraph, inImport) begin
                   (g, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkElementNode(inImport, r, FCore.USERDEFINED(), g)
+                      g = FGraphBuild.mkElementNode(inImport, r, FCore.USERDEFINED(), g)
                     g
                   end
                 end
@@ -1144,7 +1144,7 @@ import MetaModelica.Dangerous
                 @match (inGraph, inDu) begin
                   (g, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuildEnv.mkElementNode(inDu, r, FCore.USERDEFINED(), g)
+                      g = FGraphBuild.mkElementNode(inDu, r, FCore.USERDEFINED(), g)
                     g
                   end
                 end

@@ -155,7 +155,7 @@ module Types
 
         import MetaModelica.Dangerous.listReverseInPlace
 
-        import .TypesInterface
+        import ..TypesInterface
 
          #= Succeeds for all the discrete types, Integer, String, Boolean and enumeration. =#
         function discreteType(inType::DAE.Type)

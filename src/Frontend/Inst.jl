@@ -1957,7 +1957,7 @@
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope. =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -1980,7 +1980,7 @@
                       _ = AbsynUtil.getArrayDimOptAsList(ad)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2013,14 +2013,14 @@
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
                         mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, parentClassEnv, ih, store, mods_1, pre, ci_state, className, classDefParent, re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       else
                         mod = InstUtil.chainRedeclares(mods, mod)
                         (parentEnv, _) = FGraphUtil.stripLastScopeRef(env)
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
                         mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, env, ih, store, mods_1, pre, ci_state, className, SCode.PARTS(list(SCode.EXTENDS(cn, vis, SCode.NOMOD(), NONE(), info)), nil, nil, nil, nil, nil, nil, NONE()), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       end
                     (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph)
                   end
@@ -2041,7 +2041,7 @@
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2060,7 +2060,7 @@
                       ty = listHead(tys)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METALIST(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_LIST(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2071,7 +2071,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAOPTION(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_OPTION(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2082,7 +2082,7 @@
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = ListUtil.map(tys, Types.boxIfUnboxedType)
                       bc = SOME(DAE.T_METATUPLE(tys))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_TUPLE(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2093,7 +2093,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAARRAY(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_ARRAY(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2102,7 +2102,7 @@
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
                       (cache, _, ih, _, csets, oDA) = instClassDefHelper(cache, env, ih, nil, pre, inst_dims, impl, nil, inSets, info)
                       bc = SOME(DAE.T_METAPOLYMORPHIC(className))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_POLYMORPHIC(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2134,7 +2134,7 @@
                         fail()
                       end
                       ty = Types.setTypeVariables(ty, tys)
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       bc = SOME(ty)
                     (cache, env, ih, store, DAE.emptyDae, csets, new_ci_state, nil, bc, oDA, NONE(), graph)
                   end
@@ -2928,7 +2928,7 @@
                           else
                             true
                           end
-                      m = SCodeUtil.myMergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      m = SCodeUtil.mergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
                       if SCodeUtil.finalBool(final_prefix)
                         m = InstUtil.traverseModAddFinal(m)
                       end
@@ -2976,7 +2976,7 @@
                         end
                         mod_1 = Mod.myMerge(mod_1, cls_mod, name)
                       end
-                      attr = SCodeUtil.myMergeAttributesFromClass(attr, cls)
+                      attr = SCodeUtil.mergeAttributesFromClass(attr, cls)
                       inst_dims = ListUtil.appendElt(nil, inst_dims)
                       (cache, mod) = Mod.updateMod(cache, env2, ih, pre, mod, impl, info)
                       (cache, mod_1) = Mod.updateMod(cache, env2, ih, pre, mod_1, impl, info)
@@ -3563,7 +3563,7 @@
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match true = stringEq(name, id)
                       (cl, _) = Lookup.lookupClassLocal(env, name)
-                      env = FGraphUtil.updateClass(env, SCodeUtil.myMergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
+                      env = FGraphUtil.updateClass(env, SCodeUtil.mergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
                       updatedComps = getUpdatedCompsHashTable(inUpdatedComps)
                       updatedComps = BaseHashTable.add((cref, 0), updatedComps)
                     (cache, env, ih, SOME(updatedComps))
@@ -3706,7 +3706,7 @@
               try
                 @match 1 = BaseHashTable.get(inCref, inUpdatedComps)
               catch
-                smod = SCodeUtil.myMergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
+                smod = SCodeUtil.mergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
                 (outCache, mod1) = updateComponentInEnv3(outCache, outEnv, outIH, smod, inImpl, Mod.COMPONENT(inName), inInfo)
                 class_mod = Mod.lookupModificationP(inMod, inPath)
                 mod2 = Mod.myMerge(class_mod, mod1, inName)
@@ -4990,7 +4990,7 @@
                 mod = begin
                   @match cmt begin
                     SCode.COMMENT(annotation_ = SOME(SCode.ANNOTATION(modification = mod2)))  => begin
-                      SCodeUtil.myMergeModifiers(mod2, mod)
+                      SCodeUtil.mergeModifiers(mod2, mod)
                     end
 
                     _  => begin

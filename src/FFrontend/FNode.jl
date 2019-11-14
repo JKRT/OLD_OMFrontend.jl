@@ -53,6 +53,8 @@ Apply = Function
 @importDBG Config
 @importDBG Flags
 @importDBG SCodeUtil
+@importDBG System
+@importDBG Global
 print("After imports in FNode")
 Name = FCore.Name
 Names = FCore.Names
@@ -910,6 +912,24 @@ function originalScope(inRef::MMRef) ::Scope
 
   outScope = originalScope_dispatch(inRef, nil)
   outScope
+end
+
+
+function isTop(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.TOP(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
 end
 
 #= @author:

@@ -1498,7 +1498,7 @@
                                  type A = input discrete flow Integer[3];
                                  A x; <-- input discrete flow IS NOT propagated even if it should. FIXME!
                                */ =#
-                       #= SOME(attr3) = SCodeUtil.myMergeAttributes(attr,SOME(absynAttr));
+                       #= SOME(attr3) = SCodeUtil.mergeAttributes(attr,SOME(absynAttr));
                        =#
                       smod = InstUtil.chainRedeclares(inMod, smod)
                       (_, mod) = Mod.elabMod(outCache, outEnv, outIH, inPrefix, smod, inImpl, Mod.DERIVED(cls_path), inInfo)

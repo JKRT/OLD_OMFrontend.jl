@@ -12,6 +12,7 @@ module CrefForHashTable
 @importDBG DAE
 @importDBG Tpl
 @importDBG Print
+@importDBG System
 import MetaModelica.Dangerous
 
 FuncCrefTypeA = Function

@@ -43,6 +43,8 @@ using ExportAll
 
 @importDBG FCore
 
+@importDBG FGraphUtil
+
 @importDBG FNode
 
 @importDBG DAE
@@ -1295,4 +1297,3 @@ end
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()
 end
-
