@@ -45,7 +45,7 @@
         import FNode
 
         import ListUtil
-        import FGraph
+        import FGraphUtil
         import FGraphBuild
 
         Name = FCore.Name 
@@ -478,7 +478,7 @@
               local outRef::Ref
               local outGraph::Graph
 
-              (outGraph, outRef) = name(inGraph, FGraph.top(inGraph), inName, inOptions, inMsg)
+              (outGraph, outRef) = name(inGraph, FGraphUtil.top(inGraph), inName, inOptions, inMsg)
           (outGraph, outRef)
         end
 
@@ -528,7 +528,7 @@
                   end
                   
                   (g, _, Absyn.CREF_FULLYQUALIFIED(rest), _, _)  => begin
-                      r = FGraph.top(g)
+                      r = FGraphUtil.top(g)
                       (g, r) = cr(g, r, rest, inOptions, inMsg)
                     (g, r)
                   end

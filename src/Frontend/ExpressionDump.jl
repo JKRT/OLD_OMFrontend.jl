@@ -50,7 +50,7 @@
          =#
 
         @importDBG Absyn
-  
+
         @importDBG AbsynUtil
 
         @importDBG DAE
@@ -64,10 +64,10 @@
         @importDBG Dump
 
         @importDBG ExpressionUtil
-  
-        @importDBG ListUtil
 
-        @importDBG Patternm
+        @importDBG CrefForHashTable
+
+        @importDBG ListUtil
 
         @importDBG Print
 
@@ -660,10 +660,13 @@
 
          #= This function prints a complete expression. =#
         function printExpStr(e::DAE.Exp) ::String
+          CrefForHashTable.printExpStr(e)
         end
 
         function printCrefsFromExpStr(e::DAE.Exp) ::String
+           CrefForHashTable.printCrefsFromExpStr(e)
         end
+
 
         function printComponentRefStr(inComponentRef::DAE.ComponentRef) ::String
               local outString::String
@@ -770,6 +773,91 @@
          outString
        end
 
+       #= Pattern to String unparsing =#
+      function patternStr(pattern::DAE.Pattern) ::String
+            local str::String
+
+            str = begin
+                local pats::List{DAE.Pattern}
+                local fields::List{String}
+                local patsStr::List{String}
+                local exp::DAE.Exp
+                local pat::DAE.Pattern
+                local head::DAE.Pattern
+                local tail::DAE.Pattern
+                local id::String
+                local namedpats::List{Tuple{DAE.Pattern, String, DAE.Type}}
+                local name::Absyn.Path
+              @matchcontinue pattern begin
+                DAE.PAT_WILD(__)  => begin
+                  "_"
+                end
+
+                DAE.PAT_AS(id = id, pat = DAE.PAT_WILD(__))  => begin
+                  id
+                end
+
+                DAE.PAT_AS_FUNC_PTR(id, DAE.PAT_WILD(__))  => begin
+                  id
+                end
+
+                DAE.PAT_SOME(pat)  => begin
+                    str = patternStr(pat)
+                  "SOME(" + str + ")"
+                end
+
+                DAE.PAT_META_TUPLE(pats)  => begin
+                    str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
+                  "(" + str + ")"
+                end
+
+                DAE.PAT_CALL_TUPLE(pats)  => begin
+                    str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
+                  "(" + str + ")"
+                end
+
+                DAE.PAT_CALL(name = name, patterns = pats)  => begin
+                    id = AbsynUtil.pathString(name)
+                    str = stringDelimitList(ListUtil.map(pats, patternStr), ",")
+                  stringAppendList(list(id, "(", str, ")"))
+                end
+
+                DAE.PAT_CALL_NAMED(name = name, patterns = namedpats)  => begin
+                    id = AbsynUtil.pathString(name)
+                    fields = ListUtil.map(namedpats, Util.tuple32)
+                    patsStr = ListUtil.map1r(ListUtil.mapMap(namedpats, Util.tuple31, patternStr), stringAppend, "=")
+                    str = stringDelimitList(ListUtil.threadMap(fields, patsStr, stringAppend), ",")
+                  stringAppendList(list(id, "(", str, ")"))
+                end
+
+                DAE.PAT_CONS(head, tail)  => begin
+                  patternStr(head) + "::" + patternStr(tail)
+                end
+
+                DAE.PAT_CONSTANT(exp = exp)  => begin
+                  #TODO
+                  #ExpressionDump.printExpStr(exp)
+                  throw("TODO error")
+                end
+
+                DAE.PAT_AS(id = id, pat = pat)  => begin
+                  id + " as " + patternStr(pat)
+                end
+
+                DAE.PAT_AS_FUNC_PTR(id, pat)  => begin
+                  id + " as " + patternStr(pat)
+                end
+
+                _  => begin
+                      Error.addMessage(Error.INTERNAL_ERROR, list("patternStr not implemented correctly"))
+                    "*PATTERN*"
+                end
+              end
+            end
+             #=  case DAE.PAT_CONSTANT(SOME(et),exp) then \"(\" + Types.unparseType(et) + \")\" + ExpressionDump.printExpStr(exp);
+             =#
+        str
+      end
 
          #= Helper function to printExpStr. =#
         function printExp2Str(inExp::DAE.Exp, stringDelimiter::String, opcreffunc::Option{<:Tuple{<:printComponentRefStrFunc, Type_a}} #= tuple of function that prints component references and an extra parameter passed through to the function =#, opcallfunc::Option{<:printCallFunc} #= function that prints function calls =#) ::String
@@ -1124,7 +1212,7 @@
                   end
 
                   (DAE.PATTERN(pattern = pat), _, _, _)  => begin
-                    Patternm.patternStr(pat)
+                    patternStr(pat)
                   end
 
                   (DAE.CODE(code = code), _, _, _)  => begin
@@ -1363,25 +1451,25 @@
                   local bodyStr::String
                 @match matchCase begin
                   DAE.CASE(patterns = patterns, body =  nil(), result = SOME(result))  => begin
-                      patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
+                      patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
                       resultStr = printExpStr(result)
                     stringAppendList(list("    case ", patternsStr, " then ", resultStr, ";\\n"))
                   end
 
                   DAE.CASE(patterns = patterns, body =  nil(), result = NONE())  => begin
-                      patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
+                      patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
                     stringAppendList(list("    case ", patternsStr, " then fail();\\n"))
                   end
 
                   DAE.CASE(patterns = patterns, body = body, result = SOME(result))  => begin
-                      patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
+                      patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
                       resultStr = printExpStr(result)
                       bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then ", resultStr, ";\\n"))
                   end
 
                   DAE.CASE(patterns = patterns, body = body, result = NONE())  => begin
-                      patternsStr = Patternm.patternStr(DAE.PAT_META_TUPLE(patterns))
+                      patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
                       bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then fail();\\n"))
                   end

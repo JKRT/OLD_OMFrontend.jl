@@ -52,7 +52,7 @@
         
         import FCoreUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import InstTypes
 
@@ -80,7 +80,7 @@
 
         import Flags
 
-        import FGraph
+        import FGraphUtil
 
         import FNode
 
@@ -101,17 +101,17 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
         InstDims = List
 
          #= instantiate an external object.
          This is done by instantiating the destructor and constructor
          functions and create a DAE element containing these two. =#
-        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuter.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, ClassInf.SMNode}
+        function instantiateExternalObject(inCache::FCore.Cache, inEnv::FCore.Graph #= environment =#, inIH::InnerOuterTypes.InstHierarchy, els::List{<:SCode.Element} #= elements =#, inMod::DAE.Mod, impl::Bool, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist, ClassInf.SMNode}
               local ciState::ClassInf.SMNode
               local dae::DAE.DAElist #= resulting dae =#
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -133,26 +133,26 @@
                    =#
                 @matchcontinue (inCache, inEnv, inIH, els, inMod, impl, comment, info) begin
                   (cache, env, ih, _, _, false, _, _)  => begin
-                      className = FNode.refName(FGraph.lastScopeRef(env))
+                      className = FNode.refName(FGraphUtil.lastScopeRef(env))
                       checkExternalObjectMod(inMod, className)
                       destr = SCodeUtil.getExternalObjectDestructor(els)
                       constr = SCodeUtil.getExternalObjectConstructor(els)
-                      env = FGraph.mkClassNode(env, destr, Prefix.NOPRE(), inMod)
-                      env = FGraph.mkClassNode(env, constr, Prefix.NOPRE(), inMod)
+                      env = FGraphUtil.mkClassNode(env, destr, Prefix.NOPRE(), inMod)
+                      env = FGraphUtil.mkClassNode(env, constr, Prefix.NOPRE(), inMod)
                       (cache, ih) = instantiateExternalObjectDestructor(cache, env, ih, destr)
                       (cache, ih, functp) = instantiateExternalObjectConstructor(cache, env, ih, constr)
-                      @match SOME(classNameFQ) = FGraph.getScopePath(env)
-                      (env, r) = FGraph.stripLastScopeRef(env)
-                      env = FGraph.mkTypeNode(env, className, functp)
-                      env = FGraph.pushScopeRef(env, r)
-                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
+                      @match SOME(classNameFQ) = FGraphUtil.getScopePath(env)
+                      (env, r) = FGraphUtil.stripLastScopeRef(env)
+                      env = FGraphUtil.mkTypeNode(env, className, functp)
+                      env = FGraphUtil.pushScopeRef(env, r)
+                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraphUtil.getScopePath(env))
                       source = ElementSource.addCommentToSource(source, SOME(comment))
                       source = ElementSource.addElementSourceFileInfo(source, info)
                     (cache, env, ih, DAE.DAE_LIST(list(DAE.EXTOBJECTCLASS(classNameFQ, source))), ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
 
                   (cache, _, ih, _, _, true, _, _)  => begin
-                      @match SOME(classNameFQ) = FGraph.getScopePath(inEnv)
+                      @match SOME(classNameFQ) = FGraphUtil.getScopePath(inEnv)
                     (cache, inEnv, ih, DAE.emptyDae, ClassInf.EXTERNAL_OBJ(classNameFQ))
                   end
 
@@ -211,8 +211,8 @@
         end
 
          #= instantiates the destructor function of an external object =#
-        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy}
-              local outIH::InnerOuter.InstHierarchy
+        function instantiateExternalObjectDestructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuterTypes.InstHierarchy}
+              local outIH::InnerOuterTypes.InstHierarchy
               local outCache::FCore.Cache
 
               (outCache, outIH) = begin
@@ -236,9 +236,9 @@
         end
 
          #= instantiates the constructor function of an external object =#
-        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.Type}
+        function instantiateExternalObjectConstructor(inCache::FCore.Cache, env::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, cl::SCode.Element) ::Tuple{FCore.Cache, InnerOuterTypes.InstHierarchy, DAE.Type}
               local outType::DAE.Type
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outCache::FCore.Cache
 
               (outCache, outIH, outType) = begin
@@ -266,8 +266,8 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
-              local outIH::InnerOuter.InstHierarchy
+        function implicitFunctionInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy}
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -307,7 +307,7 @@
                   (_, env, _, _, _, SCode.CLASS(name = n), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.implicitFunctionInstantiation failed " + n)
-                      Debug.traceln("  Scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
@@ -322,9 +322,9 @@
          #= This function instantiates a function, which is performed *implicitly*
           since the variables of a function should not be instantiated as for an
           ordinary class. =#
-        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
+        function implicitFunctionInstantiation2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, instFunctionTypeOnly::Bool #= if true, do no additional checking of the function =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{DAE.Function}}
               local funcs::List{DAE.Function}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -391,8 +391,8 @@
                       cache = instantiateDerivativeFuncs(cache, env, ih, derFuncs, fpath, info)
                       ty1 = InstUtil.setFullyQualifiedTypename(ty, fpath)
                       checkExtObjOutput(ty1, info)
-                      env_1 = FGraph.mkTypeNode(env_1, n, ty1)
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      env_1 = FGraphUtil.mkTypeNode(env_1, n, ty1)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       inlineType = InstUtil.commentIsInlineFunc(cmt)
                       partialPrefixBool = SCodeUtil.partialBool(partialPrefix)
                       daeElts = InstUtil.optimizeFunctionCheckForLocals(fpath, daeElts, NONE(), nil, nil, nil)
@@ -412,11 +412,11 @@
                       cache = instantiateDerivativeFuncs(cache, env, ih, derFuncs, fpath, info)
                       ty1 = InstUtil.setFullyQualifiedTypename(ty, fpath)
                       checkExtObjOutput(ty1, info)
-                      env_1 = FGraph.mkTypeNode(cenv, n, ty1)
+                      env_1 = FGraphUtil.mkTypeNode(cenv, n, ty1)
                       vis = SCode.PUBLIC()
                       (cache, tempenv, ih, _, _, _, _, _, _, _, _, _) = Inst.instClassdef(cache, env_1, ih, UnitAbsyn.noStore, mod, pre, ClassInf.FUNCTION(fpath, isImpure), n, parts, restr, vis, partialPrefix, encapsulatedPrefix, inst_dims, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE(), cmt, info) #= how to get this? impl =#
                       (cache, ih, extdecl) = instExtDecl(cache, tempenv, ih, n, scExtdecl, daeElts, ty1, true, pre, info) #= impl =#
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       partialPrefixBool = SCodeUtil.partialBool(partialPrefix)
                       InstUtil.checkExternalFunction(daeElts, extdecl, AbsynUtil.pathString(fpath))
                     (cache, env_1, ih, list(DAE.FUNCTION(fpath, _cons(DAE.FUNCTION_EXT(daeElts, extdecl), derFuncs), ty1, visibility, partialPrefixBool, isImpure, DAE.NO_INLINE(), source, SOME(cmt))))
@@ -432,14 +432,14 @@
                   (_, env, _, _, _, SCode.CLASS(name = n), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.implicitFunctionInstantiation2 failed " + n)
-                      Debug.traceln("  Scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
               end
                #=  External functions should also have their type in env, but no dae.
                =#
-               #= env_11 = FGraph.mkClassNode(cenv,pre,mod,c);
+               #= env_11 = FGraphUtil.mkClassNode(cenv,pre,mod,c);
                =#
                #=  Only created to be able to get FQ path.
                =#
@@ -456,7 +456,7 @@
 
          #= instantiates all functions found in derivative annotations so they are also added to the
         dae and can be generated code for in case they are required =#
-        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
+        function instantiateDerivativeFuncs(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuterTypes.InstHierarchy, funcs::List{<:DAE.FunctionDefinition}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
               local outCache::FCore.Cache
 
                #=  print(\"instantiate deriative functions for \"+AbsynUtil.pathString(path)+\"\\n\");
@@ -468,7 +468,7 @@
         end
 
          #= help function =#
-        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
+        function instantiateDerivativeFuncs2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPaths::List{<:Absyn.Path}, path::Absyn.Path #= the function name itself, must be added to derivative functions mapping to be able to search upwards =#, info::SourceInfo) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -512,7 +512,7 @@
                   _  => begin
                         @match _cons(p, _) = inPaths
                         fun = AbsynUtil.pathString(p)
-                        scope = FGraph.printGraphPathStr(inEnv)
+                        scope = FGraphUtil.printGraphPathStr(inEnv)
                         Error.addSourceMessage(Error.LOOKUP_FUNCTION_ERROR, list(fun, scope), info)
                       fail()
                   end
@@ -533,8 +533,8 @@
 
           Extended 2007-06-29, BZ
           Now this function also handles Derived function. =#
-        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
-              local outIH::InnerOuter.InstHierarchy
+        function implicitFunctionTypeInstantiation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inClass::SCode.Element) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy}
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -591,7 +591,7 @@
                       env_1 = env
                       (cache, fpath) = Inst.makeFullyQualifiedIdent(cache, env_1, id)
                       ty1 = InstUtil.setFullyQualifiedTypename(ty, fpath)
-                      env_1 = FGraph.mkTypeNode(env_1, id, ty1)
+                      env_1 = FGraphUtil.mkTypeNode(env_1, id, ty1)
                     (cache, env_1, ih)
                   end
 
@@ -602,7 +602,7 @@
 
                   (_, _, _, SCode.CLASS(name = id))  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.traceln("- Inst.implicitFunctionTypeInstantiation failed " + id + "\\nenv: " + FGraph.getGraphNameStr(inEnv) + "\\nelelement: " + SCodeDump.unparseElementStr(inClass, SCodeDump.defaultOptions))
+                      Debug.traceln("- Inst.implicitFunctionTypeInstantiation failed " + id + "\\nenv: " + FGraphUtil.getGraphNameStr(inEnv) + "\\nelelement: " + SCodeDump.unparseElementStr(inClass, SCodeDump.defaultOptions))
                     fail()
                   end
                 end
@@ -625,7 +625,7 @@
                =#
                #=  Makes MultiBody gravityacceleration hacks shit itself
                =#
-               #=  why would you want to do this: FGraph.mkClassNode(env,c); ?????
+               #=  why would you want to do this: FGraphUtil.mkClassNode(env,c); ?????
                =#
                #=  (cache,env_1,ih,_) = implicitFunctionInstantiation2(cache, env, ih, DAE.NOMOD(), Prefix.NOPRE(), inClass, {}, true);
                =#
@@ -635,9 +635,9 @@
          #= This function instantiates the functions in the overload list of a
           overloading function definition and register the function types using
           the overloaded name. It also creates dae elements for the functions. =#
-        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Function}}
+        function instOverloadedFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, inAbsynPathLst::List{<:Absyn.Path}, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{DAE.Function}}
               local outFns::List{DAE.Function}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -694,7 +694,7 @@
           that type. If no explicit call and only one output parameter exists, then
           this will be the return type of the function, otherwise the return type
           will be void. =#
-        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::InnerOuter.InstHierarchy, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, DAE.ExternalDecl}
+        function instExtDecl(cache::FCore.Cache, env::FCore.Graph, iH::InnerOuterTypes.InstHierarchy, name::String, inScExtDecl::SCode.ExternalDecl, inElements::List{<:DAE.Element}, funcType::DAE.Type, impl::Bool, pre::Prefix.PrefixType, info::SourceInfo) ::Tuple{FCore.Cache, InnerOuterTypes.InstHierarchy, DAE.ExternalDecl}
               local daeextdecl::DAE.ExternalDecl
 
 
@@ -834,9 +834,9 @@
                       (_, recordCl, recordEnv) = Lookup.lookupClass(inCache, inEnv, inPath)
                       @match true = SCodeUtil.isRecord(recordCl)
                       name = SCodeUtil.getElementName(recordCl)
-                      newName = FGraph.getInstanceOriginalName(recordEnv, name)
+                      newName = FGraphUtil.getInstanceOriginalName(recordEnv, name)
                       recordCl = SCodeUtil.setClassName(newName, recordCl)
-                      (cache, _, _, _, _, _, recType, _, _, _) = Inst.instClass(inCache, recordEnv, InnerOuter.emptyInstHierarchy, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), Prefix.NOPRE(), recordCl, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
+                      (cache, _, _, _, _, _, recType, _, _, _) = Inst.instClass(inCache, recordEnv, InnerOuterTypes.emptyInstHierarchy, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), Prefix.NOPRE(), recordCl, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       @match DAE.T_COMPLEX(ClassInf.RECORD(path), vars, eqCo) = recType
                       vars = Types.filterRecordComponents(vars, SCodeUtil.elementInfo(recordCl))
                       (inputs, locals) = ListUtil.extractOnTrue(vars, Types.isModifiableTypesVar)

@@ -44,7 +44,7 @@
 
         import System
         import FResolve
-        import FGraph
+        import FGraphUtil
         import ListUtil
 
         Name = FCore.Name 
@@ -78,7 +78,7 @@
                   local g::Graph
                 @match (inGraph, inPath) begin
                   (g, _)  => begin
-                      t = FGraph.top(g)
+                      t = FGraphUtil.top(g)
                       r = t
                     (g, r)
                   end
@@ -99,37 +99,37 @@
                   g  => begin
                       lst = nil
                       System.startTimer()
-                      g = FResolve.ext(FGraph.top(g), g)
+                      g = FResolve.ext(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("Extends:        " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.derived(FGraph.top(g), g)
+                      g = FResolve.derived(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("Derived:        " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.cc(FGraph.top(g), g)
+                      g = FResolve.cc(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("ConstrainedBy:  " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.clsext(FGraph.top(g), g)
+                      g = FResolve.clsext(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("ClassExtends:   " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.ty(FGraph.top(g), g)
+                      g = FResolve.ty(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("ComponentTypes: " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.cr(FGraph.top(g), g)
+                      g = FResolve.cr(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("Comp Refs:      " + realString(listHead(lst)) + "\\n")
                       System.startTimer()
-                      g = FResolve.mod(FGraph.top(g), g)
+                      g = FResolve.mod(FGraphUtil.top(g), g)
                       System.stopTimer()
                       lst = ListUtil.consr(lst, System.getTimerIntervalTime())
                       print("Modifiers:      " + realString(listHead(lst)) + "\\n")

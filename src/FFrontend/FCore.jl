@@ -465,6 +465,8 @@ end
   end
 end
 
+const emptyGraph = EG("empty")
+
 @Uniontype Top begin
   @Record GTOP begin
     graph::Array{Graph}

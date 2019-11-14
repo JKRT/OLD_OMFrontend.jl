@@ -1,4 +1,4 @@
-  module ElementSource 
+  module ElementSource
 
 
     using MetaModelica
@@ -11,12 +11,12 @@
         import Absyn
         import Algorithm
         import Error
-        import Expression
+        import CrefForHashTable
         import ListUtil
         import SCode
         import Flags
 
-        function myMergeSources(src1::DAE.ElementSource, src2::DAE.ElementSource) ::DAE.ElementSource 
+        function myMergeSources(src1::DAE.ElementSource, src2::DAE.ElementSource) ::DAE.ElementSource
               local myMergedSrc::DAE.ElementSource
 
               myMergedSrc = begin
@@ -47,7 +47,7 @@
                           Prefix.NOCOMPPRE(__)  => begin
                             instanceOpt2
                           end
-                          
+
                           _  => begin
                               instanceOpt1
                           end
@@ -65,7 +65,7 @@
           myMergedSrc
         end
 
-        function addCommentToSource(source::DAE.ElementSource, commentIn::Option{<:SCode.Comment}) ::DAE.ElementSource 
+        function addCommentToSource(source::DAE.ElementSource, commentIn::Option{<:SCode.Comment}) ::DAE.ElementSource
 
 
               source = begin
@@ -83,7 +83,7 @@
                       source.comment = _cons(comment, source.comment)
                     source
                   end
-                  
+
                   _  => begin
                       source
                   end
@@ -94,7 +94,7 @@
 
          #= @author: adrpo
          set the various sources of the element =#
-        function createElementSource(fileInfo::SourceInfo, partOf::Option{<:Absyn.Path} = NONE() #= the model(s) this element came from =#, prefix::Prefix.PrefixType = Prefix.NOPRE() #= the instance(s) this element is part of =#, connectEquation::Tuple{<:DAE.ComponentRef, DAE.ComponentRef} = (DAE.emptyCref, DAE.emptyCref) #= this element came from this connect(s) =#) ::DAE.ElementSource 
+        function createElementSource(fileInfo::SourceInfo, partOf::Option{<:Absyn.Path} = NONE() #= the model(s) this element came from =#, prefix::Prefix.PrefixType = Prefix.NOPRE() #= the instance(s) this element is part of =#, connectEquation::Tuple{<:DAE.ComponentRef, DAE.ComponentRef} = (DAE.emptyCref, DAE.emptyCref) #= this element came from this connect(s) =#) ::DAE.ElementSource
               local source::DAE.ElementSource
 
               local path::Absyn.Path
@@ -104,7 +104,7 @@
                   NONE()  => begin
                     nil
                   end
-                  
+
                   SOME(path)  => begin
                     list(Absyn.WITHIN(path))
                   end
@@ -114,7 +114,7 @@
                   Prefix.NOPRE(__)  => begin
                     Prefix.NOCOMPPRE()
                   end
-                  
+
                   Prefix.PREFIX(__)  => begin
                     prefix.compPre
                   end
@@ -124,7 +124,7 @@
                   (DAE.CREF_IDENT(ident = ""), _)  => begin
                     nil
                   end
-                  
+
                   _  => begin
                       list(connectEquation)
                   end
@@ -133,7 +133,7 @@
           source
         end
 
-        function addAdditionalComment(source::DAE.ElementSource, message::String) ::DAE.ElementSource 
+        function addAdditionalComment(source::DAE.ElementSource, message::String) ::DAE.ElementSource
               local outSource::DAE.ElementSource
 
               outSource = begin
@@ -162,7 +162,7 @@
           outSource
         end
 
-        function addAnnotation(source::DAE.ElementSource, comment::SCode.Comment) ::DAE.ElementSource 
+        function addAnnotation(source::DAE.ElementSource, comment::SCode.Comment) ::DAE.ElementSource
               local outSource::DAE.ElementSource
 
               outSource = begin
@@ -179,7 +179,7 @@
                   (DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, operations, commentLst), SCode.COMMENT(annotation_ = SOME(_)))  => begin
                     DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, operations, _cons(comment, commentLst))
                   end
-                  
+
                   _  => begin
                       source
                   end
@@ -188,7 +188,7 @@
           outSource
         end
 
-        function getCommentsFromSource(source::DAE.ElementSource) ::List{SCode.Comment} 
+        function getCommentsFromSource(source::DAE.ElementSource) ::List{SCode.Comment}
               local outComments::List{SCode.Comment}
 
               outComments = begin
@@ -202,7 +202,7 @@
           outComments
         end
 
-        function addSymbolicTransformation(source::DAE.ElementSource, op::DAE.SymbolicOperation) ::DAE.ElementSource 
+        function addSymbolicTransformation(source::DAE.ElementSource, op::DAE.SymbolicOperation) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -223,11 +223,11 @@
                   local es::List{DAE.Exp}
                   local comment::List{SCode.Comment}
                 @match (source, op) begin
-                  (DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, DAE.SUBSTITUTION(es1 && h1 <| _, t1) <| operations, comment), DAE.SUBSTITUTION(es2, t2)) where (Expression.expEqual(t2, h1))  => begin
+                  (DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, DAE.SUBSTITUTION(es1 && h1 <| _, t1) <| operations, comment), DAE.SUBSTITUTION(es2, t2)) where (CrefForHashTable.expEqual(t2, h1))  => begin
                       es = listAppend(es2, es1)
                     DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, _cons(DAE.SUBSTITUTION(es, t1), operations), comment)
                   end
-                  
+
                   (DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, operations, comment), _)  => begin
                     DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, _cons(op, operations), comment)
                   end
@@ -242,7 +242,7 @@
           source
         end
 
-        function condAddSymbolicTransformation(cond::Bool, source::DAE.ElementSource, op::DAE.SymbolicOperation) ::DAE.ElementSource 
+        function condAddSymbolicTransformation(cond::Bool, source::DAE.ElementSource, op::DAE.SymbolicOperation) ::DAE.ElementSource
 
 
               if ! cond
@@ -252,7 +252,7 @@
           source
         end
 
-        function addSymbolicTransformationDeriveLst(source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource 
+        function addSymbolicTransformationDeriveLst(source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -268,7 +268,7 @@
                   ( nil(), _)  => begin
                     source
                   end
-                  
+
                   (exp1 <| rexplst1, exp2 <| rexplst2)  => begin
                       op = DAE.OP_DIFFERENTIATE(DAE.crefTime, exp1, exp2)
                       source = addSymbolicTransformation(source, op)
@@ -279,7 +279,7 @@
           source
         end
 
-        function addSymbolicTransformationFlattenedEqs(source::DAE.ElementSource, elt::DAE.Element) ::DAE.ElementSource 
+        function addSymbolicTransformationFlattenedEqs(source::DAE.ElementSource, elt::DAE.Element) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -302,7 +302,7 @@
                   (DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, DAE.FLATTEN(scode, NONE()) <| operations, comment), _)  => begin
                     DAE.SOURCE(info, partOfLst, instanceOpt, connectEquationOptLst, typeLst, _cons(DAE.FLATTEN(scode, SOME(elt)), operations), comment)
                   end
-                  
+
                   (DAE.SOURCE(info = info), _)  => begin
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list("Tried to add the flattened elements to the list of operations, but did not find the SCode equation"), info)
                     fail()
@@ -312,7 +312,7 @@
           source
         end
 
-        function addSymbolicTransformationSubstitutionLst(add::List{<:Bool}, source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource 
+        function addSymbolicTransformationSubstitutionLst(add::List{<:Bool}, source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -328,12 +328,12 @@
                   ( nil(), _, _)  => begin
                     source
                   end
-                  
+
                   (true <| brest, exp1 <| rexplst1, exp2 <| rexplst2)  => begin
                       source = addSymbolicTransformationSubstitution(true, source, exp1, exp2)
                     addSymbolicTransformationSubstitutionLst(brest, source, rexplst1, rexplst2)
                   end
-                  
+
                   (false <| brest, _ <| rexplst1, _ <| rexplst2)  => begin
                     addSymbolicTransformationSubstitutionLst(brest, source, rexplst1, rexplst2)
                   end
@@ -342,7 +342,7 @@
           source
         end
 
-        function addSymbolicTransformationSubstitution(add::Bool, source::DAE.ElementSource, exp1::DAE.Exp, exp2::DAE.Exp) ::DAE.ElementSource 
+        function addSymbolicTransformationSubstitution(add::Bool, source::DAE.ElementSource, exp1::DAE.Exp, exp2::DAE.Exp) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -352,7 +352,7 @@
           source
         end
 
-        function addSymbolicTransformationSimplifyLst(add::List{<:Bool}, source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource 
+        function addSymbolicTransformationSimplifyLst(add::List{<:Bool}, source::DAE.ElementSource, explst1::List{<:DAE.Exp}, explst2::List{<:DAE.Exp}) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -368,12 +368,12 @@
                   ( nil(), _, _)  => begin
                     source
                   end
-                  
+
                   (true <| brest, exp1 <| rexplst1, exp2 <| rexplst2)  => begin
                       source = addSymbolicTransformation(source, DAE.SIMPLIFY(DAE.PARTIAL_EQUATION(exp1), DAE.PARTIAL_EQUATION(exp2)))
                     addSymbolicTransformationSimplifyLst(brest, source, rexplst1, rexplst2)
                   end
-                  
+
                   (false <| brest, _ <| rexplst1, _ <| rexplst2)  => begin
                     addSymbolicTransformationSimplifyLst(brest, source, rexplst1, rexplst2)
                   end
@@ -382,7 +382,7 @@
           source
         end
 
-        function addSymbolicTransformationSimplify(add::Bool, source::DAE.ElementSource, exp1::DAE.EquationExp, exp2::DAE.EquationExp) ::DAE.ElementSource 
+        function addSymbolicTransformationSimplify(add::Bool, source::DAE.ElementSource, exp1::DAE.EquationExp, exp2::DAE.EquationExp) ::DAE.ElementSource
 
 
               if ! Flags.isSet(Flags.INFO_XML_OPERATIONS)
@@ -392,7 +392,7 @@
           source
         end
 
-        function addSymbolicTransformationSolve(add::Bool, source::DAE.ElementSource, cr::DAE.ComponentRef, exp1::DAE.Exp, exp2::DAE.Exp, exp::DAE.Exp, asserts::List{<:DAE.Statement}) ::DAE.ElementSource 
+        function addSymbolicTransformationSolve(add::Bool, source::DAE.ElementSource, cr::DAE.ComponentRef, exp1::DAE.Exp, exp2::DAE.Exp, exp::DAE.Exp, asserts::List{<:DAE.Statement}) ::DAE.ElementSource
 
 
               local op::DAE.SymbolicOperation
@@ -404,7 +404,7 @@
               end
               op1 = DAE.SOLVE(cr, exp1, exp2, exp, list(Algorithm.getAssertCond(ass) for ass in asserts))
               op2 = DAE.SOLVED(cr, exp2) #= If it was already on solved form =#
-              op = if Expression.expEqual(exp2, exp)
+              op = if CrefForHashTable.expEqual(exp2, exp)
                     op2
                   else
                     op1
@@ -413,14 +413,14 @@
           source
         end
 
-        function getSymbolicTransformations(source::DAE.ElementSource) ::List{DAE.SymbolicOperation} 
+        function getSymbolicTransformations(source::DAE.ElementSource) ::List{DAE.SymbolicOperation}
               local ops::List{DAE.SymbolicOperation}
 
               ops = source.operations
           ops
         end
 
-        function getElementSource(element::DAE.Element) ::DAE.ElementSource 
+        function getElementSource(element::DAE.Element) ::DAE.ElementSource
               local source::DAE.ElementSource
 
               source = begin
@@ -428,103 +428,103 @@
                   DAE.VAR(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.DEFINE(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIALDEFINE(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.EQUEQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.ARRAY_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_ARRAY_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.COMPLEX_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_COMPLEX_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.WHEN_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.IF_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_IF_EQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIALEQUATION(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.ALGORITHM(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIALALGORITHM(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.COMP(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.EXTOBJECTCLASS(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.ASSERT(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_ASSERT(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.TERMINATE(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_TERMINATE(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.REINIT(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.NORETCALL(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.CONSTRAINT(__)  => begin
                     element.source
                   end
-                  
+
                   DAE.INITIAL_NORETCALL(__)  => begin
                     element.source
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("ElementSource.getElementSource failed: Element does not have a source"))
                       fail()
@@ -535,7 +535,7 @@
         end
 
          #= Returns the element source associated with a statement. =#
-        function getStatementSource(stmt::DAE.Statement) ::DAE.ElementSource 
+        function getStatementSource(stmt::DAE.Statement) ::DAE.ElementSource
               local source::DAE.ElementSource
 
               source = begin
@@ -543,63 +543,63 @@
                   DAE.STMT_ASSIGN(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_TUPLE_ASSIGN(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_ASSIGN_ARR(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_IF(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_FOR(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_PARFOR(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_WHILE(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_WHEN(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_ASSERT(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_TERMINATE(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_REINIT(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_NORETCALL(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_RETURN(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_BREAK(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_ARRAY_INIT(__)  => begin
                     stmt.source
                   end
-                  
+
                   DAE.STMT_FAILURE(__)  => begin
                     stmt.source
                   end
@@ -610,18 +610,18 @@
 
          #= Gets the file information associated with an element.
         If there are several candidates, select the first one. =#
-        function getElementSourceFileInfo(source::DAE.ElementSource) ::SourceInfo 
+        function getElementSourceFileInfo(source::DAE.ElementSource) ::SourceInfo
               local info::SourceInfo
 
               info = source.info
           info
         end
-        
+
         getInfo = getElementSourceFileInfo
 
          #= @author: adrpo
          retrieves the paths from the DAE.ElementSource.SOURCE.typeLst =#
-        function getElementSourceTypes(source::DAE.ElementSource #= the source of the element =#) ::List{Absyn.Path} 
+        function getElementSourceTypes(source::DAE.ElementSource #= the source of the element =#) ::List{Absyn.Path}
               local pathLst::List{Absyn.Path}
 
               pathLst = source.typeLst
@@ -630,7 +630,7 @@
 
          #= @author: adrpo
          retrieves the paths from the DAE.ElementSource.SOURCE.instanceOpt =#
-        function getElementSourceInstances(source::DAE.ElementSource #= the source of the element =#) ::Prefix.ComponentPrefix 
+        function getElementSourceInstances(source::DAE.ElementSource #= the source of the element =#) ::Prefix.ComponentPrefix
               local instanceOpt::Prefix.ComponentPrefix
 
               instanceOpt = source.instance
@@ -639,7 +639,7 @@
 
          #= @author: adrpo
          retrieves the paths from the DAE.ElementSource.SOURCE.connectEquationOptLst =#
-        function getElementSourceConnects(source::DAE.ElementSource #= the source of the element =#) ::List{Tuple{DAE.ComponentRef, DAE.ComponentRef}} 
+        function getElementSourceConnects(source::DAE.ElementSource #= the source of the element =#) ::List{Tuple{DAE.ComponentRef, DAE.ComponentRef}}
               local connectEquationOptLst::List{Tuple{DAE.ComponentRef, DAE.ComponentRef}}
 
               connectEquationOptLst = source.connectEquationOptLst
@@ -648,14 +648,14 @@
 
          #= @author: adrpo
          retrieves the withins from the DAE.ElementSource.SOURCE.partOfLst =#
-        function getElementSourcePartOfs(source::DAE.ElementSource #= the source of the element =#) ::List{Absyn.Within} 
+        function getElementSourcePartOfs(source::DAE.ElementSource #= the source of the element =#) ::List{Absyn.Within}
               local withinLst::List{Absyn.Within}
 
               withinLst = source.partOfLst
           withinLst
         end
 
-        function addElementSourcePartOf(source::DAE.ElementSource, withinPath::Absyn.Within) ::DAE.ElementSource 
+        function addElementSourcePartOf(source::DAE.ElementSource, withinPath::Absyn.Within) ::DAE.ElementSource
 
 
               if ! (Flags.isSet(Flags.INFO_XML_OPERATIONS) || Flags.isSet(Flags.VISUAL_XML))
@@ -665,7 +665,7 @@
           source
         end
 
-        function addElementSourcePartOfOpt(source::DAE.ElementSource, classPathOpt::Option{<:Absyn.Path}) ::DAE.ElementSource 
+        function addElementSourcePartOfOpt(source::DAE.ElementSource, classPathOpt::Option{<:Absyn.Path}) ::DAE.ElementSource
 
 
               if ! (Flags.isSet(Flags.INFO_XML_OPERATIONS) || Flags.isSet(Flags.VISUAL_XML))
@@ -679,7 +679,7 @@
                   (_, NONE())  => begin
                     source
                   end
-                  
+
                   (_, SOME(classPath))  => begin
                     addElementSourcePartOf(source, Absyn.WITHIN(classPath))
                   end
@@ -688,14 +688,14 @@
           source
         end
 
-        function addElementSourceFileInfo(source::DAE.ElementSource, fileInfo::SourceInfo) ::DAE.ElementSource 
+        function addElementSourceFileInfo(source::DAE.ElementSource, fileInfo::SourceInfo) ::DAE.ElementSource
               local outSource::DAE.ElementSource = source
 
               outSource.info = fileInfo
           outSource
         end
 
-        function addElementSourceConnect(inSource::DAE.ElementSource, connectEquationOpt::Tuple{<:DAE.ComponentRef, DAE.ComponentRef}) ::DAE.ElementSource 
+        function addElementSourceConnect(inSource::DAE.ElementSource, connectEquationOpt::Tuple{<:DAE.ComponentRef, DAE.ComponentRef}) ::DAE.ElementSource
               local outSource::DAE.ElementSource
 
               outSource = begin
@@ -717,7 +717,7 @@
           outSource
         end
 
-        function addElementSourceType(source::DAE.ElementSource, classPath::Absyn.Path) ::DAE.ElementSource 
+        function addElementSourceType(source::DAE.ElementSource, classPath::Absyn.Path) ::DAE.ElementSource
 
 
               if ! (Flags.isSet(Flags.INFO_XML_OPERATIONS) || Flags.isSet(Flags.VISUAL_XML))
@@ -740,7 +740,7 @@
           source
         end
 
-        function addElementSourceInstanceOpt(source::DAE.ElementSource, instanceOpt::Prefix.ComponentPrefix) ::DAE.ElementSource 
+        function addElementSourceInstanceOpt(source::DAE.ElementSource, instanceOpt::Prefix.ComponentPrefix) ::DAE.ElementSource
 
 
               () = begin
@@ -748,7 +748,7 @@
                   (_, Prefix.NOCOMPPRE(__))  => begin
                     ()
                   end
-                  
+
                   (DAE.SOURCE(__), _)  => begin
                        #=  a NONE() means top level (equivalent to NO_PRE, SOME(cref) means subcomponent
                        =#

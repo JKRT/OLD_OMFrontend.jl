@@ -1333,7 +1333,7 @@ module InnerOuter
           function lastScopeRef(inGraph::FCore.Graph)::MMRef
             outRef = listHead(currentScope(inGraph))
           end
-          
+
           local outEnv::FCore.Graph
               outEnv = begin
                   local envIn::FCore.Graph
@@ -1668,7 +1668,7 @@ function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, in
     outString
   end
 
-  
+
               local outIH::InstHierarchy
               outIH = begin
                   local name::String
@@ -1934,7 +1934,7 @@ function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, in
                    =#
                 @match (inIH, inEnv) begin
                   ( nil(), _)  => begin
-                    "There are no 'inner' components defined in the model in any of the parent scopes of 'outer' component's scope: " + "FGraph.printGraphPathStr(inEnv)" + "."
+                    "There are no 'inner' components defined in the model in any of the parent scopes of 'outer' component's scope: " + "FGraphUtil.printGraphPathStr(inEnv)" + "."
                   end
 
                   (TOP_INSTANCE(_, ht, _, _) <| _, _)  => begin

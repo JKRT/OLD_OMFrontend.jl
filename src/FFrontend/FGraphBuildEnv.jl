@@ -753,7 +753,7 @@ function mkTypeNode(inTypes::List{<:DAE.Type} #= the types to add =#, inParentRe
       end
 
       _  => begin
-        pr = FGraph.top(inGraph)
+        pr = FGraphUtil.top(inGraph)
         print("FGraphBuildEnv.mkTypeNode: Error making type node: " + inName + " in parent: " + FNode.name(FNode.fromRef(pr)) + "\\n")
         inGraph
       end
@@ -792,7 +792,7 @@ function mkEqNode(inName::Name, inEqs::List{<:SCode.Equation}, inParentRef::MMRe
       end
 
       (_, _, _, _, g)  => begin
-        (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.EQ(inName, inEqs))
+        (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.EQ(inName, inEqs))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, inName, nr)
         g = ListUtil.fold2(inEqs, analyseEquation, nr, inKind, g)
@@ -817,7 +817,7 @@ function mkAlNode(inName::Name, inAlgs::List{<:SCode.AlgorithmSection}, inParent
       end
 
       (_, _, _, _, g)  => begin
-        (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.AL(inName, inAlgs))
+        (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.AL(inName, inAlgs))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, inName, nr)
         g = ListUtil.fold2(inAlgs, analyseAlgorithm, nr, inKind, g)
@@ -842,7 +842,7 @@ function mkOptNode(inName::Name, inConstraintLst::List{<:SCode.ConstraintSection
       end
 
       (_, _, _, _, _, g)  => begin
-        (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.OT(inConstraintLst, inClsAttrs))
+        (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.OT(inConstraintLst, inClsAttrs))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, inName, nr)
         g
@@ -870,7 +870,7 @@ function mkExternalNode(inName::Name, inExternalDeclOpt::Option{<:SCode.External
       end
 
       (_, SOME(ed && SCode.EXTERNALDECL(output_ = ocr, args = exps)), _, _, g)  => begin
-        (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.ED(ed))
+        (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.ED(ed))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, inName, nr)
         oae = Util.applyOption(ocr, AbsynUtil.crefExp)
@@ -1163,7 +1163,7 @@ function addIterators(inIterators::Absyn.ForIterators, inParentRef::MMRef, inKin
       end
 
       (_, _, _, g)  => begin
-        (g, n) = FGraph.node(g, FNode.forNodeName, list(inParentRef), FCore.FS(inIterators))
+        (g, n) = FGraphUtil.node(g, FNode.forNodeName, list(inParentRef), FCore.FS(inIterators))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, FNode.forNodeName, nr)
         g = addIterators_helper(inIterators, nr, inKind, g)
@@ -1196,7 +1196,7 @@ function addIterators_helper(inIterators::Absyn.ForIterators, inParentRef::MMRef
       end
 
       (i && Absyn.ITERATOR(name = name) <| rest, _, _, g)  => begin
-        (g, n) = FGraph.node(g, name, list(inParentRef), FCore.FI(i))
+        (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.FI(i))
         nr = FNode.toRef(n)
         FNode.addChildRef(inParentRef, name, nr)
         g = addIterators_helper(rest, inParentRef, inKind, g)
@@ -1219,7 +1219,7 @@ function addMatchScope(inMatchExp::Absyn.Exp, inParentRef::MMRef, inKind::Kind, 
   local local_decls::List{Absyn.ElementItem}
   local g::Graph
 
-  (g, n) = FGraph.node(inGraph, FNode.matchNodeName, list(inParentRef), FCore.MS(inMatchExp))
+  (g, n) = FGraphUtil.node(inGraph, FNode.matchNodeName, list(inParentRef), FCore.MS(inMatchExp))
   nr = FNode.toRef(n)
   FNode.addChildRef(inParentRef, FNode.matchNodeName, nr)
   @match Absyn.MATCHEXP(localDecls = local_decls) = inMatchExp
@@ -1279,7 +1279,7 @@ function mkRefNode(inName::Name, inTargetScope::Scope, inParentRef::MMRef, inGra
     local g::Graph
     @match (inName, inTargetScope, inParentRef, inGraph) begin
       (_, _, _, g)  => begin
-        (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.REF(inTargetScope))
+        (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.REF(inTargetScope))
         rn = FNode.toRef(n)
         FNode.addChildRef(inParentRef, inName, rn)
         g

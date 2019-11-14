@@ -1,4 +1,4 @@
-  module CevalFunction 
+  module CevalFunction
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl LoopControl 
+    @UniontypeDecl LoopControl
 
          #= /*
          * This file is part of OpenModelica.
@@ -62,7 +62,7 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import SCode
@@ -107,13 +107,13 @@
 
         import ValuesUtil
 
-        import FGraph
+        import FGraphUtil
 
         import FNode
          #=  [TYPE]  Types
          =#
 
-        FunctionVar = Tuple 
+        FunctionVar = Tuple
          #=  LoopControl is used to control the functions behaviour in different
          =#
          #=  situations. All evaluation functions returns a LoopControl variable that
@@ -140,7 +140,7 @@
 
          #= This is the entry point of CevalFunction. This function constant evaluates a
           function given an instantiated function and a list of function arguments. =#
-        function evaluate(inCache::FCore.Cache, inEnv::FCore.Graph, inFunction::DAE.Function, inFunctionArguments::List{<:Values.Value}) ::Tuple{FCore.Cache, Values.Value} 
+        function evaluate(inCache::FCore.Cache, inEnv::FCore.Graph, inFunction::DAE.Function, inFunctionArguments::List{<:Values.Value}) ::Tuple{FCore.Cache, Values.Value}
               local outResult::Values.Value
               local outCache::FCore.Cache
 
@@ -165,7 +165,7 @@
                       (cache, result) = evaluateFunctionDefinition(inCache, inEnv, func_name, func, ty, inFunctionArguments, src)
                     (cache, result)
                   end
-                  
+
                   (_, _, DAE.FUNCTION(path = p, functions = _ <| _, partialPrefix = partialPrefix), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- CevalFunction.evaluate failed for function: " + (if partialPrefix
@@ -181,7 +181,7 @@
         end
 
          #= This function constant evaluates a function definition. =#
-        function evaluateFunctionDefinition(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncName::String, inFunc::DAE.FunctionDefinition, inFuncType::DAE.Type, inFuncArgs::List{<:Values.Value}, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, Values.Value} 
+        function evaluateFunctionDefinition(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncName::String, inFunc::DAE.FunctionDefinition, inFuncType::DAE.Type, inFuncArgs::List{<:Values.Value}, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, Values.Value}
               local outResult::Values.Value
               local outCache::FCore.Cache
 
@@ -210,7 +210,7 @@
                       return_value = boxReturnValue(return_values)
                     (cache, return_value)
                   end
-                  
+
                   (_, _, _, DAE.FUNCTION_EXT(body = body, externalDecl = DAE.EXTERNALDECL(name = ext_fun_name, args = ext_fun_args)), _, _, _)  => begin
                       (vars, _) = ListUtil.splitOnFirstMatch(body, DAEUtil.isNotVar)
                       vars = ListUtil.map(vars, removeSelfReferentialDims)
@@ -223,7 +223,7 @@
                       return_value = boxReturnValue(return_values)
                     (cache, return_value)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- CevalFunction.evaluateFunction failed.\\n")
@@ -276,7 +276,7 @@
           each input parameter get one input argument. This is done since we sort the
           function variables by dependencies, and need to keep track of which argument
           belongs to which parameter. =#
-        function pairFuncParamsWithArgs(inElements::List{<:DAE.Element}, inValues::List{<:Values.Value}) ::List{FunctionVar} 
+        function pairFuncParamsWithArgs(inElements::List{<:DAE.Element}, inValues::List{<:Values.Value}) ::List{FunctionVar}
               local outFunctionVars::List{FunctionVar}
 
               outFunctionVars = begin
@@ -289,18 +289,18 @@
                   ( nil(),  nil())  => begin
                     nil
                   end
-                  
+
                   (DAE.VAR(direction = DAE.INPUT(__)) <| _,  nil())  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- CevalFunction.pairFuncParamsWithArgs failed because of too few input arguments.\\n")
                     fail()
                   end
-                  
+
                   (var && DAE.VAR(direction = DAE.INPUT(__)) <| rest_vars, val <| rest_vals)  => begin
                       params = pairFuncParamsWithArgs(rest_vars, rest_vals)
                     _cons((var, SOME(val)), params)
                   end
-                  
+
                   (var <| rest_vars, _)  => begin
                       params = pairFuncParamsWithArgs(rest_vars, inValues)
                     _cons((var, NONE()), params)
@@ -312,7 +312,7 @@
 
          #= We can't handle self-referential dimensions in function parameters, i.e.
            x[:, size(x, 1)], so just replace them with : instead. =#
-        function removeSelfReferentialDims(inElement::DAE.Element) ::DAE.Element 
+        function removeSelfReferentialDims(inElement::DAE.Element) ::DAE.Element
               local outElement::DAE.Element
 
               outElement = begin
@@ -340,7 +340,7 @@
           outElement
         end
 
-        function removeSelfReferentialDim(inDim::DAE.Dimension, inName::String) ::DAE.Dimension 
+        function removeSelfReferentialDim(inDim::DAE.Dimension, inName::String) ::DAE.Dimension
               local outDim::DAE.Dimension
 
               outDim = begin
@@ -352,7 +352,7 @@
                       @match true = ListUtil.isMemberOnTrue(inName, crefs, isCrefNamed)
                     DAE.DIM_UNKNOWN()
                   end
-                  
+
                   _  => begin
                       inDim
                   end
@@ -361,7 +361,7 @@
           outDim
         end
 
-        function isCrefNamed(inName::String, inCref::DAE.ComponentRef) ::Bool 
+        function isCrefNamed(inName::String, inCref::DAE.ComponentRef) ::Bool
               local outIsNamed::Bool
 
               outIsNamed = begin
@@ -370,7 +370,7 @@
                   (_, DAE.CREF_IDENT(ident = name))  => begin
                     stringEq(inName, name)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -380,7 +380,7 @@
         end
 
          #= Evaluates an external function argument to a value. =#
-        function evaluateExtInputArg(inArgument::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Values.Value, FCore.Cache} 
+        function evaluateExtInputArg(inArgument::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Values.Value, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::Values.Value
 
@@ -396,18 +396,18 @@
                       val = getVariableValue(cref, ty, inEnv)
                     (val, inCache)
                   end
-                  
+
                   (DAE.EXTARGEXP(exp = exp), cache, _)  => begin
                       (cache, val) = cevalExp(exp, cache, inEnv)
                     (val, cache)
                   end
-                  
+
                   (DAE.EXTARGSIZE(componentRef = cref, exp = exp), cache, _)  => begin
                       exp = DAE.SIZE(DAE.CREF(cref, DAE.T_UNKNOWN_DEFAULT), SOME(exp))
                       (cache, val) = cevalExp(exp, cache, inEnv)
                     (val, cache)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         err_str = DAEDump.dumpExtArgStr(inArgument)
@@ -420,7 +420,7 @@
         end
 
          #= Evaluates an external function argument to an Integer. =#
-        function evaluateExtIntArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{ModelicaInteger, FCore.Cache} 
+        function evaluateExtIntArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{ModelicaInteger, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::ModelicaInteger
 
@@ -429,7 +429,7 @@
         end
 
          #= Evaluates an external function argument to a Real. =#
-        function evaluateExtRealArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{ModelicaReal, FCore.Cache} 
+        function evaluateExtRealArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{ModelicaReal, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::ModelicaReal
 
@@ -438,7 +438,7 @@
         end
 
          #= Evaluates an external function argument to a String. =#
-        function evaluateExtStringArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{String, FCore.Cache} 
+        function evaluateExtStringArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{String, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::String
 
@@ -447,7 +447,7 @@
         end
 
          #= Evaluates an external function argument to an Integer array. =#
-        function evaluateExtIntArrayArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{ModelicaInteger}, FCore.Cache} 
+        function evaluateExtIntArrayArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{ModelicaInteger}, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::List{ModelicaInteger}
 
@@ -459,7 +459,7 @@
         end
 
          #= Evaluates an external function argument to a Real array. =#
-        function evaluateExtRealArrayArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{ModelicaReal}, FCore.Cache} 
+        function evaluateExtRealArrayArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{ModelicaReal}, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::List{ModelicaReal}
 
@@ -471,7 +471,7 @@
         end
 
          #= Evaluates an external function argument to a Real matrix. =#
-        function evaluateExtRealMatrixArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{List{ModelicaReal}}, FCore.Cache} 
+        function evaluateExtRealMatrixArg(inArg::DAE.ExtArg, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{List{List{ModelicaReal}}, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::List{List{ModelicaReal}}
 
@@ -483,7 +483,7 @@
         end
 
          #= Returns the component reference to an external function output. =#
-        function evaluateExtOutputArg(inArg::DAE.ExtArg) ::DAE.ComponentRef 
+        function evaluateExtOutputArg(inArg::DAE.ExtArg) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               @match DAE.EXTARG(componentRef = outCref) = inArg
@@ -492,7 +492,7 @@
 
          #= Assigns the outputs from an external function to the correct variables in the
           environment. =#
-        function assignExtOutputs(inArgs::List{<:DAE.ExtArg}, inValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function assignExtOutputs(inArgs::List{<:DAE.ExtArg}, inValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -508,7 +508,7 @@
                   ( nil(),  nil(), _, _)  => begin
                     (inCache, inEnv)
                   end
-                  
+
                   (arg <| rest_args, val <| rest_vals, cache, env)  => begin
                       cr = evaluateExtOutputArg(arg)
                       val = unliftExtOutputValue(cr, val, env)
@@ -524,7 +524,7 @@
          #= Some external functions don't make much difference between arrays and
           matrices, so this function converts a matrix value to an array value when
           needed. =#
-        function unliftExtOutputValue(inCref::DAE.ComponentRef, inValue::Values.Value, inEnv::FCore.Graph) ::Values.Value 
+        function unliftExtOutputValue(inCref::DAE.ComponentRef, inValue::Values.Value, inEnv::FCore.Graph) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -541,7 +541,7 @@
                       vals = ListUtil.map(vals, ValuesUtil.arrayScalar)
                     Values.ARRAY(vals, list(dim))
                   end
-                  
+
                   _  => begin
                       inValue
                   end
@@ -555,7 +555,7 @@
          #= This function evaluates an external function, at the moment this means a
           LAPACK function. This function was automatically generated. No programmers
           were hurt during the generation of this function. =#
-        function evaluateExternalFunc(inFuncName::String, inFuncArgs::List{<:DAE.ExtArg}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function evaluateExternalFunc(inFuncName::String, inFuncArgs::List{<:DAE.ExtArg}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -702,7 +702,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgegv", arg_JOBVL <| arg_JOBVR <| arg_N <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_ALPHAR <| arg_ALPHAI <| arg_BETA <| arg_VL <| arg_LDVL <| arg_VR <| arg_LDVR <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (JOBVL, cache) = evaluateExtStringArg(arg_JOBVL, cache, env)
                       (JOBVR, cache) = evaluateExtStringArg(arg_JOBVR, cache, env)
@@ -728,7 +728,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgels", arg_TRANS <| arg_M <| arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (TRANS, cache) = evaluateExtStringArg(arg_TRANS, cache, env)
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
@@ -750,7 +750,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgelsx", arg_M <| arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_JPVT <| arg_RCOND <| arg_RANK <| arg_WORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -773,7 +773,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgelsx", arg_M <| arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_JPVT <| arg_RCOND <| arg_RANK <| arg_WORK <| _ <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -796,7 +796,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgelsy", arg_M <| arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_JPVT <| arg_RCOND <| arg_RANK <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -821,7 +821,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgesv", arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_IPIV <| arg_B <| arg_LDB <| arg_INFO <|  nil(), cache, env)  => begin
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
                       (NRHS, cache) = evaluateExtIntArg(arg_NRHS, cache, env)
@@ -839,7 +839,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgglse", arg_M <| arg_N <| arg_P <| arg_A <| arg_LDA <| arg_B <| arg_LDB <| arg_C <| arg_D <| arg_X <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -865,7 +865,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgtsv", arg_N <| arg_NRHS <| arg_DL <| arg_D <| arg_DU <| arg_B <| arg_LDB <| arg_INFO <|  nil(), cache, env)  => begin
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
                       (NRHS, cache) = evaluateExtIntArg(arg_NRHS, cache, env)
@@ -885,7 +885,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgbsv", arg_N <| arg_KL <| arg_KU <| arg_NRHS <| arg_AB <| arg_LDAB <| arg_IPIV <| arg_B <| arg_LDB <| arg_INFO <|  nil(), cache, env)  => begin
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
                       (KL, cache) = evaluateExtIntArg(arg_KL, cache, env)
@@ -905,7 +905,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgesvd", arg_JOBU <| arg_JOBVT <| arg_M <| arg_N <| arg_A <| arg_LDA <| arg_S <| arg_U <| arg_LDU <| arg_VT <| arg_LDVT <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (JOBU, cache) = evaluateExtStringArg(arg_JOBU, cache, env)
                       (JOBVT, cache) = evaluateExtStringArg(arg_JOBVT, cache, env)
@@ -929,7 +929,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgetrf", arg_M <| arg_N <| arg_A <| arg_LDA <| arg_IPIV <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -944,7 +944,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgetrs", arg_TRANS <| arg_N <| arg_NRHS <| arg_A <| arg_LDA <| arg_IPIV <| arg_B <| arg_LDB <| arg_INFO <|  nil(), cache, env)  => begin
                       (TRANS, cache) = evaluateExtStringArg(arg_TRANS, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -962,7 +962,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgetri", arg_N <| arg_A <| arg_LDA <| arg_IPIV <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
                       (A, cache) = evaluateExtRealMatrixArg(arg_A, cache, env)
@@ -979,7 +979,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dgeqpf", arg_M <| arg_N <| arg_A <| arg_LDA <| arg_JPVT <| arg_TAU <| arg_WORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -997,7 +997,7 @@
                       (cache, env) = assignExtOutputs(arg_out, val_out, cache, env)
                     (cache, env)
                   end
-                  
+
                   ("dorgqr", arg_M <| arg_N <| arg_K <| arg_A <| arg_LDA <| arg_TAU <| arg_WORK <| arg_LWORK <| arg_INFO <|  nil(), cache, env)  => begin
                       (M, cache) = evaluateExtIntArg(arg_M, cache, env)
                       (N, cache) = evaluateExtIntArg(arg_N, cache, env)
@@ -1022,7 +1022,7 @@
         end
 
          #= This function evaluates a list of elements. =#
-        function evaluateElements(inElements::List{<:DAE.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateElements(inElements::List{<:DAE.Element}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1037,11 +1037,11 @@
                   (_, _, _, RETURN(__))  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   ( nil(), _, _, _)  => begin
                     (inCache, inEnv, NEXT())
                   end
-                  
+
                   (elem <| rest_elems, _, _, _)  => begin
                       (cache, env, loop_ctrl) = evaluateElement(elem, inCache, inEnv)
                       (cache, env, loop_ctrl) = evaluateElements(rest_elems, cache, env, loop_ctrl)
@@ -1053,7 +1053,7 @@
         end
 
          #= This function evaluates a single element, which should be an algorithm. =#
-        function evaluateElement(inElement::DAE.Element, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateElement(inElement::DAE.Element, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1075,7 +1075,7 @@
         end
 
          #= This function evaluates a statement. =#
-        function evaluateStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1105,44 +1105,44 @@
                       (cache, env) = assignVariable(lhs_cref, rhs_val, cache, env)
                     (cache, env, NEXT())
                   end
-                  
+
                   (DAE.STMT_TUPLE_ASSIGN(__), _, _)  => begin
                       (cache, env) = evaluateTupleAssignStatement(inStatement, inCache, inEnv)
                     (cache, env, NEXT())
                   end
-                  
+
                   (DAE.STMT_ASSIGN_ARR(lhs = lhs, exp = rhs), _, env)  => begin
                       (cache, rhs_val) = cevalExp(rhs, inCache, env)
                       lhs_cref = extractLhsComponentRef(lhs)
                       (cache, env) = assignVariable(lhs_cref, rhs_val, cache, env)
                     (cache, env, NEXT())
                   end
-                  
+
                   (DAE.STMT_IF(__), _, _)  => begin
                       (cache, env, loop_ctrl) = evaluateIfStatement(inStatement, inCache, inEnv)
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (DAE.STMT_FOR(__), _, _)  => begin
                       (cache, env, loop_ctrl) = evaluateForStatement(inStatement, inCache, inEnv)
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (DAE.STMT_WHILE(exp = condition, statementLst = statements), _, _)  => begin
                       (cache, env, loop_ctrl) = evaluateWhileStatement(condition, statements, inCache, inEnv, NEXT())
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = condition), _, _)  => begin
                       @match (cache, Values.BOOL(boolean = true)) = cevalExp(condition, inCache, inEnv)
                     (cache, inEnv, NEXT())
                   end
-                  
+
                   (DAE.STMT_ASSERT(cond = condition), _, _)  => begin
                       @match (cache, Values.BOOL(boolean = true)) = cevalExp(condition, inCache, inEnv)
                     (cache, inEnv, NEXT())
                   end
-                  
+
                   (DAE.STMT_NORETCALL(exp = rhs && DAE.CALL(expLst = exps, attr = DAE.CALL_ATTR(ty = _, tailCall = tailCall))), _, _)  => begin
                        #=  If the condition is true in the assert, do nothing. If the condition
                        =#
@@ -1161,18 +1161,18 @@
                           DAE.NO_TAIL(__)  => begin
                             (cache, inEnv, NEXT())
                           end
-                          
+
                           DAE.TAIL(outVars =  nil())  => begin
                             (cache, inEnv, RETURN())
                           end
-                          
+
                           DAE.TAIL(outVars = var <|  nil())  => begin
                                #=  Handle tail recursion; same as a assigning all outputs followed by a return
                                =#
                               (cache, env) = assignVariable(ComponentReference.makeUntypedCrefIdent(var), v, cache, inEnv)
                             (cache, env, RETURN())
                           end
-                          
+
                           DAE.TAIL(outVars = vars)  => begin
                               @match Values.TUPLE(vals) = v
                               for val in vals
@@ -1185,15 +1185,15 @@
                       end
                     (cache, env, NEXT())
                   end
-                  
+
                   (DAE.STMT_RETURN(__), _, _)  => begin
                     (inCache, inEnv, RETURN())
                   end
-                  
+
                   (DAE.STMT_BREAK(__), _, _)  => begin
                     (inCache, inEnv, BREAK())
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- CevalFunction.evaluateStatement failed for:")
@@ -1207,7 +1207,7 @@
 
          #= This function evaluates a list of statements. This is just a wrapper for
           evaluateStatements2. =#
-        function evaluateStatements(inStatement::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateStatements(inStatement::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1218,7 +1218,7 @@
 
          #= This is a helper function to evaluateStatements that evaluates a list of
           statements. =#
-        function evaluateStatements2(inStatement::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateStatements2(inStatement::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1233,15 +1233,15 @@
                   (_, _, _, BREAK(__))  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   (_, _, _, RETURN(__))  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   ( nil(), _, _, _)  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   (stmt <| rest_stmts, _, _, NEXT(__))  => begin
                       (cache, env, loop_ctrl) = evaluateStatement(stmt, inCache, inEnv)
                       (cache, env, loop_ctrl) = evaluateStatements2(rest_stmts, cache, env, loop_ctrl)
@@ -1255,7 +1255,7 @@
          #= This function evaluates tuple assignment statements, i.e. assignment
           statements where the right hand side expression is a tuple. Ex:
             (x, y, z) := fun(...) =#
-        function evaluateTupleAssignStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function evaluateTupleAssignStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1279,7 +1279,7 @@
         end
 
          #= This function evaluates an if statement. =#
-        function evaluateIfStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateIfStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1304,7 +1304,7 @@
         end
 
          #= Helper function to evaluateIfStatement. =#
-        function evaluateIfStatement2(inCondition::Bool, inStatements::List{<:DAE.Statement}, inElse::DAE.Else, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateIfStatement2(inCondition::Bool, inStatements::List{<:DAE.Statement}, inElse::DAE.Else, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1324,18 +1324,18 @@
                       (cache, env, loop_ctrl) = evaluateStatements(statements, inCache, env)
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (false, _, DAE.ELSE(statementLst = statements), _, env)  => begin
                       (cache, env, loop_ctrl) = evaluateStatements(statements, inCache, env)
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (false, _, DAE.ELSEIF(exp = condition, statementLst = statements, else_ = else_branch), _, env)  => begin
                       @match (cache, Values.BOOL(boolean = bool_condition)) = cevalExp(condition, inCache, env)
                       (cache, env, loop_ctrl) = evaluateIfStatement2(bool_condition, statements, else_branch, cache, env)
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (false, _, DAE.NOELSE(__), _, _)  => begin
                     (inCache, inEnv, NEXT())
                   end
@@ -1355,7 +1355,7 @@
         end
 
          #= This function evaluates for statements. =#
-        function evaluateForStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateForStatement(inStatement::DAE.Statement, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1380,7 +1380,7 @@
                       (cache, env, loop_ctrl) = evaluateForLoopArray(cache, env, iter_cr, ty, range_vals, statements, NEXT())
                     (cache, env, loop_ctrl)
                   end
-                  
+
                   (DAE.STMT_FOR(range = range), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- evaluateForStatement not implemented for:")
@@ -1393,7 +1393,7 @@
         end
 
          #= This function evaluates a for loop where the range is an array. =#
-        function evaluateForLoopArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIter::DAE.ComponentRef, inIterType::DAE.Type, inValues::List{<:Values.Value}, inStatements::List{<:DAE.Statement}, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateForLoopArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIter::DAE.ComponentRef, inIterType::DAE.Type, inValues::List{<:Values.Value}, inStatements::List{<:DAE.Statement}, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1408,15 +1408,15 @@
                   (_, _, _, _, _, _, BREAK(__))  => begin
                     (inCache, inEnv, NEXT())
                   end
-                  
+
                   (_, _, _, _, _, _, RETURN(__))  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   (_, _, _, _,  nil(), _, _)  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   (_, env, _, _, value <| rest_vals, _, NEXT(__))  => begin
                       env = updateVariableBinding(inIter, env, inIterType, value)
                       (cache, env, loop_ctrl) = evaluateStatements(inStatements, inCache, env)
@@ -1429,7 +1429,7 @@
         end
 
          #= This function evaluates a while statement. =#
-        function evaluateWhileStatement(inCondition::DAE.Exp, inStatements::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl} 
+        function evaluateWhileStatement(inCondition::DAE.Exp, inStatements::List{<:DAE.Statement}, inCache::FCore.Cache, inEnv::FCore.Graph, inLoopControl::LoopControl) ::Tuple{FCore.Cache, FCore.Graph, LoopControl}
               local outLoopControl::LoopControl
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
@@ -1443,11 +1443,11 @@
                   (_, _, _, _, BREAK(__))  => begin
                     (inCache, inEnv, NEXT())
                   end
-                  
+
                   (_, _, _, _, RETURN(__))  => begin
                     (inCache, inEnv, inLoopControl)
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match (cache, Values.BOOL(boolean = b)) = cevalExp(inCondition, inCache, inEnv)
                       if b
@@ -1466,7 +1466,7 @@
 
          #= This function extracts a component reference from an expression. It's used to
           get the left hand side component reference in simple assignments. =#
-        function extractLhsComponentRef(inExp::DAE.Exp) ::DAE.ComponentRef 
+        function extractLhsComponentRef(inExp::DAE.Exp) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = begin
@@ -1475,7 +1475,7 @@
                   DAE.CREF(componentRef = cref)  => begin
                     cref
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- CevalFunction.extractLhsComponentRef failed on " + ExpressionDump.printExpStr(inExp))
@@ -1487,7 +1487,7 @@
         end
 
          #= A wrapper for Ceval with most of the arguments filled in. =#
-        function cevalExp(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalExp(inExp::DAE.Exp, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -1497,7 +1497,7 @@
         end
 
          #= A wrapper for Ceval with most of the arguments filled in. =#
-        function cevalExpList(inExpLst::List{<:DAE.Exp}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function cevalExpList(inExpLst::List{<:DAE.Exp}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}}
               local outValue::List{Values.Value}
               local outCache::FCore.Cache
 
@@ -1509,18 +1509,18 @@
          =#
 
          #= Opens up a new scope for the functions and adds all function variables to it. =#
-        function setupFunctionEnvironment(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncName::String, inFuncParams::List{<:FunctionVar}) ::Tuple{FCore.Cache, FCore.Graph} 
+        function setupFunctionEnvironment(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncName::String, inFuncParams::List{<:FunctionVar}) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
-              outEnv = FGraph.openScope(inEnv, SCode.NOT_ENCAPSULATED(), inFuncName, SOME(FCore.FUNCTION_SCOPE()))
+              outEnv = FGraphUtil.openScope(inEnv, SCode.NOT_ENCAPSULATED(), inFuncName, SOME(FCore.FUNCTION_SCOPE()))
               (outCache, outEnv) = extendEnvWithFunctionVars(inCache, outEnv, inFuncParams)
           (outCache, outEnv)
         end
 
          #= Extends the environment with a list of variables. The list of values is the
           input arguments to the function. =#
-        function extendEnvWithFunctionVars(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncParams::List{<:FunctionVar}) ::Tuple{FCore.Cache, FCore.Graph} 
+        function extendEnvWithFunctionVars(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncParams::List{<:FunctionVar}) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1533,7 +1533,7 @@
                   (_, _,  nil())  => begin
                     (inCache, inEnv)
                   end
-                  
+
                   (cache, env, param <| rest_params)  => begin
                       (cache, env) = extendEnvWithFunctionVar(cache, env, param)
                       (cache, env) = extendEnvWithFunctionVars(cache, env, rest_params)
@@ -1544,7 +1544,7 @@
           (outCache, outEnv)
         end
 
-        function extendEnvWithFunctionVar(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncParam::FunctionVar) ::Tuple{FCore.Cache, FCore.Graph} 
+        function extendEnvWithFunctionVar(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncParam::FunctionVar) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1563,13 +1563,13 @@
                       (cache, env) = extendEnvWithElement(e, val, inCache, env)
                     (cache, env)
                   end
-                  
+
                   (_, env, (e && DAE.VAR(binding = binding_exp), NONE()))  => begin
                       (val, cache) = evaluateBinding(binding_exp, inCache, inEnv)
                       (cache, env) = extendEnvWithElement(e, val, cache, env)
                     (cache, env)
                   end
-                  
+
                   (_, _, (e, _))  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- CevalFunction.extendEnvWithFunctionVars failed for:")
@@ -1587,7 +1587,7 @@
 
          #= Evaluates an optional binding expression. If SOME expression is given,
           returns SOME value or fails. If NONE expression given, returns NONE value. =#
-        function evaluateBinding(inBinding::Option{<:DAE.Exp}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Option{Values.Value}, FCore.Cache} 
+        function evaluateBinding(inBinding::Option{<:DAE.Exp}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{Option{Values.Value}, FCore.Cache}
               local outCache::FCore.Cache
               local outValue::Option{Values.Value}
 
@@ -1600,7 +1600,7 @@
                       (cache, val) = cevalExp(binding_exp, inCache, inEnv)
                     (SOME(val), cache)
                   end
-                  
+
                   (NONE(), _, _)  => begin
                     (NONE(), inCache)
                   end
@@ -1611,7 +1611,7 @@
 
          #= This function extracts the necessary data from a variable element, and calls
           extendEnvWithVar to add a new variable to the environment. =#
-        function extendEnvWithElement(inElement::DAE.Element, inBindingValue::Option{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function extendEnvWithElement(inElement::DAE.Element, inBindingValue::Option{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1635,7 +1635,7 @@
 
          #= This function does the actual work of extending the environment with a
           variable. =#
-        function extendEnvWithVar(inName::String, inType::DAE.Type, inOptValue::Option{<:Values.Value}, inDims::DAE.InstDims, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function extendEnvWithVar(inName::String, inType::DAE.Type, inOptValue::Option{<:Values.Value}, inDims::DAE.InstDims, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1659,15 +1659,15 @@
                       (cache, ty) = appendDimensions(inType, inOptValue, inDims, inCache, inEnv)
                       var = makeFunctionVariable(inName, ty, binding)
                       (cache, record_env) = makeRecordEnvironment(inType, inOptValue, cache, inEnv)
-                      env = FGraph.mkComponentNode(inEnv, var, SCode.COMPONENT(inName, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_TYPED(), record_env)
+                      env = FGraphUtil.mkComponentNode(inEnv, var, SCode.COMPONENT(inName, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_TYPED(), record_env)
                     (cache, env)
                   end
-                  
+
                   _  => begin
                         binding = getBinding(inOptValue)
                         (cache, ty) = appendDimensions(inType, inOptValue, inDims, inCache, inEnv)
                         var = makeFunctionVariable(inName, ty, binding)
-                        env = FGraph.mkComponentNode(inEnv, var, SCode.COMPONENT(inName, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_TYPED(), FGraph.empty())
+                        env = FGraphUtil.mkComponentNode(inEnv, var, SCode.COMPONENT(inName, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.VAR(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_TYPED(), FCore.emptyGraph)
                       (cache, env)
                   end
                 end
@@ -1679,7 +1679,7 @@
 
          #= This function creates a new variable ready to be added to an environment
           given a name, type and binding. =#
-        function makeFunctionVariable(inName::String, inType::DAE.Type, inBinding::DAE.Binding) ::DAE.Var 
+        function makeFunctionVariable(inName::String, inType::DAE.Type, inBinding::DAE.Binding) ::DAE.Var
               local outVar::DAE.Var
 
               outVar = DAE.TYPES_VAR(inName, DAE.dummyAttrVar, inType, inBinding, NONE())
@@ -1688,7 +1688,7 @@
 
          #= Creates a binding from an optional value. If some value is given we return a
           value bound binding, otherwise an unbound binding. =#
-        function getBinding(inBindingValue::Option{<:Values.Value}) ::DAE.Binding 
+        function getBinding(inBindingValue::Option{<:Values.Value}) ::DAE.Binding
               local outBinding::DAE.Binding
 
               outBinding = begin
@@ -1697,7 +1697,7 @@
                   SOME(val)  => begin
                     DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE())
                   end
-                  
+
                   NONE()  => begin
                     DAE.UNBOUND()
                   end
@@ -1709,7 +1709,7 @@
          #= This function creates an environment for a record variable by creating a new
           environment and adding the records components to it. If an optional value is
           supplied it also gives the components a value binding. =#
-        function makeRecordEnvironment(inRecordType::DAE.Type, inOptValue::Option{<:Values.Value}, inCache::FCore.Cache, inGraph::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function makeRecordEnvironment(inRecordType::DAE.Type, inOptValue::Option{<:Values.Value}, inCache::FCore.Cache, inGraph::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outRecordEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1723,11 +1723,11 @@
                   local node::FCore.Node
                 @match (inRecordType, inOptValue, inCache, inGraph) begin
                   (DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__), varLst = var_lst), _, _, _)  => begin
-                      parent = FGraph.lastScopeRef(inGraph)
-                      (graph, node) = FGraph.node(inGraph, FNode.feNodeName, list(parent), FCore.ND(NONE()))
+                      parent = FGraphUtil.lastScopeRef(inGraph)
+                      (graph, node) = FGraphUtil.node(inGraph, FNode.feNodeName, list(parent), FCore.ND(NONE()))
                       child = FNode.toRef(node)
                       FNode.addChildRef(parent, FNode.feNodeName, child)
-                      graph = FGraph.pushScopeRef(graph, child)
+                      graph = FGraphUtil.pushScopeRef(graph, child)
                       vals = getRecordValues(inOptValue, inRecordType)
                       (cache, graph) = ListUtil.threadFold(var_lst, vals, extendEnvWithRecordVar, (inCache, graph))
                     (cache, graph)
@@ -1741,7 +1741,7 @@
           records components. If some record value is given it returns the list of
           values inside it, made into options, otherwise it returns a list of as many
           NONE as there are components in the record. =#
-        function getRecordValues(inOptValue::Option{<:Values.Value}, inRecordType::DAE.Type) ::List{Option{Values.Value}} 
+        function getRecordValues(inOptValue::Option{<:Values.Value}, inRecordType::DAE.Type) ::List{Option{Values.Value}}
               local outValues::List{Option{Values.Value}}
 
               outValues = begin
@@ -1754,7 +1754,7 @@
                       opt_vals = ListUtil.map(vals, Util.makeOption)
                     opt_vals
                   end
-                  
+
                   (NONE(), DAE.T_COMPLEX(varLst = vars))  => begin
                       n = listLength(vars)
                       opt_vals = ListUtil.fill(NONE(), n)
@@ -1766,7 +1766,7 @@
         end
 
          #= This function extends an environment with a record component. =#
-        function extendEnvWithRecordVar(inVar::DAE.Var, inOptValue::Option{<:Values.Value}, inEnv::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{FCore.Cache, FCore.Graph} 
+        function extendEnvWithRecordVar(inVar::DAE.Var, inOptValue::Option{<:Values.Value}, inEnv::Tuple{<:FCore.Cache, FCore.Graph}) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::Tuple{FCore.Cache, FCore.Graph}
 
               outEnv = begin
@@ -1788,7 +1788,7 @@
          #= This function opens a new for loop scope in the environment by opening a new
           scope and adding the given iterator to it. For convenience it also returns the
           type and component reference of the iterator. =#
-        function extendEnvWithForScope(inIterName::String, inIterType::DAE.Type, inEnv::FCore.Graph) ::Tuple{FCore.Graph, DAE.Type, DAE.ComponentRef} 
+        function extendEnvWithForScope(inIterName::String, inIterType::DAE.Type, inEnv::FCore.Graph) ::Tuple{FCore.Graph, DAE.Type, DAE.ComponentRef}
               local outIterCref::DAE.ComponentRef
               local outIterType::DAE.Type
               local outEnv::FCore.Graph
@@ -1796,7 +1796,7 @@
               local iter_cr::DAE.ComponentRef
 
               outIterType = Types.expTypetoTypesType(inIterType)
-              outEnv = FGraph.addForIterator(inEnv, inIterName, outIterType, DAE.UNBOUND(), SCode.CONST(), SOME(DAE.C_CONST()))
+              outEnv = FGraphUtil.addForIterator(inEnv, inIterName, outIterType, DAE.UNBOUND(), SCode.CONST(), SOME(DAE.C_CONST()))
               outIterCref = ComponentReference.makeCrefIdent(inIterName, inIterType, nil)
           (outEnv, outIterType, outIterCref)
         end
@@ -1807,7 +1807,7 @@
           either they are specified in the variable itself as DAE.InstDims, or if the
           variable is declared with unknown dimensions they can be determined from the
           variables binding (i.e. input argument to the function). =#
-        function appendDimensions(inType::DAE.Type, inOptBinding::Option{<:Values.Value}, inDims::DAE.InstDims, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Type} 
+        function appendDimensions(inType::DAE.Type, inOptBinding::Option{<:Values.Value}, inDims::DAE.InstDims, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Type}
               local outType::DAE.Type
               local outCache::FCore.Cache
 
@@ -1821,7 +1821,7 @@
          #= Helper function to appendDimensions. Appends dimensions to a type. inDims is
           the declared dimensions of the variable while inBindingDims is the dimensions
           of the variables binding (empty list if it doesn't have a binding). =#
-        function appendDimensions2(inType::DAE.Type, inDims::DAE.InstDims, inBindingDims::List{<:ModelicaInteger}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Type} 
+        function appendDimensions2(inType::DAE.Type, inDims::DAE.InstDims, inBindingDims::List{<:ModelicaInteger}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, DAE.Type}
               local outType::DAE.Type
               local outCache::FCore.Cache
 
@@ -1839,39 +1839,39 @@
                   (ty,  nil(), _, _, _)  => begin
                     (inCache, ty)
                   end
-                  
+
                   (ty, DAE.DIM_UNKNOWN(__) <| rest_dims, dim_int <| bind_dims, _, _)  => begin
                       dim = Expression.intDimension(dim_int)
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(dim)))
                   end
-                  
+
                   (ty, DAE.DIM_UNKNOWN(__) <| rest_dims, bind_dims, _, _)  => begin
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(0))))
                   end
-                  
+
                   (ty, DAE.DIM_INTEGER(dim_int) <| rest_dims, bind_dims, _, _)  => begin
                       dim = DAE.DIM_INTEGER(dim_int)
                       bind_dims = ListUtil.stripFirst(bind_dims)
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(dim)))
                   end
-                  
+
                   (ty, DAE.DIM_BOOLEAN(__) <| rest_dims, bind_dims, _, _)  => begin
                       dim = DAE.DIM_INTEGER(2)
                       bind_dims = ListUtil.stripFirst(bind_dims)
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(dim)))
                   end
-                  
+
                   (ty, DAE.DIM_ENUM(size = dim_int) <| rest_dims, bind_dims, _, _)  => begin
                       dim = DAE.DIM_INTEGER(dim_int)
                       bind_dims = ListUtil.stripFirst(bind_dims)
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(dim)))
                   end
-                  
+
                   (ty, DAE.DIM_EXP(exp = dim_exp) <| rest_dims, bind_dims, _, _)  => begin
                       (cache, dim_val) = cevalExp(dim_exp, inCache, inEnv)
                       dim_int = ValuesUtil.valueInteger(dim_val)
@@ -1880,7 +1880,7 @@
                       (cache, ty) = appendDimensions2(ty, rest_dims, bind_dims, inCache, inEnv)
                     (cache, DAE.T_ARRAY(ty, list(dim)))
                   end
-                  
+
                   (_, _ <| _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- CevalFunction.appendDimensions2 failed\\n")
@@ -1897,7 +1897,7 @@
          =#
 
          #= This function assigns a variable in the environment a new value. =#
-        function assignVariable(inCref::DAE.ComponentRef, inNewValue::Values.Value, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function assignVariable(inCref::DAE.ComponentRef, inNewValue::Values.Value, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1920,21 +1920,21 @@
                   (DAE.WILD(__), _, _, _)  => begin
                     (inCache, inEnv)
                   end
-                  
+
                   (DAE.CREF_IDENT(ident = id, subscriptLst =  nil(), identType = ety && DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__))), _, _, _)  => begin
                       (_, var, _, _, inst_status, env) = Lookup.lookupIdentLocal(inCache, inEnv, id)
                       (cache, env) = assignRecord(ety, inNewValue, inCache, env)
                       var = updateRecordBinding(var, inNewValue)
-                      env = FGraph.updateComp(inEnv, var, inst_status, env)
+                      env = FGraphUtil.updateComp(inEnv, var, inst_status, env)
                     (cache, env)
                   end
-                  
+
                   (cr && DAE.CREF_IDENT(subscriptLst =  nil()), _, _, _)  => begin
                       ty = Types.unflattenArrayType(Expression.typeof(ValuesUtil.valueExp(inNewValue)))
                       env = updateVariableBinding(cr, inEnv, ty, inNewValue)
                     (inCache, env)
                   end
-                  
+
                   (DAE.CREF_IDENT(subscriptLst = subs), _, _, _)  => begin
                       cr = ComponentReference.crefStripSubs(inCref)
                       (ty, val) = getVariableTypeAndValue(cr, inEnv)
@@ -1942,13 +1942,13 @@
                       env = updateVariableBinding(cr, inEnv, ty, val)
                     (cache, env)
                   end
-                  
+
                   (DAE.CREF_QUAL(ident = id, subscriptLst =  nil(), componentRef = cr_rest), _, _, _)  => begin
                       (_, var, _, _, inst_status, env) = Lookup.lookupIdentLocal(inCache, inEnv, id)
                       (cache, env) = assignVariable(cr_rest, inNewValue, inCache, env)
                       comp_id = ComponentReference.crefFirstIdent(cr_rest)
                       var = updateRecordComponentBinding(var, comp_id, inNewValue)
-                      env = FGraph.updateComp(inEnv, var, inst_status, env)
+                      env = FGraphUtil.updateComp(inEnv, var, inst_status, env)
                     (cache, env)
                   end
                 end
@@ -1972,7 +1972,7 @@
 
          #= This function assign a tuple by calling assignVariable for each tuple
           component. =#
-        function assignTuple(inLhsCrefs::List{<:DAE.ComponentRef}, inRhsValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function assignTuple(inLhsCrefs::List{<:DAE.ComponentRef}, inRhsValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1987,7 +1987,7 @@
                   ( nil(), _, cache, env)  => begin
                     (cache, env)
                   end
-                  
+
                   (cr <| rest_crefs, value <| rest_vals, cache, env)  => begin
                       (cache, env) = assignVariable(cr, value, cache, env)
                       (cache, env) = assignTuple(rest_crefs, rest_vals, cache, env)
@@ -1998,7 +1998,7 @@
           (outCache, outEnv)
         end
 
-        function assignRecord(inType::DAE.Type, inValue::Values.Value, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function assignRecord(inType::DAE.Type, inValue::Values.Value, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2017,7 +2017,7 @@
           (outCache, outEnv)
         end
 
-        function assignRecordComponents(inVars::List{<:DAE.Var}, inValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph} 
+        function assignRecordComponents(inVars::List{<:DAE.Var}, inValues::List{<:Values.Value}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph}
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2034,7 +2034,7 @@
                   ( nil(),  nil(), _, _)  => begin
                     (inCache, inEnv)
                   end
-                  
+
                   (DAE.TYPES_VAR(name = name, ty = ty) <| rest_vars, val <| rest_vals, _, _)  => begin
                       cr = ComponentReference.makeCrefIdent(name, ty, nil)
                       (cache, env) = assignVariable(cr, val, inCache, inEnv)
@@ -2048,7 +2048,7 @@
 
          #= This function assigns a part of a vector by replacing the parts indicated by
           the subscripts in the old value with the new value. =#
-        function assignVector(inNewValue::Values.Value, inOldValue::Values.Value, inSubscripts::List{<:DAE.Subscript}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, Values.Value} 
+        function assignVector(inNewValue::Values.Value, inOldValue::Values.Value, inSubscripts::List{<:DAE.Subscript}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, Values.Value}
               local outResult::Values.Value
               local outCache::FCore.Cache
 
@@ -2074,7 +2074,7 @@
                   (_, _,  nil(), _, _)  => begin
                     (inCache, inNewValue)
                   end
-                  
+
                   (_, Values.ARRAY(valueLst = values, dimLst = dims), DAE.INDEX(exp = e) <| rest_subs, _, _)  => begin
                       (cache, index) = cevalExp(e, inCache, inEnv)
                       i = ValuesUtil.valueInteger(index)
@@ -2083,7 +2083,7 @@
                       values = ListUtil.replaceAt(val, i, values)
                     (cache, Values.ARRAY(values, dims))
                   end
-                  
+
                   (Values.ARRAY(valueLst = values), Values.ARRAY(valueLst = old_values, dimLst = dims), DAE.SLICE(exp = e) <| rest_subs, _, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = (@match _cons(Values.INTEGER(integer = i), _) = indices))) = cevalExp(e, inCache, inEnv)
                       (old_values, old_values2) = ListUtil.splitr(old_values, i - 1)
@@ -2091,12 +2091,12 @@
                       values = ListUtil.append_reverse(old_values, values2)
                     (cache, Values.ARRAY(values, dims))
                   end
-                  
+
                   (Values.ARRAY(valueLst = values), Values.ARRAY(valueLst = values2, dimLst = dims), DAE.WHOLEDIM(__) <| rest_subs, _, _)  => begin
                       (cache, values) = assignWholeDim(values, values2, rest_subs, inCache, inEnv)
                     (cache, Values.ARRAY(values, dims))
                   end
-                  
+
                   (_, _, sub <| _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       print("- CevalFunction.assignVector failed on: ")
@@ -2126,7 +2126,7 @@
 
          #= This function assigns a slice of a vector given a list of new and old values
           and a list of indices. =#
-        function assignSlice(inNewValues::List{<:Values.Value}, inOldValues::List{<:Values.Value}, inIndices::List{<:Values.Value}, inSubscripts::List{<:DAE.Subscript}, inIndex::ModelicaInteger, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function assignSlice(inNewValues::List{<:Values.Value}, inOldValues::List{<:Values.Value}, inIndices::List{<:Values.Value}, inSubscripts::List{<:DAE.Subscript}, inIndex::ModelicaInteger, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}}
               local outResult::List{Values.Value}
               local outCache::FCore.Cache
 
@@ -2142,13 +2142,13 @@
                   (_, _,  nil(), _, _, _, _)  => begin
                     (inCache, inOldValues)
                   end
-                  
+
                   (vl1, v2 <| vl2, index <| _, _, _, _, _)  => begin
                       @match true = inIndex < ValuesUtil.valueInteger(index)
                       (cache, vl1) = assignSlice(vl1, vl2, inIndices, inSubscripts, inIndex + 1, inCache, inEnv)
                     (cache, _cons(v2, vl1))
                   end
-                  
+
                   (v1 <| vl1, v2 <| vl2, _ <| rest_indices, _, _, _, _)  => begin
                       (cache, v1) = assignVector(v1, v2, inSubscripts, inCache, inEnv)
                       (cache, vl1) = assignSlice(vl1, vl2, rest_indices, inSubscripts, inIndex + 1, inCache, inEnv)
@@ -2162,7 +2162,7 @@
         end
 
          #= This function assigns a whole dimension of a vector. =#
-        function assignWholeDim(inNewValues::List{<:Values.Value}, inOldValues::List{<:Values.Value}, inSubscripts::List{<:DAE.Subscript}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}} 
+        function assignWholeDim(inNewValues::List{<:Values.Value}, inOldValues::List{<:Values.Value}, inSubscripts::List{<:DAE.Subscript}, inCache::FCore.Cache, inEnv::FCore.Graph) ::Tuple{FCore.Cache, List{Values.Value}}
               local outResult::List{Values.Value}
               local outCache::FCore.Cache
 
@@ -2176,7 +2176,7 @@
                   ( nil(), _, _, _, _)  => begin
                     (inCache, nil)
                   end
-                  
+
                   (v1 <| vl1, v2 <| vl2, _, _, _)  => begin
                       (cache, v1) = assignVector(v1, v2, inSubscripts, inCache, inEnv)
                       (cache, vl1) = assignWholeDim(vl1, vl2, inSubscripts, inCache, inEnv)
@@ -2188,7 +2188,7 @@
         end
 
          #= This function updates a variables binding in the environment. =#
-        function updateVariableBinding(inVariableCref::DAE.ComponentRef, inEnv::FCore.Graph, inType::DAE.Type, inNewValue::Values.Value) ::FCore.Graph 
+        function updateVariableBinding(inVariableCref::DAE.ComponentRef, inEnv::FCore.Graph, inType::DAE.Type, inNewValue::Values.Value) ::FCore.Graph
               local outEnv::FCore.Graph
 
               local var_name::String
@@ -2196,12 +2196,12 @@
 
               var_name = ComponentReference.crefStr(inVariableCref)
               var = makeFunctionVariable(var_name, inType, DAE.VALBOUND(inNewValue, DAE.BINDING_FROM_DEFAULT_VALUE()))
-              outEnv = FGraph.updateComp(inEnv, var, FCore.VAR_TYPED(), FGraph.empty())
+              outEnv = FGraphUtil.updateComp(inEnv, var, FCore.VAR_TYPED(), FCore.emptyGraph)
           outEnv
         end
 
          #= Updates the binding of a record variable. =#
-        function updateRecordBinding(inVar::DAE.Var, inValue::Values.Value) ::DAE.Var 
+        function updateRecordBinding(inVar::DAE.Var, inValue::Values.Value) ::DAE.Var
               local outVar::DAE.Var
 
               local name::DAE.Ident
@@ -2215,7 +2215,7 @@
         end
 
          #= Updates the binding of a record component. =#
-        function updateRecordComponentBinding(inVar::DAE.Var, inComponentId::String, inValue::Values.Value) ::DAE.Var 
+        function updateRecordComponentBinding(inVar::DAE.Var, inComponentId::String, inValue::Values.Value) ::DAE.Var
               local outVar::DAE.Var
 
               local name::DAE.Ident
@@ -2233,7 +2233,7 @@
           outVar
         end
 
-        function updateRecordComponentValue(inComponentId::String, inComponentValue::Values.Value, inRecordValue::Values.Value) ::Values.Value 
+        function updateRecordComponentValue(inComponentId::String, inComponentValue::Values.Value, inRecordValue::Values.Value) ::Values.Value
               local outRecordValue::Values.Value
 
               local name::Absyn.Path
@@ -2250,7 +2250,7 @@
 
          #= This function looks a variable up in the environment, and returns it's type
           and binding. =#
-        function getVariableTypeAndBinding(inCref::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{DAE.Type, DAE.Binding} 
+        function getVariableTypeAndBinding(inCref::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{DAE.Type, DAE.Binding}
               local outBinding::DAE.Binding
               local outType::DAE.Type
 
@@ -2260,7 +2260,7 @@
 
          #= This function looks a variable up in the environment, and returns it's type
           and value. If it doesn't have a value, then a default value will be returned. =#
-        function getVariableTypeAndValue(inCref::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{DAE.Type, Values.Value} 
+        function getVariableTypeAndValue(inCref::DAE.ComponentRef, inEnv::FCore.Graph) ::Tuple{DAE.Type, Values.Value}
               local outValue::Values.Value
               local outType::DAE.Type
 
@@ -2273,7 +2273,7 @@
 
          #= Returns the value in a binding, or a default value if binding isn't a value
           binding. =#
-        function getBindingOrDefault(inBinding::DAE.Binding, inType::DAE.Type) ::Values.Value 
+        function getBindingOrDefault(inBinding::DAE.Binding, inType::DAE.Type) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2282,7 +2282,7 @@
                   (DAE.VALBOUND(valBound = val), _)  => begin
                     val
                   end
-                  
+
                   _  => begin
                       generateDefaultBinding(inType)
                   end
@@ -2294,7 +2294,7 @@
          #= This function generates a default value for a type. This is needed when
           assigning parts of an array, since we can only assign parts of an already
           existing array. The value will be the types equivalence to zero. =#
-        function generateDefaultBinding(inType::DAE.Type) ::Values.Value 
+        function generateDefaultBinding(inType::DAE.Type) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2311,23 +2311,23 @@
                   DAE.T_INTEGER(__)  => begin
                     Values.INTEGER(0)
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     Values.REAL(0.0)
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     Values.STRING("")
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     Values.BOOL(false)
                   end
-                  
+
                   DAE.T_ENUMERATION(__)  => begin
                     Values.ENUM_LITERAL(Absyn.IDENT(""), 0)
                   end
-                  
+
                   DAE.T_ARRAY(dims = dim <|  nil(), ty = ty)  => begin
                       int_dim = Expression.dimensionSize(dim)
                       value = generateDefaultBinding(ty)
@@ -2335,12 +2335,12 @@
                       dims = ValuesUtil.valueDimensions(value)
                     Values.ARRAY(values, _cons(int_dim, dims))
                   end
-                  
+
                   DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path = path), varLst = vars)  => begin
                       (values, var_names) = ListUtil.map_2(vars, getRecordVarBindingAndName)
                     Values.RECORD(path, values, var_names, -1)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- CevalFunction.generateDefaultBinding failed\\n")
@@ -2351,7 +2351,7 @@
           outValue
         end
 
-        function getRecordVarBindingAndName(inVar::DAE.Var) ::Tuple{Values.Value, String} 
+        function getRecordVarBindingAndName(inVar::DAE.Var) ::Tuple{Values.Value, String}
               local outName::String
               local outBinding::Values.Value
 
@@ -2365,7 +2365,7 @@
                       val = getBindingOrDefault(binding, ty)
                     (val, name)
                   end
-                  
+
                   DAE.TYPES_VAR(name = name)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- CevalFunction.getRecordVarBindingAndName failed on variable " + name + "\\n")
@@ -2378,7 +2378,7 @@
 
          #= This function fetches one return value for the function, given an output
           variable and an environment. =#
-        function getFunctionReturnValue(inOutputVar::DAE.Element, inEnv::FCore.Graph) ::Values.Value 
+        function getFunctionReturnValue(inOutputVar::DAE.Element, inEnv::FCore.Graph) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2397,7 +2397,7 @@
 
          #= Helper function to getFunctionReturnValue. Fetches a variables value from the
           environment. =#
-        function getVariableValue(inCref::DAE.ComponentRef, inType::DAE.Type, inEnv::FCore.Graph) ::Values.Value 
+        function getVariableValue(inCref::DAE.ComponentRef, inType::DAE.Type, inEnv::FCore.Graph) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2413,7 +2413,7 @@
                       val = getRecordValue(p, inType, inEnv)
                     val
                   end
-                  
+
                   _  => begin
                         (_, val) = getVariableTypeAndValue(inCref, inEnv)
                       val
@@ -2427,7 +2427,7 @@
 
          #= Looks up the value of a record by looking up the record components in the
           records environment and assembling a record value. =#
-        function getRecordValue(inRecordName::Absyn.Path, inType::DAE.Type, inEnv::FCore.Graph) ::Values.Value 
+        function getRecordValue(inRecordName::Absyn.Path, inType::DAE.Type, inEnv::FCore.Graph) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2450,7 +2450,7 @@
         end
 
          #= Looks up the value for a record component. =#
-        function getRecordComponentValue(inVars::DAE.Var, inEnv::FCore.Graph) ::Values.Value 
+        function getRecordComponentValue(inVars::DAE.Var, inEnv::FCore.Graph) ::Values.Value
               local outValues::Values.Value
 
               outValues = begin
@@ -2465,7 +2465,7 @@
                       val = getRecordValue(Absyn.IDENT(id), ty, inEnv)
                     val
                   end
-                  
+
                   (DAE.TYPES_VAR(name = id, ty = ty), _)  => begin
                       @match (_, DAE.TYPES_VAR(binding = binding), _, _, _, _) = Lookup.lookupIdentLocal(FCoreUtil.emptyCache(), inEnv, id)
                       val = getBindingOrDefault(binding, ty)
@@ -2481,7 +2481,7 @@
          #= This function takes a list of return values, and return either a NORETCALL, a
           single value or a tuple with the values depending on how many return variables
           there are. =#
-        function boxReturnValue(inReturnValues::List{<:Values.Value}) ::Values.Value 
+        function boxReturnValue(inReturnValues::List{<:Values.Value}) ::Values.Value
               local outValue::Values.Value
 
               outValue = begin
@@ -2490,11 +2490,11 @@
                    nil()  => begin
                     Values.NORETCALL()
                   end
-                  
+
                   val <|  nil()  => begin
                     val
                   end
-                  
+
                   _ <| _  => begin
                     Values.TUPLE(inReturnValues)
                   end
@@ -2510,7 +2510,7 @@
           dimensions that depend on the size of another variable. This function sorts
           the list of variables so that any dependencies to a variable will be before
           the variable in resulting list. =#
-        function sortFunctionVarsByDependency(inFuncVars::List{<:FunctionVar}, inSource::DAE.ElementSource) ::List{FunctionVar} 
+        function sortFunctionVarsByDependency(inFuncVars::List{<:FunctionVar}, inSource::DAE.ElementSource) ::List{FunctionVar}
               local outFuncVars::List{FunctionVar}
 
               local cycles::List{Tuple{FunctionVar, List{FunctionVar}}}
@@ -2521,7 +2521,7 @@
         end
 
          #= Returns the dependencies given an element. =#
-        function getElementDependencies(inElement::FunctionVar, inAllElements::List{<:FunctionVar}) ::List{FunctionVar} 
+        function getElementDependencies(inElement::FunctionVar, inAllElements::List{<:FunctionVar}) ::List{FunctionVar}
               local outDependencies::List{FunctionVar}
 
               outDependencies = begin
@@ -2535,12 +2535,12 @@
                       (_, (_, deps, _)) = ListUtil.mapFold(dims, getElementDependenciesFromDims, arg)
                     deps
                   end
-                  
+
                   ((DAE.VAR(dims = dims), _), _)  => begin
                       (_, (_, deps, _)) = ListUtil.mapFold(dims, getElementDependenciesFromDims, (inAllElements, nil, nil))
                     deps
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2551,7 +2551,7 @@
 
          #= Helper function to getElementDependencies that gets the dependencies from the
           dimensions of a variable. =#
-        function getElementDependenciesFromDims(inDimension::DAE.Dimension, inArg::Arg) ::Tuple{DAE.Dimension, Arg} 
+        function getElementDependenciesFromDims(inDimension::DAE.Dimension, inArg::Arg) ::Tuple{DAE.Dimension, Arg}
               local outArg::Arg
               local outDimension::DAE.Dimension
 
@@ -2564,7 +2564,7 @@
                       (_, arg) = Expression.traverseExpBidir(dim_exp, getElementDependenciesTraverserEnter, getElementDependenciesTraverserExit, inArg)
                     (inDimension, arg)
                   end
-                  
+
                   _  => begin
                       (inDimension, inArg)
                   end
@@ -2576,7 +2576,7 @@
          #= Traverse function used by getElementDependencies to collect all dependencies
           for an element. The extra arguments are a list of all elements, a list of
           accumulated depencies and a list of iterators from enclosing for-loops. =#
-        function getElementDependenciesTraverserEnter(inExp::DAE.Exp, inArg::Arg) ::Tuple{DAE.Exp, Arg} 
+        function getElementDependenciesTraverserEnter(inExp::DAE.Exp, inArg::Arg) ::Tuple{DAE.Exp, Arg}
               local outArg::Arg
               local outExp::DAE.Exp
 
@@ -2598,17 +2598,17 @@
                       @match true = ListUtil.isMemberOnTrue(iter, iters, stringEqual)
                     (exp, (all_el, accum_el, iters))
                   end
-                  
+
                   (exp && DAE.CREF(componentRef = cref), (all_el, accum_el, iters))  => begin
                       @match (all_el, SOME(e)) = ListUtil.deleteMemberOnTrue(cref, all_el, isElementNamed)
                     (exp, (all_el, _cons(e, accum_el), iters))
                   end
-                  
+
                   (exp && DAE.REDUCTION(iterators = riters), (all_el, accum_el, iters))  => begin
                       iters = listAppend(ListUtil.map(riters, Expression.reductionIterName), iters)
                     (exp, (all_el, accum_el, iters))
                   end
-                  
+
                   _  => begin
                       (inExp, inArg)
                   end
@@ -2630,7 +2630,7 @@
         end
 
          #= Exit traversal function used by getElementDependencies. =#
-        function getElementDependenciesTraverserExit(inExp::DAE.Exp, inArg::Arg) ::Tuple{DAE.Exp, Arg} 
+        function getElementDependenciesTraverserExit(inExp::DAE.Exp, inArg::Arg) ::Tuple{DAE.Exp, Arg}
               local outArg::Arg
               local outExp::DAE.Exp
 
@@ -2649,7 +2649,7 @@
                       iters = compareIterators(listReverse(riters), iters)
                     (exp, (all_el, accum_el, iters))
                   end
-                  
+
                   _  => begin
                       (inExp, inArg)
                   end
@@ -2658,7 +2658,7 @@
           (outExp, outArg)
         end
 
-        function compareIterators(inRiters::DAE.ReductionIterators, inIters::List{<:String}) ::List{String} 
+        function compareIterators(inRiters::DAE.ReductionIterators, inIters::List{<:String}) ::List{String}
               local outIters::List{String}
 
               outIters = begin
@@ -2671,11 +2671,11 @@
                       @match true = stringEqual(id1, id2)
                     compareIterators(riters, iters)
                   end
-                  
+
                   ( nil(), _)  => begin
                     inIters
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Different iterators in CevalFunction.compareIterators."))
                       fail()
@@ -2688,7 +2688,7 @@
         end
 
          #= Checks if a function parameter has the given name. =#
-        function isElementNamed(inName::DAE.ComponentRef, inElement::FunctionVar) ::Bool 
+        function isElementNamed(inName::DAE.ComponentRef, inElement::FunctionVar) ::Bool
               local isNamed::Bool
 
               local name::DAE.ComponentRef
@@ -2699,7 +2699,7 @@
         end
 
          #= Checks if two function parameters are equal, i.e. have the same name. =#
-        function isElementEqual(inElement1::FunctionVar, inElement2::FunctionVar) ::Bool 
+        function isElementEqual(inElement1::FunctionVar, inElement2::FunctionVar) ::Bool
               local isEqual::Bool
 
               local cr1::DAE.ComponentRef
@@ -2714,7 +2714,7 @@
          #= Checks the return value from Graph.topologicalSort. If the list of cycles is
           not empty, print an error message and fail, since it's not allowed for
           constants or parameters to have cyclic dependencies. =#
-        function checkCyclicalComponents(inCycles::List{<:Tuple{<:FunctionVar, List{<:FunctionVar}}}, inSource::DAE.ElementSource)  
+        function checkCyclicalComponents(inCycles::List{<:Tuple{<:FunctionVar, List{<:FunctionVar}}}, inSource::DAE.ElementSource)
               _ = begin
                   local cycles::List{List{FunctionVar}}
                   local elements::List{List{DAE.Element}}
@@ -2728,7 +2728,7 @@
                   ( nil(), _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         cycles = Graph.findCycles(inCycles, isElementEqual)
                         elements = ListUtil.mapList(cycles, Util.tuple21)
@@ -2753,7 +2753,7 @@
           to transform ASUB expressions to CREFs so that this doesn't need to be done
           while evaluating the function. But it's possible that more forms of
           optimization can be done too. =#
-        function optimizeExpTraverser(inExp::DAE.Exp, inEnv::FCore.Graph) ::Tuple{DAE.Exp, FCore.Graph} 
+        function optimizeExpTraverser(inExp::DAE.Exp, inEnv::FCore.Graph) ::Tuple{DAE.Exp, FCore.Graph}
               local outEnv::FCore.Graph
               local outExp::DAE.Exp
 
@@ -2771,11 +2771,11 @@
                       exp = Expression.makeCrefExp(cref, ety)
                     (exp, env)
                   end
-                  
+
                   (DAE.TSUB(exp = DAE.TUPLE(exp <| _), ix = 1), env)  => begin
                     (exp, env)
                   end
-                  
+
                   _  => begin
                       (inExp, inEnv)
                   end

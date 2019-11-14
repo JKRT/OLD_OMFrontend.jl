@@ -73,7 +73,7 @@
 
         import DAEUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import Expression
 
@@ -203,7 +203,7 @@
         Author: BTH
         Wrap state machine components into corresponding flat state machine containers.
          =#
-        function wrapSMCompsInFlatSMs(inIH::InnerOuter.InstHierarchy, inDae1::DAE.DAElist, inDae2::DAE.DAElist, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable, smInitialCrefs::List{<:DAE.ComponentRef} #= every smInitialCrefs corresponds to a flat state machine group =#) ::Tuple{DAE.DAElist, DAE.DAElist} 
+        function wrapSMCompsInFlatSMs(inIH::InnerOuterTypes.InstHierarchy, inDae1::DAE.DAElist, inDae2::DAE.DAElist, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable, smInitialCrefs::List{<:DAE.ComponentRef} #= every smInitialCrefs corresponds to a flat state machine group =#) ::Tuple{DAE.DAElist, DAE.DAElist} 
               local outDae2::DAE.DAElist
               local outDae1::DAE.DAElist
 
@@ -245,7 +245,7 @@
         Author: BTH
         Create fresh equations for merging outer output variable definitions
          =#
-        function myMergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuter.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element} 
+        function myMergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuterTypes.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element} 
               local outElementLst::List{DAE.Element}
 
               local outerOutputCrefToSMCompCref::HashTableCG.HashTable #= Table to map outer outputs to corresponding state =#
@@ -616,7 +616,7 @@
         Author: BTH
         Helper function to myMergeVariableDefinitions
          =#
-        function matchOuterWithInner(inOuterCref::DAE.ComponentRef, inIH::InnerOuter.InstHierarchy, inOuterCrefToInnerCref::HashTableCG.HashTable) ::HashTableCG.HashTable 
+        function matchOuterWithInner(inOuterCref::DAE.ComponentRef, inIH::InnerOuterTypes.InstHierarchy, inOuterCrefToInnerCref::HashTableCG.HashTable) ::HashTableCG.HashTable 
               local outOuterCrefToInnerCref::HashTableCG.HashTable = inOuterCrefToInnerCref
 
               local crefIdent::DAE.ComponentRef
@@ -646,7 +646,7 @@
         Author: BTH
         Helper function to matchOuterWithInner
          =#
-        function findInner(inCrefTest::DAE.ComponentRef, inCrefIdent::DAE.ComponentRef, inIH::InnerOuter.InstHierarchy) ::DAE.ComponentRef 
+        function findInner(inCrefTest::DAE.ComponentRef, inCrefIdent::DAE.ComponentRef, inIH::InnerOuterTypes.InstHierarchy) ::DAE.ComponentRef 
               local outCrefFound::DAE.ComponentRef
 
               local testCref::DAE.ComponentRef

@@ -64,7 +64,7 @@
 
         import FCore
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import SCode
 
@@ -82,7 +82,7 @@
 
         import Flags
 
-        import FGraph
+        import FGraphUtil
 
         import Inst
 
@@ -108,12 +108,12 @@
          #= protected import System;
          =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
          #= This function flattens out the inheritance structure of a class. It takes an
            SCode.Element list and flattens out the extends nodes of that list. The
            result is a list of components and lists of equations and algorithms. =#
-        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inLocalElements::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String #= The class whose elements are getting instantiated =#, inImpl::Bool, inPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local outComments::List{SCode.Comment} = nil
               local outInitialAlgs::List{SCode.AlgorithmSection} = nil
               local outNormalAlgs::List{SCode.AlgorithmSection} = nil
@@ -121,7 +121,7 @@
               local outNormalEqs::List{SCode.Equation} = nil
               local outElements::List{Tuple{SCode.Element, DAE.Mod, Bool}} = nil
               local outMod::DAE.Mod = inMod
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -175,7 +175,7 @@
                          #=  Check if the extends is referencing the class we're instantiating.
                          =#
                         base_first_id = AbsynUtil.pathFirstIdent(el.baseClassPath)
-                        eq_name = stringEq(inClassName, base_first_id) && AbsynUtil.pathEqual(ClassInf.getStateName(inState), AbsynUtil.joinPaths(FGraph.getGraphName(outEnv), AbsynUtil.makeIdentPathFromString(base_first_id)))
+                        eq_name = stringEq(inClassName, base_first_id) && AbsynUtil.pathEqual(ClassInf.getStateName(inState), AbsynUtil.joinPaths(FGraphUtil.getGraphName(outEnv), AbsynUtil.makeIdentPathFromString(base_first_id)))
                          #=  Look up the base class.
                          =#
                         (outCache, ocls, cenv) = lookupBaseClass(el.baseClassPath, eq_name, inClassName, outEnv, outCache)
@@ -185,7 +185,7 @@
                         else
                           if Flags.getConfigBool(Flags.PERMISSIVE)
                             bc_str = AbsynUtil.pathString(el.baseClassPath)
-                            scope_str = FGraph.printGraphPathStr(inEnv)
+                            scope_str = FGraphUtil.printGraphPathStr(inEnv)
                             Error.addSourceMessage(Error.LOOKUP_BASECLASS_ERROR, list(bc_str, scope_str), el.info)
                           end
                           fail()
@@ -205,7 +205,7 @@
                          =#
                         cacheArr = arrayCreate(1, outCache)
                         emod = fixModifications(cacheArr, inEnv, emod, tree)
-                        cenv = FGraph.openScope(cenv, encf, cn, FGraph.classInfToScopeType(inState))
+                        cenv = FGraphUtil.openScope(cenv, encf, cn, FGraphUtil.classInfToScopeType(inState))
                          #=  Add classdefs and imports to env, so e.g. imports from baseclasses can be found.
                          =#
                         (import_els, cdef_els, clsext_els, rest_els) = InstUtil.splitEltsNoComponents(els1)
@@ -278,7 +278,7 @@
 
                     _  => begin
                           @match true = Flags.isSet(Flags.FAILTRACE)
-                          Debug.traceln("- Inst.instExtendsList failed on:\\n\\t" + "className: " + inClassName + "\\n\\t" + "env:       " + FGraph.printGraphPathStr(outEnv) + "\\n\\t" + "mods:      " + Mod.printModStr(outMod) + "\\n\\t" + "elem:      " + SCodeDump.unparseElementStr(el))
+                          Debug.traceln("- Inst.instExtendsList failed on:\\n\\t" + "className: " + inClassName + "\\n\\t" + "env:       " + FGraphUtil.printGraphPathStr(outEnv) + "\\n\\t" + "mods:      " + Mod.printModStr(outMod) + "\\n\\t" + "elem:      " + SCodeDump.unparseElementStr(el))
                         fail()
                     end
                   end
@@ -368,7 +368,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsAndClassExtendsList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local outComments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}
@@ -376,7 +376,7 @@
               local outNormalEqs::List{SCode.Equation}
               local outElements::List{Tuple{SCode.Element, DAE.Mod}}
               local outMod::DAE.Mod
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -409,7 +409,7 @@
           It takes an SCode.Element list and flattens out the extends nodes and
           class extends nodes of that list. The result is a list of components and
           lists of equations and algorithms. =#
-        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
+        function instExtendsAndClassExtendsList2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inExtendsElementLst::List{<:SCode.Element}, inClassExtendsElementLst::List{<:SCode.Element}, inElementsFromExtendsScope::List{<:SCode.Element}, inState::ClassInf.SMNode, inClassName::String, inImpl::Bool, isPartialInst::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.Mod, List{Tuple{SCode.Element, DAE.Mod, Bool}}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, List{SCode.Comment}}
               local comments::List{SCode.Comment}
               local outInitialAlgs::List{SCode.AlgorithmSection}
               local outNormalAlgs::List{SCode.AlgorithmSection}
@@ -417,7 +417,7 @@
               local outNormalEqs::List{SCode.Equation}
               local outElements::List{Tuple{SCode.Element, DAE.Mod, Bool}}
               local outMod::DAE.Mod
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -533,7 +533,7 @@
                 @matchcontinue (inMod, inName, inClassExtendsElt, inElements) begin
                   (emod, name1, classExtendsElt, (cl && SCode.CLASS(name = name2, classDef = SCode.PARTS(__)), mod1, b) <| rest)  => begin
                       @match true = name1 == name2
-                      env_path = AbsynUtil.pathString(FGraph.getGraphName(inEnv))
+                      env_path = AbsynUtil.pathString(FGraphUtil.getGraphName(inEnv))
                       name2 = buildClassExtendsName(env_path, name2)
                       @match SCode.CLASS(_, prefixes2, encapsulatedPrefix2, partialPrefix2, restriction2, SCode.PARTS(els2, nEqn2, inEqn2, nAlg2, inAlg2, inCons2, clats, externalDecl2), comment2, info2) = cl
                       @match SCode.CLASS(_, prefixes1, encapsulatedPrefix1, partialPrefix1, restriction1, classExtendsCdef, comment1, info1) = classExtendsElt
@@ -550,7 +550,7 @@
 
                   (emod, name1, classExtendsElt, (cl && SCode.CLASS(name = name2, classDef = SCode.DERIVED(__)), mod1, b) <| rest)  => begin
                       @match true = name1 == name2
-                      env_path = AbsynUtil.pathString(FGraph.getGraphName(inEnv))
+                      env_path = AbsynUtil.pathString(FGraphUtil.getGraphName(inEnv))
                       name2 = buildClassExtendsName(env_path, name2)
                       @match SCode.CLASS(_, prefixes2, encapsulatedPrefix2, partialPrefix2, restriction2, SCode.DERIVED(derivedTySpec, derivedMod, attrs), comment2, info2) = cl
                       @match SCode.CLASS(_, prefixes1, encapsulatedPrefix1, partialPrefix1, restriction1, classExtendsCdef, comment1, info1) = classExtendsElt
@@ -598,7 +598,7 @@
           elements and equations and algorithms of the class.
           If the class is derived, the class is looked up and the
           derived class parts are fetched. =#
-        function instDerivedClasses(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}}
+        function instDerivedClasses(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}}
               local outComments::List{SCode.Comment}
               local outMod::DAE.Mod
               local outSCodeAlgorithmLst6::List{SCode.AlgorithmSection}
@@ -606,7 +606,7 @@
               local outSCodeEquationLst4::List{SCode.Equation}
               local outSCodeEquationLst3::List{SCode.Equation}
               local outSCodeElementLst2::List{SCode.Element}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv1::FCore.Graph
               local outCache::FCore.Cache
 
@@ -619,7 +619,7 @@
           elements and equations and algorithms of the class.
           If the class is derived, the class is looked up and the
           derived class parts are fetched. =#
-        function instDerivedClassesWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#, overflow::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}}
+        function instDerivedClassesWork(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inBoolean::Bool, inInfo::SourceInfo #= File information of the extends element =#, overflow::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{SCode.Element}, List{SCode.Equation}, List{SCode.Equation}, List{SCode.AlgorithmSection}, List{SCode.AlgorithmSection}, DAE.Mod, List{SCode.Comment}}
               local outComments::List{SCode.Comment}
               local outMod::DAE.Mod
               local outSCodeAlgorithmLst6::List{SCode.AlgorithmSection}
@@ -627,7 +627,7 @@
               local outSCodeEquationLst4::List{SCode.Equation}
               local outSCodeEquationLst3::List{SCode.Equation}
               local outSCodeElementLst2::List{SCode.Element}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv1::FCore.Graph
               local outCache::FCore.Cache
 
@@ -689,7 +689,7 @@
 
                   (_, _, _, _, _, _, _, _, true)  => begin
                       str1 = SCodeDump.unparseElementStr(inClass, SCodeDump.defaultOptions)
-                      str2 = FGraph.printGraphPathStr(inEnv)
+                      str2 = FGraphUtil.printGraphPathStr(inEnv)
                       Error.addSourceMessage(Error.RECURSION_DEPTH_DERIVED, list(str1, str2), inInfo)
                     fail()
                   end
@@ -702,9 +702,9 @@
                 end
               end
                #= /* elt_1 = noImportElements(elt); */ =#
-               #=  fprintln(Flags.INST_TRACE, \"DERIVED: \" + FGraph.printGraphPathStr(env) + \" el: \" + SCodeDump.unparseElementStr(inClass) + \" mods: \" + Mod.printModStr(mod));
+               #=  fprintln(Flags.INST_TRACE, \"DERIVED: \" + FGraphUtil.printGraphPathStr(env) + \" el: \" + SCodeDump.unparseElementStr(inClass) + \" mods: \" + Mod.printModStr(mod));
                =#
-               #=  false = AbsynUtil.pathEqual(FGraph.getGraphName(env),FGraph.getGraphName(cenv)) and SCodeUtil.elementEqual(c,inClass);
+               #=  false = AbsynUtil.pathEqual(FGraphUtil.getGraphName(env),FGraphUtil.getGraphName(cenv)) and SCodeUtil.elementEqual(c,inClass);
                =#
                #=  modifiers should be evaluated in the current scope for derived!
                =#
@@ -791,7 +791,7 @@
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
-                        Debug.traceln("- InstExtends.updateComponentsAndClassdefs2 failed on:\\n" + "env = " + FGraph.printGraphPathStr(inEnv) + "\\nmod = " + Mod.printModStr(inMod) + "\\ncmod = " + Mod.printModStr(mod) + "\\nbool = " + boolString(b) + "\\n" + SCodeDump.unparseElementStr(el))
+                        Debug.traceln("- InstExtends.updateComponentsAndClassdefs2 failed on:\\n" + "env = " + FGraphUtil.printGraphPathStr(inEnv) + "\\nmod = " + Mod.printModStr(inMod) + "\\ncmod = " + Mod.printModStr(mod) + "\\nbool = " + boolString(b) + "\\n" + SCodeDump.unparseElementStr(el))
                       fail()
                   end
                 end
@@ -979,7 +979,7 @@
 
                   (env, SCode.CLASS(name, prefixes && SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(_)), SCode.ENCAPSULATED(__), partialPrefix, restriction, _, comment, info))  => begin
                       @match (SCode.CLASS(prefixes = prefixes, partialPrefix = partialPrefix, restriction = restriction, cmt = comment, info = info, classDef = classDef1), env) = Lookup.lookupClassLocal(env, name)
-                      env = FGraph.openScope(env, SCode.ENCAPSULATED(), name, FGraph.restrictionToScopeType(restriction))
+                      env = FGraphUtil.openScope(env, SCode.ENCAPSULATED(), name, FGraphUtil.restrictionToScopeType(restriction))
                       classDef2 = fixClassdef(inCache, env, classDef1, tree)
                     if referenceEq(classDef1, classDef2)
                           inElt
@@ -989,7 +989,7 @@
                   end
 
                   (env, SCode.CLASS(name, prefixes, SCode.ENCAPSULATED(__), partialPrefix, restriction, classDef1, comment, info))  => begin
-                      env = FGraph.openScope(env, SCode.ENCAPSULATED(), name, FGraph.restrictionToScopeType(restriction))
+                      env = FGraphUtil.openScope(env, SCode.ENCAPSULATED(), name, FGraphUtil.restrictionToScopeType(restriction))
                       classDef2 = fixClassdef(inCache, env, classDef1, tree)
                     if referenceEq(classDef1, classDef2)
                           inElt
@@ -1000,7 +1000,7 @@
 
                   (env, SCode.CLASS(name, prefixes && SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(_)), SCode.NOT_ENCAPSULATED(__), partialPrefix, restriction, _, comment, info))  => begin
                       @match (SCode.CLASS(prefixes = prefixes, partialPrefix = partialPrefix, restriction = restriction, cmt = comment, info = info, classDef = classDef1), env) = Lookup.lookupClassLocal(env, name)
-                      env = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), name, FGraph.restrictionToScopeType(restriction))
+                      env = FGraphUtil.openScope(env, SCode.NOT_ENCAPSULATED(), name, FGraphUtil.restrictionToScopeType(restriction))
                       classDef2 = fixClassdef(inCache, env, classDef1, tree)
                     if referenceEq(classDef1, classDef2)
                           inElt
@@ -1010,7 +1010,7 @@
                   end
 
                   (env, SCode.CLASS(name, prefixes, SCode.NOT_ENCAPSULATED(__), partialPrefix, restriction, classDef1, comment, info))  => begin
-                      env = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), name, FGraph.restrictionToScopeType(restriction))
+                      env = FGraphUtil.openScope(env, SCode.NOT_ENCAPSULATED(), name, FGraphUtil.restrictionToScopeType(restriction))
                       classDef2 = fixClassdef(inCache, env, classDef1, tree)
                     if referenceEq(classDef1, classDef2)
                           inElt
@@ -1605,25 +1605,25 @@
                   _  => begin
                       id = AbsynUtil.pathFirstIdent(inPath)
                       @match true = AvlSetString.hasKey(tree, id)
-                      path2 = FGraph.pathStripGraphScopePrefix(inPath, inEnv, false)
+                      path2 = FGraphUtil.pathStripGraphScopePrefix(inPath, inEnv, false)
                     path2
                   end
 
                   _  => begin
                       (_, _) = Lookup.lookupClassLocal(inEnv, AbsynUtil.pathFirstIdent(inPath))
-                      path = FGraph.pathStripGraphScopePrefix(inPath, inEnv, false)
+                      path = FGraphUtil.pathStripGraphScopePrefix(inPath, inEnv, false)
                     path
                   end
 
                   _  => begin
                       (cache, path) = Inst.makeFullyQualified(arrayGet(inCache, 1), inEnv, inPath)
-                      path = FGraph.pathStripGraphScopePrefix(path, inEnv, false)
+                      path = FGraphUtil.pathStripGraphScopePrefix(path, inEnv, false)
                       arrayUpdate(inCache, 1, cache)
                     path
                   end
 
                   _  => begin
-                        path = FGraph.pathStripGraphScopePrefix(inPath, inEnv, false)
+                        path = FGraphUtil.pathStripGraphScopePrefix(inPath, inEnv, false)
                       path
                   end
                 end
@@ -1638,7 +1638,7 @@
                =#
                #= print(\"Try makeFullyQualified \" + AbsynUtil.pathString(path) + \"\\n\");
                =#
-               #=  path = if_(isOutside, path, FGraph.pathStripGraphScopePrefix(path, inEnv, false));
+               #=  path = if_(isOutside, path, FGraphUtil.pathStripGraphScopePrefix(path, inEnv, false));
                =#
                #= print(\"FullyQual: \" + AbsynUtil.pathString(path) + \"\\n\");
                =#
@@ -1679,14 +1679,14 @@
                   local isOutside::Bool
                 @matchcontinue (inEnv, inCref) begin
                   (env, Absyn.CREF_FULLYQUALIFIED(__))  => begin
-                      env = FGraph.topScope(inEnv)
+                      env = FGraphUtil.topScope(inEnv)
                     fixCref(cache, env, inCref.componentRef, tree)
                   end
 
                   (env, cref)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match true = AvlSetString.hasKey(tree, id)
-                      cref = FGraph.crefStripGraphScopePrefix(cref, env, false)
+                      cref = FGraphUtil.crefStripGraphScopePrefix(cref, env, false)
                       cref = if AbsynUtil.crefEqual(cref, inCref)
                             inCref
                           else
@@ -1698,9 +1698,9 @@
                   (env, cref)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       (denv, id) = lookupVarNoErrorMessage(arrayGet(cache, 1), env, id)
-                      denv = FGraph.openScope(denv, SCode.ENCAPSULATED(), id, NONE())
-                      cref = AbsynUtil.crefReplaceFirstIdent(cref, FGraph.getGraphName(denv))
-                      cref = FGraph.crefStripGraphScopePrefix(cref, env, false)
+                      denv = FGraphUtil.openScope(denv, SCode.ENCAPSULATED(), id, NONE())
+                      cref = AbsynUtil.crefReplaceFirstIdent(cref, FGraphUtil.getGraphName(denv))
+                      cref = FGraphUtil.crefStripGraphScopePrefix(cref, env, false)
                       cref = if AbsynUtil.crefEqual(cref, inCref)
                             inCref
                           else
@@ -1713,9 +1713,9 @@
                       id = AbsynUtil.crefFirstIdent(cref)
                       (_, c, denv) = Lookup.lookupClassIdent(arrayGet(cache, 1), env, id)
                       id = SCodeUtil.getElementName(c)
-                      denv = FGraph.openScope(denv, SCode.ENCAPSULATED(), id, NONE())
-                      cref = AbsynUtil.crefReplaceFirstIdent(cref, FGraph.getGraphName(denv))
-                      cref = FGraph.crefStripGraphScopePrefix(cref, env, false)
+                      denv = FGraphUtil.openScope(denv, SCode.ENCAPSULATED(), id, NONE())
+                      cref = AbsynUtil.crefReplaceFirstIdent(cref, FGraphUtil.getGraphName(denv))
+                      cref = FGraphUtil.crefStripGraphScopePrefix(cref, env, false)
                       cref = if AbsynUtil.crefEqual(cref, inCref)
                             inCref
                           else
@@ -1735,21 +1735,21 @@
                =#
                #= fprintln(Flags.DEBUG,\"Got env \" + intString(listLength(env)));
                =#
-               #=  isOutside = FGraph.graphPrefixOf(denv, env);
+               #=  isOutside = FGraphUtil.graphPrefixOf(denv, env);
                =#
-               #=  cref = if_(isOutside, cref, FGraph.crefStripGraphScopePrefix(cref, env, false));
+               #=  cref = if_(isOutside, cref, FGraphUtil.crefStripGraphScopePrefix(cref, env, false));
                =#
                #= fprintln(Flags.DEBUG, \"Cref VAR fixed: \" + AbsynUtil.printComponentRefStr(cref));
                =#
                #= print(\"Try lookupC \" + id + \"\\n\");
                =#
-               #=  isOutside = FGraph.graphPrefixOf(denv, env);
+               #=  isOutside = FGraphUtil.graphPrefixOf(denv, env);
                =#
                #=  id might come from named import, make sure you use the actual class name!
                =#
                #= fprintln(Flags.DEBUG,\"Got env \" + intString(listLength(env)));
                =#
-               #=  cref = if_(isOutside, cref, FGraph.crefStripGraphScopePrefix(cref, env, false));
+               #=  cref = if_(isOutside, cref, FGraphUtil.crefStripGraphScopePrefix(cref, env, false));
                =#
                #= print(\"Cref CLASS fixed: \" + AbsynUtil.printComponentRefStr(cref) + \"\\n\");
                =#
@@ -1892,7 +1892,7 @@
                   end
                 end
               end
-               #=  print(\"cref actual: \" + AbsynUtil.crefString(cref) + \" scope: \" + FGraph.printGraphPathStr(env) + \"\\n\");
+               #=  print(\"cref actual: \" + AbsynUtil.crefString(cref) + \" scope: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                =#
                #=  print(\"cref fixed : \" + AbsynUtil.crefString(cref) + \"\\n\");
                =#

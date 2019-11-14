@@ -1,4 +1,4 @@
-  module HashTable4 
+  module HashTable4
 
 
     using MetaModelica
@@ -54,19 +54,15 @@
 
         import DAE
 
-        import ComponentReference
+        import CrefForHashTable
 
-        import Expression
+        Key = DAE.Exp
 
-        import ExpressionDump
+        Value = DAE.ComponentRef
 
-        Key = DAE.Exp 
+        HashTableCrefFunctionsType = Tuple
 
-        Value = DAE.ComponentRef 
-
-        HashTableCrefFunctionsType = Tuple 
-
-        HashTable = Tuple 
+        HashTable = Tuple
 
 
 
@@ -76,11 +72,11 @@
 
 
 
-         #= 
+         #=
           Returns an empty HashTable.
           Using the default bucketsize..
          =#
-        function emptyHashTable() ::HashTable 
+        function emptyHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
@@ -89,10 +85,10 @@
 
          #= Returns an empty HashTable.
          Using the bucketsize size. =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (Expression.hashExpMod, Expression.expEqual, ExpressionDump.printExpStr, ComponentReference.printComponentRefStr))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashExpMod, CrefForHashTable.expEqual, CrefForHashTable.printExpStr, CrefForHashTable.printComponentRefStr))
           hashTable
         end
 

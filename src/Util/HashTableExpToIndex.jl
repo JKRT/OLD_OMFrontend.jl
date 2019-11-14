@@ -1,4 +1,4 @@
-  module HashTableExpToIndex 
+  module HashTableExpToIndex
 
 
     using MetaModelica
@@ -54,17 +54,15 @@
 
         import DAE
 
-        import Expression
+        import CrefForHashTable
 
-        import ExpressionDump
+        Key = DAE.Exp
 
-        Key = DAE.Exp 
+        Value = ModelicaInteger
 
-        Value = ModelicaInteger 
+        HashTableCrefFunctionsType = Tuple
 
-        HashTableCrefFunctionsType = Tuple 
-
-        HashTable = Tuple 
+        HashTable = Tuple
 
 
 
@@ -74,25 +72,25 @@
 
 
 
-         #= 
+         #=
           Returns an empty HashTable.
           Using the default bucketsize..
          =#
-        function emptyHashTable() ::HashTable 
+        function emptyHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
           hashTable
         end
 
-         #= 
+         #=
           Returns an empty HashTable.
           Using the bucketsize size.
          =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (Expression.hashExpMod, Expression.expEqual, ExpressionDump.printExpStr, intString))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashExpMod, CrefForHashTable.expEqual, CrefForHashTable.printExpStr, intString))
           hashTable
         end
 

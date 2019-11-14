@@ -51,7 +51,7 @@ import Error
 import Expression
 import ExpressionDump
 import ExpressionSimplify
-import FGraph
+import FGraphUtil
 import Flags
 import Global
 import Inline
@@ -1377,7 +1377,7 @@ function lookupOperatorBaseClass(inCache::FCore.Cache, inEnv::FCore.Graph, inCla
       end
 
       (cache, env, SCode.CLASS(name = name))  => begin
-        path = FGraph.joinScopePath(env, Absyn.IDENT(name))
+        path = FGraphUtil.joinScopePath(env, Absyn.IDENT(name))
         (cache, path, env)
       end
     end
@@ -2052,7 +2052,7 @@ function warnUnsafeRelations(inEnv::FCore.Graph, inExp::Absyn.Exp, variability::
     =#
     @matchcontinue (inEnv, inExp, variability, t1, t2, e1, e2, op, inPrefix, inInfo) begin
       (_, _, _, _, _, _, _, _, _, _)  => begin
-        @match true = FGraph.inFunctionScope(inEnv)
+        @match true = FGraphUtil.inFunctionScope(inEnv)
         ()
       end
 

@@ -46,7 +46,7 @@
 
         import FNode
 
-        import FGraph
+        import FGraphUtil
 
         import DAE
 
@@ -84,7 +84,7 @@
 
               local topRef::Ref
 
-              topRef = FGraph.top(inGraph)
+              topRef = FGraphUtil.top(inGraph)
               outGraph = ListUtil.fold2(inProgram, mkClassGraph, topRef, inKind, inGraph)
           outGraph
         end
@@ -125,7 +125,7 @@
                   (_, _, _, g)  => begin
                       cls = SCodeInstUtil.expandEnumerationClass(inClass)
                       @match SCode.CLASS(name = name, classDef = cdef) = cls
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.CL(cls, Prefix.NOPRE(), DAE.NOMOD(), inKind, FCore.VAR_UNTYPED()))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.CL(cls, Prefix.NOPRE(), DAE.NOMOD(), inKind, FCore.VAR_UNTYPED()))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkConstrainClass(cls, nr, inKind, g)
@@ -151,7 +151,7 @@
                   local p::Absyn.Path
                 @matchcontinue (inElement, inParentRef, inKind, inGraph) begin
                   (SCode.CLASS(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(SOME(cc && SCode.CONSTRAINCLASS(constrainingClass = p, modifier = m))))), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
+                      (g, n) = FGraphUtil.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.ccNodeName, nr)
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_CONSTRAINEDBY(p), nr, inKind, g)
@@ -159,7 +159,7 @@
                   end
 
                   (SCode.COMPONENT(prefixes = SCode.PREFIXES(replaceablePrefix = SCode.REPLACEABLE(SOME(cc && SCode.CONSTRAINCLASS(constrainingClass = p, modifier = m))))), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
+                      (g, n) = FGraphUtil.node(g, FNode.ccNodeName, list(inParentRef), FCore.CC(cc))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.ccNodeName, nr)
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_CONSTRAINEDBY(p), nr, inKind, g)
@@ -200,7 +200,7 @@
                   end
 
                   (name, SCode.MOD(subModLst =  nil(), binding = b && SOME(_)), _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkBindingNode(b, nr, inKind, g)
@@ -208,7 +208,7 @@
                   end
 
                   (name, SCode.MOD(subModLst = sm, binding = b), _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       sm = FMod.compactSubMods(sm, inModScope)
@@ -218,7 +218,7 @@
                   end
 
                   (name, SCode.REDECL(element = e), _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.MO(inMod))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.MO(inMod))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkElementNode(e, nr, inKind, g)
@@ -394,7 +394,7 @@
 
                   (SCode.EXTENDS(baseClassPath = p, modifications = m), _, _, g)  => begin
                       name = FNode.mkExtendsName(p)
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.EX(inElement, DAE.NOMOD()))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.EX(inElement, DAE.NOMOD()))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkModNode(FNode.modNodeName, m, FCore.MS_EXTENDS(p), nr, inKind, g)
@@ -440,7 +440,7 @@
                   end
 
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.duNodeName, list(inParentRef), FCore.DU(list(inElement)))
+                      (g, n) = FGraphUtil.node(g, FNode.duNodeName, list(inParentRef), FCore.DU(list(inElement)))
                       r = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.duNodeName, r)
                     g
@@ -473,7 +473,7 @@
                   end
 
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.imNodeName, list(inParentRef), FCore.IM(FCore.emptyImportTable))
+                      (g, n) = FGraphUtil.node(g, FNode.imNodeName, list(inParentRef), FCore.IM(FCore.emptyImportTable))
                       r = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.imNodeName, r)
                       FNode.addImportToRef(r, inElement)
@@ -505,7 +505,7 @@
                   end
 
                   (_, SOME(a && _ <| _), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.DIMS(inName, a))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.DIMS(inName, a))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = mkDimsNode_helper(0, a, nr, inKind, g)
@@ -577,7 +577,7 @@
 
               @match SCode.COMPONENT(name = name, attributes = SCode.ATTR(arrayDims = ad), typeSpec = ts, modifications = m, condition = cnd) = inComp
               (nd, i) = FNode.element2Data(inComp, inKind)
-              (g, n) = FGraph.node(inGraph, name, list(inParentRef), nd)
+              (g, n) = FGraphUtil.node(inGraph, name, list(inParentRef), nd)
               nr = FNode.toRef(n)
               FNode.addChildRef(inParentRef, name, nr)
                #=  add instance node
@@ -614,7 +614,7 @@
               local n::Node
               local g::Graph
 
-              (g, n) = FGraph.node(inGraph, FNode.itNodeName, list(inParentRef), FCore.IT(inVar))
+              (g, n) = FGraphUtil.node(inGraph, FNode.itNodeName, list(inParentRef), FCore.IT(inVar))
               nr = FNode.toRef(n)
               FNode.addChildRef(inParentRef, FNode.itNodeName, nr)
               outGraph = g
@@ -658,7 +658,7 @@
                   local g::Graph
                 @match (inName, inExp, inParentRef, inKind, inGraph) begin
                   (_, e, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.EXP(inName, e))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.EXP(inName, e))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = analyseExp(e, nr, inKind, g)
@@ -713,7 +713,7 @@
                 @match (inCref, inParentRef, inKind, inGraph) begin
                   (_, _, _, g)  => begin
                       name = AbsynUtil.printComponentRefStr(inCref)
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.CR(inCref))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.CR(inCref))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = mkDimsNode(FNode.subsNodeName, ListUtil.mkOption(AbsynUtil.getSubsFromCref(inCref, true, true)), nr, inKind, g)
@@ -748,10 +748,10 @@
 
                   (_, _, _, g)  => begin
                       @shouldFail _ = FNode.child(inParentRef, FNode.tyNodeName)
-                      (g, n) = FGraph.node(g, FNode.tyNodeName, list(inParentRef), FCore.ND(NONE()))
+                      (g, n) = FGraphUtil.node(g, FNode.tyNodeName, list(inParentRef), FCore.ND(NONE()))
                       pr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.tyNodeName, pr)
-                      (g, n) = FGraph.node(g, inName, list(pr), FCore.FT(inTypes))
+                      (g, n) = FGraphUtil.node(g, inName, list(pr), FCore.FT(inTypes))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(pr, inName, nr)
                     g
@@ -760,14 +760,14 @@
                   (_, _, _, g)  => begin
                       pr = FNode.child(inParentRef, FNode.tyNodeName)
                       @shouldFail _ = FNode.child(pr, inName)
-                      (g, n) = FGraph.node(g, inName, list(pr), FCore.FT(inTypes))
+                      (g, n) = FGraphUtil.node(g, inName, list(pr), FCore.FT(inTypes))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(pr, inName, nr)
                     g
                   end
 
                   _  => begin
-                        pr = FGraph.top(inGraph)
+                        pr = FGraphUtil.top(inGraph)
                         print("FGraphBuild.mkTypeNode: Error making type node: " + inName + " in parent: " + FNode.name(FNode.fromRef(pr)) + "\\n")
                       inGraph
                   end
@@ -806,7 +806,7 @@
                   end
 
                   (_, _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.EQ(inName, inEqs))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.EQ(inName, inEqs))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = ListUtil.fold2(inEqs, analyseEquation, nr, inKind, g)
@@ -831,7 +831,7 @@
                   end
 
                   (_, _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.AL(inName, inAlgs))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.AL(inName, inAlgs))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       g = ListUtil.fold2(inAlgs, analyseAlgorithm, nr, inKind, g)
@@ -856,7 +856,7 @@
                   end
 
                   (_, _, _, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.OT(inConstraintLst, inClsAttrs))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.OT(inConstraintLst, inClsAttrs))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                     g
@@ -884,7 +884,7 @@
                   end
 
                   (_, SOME(ed && SCode.EXTERNALDECL(output_ = ocr, args = exps)), _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.ED(ed))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.ED(ed))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, nr)
                       oae = Util.applyOption(ocr, AbsynUtil.crefExp)
@@ -1177,7 +1177,7 @@
                   end
 
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, FNode.forNodeName, list(inParentRef), FCore.FS(inIterators))
+                      (g, n) = FGraphUtil.node(g, FNode.forNodeName, list(inParentRef), FCore.FS(inIterators))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, FNode.forNodeName, nr)
                       g = addIterators_helper(inIterators, nr, inKind, g)
@@ -1210,7 +1210,7 @@
                   end
 
                   (i && Absyn.ITERATOR(name = name) <| rest, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, name, list(inParentRef), FCore.FI(i))
+                      (g, n) = FGraphUtil.node(g, name, list(inParentRef), FCore.FI(i))
                       nr = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, name, nr)
                       g = addIterators_helper(rest, inParentRef, inKind, g)
@@ -1233,7 +1233,7 @@
               local local_decls::List{Absyn.ElementItem}
               local g::Graph
 
-              (g, n) = FGraph.node(inGraph, FNode.matchNodeName, list(inParentRef), FCore.MS(inMatchExp))
+              (g, n) = FGraphUtil.node(inGraph, FNode.matchNodeName, list(inParentRef), FCore.MS(inMatchExp))
               nr = FNode.toRef(n)
               FNode.addChildRef(inParentRef, FNode.matchNodeName, nr)
               @match Absyn.MATCHEXP(localDecls = local_decls) = inMatchExp
@@ -1294,7 +1294,7 @@
                   local g::Graph
                 @match (inName, inTargetScope, inParentRef, inGraph) begin
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.REF(inTargetScope))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.REF(inTargetScope))
                       rn = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, rn)
                     g
@@ -1319,7 +1319,7 @@
                   local g::Graph
                 @match (inName, inMessage, inParentRef, inGraph) begin
                   (_, _, _, g)  => begin
-                      (g, n) = FGraph.node(g, inName, list(inParentRef), FCore.ASSERT(inMessage))
+                      (g, n) = FGraphUtil.node(g, inName, list(inParentRef), FCore.ASSERT(inMessage))
                       rn = FNode.toRef(n)
                       FNode.addChildRef(inParentRef, inName, rn)
                     (g, rn)
@@ -1368,7 +1368,7 @@
 
                 print(\"Cloning: \" + FNode.toPathStr(FNode.fromRef(inTargetRef)) + \"/\" + FNode.toStr(FNode.fromRef(inTargetRef)) + \"\\n\\t\" +
                       \"Scope: \" + FNode.toPathStr(FNode.fromRef(inParentRef)) + \"/\" + FNode.toStr(FNode.fromRef(inParentRef)) + \"\\n\");
-                (g, n) = FGraph.node(g, inName, {inParentRef}, FCore.CLONE(inTargetRef));
+                (g, n) = FGraphUtil.node(g, inName, {inParentRef}, FCore.CLONE(inTargetRef));
                  make a ref
                 rn = FNode.toRef(n);
                  add the ref node

@@ -87,7 +87,7 @@
         
         import FCoreUtil
 
-        import FGraph
+        import FGraphUtil
 
         import ElementSource
 
@@ -1596,7 +1596,7 @@
 
                   DAE.CALL(path = Absyn.IDENT("fill"), expLst = e <| expl)  => begin
                       valueLst = ListUtil.map(expl, ValuesUtil.expValue)
-                      (_, outExp, _) = Static.elabBuiltinFill2(FCoreUtil.noCache(), FGraph.empty(), e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
+                      (_, outExp, _) = Static.elabBuiltinFill2(FCoreUtil.noCache(), FCore.emptyGraph, e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
                     outExp
                   end
 

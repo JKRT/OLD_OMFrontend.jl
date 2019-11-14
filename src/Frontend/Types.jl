@@ -1,12 +1,35 @@
 
 module TypesInterface
 
+using MetaModelica
+#= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
+using ExportAll
+#= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+
 import DAE
 
-import Patternm
-
 function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp}
-  Patternm.resultExps(inCases)
+      local exps::List{DAE.Exp}
+
+      exps = begin
+          local exp::DAE.Exp
+          local cases::List{DAE.MatchCase}
+        @match inCases begin
+           nil()  => begin
+            nil
+          end
+
+          DAE.CASE(result = SOME(exp)) <| cases  => begin
+              exps = resultExps(cases)
+            _cons(exp, exps)
+          end
+
+          _ <| cases  => begin
+            resultExps(cases)
+          end
+        end
+      end
+  exps
 end
 
 @exportAll
@@ -97,7 +120,7 @@ module Types
 
         EqMod = DAE.EqMod
 
-        import ComponentReference
+        import CrefForHashTable
 
         import Config
 
@@ -108,8 +131,6 @@ module Types
         import Error
 
         import Expression
-
-        import ExpressionDump
 
         import ExpressionSimplify
 
@@ -1480,7 +1501,7 @@ import TypesInterface
         function printDimensionsStr(dims::DAE.Dimensions) ::String
               local res::String
 
-              res = stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ")
+              res = stringDelimitList(ListUtil.map(dims, CrefForHashTable.dimensionString), ", ")
           res
         end
 
@@ -2748,7 +2769,7 @@ import TypesInterface
                   local e2::Absyn.Exp
                 @match eq begin
                   DAE.TYPED(modifierAsExp = e)  => begin
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                     str
                   end
 
@@ -3227,7 +3248,7 @@ import TypesInterface
                   end
 
                   DAE.T_ARRAY(dims = dims, ty = t)  => begin
-                      s1 = stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ")
+                      s1 = stringDelimitList(ListUtil.map(dims, CrefForHashTable.dimensionString), ", ")
                       s2 = printTypeStr(t)
                       str = stringAppendList(list("array(", s2, ")[", s1, "]"))
                     str
@@ -3469,7 +3490,7 @@ import TypesInterface
                   local e::DAE.Exp
                 @matchcontinue inVar begin
                   DAE.TYPES_VAR(name = n, binding = DAE.EQBOUND(exp = e))  => begin
-                      bindStr = ExpressionDump.printExpStr(e)
+                      bindStr = CrefForHashTable.printExpStr(e)
                       res = stringAppendList(list(n, " = ", bindStr))
                     res
                   end
@@ -3564,7 +3585,7 @@ import TypesInterface
                   DAE.FUNCARG(id, ty, c, p, SOME(exp))  => begin
                       tstr = unparseType(ty)
                       cstr = DAEUtil.constStrFriendly(c)
-                      estr = ExpressionDump.printExpStr(exp)
+                      estr = CrefForHashTable.printExpStr(exp)
                       pstr = DAEUtil.dumpVarParallelismStr(p)
                       res = stringAppendList(list(tstr, " ", cstr, pstr, id, " := ", estr))
                     res
@@ -3626,7 +3647,7 @@ import TypesInterface
                   end
 
                   DAE.EQBOUND(exp = exp, evaluatedExp = NONE(), constant_ = f, source = source)  => begin
-                      str = ExpressionDump.printExpStr(exp)
+                      str = CrefForHashTable.printExpStr(exp)
                       str2 = printConstStr(f)
                       str3 = DAEUtil.printBindingSourceStr(source)
                       res = stringAppendList(list("DAE.EQBOUND(", str, ", NONE(), ", str2, ", ", str3, ")"))
@@ -3634,7 +3655,7 @@ import TypesInterface
                   end
 
                   DAE.EQBOUND(exp = exp, evaluatedExp = SOME(v), constant_ = f, source = source)  => begin
-                      str = ExpressionDump.printExpStr(exp)
+                      str = CrefForHashTable.printExpStr(exp)
                       str2 = printConstStr(f)
                       v_str = ValuesUtil.valString(v)
                       str3 = DAEUtil.printBindingSourceStr(source)
@@ -4240,7 +4261,7 @@ import TypesInterface
                   local parallelism::DAE.VarParallelism
                 @match (inElement, inFarg) begin
                   (DAE.VAR(componentRef = cref), _)  => begin
-                      name = ComponentReference.crefLastIdent(cref)
+                      name = CrefForHashTable.crefLastIdent(cref)
                     setFuncArgName(inFarg, name)
                   end
                 end
@@ -4488,7 +4509,7 @@ import TypesInterface
 
                   arrayty && DAE.T_ARRAY(__)  => begin
                       (ty, dims) = flattenArrayType(arrayty)
-                      dimstr = ExpressionDump.dimensionsString(dims)
+                      dimstr = CrefForHashTable.dimensionsString(dims)
                       tystr = getTypeName(ty)
                       str = stringAppendList(list(tystr, "[", dimstr, "]"))
                     str
@@ -5241,7 +5262,7 @@ import TypesInterface
 
                   (e, _, _, true)  => begin
                       @match true = Flags.isSet(Flags.TYPES)
-                      Debug.traceln("- Types.matchProp failed on exp: " + ExpressionDump.printExpStr(e))
+                      Debug.traceln("- Types.matchProp failed on exp: " + CrefForHashTable.printExpStr(e))
                       Debug.traceln(printPropStr(inActualType) + " != ")
                       Debug.traceln(printPropStr(inExpectedType))
                     fail()
@@ -5797,8 +5818,8 @@ import TypesInterface
                       tys2 = ListUtil.map(tys1, boxIfUnboxedType, DAE.Type)
                       expTypes = ListUtil.map(tys1, simplifyType)
                       pathList = ListUtil.map(l, AbsynUtil.makeIdentPathFromString)
-                      crefList = ListUtil.map(pathList, ComponentReference.pathToCref)
-                      crefList = ListUtil.map1r(crefList, ComponentReference.joinCrefs, cref)
+                      crefList = ListUtil.map(pathList, CrefForHashTable.pathToCref)
+                      crefList = ListUtil.map1r(crefList, CrefForHashTable.joinCrefs, cref)
                       elist = ListUtil.threadMap(crefList, expTypes, Expression.makeCrefExp)
                       (elist, _) = matchTypeTuple(elist, tys1, tys2, printFailtrace)
                       e_1 = DAE.METARECORDCALL(path, elist, l, -1, nil)
@@ -5807,7 +5828,7 @@ import TypesInterface
 
                   (e, DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(__)), DAE.T_METABOXED(__), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.trace("- Not yet implemented: Converting record into boxed records: " + ExpressionDump.printExpStr(e) + "\\n")
+                      Debug.trace("- Not yet implemented: Converting record into boxed records: " + CrefForHashTable.printExpStr(e) + "\\n")
                     fail()
                   end
 
@@ -6399,7 +6420,7 @@ import TypesInterface
 
                   (DAE.TYPES_VAR(name = id, attributes = DAE.ATTR(connectorType = DAE.FLOW(__)), ty = ty) <| vs, cr)  => begin
                       ty2 = simplifyType(ty)
-                      cr_1 = ComponentReference.crefPrependIdent(cr, id, nil, ty2)
+                      cr_1 = CrefForHashTable.crefPrependIdent(cr, id, nil, ty2)
                       res = flowVariables(vs, cr)
                     _cons(cr_1, res)
                   end
@@ -6412,7 +6433,7 @@ import TypesInterface
               end
                #=  we have a flow prefix
                =#
-               #=  print(\"\\n created: \" + ComponentReference.debugPrintComponentRefTypeStr(cr_1) + \"\\n\");
+               #=  print(\"\\n created: \" + CrefForHashTable.debugPrintComponentRefTypeStr(cr_1) + \"\\n\");
                =#
                #=  handle the rest
                =#
@@ -6440,7 +6461,7 @@ import TypesInterface
 
                   (DAE.TYPES_VAR(name = id, attributes = DAE.ATTR(connectorType = DAE.STREAM(__)), ty = ty) <| vs, cr)  => begin
                       ty2 = simplifyType(ty)
-                      cr_1 = ComponentReference.crefPrependIdent(cr, id, nil, ty2)
+                      cr_1 = CrefForHashTable.crefPrependIdent(cr, id, nil, ty2)
                       res = streamVariables(vs, cr)
                     _cons(cr_1, res)
                   end
@@ -6876,7 +6897,7 @@ import TypesInterface
 
                   (e <| _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                       Debug.traceln("- Types.listMatchSuperType2 failed: " + str)
                     fail()
                   end
@@ -7012,15 +7033,15 @@ import TypesInterface
                 (exp, actual) = matchType(exp, actual, expected, printFailtrace)
               else
                 if debug
-                  print("match type: " + ExpressionDump.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + "\\n")
+                  print("match type: " + CrefForHashTable.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + "\\n")
                 end
                 (exp, actual) = matchType(exp, actual, DAE.T_METABOXED(DAE.T_UNKNOWN_DEFAULT), printFailtrace)
                 if debug
-                  print("matched type: " + ExpressionDump.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + " (boxed)\\n")
+                  print("matched type: " + CrefForHashTable.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + " (boxed)\\n")
                 end
                 polymorphicBindings = subtypePolymorphic(getUniontypeIfMetarecordReplaceAllSubtypes(actual), getUniontypeIfMetarecordReplaceAllSubtypes(expected), envPath, polymorphicBindings)
                 if debug
-                  print("match type: " + ExpressionDump.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + " and bindings " + polymorphicBindingsStr(polymorphicBindings) + " (OK)\\n")
+                  print("match type: " + CrefForHashTable.printExpStr(exp) + " of " + unparseType(actual) + " with " + unparseType(expected) + " and bindings " + polymorphicBindingsStr(polymorphicBindings) + " (OK)\\n")
                 end
               end
                #= /*(if not Config.acceptMetaModelicaGrammar() then true else*/ =#
@@ -7054,7 +7075,7 @@ import TypesInterface
                   end
 
                   _  => begin
-                        str1 = ExpressionDump.printExpStr(iexp)
+                        str1 = CrefForHashTable.printExpStr(iexp)
                         str2 = unparseType(iactual)
                         str3 = unparseType(iexpected)
                         Error.addSourceMessage(Error.EXP_TYPE_MISMATCH, list(str1, str3, str2), info)
@@ -7162,7 +7183,7 @@ import TypesInterface
                   end
 
                   _  => begin
-                        str = "- Types.matchTypes failed for " + ExpressionDump.printExpStr(inExp) + " from " + unparseType(inType) + " to " + unparseType(inExpected) + "\\n"
+                        str = "- Types.matchTypes failed for " + CrefForHashTable.printExpStr(inExp) + " from " + unparseType(inType) + " to " + unparseType(inExpected) + "\\n"
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
                       fail()
                   end
@@ -7177,7 +7198,7 @@ import TypesInterface
          generate the strings at all. =#
         function printFailure(flag::Flags.DebugFlag, source::String, e::DAE.Exp, e_type::DAE.Type, expected_type::DAE.Type)
               if Flags.isSet(flag)
-                Debug.traceln("- Types." + source + " failed on:" + ExpressionDump.printExpStr(e))
+                Debug.traceln("- Types." + source + " failed on:" + CrefForHashTable.printExpStr(e))
                 Debug.traceln("  type:" + unparseType(e_type) + " differs from expected\\n  type:" + unparseType(expected_type))
               end
         end
@@ -7580,7 +7601,7 @@ import TypesInterface
 
                   _ <| rest  => begin
                       (restExp, restType) = makeDummyExpAndTypeLists(rest)
-                      cref_ = ComponentReference.makeCrefIdent("#DummyExp#", DAE.T_UNKNOWN_DEFAULT, nil)
+                      cref_ = CrefForHashTable.makeCrefIdent("#DummyExp#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cref_)
                     (_cons(crefExp, restExp), _cons(DAE.T_METABOXED(DAE.T_UNKNOWN_DEFAULT), restType))
                   end

@@ -62,7 +62,7 @@ module Static
 
         import AbsynToSCode
         import AbsynUtil
-        import FGraph
+        import FGraphUtil
         import FNode
         import InstMeta
         import MetaUtil
@@ -104,7 +104,7 @@ module Static
         import Inst
         import InstFunction
         import InstTypes
-        import InnerOuter
+        import InnerOuterTypes
         import ListUtil
         import Lookup
         import Mutable
@@ -1020,7 +1020,7 @@ module Static
                =#
                #=  using parmodelica, check for assignment to input.
                =#
-              if ! inAllowTopLevelInputs && FGraph.inFunctionScope(inEnv) && ! Config.acceptParModelicaGrammar()
+              if ! inAllowTopLevelInputs && FGraphUtil.inFunctionScope(inEnv) && ! Config.acceptParModelicaGrammar()
                 checkAssignmentToInput2(inExp, inAttributes, inInfo)
               end
         end
@@ -1044,7 +1044,7 @@ module Static
         end
 
         function checkAssignmentToInputs(inExpCrefs::List{<:Absyn.Exp}, inAttributes::List{<:DAE.Attributes}, inEnv::FCore.Graph, inInfo::SourceInfo)
-              if FGraph.inFunctionScope(inEnv)
+              if FGraphUtil.inFunctionScope(inEnv)
                 ListUtil.threadMap1_0(inExpCrefs, inAttributes, checkAssignmentToInput2, inInfo)
               end
         end
@@ -1397,7 +1397,7 @@ module Static
               local res_id::String
 
               try
-                env = FGraph.openScope(inEnv, SCode.NOT_ENCAPSULATED(), FCore.forIterScopeName, NONE())
+                env = FGraphUtil.openScope(inEnv, SCode.NOT_ENCAPSULATED(), FCore.forIterScopeName, NONE())
                 (outCache, env, reduction_iters, dims, iter_const, has_guard_exp) = elabCallReductionIterators(inCache, env, listReverse(inIterators), inReductionExp, inImplicit, inDoVect, inPrefix, inInfo)
                 dims = fixDimsIterType(inIterType, listReverse(dims))
                 @match (outCache, exp, DAE.PROP(exp_ty, exp_const)) = elabExpInExpression(outCache, env, inReductionExp, inImplicit, inDoVect, inPrefix, inInfo)
@@ -1491,15 +1491,15 @@ module Static
                 else
                   @match (iter_exp, DAE.PROP(full_iter_ty, iter_const), outCache) = deduceIterationRange(iter_name, AbsynUtil.findIteratorIndexedCrefs(inReductionExp, iter_name), inEnv, outCache, inInfo)
                 end
-                c = if FGraph.inFunctionScope(inEnv)
+                c = if FGraphUtil.inFunctionScope(inEnv)
                       iter_const
                     else
                       DAE.C_CONST()
                     end
                 (outCache, iter_exp, _) = Ceval.cevalIfConstant(outCache, inEnv, iter_exp, DAE.PROP(full_iter_ty, c), inImpl, inInfo)
                 (iter_ty, dim) = Types.unliftArrayOrList(full_iter_ty)
-                env = FGraph.addForIterator(inEnv, iter_name, iter_ty, DAE.UNBOUND(), SCode.CONST(), SOME(iter_const))
-                outIteratorsEnv = FGraph.addForIterator(outIteratorsEnv, iter_name, iter_ty, DAE.UNBOUND(), SCode.CONST(), SOME(iter_const))
+                env = FGraphUtil.addForIterator(inEnv, iter_name, iter_ty, DAE.UNBOUND(), SCode.CONST(), SOME(iter_const))
+                outIteratorsEnv = FGraphUtil.addForIterator(outIteratorsEnv, iter_name, iter_ty, DAE.UNBOUND(), SCode.CONST(), SOME(iter_const))
                 @match (outCache, guard_exp, DAE.PROP(_, guard_const)) = elabExpOptAndMatchType(outCache, env, oaguard_exp, DAE.T_BOOL_DEFAULT, inImpl, inDoVect, inPrefix, inInfo)
                 if isSome(guard_exp)
                   outHasGuard = true
@@ -1813,8 +1813,8 @@ module Static
                   end
 
                   Absyn.IDENT("sum")  => begin
-                      env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
-                      env = FGraph.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                      env = FGraphUtil.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                      env = FGraphUtil.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
                       cr1 = Absyn.CREF_IDENT(foldId, nil)
                       cr2 = Absyn.CREF_IDENT(resultId, nil)
                       exp = Absyn.BINARY(Absyn.CREF(cr2), Absyn.ADD(), Absyn.CREF(cr1))
@@ -1822,8 +1822,8 @@ module Static
                   end
 
                   Absyn.IDENT("product")  => begin
-                      env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
-                      env = FGraph.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                      env = FGraphUtil.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                      env = FGraphUtil.addForIterator(env, resultId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
                       cr1 = Absyn.CREF_IDENT(foldId, nil)
                       cr2 = Absyn.CREF_IDENT(resultId, nil)
                       exp = Absyn.BINARY(Absyn.CREF(cr2), Absyn.MUL(), Absyn.CREF(cr1))
@@ -1832,8 +1832,8 @@ module Static
 
                   _  => begin
                         cr = AbsynUtil.pathToCref(path)
-                        env = FGraph.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
-                        env = FGraph.addForIterator(env, resultId, resultTy, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                        env = FGraphUtil.addForIterator(inEnv, foldId, expty, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
+                        env = FGraphUtil.addForIterator(env, resultId, resultTy, DAE.UNBOUND(), SCode.VAR(), SOME(DAE.C_VAR()))
                         cr1 = Absyn.CREF_IDENT(foldId, nil)
                         cr2 = Absyn.CREF_IDENT(resultId, nil)
                         exp = Absyn.CALL(cr, Absyn.FUNCTIONARGS(list(Absyn.CREF(cr1), Absyn.CREF(cr2)), nil))
@@ -2053,7 +2053,7 @@ module Static
                 @match fnTypes begin
                    nil()  => begin
                       str1 = AbsynUtil.pathString(inPath)
-                      str2 = FGraph.printGraphPathStr(inEnv)
+                      str2 = FGraphUtil.printGraphPathStr(inEnv)
                       Error.addSourceMessage(Error.LOOKUP_FUNCTION_ERROR, list(str1, str2), info)
                     fail()
                   end
@@ -3425,7 +3425,7 @@ module Static
                   _  => begin
                         exp = DAE.SIZE(inArrayExp, SOME(inIndexExp))
                         cnst = DAE.C_PARAM()
-                        cnst = if FGraph.inFunctionScope(inEnv)
+                        cnst = if FGraphUtil.inFunctionScope(inEnv)
                               DAE.C_VAR()
                             else
                               cnst
@@ -3565,7 +3565,7 @@ module Static
                   end
 
                   (_, env, dims, _, _, _, _)  => begin
-                      str = "Static.elabBuiltinFill failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraph.printGraphPathStr(env) + " for expression: fill(" + Dump.printExpLstStr(dims) + ")"
+                      str = "Static.elabBuiltinFill failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraphUtil.printGraphPathStr(env) + " for expression: fill(" + Dump.printExpLstStr(dims) + ")"
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
                     fail()
                   end
@@ -3653,7 +3653,7 @@ module Static
                   end
 
                   _  => begin
-                        str = "Static.elabBuiltinFill2 failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraph.printGraphPathStr(inEnv) + " for expression: fill(" + Dump.printExpLstStr(inDims) + ")"
+                        str = "Static.elabBuiltinFill2 failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraphUtil.printGraphPathStr(inEnv) + " for expression: fill(" + Dump.printExpLstStr(inDims) + ")"
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), inInfo)
                       fail()
                   end
@@ -5422,7 +5422,7 @@ module Static
               local exp_str::String
               local ty_str::String
 
-              if FGraph.inFunctionScope(inEnv)
+              if FGraphUtil.inFunctionScope(inEnv)
                 Error.addSourceMessageAndFail(Error.DERIVATIVE_FUNCTION_CONTEXT, nil, inInfo)
               end
               checkBuiltinCallArgs(inPosArgs, inNamedArgs, 1, "der", inInfo)
@@ -5895,7 +5895,7 @@ module Static
               checkBuiltinCallArgs(inPosArgs, inNamedArgs, 0, "getInstanceName", inInfo)
               @match FCore.CACHE(modelName = name) = inCache
               if PrefixUtil.isNoPrefix(inPrefix)
-                envName = FGraph.getGraphNameNoImplicitScopes(inEnv)
+                envName = FGraphUtil.getGraphNameNoImplicitScopes(inEnv)
                 str = if AbsynUtil.pathEqual(envName, name)
                       AbsynUtil.pathLastIdent(name)
                     else
@@ -5919,8 +5919,8 @@ module Static
               local exp::Absyn.Exp
 
               checkBuiltinCallArgs(inPosArgs, inNamedArgs, 1, "isPresent", info)
-              if ! FGraph.inFunctionScope(inEnv)
-                Error.addSourceMessage(Error.IS_PRESENT_WRONG_SCOPE, list(SCodeDump.restrString(FGraph.getScopeRestriction(FGraph.currentScope(inEnv)))), info)
+              if ! FGraphUtil.inFunctionScope(inEnv)
+                Error.addSourceMessage(Error.IS_PRESENT_WRONG_SCOPE, list(SCodeDump.restrString(FGraphUtil.getScopeRestriction(FGraphUtil.currentScope(inEnv)))), info)
               end
               outExp = begin
                 @match listGet(inPosArgs, 1) begin
@@ -6020,7 +6020,7 @@ module Static
               for dim in dims
                 if dim > 1
                   if found_dim_sz_one
-                    scope_str = FGraph.printGraphPathStr(inEnv)
+                    scope_str = FGraphUtil.printGraphPathStr(inEnv)
                     arg_str = "vector(" + Dump.printExpStr(inExp) + ")"
                     dim_str = "[" + stringDelimitList(list(intString(d) for d in dims), ", ") + "]"
                     pre_str = PrefixUtil.printPrefixStr3(inPrefix)
@@ -6859,7 +6859,7 @@ module Static
               local ty::DAE.Type
 
               try
-                @match true = FGraph.checkScopeType(list(FGraph.lastScopeRef(env)), SOME(FCore.CLASS_SCOPE()))
+                @match true = FGraphUtil.checkScopeType(list(FGraphUtil.lastScopeRef(env)), SOME(FCore.CLASS_SCOPE()))
                 ty = Types.getPropType(inProperties)
                 (ty, (outCache, _)) = Types.traverseType(ty, (inCache, env), elabCallArgsEvaluateArrayLength2)
                 outProperties = Types.setPropType(inProperties, ty)
@@ -7167,7 +7167,7 @@ module Static
 
                   (cache, env, fn, _, _, _, _)  => begin
                       @shouldFail (_, _, _) = Lookup.lookupType(cache, env, fn, NONE()) #= msg =#
-                      scope = FGraph.printGraphPathStr(env) + " (looking for a function or record)"
+                      scope = FGraphUtil.printGraphPathStr(env) + " (looking for a function or record)"
                       fn_str = AbsynUtil.pathString(fn)
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(fn_str, scope), info)
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
@@ -7187,7 +7187,7 @@ module Static
                   (_, env, fn, _, _, _, _)  => begin
                       ErrorExt.delCheckpoint("elabCallArgs2FunctionLookup")
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.traceln("- Static.elabCallArgs failed on: " + AbsynUtil.pathString(fn) + " in env: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("- Static.elabCallArgs failed on: " + AbsynUtil.pathString(fn) + " in env: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
@@ -7367,7 +7367,7 @@ module Static
         function isValidWRTParallelScope(inFn::Absyn.Path, isBuiltin::Bool, inFuncParallelism::DAE.FunctionParallelism, inEnv::FCore.Graph, inInfo::SourceInfo) ::Bool
               local isValid::Bool
 
-              isValid = isValidWRTParallelScope_dispatch(inFn, isBuiltin, inFuncParallelism, FGraph.currentScope(inEnv), inInfo)
+              isValid = isValidWRTParallelScope_dispatch(inFn, isBuiltin, inFuncParallelism, FGraphUtil.currentScope(inEnv), inInfo)
           isValid
         end
 
@@ -7395,19 +7395,19 @@ module Static
                   end
 
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.CLASS_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.CLASS_SCOPE()))
                     true
                   end
 
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.FUNCTION_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.FUNCTION_SCOPE()))
                     true
                   end
 
                   (_, _, DAE.FP_NON_PARALLEL(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
                       errorString = "\\n" + "- Non-Parallel function '" + AbsynUtil.pathString(inFn) + "' can not be called from a parallel scope." + "\\n" + "- Here called from :" + scopeName + "\\n" + "- Please declare the function as parallel function."
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
@@ -7416,7 +7416,7 @@ module Static
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
                       @match false = stringEqual(scopeName, AbsynUtil.pathString(inFn))
                     true
                   end
@@ -7424,7 +7424,7 @@ module Static
                   (_, _, DAE.FP_PARALLEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
                       @match true = stringEqual(scopeName, AbsynUtil.pathString(inFn))
                       errorString = "\\n" + "- Parallel function '" + AbsynUtil.pathString(inFn) + "' can not call itself. Recurrsion is not allowed for parallel functions currently." + "\\n" + "- Parallel functions can only be called from: 'kernel' functions," + " OTHER 'parallel' functions (no recurrsion) or from a body of a" + " 'parfor' loop"
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
@@ -7458,7 +7458,7 @@ module Static
                   (_, _, DAE.FP_KERNEL_FUNCTION(__), ref <| _, _)  => begin
                       @match false = FNode.isRefTop(ref)
                       scopeName = FNode.refName(ref)
-                      @match true = FGraph.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
+                      @match true = FGraphUtil.checkScopeType(list(ref), SOME(FCore.PARALLEL_SCOPE()))
                       errorString = "\\n" + "- Kernel function '" + AbsynUtil.pathString(inFn) + "' can not be called from a parallel scope '" + scopeName + "'.\\n" + "- Kernel functions CAN NOT be called from: 'kernel' functions," + " 'parallel' functions or from a body of a" + " 'parfor' loop"
                       Error.addSourceMessage(Error.PARMODELICA_ERROR, list(errorString), inInfo)
                     false
@@ -7728,8 +7728,8 @@ module Static
                   (_, NONE(), _, _)  => begin
                        #=  Recursive calls (by looking at environment) skipped
                        =#
-                      @match false = FGraph.isTopScope(inEnv)
-                      @match true = AbsynUtil.pathSuffixOf(inName, FGraph.getGraphName(inEnv))
+                      @match false = FGraphUtil.isTopScope(inEnv)
+                      @match true = AbsynUtil.pathSuffixOf(inName, FGraphUtil.getGraphName(inEnv))
                     (inCache, Util.SUCCESS())
                   end
 
@@ -7746,7 +7746,7 @@ module Static
                        =#
                       (outCache, env, cl, name) = lookupAndFullyQualify(inCache, inEnv, inName)
                       outCache = FCoreUtil.addCachedInstFuncGuard(outCache, name)
-                      outCache = InstFunction.implicitFunctionInstantiation(outCache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
+                      outCache = InstFunction.implicitFunctionInstantiation(outCache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (outCache, Util.SUCCESS())
                   end
 
@@ -7754,7 +7754,7 @@ module Static
                        #=  class already available
                        =#
                       (outCache, _) = Inst.makeFullyQualified(inCache, inEnv, inName)
-                      outCache = InstFunction.implicitFunctionInstantiation(outCache, inEnv, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
+                      outCache = InstFunction.implicitFunctionInstantiation(outCache, inEnv, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, nil)
                     (outCache, Util.SUCCESS())
                   end
 
@@ -7769,7 +7769,7 @@ module Static
 
                   (_, _, true, _)  => begin
                       @match true = Error.getNumErrorMessages() == numError
-                      envStr = FGraph.printGraphPathStr(inEnv)
+                      envStr = FGraphUtil.printGraphPathStr(inEnv)
                       pathStr = AbsynUtil.pathString(inName)
                       Error.addMessage(Error.GENERIC_INST_FUNCTION, list(pathStr, envStr))
                     fail()
@@ -7791,11 +7791,11 @@ module Static
 
               if Lookup.isFunctionCallViaComponent(inCache, inEnv, inFunctionName)
                 (_, outClass, outEnv) = Lookup.lookupClass(inCache, inEnv, inFunctionName)
-                outFunctionName = FGraph.joinScopePath(outEnv, AbsynUtil.makeIdentPathFromString(SCodeUtil.elementName(outClass)))
+                outFunctionName = FGraphUtil.joinScopePath(outEnv, AbsynUtil.makeIdentPathFromString(SCodeUtil.elementName(outClass)))
                 outCache = inCache
               else
                 (outCache, outClass, outEnv) = Lookup.lookupClass(inCache, inEnv, inFunctionName)
-                outFunctionName = AbsynUtil.makeFullyQualified(FGraph.joinScopePath(outEnv, AbsynUtil.makeIdentPathFromString(SCodeUtil.elementName(outClass))))
+                outFunctionName = AbsynUtil.makeFullyQualified(FGraphUtil.joinScopePath(outEnv, AbsynUtil.makeIdentPathFromString(SCodeUtil.elementName(outClass))))
               end
                #=  do NOT qualify function calls via component instance!
                =#
@@ -8497,7 +8497,7 @@ module Static
                =#
                #=  scope so comp1.comp2 can be looked up without package constant restriction.
                =#
-              env = FGraph.openScope(inEnv, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
+              env = FGraphUtil.openScope(inEnv, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
                #=  Add variables to the environment.
                =#
               env = makeDummyFuncEnv(env, vars, dummy_var)
@@ -8753,7 +8753,7 @@ module Static
 
               for var in inVars
                 dummy_var = SCodeUtil.setComponentName(inDummyVar, DAEUtil.typeVarIdent(var))
-                outEnv = FGraph.mkComponentNode(outEnv, var, dummy_var, DAE.NOMOD(), FCore.VAR_TYPED(), FGraph.empty())
+                outEnv = FGraphUtil.mkComponentNode(outEnv, var, dummy_var, DAE.NOMOD(), FCore.VAR_TYPED(), FCore.emptyGraph)
               end
           outEnv
         end
@@ -9304,7 +9304,7 @@ module Static
                            =#
                           @match SCode.COMPONENT(modifications = SCode.MOD(binding = SOME(e))) = SCodeUtil.getElementNamed(defarg.name, inClass)
                           @match (outCache, exp, DAE.PROP(ty, c)) = elabExpInExpression(outCache, inEnv, e, inImplicit, true, inPrefix, inInfo)
-                          (exp, _, outPolymorphicBindings) = Types.matchTypePolymorphic(exp, ty, defarg.ty, FGraph.getGraphPathNoImplicitScope(inEnv), outPolymorphicBindings, false)
+                          (exp, _, outPolymorphicBindings) = Types.matchTypePolymorphic(exp, ty, defarg.ty, FGraphUtil.getGraphPathNoImplicitScope(inEnv), outPolymorphicBindings, false)
                           @match true = Types.constEqualOrHigher(c, defarg.constType)
                           outConsts = _cons(c, outConsts)
                           slot.slotFilled = true
@@ -9561,7 +9561,7 @@ module Static
                       t = Types.getPropType(props)
                       (vt, _) = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
                       c1 = Types.propAllConst(props)
-                      (e_2, _, polymorphicBindings) = Types.matchTypePolymorphic(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env), polymorphicBindings, false)
+                      (e_2, _, polymorphicBindings) = Types.matchTypePolymorphic(e_1, t, vt, FGraphUtil.getGraphPathNoImplicitScope(env), polymorphicBindings, false)
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, nil, slots, pre, info, path) #= no vectorized dim =#
                     (cache, slots_1, c1, polymorphicBindings)
                   end
@@ -9571,7 +9571,7 @@ module Static
                       t = Types.getPropType(props)
                       (vt, _) = Types.traverseType(vt, -1, Types.makeExpDimensionsUnknown)
                       c1 = Types.propAllConst(props)
-                      (e_2, _, ds, polymorphicBindings) = Types.vectorizableType(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env))
+                      (e_2, _, ds, polymorphicBindings) = Types.vectorizableType(e_1, t, vt, FGraphUtil.getGraphPathNoImplicitScope(env))
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, ds, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
@@ -9718,7 +9718,7 @@ module Static
                       vt = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
                       @match (cache, e_1, DAE.PROP(t, c1)) = elabExpInExpression(cache, env, e, impl, true, pre, info)
-                      (e_2, _, polymorphicBindings) = Types.matchTypePolymorphic(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env), polymorphicBindings, false)
+                      (e_2, _, polymorphicBindings) = Types.matchTypePolymorphic(e_1, t, vt, FGraphUtil.getGraphPathNoImplicitScope(env), polymorphicBindings, false)
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, nil, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
@@ -9727,7 +9727,7 @@ module Static
                       vt = findNamedArgType(id, farg)
                       pr = findNamedArgParallelism(id, farg)
                       @match (cache, e_1, DAE.PROP(t, c1)) = elabExpInExpression(cache, env, e, impl, true, pre, info)
-                      (e_2, _, ds, polymorphicBindings) = Types.vectorizableType(e_1, t, vt, FGraph.getGraphPathNoImplicitScope(env))
+                      (e_2, _, ds, polymorphicBindings) = Types.vectorizableType(e_1, t, vt, FGraphUtil.getGraphPathNoImplicitScope(env))
                       slots_1 = fillSlot(DAE.FUNCARG(id, vt, c1, pr, NONE()), e_2, ds, slots, pre, info, path)
                     (cache, slots_1, c1, polymorphicBindings)
                   end
@@ -10011,7 +10011,7 @@ module Static
                        =#
                       c = replaceEnd(c)
                       env = if AbsynUtil.crefIsFullyQualified(inComponentRef)
-                            FGraph.topScope(inEnv)
+                            FGraphUtil.topScope(inEnv)
                           else
                             inEnv
                           end
@@ -10030,7 +10030,7 @@ module Static
                       path = AbsynUtil.crefToPath(c)
                       @match (cache, (@match SCode.CLASS(restriction = SCode.R_ENUMERATION()) = cl), env) = Lookup.lookupClass(cache, env, path)
                       typeStr = AbsynUtil.pathLastIdent(path)
-                      path = FGraph.joinScopePath(env, Absyn.IDENT(typeStr))
+                      path = FGraphUtil.joinScopePath(env, Absyn.IDENT(typeStr))
                       enum_lit_strs = SCodeUtil.componentNames(cl)
                       (exp, t) = makeEnumerationArray(path, enum_lit_strs)
                     (cache, SOME((exp, DAE.PROP(t, DAE.C_CONST()), DAE.dummyAttrConst)))
@@ -10078,14 +10078,14 @@ module Static
 
                   (_, env, c, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.traceln("- Static.elabCref failed: " + Dump.printComponentRefStr(c) + " in env: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("- Static.elabCref failed: " + Dump.printComponentRefStr(c) + " in env: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
 
                   (cache, env, c, impl, pre)  => begin
                       @shouldFail (_, _, _, _) = elabCrefSubs(cache, env, env, c, pre, Prefix.NOPRE(), impl, false, info)
                       s = Dump.printComponentRefStr(c)
-                      scope = FGraph.printGraphPathStr(env)
+                      scope = FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.LOOKUP_VARIABLE_ERROR, list(s, scope), info)
                     (cache, NONE())
                   end
@@ -10096,7 +10096,7 @@ module Static
                =#
                #=  enabled with -d=failtrace
                =#
-               #=  Debug.traceln(\"ENVIRONMENT:\\n\" + FGraph.printGraphStr(env));
+               #=  Debug.traceln(\"ENVIRONMENT:\\n\" + FGraphUtil.printGraphStr(env));
                =#
                #= /*
                    maybe we do have it but without a binding, so maybe we can actually type it!
@@ -10124,7 +10124,7 @@ module Static
               local res::SCode.Restriction
 
               try
-                res = FGraph.lastScopeRestriction(inEnv)
+                res = FGraphUtil.lastScopeRestriction(inEnv)
               catch
                 outIsValid = true
                 return outIsValid
@@ -10569,7 +10569,7 @@ module Static
                        =#
                       if Flags.isSet(Flags.STATIC)
                         s = ComponentReference.printComponentRefStr(inCref)
-                        scope = FGraph.printGraphPathStr(inEnv)
+                        scope = FGraphUtil.printGraphPathStr(inEnv)
                         pre_str = PrefixUtil.printPrefixStr2(inPrefix)
                         s = pre_str + s
                         Debug.traceln("- Static.elabCref2 failed on: " + pre_str + s + " with no constant binding in scope: " + scope)
@@ -10596,7 +10596,7 @@ module Static
                          =#
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         pre_str = PrefixUtil.printPrefixStr2(inPrefix)
-                        Debug.traceln("- Static.elabCref2 failed for: " + pre_str + ComponentReference.printComponentRefStr(inCref) + "\\n env:" + FGraph.printGraphStr(inEnv))
+                        Debug.traceln("- Static.elabCref2 failed for: " + pre_str + ComponentReference.printComponentRefStr(inCref) + "\\n env:" + FGraphUtil.printGraphStr(inEnv))
                       fail()
                   end
                 end
@@ -11366,7 +11366,7 @@ module Static
                    =#
                 @matchcontinue (inCache, inCrefEnv, inSubsEnv, inComponentRef, inTopPrefix, inCrefPrefix, inBoolean, inHasZeroSizeDim, info) begin
                   (cache, crefEnv, crefSubs, Absyn.CREF_IDENT(name = id, subscripts = ss), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
-                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuter.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuterTypes.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       @match (cache, _, _, _, _, InstTypes.SPLICEDEXPDATA(identType = id_ty), _, _, _) = Lookup.lookupVar(cache, crefEnv, cr)
                       id_ty = Types.simplifyType(id_ty)
                       hasZeroSizeDim = Types.isZeroLengthArray(id_ty)
@@ -11376,7 +11376,7 @@ module Static
                   end
 
                   (cache, crefEnv, crefSubs, Absyn.CREF_QUAL(name = id, subscripts =  nil(), componentRef = restCref), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
-                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuter.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuterTypes.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       (cache, _, t, _, _, _, _, _, _) = Lookup.lookupVar(cache, crefEnv, cr)
                       ty = Types.simplifyType(t)
                       sl = Types.getDimensions(ty)
@@ -11392,7 +11392,7 @@ module Static
                   end
 
                   (cache, crefEnv, crefSubs, Absyn.CREF_QUAL(name = id, subscripts = ss && _ <| _, componentRef = restCref), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
-                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuter.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
+                      (cache, cr) = PrefixUtil.prefixCref(cache, crefEnv, InnerOuterTypes.emptyInstHierarchy, crefPrefix, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       @match (cache, DAE.ATTR(variability = vt), t, _, _, InstTypes.SPLICEDEXPDATA(identType = id_ty), _, _, _) = Lookup.lookupVar(cache, crefEnv, cr)
                       ty = Types.simplifyType(t)
                       id_ty = Types.simplifyType(id_ty)
@@ -11405,14 +11405,14 @@ module Static
                   end
 
                   (cache, crefEnv, crefSubs, Absyn.CREF_FULLYQUALIFIED(componentRef = absynCr), topPrefix, crefPrefix, impl, hasZeroSizeDim, _)  => begin
-                      crefEnv = FGraph.topScope(crefEnv)
+                      crefEnv = FGraphUtil.topScope(crefEnv)
                       (cache, cr, const1, hasZeroSizeDim) = elabCrefSubs(cache, crefEnv, crefSubs, absynCr, topPrefix, crefPrefix, impl, hasZeroSizeDim, info)
                     (cache, cr, const1, hasZeroSizeDim)
                   end
 
                   (_, crefEnv, _, absynCref, topPrefix, crefPrefix, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.traceln("- Static.elabCrefSubs failed on: " + "[top:" + PrefixUtil.printPrefixStr(topPrefix) + "]." + PrefixUtil.printPrefixStr(crefPrefix) + "." + Dump.printComponentRefStr(absynCref) + " env: " + FGraph.printGraphPathStr(crefEnv))
+                      Debug.traceln("- Static.elabCrefSubs failed on: " + "[top:" + PrefixUtil.printPrefixStr(topPrefix) + "]." + PrefixUtil.printPrefixStr(crefPrefix) + "." + Dump.printComponentRefStr(absynCref) + " env: " + FGraphUtil.printGraphPathStr(crefEnv))
                     fail()
                   end
                 end
@@ -11431,7 +11431,7 @@ module Static
                =#
                #=  QUAL,with no subscripts => looking for var in the top env!
                =#
-               #= print(\"env:\");print(FGraph.printGraphStr(env));print(\"\\n\");
+               #= print(\"env:\");print(FGraphUtil.printGraphStr(env));print(\"\\n\");
                =#
                #=  variability doesn't matter
                =#
@@ -11568,7 +11568,7 @@ module Static
                    =#
                 @matchcontinue (inDimension, inProperties) begin
                   (_, _)  => begin
-                      @match true = FGraph.inForOrParforIterLoopScope(inEnv)
+                      @match true = FGraphUtil.inForOrParforIterLoopScope(inEnv)
                       @match true = Expression.dimensionKnown(inDimension)
                     (inCache, inSubscript)
                   end
@@ -11602,7 +11602,7 @@ module Static
 
                   (_, _)  => begin
                       @match true = Expression.dimensionKnown(inDimension)
-                      @match false = Types.isConstant(inConst) || Types.isParameter(inConst) && ! FGraph.inForLoopScope(inEnv)
+                      @match false = Types.isConstant(inConst) || Types.isParameter(inConst) && ! FGraphUtil.inForLoopScope(inEnv)
                     (inCache, inSubscript)
                   end
 
@@ -11683,7 +11683,7 @@ module Static
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
-                        Debug.traceln("- Static.elabSubscript failed on " + Dump.printSubscriptStr(inSubscript) + " in env: " + FGraph.printGraphPathStr(inEnv))
+                        Debug.traceln("- Static.elabSubscript failed on " + Dump.printSubscriptStr(inSubscript) + " in env: " + FGraphUtil.printGraphPathStr(inEnv))
                       fail()
                   end
                 end
@@ -11893,7 +11893,7 @@ module Static
                =#
                #=  not in a function, then we need to choose one of the branches.
                =#
-              if Types.arrayHasUnknownDims(exp_ty) && ! FGraph.inFunctionScope(inEnv)
+              if Types.arrayHasUnknownDims(exp_ty) && ! FGraphUtil.inFunctionScope(inEnv)
                 if Types.isParameterOrConstant(cond_c)
                   cond_c = DAE.C_CONST()
                 else
@@ -12053,7 +12053,7 @@ module Static
         function unevaluatedFunctionVariability(inEnv::FCore.Graph) ::DAE.Const
               local outConst::DAE.Const
 
-              if FGraph.inFunctionScope(inEnv)
+              if FGraphUtil.inFunctionScope(inEnv)
                 outConst = DAE.C_VAR()
               elseif Flags.getConfigBool(Flags.CHECK_MODEL) || Config.splitArrays()
                 outConst = DAE.C_UNKNOWN()

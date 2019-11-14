@@ -52,7 +52,7 @@
 
         import DAE
 
-        import ComponentReference
+        import CrefForHashTable
 
         Key = DAE.ComponentRef
 
@@ -76,7 +76,7 @@
         function emptyHashSetSized(size::ModelicaInteger) ::HashSet
               local hashSet::HashSetType
 
-              hashSet = BaseHashSet.emptyHashSetWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr))
+              hashSet = BaseHashSet.emptyHashSetWork(size, (CrefForHashTable.hashComponentRefMod, CrefForHashTable.crefEqual, CrefForHashTable.printComponentRefStr))
           hashSet
         end
 

@@ -66,7 +66,6 @@ module ConnectUtil
         import DAE
         import FCore
         import FCoreUtil
-        import InnerOuter
         import Prefix
         import ConnectionGraph
          #=  protected imports

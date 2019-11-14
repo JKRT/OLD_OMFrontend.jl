@@ -40,7 +40,7 @@
         import SCode
         import FCore
         import FCoreUtil
-        import FGraph
+        import FGraphUtil
 
         import ClassInf
         import Config
@@ -133,8 +133,8 @@
           - cat
             These operators are catched in the elabBuiltinHandler, along with all
             others. =#
-        function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph} 
-              local graph::FGraph.Graph
+        function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraphUtil.Graph} 
+              local graph::FGraphUtil.Graph
               local outCache::FCore.Cache
 
               local cache::FCore.Cache
@@ -150,7 +150,7 @@
                 @matchcontinue inCache begin
                   cache  => begin
                       graph = FCoreUtil.getCachedInitialGraph(cache)
-                      graph = FGraph.clone(graph)
+                      graph = FGraphUtil.clone(graph)
                     (cache, graph)
                   end
                   
@@ -160,7 +160,7 @@
                   end
                   
                   cache  => begin
-                      graph = FGraph.new("graph", FCore.dummyTopModel)
+                      graph = FGraphUtil.new("graph", FCore.dummyTopModel)
                       graph = FGraphBuildEnv.mkProgramGraph(FBuiltin.getBasicTypes(), FCore.BASIC_TYPE(), graph)
                       graph = FBuiltin.initialGraphModelica(graph, FGraphBuildEnv.mkTypeNode, FGraphBuildEnv.mkCompNode)
                       (_, initialProgram) = FBuiltin.getInitialFunctions()
@@ -169,7 +169,7 @@
                       graph = FBuiltin.initialGraphMetaModelica(graph, FGraphBuildEnv.mkTypeNode)
                       cache = FCoreUtil.setCachedInitialGraph(cache, graph)
                       _ = getSetInitialGraph(SOME(graph))
-                      graph = FGraph.clone(graph)
+                      graph = FGraphUtil.clone(graph)
                     (cache, graph)
                   end
                 end
@@ -188,12 +188,12 @@
         end
 
          #= gets/sets the initial environment depending on grammar flags =#
-        function getSetInitialGraph(inEnvOpt::Option{<:FGraph.Graph}) ::FGraph.Graph 
-              local initialEnv::FGraph.Graph
+        function getSetInitialGraph(inEnvOpt::Option{<:FGraphUtil.Graph}) ::FGraphUtil.Graph 
+              local initialEnv::FGraphUtil.Graph
 
               initialEnv = begin
-                  local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
-                  local graph::FGraph.Graph
+                  local assocLst::List{Tuple{ModelicaInteger, FGraphUtil.Graph}}
+                  local graph::FGraphUtil.Graph
                   local f::ModelicaInteger
                    #=  nothing there
                    =#
@@ -206,7 +206,7 @@
                   
                   NONE()  => begin
                       assocLst = getGlobalRoot(Global.builtinGraphIndex)
-                      graph = FGraph.clone(Util.assoc(Flags.getConfigEnum(Flags.GRAMMAR), assocLst))
+                      graph = FGraphUtil.clone(Util.assoc(Flags.getConfigEnum(Flags.GRAMMAR), assocLst))
                     graph
                   end
                   

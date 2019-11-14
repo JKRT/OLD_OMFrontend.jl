@@ -63,7 +63,7 @@ import Absyn
 import FCoreUtil
 import Inst
 import InstHashTable
-import InnerOuter
+import InnerOuterTypes
 
 module AbsynPrograms
   using Absyn
@@ -105,14 +105,14 @@ function run()
   InstHashTable.init()
   #= Creating a cache. At this point the SCode is the bouncing ball... =#
   println("empty cache")
-  # don't do this, it will load NFModelicaBuiltin.mo 
+  # don't do this, it will load NFModelicaBuiltin.mo
   # Flags.set(Flags.SCODE_INST, true)
   # Flags.set(Flags.EXEC_STAT, true) # not yet working!
   cache = FCoreUtil.emptyCache()
   println("after empty cache")
   className = Absyn.IDENT("HelloWorld")
   println("dive in inst")
-  (cache,_,_,dae) = Inst.instantiateClass(cache, InnerOuter.emptyInstHierarchy, scode, className)
+  (cache,_,_,dae) = Inst.instantiateClass(cache, InnerOuterTypes.emptyInstHierarchy, scode, className)
   println("after inst")
   @show dae
   println("*******************************")

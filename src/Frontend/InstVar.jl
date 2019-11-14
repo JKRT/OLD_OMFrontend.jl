@@ -50,9 +50,9 @@
 
         import FCore
 
-        import FGraph
+        import FGraphUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import InstTypes
 
@@ -123,7 +123,7 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
         InstDims = List
 
@@ -141,13 +141,13 @@
         the backend. The current implementation doesn't handle cases in which the
         'inner' is not (yet) set.
            =#
-        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instVar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #=<:List{<:DAE.Dimension}=#}, inImpl::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, componentDefinitionParentEnv::FCore.Graph) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -243,7 +243,7 @@
                       (cache, typePath) = Inst.makeFullyQualifiedIdent(cache, env, typeName)
                       outerCompEnv = InnerOuter.switchInnerToOuterInGraph(innerCompEnv, cref)
                       outerDAE = DAE.emptyDae
-                      innerScope = FGraph.printGraphPathStr(componentDefinitionParentEnv)
+                      innerScope = FGraphUtil.printGraphPathStr(componentDefinitionParentEnv)
                       ih = InnerOuter.updateInstHierarchy(ih, pre, io, InnerOuter.INST_INNER(pre, n, io, fullName, typePath, innerScope, SOME(InnerOuter.INST_RESULT(cache, outerCompEnv, store, outerDAE, csets, ty, graph)), nil, NONE()))
                     (cache, innerCompEnv, ih, store, dae, csets, ty, graph)
                   end
@@ -335,7 +335,7 @@
                       (cache, typePath) = Inst.makeFullyQualifiedIdent(cache, env, typeName)
                       outerCompEnv = InnerOuter.switchInnerToOuterInGraph(innerCompEnv, cref)
                       innerDAE = dae
-                      innerScope = FGraph.printGraphPathStr(componentDefinitionParentEnv)
+                      innerScope = FGraphUtil.printGraphPathStr(componentDefinitionParentEnv)
                       ih = InnerOuter.updateInstHierarchy(ih, pre, io, InnerOuter.INST_INNER(pre, n, io, fullName, typePath, innerScope, SOME(InnerOuter.INST_RESULT(cache, outerCompEnv, store, innerDAE, csetsInner, ty, graph)), nil, NONE()))
                       (cache, compenv, ih, store, dae, _, ty, graph) = instVar_dispatch(cache, env, ih, store, ci_state, DAE.NOMOD(), pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets)
                     (cache, compenv, ih, store, dae, csetsInner, ty, graph)
@@ -349,7 +349,7 @@
                       (cache, typePath) = Inst.makeFullyQualifiedIdent(cache, env, typeName)
                       outerCompEnv = InnerOuter.switchInnerToOuterInGraph(innerCompEnv, cref)
                       innerDAE = dae
-                      innerScope = FGraph.printGraphPathStr(componentDefinitionParentEnv)
+                      innerScope = FGraphUtil.printGraphPathStr(componentDefinitionParentEnv)
                       ih = InnerOuter.updateInstHierarchy(ih, pre, io, InnerOuter.INST_INNER(pre, n, io, fullName, typePath, innerScope, SOME(InnerOuter.INST_RESULT(cache, outerCompEnv, store, innerDAE, csetsInner, ty, graph)), nil, NONE()))
                       pf = SCodeUtil.prefixesSetInnerOuter(pf, Absyn.OUTER())
                       (cache, compenv, ih, store, dae, _, ty, graph) = instVar(cache, env, ih, store, ci_state, DAE.NOMOD(), pre, n, cl, attr, pf, dims, idxs, inst_dims, impl, comment, info, graph, csets, componentDefinitionParentEnv)
@@ -367,7 +367,7 @@
                   (cache, env, ih, _, _, mod, pre, n, cl, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       (cache, cref) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, DAE.T_UNKNOWN_DEFAULT, nil))
-                      Debug.traceln("- InstVar.instVar failed while instatiating variable: " + ComponentReference.printComponentRefStr(cref) + " " + Mod.prettyPrintMod(mod, 0) + "\\nin scope: " + FGraph.printGraphPathStr(env) + " class:\\n" + SCodeDump.unparseElementStr(cl))
+                      Debug.traceln("- InstVar.instVar failed while instatiating variable: " + ComponentReference.printComponentRefStr(cref) + " " + Mod.prettyPrintMod(mod, 0) + "\\nin scope: " + FGraphUtil.printGraphPathStr(env) + " class:\\n" + SCodeDump.unparseElementStr(cl))
                     fail()
                   end
                 end
@@ -396,7 +396,7 @@
                =#
                #=  both inner and outer
                =#
-               #=  fprintln(Flags.INNER_OUTER, \"- InstVar.instVar inner outer: \" + PrefixUtil.printPrefixStr(pre) + \"/\" + n + \" in env: \" + FGraph.printGraphPathStr(env));
+               #=  fprintln(Flags.INNER_OUTER, \"- InstVar.instVar inner outer: \" + PrefixUtil.printPrefixStr(pre) + \"/\" + n + \" in env: \" + FGraphUtil.printGraphPathStr(env));
                =#
                #=  add it to the instance hierarchy
                =#
@@ -418,7 +418,7 @@
                =#
                #=  no inner no outer
                =#
-               #=  fprintln(Flags.INNER_OUTER, \"- InstVar.instVar NO inner NO outer: \" + PrefixUtil.printPrefixStr(pre) + \"/\" + n + \" in env: \" + FGraph.printGraphPathStr(env));
+               #=  fprintln(Flags.INNER_OUTER, \"- InstVar.instVar NO inner NO outer: \" + PrefixUtil.printPrefixStr(pre) + \"/\" + n + \" in env: \" + FGraphUtil.printGraphPathStr(env));
                =#
                #=  failtrace
                =#
@@ -432,13 +432,13 @@
           P.A: Most of the implementation is moved to instVar2. instVar collects
           dimensions for userdefined types, such that these can be correctly
           handled by instVar2 (using instArray) =#
-        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instVar_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::List{<:DAE.Dimension}, inIndices::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -465,7 +465,7 @@
                   attr = InstUtil.propagateClassPrefix(inAttributes, inPrefix)
                 end
                 (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outGraph) = instVar2(outCache, inEnv, inIH, inStore, inState, mod, inPrefix, inName, cls, attr, inPrefixes, dims, inIndices, inInstDims, inImpl, inComment, inInfo, inGraph, inSets)
-                source = ElementSource.createElementSource(inInfo, FGraph.getScopePath(inEnv), inPrefix)
+                source = ElementSource.createElementSource(inInfo, FGraphUtil.getScopePath(inEnv), inPrefix)
                 (outCache, outDae) = addArrayVarEquation(outCache, inEnv, outIH, inState, outDae, outType, mod, NFInstUtil.toConst(SCodeUtil.attrVariability(attr)), inPrefix, inName, source)
                 outCache = InstFunction.addRecordConstructorFunction(outCache, inEnv, Types.arrayElementType(outType), SCodeUtil.elementInfo(inClass))
                 Error.clearCurrentComponent()
@@ -556,7 +556,7 @@
           outEqMod
         end
 
-        function addArrayVarEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inState::ClassInf.SMNode, inDae::DAE.DAElist, inType::DAE.Type, mod::DAE.Mod, constVar::DAE.Const, pre::Prefix.PrefixType, n::String, source::DAE.ElementSource) ::Tuple{FCore.Cache, DAE.DAElist}
+        function addArrayVarEquation(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inState::ClassInf.SMNode, inDae::DAE.DAElist, inType::DAE.Type, mod::DAE.Mod, constVar::DAE.Const, pre::Prefix.PrefixType, n::String, source::DAE.ElementSource) ::Tuple{FCore.Cache, DAE.DAElist}
               local outDae::DAE.DAElist
               local outCache::FCore.Cache
 
@@ -600,13 +600,13 @@
         end
 
          #= Helper function to instVar, does the main work. =#
-        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instVar2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -700,7 +700,7 @@
                       ty_2 = Types.simplifyType(ty_1)
                       (cache, cr) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, ty_2, nil))
                       @match (cache, DAE.EQBOUND(e, _, _, _)) = InstBinding.makeBinding(cache, env, attr, mod, ty_2, pre, n, info)
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       @match SCode.PREFIXES(visibility = vis, finalPrefix = fin, innerOuter = io) = pf
                       dae = InstDAE.daeDeclare(cache, env, env_1, cr, ci_state, ty, attr, vis, SOME(e), list(dims), NONE(), dae_var_attr, SOME(comment), io, fin, source, true)
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
@@ -718,7 +718,7 @@
                       (e_1, _) = Types.matchProp(e, p, DAE.PROP(ty_1, DAE.C_VAR()), true)
                       ty_2 = Types.simplifyType(ty_1)
                       (cache, cr) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, ty_2, nil))
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       @match SCode.PREFIXES(visibility = vis, finalPrefix = fin, innerOuter = io) = pf
                       dae = InstDAE.daeDeclare(cache, env, env_1, cr, ci_state, ty, attr, vis, SOME(e_1), list(dims), NONE(), dae_var_attr, SOME(comment), io, fin, source, true)
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
@@ -733,7 +733,7 @@
                       InstUtil.checkFunctionVarType(arrty, ci_state, n, info)
                       (cache, cr) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, arrty, nil))
                       (cache, dae_var_attr) = InstBinding.instDaeVariableAttributes(cache, env, mod, ty, nil)
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       @match SCode.PREFIXES(visibility = vis, finalPrefix = fin, innerOuter = io) = pf
                       dae = InstDAE.daeDeclare(cache, env, env_1, cr, ci_state, ty, attr, vis, NONE(), list(dims), NONE(), dae_var_attr, SOME(comment), io, fin, source, true)
                       store = UnitAbsynBuilder.instAddStore(store, ty, cr)
@@ -792,7 +792,7 @@
 
                   (_, env, _, _, _, mod, pre, n, _, _, _, _, _, _, _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.traceln("- InstVar.instVar2 failed: " + PrefixUtil.printPrefixStr(pre) + "." + n + "(" + Mod.prettyPrintMod(mod, 0) + ")\\n  Scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("- InstVar.instVar2 failed: " + PrefixUtil.printPrefixStr(pre) + "." + n + "(" + Mod.prettyPrintMod(mod, 0) + ")\\n  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
@@ -896,13 +896,13 @@
         end
 
          #= Instantiates a scalar variable. =#
-        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instScalar(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::Option{<:SCode.Comment}, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -951,7 +951,7 @@
                       cr = ComponentReference.makeCrefIdent(inName, ident_ty, idxs)
                       (cache, cr) = PrefixUtil.prefixCref(cache, env, ih, inPrefix, cr)
                       InstUtil.checkModificationOnOuter(cache, env_1, ih, inPrefix, inName, cr, inMod, vt, io, inImpl, inInfo)
-                      source = ElementSource.createElementSource(inInfo, FGraph.getScopePath(env_1), inPrefix)
+                      source = ElementSource.createElementSource(inInfo, FGraphUtil.getScopePath(env_1), inPrefix)
                       mod = if ! listEmpty(inSubscripts) && ! SCodeUtil.isParameterOrConst(vt) && ! ClassInf.isFunctionOrRecord(inState) && ! Types.isComplexType(Types.arrayElementType(ty)) && ! Types.isExternalObject(Types.arrayElementType(ty)) && ! Config.scalarizeBindings()
                             DAE.NOMOD()
                           else
@@ -971,7 +971,7 @@
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
-                        Debug.traceln("- Inst.instScalar failed on " + inName + " in scope " + PrefixUtil.printPrefixStr(inPrefix) + " env: " + FGraph.printGraphPathStr(inEnv) + "\\n")
+                        Debug.traceln("- Inst.instScalar failed on " + inName + " in scope " + PrefixUtil.printPrefixStr(inPrefix) + " env: " + FGraphUtil.printGraphPathStr(inEnv) + "\\n")
                       fail()
                   end
                 end
@@ -1297,13 +1297,13 @@
          #= When an array is instantiated by instVar, this function is used
           to go through all the array elements and instantiate each array
           element separately. =#
-        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArray(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inIdent::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inInteger::ModelicaInteger, inDimension::DAE.Dimension, inDimensionLst::DAE.Dimensions, inIntegerLst::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool, inComment::SCode.Comment, info::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1372,7 +1372,7 @@
                       ty_1 = Types.simplifyType(ty)
                       (cache, cr) = PrefixUtil.prefixCref(cache, env, ih, pre, ComponentReference.makeCrefIdent(n, ty_1, nil)) #= check their types =#
                       (rhs, _) = Types.matchProp(e, p, DAE.PROP(ty, DAE.C_VAR()), true)
-                      source = ElementSource.createElementSource(info, FGraph.getScopePath(env), pre)
+                      source = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env), pre)
                       lhs = Expression.makeCrefExp(cr, ty_1)
                       dae = InstSection.makeDaeEquation(lhs, rhs, source, SCode.NON_INITIAL())
                     (cache, env_1, ih, store, dae, inSets, ty, graph)
@@ -1464,13 +1464,13 @@
 
          #= When an array is instantiated by instVar, this function is used to go through all the array elements and instantiate each array element separately.
         Special case for DIM_INTEGER: tail-recursive implementation since the number of dimensions may grow arbitrarily large. =#
-        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArrayDimInteger(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inElement::Tuple{<:SCode.Element, SCode.Attributes}, inPrefixes::SCode.Prefixes, inDimensionSize::ModelicaInteger, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
               local outSets::DAE.Sets = inSets
               local outDae::DAE.DAElist = DAE.emptyDae
               local outStore::UnitAbsyn.InstStore = inStore
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -1521,13 +1521,13 @@
           (outCache, outEnv, outIH, outStore, outDae, outSets, outType, outGraph)
         end
 
-        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
+        function instArrayDimEnum(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inState::ClassInf.SMNode, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inName::String, inClass::SCode.Element, inAttributes::SCode.Attributes, inPrefixes::SCode.Prefixes, inDimension::DAE.Dimension, inRestDimensions::DAE.Dimensions, inSubscripts::List{<:DAE.Subscript}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, inComment::SCode.Comment, inInfo::SourceInfo, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outType::DAE.Type = DAE.T_UNKNOWN_DEFAULT
               local outSets::DAE.Sets = inSets
               local outDae::DAE.DAElist = DAE.emptyDae
               local outStore::UnitAbsyn.InstStore = inStore
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
