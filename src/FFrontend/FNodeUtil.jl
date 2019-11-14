@@ -35,6 +35,8 @@ using MetaModelica
 using ExportAll
 
 @importDBG FCore
+@importDBG SCode
+@importDBG SCodeUtil
 
 FunctionRefIs = Function
 Filter = Function
