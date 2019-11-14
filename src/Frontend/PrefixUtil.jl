@@ -1720,7 +1720,7 @@
 
       #= @author: adrpo
        search in the outer prefixes and retrieve the outer/inner crefs =#
-     function searchForInnerPrefix(fullCref::DAE.ComponentRef, inOuterCref::DAE.ComponentRef, outerPrefixes::OuterPrefixes) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
+     function searchForInnerPrefix(fullCref::DAE.ComponentRef, inOuterCref::DAE.ComponentRef, outerPrefixes::InnerOuterTypes.OuterPrefixes) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
            local innerCrefPrefix::DAE.ComponentRef
            local outerCrefPrefix::DAE.ComponentRef
 
