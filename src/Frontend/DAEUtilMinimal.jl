@@ -1,15 +1,10 @@
-  module HashTableExpToIndex
+  module DAEUtilMinimal
 
 
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
-    FuncHashCref = Function
-    FuncCrefEqual = Function
-    FuncCrefStr = Function
-    FuncExpStr = Function
 
          #= /*
          * This file is part of OpenModelica.
@@ -41,58 +36,52 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-         #= /* Below is the instance specific code. For each hashtable the user must define:
 
-        Key       - The key used to uniquely define elements in a hashtable
-        Value     - The data to associate with each key
-        hashFunc   - A function that maps a key to a positive integer.
-        keyEqual   - A comparison function between two keys, returns true if equal.
-        */ =#
-         #= /* HashTable instance specific code */ =#
+        @importDBG Absyn
+        @importDBG DAE
 
-        import BaseHashTable
+        function varName(var::DAE.Element) ::String
+              local name::String
 
-        import DAE
-
-        import CrefForHashTable
-
-        Key = DAE.Exp
-
-        Value = ModelicaInteger
-
-        HashTableCrefFunctionsType = Tuple
-
-        HashTable = Tuple
-
-
-
-
-
-
-
-
-
-         #=
-          Returns an empty HashTable.
-          Using the default bucketsize..
-         =#
-        function emptyHashTable() ::HashTable
-              local hashTable::HashTable
-
-              hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
-          hashTable
+              @match DAE.VAR(componentRef = DAE.CREF_IDENT(ident = name)) = var
+          name
         end
 
-         #=
-          Returns an empty HashTable.
-          Using the bucketsize size.
-         =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
-              local hashTable::HashTable
+        function typeVarIdent(var::DAE.Var) ::DAE.Ident
+              local name::DAE.Ident
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashExpMod, CrefForHashTable.expEqual, CrefForHashTable.printExpStr, intString))
-          hashTable
+              @match DAE.TYPES_VAR(name = name) = var
+          name
         end
+
+        function typeVarIdentEqual(var::DAE.Var, name::String) ::Bool
+              local b::Bool
+
+              local name2::String
+
+              @match DAE.TYPES_VAR(name = name2) = var
+              b = stringEq(name, name2)
+          b
+        end
+
+        #= returns true if type is array type
+       Alternative names: isArrayType, isExpTypeArray =#
+       function expTypeArray(tp::DAE.Type) ::Bool
+             local isArray::Bool
+
+             isArray = begin
+               @match tp begin
+                 DAE.T_ARRAY(__)  => begin
+                   true
+                 end
+
+                 _  => begin
+                     false
+                 end
+               end
+             end
+         isArray
+       end
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

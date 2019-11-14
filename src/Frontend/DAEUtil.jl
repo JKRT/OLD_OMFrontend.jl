@@ -107,18 +107,17 @@
         @importDBG HashTable2
         @importDBG Algorithm
         @importDBG BaseHashTable
-        @importDBG Ceval
-        @importDBG DAE.AvlTreePathFunction
-        @importDBG ComponentReference
+        # @importDBG Ceval
+        import DAE.AvlTreePathFunction
+        @importDBG CrefForHashTable
         @importDBG Config
-        @importDBG ConnectUtil
+        @importDBG ConnectUtilMinimal
         #@importDBG DAEDump
         @importDBG Debug
         @importDBG DoubleEnded
         @importDBG ElementSource
         @importDBG Error
         @importDBG Expression
-        @importDBG ExpressionDump
         # @importDBG ExpressionSimplify
         @importDBG Flags
         @importDBG ListUtil
@@ -126,8 +125,8 @@
         @importDBG System
         @importDBG Types
         @importDBG Util
-        @importDBG StateMachineFlatten
-        @importDBG VarTransform
+        # @importDBG StateMachineFlatten
+        # @importDBG VarTransform
         @importDBG AvlSetCR
 
         @Uniontype splitElements begin
@@ -262,7 +261,7 @@
                     true
                   end
 
-                  (DAE.INPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
+                  (DAE.INPUT(__), _) where (ConnectUtilMinimal.faceEqual(ConnectUtilMinimal.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -286,7 +285,7 @@
                     true
                   end
 
-                  (DAE.OUTPUT(__), _) where (ConnectUtil.faceEqual(ConnectUtil.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
+                  (DAE.OUTPUT(__), _) where (ConnectUtilMinimal.faceEqual(ConnectUtilMinimal.componentFaceType(inComponentRef), DAE.OUTSIDE()))  => begin
                     topLevelConnectorType(inConnectorType)
                   end
 
@@ -850,7 +849,7 @@
                     local isEmpty::Bool
                   @match el begin
                     v && DAE.VAR(componentRef = cr)  => begin
-                        if listEmpty(ListUtil.select1(variableNames, ComponentReference.crefEqual, cr))
+                        if listEmpty(ListUtil.select1(variableNames, CrefForHashTable.crefEqual, cr))
                           outElements = _cons(v, outElements)
                         end
                       ()
@@ -896,7 +895,7 @@
                   end
 
                   (_, DAE.DAE_LIST(DAE.VAR(componentRef = cr) <| elist))  => begin
-                      @match true = ComponentReference.crefEqualNoStringCompare(var, cr)
+                      @match true = CrefForHashTable.crefEqualNoStringCompare(var, cr)
                     DAE.DAE_LIST(elist)
                   end
 
@@ -965,7 +964,7 @@
                     DAE.DAE_LIST(elist)
                   end
 
-                  (_, DAE.DAE_LIST(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io) <| elist)) where (ComponentReference.crefEqualNoStringCompare(var, cr))  => begin
+                  (_, DAE.DAE_LIST(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io) <| elist)) where (CrefForHashTable.crefEqualNoStringCompare(var, cr))  => begin
                       io2 = removeInnerAttribute(io)
                     DAE.DAE_LIST(_cons(DAE.VAR(cr, kind, dir, prl, prot, tp, bind, dim, ct, source, attr, cmt, io2), elist))
                   end
@@ -1000,8 +999,8 @@
               local s2::String
               local s3::String
 
-              s1 = ComponentReference.printComponentRefStr(cr1)
-              s2 = ComponentReference.printComponentRefStr(cr2)
+              s1 = CrefForHashTable.printComponentRefStr(cr1)
+              s2 = CrefForHashTable.printComponentRefStr(cr2)
               s1 = System.stringReplace(s1, DAE.UNIQUEIO, "")
               s2 = System.stringReplace(s2, DAE.UNIQUEIO, "")
               equal = stringEq(s1, s2)
@@ -1023,12 +1022,12 @@
                 @match inCr begin
                   DAE.CREF_IDENT(id, idt, subs)  => begin
                       id = DAE.UNIQUEIO + id
-                    ComponentReference.makeCrefIdent(id, idt, subs)
+                    CrefForHashTable.makeCrefIdent(id, idt, subs)
                   end
 
                   DAE.CREF_QUAL(id, idt, subs, child)  => begin
                       newChild = nameInnerouterUniqueCref(child)
-                    ComponentReference.makeCrefQual(id, idt, subs, newChild)
+                    CrefForHashTable.makeCrefQual(id, idt, subs, newChild)
                   end
                 end
               end
@@ -1052,13 +1051,13 @@
                 @matchcontinue (cr, removalString) begin
                   (DAE.CREF_IDENT(str, ty, subs), _)  => begin
                       str2 = System.stringReplace(str, removalString, "")
-                    ComponentReference.makeCrefIdent(str2, ty, subs)
+                    CrefForHashTable.makeCrefIdent(str2, ty, subs)
                   end
 
                   (DAE.CREF_QUAL(str, ty, subs, child), _)  => begin
                       child_2 = unNameInnerouterUniqueCref(child, removalString)
                       str2 = System.stringReplace(str, removalString, "")
-                    ComponentReference.makeCrefQual(str2, ty, subs, child_2)
+                    CrefForHashTable.makeCrefQual(str2, ty, subs, child_2)
                   end
 
                   (DAE.WILD(__), _)  => begin
@@ -1067,7 +1066,7 @@
 
                   (child, _)  => begin
                       print(" failure unNameInnerouterUniqueCref: ")
-                      print(ComponentReference.printComponentRefStr(child) + "\\n")
+                      print(CrefForHashTable.printComponentRefStr(child) + "\\n")
                     fail()
                   end
                 end
@@ -2018,12 +2017,12 @@
                   end
 
                   SOME(DAE.VAR_ATTR_REAL(start = SOME(r)))  => begin
-                      s = ExpressionDump.printExpStr(r)
+                      s = CrefForHashTable.printExpStr(r)
                     s
                   end
 
                   SOME(DAE.VAR_ATTR_INT(start = SOME(r)))  => begin
-                      s = ExpressionDump.printExpStr(r)
+                      s = CrefForHashTable.printExpStr(r)
                     s
                   end
 
@@ -2860,7 +2859,7 @@
                   local lst::List{DAE.Element}
                 @match inElementLst begin
                   DAE.VAR(binding = SOME(e)) <| lst && _ <| _  => begin
-                      expstr = ExpressionDump.printExpStr(e)
+                      expstr = CrefForHashTable.printExpStr(e)
                       s3 = stringAppend(expstr, ",")
                       s4 = getBindingsStr(lst)
                       str = stringAppend(s3, s4)
@@ -2875,7 +2874,7 @@
                   end
 
                   DAE.VAR(binding = SOME(e)) <|  nil()  => begin
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                     str
                   end
 
@@ -2993,14 +2992,14 @@
 
                   (_, SCode.PARGLOBAL(__), _, _)  => begin
                       path = ClassInf.getStateName(inState)
-                      str1 = "\\n" + "- DAEUtil.toDaeParallelism: parglobal component '" + ComponentReference.printComponentRefStr(inCref) + "' in non-function class: " + ClassInf.printStateStr(inState) + " " + AbsynUtil.pathString(path)
+                      str1 = "\\n" + "- DAEUtil.toDaeParallelism: parglobal component '" + CrefForHashTable.printComponentRefStr(inCref) + "' in non-function class: " + ClassInf.printStateStr(inState) + " " + AbsynUtil.pathString(path)
                       Error.addSourceMessage(Error.PARMODELICA_WARNING, list(str1), inInfo)
                     DAE.PARGLOBAL()
                   end
 
                   (_, SCode.PARLOCAL(__), _, _)  => begin
                       path = ClassInf.getStateName(inState)
-                      str1 = "\\n" + "- DAEUtil.toDaeParallelism: parlocal component '" + ComponentReference.printComponentRefStr(inCref) + "' in non-function class: " + ClassInf.printStateStr(inState) + " " + AbsynUtil.pathString(path)
+                      str1 = "\\n" + "- DAEUtil.toDaeParallelism: parlocal component '" + CrefForHashTable.printComponentRefStr(inCref) + "' in non-function class: " + ClassInf.printStateStr(inState) + " " + AbsynUtil.pathString(path)
                       Error.addSourceMessage(Error.PARMODELICA_WARNING, list(str1), inInfo)
                     DAE.PARLOCAL()
                   end
@@ -3120,7 +3119,7 @@
 
                   (cr <| xs, id)  => begin
                       res = getFlowVariables2(xs, id)
-                      cr_1 = ComponentReference.makeCrefQual(id, DAE.T_UNKNOWN_DEFAULT, nil, cr)
+                      cr_1 = CrefForHashTable.makeCrefQual(id, DAE.T_UNKNOWN_DEFAULT, nil, cr)
                     _cons(cr_1, res)
                   end
                 end
@@ -3187,7 +3186,7 @@
 
                   (cr <| xs, id)  => begin
                       res = getStreamVariables2(xs, id)
-                      cr_1 = ComponentReference.makeCrefQual(id, DAE.T_UNKNOWN_DEFAULT, nil, cr)
+                      cr_1 = CrefForHashTable.makeCrefQual(id, DAE.T_UNKNOWN_DEFAULT, nil, cr)
                     _cons(cr_1, res)
                   end
                 end
@@ -3231,7 +3230,7 @@
                       info = ElementSource.getElementSourceFileInfo(source)
                       (cache, value) = Ceval.ceval(cache, env, rhs, impl, Absyn.MSG(info), 0)
                       @match (cache, Values.RECORD(cname, vals, names, ix)) = daeToRecordValue(cache, env, cname, rest, impl)
-                      cr_str = ComponentReference.printComponentRefStr(cr)
+                      cr_str = CrefForHashTable.printComponentRefStr(cr)
                     (cache, Values.RECORD(cname, _cons(value, vals), _cons(cr_str, names), ix))
                   end
 
@@ -3244,7 +3243,7 @@
                 end
               end
                #= /* impl */ =#
-               #=  fprintln(Flags.FAILTRACE, \"- DAEUtil.daeToRecordValue typeOfRHS: \" + ExpressionDump.typeOfString(rhs));
+               #=  fprintln(Flags.FAILTRACE, \"- DAEUtil.daeToRecordValue typeOfRHS: \" + CrefForHashTable.typeOfString(rhs));
                =#
           (outCache, outValue)
         end
@@ -3335,12 +3334,12 @@
                   end
 
                   DAE.VAR(componentRef = cr, kind = a, direction = b, parallelism = prl, protection = prot, ty = t, binding = d, dims = instDim, connectorType = ct, source = source, variableAttributesOption = dae_var_attr, comment = comment, innerOuter = io) <| elts  => begin
-                      str = ComponentReference.printComponentRefStr(cr)
+                      str = CrefForHashTable.printComponentRefStr(cr)
                       str_1 = Util.stringReplaceChar(str, ".", "_")
                       elts_1 = toModelicaFormElts(elts)
                       d_1 = toModelicaFormExpOpt(d)
-                      ty = ComponentReference.crefLastType(cr)
-                      cref_ = ComponentReference.makeCrefIdent(str_1, ty, nil)
+                      ty = CrefForHashTable.crefLastType(cr)
+                      cref_ = CrefForHashTable.makeCrefIdent(str_1, ty, nil)
                     _cons(DAE.VAR(cref_, a, b, prl, prot, t, d_1, instDim, ct, source, dae_var_attr, comment, io), elts_1)
                   end
 
@@ -3620,10 +3619,10 @@
               local str_1::String
               local ty::DAE.Type
 
-              str = ComponentReference.printComponentRefStr(cr)
-              ty = ComponentReference.crefLastType(cr)
+              str = CrefForHashTable.printComponentRefStr(cr)
+              ty = CrefForHashTable.crefLastType(cr)
               str_1 = Util.stringReplaceChar(str, ".", "_")
-              outComponentRef = ComponentReference.makeCrefIdent(str_1, ty, nil)
+              outComponentRef = CrefForHashTable.makeCrefIdent(str_1, ty, nil)
           outComponentRef
         end
 
@@ -4140,7 +4139,7 @@
                   Error.addSourceMessageAndFail(Error.CLOCKED_WHEN_BRANCH, nil, info)
                 end
                 crefs2 = verifyBoolWhenEquationBranch(cond, eqs)
-                crefs2 = ListUtil.unionOnTrue(crefs1, crefs2, ComponentReference.crefEqual)
+                crefs2 = ListUtil.unionOnTrue(crefs1, crefs2, CrefForHashTable.crefEqual)
                 if listLength(crefs2) != listLength(crefs1)
                   info = ElementSource.getElementSourceFileInfo(source)
                   Error.addSourceMessageAndFail(Error.DIFFERENT_VARIABLES_SOLVED_IN_ELSEWHEN, nil, info)
@@ -4319,7 +4318,7 @@
                   end
 
                   _  => begin
-                        msg = ExpressionDump.printExpStr(inExp)
+                        msg = CrefForHashTable.printExpStr(inExp)
                         info = ElementSource.getElementSourceFileInfo(source)
                         Error.addSourceMessage(Error.WHEN_EQ_LHS, list(msg), info)
                       fail()
@@ -4356,7 +4355,7 @@
                       i = listLength(recRefs)
                       if intGt(i, 0)
                         b1 = 0 == intMod(listLength(crefs), i)
-                        crefs = ListUtil.unionOnTrueList(list(recRefs, crefs), ComponentReference.crefEqual)
+                        crefs = ListUtil.unionOnTrueList(list(recRefs, crefs), CrefForHashTable.crefEqual)
                         b2 = intEq(listLength(crefs), i)
                         b1 = boolAnd(b1, boolAnd(b2, b3))
                       else
@@ -6619,7 +6618,7 @@
                     end
 
                     DAE.SM_COMP(__)  => begin
-                        split_comp = splitComponent(DAE.COMP(ComponentReference.crefStr(e.componentRef), e.dAElist, DAE.emptyElementSource, SOME(SCode.COMMENT(NONE(), SOME("state")))))
+                        split_comp = splitComponent(DAE.COMP(CrefForHashTable.crefStr(e.componentRef), e.dAElist, DAE.emptyElementSource, SOME(SCode.COMMENT(NONE(), SOME("state")))))
                         stateMachineComps = _cons(split_comp, stateMachineComps)
                       ()
                     end
@@ -6880,9 +6879,9 @@
          =#
          #=        equation
          =#
-         #=          cref_1 = ComponentReference.makeCrefQual(\"$old\",DAE.T_REAL_DEFAULT,{},cr);
+         #=          cref_1 = CrefForHashTable.makeCrefQual(\"$old\",DAE.T_REAL_DEFAULT,{},cr);
          =#
-         #=          cref_2 = ComponentReference.makeCrefIdent(\"$current_step_size\",DAE.T_REAL_DEFAULT,{});
+         #=          cref_2 = CrefForHashTable.makeCrefIdent(\"$current_step_size\",DAE.T_REAL_DEFAULT,{});
          =#
          #=          e1 = Expression.makeCrefExp(cref_1,DAE.T_REAL_DEFAULT);
          =#
@@ -6922,7 +6921,8 @@
 
                #=  Transform Modelica state machines to flat data-flow equations
                =#
-              dAElist = StateMachineFlatten.stateMachineToDataFlow(cache, env, inDAElist)
+               # TODO! FIXME! activate this back!
+              dAElist = inDAElist # StateMachineFlatten.stateMachineToDataFlow(cache, env, inDAElist)
               if Flags.isSet(Flags.SCODE_INST)
                 @match DAE.DAE_LIST(elts) = dAElist
                 outDAElist = DAE.DAE_LIST(elts)
@@ -6951,7 +6951,7 @@
 
               crs = AvlSetCR.listKeys(ht)
               if ! listEmpty(crs)
-                strs = ListUtil.map(crs, ComponentReference.printComponentRefStr)
+                strs = ListUtil.map(crs, CrefForHashTable.printComponentRefStr)
                 str = stringDelimitList(strs, ", ")
                 Error.addMessage(Error.NOTIFY_FRONTEND_STRUCTURAL_PARAMETERS, list(str))
               end
@@ -7033,7 +7033,7 @@
                   end
 
                   DAE.EQBOUND(exp = e)  => begin
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                     str
                   end
 
@@ -7603,7 +7603,7 @@
                   end
 
                   (x && DAE.VAR(componentRef = cr) <| lst, _, accNamed, accRest)  => begin
-                      equal = stringEq(ComponentReference.crefFirstIdent(cr), inName)
+                      equal = stringEq(CrefForHashTable.crefFirstIdent(cr), inName)
                       accNamed = ListUtil.consOnTrue(equal, x, accNamed)
                       accRest = ListUtil.consOnTrue(boolNot(equal), x, accRest)
                       (accNamed, accRest) = splitVariableNamed(lst, inName, accNamed, accRest)
@@ -7640,7 +7640,7 @@
                   local cr::DAE.ComponentRef
                 @match (exp, acc) begin
                   (DAE.CREF(componentRef = cr), _)  => begin
-                    (exp, ListUtil.consOnTrue(ConnectUtil.isExpandable(cr), cr, acc))
+                    (exp, ListUtil.consOnTrue(ConnectUtilMinimal.isExpandable(cr), cr, acc))
                   end
 
                   _  => begin
@@ -7904,7 +7904,7 @@
                 obnd = begin
                   @match i begin
                     DAE.VAR(componentRef = cr, binding = obnd)  => begin
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7912,7 +7912,7 @@
 
                     DAE.DEFINE(componentRef = cr, exp = e)  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7920,7 +7920,7 @@
 
                     DAE.INITIALDEFINE(componentRef = cr, exp = e)  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7928,7 +7928,7 @@
 
                     DAE.EQUATION(exp = DAE.CREF(componentRef = cr), scalar = e)  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7936,7 +7936,7 @@
 
                     DAE.EQUATION(exp = e, scalar = DAE.CREF(componentRef = cr))  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7944,7 +7944,7 @@
 
                     DAE.INITIALEQUATION(exp1 = DAE.CREF(componentRef = cr), exp2 = e)  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -7952,7 +7952,7 @@
 
                     DAE.INITIALEQUATION(exp1 = e, exp2 = DAE.CREF(componentRef = cr))  => begin
                         obnd = SOME(e)
-                        if ComponentReference.crefEqualNoStringCompare(icr, cr)
+                        if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
                           return
                         end
                       obnd
@@ -8037,6 +8037,7 @@
         end
         =#
 
+        #=
         function replaceCrefInDAEElements(inElements::List{<:DAE.Element}, inCref::DAE.ComponentRef, inExp::DAE.Exp) ::List{DAE.Element}
               local outElements::List{DAE.Element}
 
@@ -8065,6 +8066,7 @@
               (outExp, _) = VarTransform.replaceExp(inExp, replIn, NONE())
           (outExp, replOut)
         end
+        =#
 
         function connectorTypeStr(connectorType::DAE.ConnectorType) ::String
               local string::String
@@ -8086,7 +8088,7 @@
                   end
 
                   DAE.STREAM(SOME(cref))  => begin
-                      cref_str = ComponentReference.printComponentRefStr(cref)
+                      cref_str = CrefForHashTable.printComponentRefStr(cref)
                     "stream(" + cref_str + ")"
                   end
 

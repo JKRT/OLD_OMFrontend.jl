@@ -39,6 +39,8 @@ module Expression
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
+    using ExpressionPriority # for shouldParenthesize
+
 FuncCrefTypeA = Function
 FuncExpType = Function
 FuncExpType2 = Function
@@ -67,11 +69,11 @@ Type_a = Any
     @importDBG Debug
     @importDBG Dump
     @importDBG Error
-    @importDBG ExpressionDump
+    @importDBG CrefForHashTable
     @importDBG ExpressionUtil
     @importDBG Flags
     @importDBG ListUtil
-    @importDBG MetaModelica.Dangerous
+    import MetaModelica.Dangerous
     @importDBG Print
     @importDBG System
     @importDBG Types
@@ -105,8 +107,8 @@ Type_a = Any
             res
           end
 
-  
-  
+
+
     function typeof(inExp::DAE.Exp) ::DAE.Type
       ExpressionUtil.typeof(inExp)
     end
@@ -655,40 +657,7 @@ Type_a = Any
 
            #= Helper function to printComponentRefStr. =#
           function printComponentRef2Str(inIdent::DAE.Ident, inSubscriptLst::List{<:DAE.Subscript}) ::String
-                local outString::String
-
-                outString = begin
-                    local s::DAE.Ident
-                    local str::DAE.Ident
-                    local strseba::DAE.Ident
-                    local strsebb::DAE.Ident
-                    local l::List{DAE.Subscript}
-                    local b::Bool
-                     #=  no subscripts
-                     =#
-                  @match (inIdent, inSubscriptLst) begin
-                    (s,  nil())  => begin
-                      s
-                    end
-
-                    (s, l)  => begin
-                        b = Config.modelicaOutput()
-                        str = ExpressionDump.printListStr(l, ExpressionDump.printSubscriptStr, ",")
-                        (strseba, strsebb) = if b
-                              ("_L", "_R")
-                            else
-                              ("[", "]")
-                            end
-                        str = stringAppendList(list(s, strseba, str, strsebb))
-                      str
-                    end
-                  end
-                end
-                 #=  some subscripts, Modelica output
-                 =#
-                 #=  some subscripts, non Modelica output
-                 =#
-            outString
+            CrefForHashTable.printComponentRef2Str(inIdent, inSubscriptLst)
           end
 
            #= Function: debugPrintComponentRefTypeStr
@@ -713,7 +682,7 @@ Type_a = Any
                     end
 
                     DAE.CREF_IDENT(ident = s, identType = ty, subscriptLst = subs)  => begin
-                        str_1 = ExpressionDump.printListStr(subs, ExpressionDump.debugPrintSubscriptStr, ", ")
+                        str_1 = CrefForHashTable.printListStr(subs, CrefForHashTable.printSubscriptStr, ", ")
                         str = s + (if stringLength(str_1) > 0
                               "[" + str_1 + "]"
                             else
@@ -731,7 +700,7 @@ Type_a = Any
                           strrest = debugPrintComponentRefTypeStr(cr)
                           str = stringAppendList(list(str, " [", str2, "] ", "__", strrest))
                         else
-                          str_1 = ExpressionDump.printListStr(subs, ExpressionDump.debugPrintSubscriptStr, ", ")
+                          str_1 = CrefForHashTable.printListStr(subs, CrefForHashTable.printSubscriptStr, ", ")
                           str = s + (if stringLength(str_1) > 0
                                 "[" + str_1 + "]"
                               else
@@ -824,7 +793,7 @@ Type_a = Any
             #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
             using ExportAll
 
-                import .CompareWithSubsType
+                import ..CompareWithSubsType
                 import DAE
 
                 compareSubscript = CompareWithSubsType.WithGenericSubscript::Int64
@@ -905,7 +874,7 @@ Type_a = Any
                         end
                         @match _cons(s2, ss) = ss
                         if compareSubscript == CompareWithSubsType.WithGenericSubscript
-                          res = stringCompare(ExpressionDump.printSubscriptStr(s1), ExpressionDump.printSubscriptStr(s2))
+                          res = stringCompare(CrefForHashTable.printSubscriptStr(s1), CrefForHashTable.printSubscriptStr(s2))
                         elseif compareSubscript == CompareWithSubsType.WithGenericSubscriptNotAlphabetic
                           res = Expression.compareSubscripts(s1, s2)
                         else
@@ -1281,14 +1250,14 @@ Type_a = Any
 
                     (DAE.CREF_IDENT(ident = n1, subscriptLst =  nil()), DAE.CREF_IDENT(ident = n2, subscriptLst = idx2 && _ <| _))  => begin
                         @match 0 = System.stringFind(n1, n2)
-                        s1 = n2 + "[" + ExpressionDump.printListStr(idx2, ExpressionDump.printSubscriptStr, ",") + "]"
+                        s1 = n2 + "[" + CrefForHashTable.printListStr(idx2, CrefForHashTable.printSubscriptStr, ",") + "]"
                         @match true = stringEq(s1, n1)
                       true
                     end
 
                     (DAE.CREF_IDENT(ident = n1, subscriptLst = idx2 && _ <| _), DAE.CREF_IDENT(ident = n2, subscriptLst =  nil()))  => begin
                         @match 0 = System.stringFind(n2, n1)
-                        s1 = n1 + "[" + ExpressionDump.printListStr(idx2, ExpressionDump.printSubscriptStr, ",") + "]"
+                        s1 = n1 + "[" + CrefForHashTable.printListStr(idx2, CrefForHashTable.printSubscriptStr, ",") + "]"
                         @match true = stringEq(s1, n2)
                       true
                     end
@@ -3436,12 +3405,12 @@ Type_a = Any
                         if Config.modelicaOutput()
                           Print.printBuf(s)
                           Print.printBuf("_L")
-                          ExpressionDump.printList(l, ExpressionDump.printSubscript, ",")
+                          CrefForHashTable.printList(l, CrefForHashTable.printSubscript, ",")
                           Print.printBuf("_R")
                         else
                           Print.printBuf(s)
                           Print.printBuf("[")
-                          ExpressionDump.printList(l, ExpressionDump.printSubscript, ",")
+                          CrefForHashTable.printList(l, CrefForHashTable.printSubscript, ",")
                           Print.printBuf("]")
                         end
                       ()
@@ -3915,7 +3884,7 @@ Type_a = Any
                       end
 
                       _  => begin
-                            str = ExpressionDump.printSubscriptStr(subScript)
+                            str = CrefForHashTable.printSubscriptStr(subScript)
                             Error.addInternalError("function CREF_LOCAL.makeCrefsFromSubScriptLst for:" + str + "\\n", sourceInfo())
                           fail()
                       end
@@ -3940,7 +3909,7 @@ Type_a = Any
                     local enum_lit::Absyn.Path
                   @match inExp begin
                     DAE.ICONST(__)  => begin
-                        str = ExpressionDump.printExpStr(inExp)
+                        str = CrefForHashTable.printExpStr(inExp)
                       DAE.CREF_IDENT(str, DAE.T_UNKNOWN_DEFAULT, nil)
                     end
 
@@ -3963,7 +3932,7 @@ Type_a = Any
                     end
 
                     _  => begin
-                          str = ExpressionDump.dumpExpStr(inExp, 0)
+                          str = CrefForHashTable.dumpExpStr(inExp, 0)
                           Error.addInternalError("function CREF_LOCAL.makeCrefsFromSubScriptExp for:" + str + "\\n", sourceInfo())
                         fail()
                     end
@@ -4276,8 +4245,8 @@ Type_a = Any
                 local idx_str::String
                 local cref_str::String
 
-                sub_str = ExpressionDump.printExpStr(inSubscriptExp)
-                dim_str = ExpressionDump.dimensionString(inDimension)
+                sub_str = CrefForHashTable.printExpStr(inSubscriptExp)
+                dim_str = CrefForHashTable.dimensionString(inDimension)
                 idx_str = intString(inIndex)
                 cref_str = printComponentRefStr(inCref)
                 Error.addSourceMessage(Error.ARRAY_INDEX_OUT_OF_BOUNDS, list(sub_str, idx_str, dim_str, cref_str), inInfo)
@@ -4290,7 +4259,7 @@ Type_a = Any
                 local s2::String
 
                 s1 = stringDelimitList(toStringList(cref), "_P")
-                s2 = stringDelimitList(ListUtil.mapMap(crefSubs(cref), Expression.getSubscriptExp, ExpressionDump.printExpStr), ",")
+                s2 = stringDelimitList(ListUtil.mapMap(crefSubs(cref), Expression.getSubscriptExp, CrefForHashTable.printExpStr), ",")
                 s = s1 + "[" + s2 + "]"
             s
           end
@@ -4373,17 +4342,17 @@ Type_a = Any
                       end
 
                       DAE.SLICE(exp)  => begin
-                          File.write(file, ExpressionDump.printExpStr(exp))
+                          File.write(file, CrefForHashTable.printExpStr(exp))
                         ()
                       end
 
                       DAE.INDEX(exp)  => begin
-                          File.write(file, ExpressionDump.printExpStr(exp))
+                          File.write(file, CrefForHashTable.printExpStr(exp))
                         ()
                       end
 
                       DAE.WHOLE_NONEXP(exp)  => begin
-                          File.write(file, ExpressionDump.printExpStr(exp))
+                          File.write(file, CrefForHashTable.printExpStr(exp))
                         ()
                       end
                     end
@@ -4476,6 +4445,8 @@ Type_a = Any
       @exportAll()
     end #=End of CREF_LOCAL=#
 
+######################################
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -4525,7 +4496,7 @@ Type_a = Any
 
          #=  stringReal
          =#
-        @importDBG CREF_LOCAL
+        import .CREF_LOCAL
         @importDBG ArrayUtil
         @importDBG ClassInf
         @importDBG Config
@@ -4533,8 +4504,7 @@ Type_a = Any
         @importDBG DoubleEnded
         @importDBG Dump
         @importDBG Error
-        @importDBG ExpressionDump
-        @importDBG ExpressionDump.printExpStr
+        @importDBG CrefForHashTable
         @importDBG ExpressionSimplify
         @importDBG FCore
         @importDBG FCoreUtil
@@ -4542,10 +4512,86 @@ Type_a = Any
         @importDBG Flags
         @importDBG ListUtil
         @importDBG Prefix
-        @importDBG Static
+        # @importDBG Static
         @importDBG System
         @importDBG Types
         @importDBG Util
+        @importDBG DAETraverse
+
+
+        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::Type_a) ::Tuple{List{DAE.MatchCase}, Type_a}
+              local oa::Type_a
+              local outCases::List{DAE.MatchCase}
+
+              (outCases, oa) = begin
+                  local patterns::List{DAE.Pattern}
+                  local decls::List{DAE.Element}
+                  local body::List{DAE.Statement}
+                  local body1::List{DAE.Statement}
+                  local result::Option{DAE.Exp}
+                  local result1::Option{DAE.Exp}
+                  local patternGuard::Option{DAE.Exp}
+                  local patternGuard1::Option{DAE.Exp}
+                  local jump::ModelicaInteger
+                  local resultInfo::SourceInfo
+                  local info::SourceInfo
+                  local cases::List{DAE.MatchCase}
+                  local cases1::List{DAE.MatchCase}
+                  local a::Type_a
+                @match (inCases, func, inA) begin
+                  ( nil(), _, a)  => begin
+                    (nil, a)
+                  end
+
+                  (DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) <| cases, _, a)  => begin
+                      (body1, (_, a)) = DAETraverse.traverseDAEEquationsStmts(body, Expression.traverseSubexpressionsHelper, (func, a))
+                      (patternGuard1, a) = Expression.traverseExpOpt(patternGuard, func, a)
+                      (result1, a) = Expression.traverseExpOpt(result, func, a)
+                      (cases1, a) = traverseCases(cases, func, a)
+                      cases = if referenceEq(cases, cases1) && referenceEq(patternGuard, patternGuard1) && referenceEq(result, result1) && referenceEq(body, body1)
+                            inCases
+                          else
+                            _cons(DAE.CASE(patterns, patternGuard1, decls, body1, result1, resultInfo, jump, info), cases1)
+                          end
+                    (cases, a)
+                  end
+                end
+              end
+          (outCases, oa)
+        end
+
+        function traverseCasesTopDown(inCases::List{DAE.MatchCase}, func::FuncExpType, inA::Type_a)  where {Type_a}
+              local a::Type_a = inA
+              local cases::List{DAE.MatchCase} = nil
+
+              local patterns::List{DAE.Pattern}
+              local decls::List{DAE.Element}
+              local body::List{DAE.Statement}
+              local body1::List{DAE.Statement}
+              local result::Option{DAE.Exp}
+              local result1::Option{DAE.Exp}
+              local patternGuard::Option{DAE.Exp}
+              local patternGuard1::Option{DAE.Exp}
+              local jump::ModelicaInteger
+              local resultInfo::SourceInfo
+              local info::SourceInfo
+              local tpl::Tuple{FuncExpType, Type_a}
+
+              for c in inCases
+                @match DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) = c
+                tpl = (func, a)
+                (body1, (_, a)) = DAETraverse.traverseDAEEquationsStmts(body, Expression.traverseSubexpressionsTopDownHelper, tpl)
+                (patternGuard1, a) = Expression.traverseExpOptTopDown(patternGuard, func, a)
+                (result1, a) = Expression.traverseExpOptTopDown(result, func, a)
+                cases = _cons(DAE.CASE(patterns, patternGuard1, decls, body1, result1, resultInfo, jump, info), cases)
+              end
+               #=  TODO: Enable with new tarball
+               =#
+              cases = listReverse(cases)
+               #=  TODO: in-place reverse?
+               =#
+          (cases, a)
+        end
 
          #= /***************************************************/ =#
          #= /* transform to other types */ =#
@@ -5090,6 +5136,7 @@ Type_a = Any
           outExp
         end
 
+        #=
         function CodeVarToCref(inExp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
 
@@ -5099,13 +5146,13 @@ Type_a = Any
                   local e::DAE.Exp
                 @match inExp begin
                   DAE.CODE(Absyn.C_VARIABLENAME(cref), _)  => begin
-                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
+                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FCore.emptyGraph, cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
                       e = crefExp(e_cref)
                     e
                   end
 
                   DAE.CODE(Absyn.C_EXPRESSION(Absyn.CALL(Absyn.CREF_IDENT("der",  nil()), Absyn.FUNCTIONARGS(Absyn.CREF(cref) <|  nil(),  nil()))), _)  => begin
-                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FGraph.empty(), cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
+                      (_, e_cref) = Static.elabUntypedCref(FCoreUtil.emptyCache(), FCore.emptyGraph, cref, false, Prefix.NOPRE(), AbsynUtil.dummyInfo)
                       e = crefExp(e_cref)
                     DAE.CALL(Absyn.IDENT("der"), list(e), DAE.callAttrBuiltinReal)
                   end
@@ -5113,6 +5160,7 @@ Type_a = Any
               end
           outExp
         end
+        =#
 
          #= converts to ICONST if possible. If it does
          not fit, a RCONST is returned instead. =#
@@ -10812,7 +10860,7 @@ Type_a = Any
 
                   DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp)  => begin
                       (expl_1, ext_arg) = traverseExpList(expl, inFunc, inExtArg)
-                      (cases_1, ext_arg) = ExpressionUtil.traverseCases(cases, inFunc, ext_arg)
+                      (cases_1, ext_arg) = traverseCases(cases, inFunc, ext_arg)
                       e = if referenceEq(expl, expl_1) && referenceEq(cases, cases_1)
                             inExp
                           else
@@ -11453,7 +11501,7 @@ Type_a = Any
 
                   (_, DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), rel, ext_arg)  => begin
                       (expl, ext_arg) = traverseExpListTopDown(expl, rel, ext_arg)
-                      (cases, ext_arg) = ExpressionUtil.traverseCasesTopDown(cases, rel, ext_arg)
+                      (cases, ext_arg) = traverseCasesTopDown(cases, rel, ext_arg)
                     (DAE.MATCHEXPRESSION(matchType, expl, aliases, localDecls, cases, et), ext_arg)
                   end
 
@@ -17784,363 +17832,6 @@ Type_a = Any
           (enumExp, newIndex)
         end
 
-         #= Determines whether an operand in an expression needs parentheses around it. =#
-        function shouldParenthesize(inOperand::DAE.Exp, inOperator::DAE.Exp, inLhs::Bool) ::Bool
-              local outShouldParenthesize::Bool
-
-              outShouldParenthesize = begin
-                  local diff::ModelicaInteger
-                @match (inOperand, inOperator, inLhs) begin
-                  (DAE.UNARY(__), _, _)  => begin
-                    true
-                  end
-
-                  _  => begin
-                        diff = Util.intCompare(priority(inOperand, inLhs), priority(inOperator, inLhs))
-                      shouldParenthesize2(diff, inOperand, inLhs)
-                  end
-                end
-              end
-          outShouldParenthesize
-        end
-
-        function shouldParenthesize2(inPrioDiff::ModelicaInteger, inOperand::DAE.Exp, inLhs::Bool) ::Bool
-              local outShouldParenthesize::Bool
-
-              outShouldParenthesize = begin
-                @match (inPrioDiff, inOperand, inLhs) begin
-                  (1, _, _)  => begin
-                    true
-                  end
-
-                  (0, _, false)  => begin
-                    ! isAssociativeExp(inOperand)
-                  end
-
-                  _  => begin
-                      false
-                  end
-                end
-              end
-          outShouldParenthesize
-        end
-
-         #= Determines whether the given expression represents an associative operation or not. =#
-        function isAssociativeExp(inExp::DAE.Exp) ::Bool
-              local outIsAssociative::Bool
-
-              outIsAssociative = begin
-                  local op::DAE.Operator
-                @match inExp begin
-                  DAE.BINARY(operator = op)  => begin
-                    isAssociativeOp(op)
-                  end
-
-                  DAE.LBINARY(__)  => begin
-                    true
-                  end
-
-                  _  => begin
-                      false
-                  end
-                end
-              end
-          outIsAssociative
-        end
-
-         #= Determines whether the given operator is associative or not. =#
-        function isAssociativeOp(inOperator::DAE.Operator) ::Bool
-              local outIsAssociative::Bool
-
-              outIsAssociative = begin
-                @match inOperator begin
-                  DAE.ADD(__)  => begin
-                    true
-                  end
-
-                  DAE.MUL(__)  => begin
-                    true
-                  end
-
-                  DAE.ADD_ARR(__)  => begin
-                    true
-                  end
-
-                  DAE.MUL_ARRAY_SCALAR(__)  => begin
-                    true
-                  end
-
-                  DAE.ADD_ARRAY_SCALAR(__)  => begin
-                    true
-                  end
-
-                  _  => begin
-                      false
-                  end
-                end
-              end
-          outIsAssociative
-        end
-
-         #= Returns an integer priority given an expression, which is used by
-           ExpressionDumpTpl to add parentheses when dumping expressions. The inLhs
-           argument should be true if the expression occurs on the left side of a binary
-           operation, otherwise false. This is because we don't need to add parentheses
-           to expressions such as x * y / z, but x / (y * z) needs them, so the
-           priorities of some binary operations differ depending on which side they are. =#
-        function priority(inExp::DAE.Exp, inLhs::Bool) ::ModelicaInteger
-              local outPriority::ModelicaInteger
-
-              outPriority = begin
-                  local op::DAE.Operator
-                @match (inExp, inLhs) begin
-                  (DAE.BINARY(operator = op), false)  => begin
-                    priorityBinopRhs(op)
-                  end
-
-                  (DAE.BINARY(operator = op), true)  => begin
-                    priorityBinopLhs(op)
-                  end
-
-                  (DAE.RCONST(__), _) where (inExp.real < 0.0)  => begin
-                    4
-                  end
-
-                  (DAE.UNARY(__), _)  => begin
-                    4
-                  end
-
-                  (DAE.LBINARY(operator = op), _)  => begin
-                    priorityLBinop(op)
-                  end
-
-                  (DAE.LUNARY(__), _)  => begin
-                    7
-                  end
-
-                  (DAE.RELATION(__), _)  => begin
-                    6
-                  end
-
-                  (DAE.RANGE(__), _)  => begin
-                    10
-                  end
-
-                  (DAE.IFEXP(__), _)  => begin
-                    11
-                  end
-
-                  _  => begin
-                      0
-                  end
-                end
-              end
-               #=  Same as unary minus of a real literal
-               =#
-          outPriority
-        end
-
-         #= Returns the priority for a binary operation on the left hand side. Add and
-           sub has the same priority, and mul and div too, in contrast with
-           priorityBinopRhs. =#
-        function priorityBinopLhs(inOp::DAE.Operator) ::ModelicaInteger
-              local outPriority::ModelicaInteger
-
-              outPriority = begin
-                @match inOp begin
-                  DAE.ADD(__)  => begin
-                    5
-                  end
-
-                  DAE.SUB(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL(__)  => begin
-                    2
-                  end
-
-                  DAE.DIV(__)  => begin
-                    2
-                  end
-
-                  DAE.POW(__)  => begin
-                    1
-                  end
-
-                  DAE.ADD_ARR(__)  => begin
-                    5
-                  end
-
-                  DAE.SUB_ARR(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL_ARR(__)  => begin
-                    2
-                  end
-
-                  DAE.DIV_ARR(__)  => begin
-                    2
-                  end
-
-                  DAE.MUL_ARRAY_SCALAR(__)  => begin
-                    2
-                  end
-
-                  DAE.ADD_ARRAY_SCALAR(__)  => begin
-                    5
-                  end
-
-                  DAE.SUB_SCALAR_ARRAY(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL_SCALAR_PRODUCT(__)  => begin
-                    2
-                  end
-
-                  DAE.MUL_MATRIX_PRODUCT(__)  => begin
-                    2
-                  end
-
-                  DAE.DIV_ARRAY_SCALAR(__)  => begin
-                    2
-                  end
-
-                  DAE.DIV_SCALAR_ARRAY(__)  => begin
-                    2
-                  end
-
-                  DAE.POW_ARRAY_SCALAR(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_SCALAR_ARRAY(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_ARR(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_ARR2(__)  => begin
-                    1
-                  end
-                end
-              end
-          outPriority
-        end
-
-         #= Returns the priority for a binary operation on the right hand side. Add and
-           sub has different priorities, and mul and div too, in contrast with
-           priorityBinopLhs. =#
-        function priorityBinopRhs(inOp::DAE.Operator) ::ModelicaInteger
-              local outPriority::ModelicaInteger
-
-              outPriority = begin
-                @match inOp begin
-                  DAE.ADD(__)  => begin
-                    6
-                  end
-
-                  DAE.SUB(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL(__)  => begin
-                    3
-                  end
-
-                  DAE.DIV(__)  => begin
-                    2
-                  end
-
-                  DAE.POW(__)  => begin
-                    1
-                  end
-
-                  DAE.ADD_ARR(__)  => begin
-                    6
-                  end
-
-                  DAE.SUB_ARR(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL_ARR(__)  => begin
-                    3
-                  end
-
-                  DAE.DIV_ARR(__)  => begin
-                    2
-                  end
-
-                  DAE.MUL_ARRAY_SCALAR(__)  => begin
-                    3
-                  end
-
-                  DAE.ADD_ARRAY_SCALAR(__)  => begin
-                    6
-                  end
-
-                  DAE.SUB_SCALAR_ARRAY(__)  => begin
-                    5
-                  end
-
-                  DAE.MUL_SCALAR_PRODUCT(__)  => begin
-                    3
-                  end
-
-                  DAE.MUL_MATRIX_PRODUCT(__)  => begin
-                    3
-                  end
-
-                  DAE.DIV_ARRAY_SCALAR(__)  => begin
-                    2
-                  end
-
-                  DAE.DIV_SCALAR_ARRAY(__)  => begin
-                    2
-                  end
-
-                  DAE.POW_ARRAY_SCALAR(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_SCALAR_ARRAY(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_ARR(__)  => begin
-                    1
-                  end
-
-                  DAE.POW_ARR2(__)  => begin
-                    1
-                  end
-                end
-              end
-          outPriority
-        end
-
-        function priorityLBinop(inOp::DAE.Operator) ::ModelicaInteger
-              local outPriority::ModelicaInteger
-
-              outPriority = begin
-                @match inOp begin
-                  DAE.AND(__)  => begin
-                    8
-                  end
-
-                  DAE.OR(__)  => begin
-                    9
-                  end
-                end
-              end
-          outPriority
-        end
-
         function isWild(exp::DAE.Exp) ::Bool
               local b::Bool
 
@@ -19834,7 +19525,7 @@ Type_a = Any
 
                   (DAE.MATCHEXPRESSION(matchTy, expl, aliases, localDecls, cases, tp), rel, ext_arg)  => begin
                       (expl_1, ext_arg) = traverseExpDerPreStartList(expl, rel, ext_arg)
-                      (cases_1, ext_arg) = ExpressionUtil.traverseCases(cases, rel, ext_arg)
+                      (cases_1, ext_arg) = traverseCases(cases, rel, ext_arg)
                       e = if referenceEq(expl, expl_1) && referenceEq(cases, cases_1)
                             inExp
                           else

@@ -18,7 +18,7 @@ module HashTable
 
         import DAE
 
-        import ComponentReference
+        import CrefForHashTable
 
         const Key = DAE.ComponentRef
 
@@ -44,7 +44,7 @@ module HashTable
         function emptyHashTableSized(size::ModelicaInteger) ::HashTableType
               local hashTable::HashTableType
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr, intString))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashComponentRefMod, CrefForHashTable.crefEqual, CrefForHashTable.printComponentRefStr, intString))
           hashTable
         end
 

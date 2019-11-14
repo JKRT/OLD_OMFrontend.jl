@@ -46,9 +46,9 @@
 
         import FCore
 
-        import FGraph
+        import FGraphUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import Mod
 
@@ -60,7 +60,7 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
         InstDims = List
 
@@ -807,7 +807,7 @@
                   else
                     ety = Types.simplifyType(ty)
                     ty = Types.liftArrayListDims(ty, dims)
-                    scope = FGraph.printGraphPathStr(inEnv)
+                    scope = FGraphUtil.printGraphPathStr(inEnv)
                     ty_str = Types.printTypeStr(ty)
                     exp = DAE.EMPTY(scope, DAE.CREF_IDENT(name, ety, nil), ety, ty_str)
                     val = Values.EMPTY(scope, name, Types.typeToValue(ty), ty_str)

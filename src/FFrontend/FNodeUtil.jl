@@ -33,8 +33,10 @@ module FNodeUtil
 #= anything that is not top, class or a component is an implicit scope! =#
 using MetaModelica
 using ExportAll
-  
+
 @importDBG FCore
+@importDBG SCode
+@importDBG SCodeUtil
 
 FunctionRefIs = Function
 Filter = Function
@@ -320,23 +322,6 @@ function isComponent(inNode::Node) ::Bool
   b
 end
 
-function isConstrainClass(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.CC(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
 function isCref(inNode::Node) ::Bool
   local b::Bool
 
@@ -597,7 +582,7 @@ module FNodeUtil
 #= anything that is not top, class or a component is an implicit scope! =#
 using MetaModelica
 using ExportAll
-  
+
 import FCore
 
 FunctionRefIs = Function
@@ -743,40 +728,6 @@ function isUserDefined(inNode::Node) ::Bool
   b
 end
 
-function isTop(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.TOP(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
-function isExtends(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.EX(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
 function isDerived(inNode::Node) ::Bool
   local b::Bool
 
@@ -818,61 +769,6 @@ function isInstance(inNode::Node) ::Bool
   b = begin
     @match inNode begin
       FCore.N(data = FCore.CL(status = FCore.CLS_INSTANCE(_)))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
-function isRedeclare(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.CL(e = SCode.CLASS(prefixes = SCode.PREFIXES(redeclarePrefix = SCode.REDECLARE(__)))))  => begin
-        true
-      end
-
-      FCore.N(data = FCore.CO(e = SCode.COMPONENT(prefixes = SCode.PREFIXES(redeclarePrefix = SCode.REDECLARE(__)))))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
-function isClassExtends(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.CL(e = SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__))))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
-function isComponent(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.CO(__))  => begin
         true
       end
 

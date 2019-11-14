@@ -18,7 +18,7 @@
     FuncExpType = Function
 
     FuncExpType = Function
-    
+
     Type_a = Any
 
          #= /*
@@ -58,10 +58,11 @@
         @importDBG ConnectionGraph
         @importDBG DAE
         @importDBG FCore
+        @importDBG FGraphUtil
         @importDBG HashTableStringToPath
         @importDBG SCode
         @importDBG Dump
-        @importDBG InnerOuter
+        @importDBG InnerOuterTypes
         @importDBG Prefix
         @importDBG Types
         @importDBG UnitAbsyn
@@ -69,9 +70,9 @@
         @importDBG Algorithm
         @importDBG AvlSetString
         @importDBG BaseHashTable
-        @importDBG ComponentReference
+        @importDBG CrefForHashTable
         # @importDBG Connect
-        @importDBG DAEUtil
+        # @importDBG DAEUtil
         @importDBG ElementSource
         @importDBG Expression
         #@importDBG ExpressionDump
@@ -85,7 +86,7 @@
         @importDBG InstUtil
         @importDBG ListUtil
         @importDBG Lookup
-        @importDBG MetaModelica.Dangerous
+        import MetaModelica.Dangerous
         @importDBG AbsynToSCode
         @importDBG SCodeUtil
         @importDBG Static
@@ -672,7 +673,7 @@
                   local ty2::DAE.Type
                 @matchcontinue (inTy1, inTy2, lhs, info) begin
                   (DAE.T_METABOXED(ty = ty1), ty2, _, _)  => begin
-                      cr = ComponentReference.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
+                      cr = CrefForHashTable.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cr)
                       (_, ty1) = Types.matchType(crefExp, ty1, ty2, true)
                       et = Types.simplifyType(ty1)
@@ -680,7 +681,7 @@
                   end
 
                   (ty1, ty2, _, _)  => begin
-                      cr = ComponentReference.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
+                      cr = CrefForHashTable.makeCrefIdent("#DUMMY#", DAE.T_UNKNOWN_DEFAULT, nil)
                       crefExp = Expression.crefExp(cr)
                       (_, _) = Types.matchType(crefExp, ty1, ty2, true)
                     NONE()
@@ -1414,7 +1415,7 @@
                   local extra::Tuple{AvlSetString.Tree, AvlSetString.Tree, SourceInfo}
                 @matchcontinue (inExp, inTpl) begin
                   (DAE.CREF(componentRef = cr, ty = ty), extra && (localsTree, useTree, info))  => begin
-                      name = ComponentReference.crefFirstIdent(cr)
+                      name = CrefForHashTable.crefFirstIdent(cr)
                       if AvlSetString.hasKey(localsTree, name) && ! AvlSetString.hasKey(useTree, name)
                         Error.assertionOrAddSourceMessage(! Flags.isSet(Flags.PATTERNM_ALL_INFO), Error.META_UNUSED_ASSIGNMENT, list(name), info)
                         outExp = DAE.CREF(DAE.WILD(), ty)
@@ -2351,12 +2352,12 @@
                           end
                       (cache, elabPatterns) = elabPatternTuple(cache, env, patterns, tys, patternInfo, pattern)
                       checkPatternsDuplicateAsBindings(elabPatterns, patternInfo)
-                      env = FGraph.openNewScope(env, SCode.NOT_ENCAPSULATED(), SOME(FCore.patternTypeScope), NONE())
+                      env = FGraphUtil.openNewScope(env, SCode.NOT_ENCAPSULATED(), SOME(FCore.patternTypeScope), NONE())
                       (elabPatterns2, cache) = addPatternAliasesList(elabPatterns, inputAliases, cache, inEnv)
                       (_, env) = traversePatternList(elabPatterns2, addEnvKnownAsBindings, env)
                       eqAlgs = Static.fromEquationsToAlgAssignments(cp)
                       algs = AbsynToSCode.translateClassdefAlgorithmitems(eqAlgs)
-                      (cache, body) = InstSection.instStatements(cache, env, InnerOuter.emptyInstHierarchy, pre, ClassInf.FUNCTION(Absyn.IDENT("match"), false), algs, ElementSource.addElementSourceFileInfo(DAE.emptyElementSource, patternInfo), SCode.NON_INITIAL(), true, InstTypes.neverUnroll)
+                      (cache, body) = InstSection.instStatements(cache, env, InnerOuterTypes.emptyInstHierarchy, pre, ClassInf.FUNCTION(Absyn.IDENT("match"), false), algs, ElementSource.addElementSourceFileInfo(DAE.emptyElementSource, patternInfo), SCode.NON_INITIAL(), true, InstTypes.neverUnroll)
                       (cache, body, elabResult, resultInfo, resType) = elabResultExp(cache, env, body, result, impl, performVectorization, pre, resultInfo)
                       (cache, dPatternGuard) = elabPatternGuard(cache, env, patternGuard, impl, performVectorization, pre, patternInfo)
                       localsTree = AvlSetString.join(matchExpLocalTree, caseLocalTree)
@@ -2676,80 +2677,6 @@
           (outPattern, extra)
         end
 
-        function traverseCases(inCases::List{<:DAE.MatchCase}, func::FuncExpType, inA::Type_a) ::Tuple{List{DAE.MatchCase}, Type_a}
-              local oa::Type_a
-              local outCases::List{DAE.MatchCase}
-
-              (outCases, oa) = begin
-                  local patterns::List{DAE.Pattern}
-                  local decls::List{DAE.Element}
-                  local body::List{DAE.Statement}
-                  local body1::List{DAE.Statement}
-                  local result::Option{DAE.Exp}
-                  local result1::Option{DAE.Exp}
-                  local patternGuard::Option{DAE.Exp}
-                  local patternGuard1::Option{DAE.Exp}
-                  local jump::ModelicaInteger
-                  local resultInfo::SourceInfo
-                  local info::SourceInfo
-                  local cases::List{DAE.MatchCase}
-                  local cases1::List{DAE.MatchCase}
-                  local a::Type_a
-                @match (inCases, func, inA) begin
-                  ( nil(), _, a)  => begin
-                    (nil, a)
-                  end
-
-                  (DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) <| cases, _, a)  => begin
-                      (body1, (_, a)) = DAEUtil.traverseDAEEquationsStmts(body, Expression.traverseSubexpressionsHelper, (func, a))
-                      (patternGuard1, a) = Expression.traverseExpOpt(patternGuard, func, a)
-                      (result1, a) = Expression.traverseExpOpt(result, func, a)
-                      (cases1, a) = traverseCases(cases, func, a)
-                      cases = if referenceEq(cases, cases1) && referenceEq(patternGuard, patternGuard1) && referenceEq(result, result1) && referenceEq(body, body1)
-                            inCases
-                          else
-                            _cons(DAE.CASE(patterns, patternGuard1, decls, body1, result1, resultInfo, jump, info), cases1)
-                          end
-                    (cases, a)
-                  end
-                end
-              end
-          (outCases, oa)
-        end
-
-        function traverseCasesTopDown(inCases::List{DAE.MatchCase}, func::FuncExpType, inA::Type_a)  where {Type_a}
-              local a::Type_a = inA
-              local cases::List{DAE.MatchCase} = nil
-
-              local patterns::List{DAE.Pattern}
-              local decls::List{DAE.Element}
-              local body::List{DAE.Statement}
-              local body1::List{DAE.Statement}
-              local result::Option{DAE.Exp}
-              local result1::Option{DAE.Exp}
-              local patternGuard::Option{DAE.Exp}
-              local patternGuard1::Option{DAE.Exp}
-              local jump::ModelicaInteger
-              local resultInfo::SourceInfo
-              local info::SourceInfo
-              local tpl::Tuple{FuncExpType, Type_a}
-
-              for c in inCases
-                @match DAE.CASE(patterns, patternGuard, decls, body, result, resultInfo, jump, info) = c
-                tpl = (func, a)
-                (body1, (_, a)) = DAEUtil.traverseDAEEquationsStmts(body, Expression.traverseSubexpressionsTopDownHelper, tpl)
-                (patternGuard1, a) = Expression.traverseExpOptTopDown(patternGuard, func, a)
-                (result1, a) = Expression.traverseExpOptTopDown(result, func, a)
-                cases = _cons(DAE.CASE(patterns, patternGuard1, decls, body1, result1, resultInfo, jump, info), cases)
-              end
-               #=  TODO: Enable with new tarball
-               =#
-              cases = listReverse(cases)
-               #=  TODO: in-place reverse?
-               =#
-          (cases, a)
-        end
-
         function filterEmptyPattern(tpl::Tuple{<:DAE.Pattern, String, DAE.Type}) ::Bool
               local outB::Bool
 
@@ -2794,7 +2721,7 @@
                   end
 
                   (cache, env, ld, _, _, _)  => begin
-                      env2 = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), scopeName, NONE())
+                      env2 = FGraphUtil.openScope(env, SCode.NOT_ENCAPSULATED(), scopeName, NONE())
                       ld2 = AbsynToSCode.translateEitemlist(ld, SCode.PROTECTED())
                       @match true = ListUtil.applyAndFold1(ld2, boolAnd, SCodeUtil.isComponentWithDirection, Absyn.BIDIR(), true)
                       (cache, b) = ListUtil.fold1(ld2, checkLocalShadowing, env, (cache, false))
@@ -2805,8 +2732,8 @@
                           end
                       ld_mod = InstUtil.addNomod(ld2)
                       dummyFunc = ClassInf.FUNCTION(Absyn.IDENT("dummieFunc"), false)
-                      (cache, env2, _) = InstUtil.addComponentsToEnv(cache, env2, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, impl)
-                      (cache, env2, _, _, dae1, _, _, _, _, _) = Inst.instElementList(cache, env2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, nil, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
+                      (cache, env2, _) = InstUtil.addComponentsToEnv(cache, env2, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, impl)
+                      (cache, env2, _, _, dae1, _, _, _, _, _) = Inst.instElementList(cache, env2, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), dummyFunc, ld_mod, nil, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
                       names = ListUtil.map(ld2, SCodeUtil.elementName)
                       declsTree = AvlSetString.addList(AvlSetString.new(), names)
                       res = if b
@@ -3157,7 +3084,7 @@
                   (DAE.PAT_AS(id = id, attr = attr), DAE.PAT_CALL(index = index, typeVars = typeVars, fields = fields, knownSingleton = knownSingleton, name = name))  => begin
                       path = AbsynUtil.stripLast(name)
                       ty = DAE.T_METARECORD(name, path, typeVars, index, fields, knownSingleton)
-                      env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(name, NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_DAE(), FGraph.empty())
+                      env = FGraphUtil.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(name, NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo), DAE.NOMOD(), FCore.VAR_DAE(), FCore.emptyGraph)
                     env
                   end
 
@@ -3262,7 +3189,7 @@
 
                   (env, ty <| _, id <| rest <| aliases, _)  => begin
                       attr = DAE.dummyAttrInput
-                      env = FGraph.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(Absyn.IDENT("dummy"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), info), DAE.NOMOD(), FCore.VAR_DAE(), FGraph.empty())
+                      env = FGraphUtil.mkComponentNode(env, DAE.TYPES_VAR(id, attr, ty, DAE.UNBOUND(), NONE()), SCode.COMPONENT(id, SCode.defaultPrefixes, SCode.defaultVarAttr, Absyn.TPATH(Absyn.IDENT("dummy"), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), info), DAE.NOMOD(), FCore.VAR_DAE(), FCore.emptyGraph)
                     addAliasesToEnv(env, inTypes, _cons(rest, aliases), info)
                   end
                 end

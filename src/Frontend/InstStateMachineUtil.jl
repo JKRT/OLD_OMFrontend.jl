@@ -1,4 +1,4 @@
-  module InstStateMachineUtil 
+  module InstStateMachineUtil
 
 
     using MetaModelica
@@ -6,9 +6,9 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl SMNode 
-    @UniontypeDecl FlatSMGroup 
-    @UniontypeDecl IncidenceTable 
+    @UniontypeDecl SMNode
+    @UniontypeDecl FlatSMGroup
+    @UniontypeDecl IncidenceTable
 
          #= /*
          * This file is part of OpenModelica.
@@ -42,7 +42,7 @@
          */ =#
 
         import Absyn
-        
+
         import SCode
 
         import DAE
@@ -54,7 +54,7 @@
         import ListUtil
 
         import ComponentReference
-        
+
         import BaseHashTable
 
         import HashTable
@@ -73,12 +73,14 @@
 
         import DAEUtil
 
+        import InnerOuterTypes
+
         import InnerOuter
 
         import Expression
 
         import Debug
-        
+
         import Prefix
 
         import PrefixUtil
@@ -114,19 +116,19 @@
 
          #=  Table having crefs as keys and corresponding SMNODE as value
          =#
-        SMNodeTable = HashTableSM1.HashTable 
+        SMNodeTable = HashTableSM1.HashTable
          #=  Table mapping crefs of SMNodes to corresponding crefs of FlatSMGroup
          =#
-        SMNodeToFlatSMGroupTable = HashTableCG.HashTable 
+        SMNodeToFlatSMGroupTable = HashTableCG.HashTable
          const SMS_PRE = "smOf" #= prefix for flat SMNode Machine names =#::String
 
          const DEBUG_SMDUMP = false #= enable verbose stdout debug information during elaboration =#::Bool
 
-         #= 
+         #=
         Author: BTH
         Create table that associates a state instance with its governing flat state machine.
          =#
-        function createSMNodeToFlatSMGroupTable(inDae::DAE.DAElist) ::SMNodeToFlatSMGroupTable 
+        function createSMNodeToFlatSMGroupTable(inDae::DAE.DAElist) ::SMNodeToFlatSMGroupTable
               local smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable
 
               local elementLst::List{DAE.Element}
@@ -199,11 +201,11 @@
           smNodeToFlatSMGroup
         end
 
-         #= 
+         #=
         Author: BTH
         Wrap state machine components into corresponding flat state machine containers.
          =#
-        function wrapSMCompsInFlatSMs(inIH::InnerOuter.InstHierarchy, inDae1::DAE.DAElist, inDae2::DAE.DAElist, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable, smInitialCrefs::List{<:DAE.ComponentRef} #= every smInitialCrefs corresponds to a flat state machine group =#) ::Tuple{DAE.DAElist, DAE.DAElist} 
+        function wrapSMCompsInFlatSMs(inIH::InnerOuterTypes.InstHierarchy, inDae1::DAE.DAElist, inDae2::DAE.DAElist, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable, smInitialCrefs::List{<:DAE.ComponentRef} #= every smInitialCrefs corresponds to a flat state machine group =#) ::Tuple{DAE.DAElist, DAE.DAElist}
               local outDae2::DAE.DAElist
               local outDae1::DAE.DAElist
 
@@ -241,11 +243,11 @@
           (outDae1, outDae2)
         end
 
-         #= 
+         #=
         Author: BTH
         Create fresh equations for merging outer output variable definitions
          =#
-        function myMergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuter.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element} 
+        function myMergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuterTypes.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element}
               local outElementLst::List{DAE.Element}
 
               local outerOutputCrefToSMCompCref::HashTableCG.HashTable #= Table to map outer outputs to corresponding state =#
@@ -347,12 +349,12 @@
           outElementLst
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinition.
         Create a fresh alias equation between inners and their corresponding outer output variable defintions
          =#
-        function freshAliasEqn_der(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::List{DAE.Element} 
+        function freshAliasEqn_der(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::List{DAE.Element}
               local outEqns::List{DAE.Element}
 
               local innerCref::DAE.ComponentRef
@@ -369,12 +371,12 @@
           outEqns
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinition.
         Create a fresh equation for merging outer output variable defintions of equations involving der(..)
          =#
-        function freshMergingEqn_der(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::DAE.Element 
+        function freshMergingEqn_der(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local innerCref::DAE.ComponentRef
@@ -401,12 +403,12 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to freshMergingEqn_der.
         Create RHS expression of merging equation.
          =#
-        function mergingRhs_der(inOuterCrefs::List{<:DAE.ComponentRef} #= List of the crefs of the outer variables =#, inInnerCref::DAE.ComponentRef, ty::DAE.Type #= type of inner cref (inner cref type expected to the same as outer crefs type) =#) ::DAE.Exp 
+        function mergingRhs_der(inOuterCrefs::List{<:DAE.ComponentRef} #= List of the crefs of the outer variables =#, inInnerCref::DAE.ComponentRef, ty::DAE.Type #= type of inner cref (inner cref type expected to the same as outer crefs type) =#) ::DAE.Exp
               local res::DAE.Exp
 
               local callAttributes::DAE.CallAttributes = DAE.CALL_ATTR(ty, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL())
@@ -431,7 +433,7 @@
                       ifExp = DAE.IFEXP(expCond, outerCrefExp, expElse)
                     ifExp
                   end
-                  
+
                   outerCref <| rest  => begin
                       outerCrefExp = DAE.CREF(outerCref, ty)
                       crefState = ComponentReference.crefStripLastIdent(outerCref)
@@ -446,12 +448,12 @@
           res
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to traverse subexpressions
         Counts occurances of 'der(cref)'
          =#
-        function traversingCountDer(inExp::DAE.Exp, inCref_HitCount::Tuple{<:DAE.ComponentRef, ModelicaInteger} #= tuple of x and counter for hits of der(x) =#) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, ModelicaInteger}} 
+        function traversingCountDer(inExp::DAE.Exp, inCref_HitCount::Tuple{<:DAE.ComponentRef, ModelicaInteger} #= tuple of x and counter for hits of der(x) =#) ::Tuple{DAE.Exp, Tuple{DAE.ComponentRef, ModelicaInteger}}
               local outCref_HitCount::Tuple{DAE.ComponentRef, ModelicaInteger}
               local outExp::DAE.Exp
 
@@ -467,7 +469,7 @@
                   DAE.CALL(path = Absyn.IDENT("der"), expLst = DAE.CREF(componentRef = componentRef) <|  nil()) where (ComponentReference.crefEqual(componentRef, cref))  => begin
                     (inExp, (cref, hitCount + 1))
                   end
-                  
+
                   _  => begin
                       (inExp, inCref_HitCount)
                   end
@@ -476,12 +478,12 @@
           (outExp, outCref_HitCount)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinition.
         Create a fresh equation for merging outer output variable defintions
          =#
-        function freshMergingEqn(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::DAE.Element 
+        function freshMergingEqn(inInnerCrefToOuterOutputCrefs::Tuple{<:DAE.ComponentRef, List{<:DAE.ComponentRef}} #= tuple relating the inner cref to respective outer crefs =#) ::DAE.Element
               local outEqn::DAE.Element
 
               local innerCref::DAE.ComponentRef
@@ -498,12 +500,12 @@
           outEqn
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to freshMergingEqn.
         Create RHS expression of merging equation.
          =#
-        function mergingRhs(inOuterCrefs::List{<:DAE.ComponentRef} #= List of the crefs of the outer variables =#, inInnerCref::DAE.ComponentRef, ty::DAE.Type #= type of inner cref (inner cref type expected to the same as outer crefs type) =#) ::DAE.Exp 
+        function mergingRhs(inOuterCrefs::List{<:DAE.ComponentRef} #= List of the crefs of the outer variables =#, inInnerCref::DAE.ComponentRef, ty::DAE.Type #= type of inner cref (inner cref type expected to the same as outer crefs type) =#) ::DAE.Exp
               local res::DAE.Exp
 
               local callAttributes::DAE.CallAttributes = DAE.CALL_ATTR(ty, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL())
@@ -529,7 +531,7 @@
                       ifExp = DAE.IFEXP(expCond, outerCrefExp, expElse)
                     ifExp
                   end
-                  
+
                   outerCref <| rest  => begin
                       outerCrefExp = DAE.CREF(outerCref, ty)
                       crefState = ComponentReference.crefStripLastIdent(outerCref)
@@ -544,10 +546,10 @@
           res
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinitions =#
-        function collectCorrespondingKeys(inInnerCref::DAE.ComponentRef, inHashEntries::List{<:Tuple{<:DAE.ComponentRef, DAE.ComponentRef}}, inInnerCrefToOuterOutputCrefs::HashTable3.HashTable) ::HashTable3.HashTable 
+        function collectCorrespondingKeys(inInnerCref::DAE.ComponentRef, inHashEntries::List{<:Tuple{<:DAE.ComponentRef, DAE.ComponentRef}}, inInnerCrefToOuterOutputCrefs::HashTable3.HashTable) ::HashTable3.HashTable
               local outInnerCrefToOuterOutputCrefs::HashTable3.HashTable = inInnerCrefToOuterOutputCrefs
 
               local outerRefs::List{DAE.ComponentRef}
@@ -557,9 +559,9 @@
           outInnerCrefToOuterOutputCrefs
         end
 
-         #= 
+         #=
         Helper function to collect collectCorrespondingKeys =#
-        function crefEqualTuple22(inHashEntry::Tuple{<:DAE.ComponentRef, DAE.ComponentRef}, inCref::DAE.ComponentRef) ::DAE.ComponentRef 
+        function crefEqualTuple22(inHashEntry::Tuple{<:DAE.ComponentRef, DAE.ComponentRef}, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               local isEqual::Bool
@@ -574,11 +576,11 @@
           outCref
         end
 
-         #= 
+         #=
         Author: BTH
         Substitute outer variables in previous(x) by corresponding 'inner'.
         Helper function to myMergeVariableDefinitions =#
-        function traverserHelperSubsOuterByInnerExp(inExp::DAE.Exp, inOuterToInner::HashTableCG.HashTable) ::Tuple{DAE.Exp, HashTableCG.HashTable} 
+        function traverserHelperSubsOuterByInnerExp(inExp::DAE.Exp, inOuterToInner::HashTableCG.HashTable) ::Tuple{DAE.Exp, HashTableCG.HashTable}
               local outOuterToInner::HashTableCG.HashTable
               local outExp::DAE.Exp
 
@@ -586,10 +588,10 @@
           (outExp, outOuterToInner)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to traverserHelperSubsOuterByInnerExp =#
-        function traverserHelperSubsOuterByInner(inExp::DAE.Exp, inOuterToInner::HashTableCG.HashTable) ::Tuple{DAE.Exp, HashTableCG.HashTable} 
+        function traverserHelperSubsOuterByInner(inExp::DAE.Exp, inOuterToInner::HashTableCG.HashTable) ::Tuple{DAE.Exp, HashTableCG.HashTable}
               local outOuterToInner::HashTableCG.HashTable
               local outExp::DAE.Exp
 
@@ -603,7 +605,7 @@
                   DAE.CALL(Absyn.IDENT("previous"), DAE.CREF(componentRef, ty) <|  nil(), attr) where (BaseHashTable.hasKey(componentRef, inOuterToInner))  => begin
                     (DAE.CALL(Absyn.IDENT("previous"), list(DAE.CREF(BaseHashTable.get(componentRef, inOuterToInner), ty)), attr), inOuterToInner)
                   end
-                  
+
                   _  => begin
                       (inExp, inOuterToInner)
                   end
@@ -612,11 +614,11 @@
           (outExp, outOuterToInner)
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinitions
          =#
-        function matchOuterWithInner(inOuterCref::DAE.ComponentRef, inIH::InnerOuter.InstHierarchy, inOuterCrefToInnerCref::HashTableCG.HashTable) ::HashTableCG.HashTable 
+        function matchOuterWithInner(inOuterCref::DAE.ComponentRef, inIH::InnerOuterTypes.InstHierarchy, inOuterCrefToInnerCref::HashTableCG.HashTable) ::HashTableCG.HashTable
               local outOuterCrefToInnerCref::HashTableCG.HashTable = inOuterCrefToInnerCref
 
               local crefIdent::DAE.ComponentRef
@@ -642,11 +644,11 @@
           outOuterCrefToInnerCref
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to matchOuterWithInner
          =#
-        function findInner(inCrefTest::DAE.ComponentRef, inCrefIdent::DAE.ComponentRef, inIH::InnerOuter.InstHierarchy) ::DAE.ComponentRef 
+        function findInner(inCrefTest::DAE.ComponentRef, inCrefIdent::DAE.ComponentRef, inIH::InnerOuterTypes.InstHierarchy) ::DAE.ComponentRef
               local outCrefFound::DAE.ComponentRef
 
               local testCref::DAE.ComponentRef
@@ -672,11 +674,11 @@
           outCrefFound
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to myMergeVariableDefinitions.
          =#
-        function collectOuterOutputs(inElem::DAE.Element, inOuterAcc::HashTableCG.HashTable) ::HashTableCG.HashTable 
+        function collectOuterOutputs(inElem::DAE.Element, inOuterAcc::HashTableCG.HashTable) ::HashTableCG.HashTable
               local outOuterAcc::HashTableCG.HashTable = inOuterAcc
 
               local outerOutputs::List{DAE.Element}
@@ -695,7 +697,7 @@
                       outerOutputCrefToSMCompCref = ListUtil.map(outerOutputCrefs, (componentRef) -> Util.makeTuple(inValue2 = componentRef))
                     ListUtil.fold(outerOutputCrefToSMCompCref, BaseHashTable.addUnique, outOuterAcc)
                   end
-                  
+
                   _  => begin
                       inOuterAcc
                   end
@@ -704,11 +706,11 @@
           outOuterAcc
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to collectOuterOutputs.
          =#
-        function isOuterOutput(inElem::DAE.Element) ::Bool 
+        function isOuterOutput(inElem::DAE.Element) ::Bool
               local outB::Bool
 
               outB = begin
@@ -718,11 +720,11 @@
                   DAE.VAR(direction = DAE.OUTPUT(__), innerOuter = Absyn.OUTER(__))  => begin
                     true
                   end
-                  
+
                   DAE.VAR(direction = DAE.OUTPUT(__), innerOuter = Absyn.INNER_OUTER(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -731,11 +733,11 @@
           outB
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to wrapSMCompsInFlatSMs.
          =#
-        function createFlatSM(smInitialCref::DAE.ComponentRef, smElemsLst::List{<:DAE.Element}, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable) ::DAE.Element 
+        function createFlatSM(smInitialCref::DAE.ComponentRef, smElemsLst::List{<:DAE.Element}, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable) ::DAE.Element
               local flatSM::DAE.Element
 
               local smElemsInFlatSM::List{DAE.Element}
@@ -745,11 +747,11 @@
           flatSM
         end
 
-         #= 
+         #=
         Author: BTH
         Check if SM_COMP, transition or initialState (first argument) is part of the flat state machine which corresponds to smInitialCref.
          =#
-        function isInFlatSM(inElement::DAE.Element, smInitialCref::DAE.ComponentRef, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable #= Table which maps the cref of an SM_COMP to the cref of its corresponding flat state machine group =#) ::Bool 
+        function isInFlatSM(inElement::DAE.Element, smInitialCref::DAE.ComponentRef, smNodeToFlatSMGroup::SMNodeToFlatSMGroupTable #= Table which maps the cref of an SM_COMP to the cref of its corresponding flat state machine group =#) ::Bool
               local outResult::Bool
 
               local crefCorrespondingFlatSMGroup::DAE.ComponentRef
@@ -760,15 +762,15 @@
                   DAE.SM_COMP(componentRef = cref1) where (BaseHashTable.hasKey(cref1, smNodeToFlatSMGroup))  => begin
                     BaseHashTable.get(cref1, smNodeToFlatSMGroup)
                   end
-                  
+
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("transition"), expLst = DAE.CREF(componentRef = cref1) <| _)) where (BaseHashTable.hasKey(cref1, smNodeToFlatSMGroup))  => begin
                     BaseHashTable.get(cref1, smNodeToFlatSMGroup)
                   end
-                  
+
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("initialState"), expLst = DAE.CREF(componentRef = cref1) <|  nil())) where (BaseHashTable.hasKey(cref1, smNodeToFlatSMGroup))  => begin
                     BaseHashTable.get(cref1, smNodeToFlatSMGroup)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- InstStateMachineUtil.isInFlatSM failed: Hash table lookup failed for " + DAEDump.dumpElementsStr(list(inElement)))
@@ -787,11 +789,11 @@
           outResult
         end
 
-         #= 
+         #=
         Author: BTH
         Check if element is a SM_COMP.
          =#
-        function isSMComp(inElement::DAE.Element) ::Bool 
+        function isSMComp(inElement::DAE.Element) ::Bool
               local outResult::Bool
 
               outResult = begin
@@ -799,7 +801,7 @@
                   DAE.SM_COMP(_, _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -808,11 +810,11 @@
           outResult
         end
 
-         #= 
+         #=
         Author: BTH
         Relate crefs of SMNodes with cref of the FlatSMGroup that it belongs to.
          =#
-        function relateNodesToGroup(flatSMGroup::FlatSMGroup, inNodeToGroup::SMNodeToFlatSMGroupTable) ::SMNodeToFlatSMGroupTable 
+        function relateNodesToGroup(flatSMGroup::FlatSMGroup, inNodeToGroup::SMNodeToFlatSMGroupTable) ::SMNodeToFlatSMGroupTable
               local outNodeToGroup::SMNodeToFlatSMGroupTable = inNodeToGroup
 
               local nodeGroup::Array{Tuple{DAE.ComponentRef, DAE.ComponentRef}}
@@ -827,11 +829,11 @@
           outNodeToGroup
         end
 
-         #= 
+         #=
         Author: BTH
         For each initial state extract the (flat) state machine group that is defined by the
         transitive closure associated with that initial state. =#
-        function extractFlatSMGroup(initialStates::List{<:DAE.ComponentRef}, iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::List{FlatSMGroup} 
+        function extractFlatSMGroup(initialStates::List{<:DAE.ComponentRef}, iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::List{FlatSMGroup}
               local flatSMGroup::List{FlatSMGroup}
 
               local cref2index::HashTable.HashTableType
@@ -878,10 +880,10 @@
           flatSMGroup
         end
 
-         #= 
+         #=
         Author: BTH
         Dump flat state machine group to string =#
-        function dumpFlatSMGroupStr(flatA::FlatSMGroup) ::String 
+        function dumpFlatSMGroupStr(flatA::FlatSMGroup) ::String
               local flatStr::String
 
               local crefs::List{DAE.ComponentRef}
@@ -902,10 +904,10 @@
           flatStr
         end
 
-         #= 
+         #=
         Author: BTH
         Return crefs of states declared as 'initialState'.  =#
-        function extractInitialStates(smNodeTable::SMNodeTable) ::List{DAE.ComponentRef} 
+        function extractInitialStates(smNodeTable::SMNodeTable) ::List{DAE.ComponentRef}
               local initialStates::List{DAE.ComponentRef}
 
               local entries::List{Tuple{DAE.ComponentRef, SMNode}}
@@ -926,7 +928,7 @@
           initialStates
         end
 
-         #= 
+         #=
         Author: BTH
         Compute the transitive closure over the transition relation between states.
         This allows to group states that are part of the same (flat) state machine.
@@ -935,7 +937,7 @@
         or the more succinct (and potentially more readable) description
         http:de.wikipedia.org/wiki/Warshall-Algorithmus
          =#
-        function transitiveClosure(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable 
+        function transitiveClosure(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable
               local transClosure::IncidenceTable
 
               local cref2index::HashTable.HashTableType
@@ -968,10 +970,10 @@
           transClosure
         end
 
-         #= 
+         #=
         Author: BTH
         Create incidence table showing which modes are connected by transitions. =#
-        function createIncidenceTable(smNodes::SMNodeTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable 
+        function createIncidenceTable(smNodes::SMNodeTable, nStates::ModelicaInteger #= Number of states =#) ::IncidenceTable
               local iTable::IncidenceTable
 
               local cref2index::HashTable.HashTableType #= Map cref to corresponding index in incidence matrix =#
@@ -1009,10 +1011,10 @@
           iTable
         end
 
-         #= 
+         #=
         Author: BTH
         Print incidence table. =#
-        function printIncidenceTable(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#)  
+        function printIncidenceTable(iTable::IncidenceTable, nStates::ModelicaInteger #= Number of states =#)
               local cref2index::HashTable.HashTableType
               local incidence::Bool[nStates, nStates]
               local entries::List{Tuple{DAE.ComponentRef, ModelicaInteger}}
@@ -1059,10 +1061,10 @@
               end
         end
 
-         #= 
+         #=
         Author: BTH
         Compare the indices assigned to two crefs (helper function for sorting) =#
-        function crefIndexCmp(inElement1::Tuple{<:DAE.ComponentRef, ModelicaInteger}, inElement2::Tuple{<:DAE.ComponentRef, ModelicaInteger}) ::Bool 
+        function crefIndexCmp(inElement1::Tuple{<:DAE.ComponentRef, ModelicaInteger}, inElement2::Tuple{<:DAE.ComponentRef, ModelicaInteger}) ::Bool
               local inRes::Bool
 
               local i1::ModelicaInteger
@@ -1074,11 +1076,11 @@
           inRes
         end
 
-         #= 
+         #=
         Author: BTH
         Traverse the equations, search for 'transition' and 'initialState' operators,
         extract the state arguments from them and collect them in the table. =#
-        function getSMNodeTable(elementLst::List{<:DAE.Element}) ::SMNodeTable 
+        function getSMNodeTable(elementLst::List{<:DAE.Element}) ::SMNodeTable
               local smNodeTable::SMNodeTable
 
               local elementLst2::List{DAE.Element}
@@ -1092,10 +1094,10 @@
           smNodeTable
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is a state machine statement, otherwise false =#
-        function isSMStatement(inElement::SCode.Equation) ::Bool 
+        function isSMStatement(inElement::SCode.Equation) ::Bool
               local outIsSMStatement::Bool
 
               outIsSMStatement = begin
@@ -1104,7 +1106,7 @@
                   SCode.EQUATION(eEquation = SCode.EQ_NORETCALL(exp = Absyn.CALL(function_ = Absyn.CREF_IDENT(name = name))))  => begin
                     (name == "transition" || name == "initialState") && Config.synchronousFeaturesAllowed()
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1113,10 +1115,10 @@
           outIsSMStatement
         end
 
-         #= 
+         #=
         Author: BTH
         Return true if element is a state machine statement, otherwise false =#
-        function isSMStatement2(inElement::DAE.Element) ::Bool 
+        function isSMStatement2(inElement::DAE.Element) ::Bool
               local outIsSMStatement::Bool
 
               outIsSMStatement = begin
@@ -1125,7 +1127,7 @@
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT(name)))  => begin
                     (name == "transition" || name == "initialState") && Config.synchronousFeaturesAllowed()
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1134,10 +1136,10 @@
           outIsSMStatement
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to getSMNodeTable =#
-        function extractSMStates2(inElement::DAE.Element, inTable::SMNodeTable) ::SMNodeTable 
+        function extractSMStates2(inElement::DAE.Element, inTable::SMNodeTable) ::SMNodeTable
               local outTable::SMNodeTable = inTable
 
               outTable = begin
@@ -1173,7 +1175,7 @@
                       outTable = BaseHashTable.add((cref2, smnode2), outTable)
                     outTable
                   end
-                  
+
                   DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("initialState"), expLst = DAE.CREF(componentRef = cref1) <|  nil()))  => begin
                       smnode1 = if BaseHashTable.hasKey(cref1, outTable)
                             BaseHashTable.get(cref1, outTable)
@@ -1195,10 +1197,10 @@
           outTable
         end
 
-         #= 
+         #=
         Author: BTH
         Return list of states defined in current context (by checking 'transtion' and 'initialState' operators) =#
-        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.PrefixType) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}} 
+        function getSMStatesInContext(eqns::List{<:SCode.Equation}, inPrefix::Prefix.PrefixType) ::Tuple{List{DAE.ComponentRef}, List{DAE.ComponentRef}}
               local initialStates::List{DAE.ComponentRef} #= Only initial states =#
               local states::List{DAE.ComponentRef} #= Initial and non-initial states =#
 
@@ -1230,22 +1232,22 @@
           (states #= Initial and non-initial states =#, initialStates #= Only initial states =#)
         end
 
-         #= 
+         #=
         Helper function to getSMStatesInContext.
         Swapped order of inputs of PrefixUtil.prefixCrefNoContext(..) in order to use it with map1 =#
-        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.PrefixType) ::DAE.ComponentRef 
+        function prefixCrefNoContext2(inCref::DAE.ComponentRef, inPre::Prefix.PrefixType) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
               outCref = PrefixUtil.prefixCrefNoContext(inPre, inCref)
           outCref
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to getSMStatesInContext.
         Return state instance componenent refs used as arguments in operator 'initialState'.
          =#
-        function extractInitialSMStates(inElement::SCode.Equation) ::Absyn.ComponentRef 
+        function extractInitialSMStates(inElement::SCode.Equation) ::Absyn.ComponentRef
               local outElement::Absyn.ComponentRef
 
               outElement = begin
@@ -1259,12 +1261,12 @@
           outElement
         end
 
-         #= 
+         #=
         Author: BTH
         Helper function to getSMStatesInContext.
         Return list of state instance componenent refs used as arguments in operators 'transtion' or 'initialState'.
          =#
-        function extractSMStates(inElement::SCode.Equation) ::List{Absyn.ComponentRef} 
+        function extractSMStates(inElement::SCode.Equation) ::List{Absyn.ComponentRef}
               local outElement::List{Absyn.ComponentRef}
 
               outElement = begin
@@ -1274,11 +1276,11 @@
                   SCode.EQUATION(eEquation = SCode.EQ_NORETCALL(exp = Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "transition"), functionArgs = Absyn.FUNCTIONARGS(args = Absyn.CREF(componentRef = cref1) <| Absyn.CREF(componentRef = cref2) <| _ <|  nil()))))  => begin
                     list(cref1, cref2)
                   end
-                  
+
                   SCode.EQUATION(eEquation = SCode.EQ_NORETCALL(exp = Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "initialState"), functionArgs = Absyn.FUNCTIONARGS(args = Absyn.CREF(componentRef = cref1) <|  nil()))))  => begin
                     list(cref1)
                   end
-                  
+
                   _  => begin
                       nil
                   end

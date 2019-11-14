@@ -61,6 +61,8 @@
 
         import FCoreUtil
 
+        import InnerOuterTypes
+
         import InnerOuter
 
         import InstTypes
@@ -81,7 +83,7 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
         InstDims = InstTypes.InstDims
 
@@ -108,6 +110,7 @@
         import ExpressionDump
         import Flags
         import FGraph
+        import FGraphUtil
         import FGraphBuildEnv
         import FNode
         import GC
@@ -150,9 +153,9 @@
 
          #=  instantiate a class.
          if this function fails with stack overflow, it will be caught in the caller =#
-        function instantiateClass_dispatch(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instantiateClass_dispatch(inCache::FCore.Cache, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -190,7 +193,7 @@
                       println("Inst.instantiateClass_dispatch 2")
                       env = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
                       println("Inst.instantiateClass_dispatch 3")
-                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
+                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraphUtil.getScopePath(env))
                       if Flags.isSet(Flags.GC_PROF)
                         print(GC.profStatsStr(GC.getProfStats(), head = "GC stats after pre-frontend work (building graphs):") + "\\n")
                       end
@@ -218,7 +221,7 @@
                       ExecStat.execStat("FrontEnd - mkProgramGraph")
                       (cache, env, ih, _, dae, _, _, _, _, _) = instClass(cache, env, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       dae = InstUtil.reEvaluateInitialIfEqns(cache, env, dae, true)
-                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
+                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraphUtil.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cdef)
                       dae = DAE.DAE_LIST(list(DAE.COMP(pathstr, daeElts, source, cmt)))
@@ -237,9 +240,9 @@
            First, all the class definitions are added to the environment without
           modifications, and then the specified class is instantiated in the
           function instClassInProgram =#
-        function instantiateClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool = true #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instantiateClass(inCache::FCore.Cache, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, doSCodeDep::Bool = true #= Do SCode dependency (if the debug flag is also enabled) =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -256,9 +259,9 @@
          This is a function for instantiating partial 'top' classes.
          It does so by converting the partial class into a non partial class.
          Currently used by: MathCore.modelEquations, CevalScript.checkModel =#
-        function instantiatePartialClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instantiatePartialClass(inCache::FCore.Cache, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -293,7 +296,7 @@
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
                       cdecls = ListUtil.map1(cdecls, SCodeUtil.classSetPartial, SCode.NOT_PARTIAL())
-                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
+                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraphUtil.getScopePath(env))
                       (cache, env_2, ih, dae) = instClassInProgram(cache, env_1, ih, cdecls, path, source)
                     (cache, env_2, ih, dae)
                   end
@@ -306,7 +309,7 @@
                       cdef = SCodeUtil.classSetPartial(cdef, SCode.NOT_PARTIAL())
                       (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsynBuilder.emptyInstStore(), DAE.NOMOD(), makeTopComponentPrefix(env_2, n), cdef, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       pathstr = AbsynUtil.pathString(path)
-                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraph.getScopePath(env))
+                      source = ElementSource.addElementSourcePartOfOpt(DAE.emptyElementSource, FGraphUtil.getScopePath(env))
                       daeElts = DAEUtil.daeElements(dae)
                       cmt = SCodeUtil.getElementComment(cdef)
                       dae = DAE.DAE_LIST(list(DAE.COMP(pathstr, daeElts, source, cmt)))
@@ -330,12 +333,12 @@
           (outCache, outEnv, outIH, outDAElist)
         end
 
-        function makeTopComponentPrefix(inGraph::FGraph.Graph, inName::Absyn.Ident) ::Prefix.PrefixType
+        function makeTopComponentPrefix(inGraph::FGraphUtil.Graph, inName::Absyn.Ident) ::Prefix.PrefixType
               local outPrefix::Prefix.PrefixType
 
               local p::Absyn.Path
 
-               #= p := FGraph.joinScopePath(inGraph, Absyn.IDENT(inName));
+               #= p := FGraphUtil.joinScopePath(inGraph, Absyn.IDENT(inName));
                =#
                #= outPrefix := Prefix.PREFIX(Prefix.PRE(\"$i\", {}, {}, Prefix.NOCOMPPRE(), ClassInf.MODEL(p)), Prefix.CLASSPRE(SCode.VAR()));
                =#
@@ -344,9 +347,9 @@
         end
 
          #= Instantiates a specific top level class in a Program. =#
-        function instClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path, inSource::DAE.ElementSource) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDae::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -397,7 +400,7 @@
            o Initialize the class inference state machine
            o Instantiate all the elements and equations
            o Generate equations from the connection sets built during instantiation =#
-        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ClassInf.SMNode, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraphType}
+        function instClass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, ClassInf.SMNode, Option{SCode.Attributes}, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local optDerAttr::Option{SCode.Attributes}
               local outState::ClassInf.SMNode
@@ -405,7 +408,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local cache::FCore.Cache
 
@@ -461,9 +464,9 @@
                   end
 
                   (cache, env, ih, store, mod, pre, c && SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r, partialPrefix = partialPrefix, info = info), inst_dims, impl, callscope, graph, _)  => begin
-                      recursionDepthReached = listLength(FGraph.currentScope(env)) < Global.recursionDepthLimit
+                      recursionDepthReached = listLength(FGraphUtil.currentScope(env)) < Global.recursionDepthLimit
                       if ! recursionDepthReached
-                        scopeName = FGraph.printGraphPathStr(env)
+                        scopeName = FGraphUtil.printGraphPathStr(env)
                         strDepth = intString(Global.recursionDepthLimit)
                         Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(strDepth, scopeName), info)
                         fail()
@@ -473,8 +476,8 @@
                       notIsPartial = ! SCodeUtil.partialBool(partialPrefix)
                       isPartialFn = isFn && SCodeUtil.partialBool(partialPrefix)
                       @match true = notIsPartial || isPartialFn
-                      env_1 = FGraph.openScope(env, encflag, n, FGraph.restrictionToScopeType(r))
-                      ci_state = ClassInf.start(r, FGraph.getGraphName(env_1))
+                      env_1 = FGraphUtil.openScope(env, encflag, n, FGraphUtil.restrictionToScopeType(r))
+                      ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env_1))
                       csets = ConnectUtil.newSet(pre, inSets)
                       println("Inst.instClass 2: " + n)
                       (cache, env_3, ih, store, dae1, csets, ci_state_1, tys, bc_ty, oDA, equalityConstraint, graph) = instClassIn(cache, env_1, ih, store, mod, pre, ci_state, c, SCode.PUBLIC(), inst_dims, impl, callscope, graph, csets, NONE())
@@ -501,7 +504,7 @@
 
                   (_, env, _, _, _, _, SCode.CLASS(name = n), _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      Debug.trace("- Inst.instClass: " + n + " in env: " + FGraph.printGraphPathStr(env) + " failed\\n")
+                      Debug.trace("- Inst.instClass: " + n + " in env: " + FGraphUtil.printGraphPathStr(env) + " failed\\n")
                     fail()
                   end
                 end
@@ -517,14 +520,14 @@
           extending from basic types. See instBasictypeBaseclass.
           NOTE: This function should only be called from instBasictypeBaseclass.
           This is new functionality in Modelica v 2.2. =#
-        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, List{DAE.Var}, ClassInf.SMNode}
+        function instClassBasictype(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inClass::SCode.Element, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, DAE.Type, List{DAE.Var}, ClassInf.SMNode}
               local outState::ClassInf.SMNode
               local outTypeVars::List{DAE.Var} #= attributes of builtin types =#
               local outType::DAE.Type
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -557,8 +560,8 @@
                   local store::UnitAbsyn.InstStore
                 @match (inCache, inEnv, inIH, inStore, inMod, inPrefix, inClass, inInstDims, inImplicit, inCallingScope, inSets) begin
                   (cache, env, ih, store, mod, pre, c && SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r), inst_dims, impl, _, _)  => begin
-                      env_1 = FGraph.openScope(env, encflag, n, FGraph.restrictionToScopeType(r))
-                      ci_state = ClassInf.start(r, FGraph.getGraphName(env_1))
+                      env_1 = FGraphUtil.openScope(env, encflag, n, FGraphUtil.restrictionToScopeType(r))
+                      ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env_1))
                       c_1 = SCodeUtil.classSetPartial(c, SCode.NOT_PARTIAL())
                       (cache, env_3, ih, store, dae1, csets, ci_state_1, tys, bc_ty, _, _, _) = instClassIn(cache, env_1, ih, store, mod, pre, ci_state, c_1, SCode.PUBLIC(), inst_dims, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, inSets, NONE())
                       (cache, fq_class) = makeFullyQualifiedIdent(cache, env_3, n)
@@ -589,7 +592,7 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
+        function instClassIn(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -599,7 +602,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -635,10 +638,10 @@
 
                   SCode.CLASS(name = n, restriction = r, encapsulatedPrefix = encflag, prefixes = SCode.PREFIXES(innerOuter = io))  => begin
                       @match true = boolOr(AbsynUtil.isInnerOuter(io), AbsynUtil.isOnlyOuter(io))
-                      @match FCore.CL(status = FCore.CLS_INSTANCE(n)) = FNode.refData(FGraph.lastScopeRef(inEnv))
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
-                      env = FGraph.openScope(env, encflag, n, FGraph.restrictionToScopeType(r))
-                      ci_state = ClassInf.start(r, FGraph.getGraphName(env))
+                      @match FCore.CL(status = FCore.CLS_INSTANCE(n)) = FNode.refData(FGraphUtil.lastScopeRef(inEnv))
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
+                      env = FGraphUtil.openScope(env, encflag, n, FGraphUtil.restrictionToScopeType(r))
+                      ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env))
                       @match InnerOuter.INST_INNER(innerElement = SOME(c)) = InnerOuter.lookupInnerVar(inCache, env, inIH, inPrefix, n, io)
                       (cache, env, ih, store, ci_state, graph, csets, dae, tys, bc, oDA, equalityConstraint) = instClassIn2(inCache, env, inIH, inStore, inMod, inPrefix, ci_state, c, inVisibility, inInstDims, implicitInstantiation, inCallingScope, inGraph, inSets, instSingleCref)
                     (cache, env, ih, store, dae, csets, ci_state, tys, bc, oDA, equalityConstraint, graph)
@@ -646,7 +649,7 @@
 
                   SCode.CLASS(name = n, prefixes = SCode.PREFIXES(innerOuter = io))  => begin
                       @match true = boolOr(AbsynUtil.isInnerOuter(io), AbsynUtil.isOnlyOuter(io))
-                      n = FGraph.getInstanceOriginalName(inEnv, n)
+                      n = FGraphUtil.getInstanceOriginalName(inEnv, n)
                       @match InnerOuter.INST_INNER(innerElement = SOME(c)) = InnerOuter.lookupInnerVar(inCache, inEnv, inIH, inPrefix, n, io)
                       (cache, env, ih, store, ci_state, graph, csets, dae, tys, bc, oDA, equalityConstraint) = instClassIn2(inCache, inEnv, inIH, inStore, inMod, inPrefix, inState, c, inVisibility, inInstDims, implicitInstantiation, inCallingScope, inGraph, inSets, instSingleCref)
                     (cache, env, ih, store, dae, csets, ci_state, tys, bc, oDA, equalityConstraint, graph)
@@ -676,7 +679,7 @@
          generation of functions in implicit instanitation (according to
          *implicitInstantiation* boolean) can cause circular dependencies
          (e.g. if a function uses a constant in its body) =#
-        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraphType, sets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType, DAE.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint}
+        function instClassIn2(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuterTypes.InstHierarchy, store::UnitAbsyn.InstStore, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInst::Bool, callingScope::InstTypes.CallingScope, graph::ConnectionGraph.ConnectionGraphType, sets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType, DAE.Sets, DAE.DAElist, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint}
               local equalityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
               local ty::Option{DAE.Type}
@@ -750,7 +753,7 @@
                 InstHashTable.addToInstCache(cache_path, SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)), NONE())
               catch
                 @match true = Flags.isSet(Flags.FAILTRACE)
-                Debug.traceln("- Inst.instClassIn2 failed on class: " + SCodeUtil.elementName(cls) + " in environment: " + FGraph.printGraphPathStr(env))
+                Debug.traceln("- Inst.instClassIn2 failed on class: " + SCodeUtil.elementName(cls) + " in environment: " + FGraphUtil.printGraphPathStr(env))
                 fail()
               end
           (cache, env, ih, store, state, graph, sets, dae, vars, ty, optDerAttr, equalityConstraint)
@@ -790,7 +793,7 @@
           generation of functions in implicit instanitation (according to
           *implicitInstantiation* boolean) can cause circular dependencies
           (e.g. if a function uses a constant in its body) =#
-        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
+        function instClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, implicitInstantiation::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -800,7 +803,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1390,7 +1393,7 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
+        function partialInstClassIn(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuterTypes.InstHierarchy, mod::DAE.Mod, prefix::Prefix.PrefixType, state::ClassInf.SMNode, cls::SCode.Element, visibility::SCode.Visibility, instDims::List{Any #= <:List{<:DAE.Dimension} =#}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local vars::List{DAE.Var}
 
 
@@ -1432,7 +1435,7 @@
                #=  Check that we don't have an instantiation loop.
                =#
               if numIter >= Global.recursionDepthLimit
-                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(String(Global.recursionDepthLimit), FGraph.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
+                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(String(Global.recursionDepthLimit), FGraphUtil.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
                 fail()
               end
                #=  Instantiate the class and add it to the cache.
@@ -1447,7 +1450,7 @@
                 InstHashTable.addToInstCache(cache_path, NONE(), SOME(InstHashTable.FUNC_partialInstClassIn(inputs, outputs)))
               catch
                 @match true = Flags.isSet(Flags.FAILTRACE)
-                Debug.traceln("- Inst.partialInstClassIn failed on class: " + SCodeUtil.elementName(cls) + " in environment: " + FGraph.printGraphPathStr(env))
+                Debug.traceln("- Inst.partialInstClassIn failed on class: " + SCodeUtil.elementName(cls) + " in environment: " + FGraphUtil.printGraphPathStr(env))
                 fail()
               end
           (cache, env, ih, state, vars)
@@ -1456,10 +1459,10 @@
          #= This function is used when instantiating classes in lookup of other classes.
           The only work performed by this function is to instantiate local classes and
           inherited classes. =#
-        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
+        function partialInstClassIn_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, partialInst::Bool, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local outVars::List{DAE.Var} = nil
               local outState::ClassInf.SMNode = inState
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -1519,7 +1522,7 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
+        function instClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, store::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1529,7 +1532,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1541,7 +1544,7 @@
         This function will try to instantiate the
         class definition as a it would extend a basic
         type =#
-        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
+        function instClassdefBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1551,7 +1554,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1660,7 +1663,7 @@
           are concatenated to produce the result.
           The last two arguments are the same as for instClassIn:
           implicit instantiation and implicit package/function instantiation. =#
-        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
+        function instClassdef2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod2::DAE.Mod, inPrefix3::Prefix.PrefixType, inState5::ClassInf.SMNode, className::String, inClassDef6::SCode.ClassDef, inRestriction7::SCode.Restriction, inVisibility::SCode.Visibility, inPartialPrefix::SCode.Partial, inEncapsulatedPrefix::SCode.Encapsulated, inInstDims9::List{Any #= <:List{<:DAE.Dimension} =#}, inBoolean10::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, instSingleCref::Option{<:DAE.ComponentRef}, comment::SCode.Comment, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, Option{DAE.Type}, Option{SCode.Attributes}, DAE.EqualityConstraint, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outEqualityConstraint::DAE.EqualityConstraint
               local optDerAttr::Option{SCode.Attributes}
@@ -1670,7 +1673,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -1805,7 +1808,7 @@
                       case (cache,env,ih,store,mods,pre,csets,ci_state,className,inClassDef6,
                             re,vis,_,_,inst_dims,impl,_,graph,instSingleCref,info,stopInst)
                         equation
-                           fprintln(Flags.INST_TRACE, \"ICD BEGIN: \" + FGraph.printGraphPathStr(env) + \" cn:\" + className + \" mods: \" + Mod.printModStr(mods));
+                           fprintln(Flags.INST_TRACE, \"ICD BEGIN: \" + FGraphUtil.printGraphPathStr(env) + \" cn:\" + className + \" mods: \" + Mod.printModStr(mods));
                         then
                           fail();*/ =#
                    #=  This rule describes how to instantiate a class definition
@@ -1847,7 +1850,7 @@
                       els = InstUtil.extractConstantPlusDeps(els, instSingleCref, nil, className)
                       (cdefelts, extendsclasselts, extendselts, compelts) = InstUtil.splitElts(els)
                       extendselts = SCodeInstUtil.addRedeclareAsElementsToExtends(extendselts, ListUtil.select(els, SCodeUtil.isRedeclareElement))
-                      (cache, env1, ih) = InstUtil.addClassdefsToEnv(cache, env, ih, pre, cdefelts, impl, SOME(mods), FGraph.isEmptyScope(env))
+                      (cache, env1, ih) = InstUtil.addClassdefsToEnv(cache, env, ih, pre, cdefelts, impl, SOME(mods), FGraphUtil.isEmptyScope(env))
                       (cache, env2, ih, emods, extcomps, eqs2, initeqs2, alg2, initalg2, comments) = InstExtends.instExtendsAndClassExtendsList(cache, env1, ih, mods, pre, extendselts, extendsclasselts, els, ci_state, className, impl, false) #= 2. EXTENDS Nodes inst_extends_list only flatten inhteritance structure. It does not perform component instantiations. =#
                       compelts_1 = InstUtil.addNomod(compelts) #= Problem. Modifiers on inherited components are unelabed, loosing their
                                         type information. This will not work, since the modifier type
@@ -1881,14 +1884,14 @@
                       mods = checkMods
                       (cache, env3, ih) = InstUtil.addComponentsToEnv(cache, env2, ih, mods, pre, ci_state, compelts_1, impl)
                       compelts_2_elem = ListUtil.map(compelts_1, Util.tuple21)
-                      InstUtil.matchModificationToComponents(compelts_2_elem, checkMods, FGraph.printGraphPathStr(env3))
+                      InstUtil.matchModificationToComponents(compelts_2_elem, checkMods, FGraphUtil.printGraphPathStr(env3))
                       (comp_cond, compelts_1) = ListUtil.splitOnTrue(compelts_1, InstUtil.componentHasCondition)
                       compelts_2 = listAppend(compelts_1, comp_cond)
                       (smCompCrefs, smInitialCrefs) = InstStateMachineUtil.getSMStatesInContext(eqs_1, pre)
                       ih = ListUtil.fold(smCompCrefs, InnerOuter.updateSMHierarchy, ih)
                       (cache, env5, ih, store, dae1, csets, ci_state2, vars, graph, domainFieldsLst) = instElementList(cache, env3, ih, store, mods, pre, ci_state1, compelts_2, inst_dims, impl, callscope, graph, csets, true)
                       zero_dims = InstUtil.instDimsHasZeroDims(inst_dims)
-                      elementSource = ElementSource.createElementSource(info, FGraph.getScopePath(env3), pre)
+                      elementSource = ElementSource.createElementSource(info, FGraphUtil.getScopePath(env3), pre)
                       csets1 = ConnectUtil.addConnectorVariablesFromDAE(zero_dims, ci_state1, pre, vars, info, elementSource, csets)
                       (cache, eqs_1) = InstUtil.reorderConnectEquationsExpandable(cache, env5, eqs_1)
                       if intEq(Flags.getConfigEnum(Flags.GRAMMAR), Flags.PDEMODELICA)
@@ -1945,10 +1948,10 @@
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
                       @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = (@match SCode.R_ENUMERATION() = r)) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
-                      env3 = FGraph.openScope(cenv, enc2, cn2, SOME(FCore.CLASS_SCOPE()))
-                      ci_state2 = ClassInf.start(r, FGraph.getGraphName(env3))
-                      new_ci_state = ClassInf.start(r, FGraph.getGraphName(env3))
-                      (cache, cenv_2, _, _, _, _, _, _, _, _, _, _) = instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ci_state2, c, SCode.PUBLIC(), nil, false, callscope, ConnectionGraph.EMPTY, DAE.emptySet, NONE())
+                      env3 = FGraphUtil.openScope(cenv, enc2, cn2, SOME(FCore.CLASS_SCOPE()))
+                      ci_state2 = ClassInf.start(r, FGraphUtil.getGraphName(env3))
+                      new_ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env3))
+                      (cache, cenv_2, _, _, _, _, _, _, _, _, _, _) = instClassIn(cache, env3, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ci_state2, c, SCode.PUBLIC(), nil, false, callscope, ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                       (cache, mod_1) = Mod.elabMod(cache, cenv_2, ih, pre, mod, impl, Mod.DERIVED(cn), info)
                       mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
@@ -1956,7 +1959,7 @@
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope. =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -1967,10 +1970,10 @@
                       valid_connector = ConnectUtil.checkShortConnectorDef(ci_state, DA, info)
                       Mutable.update(stopInst, ! valid_connector)
                       @match true = valid_connector
-                      cenv_2 = FGraph.openScope(cenv, enc2, cn2, FGraph.classInfToScopeType(ci_state))
-                      new_ci_state = ClassInf.start(r, FGraph.getGraphName(cenv_2))
+                      cenv_2 = FGraphUtil.openScope(cenv, enc2, cn2, FGraphUtil.classInfToScopeType(ci_state))
+                      new_ci_state = ClassInf.start(r, FGraphUtil.getGraphName(cenv_2))
                       mod = InstUtil.chainRedeclares(mods, mod)
-                      (parentEnv, _) = FGraph.stripLastScopeRef(env)
+                      (parentEnv, _) = FGraphUtil.stripLastScopeRef(env)
                       (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, impl, Mod.DERIVED(cn), info)
                       mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
@@ -1979,7 +1982,7 @@
                       _ = AbsynUtil.getArrayDimOptAsList(ad)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2008,18 +2011,18 @@
                         end
                       end
                         mod = InstUtil.chainRedeclares(mods, mod)
-                        (parentEnv, _) = FGraph.stripLastScopeRef(env)
+                        (parentEnv, _) = FGraphUtil.stripLastScopeRef(env)
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
                         mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, parentClassEnv, ih, store, mods_1, pre, ci_state, className, classDefParent, re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       else
                         mod = InstUtil.chainRedeclares(mods, mod)
-                        (parentEnv, _) = FGraph.stripLastScopeRef(env)
+                        (parentEnv, _) = FGraphUtil.stripLastScopeRef(env)
                         (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, false, Mod.DERIVED(cn), info)
                         mods_1 = Mod.myMerge(mods, mod_1, className)
                         (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph) = instClassdef2(cache, env, ih, store, mods_1, pre, ci_state, className, SCode.PARTS(list(SCode.EXTENDS(cn, vis, SCode.NOMOD(), NONE(), info)), nil, nil, nil, nil, nil, nil, NONE()), re, vis, partialPrefix, encapsulatedPrefix, inst_dims, impl, callscope, graph, inSets, instSingleCref, comment, info, stopInst)
-                        oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                        oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       end
                     (cache, env, ih, store, dae, csets, ci_state, vars, bc, oDA, eqConstraint, graph)
                   end
@@ -2028,11 +2031,11 @@
                       @match false = Mutable.access(stopInst)
                       @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
                       @match false = InstUtil.checkDerivedRestriction(re, r, cn2)
-                      cenv_2 = FGraph.openScope(cenv, enc2, className, FGraph.classInfToScopeType(ci_state))
-                      new_ci_state = ClassInf.start(r, FGraph.getGraphName(cenv_2))
+                      cenv_2 = FGraphUtil.openScope(cenv, enc2, className, FGraphUtil.classInfToScopeType(ci_state))
+                      new_ci_state = ClassInf.start(r, FGraphUtil.getGraphName(cenv_2))
                       c = SCodeUtil.setClassName(className, c)
                       mod = InstUtil.chainRedeclares(mods, mod)
-                      (parentEnv, _) = FGraph.stripLastScopeRef(env)
+                      (parentEnv, _) = FGraphUtil.stripLastScopeRef(env)
                       (cache, mod_1) = Mod.elabMod(cache, parentEnv, ih, pre, mod, impl, Mod.DERIVED(cn), info)
                       mods_1 = Mod.myMerge(mods, mod_1, className)
                       eq = Mod.modEquation(mods_1) #= instantiate array dimensions =#
@@ -2040,7 +2043,7 @@
                       inst_dims_1 = ListUtil.appendLastList(inst_dims, dims)
                       (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph) = instClassIn(cache, cenv_2, ih, store, mods_1, pre, new_ci_state, c, vis, inst_dims_1, impl, callscope, graph, inSets, instSingleCref) #= instantiate class in opened scope.  =#
                       ClassInf.assertValid(ci_state_1, re, info) #= Check for restriction violations =#
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env_2, ih, store, dae, csets_1, ci_state_1, vars, bc, oDA, eqConstraint, graph)
                   end
 
@@ -2059,7 +2062,7 @@
                       ty = listHead(tys)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METALIST(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_LIST(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2070,7 +2073,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAOPTION(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_OPTION(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2081,7 +2084,7 @@
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = ListUtil.map(tys, Types.boxIfUnboxedType)
                       bc = SOME(DAE.T_METATUPLE(tys))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_TUPLE(Absyn.IDENT("")), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2092,7 +2095,7 @@
                       @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAARRAY(ty))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_ARRAY(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2101,7 +2104,7 @@
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
                       (cache, _, ih, _, csets, oDA) = instClassDefHelper(cache, env, ih, nil, pre, inst_dims, impl, nil, inSets, info)
                       bc = SOME(DAE.T_METAPOLYMORPHIC(className))
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                     (cache, env, ih, store, DAE.emptyDae, csets, ClassInf.META_POLYMORPHIC(Absyn.IDENT(className)), nil, bc, oDA, NONE(), graph)
                   end
 
@@ -2133,7 +2136,7 @@
                         fail()
                       end
                       ty = Types.setTypeVariables(ty, tys)
-                      oDA = SCodeUtil.myMergeAttributes(DA, oDA)
+                      oDA = SCodeUtil.mergeAttributes(DA, oDA)
                       bc = SOME(ty)
                     (cache, env, ih, store, DAE.emptyDae, csets, new_ci_state, nil, bc, oDA, NONE(), graph)
                   end
@@ -2157,7 +2160,7 @@
                       @match false = Mutable.access(stopInst)
                       @shouldFail (_, _, _) = Lookup.lookupClass(cache, env, cn)
                       cns = AbsynUtil.pathString(cn)
-                      scope_str = FGraph.printGraphPathStr(env)
+                      scope_str = FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(cns, scope_str), info)
                     fail()
                   end
@@ -2168,14 +2171,14 @@
                       Debug.trace("- Inst.instClassdef DERIVED( ")
                       Debug.trace(AbsynUtil.pathString(cn))
                       Debug.trace(") lookup failed\\n ENV:")
-                      Debug.trace(FGraph.printGraphStr(env))
+                      Debug.trace(FGraphUtil.printGraphStr(env))
                     fail()
                   end
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Inst.instClassdef failed")
-                        s = FGraph.printGraphPathStr(inEnv)
+                        s = FGraphUtil.printGraphPathStr(inEnv)
                         Debug.traceln("  class :" + s)
                       fail()
                   end
@@ -2183,7 +2186,7 @@
               end
                #= /* ----------------------- */ =#
                #= /* If the class is derived from a class that can not be found in the environment, this rule prints an error message. */ =#
-               #=  Debug.traceln(\"  Env :\" + FGraph.printGraphStr(env));
+               #=  Debug.traceln(\"  Env :\" + FGraphUtil.printGraphStr(env));
                =#
           (outCache, outEnv, outIH, outStore, outDae, outSets, outState, outTypesVarLst, oty, optDerAttr, outEqualityConstraint, outGraph)
         end
@@ -2224,11 +2227,11 @@
 
          #= Function: instClassDefHelper
          MetaModelica extension. KS TODO: Document this function!!!! =#
-        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.PrefixType, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::DAE.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{DAE.Type}, DAE.Sets, Option{SCode.Attributes}}
+        function instClassDefHelper(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inSpecs::List{<:Absyn.TypeSpec}, inPre::Prefix.PrefixType, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImpl::Bool, accTypes::List{<:DAE.Type}, inSets::DAE.Sets, inInfo::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{DAE.Type}, DAE.Sets, Option{SCode.Attributes}}
               local outAttr::Option{SCode.Attributes}
               local outSets::DAE.Sets
               local outType::List{DAE.Type}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2292,12 +2295,12 @@
           end RealSignal;
           Such classes can not have any other components,
           and can only inherit one basic type. =#
-        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{Any #= <:List{<:DAE.Dimension} =#}, className::String, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}}
+        function instBasictypeBaseclass(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{Any #= <:List{<:DAE.Dimension} =#}, className::String, info::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#) ::Tuple{FCore.Cache, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, Option{DAE.Type}, List{DAE.Var}}
               local outTypeVars::List{DAE.Var}
               local outTypesTypeOption::Option{DAE.Type}
               local outDae::DAE.DAElist #= contain functions =#
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outCache::FCore.Cache
 
               (outCache, outIH, outStore, outDae, outTypesTypeOption, outTypeVars) = begin
@@ -2387,7 +2390,7 @@
         Author: BZ, 2009-02
         Helper function for instBasictypeBaseClass
         Handles the fail case rollbacks/deleteCheckpoint of errors. =#
-        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuter.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{Any #= <:List{<:DAE.Dimension} =#}, className::String, inInfo::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#)
+        function instBasictypeBaseclass2(inCache::FCore.Cache, inEnv1::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, store::UnitAbsyn.InstStore, inSCodeElementLst2::List{<:SCode.Element}, inSCodeElementLst3::List{<:SCode.Element}, inMod4::DAE.Mod, inInstDims5::List{Any #= <:List{<:DAE.Dimension} =#}, className::String, inInfo::SourceInfo, stopInst::MutableType #= {<:Bool} =# #= prevent instantiation of classes adding components to primary types =#)
               _ = begin
                   local m_1::DAE.Mod
                   local mods::DAE.Mod
@@ -2417,7 +2420,7 @@
                       b1 = Types.basicType(ty)
                       b2 = Types.arrayType(ty)
                       @match true = boolOr(b1, b2)
-                      classname = FGraph.printGraphPathStr(env)
+                      classname = FGraphUtil.printGraphPathStr(env)
                       ErrorExt.rollBack("instBasictypeBaseclass2")
                       Error.addSourceMessage(Error.INHERIT_BASIC_WITH_COMPS, list(classname), inInfo)
                       Mutable.update(stopInst, true)
@@ -2437,10 +2440,10 @@
 
          #= This function is used by partialInstClassIn for instantiating local class
            definitions and inherited class definitions only. =#
-        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
+        function partialInstClassdef(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inClass::SCode.Element #= The class this definition comes from. =#, inClassDef::SCode.ClassDef, inVisibility::SCode.Visibility, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, numIter::ModelicaInteger) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, ClassInf.SMNode, List{DAE.Var}}
               local outVars::List{DAE.Var}
               local outState::ClassInf.SMNode
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2483,7 +2486,7 @@
                       extends_els = SCodeInstUtil.addRedeclareAsElementsToExtends(extends_els, ListUtil.select(inClassDef.elementLst, SCodeUtil.isRedeclareElement))
                        #=  Classes and imports are added to env.
                        =#
-                      (outCache, outEnv, outIH) = InstUtil.addClassdefsToEnv(inCache, inEnv, inIH, inPrefix, cdef_els, true, SOME(inMod), FGraph.isEmptyScope(inEnv))
+                      (outCache, outEnv, outIH) = InstUtil.addClassdefsToEnv(inCache, inEnv, inIH, inPrefix, cdef_els, true, SOME(inMod), FGraphUtil.isEmptyScope(inEnv))
                        #=  Inherited elements are added to env.
                        =#
                       (outCache, outEnv, outIH, emods, ext_comps) = InstExtends.instExtendsAndClassExtendsList(outCache, outEnv, outIH, inMod, inPrefix, extends_els, class_ext_els, inClassDef.elementLst, inState, class_name, true, true)
@@ -2521,7 +2524,7 @@
                         @match (outCache, (@match SCode.CLASS() = cls), cenv) = Lookup.lookupClass(inCache, inEnv, class_path, SOME(info))
                       catch
                         class_name = AbsynUtil.pathString(class_path)
-                        scope_str = FGraph.printGraphPathStr(inEnv)
+                        scope_str = FGraphUtil.printGraphPathStr(inEnv)
                         Error.addSourceMessageAndFail(Error.LOOKUP_ERROR, list(class_name, scope_str), info)
                       end
                       @match SCode.CLASS(name = class_name, encapsulatedPrefix = enc, restriction = der_re) = cls
@@ -2530,7 +2533,7 @@
                       smod = InstUtil.chainRedeclares(inMod, class_mod)
                        #=  The mod is elaborated in the parent of this class.
                        =#
-                      parent_env = FGraph.stripLastScopeRef(inEnv)
+                      parent_env = FGraphUtil.stripLastScopeRef(inEnv)
                       (outCache, mod) = Mod.elabMod(outCache, parent_env, inIH, inPrefix, smod, false, Mod.DERIVED(class_path), info)
                       mod = Mod.myMerge(inMod, mod, class_name)
                       if has_dims && ! is_basic_type
@@ -2543,19 +2546,19 @@
                       end
                       if is_basic_type || has_dims
                         scope_ty = if is_basic_type
-                              FGraph.restrictionToScopeType(der_re)
+                              FGraphUtil.restrictionToScopeType(der_re)
                             else
-                              FGraph.classInfToScopeType(inState)
+                              FGraphUtil.classInfToScopeType(inState)
                             end
-                        cenv = FGraph.openScope(cenv, enc, class_name, scope_ty)
-                        outState = ClassInf.start(der_re, FGraph.getGraphName(cenv))
+                        cenv = FGraphUtil.openScope(cenv, enc, class_name, scope_ty)
+                        outState = ClassInf.start(der_re, FGraphUtil.getGraphName(cenv))
                         (outCache, outEnv, outIH, outState, outVars) = partialInstClassIn(outCache, cenv, inIH, mod, inPrefix, outState, cls, inVisibility, inst_dims, numIter)
                       else
                         cdef = SCode.PARTS(list(SCode.EXTENDS(class_path, inVisibility, SCode.NOMOD(), NONE(), info)), nil, nil, nil, nil, nil, nil, NONE())
                         (outCache, outEnv, outIH, outState, outVars) = partialInstClassdef(outCache, inEnv, inIH, mod, inPrefix, inState, inClass, cdef, inVisibility, inInstDims, numIter)
                       end
                       if SCodeUtil.isPartial(cls)
-                        outEnv = FGraph.makeScopePartial(inEnv)
+                        outEnv = FGraphUtil.makeScopePartial(inEnv)
                       end
                     (outCache, outEnv, outIH, outState, outVars)
                   end
@@ -2565,7 +2568,7 @@
         end
 
          #= Instantiates a list of elements. =#
-        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldsLst}
+        function instElementList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElements::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplInst::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldsLst}
               local domainFieldsListOut::InstUtil.DomainFieldsLst = nil
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var}
@@ -2573,7 +2576,7 @@
               local outSets::DAE.Sets = inSets
               local outDae::DAE.DAElist
               local outStore::UnitAbsyn.InstStore = inStore
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -2593,7 +2596,7 @@
               cache = InstUtil.pushStructuralParameters(inCache)
                #=  Sort elements based on their dependencies.
                =#
-              el = inElements # InstUtil.sortElementList(inElements, inEnv, FGraph.inFunctionScope(inEnv))
+              el = inElements # InstUtil.sortElementList(inElements, inEnv, FGraphUtil.inFunctionScope(inEnv))
                #=  adrpo: MAKE SURE inner objects ARE FIRST in the list for instantiation!
                =#
               el = InstUtil.sortInnerFirstTplLstElementMod(el)
@@ -2688,7 +2691,7 @@
           outEqual
         end
 
-        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
+        function instElement2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets, inStopOnError::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, List{DAE.Element}, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
               local outGraph::ConnectionGraph.ConnectionGraphType = inGraph
               local outVars::List{DAE.Var} = nil
@@ -2696,7 +2699,7 @@
               local outSets::DAE.Sets = inSets
               local outDae::List{DAE.Element} = nil
               local outStore::UnitAbsyn.InstStore = inStore
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2777,7 +2780,7 @@
                 isDeleted = ! cond_val
                 if isDeleted == true
                   var = DAE.TYPES_VAR(el_name, DAE.dummyAttrVar, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE())
-                  env = FGraph.updateComp(env, var, FCore.VAR_DELETED(), FGraph.emptyGraph)
+                  env = FGraphUtil.updateComp(env, var, FCore.VAR_DELETED(), FGraphUtil.emptyGraph)
                 end
               else
                 isDeleted = false
@@ -2802,7 +2805,7 @@
          #=
           This monster function instantiates an element of a class definition.  An
           element is either a class definition, a variable, or an import clause. =#
-        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
+        function instElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inUnitStore::UnitAbsyn.InstStore, inMod::DAE.Mod, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inElement::Tuple{<:SCode.Element, DAE.Mod}, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, inImplicit::Bool, inCallingScope::InstTypes.CallingScope, inGraph::ConnectionGraph.ConnectionGraphType, inSets::DAE.Sets) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, DAE.DAElist, DAE.Sets, ClassInf.SMNode, List{DAE.Var}, ConnectionGraph.ConnectionGraphType, InstUtil.DomainFieldOpt}
               local outFieldDomOpt::InstUtil.DomainFieldOpt = NONE()
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outVars::List{DAE.Var}
@@ -2810,7 +2813,7 @@
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
               local outUnitStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -2908,7 +2911,7 @@
 
                   (_, _, _, _, _, _, _, (cls && SCode.CLASS(__), cmod), _, _, _, _, _)  => begin
                       if ! Mod.isEmptyMod(cmod)
-                        env = FGraph.updateClass(inEnv, cls, inPrefix, cmod, FCore.CLS_UNTYPED(), inEnv)
+                        env = FGraphUtil.updateClass(inEnv, cls, inPrefix, cmod, FCore.CLS_UNTYPED(), inEnv)
                       else
                         env = inEnv
                       end
@@ -2927,7 +2930,7 @@
                           else
                             true
                           end
-                      m = SCodeUtil.myMergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      m = SCodeUtil.mergeModifiers(m, SCodeUtil.getConstrainedByModifiers(prefixes))
                       if SCodeUtil.finalBool(final_prefix)
                         m = InstUtil.traverseModAddFinal(m)
                       end
@@ -2975,7 +2978,7 @@
                         end
                         mod_1 = Mod.myMerge(mod_1, cls_mod, name)
                       end
-                      attr = SCodeUtil.myMergeAttributesFromClass(attr, cls)
+                      attr = SCodeUtil.mergeAttributesFromClass(attr, cls)
                       inst_dims = ListUtil.appendElt(nil, inst_dims)
                       (cache, mod) = Mod.updateMod(cache, env2, ih, pre, mod, impl, info)
                       (cache, mod_1) = Mod.updateMod(cache, env2, ih, pre, mod_1, impl, info)
@@ -3008,7 +3011,7 @@
                       dae_attr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefixes)
                       (ty, _) = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
                       new_var = DAE.TYPES_VAR(name, dae_attr, ty, binding, NONE())
-                      env = FGraph.updateComp(env2, new_var, FCore.VAR_DAE(), comp_env)
+                      env = FGraphUtil.updateComp(env2, new_var, FCore.VAR_DAE(), comp_env)
                       vars = if already_declared
                             nil
                           else
@@ -3042,7 +3045,7 @@
                       dae_attr = DAEUtil.translateSCodeAttrToDAEAttr(attr, prefixes)
                       (ty, _) = Types.traverseType(ty, 1, Types.setIsFunctionPointer)
                       new_var = DAE.TYPES_VAR(name, dae_attr, ty, binding, NONE())
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_DAE(), comp_env)
+                      env = FGraphUtil.updateComp(env, new_var, FCore.VAR_DAE(), comp_env)
                       vars = if already_declared
                             nil
                           else
@@ -3060,7 +3063,7 @@
                   (cache, env, _, _, _, pre, ci_state, (SCode.COMPONENT(name = name, attributes = SCode.ATTR(variability = vt), typeSpec = Absyn.TPATH(t, _), info = info), _), _, _, _, _, _)  => begin
                       @shouldFail (_, _, _) = Lookup.lookupClass(cache, env, t)
                       s = AbsynUtil.pathString(t)
-                      scope_str = FGraph.printGraphPathStr(env)
+                      scope_str = FGraphUtil.printGraphPathStr(env)
                       pre = PrefixUtil.prefixAdd(name, nil, nil, pre, vt, ci_state, info)
                       ns = PrefixUtil.printPrefixStrIgnoreNoPre(pre)
                       Error.addSourceMessage(Error.LOOKUP_ERROR_COMPNAME, list(s, scope_str, ns), info)
@@ -3072,7 +3075,7 @@
                   (_, env, _, _, _, _, _, (comp, _), _, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.instElement failed: " + SCodeDump.unparseElementStr(comp, SCodeDump.defaultOptions))
-                      Debug.traceln("  Scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
@@ -3127,9 +3130,9 @@
          #= never fail and *NEVER* display any error messages as this function
          prints non-true error messages and even so instElementList dependency
          analysis might work fine and still instantiate. =#
-        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
+        function updateCompeltsMods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -3161,9 +3164,9 @@
           This function updates component modifiers to typed modifiers.
           Typed modifiers are needed  to myMerge modifiers and to be able to
           fully instantiate a component. =#
-        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
+        function updateCompeltsMods_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inComponents::List{<:Tuple{<:SCode.Element, DAE.Mod}}, inState::ClassInf.SMNode, inBoolean::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, List{Tuple{SCode.Element, DAE.Mod}}}
               local outComponents::List{Tuple{SCode.Element, DAE.Mod}}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -3275,10 +3278,10 @@
          #= This function takes a DAE.Mod and an SCode.Element and if the modification
            contains a redeclare of that element, the type is changed and an updated
            element is returned. =#
-        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, SCode.Element, DAE.Mod}
+        function redeclareType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::DAE.Mod, inElement::SCode.Element, inPrefix::Prefix.PrefixType, inState::ClassInf.SMNode, inImpl::Bool, inCmod::DAE.Mod) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, SCode.Element, DAE.Mod}
               local outMod::DAE.Mod = DAE.NOMOD()
               local outElement::SCode.Element = inElement
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -3409,8 +3412,8 @@
           component can be instantiated fully and the type of the component can be
           determined. The type is added/updated to the environment such that other
           components can use it when they are instantiated. =#
-        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy}
-              local outIH::InnerOuter.InstHierarchy = inIH
+        function updateComponentsInEnv(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy}
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = env
               local outCache::FCore.Cache = cache
 
@@ -3446,9 +3449,9 @@
         end
 
          #= Helper function to updateComponentsInEnv. Does the work for one variable. =#
-        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}}
+        function updateComponentInEnv(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, cref::Absyn.ComponentRef, inCIState::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable}, currentCref::Option{<:Absyn.ComponentRef} #= The cref that caused this call to updateComponentInEnv. =#) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, Option{HashTable5.HashTable}}
               local outUpdatedComps::Option{HashTable5.HashTable}
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -3562,7 +3565,7 @@
                       id = AbsynUtil.crefFirstIdent(cref)
                       @match true = stringEq(name, id)
                       (cl, _) = Lookup.lookupClassLocal(env, name)
-                      env = FGraph.updateClass(env, SCodeUtil.myMergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
+                      env = FGraphUtil.updateClass(env, SCodeUtil.mergeWithOriginal(mod.element, cl), pre, mod, FCore.CLS_UNTYPED(), env)
                       updatedComps = getUpdatedCompsHashTable(inUpdatedComps)
                       updatedComps = BaseHashTable.add((cref, 0), updatedComps)
                     (cache, env, ih, SOME(updatedComps))
@@ -3604,7 +3607,7 @@
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Inst.updateComponentInEnv failed, cref = " + Dump.printComponentRefStr(cref))
                       Debug.traceln(" mods: " + Mod.printModStr(mod))
-                      Debug.traceln(" scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln(" scope: " + FGraphUtil.printGraphPathStr(env))
                       Debug.traceln(" prefix: " + PrefixUtil.printPrefixStr(pre))
                     fail()
                   end
@@ -3624,7 +3627,7 @@
                =#
                #=  update frame in env!
                =#
-               #=  fprintln(Flags.INST_TRACE, \"updateComponentInEnv: found a redeclaration that only changes bindings and prefixes: NEW:\\n\" + SCodeDump.unparseElementStr(compNew) + \" in env:\" + FGraph.printGraphPathStr(env));
+               #=  fprintln(Flags.INST_TRACE, \"updateComponentInEnv: found a redeclaration that only changes bindings and prefixes: NEW:\\n\" + SCodeDump.unparseElementStr(compNew) + \" in env:\" + FGraphUtil.printGraphPathStr(env));
                =#
                #=  update the mod then give it to
                =#
@@ -3634,7 +3637,7 @@
                =#
                #= Debug.traceln(\"got class \" + SCodeDump.printClassStr(cl));
                =#
-               #= print(\"updateComponentInEnv: NEW ENV:\\n\" + FGraph.printGraphStr(env_1) + \"\\n\");
+               #= print(\"updateComponentInEnv: NEW ENV:\\n\" + FGraphUtil.printGraphStr(env_1) + \"\\n\");
                =#
                #=  redeclare class!
                =#
@@ -3656,16 +3659,16 @@
                =#
                #=  report an error!
                =#
-               #= print(\"Env:\\n\" + FGraph.printGraphStr(env) + \"\\n\");
+               #= print(\"Env:\\n\" + FGraphUtil.printGraphStr(env) + \"\\n\");
                =#
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
          #=  Helper function, checks if the component was already instantiated.
           If it was, don't do it again. =#
-        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable}
+        function updateComponentInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, cenv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, path::Absyn.Path, name::String, ad::List{<:Absyn.Subscript}, cl::SCode.Element, attr::SCode.Attributes, inPrefixes::SCode.Prefixes, dattr::DAE.Attributes, info::SourceInfo, m::SCode.Mod, cmod::DAE.Mod, mod::DAE.Mod, cref::Absyn.ComponentRef, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, HashTable5.HashTable}
               local outUpdatedComps::HashTable5.HashTable
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -3680,9 +3683,9 @@
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
-        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.SMNode, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, HashTable5.HashTable}
+        function updateComponentInEnv2_dispatch(inCache::FCore.Cache, inEnv::FCore.Graph, inClsEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inPath::Absyn.Path, inName::String, inSubscripts::List{<:Absyn.Subscript}, inClass::SCode.Element, inAttr::SCode.Attributes, inPrefixes::SCode.Prefixes, inDAttr::DAE.Attributes, inInfo::SourceInfo, inSMod::SCode.Mod, inClsMod::DAE.Mod, inMod::DAE.Mod, inCref::Absyn.ComponentRef, inState::ClassInf.SMNode, inImpl::Bool, inUpdatedComps::HashTable5.HashTable) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, HashTable5.HashTable}
               local outUpdatedComps::HashTable5.HashTable = inUpdatedComps
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -3705,7 +3708,7 @@
               try
                 @match 1 = BaseHashTable.get(inCref, inUpdatedComps)
               catch
-                smod = SCodeUtil.myMergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
+                smod = SCodeUtil.mergeModifiers(inSMod, SCodeUtil.getConstrainedByModifiers(inPrefixes))
                 (outCache, mod1) = updateComponentInEnv3(outCache, outEnv, outIH, smod, inImpl, Mod.COMPONENT(inName), inInfo)
                 class_mod = Mod.lookupModificationP(inMod, inPath)
                 mod2 = Mod.myMerge(class_mod, mod1, inName)
@@ -3723,7 +3726,7 @@
                 (outCache, comp_env, outIH, _, _, _, ty) = InstVar.instVar(outCache, cls_env, outIH, UnitAbsyn.noStore, inState, mod, inPrefix, inName, cls, inAttr, inPrefixes, dims, nil, nil, inImpl, SCode.noComment, inInfo, ConnectionGraph.EMPTY, DAE.emptySet, outEnv)
                 (outCache, binding) = InstBinding.makeBinding(outCache, outEnv, inAttr, mod, ty, inPrefix, inName, inInfo)
                 var = DAE.TYPES_VAR(inName, inDAttr, ty, binding, NONE())
-                outEnv = FGraph.updateComp(outEnv, var, FCore.VAR_TYPED(), comp_env)
+                outEnv = FGraphUtil.updateComp(outEnv, var, FCore.VAR_TYPED(), comp_env)
                 outUpdatedComps = BaseHashTable.add((inCref, 1), outUpdatedComps)
               end
                #= comp_mod := Mod.lookupCompModification(inMod, inName);
@@ -3737,7 +3740,7 @@
           (outCache, outEnv, outIH, outUpdatedComps)
         end
 
-        function updateComponentInEnv3(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inMod::SCode.Mod, inImpl::Bool, inModScope::Mod.ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
+        function updateComponentInEnv3(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inMod::SCode.Mod, inImpl::Bool, inModScope::Mod.ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -3914,11 +3917,11 @@
                   end
 
                   (cache, env, s)  => begin
-                      r = FGraph.lastScopeRef(env)
+                      r = FGraphUtil.lastScopeRef(env)
                       @match false = FNode.isRefTop(r)
                       name = FNode.refName(r)
                       @match true = name == s
-                      @match SOME(path_2) = FGraph.getScopePath(env)
+                      @match SOME(path_2) = FGraphUtil.getScopePath(env)
                     (cache, AbsynUtil.makeFullyQualified(path_2))
                   end
 
@@ -4048,12 +4051,12 @@
 
          #= This is a utility used to do instantiation of list
           of things, collecting the result in another list. =#
-        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::DAE.Sets, inState::ClassInf.SMNode, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist, DAE.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
+        function instList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inSets::DAE.Sets, inState::ClassInf.SMNode, instFunc::InstFunc, inTypeALst::List{<:Type_a}, inBoolean::Bool, unrollForLoops::Bool #= we should unroll for loops if they are part of an algorithm in a model =#, inGraph::ConnectionGraph.ConnectionGraphType) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist, DAE.Sets, ClassInf.SMNode, ConnectionGraph.ConnectionGraphType}
               local outGraph::ConnectionGraph.ConnectionGraphType
               local outState::ClassInf.SMNode
               local outSets::DAE.Sets
               local outDae::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -4253,9 +4256,9 @@
         Instantiate a class, but _allways_ as inner class. This due to that we do not want flow equations equal to zero.
         Called from Interactive.mo, boschsection.
          =#
-        function instantiateBoschClass(inCache::FCore.Cache, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instantiateBoschClass(inCache::FCore.Cache, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDAElist::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -4312,9 +4315,9 @@
         end
 
          #= Helper function for instantiateBoschClass =#
-        function instBoschClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, DAE.DAElist}
+        function instBoschClassInProgram(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inProgram::SCode.Program, inPath::SCode.Path) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, DAE.DAElist}
               local outDae::DAE.DAElist
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -4387,10 +4390,10 @@
          But also instantiate the declared type, if any.
          If it fails (declarations of array dimensions using
          the size of itself) it will just remove the element. =#
-        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.SMNode, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, pre::Prefix.PrefixType, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}}
+        function removeSelfReferenceAndUpdate(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inStore::UnitAbsyn.InstStore, inRefs::List{<:Absyn.ComponentRef}, inRef::Absyn.ComponentRef, inPath::Absyn.Path, inState::ClassInf.SMNode, iattr::SCode.Attributes, inPrefixes::SCode.Prefixes, impl::Bool, inInstDims::List{Any #= <:List{<:DAE.Dimension} =#}, pre::Prefix.PrefixType, mods::DAE.Mod, scodeMod::SCode.Mod, info::SourceInfo) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, UnitAbsyn.InstStore, List{Absyn.ComponentRef}}
               local o1::List{Absyn.ComponentRef}
               local outStore::UnitAbsyn.InstStore
-              local outIH::InnerOuter.InstHierarchy
+              local outIH::InnerOuterTypes.InstHierarchy
               local outEnv::FCore.Graph
               local outCache::FCore.Cache
 
@@ -4445,7 +4448,7 @@
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
+                      env = FGraphUtil.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
@@ -4467,7 +4470,7 @@
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
+                      env = FGraphUtil.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
@@ -4489,7 +4492,7 @@
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
+                      env = FGraphUtil.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
@@ -4510,7 +4513,7 @@
                       io = SCodeUtil.prefixesInnerOuter(inPrefixes)
                       vis = SCodeUtil.prefixesVisibility(inPrefixes)
                       new_var = DAE.TYPES_VAR(n, DAE.ATTR(DAEUtil.toConnectorTypeNoState(ct), prl1, var1, dir, io, vis), ty, DAE.UNBOUND(), NONE())
-                      env = FGraph.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
+                      env = FGraphUtil.updateComp(env, new_var, FCore.VAR_TYPED(), compenv)
                       ErrorExt.rollBack("Inst.removeSelfReferenceAndUpdate")
                     (cache, env, ih, store, cl2)
                   end
@@ -4531,9 +4534,9 @@
 
          #= author: PA
           Help function to updateComponentsInEnv. =#
-        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Option{HashTable5.HashTable}}
+        function updateComponentsInEnv2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, mod::DAE.Mod, crefs::List{<:Absyn.ComponentRef}, ci_state::ClassInf.SMNode, impl::Bool, inUpdatedComps::Option{<:HashTable5.HashTable} = NONE(), currentCref::Option{<:Absyn.ComponentRef} = NONE()) ::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, Option{HashTable5.HashTable}}
               local outUpdatedComps::Option{HashTable5.HashTable} = inUpdatedComps
-              local outIH::InnerOuter.InstHierarchy = inIH
+              local outIH::InnerOuterTypes.InstHierarchy = inIH
               local outEnv::FCore.Graph = inEnv
               local outCache::FCore.Cache = inCache
 
@@ -4559,7 +4562,7 @@
               local scope::Absyn.Path
               local oscope::Option{Absyn.Path}
 
-              oscope = FGraph.getScopePath(env)
+              oscope = FGraphUtil.getScopePath(env)
               if isNone(oscope)
                 path = makeFullyQualified2Builtin(name, cachedPath)
               else
@@ -4932,14 +4935,14 @@
 
               @match true = Flags.isSet(Flags.CACHE)
               @match FCore.CL((@match SCode.CLASS(encapsulatedPrefix = enc, restriction = res) = cls), prefix) = FNode.refData(ref)
-              env2 = FGraph.openScope(env, enc, name, FGraph.restrictionToScopeType(res))
+              env2 = FGraphUtil.openScope(env, enc, name, FGraphUtil.restrictionToScopeType(res))
               try
                 cache_path = generateCachePath(env2, cls, prefix, InstTypes.INNER_CALL())
                 @match list(SOME(InstHashTable.FUNC_instClassIn(inputs, (env, _, _, _, _, _, _, _, _))), _) = InstHashTable.get(cache_path)
                 (_, prefix2, _, _, _, _, _, _, _) = inputs
                 @match true = PrefixUtil.isPrefix(prefix) && PrefixUtil.isPrefix(prefix2)
               catch
-                env = FGraph.pushScopeRef(env, ref)
+                env = FGraphUtil.pushScopeRef(env, ref)
               end
           (cache, env)
         end
@@ -4950,7 +4953,7 @@
               local name::String
 
               name = StringUtil.stringAppend9(InstTypes.callingScopeStr(callScope), "", SCodeDump.restrString(SCodeUtil.getClassRestriction(cls)), "", generatePrefixStr(prefix), "")
-              cachePath = AbsynUtil.joinPaths(Absyn.IDENT(name), FGraph.getGraphName(env))
+              cachePath = AbsynUtil.joinPaths(Absyn.IDENT(name), FGraphUtil.getGraphName(env))
           cachePath
         end
 
@@ -4989,7 +4992,7 @@
                 mod = begin
                   @match cmt begin
                     SCode.COMMENT(annotation_ = SOME(SCode.ANNOTATION(modification = mod2)))  => begin
-                      SCodeUtil.myMergeModifiers(mod2, mod)
+                      SCodeUtil.mergeModifiers(mod2, mod)
                     end
 
                     _  => begin

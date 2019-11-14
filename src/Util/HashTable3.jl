@@ -1,4 +1,4 @@
-  module HashTable3 
+  module HashTable3
 
 
     using MetaModelica
@@ -54,17 +54,15 @@
 
         import DAE
 
-        import ComponentReference
+        import CrefForHashTable
 
-        Key = DAE.ComponentRef 
+        Key = DAE.ComponentRef
 
-        Value = List 
+        Value = List
 
-        HashTableCrefFunctionsType = Tuple 
+        HashTableCrefFunctionsType = Tuple
 
-        HashTable = Tuple 
-
-
+        HashTable = Tuple
 
 
 
@@ -72,11 +70,13 @@
 
 
 
-         #= 
+
+
+         #=
           Returns an empty HashTable.
           Using the default bucketsize..
          =#
-        function emptyHashTable() ::HashTable 
+        function emptyHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
@@ -85,10 +85,10 @@
 
          #= Returns an empty HashTable.
          Using the bucketsize size. =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr, ComponentReference.printComponentRefListStr))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashComponentRefMod, CrefForHashTable.crefEqual, CrefForHashTable.printComponentRefStr, CrefForHashTable.printComponentRefListStr))
           hashTable
         end
 

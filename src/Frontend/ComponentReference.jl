@@ -1,7 +1,7 @@
   module ComponentReference
   using MetaModelica
   using ExportAll
-  @importDBG Expression
+  import Expression
   using Expression.CREF_LOCAL
   @exportAll()
   end

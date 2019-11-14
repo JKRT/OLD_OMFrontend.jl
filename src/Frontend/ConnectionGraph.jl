@@ -41,18 +41,21 @@ using ExportAll
   @UniontypeDecl ConnectionGraphType
 
 import Absyn
-
 import DAE
-
-import DAEUtil
-
+import DAE.ConnectorElement
+import DAETraverse
 import HashTable
-
 import HashTable3
-
 import HashTableCG
-
-# import Connect
+import BaseHashTable
+import CrefForHashTable
+import Debug
+import Flags
+import ListUtil
+import Util
+import System
+import IOStream
+import Settings
 
 Edge = Tuple  #= an edge is a tuple with two component references =#
 
@@ -123,7 +126,7 @@ function handleOverconstrainedConnections(inGraph::ConnectionGraphType, modelNam
         end
         (roots, connected, broken) = findResultGraph(graph, modelNameQualified)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("Roots: " + stringDelimitList(ListUtil.map(roots, ComponentReference.printComponentRefStr), ", "))
+          Debug.traceln("Roots: " + stringDelimitList(ListUtil.map(roots, CrefForHashTable.printComponentRefStr), ", "))
           Debug.traceln("Broken connections: " + stringDelimitList(ListUtil.map1(broken, printConnectionStr, "broken"), ", "))
           Debug.traceln("Allowed connections: " + stringDelimitList(ListUtil.map1(connected, printConnectionStr, "allowed"), ", "))
         end
@@ -158,7 +161,7 @@ function addDefiniteRoot(inGraph::ConnectionGraphType, inRoot::DAE.ComponentRef)
     @match (inGraph, inRoot) begin
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), root)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.addDefiniteRoot(" + ComponentReference.printComponentRefStr(root) + ")")
+          Debug.traceln("- ConnectionGraph.addDefiniteRoot(" + CrefForHashTable.printComponentRefStr(root) + ")")
         end
         GRAPH(updateGraph, _cons(root, definiteRoots), potentialRoots, uniqueRoots, branches, connections)
       end
@@ -183,7 +186,7 @@ function addPotentialRoot(inGraph::ConnectionGraphType, inRoot::DAE.ComponentRef
     @match (inGraph, inRoot, inPriority) begin
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), root, priority)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.addPotentialRoot(" + ComponentReference.printComponentRefStr(root) + ", " + realString(priority) + ")")
+          Debug.traceln("- ConnectionGraph.addPotentialRoot(" + CrefForHashTable.printComponentRefStr(root) + ", " + realString(priority) + ")")
         end
         GRAPH(updateGraph, definiteRoots, _cons((root, priority), potentialRoots), uniqueRoots, branches, connections)
       end
@@ -214,7 +217,7 @@ function addUniqueRoots(inGraph::ConnectionGraphType, inRoots::DAE.Exp, inMessag
     @match (inGraph, inRoots, inMessage) begin
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), DAE.CREF(root, _), _)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.addUniqueRoots(" + ComponentReference.printComponentRefStr(root) + ", " + ExpressionDump.printExpStr(inMessage) + ")")
+          # Debug.traceln("- ConnectionGraph.addUniqueRoots(" + CrefForHashTable.printComponentRefStr(root) + ", " + ExpressionDump.printExpStr(inMessage) + ")")
         end
         GRAPH(updateGraph, definiteRoots, potentialRoots, _cons((root, inMessage), uniqueRoots), branches, connections)
       end
@@ -225,7 +228,7 @@ function addUniqueRoots(inGraph::ConnectionGraphType, inRoots::DAE.Exp, inMessag
 
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), DAE.ARRAY(ty, scalar, DAE.CREF(root, _) <| rest), _)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.addUniqueRoots(" + ComponentReference.printComponentRefStr(root) + ", " + ExpressionDump.printExpStr(inMessage) + ")")
+          # Debug.traceln("- ConnectionGraph.addUniqueRoots(" + CrefForHashTable.printComponentRefStr(root) + ", " + ExpressionDump.printExpStr(inMessage) + ")")
         end
         graph = GRAPH(updateGraph, definiteRoots, potentialRoots, _cons((root, inMessage), uniqueRoots), branches, connections)
         graph = addUniqueRoots(graph, DAE.ARRAY(ty, scalar, rest), inMessage)
@@ -258,7 +261,7 @@ function addBranch(inGraph::ConnectionGraphType, inRef1::DAE.ComponentRef, inRef
     @match (inGraph, inRef1, inRef2) begin
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), ref1, ref2)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.addBranch(" + ComponentReference.printComponentRefStr(ref1) + ", " + ComponentReference.printComponentRefStr(ref2) + ")")
+          Debug.traceln("- ConnectionGraph.addBranch(" + CrefForHashTable.printComponentRefStr(ref1) + ", " + CrefForHashTable.printComponentRefStr(ref2) + ")")
         end
         GRAPH(updateGraph, definiteRoots, potentialRoots, uniqueRoots, _cons((ref1, ref2), branches), connections)
       end
@@ -284,7 +287,7 @@ function addConnection(inGraph::ConnectionGraphType, inRef1::DAE.ComponentRef, i
     @match (inGraph, inRef1, inRef2, inDae) begin
       (GRAPH(updateGraph = updateGraph, definiteRoots = definiteRoots, potentialRoots = potentialRoots, uniqueRoots = uniqueRoots, branches = branches, connections = connections), ref1, ref2, dae)  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.trace("- ConnectionGraph.addConnection(" + ComponentReference.printComponentRefStr(ref1) + ", " + ComponentReference.printComponentRefStr(ref2) + ")\\n")
+          Debug.trace("- ConnectionGraph.addConnection(" + CrefForHashTable.printComponentRefStr(ref1) + ", " + CrefForHashTable.printComponentRefStr(ref2) + ")\\n")
         end
         GRAPH(updateGraph, definiteRoots, potentialRoots, uniqueRoots, branches, _cons((ref1, ref2, dae), connections))
       end
@@ -299,28 +302,6 @@ end
 =#
 #=  *************************************
 =#
-
-import BaseHashTable
-
-import ComponentReference
-
-import ConnectUtil
-
-import Debug
-
-import ExpressionDump
-
-import Flags
-
-import ListUtil
-
-import Util
-
-import System
-
-import IOStream
-
-import Settings
 
 #= Returns the canonical element of the component where input element belongs to.
 See explanation at the top of file. =#
@@ -347,17 +328,17 @@ function canonical(inPartition::HashTableCG.HashTable, inRef::DAE.ComponentRef) 
   end
   #= fprintln(Flags.CGRAPH,
   =#
-  #=   \"- ConnectionGraph.canonical_case1(\" + ComponentReference.printComponentRefStr(ref) + \") = \" +
+  #=   \"- ConnectionGraph.canonical_case1(\" + CrefForHashTable.printComponentRefStr(ref) + \") = \" +
   =#
-  #=   ComponentReference.printComponentRefStr(parentCanonical));
+  #=   CrefForHashTable.printComponentRefStr(parentCanonical));
   =#
   #= partition2 = BaseHashTable.add((ref, parentCanonical), partition);
   =#
   #= fprintln(Flags.CGRAPH,
   =#
-  #=   \"- ConnectionGraph.canonical_case2(\" + ComponentReference.printComponentRefStr(ref) + \") = \" +
+  #=   \"- ConnectionGraph.canonical_case2(\" + CrefForHashTable.printComponentRefStr(ref) + \") = \" +
   =#
-  #=   ComponentReference.printComponentRefStr(ref));
+  #=   CrefForHashTable.printComponentRefStr(ref));
   =#
   outCanonical
 end
@@ -379,7 +360,7 @@ function areInSameComponent(inPartition::HashTableCG.HashTable, inRef1::DAE.Comp
       (partition, ref1, ref2)  => begin
         canon1 = canonical(partition, ref1)
         canon2 = canonical(partition, ref2)
-        @match true = ComponentReference.crefEqualNoStringCompare(canon1, canon2)
+        @match true = CrefForHashTable.crefEqualNoStringCompare(canon1, canon2)
         true
       end
 
@@ -461,7 +442,7 @@ function connectComponents(inPartition::HashTableCG.HashTable, inDaeEdge::DaeEdg
 
       (partition, (ref1, ref2, _))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.trace("- ConnectionGraph.connectComponents: should remove equations generated from: connect(" + ComponentReference.printComponentRefStr(ref1) + ", " + ComponentReference.printComponentRefStr(ref2) + ") and add {0, ..., 0} = equalityConstraint(cr1, cr2) instead.\\n")
+          Debug.trace("- ConnectionGraph.connectComponents: should remove equations generated from: connect(" + CrefForHashTable.printComponentRefStr(ref1) + ", " + CrefForHashTable.printComponentRefStr(ref2) + ") and add {0, ..., 0} = equalityConstraint(cr1, cr2) instead.\\n")
         end
         (partition, nil, list(inDaeEdge))
       end
@@ -484,7 +465,7 @@ function connectCanonicalComponents(inPartition::HashTableCG.HashTable, inRef1::
     =#
     @matchcontinue (inPartition, inRef1, inRef2) begin
       (partition, ref1, ref2)  => begin
-        @match true = ComponentReference.crefEqualNoStringCompare(ref1, ref2)
+        @match true = CrefForHashTable.crefEqualNoStringCompare(ref1, ref2)
         (partition, false)
       end
 
@@ -530,7 +511,7 @@ function resultGraphWithRoots(roots::List{<:DAE.ComponentRef}) ::HashTableCG.Has
   local table0::HashTableCG.HashTable
   local dummyRoot::DAE.ComponentRef
 
-  dummyRoot = ComponentReference.makeCrefIdent("__DUMMY_ROOT", DAE.T_INTEGER_DEFAULT, nil)
+  dummyRoot = CrefForHashTable.makeCrefIdent("__DUMMY_ROOT", DAE.T_INTEGER_DEFAULT, nil)
   table0 = HashTableCG.emptyHashTable()
   outTable = addRootsToTable(table0, roots, dummyRoot)
   outTable
@@ -576,8 +557,8 @@ function ord(inEl1::PotentialRoot, inEl2::PotentialRoot) ::Bool
     @matchcontinue (inEl1, inEl2) begin
       ((c1, r1), (c2, r2))  => begin
         @match true = realEq(r1, r2)
-        s1 = ComponentReference.printComponentRefStr(c1)
-        s2 = ComponentReference.printComponentRefStr(c2)
+        s1 = CrefForHashTable.printComponentRefStr(c1)
+        s2 = CrefForHashTable.printComponentRefStr(c2)
         @match 1 = stringCompare(s1, s2)
         true
       end
@@ -704,7 +685,7 @@ function findResultGraph(inGraph::ConnectionGraphType, modelNameQualified::Strin
           Debug.traceln("Ordered Potential Roots: " + stringDelimitList(ListUtil.map(orderedPotentialRoots, printPotentialRootTuple), ", "))
         end
         (table, connected, broken) = addConnections(table, connections)
-        dummyRoot = ComponentReference.makeCrefIdent("__DUMMY_ROOT", DAE.T_INTEGER_DEFAULT, nil)
+        dummyRoot = CrefForHashTable.makeCrefIdent("__DUMMY_ROOT", DAE.T_INTEGER_DEFAULT, nil)
         (table, finalRoots) = addPotentialRootsToTable(table, orderedPotentialRoots, definiteRoots, dummyRoot)
         brokenConnectsViaGraphViz = generateGraphViz(modelNameQualified, definiteRoots, potentialRoots, uniqueRoots, branches, connections, finalRoots, broken)
         if stringEq(brokenConnectsViaGraphViz, "")
@@ -738,8 +719,8 @@ function orderConnectsGuidedByUser(inConnections::DaeEdges, inUserSelectedBreaki
 
   for e in inConnections
     (c1, c2, _) = e
-    sc1 = ComponentReference.printComponentRefStr(c1)
-    sc2 = ComponentReference.printComponentRefStr(c2)
+    sc1 = CrefForHashTable.printComponentRefStr(c1)
+    sc2 = CrefForHashTable.printComponentRefStr(c2)
     if listMember((sc1, sc2), inUserSelectedBreaking) || listMember((sc2, sc1), inUserSelectedBreaking)
       back = _cons(e, back)
     else
@@ -827,7 +808,7 @@ function printPotentialRootTuple(potentialRoot::PotentialRoot) ::String
     local str::String
     @match potentialRoot begin
       (cr, priority)  => begin
-        str = ComponentReference.printComponentRefStr(cr) + "(" + realString(priority) + ")"
+        str = CrefForHashTable.printComponentRefStr(cr) + "(" + realString(priority) + ")"
         str
       end
     end
@@ -873,27 +854,27 @@ function setRootDistance(finalRoots::List{<:DAE.ComponentRef}, table::HashTable3
   end
   #= print(\"- ConnectionGraph.setRootDistance: Set Distance \" +
   =#
-  #=    ComponentReference.printComponentRefStr(cr) + \" , \" + intString(distance) + \"\\n\");
+  #=    CrefForHashTable.printComponentRefStr(cr) + \" , \" + intString(distance) + \"\\n\");
   =#
   #= print(\"- ConnectionGraph.setRootDistance: add \" +
   =#
-  #=    stringDelimitList(List.map(next,ComponentReference.printComponentRefStr),\"\\n\") + \" to the queue\\n\");
+  #=    stringDelimitList(List.map(next,CrefForHashTable.printComponentRefStr),\"\\n\") + \" to the queue\\n\");
   =#
   #= print(\"- ConnectionGraph.setRootDistance: Set Distance \" +
   =#
-  #=    ComponentReference.printComponentRefStr(cr) + \" , \" + intString(distance) + \"\\n\");
+  #=    CrefForHashTable.printComponentRefStr(cr) + \" , \" + intString(distance) + \"\\n\");
   =#
   #= /*    case(cr::rest,_,_,_,_)
   equation
   i = BaseHashTable.get(cr, irooted);
   print(\"- ConnectionGraph.setRootDistance: found \" +
-  ComponentReference.printComponentRefStr(cr) + \" twice, value is \" + intString(i) + \"\\n\");
+  CrefForHashTable.printComponentRefStr(cr) + \" twice, value is \" + intString(i) + \"\\n\");
   then
   setRootDistance(rest,table,distance,nextLevel,irooted);
   */ =#
   #= equation
   =#
-  #=   print(\"- ConnectionGraph.setRootDistance: cannot found \" + ComponentReference.printComponentRefStr(cr) + \"\\n\");
+  #=   print(\"- ConnectionGraph.setRootDistance: cannot found \" + CrefForHashTable.printComponentRefStr(cr) + \"\\n\");
   =#
   orooted
 end
@@ -978,7 +959,7 @@ function evalConnectionsOperators(inRoots::List{<:DAE.ComponentRef}, graph::Conn
         connections = getConnections(graph)
         table = ListUtil.fold(connections, addConnectionsRooted, table)
         rooted = setRootDistance(inRoots, table, 0, nil, HashTable.emptyHashTable())
-        (outDae, _) = DAEUtil.traverseDAEElementList(inDae, evalConnectionsOperatorsHelper, (rooted, inRoots, graph))
+        (outDae, _) = DAETraverse.traverseDAEElementList(inDae, evalConnectionsOperatorsHelper, (rooted, inRoots, graph))
         outDae
       end
     end
@@ -991,7 +972,7 @@ function evalConnectionsOperators(inRoots::List{<:DAE.ComponentRef}, graph::Conn
   =#
   #=  get distanste to root
   =#
-  #=   print(\"Roots: \" + stringDelimitList(List.map(inRoots,ComponentReference.printComponentRefStr),\"\\n\") + \"\\n\");
+  #=   print(\"Roots: \" + stringDelimitList(List.map(inRoots,CrefForHashTable.printComponentRefStr),\"\\n\") + \"\\n\");
   =#
   #=   BaseHashTable.dumpHashTable(table);
   =#
@@ -1023,7 +1004,7 @@ function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTab
     @matchcontinue (inExp, inRoots) begin
       (DAE.CALL(path = Absyn.IDENT("rooted"), expLst = DAE.ARRAY(array =  nil()) <|  nil()), (rooted, roots, graph))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
         end
         (DAE.BCONST(false), (rooted, roots, graph))
       end
@@ -1032,11 +1013,11 @@ function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTab
         branches = getBranches(graph)
         cref1 = getEdge(cref, branches)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: Found Branche Partner " + ComponentReference.printComponentRefStr(cref) + ", " + ComponentReference.printComponentRefStr(cref1))
+          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: Found Branche Partner " + CrefForHashTable.printComponentRefStr(cref) + ", " + CrefForHashTable.printComponentRefStr(cref1))
         end
         result = getRooted(cref, cref1, rooted)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
         end
         (DAE.BCONST(result), (rooted, roots, graph))
       end
@@ -1047,38 +1028,38 @@ function evalConnectionsOperatorsHelper(inExp::DAE.Exp, inRoots::Tuple{<:HashTab
 
       (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.ARRAY(array =  nil()) <|  nil()), (rooted, roots, graph))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
         end
         (DAE.BCONST(false), (rooted, roots, graph))
       end
 
       (DAE.LUNARY(DAE.NOT(_), DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.ARRAY(array =  nil()) <|  nil())), (rooted, roots, graph))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = false")
         end
         (DAE.BCONST(false), (rooted, roots, graph))
       end
 
       (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.CREF(componentRef = cref) <|  nil()), (rooted, roots, graph))  => begin
-        result = ListUtil.isMemberOnTrue(cref, roots, ComponentReference.crefEqualNoStringCompare)
+        result = ListUtil.isMemberOnTrue(cref, roots, CrefForHashTable.crefEqualNoStringCompare)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
         end
         (DAE.BCONST(result), (rooted, roots, graph))
       end
 
       (DAE.LUNARY(DAE.NOT(_), DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("isRoot")), expLst = DAE.CREF(componentRef = cref) <|  nil())), (rooted, roots, graph))  => begin
-        result = ListUtil.isMemberOnTrue(cref, roots, ComponentReference.crefEqualNoStringCompare)
+        result = ListUtil.isMemberOnTrue(cref, roots, CrefForHashTable.crefEqualNoStringCompare)
         result = boolNot(result)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: " + ExpressionDump.printExpStr(inExp) + " = " + boolString(result))
         end
         (DAE.BCONST(result), (rooted, roots, graph))
       end
 
       (DAE.CALL(path = Absyn.QUALIFIED("Connections", Absyn.IDENT("uniqueRootIndices")), expLst = uroots && DAE.ARRAY(array = lst) <| nodes <| message <|  nil()), (rooted, roots, graph))  => begin
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: Connections.uniqueRootsIndicies(" + ExpressionDump.printExpStr(uroots) + "," + ExpressionDump.printExpStr(nodes) + "," + ExpressionDump.printExpStr(message) + ")")
+          # Debug.traceln("- ConnectionGraph.evalConnectionsOperatorsHelper: Connections.uniqueRootsIndicies(" + ExpressionDump.printExpStr(uroots) + "," + ExpressionDump.printExpStr(nodes) + "," + ExpressionDump.printExpStr(message) + ")")
         end
         lst = ListUtil.fill(DAE.ICONST(1), listLength(lst))
         (DAE.ARRAY(DAE.T_INTEGER_DEFAULT, false, lst), (rooted, roots, graph))
@@ -1150,12 +1131,12 @@ function getEdge1(cr::DAE.ComponentRef, cref1::DAE.ComponentRef, cref2::DAE.Comp
   ocr = begin
     @matchcontinue (cr, cref1, cref2) begin
       (_, _, _)  => begin
-        @match true = ComponentReference.crefEqualNoStringCompare(cr, cref1)
+        @match true = CrefForHashTable.crefEqualNoStringCompare(cr, cref1)
         cref2
       end
 
       _  => begin
-        @match true = ComponentReference.crefEqualNoStringCompare(cr, cref2)
+        @match true = CrefForHashTable.crefEqualNoStringCompare(cr, cref2)
         cref1
       end
     end
@@ -1173,7 +1154,7 @@ function printConnectionStr(connectTuple::DaeEdge, ty::String) ::String
     local str::String
     @match (connectTuple, ty) begin
       ((c1, c2, _), _)  => begin
-        str = ty + "(" + ComponentReference.printComponentRefStr(c1) + ", " + ComponentReference.printComponentRefStr(c2) + ")"
+        str = ty + "(" + CrefForHashTable.printComponentRefStr(c1) + ", " + CrefForHashTable.printComponentRefStr(c2) + ")"
         str
       end
     end
@@ -1194,9 +1175,9 @@ function printEdges(inEdges::Edges)
 
       (c1, c2) <| tail  => begin
         print("    ")
-        print(ComponentReference.printComponentRefStr(c1))
+        print(CrefForHashTable.printComponentRefStr(c1))
         print(" -- ")
-        print(ComponentReference.printComponentRefStr(c2))
+        print(CrefForHashTable.printComponentRefStr(c2))
         print("\\n")
         printEdges(tail)
         ()
@@ -1218,9 +1199,9 @@ function printDaeEdges(inEdges::DaeEdges)
 
       (c1, c2, _) <| tail  => begin
         print("    ")
-        print(ComponentReference.printComponentRefStr(c1))
+        print(CrefForHashTable.printComponentRefStr(c1))
         print(" -- ")
-        print(ComponentReference.printComponentRefStr(c2))
+        print(CrefForHashTable.printComponentRefStr(c2))
         print("\\n")
         printDaeEdges(tail)
         ()
@@ -1390,7 +1371,7 @@ function graphVizEdge(inEdge::Edge) ::String
     local strEdge::String
     @match inEdge begin
       (c1, c2)  => begin
-        strEdge = "\\" + ComponentReference.printComponentRefStr(c1) + "\\ -- \\" + ComponentReference.printComponentRefStr(c2) + "\\" + " [color = blue, dir = \\none\\, fontcolor=blue, label = \\branch\\];\\n\\t"
+        strEdge = "\\" + CrefForHashTable.printComponentRefStr(c1) + "\\ -- \\" + CrefForHashTable.printComponentRefStr(c2) + "\\" + " [color = blue, dir = \\none\\, fontcolor=blue, label = \\branch\\];\\n\\t"
         strEdge
       end
     end
@@ -1443,8 +1424,8 @@ function graphVizDaeEdge(inDaeEdge::DaeEdge, inBrokenDaeEdges::DaeEdges) ::Strin
         else
           ""
         end
-        sc1 = ComponentReference.printComponentRefStr(c1)
-        sc2 = ComponentReference.printComponentRefStr(c2)
+        sc1 = CrefForHashTable.printComponentRefStr(c1)
+        sc2 = CrefForHashTable.printComponentRefStr(c2)
         strDaeEdge = stringAppendList(list("\\", sc1, "\\ -- \\", sc2, "\\ [", "dir = \\none\\, ", "style = ", style, ", ", "decorate = ", decorate, ", ", "color = ", color, ", ", labelFontSize, "fontcolor = ", fontColor, ", ", "label = \\", label, "\\", "];\\n\\t"))
         strDaeEdge
       end
@@ -1463,7 +1444,7 @@ function graphVizDefiniteRoot(inDefiniteRoot::DefiniteRoot, inFinalRoots::Defini
     @match (inDefiniteRoot, inFinalRoots) begin
       (c, _)  => begin
         isSelectedRoot = listMember(c, inFinalRoots)
-        strDefiniteRoot = "\\" + ComponentReference.printComponentRefStr(c) + "\\" + " [fillcolor = red, rank = \\source\\, label = " + "\\" + ComponentReference.printComponentRefStr(c) + "\\, " + (if isSelectedRoot
+        strDefiniteRoot = "\\" + CrefForHashTable.printComponentRefStr(c) + "\\" + " [fillcolor = red, rank = \\source\\, label = " + "\\" + CrefForHashTable.printComponentRefStr(c) + "\\, " + (if isSelectedRoot
                                                                                                                                                                                                       "shape=polygon, sides=8, distortion=\\0.265084\\, orientation=26, skew=\\0.403659\\"
                                                                                                                                                                                                       else
                                                                                                                                                                                                       "shape=box"
@@ -1486,7 +1467,7 @@ function graphVizPotentialRoot(inPotentialRoot::PotentialRoot, inFinalRoots::Def
     @match (inPotentialRoot, inFinalRoots) begin
       ((c, priority), _)  => begin
         isSelectedRoot = listMember(c, inFinalRoots)
-        strPotentialRoot = "\\" + ComponentReference.printComponentRefStr(c) + "\\" + " [fillcolor = orangered, rank = \\min\\ label = " + "\\" + ComponentReference.printComponentRefStr(c) + "\\\\n" + realString(priority) + "\\, " + (if isSelectedRoot
+        strPotentialRoot = "\\" + CrefForHashTable.printComponentRefStr(c) + "\\" + " [fillcolor = orangered, rank = \\min\\ label = " + "\\" + CrefForHashTable.printComponentRefStr(c) + "\\\\n" + realString(priority) + "\\, " + (if isSelectedRoot
                                                                                                                                                                                                                                           "shape=ploygon, sides=7, distortion=\\0.265084\\, orientation=26, skew=\\0.403659\\"
                                                                                                                                                                                                                                           else
                                                                                                                                                                                                                                           "shape=box"
@@ -1680,16 +1661,16 @@ function removeBrokenConnects(inConnects::List{<:DAE.ConnectorElement}, inConnec
           csets = list(inConnects)
         else
           toKeep = filterFromSet(inConnects, inConnected, nil, "allowed")
-          intersect = ListUtil.intersectionOnTrue(toRemove, toKeep, ComponentReference.crefEqualNoStringCompare)
+          intersect = ListUtil.intersectionOnTrue(toRemove, toKeep, CrefForHashTable.crefEqualNoStringCompare)
           if Flags.isSet(Flags.CGRAPH)
-            Debug.traceln("- ConnectionGraph.removeBrokenConnects: CS: " + stringDelimitList(ListUtil.map(inConnects, ConnectUtil.printElementStr), "\\n"))
-            Debug.traceln("- ConnectionGraph.removeBrokenConnects: keep: " + stringDelimitList(ListUtil.map(toKeep, ComponentReference.printComponentRefStr), ", "))
-            Debug.traceln("- ConnectionGraph.removeBrokenConnects: delete: " + stringDelimitList(ListUtil.map(toRemove, ComponentReference.printComponentRefStr), ", "))
-            Debug.traceln("- ConnectionGraph.removeBrokenConnects: allow = remove - keep: " + stringDelimitList(ListUtil.map(intersect, ComponentReference.printComponentRefStr), ", "))
+            #Debug.traceln("- ConnectionGraph.removeBrokenConnects: CS: " + stringDelimitList(ListUtil.map(inConnects, ConnectUtil.printElementStr), "\\n"))
+            #Debug.traceln("- ConnectionGraph.removeBrokenConnects: keep: " + stringDelimitList(ListUtil.map(toKeep, CrefForHashTable.printComponentRefStr), ", "))
+            #Debug.traceln("- ConnectionGraph.removeBrokenConnects: delete: " + stringDelimitList(ListUtil.map(toRemove, CrefForHashTable.printComponentRefStr), ", "))
+            #Debug.traceln("- ConnectionGraph.removeBrokenConnects: allow = remove - keep: " + stringDelimitList(ListUtil.map(intersect, CrefForHashTable.printComponentRefStr), ", "))
           end
           toRemove = ListUtil.setDifference(toRemove, intersect)
           if Flags.isSet(Flags.CGRAPH)
-            Debug.traceln("- ConnectionGraph.removeBrokenConnects: allow - delete: " + stringDelimitList(ListUtil.map(toRemove, ComponentReference.printComponentRefStr), ", "))
+            Debug.traceln("- ConnectionGraph.removeBrokenConnects: allow - delete: " + stringDelimitList(ListUtil.map(toRemove, CrefForHashTable.printComponentRefStr), ", "))
           end
           cset = removeFromConnects(inConnects, toRemove)
           csets = splitSetByAllowed(cset, inConnected)
@@ -1718,10 +1699,10 @@ function splitSetByAllowed(inConnects::List{<:DAE.ConnectorElement}, inConnected
     cset = nil
     (cr1, cr2, _) = e
     for ce in inConnects
-      if ComponentReference.crefPrefixOf(cr1, ce.name)
+      if CrefForHashTable.crefPrefixOf(cr1, ce.name)
         cset = _cons(ce, cset)
       end
-      if ComponentReference.crefPrefixOf(cr2, ce.name)
+      if CrefForHashTable.crefPrefixOf(cr2, ce.name)
         cset = _cons(ce, cset)
       end
     end
@@ -1731,6 +1712,18 @@ function splitSetByAllowed(inConnects::List{<:DAE.ConnectorElement}, inConnected
   end
   outConnects = csets
   outConnects #= we return a list of lists of elements as a particular connection set might be broken into several! =#
+end
+
+function isReferenceInConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Bool
+      local isThere::Bool = false
+
+      for ce in connects
+        if CrefForHashTable.crefPrefixOf(cref, ce.name)
+          isThere = true
+          return isThere
+        end
+      end
+  isThere
 end
 
 #= @author: adrpo
@@ -1749,10 +1742,10 @@ function filterFromSet(inConnects::List{<:DAE.ConnectorElement}, inFilter::DaeEd
       end
 
       (_, (c1, c2, _) <| rest, _)  => begin
-        @match true = ConnectUtil.isReferenceInConnects(inConnects, c1)
-        @match true = ConnectUtil.isReferenceInConnects(inConnects, c2)
+        @match true = isReferenceInConnects(inConnects, c1)
+        @match true = isReferenceInConnects(inConnects, c2)
         if Flags.isSet(Flags.CGRAPH)
-          Debug.traceln("- ConnectionGraph.filterFromSet: " + msg + " connect(" + ComponentReference.printComponentRefStr(c1) + ", " + ComponentReference.printComponentRefStr(c2) + ")")
+          Debug.traceln("- ConnectionGraph.filterFromSet: " + msg + " connect(" + CrefForHashTable.printComponentRefStr(c1) + ", " + CrefForHashTable.printComponentRefStr(c2) + ")")
         end
         filtered = filterFromSet(inConnects, rest, _cons(c1, _cons(c2, inAcc)), msg)
         filtered
@@ -1769,6 +1762,24 @@ function filterFromSet(inConnects::List{<:DAE.ConnectorElement}, inFilter::DaeEd
   filteredCrefs
 end
 
+function removeReferenceFromConnects(connects::List{<:ConnectorElement}, cref::DAE.ComponentRef) ::Tuple{List{ConnectorElement}, Bool}
+      local wasRemoved::Bool
+
+
+      local oe::Option{ConnectorElement}
+
+      (connects, oe) = ListUtil.deleteMemberOnTrue(cref, connects, removeReferenceFromConnects2)
+      wasRemoved = isSome(oe)
+  (connects, wasRemoved)
+end
+
+function removeReferenceFromConnects2(cref::DAE.ComponentRef, element::ConnectorElement) ::Bool
+      local matches::Bool
+
+      matches = CrefForHashTable.crefPrefixOf(cref, element.name)
+  matches
+end
+
 function removeFromConnects(inConnects::List{<:DAE.ConnectorElement}, inToRemove::List{<:DAE.ComponentRef}) ::List{DAE.ConnectorElement}
   local outConnects::List{DAE.ConnectorElement}
 
@@ -1782,7 +1793,7 @@ function removeFromConnects(inConnects::List{<:DAE.ConnectorElement}, inToRemove
       end
 
       (cset, c <| rest)  => begin
-        @match (cset, true) = ConnectUtil.removeReferenceFromConnects(cset, c)
+        @match (cset, true) = removeReferenceFromConnects(cset, c)
         cset = removeFromConnects(cset, rest)
         cset
       end
@@ -1806,7 +1817,7 @@ function addBrokenEqualityConstraintEquations(inDAE::DAE.DAElist, inBroken::DaeE
 
       _  => begin
         equalityConstraintElements = ListUtil.flatten(ListUtil.map(inBroken, Util.tuple33))
-        dae = DAEUtil.joinDaes(DAE.DAE_LIST(equalityConstraintElements), inDAE)
+        dae = DAETraverse.joinDaes(DAE.DAE_LIST(equalityConstraintElements), inDAE)
         dae
       end
     end

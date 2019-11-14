@@ -51,7 +51,7 @@ import Error
 import Expression
 import ExpressionDump
 import ExpressionSimplify
-import FGraph
+import FGraphUtil
 import Flags
 import Global
 import Inline
@@ -100,14 +100,14 @@ function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Ope
     =#
     @match (inCache, inEnv, inOperator1, inProp1, inExp1, inProp2, inExp2) begin
       (_, _, _, props1 && DAE.PROP_TUPLE(__), _, DAE.PROP(__), _) where (! Config.acceptMetaModelicaGrammar())  => begin
-        @match (@match DAE.PROP(type1, _) = prop) = Types.propTupleFirstProp(props1)
+        @match prop && DAE.PROP(type1, _) = Types.propTupleFirstProp(props1)
         exp = DAE.TSUB(inExp1, 1, type1)
         (cache, exp, prop) = binary(inCache, inEnv, inOperator1, prop, exp, inProp2, inExp2, AbExp, AbExp1, AbExp2, inImpl, inPre, inInfo)
         (cache, exp, prop)
       end
 
       (_, _, _, DAE.PROP(__), _, props2 && DAE.PROP_TUPLE(__), _) where (! Config.acceptMetaModelicaGrammar())  => begin
-        @match (@match DAE.PROP(type2, _) = prop) = Types.propTupleFirstProp(props2)
+        @match prop && DAE.PROP(type2, _) = Types.propTupleFirstProp(props2)
         exp = DAE.TSUB(inExp2, 1, type2)
         (cache, exp, prop) = binary(inCache, inEnv, inOperator1, inProp1, inExp1, prop, exp, AbExp, AbExp1, AbExp2, inImpl, inPre, inInfo)
         (cache, exp, prop)
@@ -130,7 +130,7 @@ function binary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Ope
             (exp2, type2) = Types.matchType(exp2, type2, Types.unboxedType(type2), true)
           end
           (opList, type1, exp1, type2, exp2) = operatorsBinary(aboper, type1, exp1, type2, exp2)
-          @match (oper, list(exp1, exp2), otype) = deoverload(opList, list((exp1, type1), (exp2, type2)), AbExp, inPre, inInfo)
+          @match (oper, exp1 <| exp2 <| nil, otype) = deoverload(opList, list((exp1, type1), (exp2, type2)), AbExp, inPre, inInfo)
           constVar = Types.constAnd(const1, const2)
           exp = replaceOperatorWithFcall(AbExp, exp1, oper, SOME(exp2), constVar)
           exp = ExpressionSimplify.simplify(exp)
@@ -210,7 +210,7 @@ function unary(inCache::FCore.Cache, inEnv::FCore.Graph, inOperator1::Absyn.Oper
         (cache, operatorCl, operatorEnv) = Lookup.lookupClass(cache, recordEnv, path)
         @match true = SCodeUtil.isOperator(operatorCl)
         operNames = AbsynToSCode.getListofQualOperatorFuncsfromOperator(operatorCl)
-        @match (cache, (@match _cons(_, _) = types)) = Lookup.lookupFunctionsListInEnv(cache, operatorEnv, operNames, inInfo, nil)
+        @match (cache, types && _ <| _) = Lookup.lookupFunctionsListInEnv(cache, operatorEnv, operNames, inInfo, nil)
         @match (cache, SOME((exp, prop))) = Static.elabCallArgs3(cache, env, types, path, list(absexp1), nil, inImpl, inPre, inInfo)
         (cache, exp, prop)
       end
@@ -258,7 +258,7 @@ function string(inCache::FCore.Cache, inEnv::FCore.Graph, inExp1::Absyn.Exp, inI
         (cache, operatorCl, operatorEnv) = Lookup.lookupClass(cache, recordEnv, path)
         @match true = SCodeUtil.isOperator(operatorCl)
         operNames = AbsynToSCode.getListofQualOperatorFuncsfromOperator(operatorCl)
-        @match (cache, (@match _cons(_, _) = types)) = Lookup.lookupFunctionsListInEnv(cache, operatorEnv, operNames, inInfo, nil)
+        @match (cache, types && _ <| _) = Lookup.lookupFunctionsListInEnv(cache, operatorEnv, operNames, inInfo, nil)
         @match (cache, SOME((daeExp, prop))) = Static.elabCallArgs3(cache, env, types, path, _cons(exp1, restargs), nargs, inImpl, inPre, inInfo)
         (cache, daeExp, prop)
       end
@@ -862,15 +862,12 @@ end
 =#
 (cache, exps)
 end
+
 module OperatorsBinary
 using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
   import DAE
-
-function _listAppend(a, b)
-  nil
-end
 
 #= /* We have these as constants instead of function calls as done previously
 * because it takes a long time to generate these types over and over again.
@@ -946,11 +943,11 @@ types for a specific operator, that the overload function chooses from.
 Therefore, in order for the builtin type conversion from Integer to
 Real to work, operators that work on both Integers and Reals must
 return the Integer type -before- the Real type in the list. =#
-function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, t2::DAE.Type, e2::DAE.Exp) ::Tuple{List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp}
-  local oe2::DAE.Exp
-  local oty2::DAE.Type
-  local oe1::DAE.Exp
-  local oty1::DAE.Type
+function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, t2::DAE.Type, e2::DAE.Exp) ::Tuple{List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}, DAE.Type, DAE.Exp, DAE.Type, DAE.Exp}
+  local oe2::DAE.Exp = e2
+  local oty2::DAE.Type = t2
+  local oe1::DAE.Exp = e1
+  local oty1::DAE.Type = t1
   local ops::List{Tuple{DAE.Operator, List{DAE.Type}, DAE.Type}}
   local t::DAE.Type
   local e::DAE.Exp
@@ -1042,7 +1039,9 @@ function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, 
         end
 
         Absyn.MUL(__)  => begin
-          OperatorsBinary.mulTypes
+          println("MUL!")
+          ops = OperatorsBinary.mulTypes
+          ops
         end
 
         Absyn.MUL_EW(__)  => begin
@@ -1126,7 +1125,7 @@ fail()
 end
 #=  Relational operators
 =#
-(ops, t1, e1, t2, e2, oty1, oe1, oty2, oe2)
+(ops, oty1, oe1, oty2, oe2)
 end
 
 #= This function relates the operators in the abstract syntax to the
@@ -1378,7 +1377,7 @@ function lookupOperatorBaseClass(inCache::FCore.Cache, inEnv::FCore.Graph, inCla
       end
 
       (cache, env, SCode.CLASS(name = name))  => begin
-        path = FGraph.joinScopePath(env, Absyn.IDENT(name))
+        path = FGraphUtil.joinScopePath(env, Absyn.IDENT(name))
         (cache, path, env)
       end
     end
@@ -2053,7 +2052,7 @@ function warnUnsafeRelations(inEnv::FCore.Graph, inExp::Absyn.Exp, variability::
     =#
     @matchcontinue (inEnv, inExp, variability, t1, t2, e1, e2, op, inPrefix, inInfo) begin
       (_, _, _, _, _, _, _, _, _, _)  => begin
-        @match true = FGraph.inFunctionScope(inEnv)
+        @match true = FGraphUtil.inFunctionScope(inEnv)
         ()
       end
 

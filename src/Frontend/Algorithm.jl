@@ -1,4 +1,4 @@
-  module Algorithm 
+  module Algorithm
 
 
     using MetaModelica
@@ -42,9 +42,7 @@
 
         import SCode
 
-        import ComponentReference
-
-        import DAEUtil
+        import DAETraverse
 
         import Debug
 
@@ -54,7 +52,7 @@
 
         import Expression
 
-        import ExpressionDump
+        import CrefForHashTable
 
         import Flags
 
@@ -68,7 +66,7 @@
         import Util
 
          #= Returns true if algorithm is empty, i.e. no statements =#
-        function algorithmEmpty(alg::DAE.Algorithm) ::Bool 
+        function algorithmEmpty(alg::DAE.Algorithm) ::Bool
               local empty::Bool
 
               empty = begin
@@ -76,7 +74,7 @@
                   DAE.ALGORITHM_STMTS( nil())  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -86,7 +84,7 @@
         end
 
          #= returns true if statement is a reinit =#
-        function isReinitStatement(stmt::DAE.Statement) ::Bool 
+        function isReinitStatement(stmt::DAE.Statement) ::Bool
               local res::Bool
 
               res = begin
@@ -94,7 +92,7 @@
                   DAE.STMT_REINIT(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -104,7 +102,7 @@
         end
 
          #= returns true if statement is NOT an assert =#
-        function isNotAssertStatement(stmt::DAE.Statement) ::Bool 
+        function isNotAssertStatement(stmt::DAE.Statement) ::Bool
               local res::Bool
 
               res = begin
@@ -112,7 +110,7 @@
                   DAE.STMT_ASSERT(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -122,7 +120,7 @@
         end
 
          #= Used to optimize assignments to NORETCALL if applicable =#
-        function makeAssignmentNoTypeCheck(ty::DAE.Type, lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement 
+        function makeAssignmentNoTypeCheck(ty::DAE.Type, lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -130,11 +128,11 @@
                   (_, DAE.CREF(componentRef = DAE.WILD(__)), _, _)  => begin
                     DAE.STMT_NORETCALL(rhs, source)
                   end
-                  
+
                   (_, DAE.PATTERN(pattern = DAE.PAT_WILD(__)), _, _)  => begin
                     DAE.STMT_NORETCALL(rhs, source)
                   end
-                  
+
                   _  => begin
                       DAE.STMT_ASSIGN(ty, lhs, rhs, source)
                   end
@@ -144,7 +142,7 @@
         end
 
          #= Used to optimize assignments to NORETCALL if applicable =#
-        function makeArrayAssignmentNoTypeCheck(ty::DAE.Type, lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement 
+        function makeArrayAssignmentNoTypeCheck(ty::DAE.Type, lhs::DAE.Exp, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -152,7 +150,7 @@
                   (_, DAE.CREF(DAE.WILD(__)), _, _)  => begin
                     DAE.STMT_NORETCALL(rhs, source)
                   end
-                  
+
                   _  => begin
                       DAE.STMT_ASSIGN_ARR(ty, lhs, rhs, source)
                   end
@@ -162,7 +160,7 @@
         end
 
          #= Used to optimize assignments to NORETCALL if applicable =#
-        function makeTupleAssignmentNoTypeCheck(ty::DAE.Type, lhs::List{<:DAE.Exp}, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement 
+        function makeTupleAssignmentNoTypeCheck(ty::DAE.Type, lhs::List{<:DAE.Exp}, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               local b1::Bool
@@ -174,7 +172,7 @@
           outStatement
         end
 
-        function makeTupleAssignmentNoTypeCheck2(allWild::Bool, singleAssign::Bool, ty::DAE.Type, lhs::List{<:DAE.Exp}, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement 
+        function makeTupleAssignmentNoTypeCheck2(allWild::Bool, singleAssign::Bool, ty::DAE.Type, lhs::List{<:DAE.Exp}, rhs::DAE.Exp, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -185,15 +183,15 @@
                   (true, _, _, _, _, _)  => begin
                     DAE.STMT_NORETCALL(rhs, source)
                   end
-                  
+
                   (_, true, DAE.T_TUPLE(types = ty1 && DAE.T_ARRAY(__) <| _), lhs1 <| _, _, _)  => begin
                     DAE.STMT_ASSIGN_ARR(ty1, lhs1, DAE.TSUB(rhs, 1, ty1), source)
                   end
-                  
+
                   (_, true, DAE.T_TUPLE(types = ty1 <| _), lhs1 <| _, _, _)  => begin
                     DAE.STMT_ASSIGN(ty1, lhs1, DAE.TSUB(rhs, 1, ty1), source)
                   end
-                  
+
                   _  => begin
                       DAE.STMT_TUPLE_ASSIGN(ty, lhs, rhs, source)
                   end
@@ -208,7 +206,7 @@
           LS: Added call to getPropType and isPropAnyConst instead of
           having PROP in the rules. Otherwise rules must be repeated because of
           combinations with PROP_TUPLE =#
-        function makeAssignment(inExp1::DAE.Exp, inProperties2::DAE.Properties, inExp3::DAE.Exp, inProperties4::DAE.Properties, inAttributes::DAE.Attributes, initial_::SCode.Initial, source::DAE.ElementSource) ::DAE.Statement 
+        function makeAssignment(inExp1::DAE.Exp, inProperties2::DAE.Properties, inExp3::DAE.Exp, inProperties4::DAE.Properties, inAttributes::DAE.Attributes, initial_::SCode.Initial, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -231,46 +229,46 @@
                   (DAE.CREF(componentRef = DAE.WILD(__)), _, rhs, _, _, _, _)  => begin
                     DAE.STMT_NORETCALL(rhs, source)
                   end
-                  
+
                   (lhs && DAE.CREF(componentRef = cr), lhprop, rhs, rhprop, _, SCode.NON_INITIAL(__), _)  => begin
                       @match DAE.C_PARAM() = Types.propAnyConst(lhprop)
-                      @match true = ComponentReference.isRecord(cr)
+                      @match true = CrefForHashTable.isRecord(cr)
                       outStatement = makeAssignment2(lhs, lhprop, rhs, rhprop, source)
                     outStatement
                   end
-                  
+
                   (lhs, lprop, rhs, _, _, SCode.NON_INITIAL(__), _)  => begin
                       @match DAE.C_PARAM() = Types.propAnyConst(lprop)
-                      lhs_str = ExpressionDump.printExpStr(lhs)
-                      rhs_str = ExpressionDump.printExpStr(rhs)
+                      lhs_str = CrefForHashTable.printExpStr(lhs)
+                      rhs_str = CrefForHashTable.printExpStr(rhs)
                       Error.addSourceMessage(Error.ASSIGN_PARAM_ERROR, list(lhs_str, rhs_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
                   end
-                  
+
                   (lhs, _, _, _, DAE.ATTR(variability = SCode.CONST(__)), _, _)  => begin
-                      lhs_str = ExpressionDump.printExpStr(lhs)
+                      lhs_str = CrefForHashTable.printExpStr(lhs)
                       Error.addSourceMessage(Error.ASSIGN_READONLY_ERROR, list("constant", lhs_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
                   end
-                  
+
                   (lhs, lhprop, rhs, rhprop, _, SCode.INITIAL(__), _)  => begin
                       @match DAE.C_PARAM() = Types.propAnyConst(lhprop)
                       outStatement = makeAssignment2(lhs, lhprop, rhs, rhprop, source)
                     outStatement
                   end
-                  
+
                   (lhs, lhprop, rhs, rhprop, DAE.ATTR(__), _, _)  => begin
                       @match DAE.C_VAR() = Types.propAnyConst(lhprop)
                       outStatement = makeAssignment2(lhs, lhprop, rhs, rhprop, source)
                     outStatement
                   end
-                  
+
                   (lhs, lprop, rhs, rprop, _, _, _)  => begin
                       lt = Types.getPropType(lprop)
                       rt = Types.getPropType(rprop)
                       @match false = Types.equivtypes(lt, rt)
-                      lhs_str = ExpressionDump.printExpStr(lhs)
-                      rhs_str = ExpressionDump.printExpStr(rhs)
+                      lhs_str = CrefForHashTable.printExpStr(lhs)
+                      rhs_str = CrefForHashTable.printExpStr(rhs)
                       lt_str = Types.unparseTypeNoAttr(lt)
                       rt_str = Types.unparseTypeNoAttr(rt)
                       info = ElementSource.getElementSourceFileInfo(source)
@@ -278,14 +276,14 @@
                       Error.addSourceMessage(Error.ASSIGN_TYPE_MISMATCH_ERROR, list(lhs_str, rhs_str, lt_str, rt_str), info)
                     fail()
                   end
-                  
+
                   (lhs, _, rhs, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- Algorithm.makeAssignment failed")
                       Debug.trace("    ")
-                      Debug.trace(ExpressionDump.printExpStr(lhs))
+                      Debug.trace(CrefForHashTable.printExpStr(lhs))
                       Debug.trace(" := ")
-                      Debug.traceln(ExpressionDump.printExpStr(rhs))
+                      Debug.traceln(CrefForHashTable.printExpStr(rhs))
                     fail()
                   end
                 end
@@ -304,7 +302,7 @@
         end
 
          #= Help function to makeAssignment =#
-        function makeAssignment2(lhs::DAE.Exp, lhprop::DAE.Properties, rhs::DAE.Exp, rhprop::DAE.Properties, source::DAE.ElementSource) ::DAE.Statement 
+        function makeAssignment2(lhs::DAE.Exp, lhprop::DAE.Properties, rhs::DAE.Exp, rhprop::DAE.Properties, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -323,12 +321,12 @@
                         @match rhs_1 begin
                           DAE.CALL(attr = DAE.CALL_ATTR(builtin = true), path = Absyn.IDENT("listAppend"), expLst = e1 && DAE.CREF(__) <| _) where (Expression.expEqual(lhs, e1))  => begin
                               if Flags.isSet(Flags.LIST_REVERSE_WRONG_ORDER) && ! max(SCodeUtil.commentHasBooleanNamedAnnotation(comment, "__OpenModelica_DisableListAppendWarning") for comment in ElementSource.getCommentsFromSource(source))
-                                Error.addSourceMessage(Error.LIST_REVERSE_WRONG_ORDER, list(ExpressionDump.printExpStr(e1)), ElementSource.getElementSourceFileInfo(source))
+                                Error.addSourceMessage(Error.LIST_REVERSE_WRONG_ORDER, list(CrefForHashTable.printExpStr(e1)), ElementSource.getElementSourceFileInfo(source))
                                 fail()
                               end
                             ()
                           end
-                          
+
                           _  => begin
                               ()
                           end
@@ -336,14 +334,14 @@
                       end
                     DAE.STMT_ASSIGN(t, lhs, rhs_1, source)
                   end
-                  
+
                   DAE.CREF(__)  => begin
                       (rhs_1, _) = Types.matchProp(rhs, rhprop, lhprop, false)
                       ty = Types.getPropType(lhprop)
                       t = Types.simplifyType(ty)
                     DAE.STMT_ASSIGN_ARR(t, lhs, rhs_1, source)
                   end
-                  
+
                   e3 && DAE.ASUB(_, _)  => begin
                       (rhs_1, _) = Types.matchProp(rhs, rhprop, lhprop, true)
                       t = getPropExpType(lhprop)
@@ -368,7 +366,7 @@
           outStatement
         end
 
-        function makeSimpleAssignment(inTpl::Tuple{<:DAE.Exp, DAE.Exp}, source::DAE.ElementSource) ::DAE.Statement 
+        function makeSimpleAssignment(inTpl::Tuple{<:DAE.Exp, DAE.Exp}, source::DAE.ElementSource) ::DAE.Statement
               local outStmt::DAE.Statement
 
               local e1::DAE.Exp
@@ -380,7 +378,7 @@
           outStmt
         end
 
-        function makeAssignmentsList(lhsExps::List{<:DAE.Exp}, lhsProps::List{<:DAE.Properties}, rhsExps::List{<:DAE.Exp}, rhsProps::List{<:DAE.Properties}, attributes::DAE.Attributes, initial_::SCode.Initial, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeAssignmentsList(lhsExps::List{<:DAE.Exp}, lhsProps::List{<:DAE.Properties}, rhsExps::List{<:DAE.Exp}, rhsProps::List{<:DAE.Properties}, attributes::DAE.Attributes, initial_::SCode.Initial, source::DAE.ElementSource) ::List{DAE.Statement}
               local assignments::List{DAE.Statement}
 
               assignments = begin
@@ -398,11 +396,11 @@
                   ( nil(),  nil(), _, _, _, _, _)  => begin
                     nil
                   end
-                  
+
                   (DAE.CREF(componentRef = DAE.WILD(__)) <| rest_lhs, _ <| rest_lhs_prop, _ <| rest_rhs, _ <| rest_rhs_prop, _, _, _)  => begin
                     makeAssignmentsList(rest_lhs, rest_lhs_prop, rest_rhs, rest_rhs_prop, attributes, initial_, source)
                   end
-                  
+
                   (lhs <| rest_lhs, lhs_prop <| rest_lhs_prop, rhs <| rest_rhs, rhs_prop <| rest_rhs_prop, _, _, _)  => begin
                       ass = makeAssignment(lhs, lhs_prop, rhs, rhs_prop, attributes, initial_, source)
                       rest_ass = makeAssignmentsList(rest_lhs, rest_lhs_prop, rest_rhs, rest_rhs_prop, attributes, initial_, source)
@@ -417,7 +415,7 @@
          #= @author: adrpo
          check if the parameters on rhs have fixed = false
          and fail otherwise =#
-        function checkLHSWritable(lhs::List{<:DAE.Exp}, props::List{<:DAE.Properties}, rhs::DAE.Exp, source::DAE.ElementSource)  
+        function checkLHSWritable(lhs::List{<:DAE.Exp}, props::List{<:DAE.Properties}, rhs::DAE.Exp, source::DAE.ElementSource)
               local ty::DAE.Type
               local i::ModelicaInteger = 1
               local c::String
@@ -430,26 +428,26 @@
                     DAE.PROP(constFlag = DAE.C_VAR(__))  => begin
                       ()
                     end
-                    
+
                     DAE.PROP(_, DAE.C_CONST(__))  => begin
-                        l = stringAppendList(list("(", stringDelimitList(ListUtil.map(lhs, ExpressionDump.printExpStr), ", "), ")"))
-                        r = ExpressionDump.printExpStr(rhs)
+                        l = stringAppendList(list("(", stringDelimitList(ListUtil.map(lhs, CrefForHashTable.printExpStr), ", "), ")"))
+                        r = CrefForHashTable.printExpStr(rhs)
                         Error.addSourceMessage(Error.ASSIGN_CONSTANT_ERROR, list(l, r), ElementSource.getElementSourceFileInfo(source))
                         fail()
                       ()
                     end
-                    
+
                     DAE.PROP(ty, DAE.C_PARAM(__))  => begin
                         if Types.getFixedVarAttributeParameterOrConstant(ty)
-                          l = stringAppendList(list("(", stringDelimitList(ListUtil.map(lhs, ExpressionDump.printExpStr), ", "), ")"))
-                          r = ExpressionDump.printExpStr(rhs)
-                          c = ExpressionDump.printExpStr(listGet(lhs, i))
+                          l = stringAppendList(list("(", stringDelimitList(ListUtil.map(lhs, CrefForHashTable.printExpStr), ", "), ")"))
+                          r = CrefForHashTable.printExpStr(rhs)
+                          c = CrefForHashTable.printExpStr(listGet(lhs, i))
                           Error.addSourceMessage(Error.ASSIGN_PARAM_FIXED_ERROR, list(c, l, r), ElementSource.getElementSourceFileInfo(source))
                           fail()
                         end
                       ()
                     end
-                    
+
                     DAE.PROP_TUPLE(_, _)  => begin
                       ()
                     end
@@ -464,7 +462,7 @@
          #= This function creates an `DAE.STMT_TUPLE_ASSIGN\\' construct, and checks that the
           assignment is semantically valid, which means that the component
           being assigned is not constant, and that the types match. =#
-        function makeTupleAssignment(inExpExpLst::List{<:DAE.Exp}, inTypesPropertiesLst::List{<:DAE.Properties}, inExp::DAE.Exp, inProperties::DAE.Properties, initial_::SCode.Initial, source::DAE.ElementSource) ::DAE.Statement 
+        function makeTupleAssignment(inExpExpLst::List{<:DAE.Exp}, inTypesPropertiesLst::List{<:DAE.Properties}, inExp::DAE.Exp, inProperties::DAE.Properties, initial_::SCode.Initial, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -491,45 +489,45 @@
                   (lhs, lprop, rhs, _, _, _)  => begin
                       bvals = ListUtil.map(lprop, Types.propAnyConst)
                       @match DAE.C_CONST() = ListUtil.reduce(bvals, Types.constOr)
-                      sl = ListUtil.map(lhs, ExpressionDump.printExpStr)
+                      sl = ListUtil.map(lhs, CrefForHashTable.printExpStr)
                       s = stringDelimitList(sl, ", ")
                       lhs_str = stringAppendList(list("(", s, ")"))
-                      rhs_str = ExpressionDump.printExpStr(rhs)
+                      rhs_str = CrefForHashTable.printExpStr(rhs)
                       Error.addSourceMessage(Error.ASSIGN_CONSTANT_ERROR, list(lhs_str, rhs_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
                   end
-                  
+
                   (lhs, lprop, rhs, _, SCode.NON_INITIAL(__), _)  => begin
                       bvals = ListUtil.map(lprop, Types.propAnyConst)
                       @match DAE.C_PARAM() = ListUtil.reduce(bvals, Types.constOr)
-                      sl = ListUtil.map(lhs, ExpressionDump.printExpStr)
+                      sl = ListUtil.map(lhs, CrefForHashTable.printExpStr)
                       s = stringDelimitList(sl, ", ")
                       lhs_str = stringAppendList(list("(", s, ")"))
-                      rhs_str = ExpressionDump.printExpStr(rhs)
+                      rhs_str = CrefForHashTable.printExpStr(rhs)
                       Error.addSourceMessage(Error.ASSIGN_PARAM_ERROR, list(lhs_str, rhs_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
                   end
-                  
+
                   (expl, lhprops, rhs, DAE.PROP(type_ = ty && DAE.T_TUPLE(types = tpl)), _, _)  => begin
                       checkLHSWritable(expl, lhprops, rhs, source)
                       lhrtypes = ListUtil.map(lhprops, Types.getPropType)
                       Types.matchTypeTupleCall(rhs, tpl, lhrtypes)
                     makeTupleAssignmentNoTypeCheck(ty, expl, rhs, source)
                   end
-                  
+
                   (expl, lhprops, rhs, DAE.PROP_TUPLE(type_ = ty && DAE.T_TUPLE(types = tpl), tupleConst = DAE.TUPLE_CONST(__)), _, _)  => begin
                       checkLHSWritable(expl, lhprops, rhs, source)
                       lhrtypes = ListUtil.map(lhprops, Types.getPropType)
                       Types.matchTypeTupleCall(rhs, tpl, lhrtypes)
                     makeTupleAssignmentNoTypeCheck(ty, expl, rhs, source)
                   end
-                  
+
                   (lhs, lprop, rhs, rprop, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
-                      sl = ListUtil.map(lhs, ExpressionDump.printExpStr)
+                      sl = ListUtil.map(lhs, CrefForHashTable.printExpStr)
                       s = stringDelimitList(sl, ", ")
                       lhs_str = stringAppendList(list("(", s, ")"))
-                      rhs_str = ExpressionDump.printExpStr(rhs)
+                      rhs_str = CrefForHashTable.printExpStr(rhs)
                       str1 = stringDelimitList(ListUtil.map(lprop, Types.printPropStr), ", ")
                       str2 = Types.printPropStr(rprop)
                       strInitial = SCodeDump.printInitialStr(initial_)
@@ -550,7 +548,7 @@
 
          #= Returns the expression type for a given Properties by calling
           getTypeExpType. Used by makeAssignment. =#
-        function getPropExpType(p::DAE.Properties) ::DAE.Type 
+        function getPropExpType(p::DAE.Properties) ::DAE.Type
               local t::DAE.Type
 
               local ty::DAE.Type
@@ -563,7 +561,7 @@
          #= This function creates an `DAE.STMT_IF\\' construct, checking that the types
           of the parts are correct. Else part is generated using the makeElse
           function. =#
-        function makeIf(inExp::DAE.Exp, inProperties::DAE.Properties, inTrueBranch::List{<:DAE.Statement}, inElseIfBranches::List{<:Tuple{<:DAE.Exp, DAE.Properties, List{<:DAE.Statement}}}, inElseBranch::List{<:DAE.Statement}, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeIf(inExp::DAE.Exp, inProperties::DAE.Properties, inTrueBranch::List{<:DAE.Statement}, inElseIfBranches::List{<:Tuple{<:DAE.Exp, DAE.Properties, List{<:DAE.Statement}}}, inElseBranch::List{<:DAE.Statement}, source::DAE.ElementSource) ::List{DAE.Statement}
               local outStatements::List{DAE.Statement}
 
               outStatements = begin
@@ -580,23 +578,23 @@
                   (DAE.BCONST(true), _, tb, _, _, _)  => begin
                     tb
                   end
-                  
+
                   (DAE.BCONST(false), _, _,  nil(), fb, _)  => begin
                     fb
                   end
-                  
+
                   (DAE.BCONST(false), _, _, (e, prop, tb) <| eib, fb, _)  => begin
                     makeIf(e, prop, tb, eib, fb, source)
                   end
-                  
+
                   (e, DAE.PROP(type_ = t), tb, eib, fb, _)  => begin
                       (e, _) = Types.matchType(e, t, DAE.T_BOOL_DEFAULT, true)
                       else_ = makeElse(eib, fb, source)
                     list(DAE.STMT_IF(e, tb, else_, source))
                   end
-                  
+
                   (e, DAE.PROP(type_ = t), _, _, _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       Error.addSourceMessage(Error.IF_CONDITION_TYPE_ERROR, list(e_str, t_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
@@ -606,9 +604,9 @@
           outStatements
         end
 
-         #= 
+         #=
           Create an if-statement from branches, optimizing as needed. =#
-        function makeIfFromBranches(branches::List{<:Tuple{<:DAE.Exp, List{<:DAE.Statement}}}, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeIfFromBranches(branches::List{<:Tuple{<:DAE.Exp, List{<:DAE.Statement}}}, source::DAE.ElementSource) ::List{DAE.Statement}
               local outStatements::List{DAE.Statement}
 
               outStatements = begin
@@ -620,7 +618,7 @@
                   ( nil(), _)  => begin
                     nil
                   end
-                  
+
                   ((e, br) <| rest, _)  => begin
                       else_ = makeElseFromBranches(rest)
                     list(DAE.STMT_IF(e, br, else_, source))
@@ -631,7 +629,7 @@
         end
 
          #= Creates the ELSE part of the DAE.STMT_IF. =#
-        function makeElseFromBranches(inTpl::List{<:Tuple{<:DAE.Exp, List{<:DAE.Statement}}}) ::DAE.Else 
+        function makeElseFromBranches(inTpl::List{<:Tuple{<:DAE.Exp, List{<:DAE.Statement}}}) ::DAE.Else
               local outElse::DAE.Else
 
               outElse = begin
@@ -643,11 +641,11 @@
                    nil()  => begin
                     DAE.NOELSE()
                   end
-                  
+
                   (DAE.BCONST(true), b) <|  nil()  => begin
                     DAE.ELSE(b)
                   end
-                  
+
                   (e, b) <| xs  => begin
                       else_ = makeElseFromBranches(xs)
                     DAE.ELSEIF(e, b, else_)
@@ -658,7 +656,7 @@
         end
 
          #= Every time we re-create/walk an if-statement, we optimize a bit :) =#
-        function optimizeIf(icond::DAE.Exp, istmts::List{<:DAE.Statement}, iels::DAE.Else, isource::DAE.ElementSource) ::Tuple{List{DAE.Statement}, Bool} 
+        function optimizeIf(icond::DAE.Exp, istmts::List{<:DAE.Statement}, iels::DAE.Else, isource::DAE.ElementSource) ::Tuple{List{DAE.Statement}, Bool}
               local changed::Bool
               local ostmts::List{DAE.Statement} #= can be empty or selected branch =#
 
@@ -671,20 +669,20 @@
                   (DAE.BCONST(true), stmts, _, _)  => begin
                     (stmts, true)
                   end
-                  
+
                   (DAE.BCONST(false), _, DAE.NOELSE(__), _)  => begin
                     (nil, true)
                   end
-                  
+
                   (DAE.BCONST(false), _, DAE.ELSE(stmts), _)  => begin
                     (stmts, true)
                   end
-                  
+
                   (DAE.BCONST(false), _, DAE.ELSEIF(cond, stmts, els), source)  => begin
                       (ostmts, _) = optimizeIf(cond, stmts, els, source)
                     (ostmts, true)
                   end
-                  
+
                   _  => begin
                       (_cons(DAE.STMT_IF(icond, istmts, iels, isource), nil), false)
                   end
@@ -694,7 +692,7 @@
         end
 
          #= Every time we re-create/walk an if-statement, we optimize a bit :) =#
-        function optimizeElseIf(cond::DAE.Exp, stmts::List{<:DAE.Statement}, els::DAE.Else) ::DAE.Else 
+        function optimizeElseIf(cond::DAE.Exp, stmts::List{<:DAE.Statement}, els::DAE.Else) ::DAE.Else
               local oelse::DAE.Else
 
               oelse = begin
@@ -702,11 +700,11 @@
                   (DAE.BCONST(true), _, _)  => begin
                     DAE.ELSE(stmts)
                   end
-                  
+
                   (DAE.BCONST(false), _, _)  => begin
                     els
                   end
-                  
+
                   _  => begin
                       DAE.ELSEIF(cond, stmts, els)
                   end
@@ -716,7 +714,7 @@
         end
 
          #= This function creates the ELSE part of the DAE.STMT_IF and checks if is correct. =#
-        function makeElse(inTuple::List{<:Tuple{<:DAE.Exp, DAE.Properties, List{<:DAE.Statement}}}, inStatementLst::List{<:DAE.Statement}, inSource::DAE.ElementSource) ::DAE.Else 
+        function makeElse(inTuple::List{<:Tuple{<:DAE.Exp, DAE.Properties, List{<:DAE.Statement}}}, inStatementLst::List{<:DAE.Statement}, inSource::DAE.ElementSource) ::DAE.Else
               local outElse::DAE.Else
 
               outElse = begin
@@ -733,27 +731,27 @@
                   ( nil(),  nil(), _)  => begin
                     DAE.NOELSE()
                   end
-                  
+
                   ( nil(), fb, _)  => begin
                     DAE.ELSE(fb)
                   end
-                  
+
                   ((DAE.BCONST(true), DAE.PROP(__), b) <| _, _, _)  => begin
                     DAE.ELSE(b)
                   end
-                  
+
                   ((DAE.BCONST(false), DAE.PROP(__), _) <| xs, fb, _)  => begin
                     makeElse(xs, fb, inSource)
                   end
-                  
+
                   ((e, DAE.PROP(type_ = t), b) <| xs, fb, _)  => begin
                       (e, _) = Types.matchType(e, t, DAE.T_BOOL_DEFAULT, true)
                       else_ = makeElse(xs, fb, inSource)
                     DAE.ELSEIF(e, b, else_)
                   end
-                  
+
                   ((e, DAE.PROP(type_ = t), _) <| _, _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       info = ElementSource.getElementSourceFileInfo(inSource)
                       Error.addSourceMessage(Error.IF_CONDITION_TYPE_ERROR, list(e_str, t_str), info)
@@ -767,7 +765,7 @@
 
          #= This function creates a DAE.STMT_FOR construct, checking
           that the types of the parts are correct. =#
-        function makeFor(inIdent::String, inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement 
+        function makeFor(inIdent::String, inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -785,19 +783,19 @@
                       isArray = Types.isNonscalarArray(t, dims)
                     DAE.STMT_FOR(t, isArray, i, -1, e, stmts, source)
                   end
-                  
+
                   (i, e, DAE.PROP(type_ = DAE.T_METALIST(ty = t)), stmts, _)  => begin
                       t = Types.simplifyType(t)
                     DAE.STMT_FOR(t, false, i, -1, e, stmts, source)
                   end
-                  
+
                   (i, e, DAE.PROP(type_ = DAE.T_METAARRAY(ty = t)), stmts, _)  => begin
                       t = Types.simplifyType(t)
                     DAE.STMT_FOR(t, false, i, -1, e, stmts, source)
                   end
-                  
+
                   (_, e, DAE.PROP(type_ = t), _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       Error.addSourceMessage(Error.FOR_EXPRESSION_TYPE_ERROR, list(e_str, t_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
@@ -809,7 +807,7 @@
 
          #= This function creates a DAE.STMT_PARFOR construct, checking
           that the types of the parts are correct. =#
-        function makeParFor(inIdent::String, inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, inLoopPrlVars::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, source::DAE.ElementSource) ::DAE.Statement 
+        function makeParFor(inIdent::String, inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, inLoopPrlVars::List{<:Tuple{<:DAE.ComponentRef, SourceInfo}}, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -828,9 +826,9 @@
                       _ = Types.simplifyType(t)
                     DAE.STMT_PARFOR(t, isArray, i, -1, e, stmts, inLoopPrlVars, source)
                   end
-                  
+
                   (_, e, DAE.PROP(type_ = t), _, _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       Error.addSourceMessage(Error.FOR_EXPRESSION_TYPE_ERROR, list(e_str, t_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
@@ -842,7 +840,7 @@
 
          #= This function creates a DAE.STMT_WHILE construct, checking that the types
           of the parts are correct. =#
-        function makeWhile(inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement 
+        function makeWhile(inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -855,9 +853,9 @@
                   (e, DAE.PROP(type_ = DAE.T_BOOL(__)), stmts, _)  => begin
                     DAE.STMT_WHILE(e, stmts, source)
                   end
-                  
+
                   (e, DAE.PROP(type_ = t), _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       Error.addSourceMessage(Error.WHILE_CONDITION_TYPE_ERROR, list(e_str, t_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
@@ -869,7 +867,7 @@
 
          #= This function creates a DAE.STMT_WHEN algorithm construct,
           checking that the types of the parts are correct. =#
-        function makeWhenA(inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, elseWhenStmt::Option{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement 
+        function makeWhenA(inExp::DAE.Exp, inProperties::DAE.Properties, inStatementLst::List{<:DAE.Statement}, elseWhenStmt::Option{<:DAE.Statement}, source::DAE.ElementSource) ::DAE.Statement
               local outStatement::DAE.Statement
 
               outStatement = begin
@@ -883,13 +881,13 @@
                   (e, DAE.PROP(type_ = DAE.T_BOOL(__)), stmts, elsew, _)  => begin
                     DAE.STMT_WHEN(e, nil, false, stmts, elsew, source)
                   end
-                  
+
                   (e, DAE.PROP(type_ = DAE.T_ARRAY(ty = DAE.T_BOOL(__))), stmts, elsew, _)  => begin
                     DAE.STMT_WHEN(e, nil, false, stmts, elsew, source)
                   end
-                  
+
                   (e, DAE.PROP(type_ = t), _, _, _)  => begin
-                      e_str = ExpressionDump.printExpStr(e)
+                      e_str = CrefForHashTable.printExpStr(e)
                       t_str = Types.unparseTypeNoAttr(t)
                       Error.addSourceMessage(Error.WHEN_CONDITION_TYPE_ERROR, list(e_str, t_str), ElementSource.getElementSourceFileInfo(source))
                     fail()
@@ -901,7 +899,7 @@
 
          #=  creates a reinit statement in an algorithm
          statement, only valid in when algorithm sections. =#
-        function makeReinit(inExp1::DAE.Exp, inExp2::DAE.Exp, inProperties3::DAE.Properties, inProperties4::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeReinit(inExp1::DAE.Exp, inExp2::DAE.Exp, inProperties3::DAE.Properties, inProperties4::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement}
               local outStatement::List{DAE.Statement}
 
               outStatement = begin
@@ -919,7 +917,7 @@
                       var_1 = Types.matchType(var, tp1, DAE.T_REAL_DEFAULT, true)
                     list(DAE.STMT_REINIT(var_1, val_1, source))
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INTERNAL_ERROR, list("reinit called with wrong args"), ElementSource.getElementSourceFileInfo(source))
                       fail()
@@ -933,7 +931,7 @@
 
          #= Creates an assert statement from two expressions.
          =#
-        function makeAssert(cond::DAE.Exp #= condition =#, msg::DAE.Exp #= message =#, level::DAE.Exp, inProperties3::DAE.Properties, inProperties4::DAE.Properties, inProperties5::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeAssert(cond::DAE.Exp #= condition =#, msg::DAE.Exp #= message =#, level::DAE.Exp, inProperties3::DAE.Properties, inProperties4::DAE.Properties, inProperties5::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement}
               local outStatement::List{DAE.Statement}
 
               outStatement = begin
@@ -947,21 +945,21 @@
                   (DAE.BCONST(true), _, _, DAE.PROP(type_ = DAE.T_BOOL(__)), DAE.PROP(type_ = DAE.T_STRING(__)), DAE.PROP(type_ = DAE.T_ENUMERATION(path = Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")))), _)  => begin
                     nil
                   end
-                  
+
                   (_, _, _, DAE.PROP(type_ = DAE.T_BOOL(__)), DAE.PROP(type_ = DAE.T_STRING(__)), DAE.PROP(type_ = DAE.T_ENUMERATION(path = Absyn.FULLYQUALIFIED(Absyn.IDENT("AssertionLevel")))), _)  => begin
                     list(DAE.STMT_ASSERT(cond, msg, level, source))
                   end
-                  
+
                   (_, _, _, DAE.PROP(type_ = t1), DAE.PROP(type_ = t2), DAE.PROP(type_ = t3), _)  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
-                      strExp = ExpressionDump.printExpStr(cond)
+                      strExp = CrefForHashTable.printExpStr(cond)
                       strTy = Types.unparseType(t1)
                       Error.assertionOrAddSourceMessage(Types.isBooleanOrSubTypeBoolean(t1), Error.EXP_TYPE_MISMATCH, list(strExp, "Boolean", strTy), info)
-                      strExp = ExpressionDump.printExpStr(msg)
+                      strExp = CrefForHashTable.printExpStr(msg)
                       strTy = Types.unparseType(t2)
                       Error.assertionOrAddSourceMessage(Types.isString(t2), Error.EXP_TYPE_MISMATCH, list(strExp, "String", strTy), info)
                       @shouldFail @match DAE.T_ENUMERATION(path = Absyn.IDENT("AssertionLevel")) = t3
-                      strExp = ExpressionDump.printExpStr(level)
+                      strExp = CrefForHashTable.printExpStr(level)
                       strTy = Types.unparseType(t3)
                       Error.assertionOrAddSourceMessage(Types.isString(t3), Error.EXP_TYPE_MISMATCH, list(strExp, "AssertionLevel", strTy), info)
                     fail()
@@ -971,10 +969,10 @@
           outStatement
         end
 
-         #= 
+         #=
           Creates a terminate statement from message expression.
          =#
-        function makeTerminate(msg::DAE.Exp #= message =#, props::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement} 
+        function makeTerminate(msg::DAE.Exp #= message =#, props::DAE.Properties, source::DAE.ElementSource) ::List{DAE.Statement}
               local outStatement::List{DAE.Statement}
 
               outStatement = begin
@@ -988,18 +986,18 @@
         end
 
          #= Returns all crefs from an algorithm =#
-        function getCrefFromAlg(alg::DAE.Algorithm) ::List{DAE.ComponentRef} 
+        function getCrefFromAlg(alg::DAE.Algorithm) ::List{DAE.ComponentRef}
               local crs::List{DAE.ComponentRef}
 
-              crs = ListUtil.unionOnTrueList(ListUtil.map(getAllExps(alg), Expression.extractCrefsFromExp), ComponentReference.crefEqual)
+              crs = ListUtil.unionOnTrueList(ListUtil.map(getAllExps(alg), Expression.extractCrefsFromExp), CrefForHashTable.crefEqual)
           crs
         end
 
-         #= 
+         #=
           This function goes through the Algorithm structure and finds all the
           expressions and returns them in a list
          =#
-        function getAllExps(inAlgorithm::DAE.Algorithm) ::List{DAE.Exp} 
+        function getAllExps(inAlgorithm::DAE.Algorithm) ::List{DAE.Exp}
               local outExpExpLst::List{DAE.Exp}
 
               outExpExpLst = begin
@@ -1015,18 +1013,18 @@
           outExpExpLst
         end
 
-         #= 
+         #=
           This function takes a list of statements and returns all expressions and subexpressions
           in all statements.
          =#
-        function getAllExpsStmts(stmts::List{<:DAE.Statement}) ::List{DAE.Exp} 
+        function getAllExpsStmts(stmts::List{<:DAE.Statement}) ::List{DAE.Exp}
               local exps::List{DAE.Exp}
 
-              (_, (_, exps)) = DAEUtil.traverseDAEEquationsStmts(stmts, Expression.traverseSubexpressionsHelper, (Expression.expressionCollector, nil))
+              (_, (_, exps)) = DAETraverse.traverseDAEEquationsStmts(stmts, Expression.traverseSubexpressionsHelper, (Expression.expressionCollector, nil))
           exps
         end
 
-        function getStatementSource(stmt::DAE.Statement) ::DAE.ElementSource 
+        function getStatementSource(stmt::DAE.Statement) ::DAE.ElementSource
               local source::DAE.ElementSource
 
               source = begin
@@ -1034,67 +1032,67 @@
                   DAE.STMT_ASSIGN(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_TUPLE_ASSIGN(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_ASSIGN_ARR(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_IF(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_FOR(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_PARFOR(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_WHILE(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_WHEN(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_ASSERT(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_TERMINATE(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_REINIT(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_NORETCALL(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_RETURN(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_BREAK(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_CONTINUE(source = source)  => begin
                     source
                   end
-                  
+
                   DAE.STMT_FAILURE(source = source)  => begin
                     source
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Algorithm.getStatementSource"))
                       fail()
@@ -1104,14 +1102,14 @@
           source
         end
 
-        function getAssertCond(stmt::DAE.Statement) ::DAE.Exp 
+        function getAssertCond(stmt::DAE.Statement) ::DAE.Exp
               local cond::DAE.Exp
 
               @match DAE.STMT_ASSERT(cond = cond) = stmt
           cond
         end
 
-        function isNotDummyStatement(stmt::DAE.Statement) ::Bool 
+        function isNotDummyStatement(stmt::DAE.Statement) ::Bool
               local b::Bool
 
               b = begin
@@ -1121,7 +1119,7 @@
                       (_, b) = Expression.traverseExpBottomUp(exp, Expression.hasNoSideEffects, true)
                     ! b
                   end
-                  
+
                   _  => begin
                       true
                   end

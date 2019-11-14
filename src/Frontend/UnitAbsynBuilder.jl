@@ -68,7 +68,7 @@
 
         import FNode
 
-        import FGraph
+        import FGraphUtil
 
         import ListUtil
 
@@ -120,7 +120,7 @@
                 @matchcontinue (p, tpl) begin
                   (_, _)  => begin
                       (_, _, env) = Lookup.lookupClass(Util.tuple21(tpl), Util.tuple22(tpl), p, NONE())
-                      r = FGraph.lastScopeRef(env)
+                      r = FGraphUtil.lastScopeRef(env)
                       r = FNode.child(r, FNode.duNodeName)
                       @match FCore.N(data = FCore.DU(du)) = FNode.fromRef(r)
                     du

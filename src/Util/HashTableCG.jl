@@ -1,4 +1,4 @@
-  module HashTableCG 
+  module HashTableCG
 
 
     using MetaModelica
@@ -54,17 +54,15 @@
 
         import DAE
 
-        import ComponentReference
+        import CrefForHashTable
 
-        Key = DAE.ComponentRef 
+        Key = DAE.ComponentRef
 
-        Value = DAE.ComponentRef 
+        Value = DAE.ComponentRef
 
-        HashTableCrefFunctionsType = Tuple 
+        HashTableCrefFunctionsType = Tuple
 
-        HashTable = Tuple 
-
-
+        HashTable = Tuple
 
 
 
@@ -72,25 +70,27 @@
 
 
 
-         #= 
+
+
+         #=
           Returns an empty HashTable.
           Using the default bucketsize..
          =#
-        function emptyHashTable() ::HashTable 
+        function emptyHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
           hashTable
         end
 
-         #= 
+         #=
           Returns an empty HashTable.
           Using the bucketsize size.
          =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (ComponentReference.hashComponentRefMod, ComponentReference.crefEqual, ComponentReference.printComponentRefStr, ComponentReference.printComponentRefStr))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashComponentRefMod, CrefForHashTable.crefEqual, CrefForHashTable.printComponentRefStr, CrefForHashTable.printComponentRefStr))
           hashTable
         end
 

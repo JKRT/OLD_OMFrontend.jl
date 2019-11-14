@@ -72,7 +72,7 @@
         import FBuiltin
         import FCoreUtil
         import Flags
-        import FGraph
+        import FGraphUtil
         import FNode
         import GC
         import GenerateAPIFunctionsTpl
@@ -2639,8 +2639,8 @@
               if ! skip
                 try
                   ErrorExt.setCheckpoint("getNonPartialElementsForInstantiatedClass")
-                  (_, env) = Inst.instantiateClass(FCoreUtil.emptyCache(), InnerOuter.emptyInstHierarchy, sp, AbsynUtil.makeNotFullyQualified(p), doSCodeDep = false)
-                  elts = FCore.RefTree.fold(FNode.children(FNode.fromRef(FGraph.lastScopeRef(env))), addNonPartialClassRef, nil)
+                  (_, env) = Inst.instantiateClass(FCoreUtil.emptyCache(), InnerOuterTypes.emptyInstHierarchy, sp, AbsynUtil.makeNotFullyQualified(p), doSCodeDep = false)
+                  elts = FCore.RefTree.fold(FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env))), addNonPartialClassRef, nil)
                   ErrorExt.rollBack("getNonPartialElementsForInstantiatedClass")
                   return elts
                 catch
@@ -2722,7 +2722,7 @@
                   end
                   
                   (cache, env, DAE.CALL(path = funcpath), _, _, msg, _)  => begin
-                      @match true = FGraph.isNotEmpty(env)
+                      @match true = FGraphUtil.isNotEmpty(env)
                       cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                     fail()
                   end
@@ -2880,7 +2880,7 @@
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                       @match (cache, (@match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc), env) = Lookup.lookupClass(cache, env, funcpath)
                       isCevaluableFunction(sc)
-                      (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
+                      (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
                       func = FCoreUtil.getCachedInstFunc(cache, funcpath)
                       (cache, newval) = CevalFunction.evaluate(cache, env, func, vallst)
                     (cache, newval)

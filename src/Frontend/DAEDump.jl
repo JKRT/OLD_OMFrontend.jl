@@ -53,7 +53,7 @@
          #=  protected imports
          =#
 
-        import ComponentReference
+        import CrefForHashTable
 
         import Config
 
@@ -73,7 +73,7 @@
 
         import Expression
 
-        import ExpressionDump
+        import CrefForHashTable
 
         import Absyn
 
@@ -476,7 +476,7 @@
                 @matchcontinue inStartValue begin
                   SOME(e)  => begin
                       Print.printBuf("(start=")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(")")
                     ()
                   end
@@ -498,7 +498,7 @@
                   local e::DAE.Exp
                 @matchcontinue inStartValue begin
                   SOME(e)  => begin
-                      s = ExpressionDump.printExpStr(e)
+                      s = CrefForHashTable.printExpStr(e)
                       res = stringAppendList(list("(start=", s, ")"))
                     res
                   end
@@ -562,18 +562,18 @@
                   end
 
                   DAE.EXTARG(componentRef = cr)  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
                     crstr
                   end
 
                   DAE.EXTARGEXP(exp = exp)  => begin
-                      crstr = ExpressionDump.printExpStr(exp)
+                      crstr = CrefForHashTable.printExpStr(exp)
                     crstr
                   end
 
                   DAE.EXTARGSIZE(componentRef = cr, exp = dim)  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
-                      dimstr = ExpressionDump.printExpStr(dim)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
+                      dimstr = CrefForHashTable.printExpStr(dim)
                       str = stringAppendList(list("size(", crstr, ", ", dimstr, ")"))
                     str
                   end
@@ -831,9 +831,9 @@
                   local paramNames_str::String
                 @match distribution begin
                   DAE.DISTRIBUTION(name = name, params = params, paramNames = paramNames)  => begin
-                      name_str = ExpressionDump.printExpStr(name)
-                      params_str = ExpressionDump.printExpStr(params)
-                      paramNames_str = ExpressionDump.printExpStr(paramNames)
+                      name_str = CrefForHashTable.printExpStr(name)
+                      params_str = CrefForHashTable.printExpStr(params)
+                      paramNames_str = CrefForHashTable.printExpStr(paramNames)
                     "Distribution(name = " + name_str + ", params = " + params_str + ", paramNames= " + paramNames_str + ")"
                   end
                 end
@@ -883,15 +883,15 @@
                   local dist::Option{DAE.Distribution}
                 @matchcontinue inVariableAttributesOption begin
                   SOME(DAE.VAR_ATTR_REAL(quant, unit, displayUnit, min, max, initialExp, fixed, nominal, stateSel, uncertainty, dist, _, _, _, startOrigin))  => begin
-                      quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
-                      unit_str = Dump.getOptionWithConcatStr(unit, ExpressionDump.printExpStr, "unit = ")
-                      displayUnit_str = Dump.getOptionWithConcatStr(displayUnit, ExpressionDump.printExpStr, "displayUnit = ")
+                      quantity = Dump.getOptionWithConcatStr(quant, CrefForHashTable.printExpStr, "quantity = ")
+                      unit_str = Dump.getOptionWithConcatStr(unit, CrefForHashTable.printExpStr, "unit = ")
+                      displayUnit_str = Dump.getOptionWithConcatStr(displayUnit, CrefForHashTable.printExpStr, "displayUnit = ")
                       stateSel_str = Dump.getOptionWithConcatStr(stateSel, dumpStateSelectStr, "stateSelect = ")
-                      min_str = Dump.getOptionWithConcatStr(min, ExpressionDump.printExpStr, "min = ")
-                      max_str = Dump.getOptionWithConcatStr(max, ExpressionDump.printExpStr, "max = ")
-                      nominal_str = Dump.getOptionWithConcatStr(nominal, ExpressionDump.printExpStr, "nominal = ")
-                      initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
-                      fixed_str = Dump.getOptionWithConcatStr(fixed, ExpressionDump.printExpStr, "fixed = ")
+                      min_str = Dump.getOptionWithConcatStr(min, CrefForHashTable.printExpStr, "min = ")
+                      max_str = Dump.getOptionWithConcatStr(max, CrefForHashTable.printExpStr, "max = ")
+                      nominal_str = Dump.getOptionWithConcatStr(nominal, CrefForHashTable.printExpStr, "nominal = ")
+                      initial_str = Dump.getOptionWithConcatStr(initialExp, CrefForHashTable.printExpStr, "start = ")
+                      fixed_str = Dump.getOptionWithConcatStr(fixed, CrefForHashTable.printExpStr, "fixed = ")
                       uncertainty_str = Dump.getOptionWithConcatStr(uncertainty, dumpUncertaintyStr, "uncertainty = ")
                       dist_str = Dump.getOptionWithConcatStr(dist, dumpDistributionStr, "distribution = ")
                       startOriginStr = getStartOrigin(startOrigin)
@@ -905,11 +905,11 @@
                   end
 
                   SOME(DAE.VAR_ATTR_INT(quant, min, max, initialExp, fixed, uncertainty, dist, _, _, _, startOrigin))  => begin
-                      quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
-                      min_str = Dump.getOptionWithConcatStr(min, ExpressionDump.printExpStr, "min = ")
-                      max_str = Dump.getOptionWithConcatStr(max, ExpressionDump.printExpStr, "max = ")
-                      initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
-                      fixed_str = Dump.getOptionWithConcatStr(fixed, ExpressionDump.printExpStr, "fixed = ")
+                      quantity = Dump.getOptionWithConcatStr(quant, CrefForHashTable.printExpStr, "quantity = ")
+                      min_str = Dump.getOptionWithConcatStr(min, CrefForHashTable.printExpStr, "min = ")
+                      max_str = Dump.getOptionWithConcatStr(max, CrefForHashTable.printExpStr, "max = ")
+                      initial_str = Dump.getOptionWithConcatStr(initialExp, CrefForHashTable.printExpStr, "start = ")
+                      fixed_str = Dump.getOptionWithConcatStr(fixed, CrefForHashTable.printExpStr, "fixed = ")
                       uncertainty_str = Dump.getOptionWithConcatStr(uncertainty, dumpUncertaintyStr, "uncertainty = ")
                       dist_str = Dump.getOptionWithConcatStr(dist, dumpDistributionStr, "distribution = ")
                       startOriginStr = getStartOrigin(startOrigin)
@@ -923,9 +923,9 @@
                   end
 
                   SOME(DAE.VAR_ATTR_BOOL(quant, initialExp, fixed, _, _, _, startOrigin))  => begin
-                      quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
-                      initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
-                      fixed_str = Dump.getOptionWithConcatStr(fixed, ExpressionDump.printExpStr, "fixed = ")
+                      quantity = Dump.getOptionWithConcatStr(quant, CrefForHashTable.printExpStr, "quantity = ")
+                      initial_str = Dump.getOptionWithConcatStr(initialExp, CrefForHashTable.printExpStr, "start = ")
+                      fixed_str = Dump.getOptionWithConcatStr(fixed, CrefForHashTable.printExpStr, "fixed = ")
                       startOriginStr = getStartOrigin(startOrigin)
                       res_1 = Util.stringDelimitListNonEmptyElts(list(quantity, initial_str, fixed_str, startOriginStr), ", ")
                       res = if stringEmpty(res_1)
@@ -937,9 +937,9 @@
                   end
 
                   SOME(DAE.VAR_ATTR_STRING(quant, initialExp, fixed, _, _, _, startOrigin))  => begin
-                      quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
-                      initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
-                      fixed_str = Dump.getOptionWithConcatStr(fixed, ExpressionDump.printExpStr, "fixed = ")
+                      quantity = Dump.getOptionWithConcatStr(quant, CrefForHashTable.printExpStr, "quantity = ")
+                      initial_str = Dump.getOptionWithConcatStr(initialExp, CrefForHashTable.printExpStr, "start = ")
+                      fixed_str = Dump.getOptionWithConcatStr(fixed, CrefForHashTable.printExpStr, "fixed = ")
                       startOriginStr = getStartOrigin(startOrigin)
                       res_1 = Util.stringDelimitListNonEmptyElts(list(quantity, initial_str, fixed_str, startOriginStr), ", ")
                       res = if stringEmpty(res_1)
@@ -951,11 +951,11 @@
                   end
 
                   SOME(DAE.VAR_ATTR_ENUMERATION(quant, min, max, initialExp, fixed, _, _, _, startOrigin))  => begin
-                      quantity = Dump.getOptionWithConcatStr(quant, ExpressionDump.printExpStr, "quantity = ")
-                      min_str = Dump.getOptionWithConcatStr(min, ExpressionDump.printExpStr, "min = ")
-                      max_str = Dump.getOptionWithConcatStr(max, ExpressionDump.printExpStr, "max = ")
-                      initial_str = Dump.getOptionWithConcatStr(initialExp, ExpressionDump.printExpStr, "start = ")
-                      fixed_str = Dump.getOptionWithConcatStr(fixed, ExpressionDump.printExpStr, "fixed = ")
+                      quantity = Dump.getOptionWithConcatStr(quant, CrefForHashTable.printExpStr, "quantity = ")
+                      min_str = Dump.getOptionWithConcatStr(min, CrefForHashTable.printExpStr, "min = ")
+                      max_str = Dump.getOptionWithConcatStr(max, CrefForHashTable.printExpStr, "max = ")
+                      initial_str = Dump.getOptionWithConcatStr(initialExp, CrefForHashTable.printExpStr, "start = ")
+                      fixed_str = Dump.getOptionWithConcatStr(fixed, CrefForHashTable.printExpStr, "fixed = ")
                       startOriginStr = getStartOrigin(startOrigin)
                       res_1 = Util.stringDelimitListNonEmptyElts(list(quantity, min_str, max_str, initial_str, fixed_str, startOriginStr), ", ")
                       res = if stringEmpty(res_1)
@@ -990,7 +990,7 @@
 
                   _  => begin
                       if Flags.isSet(Flags.SHOW_START_ORIGIN)
-                        str = Dump.getOptionWithConcatStr(inStartOrigin, ExpressionDump.printExpStr, "startOrigin = ")
+                        str = Dump.getOptionWithConcatStr(inStartOrigin, CrefForHashTable.printExpStr, "startOrigin = ")
                       else
                         str = ""
                       end
@@ -1197,9 +1197,9 @@
                 @matchcontinue inElement begin
                   DAE.EQUATION(exp = e1, scalar = e2, source = src)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1208,9 +1208,9 @@
 
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       Print.printBuf("  ")
-                      ComponentReference.printComponentRef(cr1)
+                      CrefForHashTable.printComponentRef(cr1)
                       Print.printBuf(" = ")
-                      ComponentReference.printComponentRef(cr2)
+                      CrefForHashTable.printComponentRef(cr2)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1219,9 +1219,9 @@
 
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1230,9 +1230,9 @@
 
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1241,9 +1241,9 @@
 
                   DAE.DEFINE(componentRef = c, exp = e, source = src)  => begin
                       Print.printBuf("  ")
-                      ComponentReference.printComponentRef(c)
+                      CrefForHashTable.printComponentRef(c)
                       Print.printBuf(" ::= ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1252,9 +1252,9 @@
 
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       Print.printBuf("assert(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(") ")
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
@@ -1263,7 +1263,7 @@
                   end
 
                   DAE.NORETCALL(exp = e1, source = src)  => begin
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       sourceStr = getSourceInformationStr(src)
                       Print.printBuf(sourceStr)
                       Print.printBuf(";\\n")
@@ -1299,43 +1299,43 @@
                 @matchcontinue inElement begin
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(";\\n")
                     ()
                   end
 
                   DAE.INITIALDEFINE(componentRef = c, exp = e)  => begin
                       Print.printBuf("  ")
-                      ComponentReference.printComponentRef(c)
+                      CrefForHashTable.printComponentRef(c)
                       Print.printBuf(" ::= ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(";\\n")
                     ()
                   end
 
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(";\\n")
                     ()
                   end
 
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("  ")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(" = ")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(";\\n")
                     ()
                   end
 
                   DAE.INITIAL_IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| trueBranches, equations3 = xs2)  => begin
                       Print.printBuf("  if ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" then\\n")
                       ListUtil.map_0(xs1, dumpInitialEquation)
                       str = dumpIfEquationsStream(conds, trueBranches, IOStream.emptyStreamOfTypeList)
@@ -1350,8 +1350,8 @@
                   DAE.INITIAL_ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       s = stringAppendList(list("  assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                       Print.printBuf(s)
                     ()
@@ -1360,14 +1360,14 @@
                   DAE.INITIAL_TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       s = stringAppendList(list("  terminate(", s1, ") ", sourceStr, ";\\n"))
                       Print.printBuf(s)
                     ()
                   end
 
                   DAE.INITIAL_NORETCALL(exp = e1)  => begin
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(";\\n")
                     ()
                   end
@@ -1405,8 +1405,8 @@
                   DAE.EQUATION(exp = e1, scalar = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
@@ -1414,8 +1414,8 @@
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ComponentReference.printComponentRefStr(cr1)
-                      s2 = ComponentReference.printComponentRefStr(cr2)
+                      s1 = CrefForHashTable.printComponentRefStr(cr1)
+                      s2 = CrefForHashTable.printComponentRefStr(cr2)
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
@@ -1423,8 +1423,8 @@
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -1432,8 +1432,8 @@
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -1441,10 +1441,10 @@
                   DAE.DEFINE(componentRef = c, exp = e, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ComponentReference.printComponentRefStr(c)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
                       s2 = stringAppend("  ", s1)
                       s3 = stringAppend(" ::= ", s2)
-                      s4 = ExpressionDump.printExpStr(e)
+                      s4 = CrefForHashTable.printExpStr(e)
                       s5 = stringAppend(s3, s4)
                       str = stringAppend(s5, sourceStr + ";\\n")
                     str
@@ -1453,8 +1453,8 @@
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("  assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -1462,7 +1462,7 @@
                   DAE.TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("  terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -1470,7 +1470,7 @@
                   DAE.NORETCALL(exp = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("  ", s1, sourceStr, ";\\n"))
                     str
                   end
@@ -1555,7 +1555,7 @@
                   local e::DAE.Exp
                 @match dc begin
                   DAE.NO_DERIVATIVE(e)  => begin
-                      str = "noDerivative(" + ExpressionDump.printExpStr(e) + ")"
+                      str = "noDerivative(" + CrefForHashTable.printExpStr(e) + ")"
                     str
                   end
 
@@ -1793,7 +1793,7 @@
                   end
 
                   DAE.EQBOUND(exp = e, source = DAE.BINDING_FROM_DEFAULT_VALUE(__))  => begin
-                      str = " = " + ExpressionDump.printExpStr(e)
+                      str = " = " + CrefForHashTable.printExpStr(e)
                     str
                   end
 
@@ -1848,9 +1848,9 @@
                 @matchcontinue (inStatement, inInteger) begin
                   (DAE.STMT_ASSIGN(exp1 = e2, exp = e, source = source), i)  => begin
                       indent(i)
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(" := ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       if Config.typeinfo()
                         Print.printBuf(" /* " + Error.infoStr(ElementSource.getElementSourceFileInfo(source)) + " */")
                       end
@@ -1860,17 +1860,17 @@
 
                   (DAE.STMT_ASSIGN_ARR(lhs = e2, exp = e), i)  => begin
                       indent(i)
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(" := ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(";\\n")
                     ()
                   end
 
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = expl, exp = e), i)  => begin
                       s1 = indentStr(i)
-                      s2 = ExpressionDump.printExpStr(e)
-                      es = ListUtil.map(expl, ExpressionDump.printExpStr)
+                      s2 = CrefForHashTable.printExpStr(e)
+                      es = ListUtil.map(expl, CrefForHashTable.printExpStr)
                       s3 = stringDelimitList(es, ", ")
                       str = stringAppendList(list(s1, "(", s3, ") := ", s2, ";\\n"))
                       Print.printBuf(str)
@@ -1880,7 +1880,7 @@
                   (DAE.STMT_IF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       indent(i)
                       Print.printBuf("if ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" then\\n")
                       i_1 = i + 2
                       ppStmtList(then_, i_1)
@@ -1898,7 +1898,7 @@
                         Print.printBuf(" /* iter index " + intString(index) + " */")
                       end
                       Print.printBuf(" in ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" loop\\n")
                       i_1 = i + 2
                       ppStmtList(stmts, i_1)
@@ -1915,7 +1915,7 @@
                         Print.printBuf(" /* iter index " + intString(index) + " */")
                       end
                       Print.printBuf(" in ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" loop\\n")
                       i_1 = i + 2
                       ppStmtList(stmts, i_1)
@@ -1927,7 +1927,7 @@
                   (DAE.STMT_WHILE(exp = e, statementLst = stmts), i)  => begin
                       indent(i)
                       Print.printBuf("while ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" loop\\n")
                       i_1 = i + 2
                       ppStmtList(stmts, i_1)
@@ -1950,7 +1950,7 @@
                           end
                         end
                       end
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(";\\n")
                     ()
                   end
@@ -1964,9 +1964,9 @@
                   (DAE.STMT_ASSERT(cond = cond, msg = msg), i)  => begin
                       indent(i)
                       Print.printBuf("assert(")
-                      ExpressionDump.printExp(cond)
+                      CrefForHashTable.printExp(cond)
                       Print.printBuf(", ")
-                      ExpressionDump.printExp(msg)
+                      CrefForHashTable.printExp(msg)
                       Print.printBuf(");\\n")
                     ()
                   end
@@ -1986,9 +1986,9 @@
                   (DAE.STMT_REINIT(var = e1, value = e2), i)  => begin
                       indent(i)
                       Print.printBuf("reinit(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(");\\n")
                     ()
                   end
@@ -2040,7 +2040,7 @@
                   local stmt::DAE.Statement
                 @match (inStatement, inInteger) begin
                   (DAE.STMT_WHEN(exp = e, statementLst = stmts, elseWhen = NONE()), i)  => begin
-                      s3 = stringAppend("when ", ExpressionDump.printExpStr(e))
+                      s3 = stringAppend("when ", CrefForHashTable.printExpStr(e))
                       s5 = stringAppend(s3, " then\\n")
                       i_1 = i + 2
                       s6 = ppStmtListStr(stmts, i_1)
@@ -2052,7 +2052,7 @@
                   end
 
                   (DAE.STMT_WHEN(exp = e, statementLst = stmts, elseWhen = SOME(stmt)), i)  => begin
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       s4 = stringAppend("when ", s3)
                       s5 = stringAppend(s4, " then\\n")
                       i_1 = i + 2
@@ -2110,24 +2110,24 @@
                 @matchcontinue (inStatement, inInteger) begin
                   (DAE.STMT_ASSIGN(exp1 = e2, exp = e), i)  => begin
                       s1 = indentStr(i)
-                      s2 = ExpressionDump.printExpStr(e2)
-                      s3 = ExpressionDump.printExpStr(e)
+                      s2 = CrefForHashTable.printExpStr(e2)
+                      s3 = CrefForHashTable.printExpStr(e)
                       str = stringAppendList(list(s1, s2, " := ", s3, ";\\n"))
                     str
                   end
 
                   (DAE.STMT_ASSIGN_ARR(lhs = e2, exp = e), i)  => begin
                       s1 = indentStr(i)
-                      s2 = ExpressionDump.printExpStr(e2)
-                      s3 = ExpressionDump.printExpStr(e)
+                      s2 = CrefForHashTable.printExpStr(e2)
+                      s3 = CrefForHashTable.printExpStr(e)
                       str = stringAppendList(list(s1, s2, " := ", s3, ";\\n"))
                     str
                   end
 
                   (DAE.STMT_TUPLE_ASSIGN(expExpLst = expl, exp = e), i)  => begin
                       s1 = indentStr(i)
-                      s2 = ExpressionDump.printExpStr(e)
-                      es = ListUtil.map(expl, ExpressionDump.printExpStr)
+                      s2 = CrefForHashTable.printExpStr(e)
+                      es = ListUtil.map(expl, CrefForHashTable.printExpStr)
                       s3 = stringDelimitList(es, ", ")
                       str = stringAppendList(list(s1, "(", s3, ") := ", s2, ";\\n"))
                     str
@@ -2136,7 +2136,7 @@
                   (DAE.STMT_IF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "if ")
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       s4 = stringAppend(s2, s3)
                       s5 = stringAppend(s4, " then\\n")
                       i_1 = i + 2
@@ -2157,7 +2157,7 @@
                           else
                             "/* iter index " + intString(index) + " */"
                           end
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       i_1 = i + 2
                       s4 = ppStmtListStr(stmts, i_1)
                       s5 = indentStr(i)
@@ -2172,7 +2172,7 @@
                           else
                             "/* iter index " + intString(index) + " */"
                           end
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       i_1 = i + 2
                       s4 = ppStmtListStr(stmts, i_1)
                       s5 = indentStr(i)
@@ -2183,7 +2183,7 @@
                   (DAE.STMT_WHILE(exp = e, statementLst = stmts), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "while ")
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       s4 = stringAppend(s2, s3)
                       s5 = stringAppend(s4, " loop\\n")
                       i_1 = i + 2
@@ -2204,15 +2204,15 @@
 
                   (DAE.STMT_ASSERT(cond = cond, msg = msg), i)  => begin
                       s1 = indentStr(i)
-                      cond_str = ExpressionDump.printExpStr(cond)
-                      msg_str = ExpressionDump.printExpStr(msg)
+                      cond_str = CrefForHashTable.printExpStr(cond)
+                      msg_str = CrefForHashTable.printExpStr(msg)
                       str = stringAppendList(list(s1, "assert(", cond_str, ", ", msg_str, ");\\n"))
                     str
                   end
 
                   (DAE.STMT_TERMINATE(msg = msg), i)  => begin
                       s1 = indentStr(i)
-                      msg_str = ExpressionDump.printExpStr(msg)
+                      msg_str = CrefForHashTable.printExpStr(msg)
                       str = stringAppendList(list(s1, "terminate(", msg_str, ");\\n"))
                     str
                   end
@@ -2230,7 +2230,7 @@
                           end
                         end
                       end
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       str = stringAppendList(list(s1, s2, s3, ";\\n"))
                     str
                   end
@@ -2249,8 +2249,8 @@
 
                   (DAE.STMT_REINIT(var = e1, value = e2), i)  => begin
                       s1 = indentStr(i)
-                      e1_str = ExpressionDump.printExpStr(e1)
-                      e2_str = ExpressionDump.printExpStr(e2)
+                      e1_str = CrefForHashTable.printExpStr(e1)
+                      e2_str = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list(s1, "reinit(", e1_str, ", ", e2_str, ");\\n"))
                     str
                   end
@@ -2348,7 +2348,7 @@
                   (DAE.ELSEIF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       indent(i)
                       Print.printBuf("elseif ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       Print.printBuf(" then\\n")
                       i_1 = i + 2
                       ppStmtList(then_, i_1)
@@ -2397,7 +2397,7 @@
                   (DAE.ELSEIF(exp = e, statementLst = then_, else_ = else_), i)  => begin
                       s1 = indentStr(i)
                       s2 = stringAppend(s1, "elseif ")
-                      s3 = ExpressionDump.printExpStr(e)
+                      s3 = CrefForHashTable.printExpStr(e)
                       s4 = stringAppend(s2, s3)
                       s5 = stringAppend(s4, " then\\n")
                       i_1 = i + 2
@@ -2553,7 +2553,7 @@
                 @matchcontinue inElement begin
                   DAE.VAR(componentRef = cr, kind = vk, binding = NONE(), variableAttributesOption = dae_var_attr, comment = comment)  => begin
                       Print.printBuf("VAR(")
-                      ComponentReference.printComponentRef(cr)
+                      CrefForHashTable.printComponentRef(cr)
                       Print.printBuf(", ")
                       dumpKind(vk)
                       comment_str = dumpCommentAnnotationStr(comment)
@@ -2567,11 +2567,11 @@
 
                   DAE.VAR(componentRef = cr, kind = vk, binding = SOME(e), variableAttributesOption = dae_var_attr, comment = comment)  => begin
                       Print.printBuf("VAR(")
-                      ComponentReference.printComponentRef(cr)
+                      CrefForHashTable.printComponentRef(cr)
                       Print.printBuf(", ")
                       dumpKind(vk)
                       Print.printBuf(", binding: ")
-                      ExpressionDump.printExp(e)
+                      CrefForHashTable.printExp(e)
                       comment_str = dumpCommentAnnotationStr(comment)
                       Print.printBuf("  comment:")
                       Print.printBuf(comment_str)
@@ -2583,45 +2583,45 @@
 
                   DAE.DEFINE(componentRef = cr, exp = exp)  => begin
                       Print.printBuf("DEFINE(")
-                      ComponentReference.printComponentRef(cr)
+                      CrefForHashTable.printComponentRef(cr)
                       Print.printBuf(", ")
-                      ExpressionDump.printExp(exp)
+                      CrefForHashTable.printExp(exp)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIALDEFINE(componentRef = cr, exp = exp)  => begin
                       Print.printBuf("INITIALDEFINE(")
-                      ComponentReference.printComponentRef(cr)
+                      CrefForHashTable.printComponentRef(cr)
                       Print.printBuf(", ")
-                      ExpressionDump.printExp(exp)
+                      CrefForHashTable.printExp(exp)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.EQUATION(exp = e1, scalar = e2)  => begin
                       Print.printBuf("EQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2)  => begin
                       Print.printBuf("EQUATION(")
-                      ComponentReference.printComponentRef(cr1)
+                      CrefForHashTable.printComponentRef(cr1)
                       Print.printBuf(",")
-                      ComponentReference.printComponentRef(cr2)
+                      CrefForHashTable.printComponentRef(cr2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2)  => begin
                       Print.printBuf("INITIALEQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
@@ -2647,36 +2647,36 @@
 
                   DAE.ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("ARRAY_EQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       Print.printBuf("INITIAL_ARRAY_EQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("COMPLEX_EQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       Print.printBuf("INITIAL_COMPLEX_EQUATION(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
@@ -2703,32 +2703,32 @@
 
                   DAE.ASSERT(condition = e1, message = e2)  => begin
                       Print.printBuf("ASSERT(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIAL_ASSERT(condition = e1, message = e2)  => begin
                       Print.printBuf("INITIAL_ASSERT(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(",")
-                      ExpressionDump.printExp(e2)
+                      CrefForHashTable.printExp(e2)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.TERMINATE(message = e1)  => begin
                       Print.printBuf("TERMINATE(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(")")
                     ()
                   end
 
                   DAE.INITIAL_TERMINATE(message = e1)  => begin
                       Print.printBuf("INITIAL_TERMINATE(")
-                      ExpressionDump.printExp(e1)
+                      CrefForHashTable.printExp(e1)
                       Print.printBuf(")")
                     ()
                   end
@@ -2745,7 +2745,7 @@
 
                   DAE.SM_COMP(componentRef = cr, dAElist = l)  => begin
                       Print.printBuf("SM_COMP(")
-                      ComponentReference.printComponentRef(cr)
+                      CrefForHashTable.printComponentRef(cr)
                       Print.printBuf(",")
                       dumpDebugElist(l)
                       Print.printBuf(")")
@@ -2953,12 +2953,12 @@
                   local exp::DAE.Exp
                 @match inElement begin
                   DAE.VAR(componentRef = cr, binding = NONE())  => begin
-                      str = ComponentReference.printComponentRefStr(cr)
+                      str = CrefForHashTable.printComponentRefStr(cr)
                     str
                   end
 
                   DAE.VAR(componentRef = cr, binding = SOME(exp))  => begin
-                      str = ComponentReference.printComponentRefStr(cr)
+                      str = CrefForHashTable.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
                       str_1 = stringAppend(str, " = ")
                       str_2 = stringAppend(str_1, expstr)
@@ -2989,7 +2989,7 @@
                   end
 
                   exp  => begin
-                      str = ExpressionDump.printExpStr(exp)
+                      str = CrefForHashTable.printExpStr(exp)
                     str
                   end
                 end
@@ -3023,13 +3023,13 @@
                   local elts::List{DAE.Element}
                 @match inElement begin
                   DAE.VAR(componentRef = cr, kind = vk, binding = NONE())  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
                       vkstr = dumpKindStr(vk)
                     Graphviz.LNODE("VAR", list(crstr, vkstr), nil, nil)
                   end
 
                   DAE.VAR(componentRef = cr, kind = vk, binding = SOME(exp))  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
                       vkstr = dumpKindStr(vk)
                       expstr = printExpStrSpecial(exp)
                       expstr_1 = stringAppend("= ", expstr)
@@ -3037,7 +3037,7 @@
                   end
 
                   DAE.DEFINE(componentRef = cr, exp = exp)  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
                       expstr_1 = stringAppend("= ", expstr)
                     Graphviz.LNODE("DEFINE", list(crstr, expstr_1), nil, nil)
@@ -3060,7 +3060,7 @@
                   end
 
                   DAE.INITIALDEFINE(componentRef = cr, exp = exp)  => begin
-                      crstr = ComponentReference.printComponentRefStr(cr)
+                      crstr = CrefForHashTable.printComponentRefStr(cr)
                       expstr = printExpStrSpecial(exp)
                       expstr_1 = stringAppend("= ", expstr)
                     Graphviz.LNODE("INITIALDEFINE", list(crstr, expstr_1), nil, nil)
@@ -3106,7 +3106,7 @@
                       @match DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(path)) = Types.arrayElementType(ty)
                       dims = Types.getDimensions(tp)
                       name = AbsynUtil.pathStringNoQual(path)
-                      dim_str = ListUtil.toString(dims, ExpressionDump.dimensionString, "", "[", ", ", "]", false)
+                      dim_str = ListUtil.toString(dims, CrefForHashTable.dimensionString, "", "[", ", ", "]", false)
                     name + dim_str
                   end
 
@@ -3144,7 +3144,7 @@
                   end
 
                   (_, true)  => begin
-                      str = "[" + stringDelimitList(ListUtil.map(dims, ExpressionDump.dimensionString), ", ") + "]"
+                      str = "[" + stringDelimitList(ListUtil.map(dims, CrefForHashTable.dimensionString), ", ") + "]"
                     str
                   end
                 end
@@ -3583,8 +3583,8 @@
 
                   (DAE.EQUATION(exp = e1, scalar = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3592,15 +3592,15 @@
 
                   (DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      str = IOStream.append(str, "  " + ComponentReference.printComponentRefStr(cr1) + " = " + ComponentReference.printComponentRefStr(cr2) + sourceStr + ";\\n")
+                      str = IOStream.append(str, "  " + CrefForHashTable.printComponentRefStr(cr1) + " = " + CrefForHashTable.printComponentRefStr(cr2) + sourceStr + ";\\n")
                       str = dumpEquationsStream(xs, str)
                     str
                   end
 
                   (DAE.ARRAY_EQUATION(dimension = dims, exp = e1, array = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       s3 = if Config.typeinfo()
                             Types.printDimensionsStr(dims)
                           else
@@ -3618,8 +3618,8 @@
 
                   (DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3627,8 +3627,8 @@
 
                   (DAE.DEFINE(componentRef = c, exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ComponentReference.printComponentRefStr(c)
-                      s2 = ExpressionDump.printExpStr(e)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
+                      s2 = CrefForHashTable.printExpStr(e)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3636,8 +3636,8 @@
 
                   (DAE.ASSERT(condition = e1, message = e2, level = DAE.ENUM_LITERAL(index = 1), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  assert(", s1, ",", s2, ")", sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3645,7 +3645,7 @@
 
                   (DAE.TERMINATE(message = e1, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = IOStream.appendList(str, list("  terminate(", s1, ")", sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3653,7 +3653,7 @@
 
                   (DAE.FOR_EQUATION(iter = s, range = e1, equations = xs1, source = src) <| xs, str)  => begin
                       _ = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = IOStream.appendList(str, list("  for ", s, " in ", s1, " loop\\n"))
                       str = dumpEquationsStream(xs1, str)
                       str = IOStream.appendList(str, list("  end for;\\n"))
@@ -3668,7 +3668,7 @@
                   (DAE.IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| tb, equations3 =  nil(), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  if ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(e))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(e))
                       str = IOStream.append(str, " then\\n")
                       str = dumpEquationsStream(xs1, str)
                       str = dumpIfEquationsStream(conds, tb, str)
@@ -3681,7 +3681,7 @@
                   (DAE.IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| tb, equations3 = xs2, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  if ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(e))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(e))
                       str = IOStream.append(str, " then\\n")
                       str = dumpEquationsStream(xs1, str)
                       str = dumpIfEquationsStream(conds, tb, str)
@@ -3695,7 +3695,7 @@
                   (DAE.WHEN_EQUATION(condition = e, equations = xs1, elsewhen_ = SOME(el), source = src) <| xs, str)  => begin
                       _ = getSourceInformationStr(src)
                       str = IOStream.append(str, "when ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(e))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(e))
                       str = IOStream.append(str, " then\\n")
                       str = dumpEquationsStream(xs1, str)
                       str = IOStream.append(str, " else")
@@ -3706,7 +3706,7 @@
                   (DAE.WHEN_EQUATION(condition = e, equations = xs1, elsewhen_ = NONE(), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
                       str = IOStream.append(str, "  when ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(e))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(e))
                       str = IOStream.append(str, " then\\n")
                       str = dumpEquationsStream(xs1, str)
                       str = IOStream.append(str, "  end when" + sourceStr + ";\\n")
@@ -3716,8 +3716,8 @@
 
                   (DAE.REINIT(componentRef = cr, exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s = ComponentReference.printComponentRefStr(cr)
-                      s1 = ExpressionDump.printExpStr(e)
+                      s = CrefForHashTable.printComponentRefStr(cr)
+                      s1 = CrefForHashTable.printExpStr(e)
                       str = IOStream.appendList(str, list("  reinit(", s, ",", s1, ")", sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3725,7 +3725,7 @@
 
                   (DAE.NORETCALL(exp = e, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e)
+                      s1 = CrefForHashTable.printExpStr(e)
                       str = IOStream.appendList(str, list("  ", s1, sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3758,7 +3758,7 @@
 
                   (c <| conds, tb <| tbs, str)  => begin
                       str = IOStream.append(str, "  elseif ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(c))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(c))
                       str = IOStream.append(str, " then\\n")
                       str = dumpEquationsStream(tb, str)
                       str = dumpIfEquationsStream(conds, tbs, str)
@@ -3794,32 +3794,32 @@
                   end
 
                   (DAE.INITIALEQUATION(exp1 = e1, exp2 = e2) <| xs, str)  => begin
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
 
                   (DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2) <| xs, str)  => begin
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
 
                   (DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2) <| xs, str)  => begin
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
                   end
 
                   (DAE.INITIALDEFINE(componentRef = c, exp = e) <| xs, str)  => begin
-                      s1 = ComponentReference.printComponentRefStr(c)
-                      s2 = ExpressionDump.printExpStr(e)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
+                      s2 = CrefForHashTable.printExpStr(e)
                       str = IOStream.appendList(str, list("  ", s1, " = ", s2, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
@@ -3827,7 +3827,7 @@
 
                   (DAE.INITIAL_IF_EQUATION(condition1 = e <| conds, equations2 = xs1 <| trueBranches, equations3 = xs2) <| xs, str)  => begin
                       str = IOStream.append(str, "  if ")
-                      str = IOStream.append(str, ExpressionDump.printExpStr(e))
+                      str = IOStream.append(str, CrefForHashTable.printExpStr(e))
                       str = IOStream.append(str, " then\\n")
                       str = dumpInitialEquationsStream(xs1, str)
                       str = dumpIfEquationsStream(conds, trueBranches, str)
@@ -3839,7 +3839,7 @@
                   end
 
                   (DAE.INITIAL_NORETCALL(exp = e) <| xs, str)  => begin
-                      s1 = ExpressionDump.printExpStr(e)
+                      s1 = CrefForHashTable.printExpStr(e)
                       str = IOStream.appendList(str, list("  ", s1, ";\\n"))
                       str = dumpInitialEquationsStream(xs, str)
                     str
@@ -3847,8 +3847,8 @@
 
                   (DAE.INITIAL_ASSERT(condition = e1, message = e2, level = DAE.ENUM_LITERAL(index = 1), source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = IOStream.appendList(str, list("  assert(", s1, ",", s2, ")", sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3856,7 +3856,7 @@
 
                   (DAE.INITIAL_TERMINATE(message = e1, source = src) <| xs, str)  => begin
                       sourceStr = getSourceInformationStr(src)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = IOStream.appendList(str, list("  terminate(", s1, ")", sourceStr, ";\\n"))
                       str = dumpEquationsStream(xs, str)
                     str
@@ -3886,7 +3886,7 @@
 
                   (DAE.CONSTRAINT(constraints = DAE.CONSTRAINT_EXPS(constraintLst = exps)) <| xs, str)  => begin
                       str = IOStream.append(str, "  ")
-                      str = IOStream.append(str, stringDelimitList(ListUtil.map(exps, ExpressionDump.printExpStr), ";\\n  "))
+                      str = IOStream.append(str, stringDelimitList(ListUtil.map(exps, CrefForHashTable.printExpStr), ";\\n  "))
                       str = IOStream.append(str, ";\\n")
                       str = dumpConstraintStream(xs, str)
                     str
@@ -4006,7 +4006,7 @@
                   local bind_str::String
                 @match inBinding begin
                   SOME(exp)  => begin
-                      bind_str = ExpressionDump.printExpStr(exp)
+                      bind_str = CrefForHashTable.printExpStr(exp)
                     " = " + bind_str
                   end
 
@@ -4058,7 +4058,7 @@
                       dir_str = dumpDirectionStr(dir)
                       (ty_str, ty_vars_str) = printTypeStr(ty)
                       dim_str = unparseDimensions(dims, printTypeDimension)
-                      name_str = ComponentReference.printComponentRefStr(id)
+                      name_str = CrefForHashTable.printComponentRefStr(id)
                       vis_str = dumpVarVisibilityStr(vis)
                       par_str = dumpVarParallelismStr(prl)
                       cmt_str = dumpCommentAnnotationStr(cmt)
@@ -4401,13 +4401,13 @@
                   end
 
                   (c1, c2) <|  nil()  => begin
-                      str = ComponentReference.printComponentRefStr(c1) + "," + ComponentReference.printComponentRefStr(c2)
+                      str = CrefForHashTable.printComponentRefStr(c1) + "," + CrefForHashTable.printComponentRefStr(c2)
                       str = "connect(" + str + ")"
                     list(str)
                   end
 
                   (c1, c2) <| rest  => begin
-                      str = ComponentReference.printComponentRefStr(c1) + "," + ComponentReference.printComponentRefStr(c2)
+                      str = CrefForHashTable.printComponentRefStr(c1) + "," + CrefForHashTable.printComponentRefStr(c2)
                       str = "connect(" + str + ")"
                       slst = connectsStr(rest)
                     _cons(str, slst)
@@ -4478,19 +4478,19 @@
                   end
 
                   DAE.INTEGER_CLOCK(intervalCounter = e1, resolution = e2)  => begin
-                    "Integer Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
+                    "Integer Clock(" + CrefForHashTable.printExpStr(e1) + "; " + CrefForHashTable.printExpStr(e2) + ")"
                   end
 
                   DAE.REAL_CLOCK(interval = e1)  => begin
-                    "Real Clock(" + ExpressionDump.printExpStr(e1) + ")"
+                    "Real Clock(" + CrefForHashTable.printExpStr(e1) + ")"
                   end
 
                   DAE.BOOLEAN_CLOCK(condition = e1, startInterval = e2)  => begin
-                    "Boolean Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
+                    "Boolean Clock(" + CrefForHashTable.printExpStr(e1) + "; " + CrefForHashTable.printExpStr(e2) + ")"
                   end
 
                   DAE.SOLVER_CLOCK(c = e1, solverMethod = e2)  => begin
-                    "Solver Clock(" + ExpressionDump.printExpStr(e1) + "; " + ExpressionDump.printExpStr(e2) + ")"
+                    "Solver Clock(" + CrefForHashTable.printExpStr(e1) + "; " + CrefForHashTable.printExpStr(e2) + ")"
                   end
                 end
               end
@@ -4522,7 +4522,7 @@
                   local cmt::List{SCode.Comment}
                 @matchcontinue inElement begin
                   DAE.VAR(componentRef = c)  => begin
-                      s1 = ComponentReference.printComponentRefStr(c)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
                       str = stringAppendList(list("VAR:  ", s1, ";\\n"))
                     str
                   end
@@ -4530,7 +4530,7 @@
                   DAE.DEFINE(componentRef = c, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ComponentReference.printComponentRefStr(c)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
                       str = stringAppend(s1, sourceStr + ";\\n")
                     str
                   end
@@ -4538,7 +4538,7 @@
                   DAE.INITIALDEFINE(componentRef = c, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ComponentReference.printComponentRefStr(c)
+                      s1 = CrefForHashTable.printComponentRefStr(c)
                       str = stringAppend(s1, sourceStr + ";\\n")
                     str
                   end
@@ -4546,8 +4546,8 @@
                   DAE.EQUATION(exp = e1, scalar = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
@@ -4555,8 +4555,8 @@
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ComponentReference.printComponentRefStr(cr1)
-                      s2 = ComponentReference.printComponentRefStr(cr2)
+                      s1 = CrefForHashTable.printComponentRefStr(cr1)
+                      s2 = CrefForHashTable.printComponentRefStr(cr2)
                       str = stringAppendList(list("EQUEQUATION  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
@@ -4564,8 +4564,8 @@
                   DAE.ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "ARRAY_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -4573,8 +4573,8 @@
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "INITIAL_ARRAY_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -4582,8 +4582,8 @@
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "COMPLEX_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -4591,8 +4591,8 @@
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = "INITIAL_COMPLEX_EQUATION  " + s1 + " = " + s2 + sourceStr + ";\\n"
                     str
                   end
@@ -4600,7 +4600,7 @@
                   DAE.WHEN_EQUATION(condition = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("WHEN_EQUATION:  ", s1, sourceStr, ";\\n"))
                     str
                   end
@@ -4622,8 +4622,8 @@
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("INITIALEQUATION  ", s1, " = ", s2, sourceStr, ";\\n"))
                     str
                   end
@@ -4661,8 +4661,8 @@
                   DAE.ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("  assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -4670,8 +4670,8 @@
                   DAE.INITIAL_ASSERT(condition = e1, message = e2, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
-                      s2 = ExpressionDump.printExpStr(e2)
+                      s1 = CrefForHashTable.printExpStr(e1)
+                      s2 = CrefForHashTable.printExpStr(e2)
                       str = stringAppendList(list("  /* initial */ assert(", s1, ",", s2, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -4679,7 +4679,7 @@
                   DAE.TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("  terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -4687,7 +4687,7 @@
                   DAE.INITIAL_TERMINATE(message = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("  /* initial */ terminate(", s1, ") ", sourceStr, ";\\n"))
                     str
                   end
@@ -4702,7 +4702,7 @@
                   DAE.NORETCALL(exp = e1, source = src)  => begin
                       cmt = ElementSource.getCommentsFromSource(src)
                       sourceStr = cmtListToString(cmt)
-                      s1 = ExpressionDump.printExpStr(e1)
+                      s1 = CrefForHashTable.printExpStr(e1)
                       str = stringAppendList(list("  ", s1, sourceStr, ";\\n"))
                     str
                   end

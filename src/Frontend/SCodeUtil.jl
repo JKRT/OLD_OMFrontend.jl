@@ -6744,7 +6744,7 @@
                   end
 
                   (SOME(SCode.ANNOTATION(mod1)), SOME(SCode.ANNOTATION(mod2)))  => begin
-                      mod = SCodeUtil.myMergeSCodeMods(mod1, mod2)
+                      mod = SCodeUtil.mergeSCodeMods(mod1, mod2)
                     SOME(SCode.ANNOTATION(mod))
                   end
                 end

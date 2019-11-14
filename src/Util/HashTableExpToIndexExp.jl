@@ -1,4 +1,4 @@
-  module HashTableExpToIndexExp 
+  module HashTableExpToIndexExp
 
 
     using MetaModelica
@@ -54,19 +54,17 @@
 
         import DAE
 
-        import Expression
+        import CrefForHashTable
 
         import Util
 
-        import ExpressionDump
+        Key = DAE.Exp
 
-        Key = DAE.Exp 
+        Value = List
 
-        Value = List 
+        HashTableCrefFunctionsType = Tuple
 
-        HashTableCrefFunctionsType = Tuple 
-
-        HashTable = Tuple 
+        HashTable = Tuple
 
 
 
@@ -76,11 +74,11 @@
 
 
 
-         #= 
+         #=
           Returns an empty HashTable.
           Using the default bucketsize..
          =#
-        function emptyHashTable() ::HashTable 
+        function emptyHashTable() ::HashTable
               local hashTable::HashTable
 
               hashTable = emptyHashTableSized(BaseHashTable.defaultBucketSize)
@@ -89,21 +87,21 @@
 
          #= Returns an empty HashTable.
          Using the bucketsize size. =#
-        function emptyHashTableSized(size::ModelicaInteger) ::HashTable 
+        function emptyHashTableSized(size::ModelicaInteger) ::HashTable
               local hashTable::HashTable
 
-              hashTable = BaseHashTable.emptyHashTableWork(size, (Expression.hashExpMod, Expression.expEqual, ExpressionDump.printExpStr, intExpListStr))
+              hashTable = BaseHashTable.emptyHashTableWork(size, (CrefForHashTable.hashExpMod, CrefForHashTable.expEqual, CrefForHashTable.printExpStr, intExpListStr))
           hashTable
         end
 
-        function intExpListStr(intExplst::List{<:Tuple{<:ModelicaInteger, DAE.Exp}}) ::String 
+        function intExpListStr(intExplst::List{<:Tuple{<:ModelicaInteger, DAE.Exp}}) ::String
               local res::String
 
               local combStr::List{String}
 
               combStr = nil
               for elem in intExplst
-                combStr = _cons(intString(Util.tuple21(elem)) + ": " + ExpressionDump.printExpStr(Util.tuple22(elem)), combStr)
+                combStr = _cons(intString(Util.tuple21(elem)) + ": " + CrefForHashTable.printExpStr(Util.tuple22(elem)), combStr)
               end
               res = "{" + stringDelimitList(combStr, ",") + "}"
           res

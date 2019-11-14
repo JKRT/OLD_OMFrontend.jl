@@ -1,4 +1,4 @@
-  module Ceval
+module Ceval
 
 
     using MetaModelica
@@ -53,10 +53,10 @@
         @importDBG DAE
 
         @importDBG FCore
-        
+
         @importDBG FCoreUtil
 
-        @importDBG FGraph
+        @importDBG FGraphUtil
 
         @importDBG FNode
 
@@ -72,7 +72,7 @@
 
         #@importDBG BackendInterface
 
-        @importDBG ComponentReference
+        @importDBG CrefForHashTable
 
         @importDBG Config
 
@@ -81,8 +81,6 @@
         @importDBG Error
 
         @importDBG Expression
-
-        @importDBG ExpressionDump
 
         @importDBG ExpressionSimplify
 
@@ -117,7 +115,7 @@
 
         @importDBG Global
 
-        @importDBG MetaModelica.Dangerous.listReverseInPlace
+        import MetaModelica.Dangerous.listReverseInPlace
 
          #=
           This function is used when the value of a constant expression is
@@ -152,8 +150,8 @@
 
                   (_, _, _, _, Absyn.MSG(info = info), _, true)  => begin
                       str1 = intString(Global.recursionDepthLimit)
-                      str2 = ExpressionDump.printExpStr(inExp)
-                      Error.addSourceMessage(Error.RECURSION_DEPTH_WARNING, list(str1, str2, FGraph.printGraphPathStr(inEnv)), info)
+                      str2 = CrefForHashTable.printExpStr(inExp)
+                      Error.addSourceMessage(Error.RECURSION_DEPTH_WARNING, list(str1, str2, FGraphUtil.printGraphPathStr(inEnv)), info)
                     fail()
                   end
                 end
@@ -279,7 +277,7 @@
                    =#
                    #=  case (cache,env,inExp,_,_,_)
                    =#
-                   #=    equation print(\"Ceval.ceval: \" + ExpressionDump.printExpStr(inExp) + \" in env: \" + FGraph.printGraphPathStr(env) + \"\\n\");
+                   #=    equation print(\"Ceval.ceval: \" + CrefForHashTable.printExpStr(inExp) + \" in env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                    =#
                    #=    then fail();
                    =#
@@ -365,13 +363,13 @@
                   end
 
                   (_, _, DAE.CREF(componentRef = cr, ty = DAE.T_FUNCTION_REFERENCE_VAR(__)), _, Absyn.MSG(info = info), _)  => begin
-                      str = ComponentReference.crefStr(cr)
+                      str = CrefForHashTable.crefStr(cr)
                       Error.addSourceMessage(Error.META_CEVAL_FUNCTION_REFERENCE, list(str), info)
                     fail()
                   end
 
                   (_, _, DAE.CREF(componentRef = cr, ty = DAE.T_FUNCTION_REFERENCE_FUNC(__)), _, Absyn.MSG(info = info), _)  => begin
-                      str = ComponentReference.crefStr(cr)
+                      str = CrefForHashTable.crefStr(cr)
                       Error.addSourceMessage(Error.META_CEVAL_FUNCTION_REFERENCE, list(str), info)
                     fail()
                   end
@@ -445,7 +443,7 @@
                   (_, _, e && DAE.CALL(__), _, _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.trace("- Ceval.ceval DAE.CALL failed: ")
-                      str = ExpressionDump.printExpStr(e)
+                      str = CrefForHashTable.printExpStr(e)
                       Debug.traceln(str)
                     fail()
                   end
@@ -611,8 +609,8 @@
                   (cache, env, DAE.BINARY(exp1 = lh, operator = DAE.DIV(__), exp2 = rh), impl, msg && Absyn.MSG(info = info), _)  => begin
                       (_, lhvVal) = ceval(cache, env, rh, impl, msg, numIter)
                       @match true = ValuesUtil.isZero(lhvVal)
-                      lhvStr = ExpressionDump.printExpStr(lh)
-                      rhvStr = ExpressionDump.printExpStr(rh)
+                      lhvStr = CrefForHashTable.printExpStr(lh)
+                      rhvStr = CrefForHashTable.printExpStr(rh)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lhvStr, rhvStr), info)
                     fail()
                   end
@@ -788,7 +786,7 @@
                   end
 
                   (cache, env, DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(iterType = iterType, path = path, foldName = foldName, resultName = resultName, foldExp = foldExp, defaultValue = ov, exprType = ty), expr = daeExp, iterators = iterators), impl, msg, _)  => begin
-                      env = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
+                      env = FGraphUtil.openScope(env, SCode.NOT_ENCAPSULATED(), FCore.forScopeName, NONE())
                       (cache, valMatrix, names, dims, tys) = cevalReductionIterators(cache, env, iterators, impl, msg, numIter + 1)
                       valMatrix = makeReductionAllCombinations(valMatrix, iterType)
                       (cache, ov) = cevalReduction(cache, env, path, ov, daeExp, ty, foldName, resultName, foldExp, names, listReverse(valMatrix), tys, impl, msg, numIter + 1)
@@ -842,9 +840,9 @@
                        =#
                        #=  print(\"After:\\n\");print(stringDelimitList(List.map1(List.mapList(valMatrix, ValuesUtil.valString), stringDelimitList, \",\"), \"\\n\") + \"\\n\");
                        =#
-                       #=  print(\"Start cevalReduction: \" + AbsynUtil.pathString(path) + \" \" + ExpressionDump.printExpStr(daeExp) + \"\\n\");
+                       #=  print(\"Start cevalReduction: \" + AbsynUtil.pathString(path) + \" \" + CrefForHashTable.printExpStr(daeExp) + \"\\n\");
                        =#
-                      s = ComponentReference.printComponentRefStr(inExp.name)
+                      s = CrefForHashTable.printComponentRefStr(inExp.name)
                       v = Types.typeToValue(inExp.ty)
                     (inCache, Values.EMPTY(inExp.scope, s, v, inExp.tyStr))
                   end
@@ -852,13 +850,13 @@
                   (_, _, _, _, _, _) where (Config.getGraphicsExpMode())  => begin
                       ty = Expression.typeof(inExp)
                       v = Types.typeToValue(ty)
-                    (inCache, Values.EMPTY("#graphicsExp#", ExpressionDump.printExpStr(inExp), v, Types.unparseType(ty)))
+                    (inCache, Values.EMPTY("#graphicsExp#", CrefForHashTable.printExpStr(inExp), v, Types.unparseType(ty)))
                   end
 
                   (_, env, e, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
-                      Debug.traceln("- Ceval.ceval failed: " + ExpressionDump.printExpStr(e))
-                      Debug.traceln("  Scope: " + FGraph.printGraphPathStr(env))
+                      Debug.traceln("- Ceval.ceval failed: " + CrefForHashTable.printExpStr(e))
+                      Debug.traceln("  Scope: " + FGraphUtil.printGraphPathStr(env))
                     fail()
                   end
                 end
@@ -867,7 +865,7 @@
                =#
                #=  Absyn.MSG())
                =#
-               #=  Debug.traceln(\"  Env:\" + FGraph.printGraphStr(env));
+               #=  Debug.traceln(\"  Env:\" + FGraphUtil.printGraphStr(env));
                =#
           (outCache, outValue)
         end
@@ -1767,15 +1765,15 @@
                   (cache, env, DAE.CREF(componentRef = cr), dimExp, false, Absyn.MSG(info = info), _)  => begin
                       (_, _, tp, binding, _, _, _, _, _) = Lookup.lookupVar(cache, env, cr) #= If dimensions not known and impl=false, error message =#
                       if ! Types.dimensionsKnown(tp)
-                        cr_str = ComponentReference.printComponentRefStr(cr)
-                        dim_str = ExpressionDump.printExpStr(dimExp)
+                        cr_str = CrefForHashTable.printComponentRefStr(cr)
+                        dim_str = CrefForHashTable.printExpStr(dimExp)
                         size_str = stringAppendList(list("size(", cr_str, ", ", dim_str, ")"))
                         Error.addSourceMessage(Error.DIMENSION_NOT_KNOWN, list(size_str), info)
                       else
                         _ = begin
                           @match binding begin
                             DAE.UNBOUND(__)  => begin
-                                expstr = ExpressionDump.printExpStr(inExp2)
+                                expstr = CrefForHashTable.printExpStr(inExp2)
                                 Error.addSourceMessage(Error.UNBOUND_VALUE, list(expstr), info)
                               fail()
                             end
@@ -1822,7 +1820,7 @@
                   (_, _, exp, _, _, Absyn.MSG(__), _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Print.printErrorBuf("#-- Ceval.cevalBuiltinSize failed: ")
-                      expstr = ExpressionDump.printExpStr(exp)
+                      expstr = CrefForHashTable.printExpStr(exp)
                       Print.printErrorBuf(expstr)
                       Print.printErrorBuf("\\n")
                     fail()
@@ -3454,8 +3452,8 @@
                       if ! rv2 == 0.0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -3473,8 +3471,8 @@
                       if ! ri2 == 0
                         fail()
                       end
-                      lh_str = ExpressionDump.printExpStr(exp1)
-                      rh_str = ExpressionDump.printExpStr(exp2)
+                      lh_str = CrefForHashTable.printExpStr(exp1)
+                      rh_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.DIVISION_BY_ZERO, list(lh_str, rh_str), info)
                     fail()
                   end
@@ -3532,15 +3530,15 @@
                   end
 
                   (_, Values.REAL(rv2), Absyn.MSG(info = info)) where (rv2 == 0.0)  => begin
-                      lhs_str = ExpressionDump.printExpStr(exp1)
-                      rhs_str = ExpressionDump.printExpStr(exp2)
+                      lhs_str = CrefForHashTable.printExpStr(exp1)
+                      rhs_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.MODULO_BY_ZERO, list(lhs_str, rhs_str), info)
                     fail()
                   end
 
                   (_, Values.INTEGER(0), Absyn.MSG(info = info))  => begin
-                      lhs_str = ExpressionDump.printExpStr(exp1)
-                      rhs_str = ExpressionDump.printExpStr(exp2)
+                      lhs_str = CrefForHashTable.printExpStr(exp1)
+                      rhs_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.MODULO_BY_ZERO, list(lhs_str, rhs_str), info)
                     fail()
                   end
@@ -3835,8 +3833,8 @@
                       if ! rv2 == 0.0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.REM_ARG_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -3846,8 +3844,8 @@
                       if ! ri2 == 0
                         fail()
                       end
-                      exp1_str = ExpressionDump.printExpStr(exp1)
-                      exp2_str = ExpressionDump.printExpStr(exp2)
+                      exp1_str = CrefForHashTable.printExpStr(exp1)
+                      exp2_str = CrefForHashTable.printExpStr(exp2)
                       Error.addSourceMessage(Error.REM_ARG_ZERO, list(exp1_str, exp2_str), info)
                     fail()
                   end
@@ -4040,7 +4038,7 @@
                   end
 
                   (_, _, _, _, Absyn.MSG(info = info), _)  => begin
-                      str = "cross" + ExpressionDump.printExpStr(DAE.TUPLE(inExpExpLst))
+                      str = "cross" + CrefForHashTable.printExpStr(DAE.TUPLE(inExpExpLst))
                       Error.addSourceMessage(Error.FAILED_TO_EVALUATE_EXPRESSION, list(str), info)
                     fail()
                   end
@@ -4221,7 +4219,7 @@
 
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
-                        Debug.traceln("- Ceval.cevalRelation failed on: " + ValuesUtil.printValStr(inValue1) + ExpressionDump.relopSymbol(inOperator) + ValuesUtil.printValStr(inValue2))
+                        Debug.traceln("- Ceval.cevalRelation failed on: " + ValuesUtil.printValStr(inValue1) + CrefForHashTable.relopSymbol(inOperator) + ValuesUtil.printValStr(inValue2))
                       fail()
                   end
                 end
@@ -4546,8 +4544,8 @@
 
                   (cache, env, c, false, Absyn.MSG(info = info), _)  => begin
                       @shouldFail (_, _, _, _, _, _, _, _, _) = Lookup.lookupVar(cache, env, c)
-                      scope_str = FGraph.printGraphPathStr(env)
-                      str = ComponentReference.printComponentRefStr(c)
+                      scope_str = FGraphUtil.printGraphPathStr(env)
+                      str = CrefForHashTable.printComponentRefStr(c)
                       Error.addSourceMessage(Error.LOOKUP_VARIABLE_ERROR, list(str, scope_str), info)
                     fail()
                   end
@@ -4590,13 +4588,13 @@
                   end
 
                   (_, _, _, _, _, DAE.UNBOUND(__), NONE(), _, _, _, _, false, Absyn.MSG(__), _)  => begin
-                      str = ComponentReference.printComponentRefStr(inCref)
-                      scope_str = FGraph.printGraphPathStr(inEnv)
+                      str = CrefForHashTable.printComponentRefStr(inCref)
+                      scope_str = FGraphUtil.printGraphPathStr(inEnv)
                       if Flags.isSet(Flags.CEVAL)
                         Debug.traceln("- Ceval.cevalCref on: " + str + " failed with no constant binding in scope: " + scope_str)
                       end
-                      s1 = FGraph.printGraphPathStr(inEnv)
-                      s2 = ComponentReference.printComponentRefStr(inCref)
+                      s1 = FGraphUtil.printGraphPathStr(inEnv)
+                      s2 = CrefForHashTable.printComponentRefStr(inCref)
                       s3 = Types.printTypeStr(inType)
                       v = Types.typeToValue(inType)
                       v = Values.EMPTY(s1, s2, v, s3)
@@ -4604,10 +4602,10 @@
                   end
 
                   (_, _, _, DAE.ATTR(variability = variability), _, _, _, _, _, _, _, _, _, _)  => begin
-                      @match true = SCodeUtil.isParameterOrConst(variability) || inImpl || FGraph.inForLoopScope(inEnv)
+                      @match true = SCodeUtil.isParameterOrConst(variability) || inImpl || FGraphUtil.inForLoopScope(inEnv)
                       @match false = crefEqualValue(inCref, inBinding)
                       (cache, v) = cevalCrefBinding(inCache, inEnv, inCref, inBinding, inImpl, inMsg, numIter)
-                      cache = FCore.addEvaluatedCref(cache, variability, ComponentReference.crefStripLastSubs(inCref))
+                      cache = FCore.addEvaluatedCref(cache, variability, CrefForHashTable.crefStripLastSubs(inCref))
                     (cache, v)
                   end
                 end
@@ -4628,7 +4626,7 @@
                =#
                #=  We might try to ceval variables in reduction scope... but it can't be helped since we do things in a ***** way in Inst/Static
                =#
-               #=  print(\"Eval cref: \" + ComponentReference.printComponentRefStr(inCref) + \"\\n  in scope \" + FGraph.printGraphPathStr(inEnv) + \"\\n\");
+               #=  print(\"Eval cref: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\n  in scope \" + FGraphUtil.printGraphPathStr(inEnv) + \"\\n\");
                =#
           (outCache, outValue)
         end
@@ -4669,15 +4667,15 @@
                       case (cache,env,cr,_,impl,msg)
                         equation
                           print(\"Ceval: \" +
-                            ComponentReference.printComponentRefStr(cr) + \" | \" +
-                            FGraph.printGraphPathStr(env) + \" | \" +
+                            CrefForHashTable.printComponentRefStr(cr) + \" | \" +
+                            FGraphUtil.printGraphPathStr(env) + \" | \" +
                             DAEUtil.printBindingExpStr(inBinding) +
                             \"\\n\");
                         then
                           fail();*/ =#
                 @matchcontinue (inCache, inEnv, inComponentRef, inBinding, inBoolean, inMsg, numIter) begin
                   (cache, env, cr, DAE.VALBOUND(valBound = v), impl, msg, _)  => begin
-                      subsc = ComponentReference.crefLastSubs(cr)
+                      subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
@@ -4703,20 +4701,20 @@
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
                       @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = list(DAE.REDUCTIONITER())) = exp
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
-                      subsc = ComponentReference.crefLastSubs(cr)
+                      subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
 
                   (cache, env, cr, DAE.EQBOUND(evaluatedExp = SOME(e_val)), impl, msg, _)  => begin
-                      subsc = ComponentReference.crefLastSubs(cr)
+                      subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, e_val, impl, msg, numIter + 1)
                     (cache, res)
                   end
 
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
-                      subsc = ComponentReference.crefLastSubs(cr)
+                      subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
@@ -4724,7 +4722,7 @@
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_PARAM(__)), impl, msg, _)  => begin
                       @match false = isRecursiveBinding(cr, exp)
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
-                      subsc = ComponentReference.crefLastSubs(cr)
+                      subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)
                     (cache, res)
                   end
@@ -4732,7 +4730,7 @@
                   (_, _, _, DAE.EQBOUND(exp = exp, constant_ = DAE.C_VAR(__)), _, Absyn.MSG(_), _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
                       Debug.trace("#- Ceval.cevalCrefBinding failed (nonconstant EQBOUND(")
-                      expstr = ExpressionDump.printExpStr(exp)
+                      expstr = CrefForHashTable.printExpStr(exp)
                       Debug.trace(expstr)
                       Debug.traceln("))")
                     fail()
@@ -4740,9 +4738,9 @@
 
                   (_, env, e1, _, _, _, _)  => begin
                       @match true = Flags.isSet(Flags.CEVAL)
-                      s1 = ComponentReference.printComponentRefStr(e1)
+                      s1 = CrefForHashTable.printComponentRefStr(e1)
                       s2 = Types.printBindingStr(inBinding)
-                      str = FGraph.printGraphPathStr(env)
+                      str = FGraphUtil.printGraphPathStr(env)
                       str = stringAppendList(list("- Ceval.cevalCrefBinding: ", s1, " = [", s2, "] in env:", str, " failed"))
                       Debug.traceln(str)
                     fail()
@@ -4765,7 +4763,7 @@
                =#
                #=  if the binding has constant-ness DAE.C_VAR we cannot constant evaluate.
                =#
-               #= print(\"ENV: \" + FGraph.printGraphStr(inEnv) + \"\\n\");
+               #= print(\"ENV: \" + FGraphUtil.printGraphStr(inEnv) + \"\\n\");
                =#
           (outCache, outValue)
         end
@@ -4777,7 +4775,7 @@
               res = begin
                 @matchcontinue (cr, exp) begin
                   (_, _)  => begin
-                      res = ListUtil.map1BoolOr(Expression.extractCrefsFromExp(exp), ComponentReference.crefEqual, cr)
+                      res = ListUtil.map1BoolOr(Expression.extractCrefsFromExp(exp), CrefForHashTable.crefEqual, cr)
                     res
                   end
 
@@ -4868,8 +4866,8 @@
                     equation
                       true = Flags.isSet(Flags.FAILTRACE);
                       Debug.traceln(\"- Ceval.cevalSubscriptValue failed on:\" +
-                        \"\\n env: \" + FGraph.printGraphPathStr(env) +
-                        \"\\n subs: \" + stringDelimitList(List.map(subs, ExpressionDump.printSubscriptStr), \", \") +
+                        \"\\n env: \" + FGraphUtil.printGraphPathStr(env) +
+                        \"\\n subs: \" + stringDelimitList(List.map(subs, CrefForHashTable.printSubscriptStr), \", \") +
                         \"\\n value: \" + ValuesUtil.printValStr(inValue) +
                         \"\\n dim sizes: \" + stringDelimitList(List.map(dims, intString), \", \")
                       );
@@ -5027,7 +5025,7 @@
                   local cr::DAE.ComponentRef
                 @match (c, v) begin
                   (_, DAE.EQBOUND(DAE.CREF(cr, _), NONE(), _, _))  => begin
-                    ComponentReference.crefEqual(c, cr)
+                    CrefForHashTable.crefEqual(c, cr)
                   end
 
                   _  => begin
@@ -5140,7 +5138,7 @@
                   end
                 end
               end
-               #=  print(\"cevalReductionEval: \" + ExpressionDump.printExpStr(exp) + \" => \" + ValuesUtil.valString(value) + \"\\n\");
+               #=  print(\"cevalReductionEval: \" + CrefForHashTable.printExpStr(exp) + \" => \" + ValuesUtil.valString(value) + \"\\n\");
                =#
                #=  print(\"cevalReductionEval => \" + Util.applyOptionOrDefault(result, ValuesUtil.valString, \"\") + \"\\n\");
                =#
@@ -5178,8 +5176,8 @@
                   end
 
                   (cache, _, SOME(value), SOME(exp))  => begin
-                      env = FGraph.addForIterator(inEnv, foldName, exprType, DAE.VALBOUND(inValue, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
-                      env = FGraph.addForIterator(env, resultName, exprType, DAE.VALBOUND(value, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
+                      env = FGraphUtil.addForIterator(inEnv, foldName, exprType, DAE.VALBOUND(inValue, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
+                      env = FGraphUtil.addForIterator(env, resultName, exprType, DAE.VALBOUND(value, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       (cache, value) = ceval(cache, env, exp, impl, msg, numIter + 1)
                     (cache, SOME(value))
                   end
@@ -5287,7 +5285,7 @@
                   end
 
                   (cache, env, _, _, val <| vals, SOME(exp), _, _, _)  => begin
-                      new_env = FGraph.addForIterator(env, id, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
+                      new_env = FGraphUtil.addForIterator(env, id, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       @match (cache, Values.BOOL(b)) = ceval(cache, new_env, exp, impl, msg, numIter + 1)
                       (cache, vals) = filterReductionIterator(cache, env, id, ty, vals, guardExp, impl, msg, numIter)
                       vals = if b
@@ -5323,7 +5321,7 @@
                   end
 
                   (env, name <| names, val <| vals, ty <| tys)  => begin
-                      env = FGraph.addForIterator(env, name, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
+                      env = FGraphUtil.addForIterator(env, name, ty, DAE.VALBOUND(val, DAE.BINDING_FROM_DEFAULT_VALUE()), SCode.VAR(), SOME(DAE.C_CONST()))
                       env = extendFrameForIterators(env, names, vals, tys)
                     env
                   end
@@ -5408,7 +5406,7 @@
         function cevalSimple(exp::DAE.Exp) ::Values.Value
               local val::Values.Value
 
-              (_, val) = ceval(FCoreUtil.emptyCache(), FGraph.empty(), exp, false, Absyn.MSG(AbsynUtil.dummyInfo), 0)
+              (_, val) = ceval(FCoreUtil.emptyCache(), FCore.emptyGraph, exp, false, Absyn.MSG(AbsynUtil.dummyInfo), 0)
           val
         end
 
@@ -5424,7 +5422,7 @@
               structuralParameters = (AvlSetCR.EMPTY(), nil)
               functionTree = Mutable.create(functions)
               cache = FCore.CACHE(NONE(), functionTree, structuralParameters, Absyn.IDENT(""))
-              (_, val) = ceval(cache, FGraph.empty(), exp, false, Absyn.NO_MSG(), 0)
+              (_, val) = ceval(cache, FCore.emptyGraph, exp, false, Absyn.NO_MSG(), 0)
               oexp = ValuesUtil.valueExp(val)
           oexp
         end

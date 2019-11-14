@@ -43,23 +43,21 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
-        import FGraph
-
-        import Lookup
+        import LookupUtil
 
         import SCode
 
         import Prefix
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import ClassInf
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
-        import ComponentReference
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
+        import CrefForHashTable
         import Config
         import Debug
         import Error
@@ -445,7 +443,7 @@
          #= Prefix a ComponentRef variable by adding the supplied prefix to
           it and returning a new ComponentRef.
           LS: Changed to call prefixToCref which is more general now =#
-        function prefixCref(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuter.InstHierarchy, pre::Prefix.PrefixType, cref::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef}
+        function prefixCref(cache::FCore.Cache, env::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, pre::Prefix.PrefixType, cref::DAE.ComponentRef) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local cref_1::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -459,7 +457,7 @@
         function prefixCrefNoContext(inPre::Prefix.PrefixType, inCref::DAE.ComponentRef) ::DAE.ComponentRef
               local outCref::DAE.ComponentRef
 
-              (_, outCref) = prefixToCref2(FCoreUtil.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, inPre, SOME(inCref))
+              (_, outCref) = prefixToCref2(FCoreUtil.noCache(), FCore.emptyGraph, InnerOuterTypes.emptyInstHierarchy, inPre, SOME(inCref))
           outCref
         end
 
@@ -467,7 +465,7 @@
         function prefixToCref(pre::Prefix.PrefixType) ::DAE.ComponentRef
               local cref_1::DAE.ComponentRef
 
-              (_, cref_1) = prefixToCref2(FCoreUtil.noCache(), FGraph.empty(), InnerOuter.emptyInstHierarchy, pre, NONE())
+              (_, cref_1) = prefixToCref2(FCoreUtil.noCache(), FCore.emptyGraph, InnerOuterTypes.emptyInstHierarchy, pre, NONE())
           cref_1
         end
 
@@ -511,7 +509,7 @@
 
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), NONE())  => begin
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
-                      cref_ = ComponentReference.makeCrefIdent(i, ident_ty, s)
+                      cref_ = CrefForHashTable.makeCrefIdent(i, ident_ty, s)
                       (cache, cref_1) = prefixToCref2(cache, env, inIH, Prefix.PREFIX(xs, cp), SOME(cref_))
                     (cache, cref_1)
                   end
@@ -519,7 +517,7 @@
                   (cache, env, _, Prefix.PREFIX(Prefix.PRE(prefix = i, dimensions = ds, subscripts = s, next = xs, ci_state = ci_state), cp), SOME(cref))  => begin
                       (cache, cref) = prefixSubscriptsInCref(cache, env, inIH, inPrefix, cref)
                       ident_ty = Expression.liftArrayLeftList(DAE.T_COMPLEX(ci_state, nil, NONE()), ds)
-                      cref_2 = ComponentReference.makeCrefQual(i, ident_ty, s, cref)
+                      cref_2 = CrefForHashTable.makeCrefQual(i, ident_ty, s, cref)
                       (cache, cref_1) = prefixToCref2(cache, env, inIH, Prefix.PREFIX(xs, cp), SOME(cref_2))
                     (cache, cref_1)
                   end
@@ -563,13 +561,13 @@
                   end
 
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), NONE())  => begin
-                      cref_ = ComponentReference.makeCrefIdent(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s)
+                      cref_ = CrefForHashTable.makeCrefIdent(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
                     cref_1
                   end
 
                   (Prefix.PREFIX(Prefix.PRE(prefix = i, subscripts = s, next = xs), cp), SOME(cref))  => begin
-                      cref_ = ComponentReference.makeCrefQual(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s, cref)
+                      cref_ = CrefForHashTable.makeCrefQual(i, DAE.T_COMPLEX(ClassInf.UNKNOWN(Absyn.IDENT("")), nil, NONE()), s, cref)
                       cref_1 = prefixToCrefOpt2(Prefix.PREFIX(xs, cp), SOME(cref_))
                     cref_1
                   end
@@ -588,12 +586,12 @@
                   local c::DAE.ComponentRef
                 @matchcontinue pre begin
                   Prefix.NOPRE(__)  => begin
-                      c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
+                      c = CrefForHashTable.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
 
                   Prefix.PREFIX(Prefix.NOCOMPPRE(__), _)  => begin
-                      c = ComponentReference.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
+                      c = CrefForHashTable.makeCrefIdent("", DAE.T_UNKNOWN_DEFAULT, nil)
                     c
                   end
 
@@ -631,13 +629,13 @@
                 @match (inCache, inEnv, inIH, pre, inCr, acc) begin
                   (cache, env, _, _, DAE.CREF_IDENT(id, tp, subs), _)  => begin
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
-                      cr = ComponentReference.makeCrefIdent(id, tp, subs)
-                    (cache, ComponentReference.implode_reverse(_cons(cr, acc)))
+                      cr = CrefForHashTable.makeCrefIdent(id, tp, subs)
+                    (cache, CrefForHashTable.implode_reverse(_cons(cr, acc)))
                   end
 
                   (cache, env, _, _, DAE.CREF_QUAL(id, tp, subs, cr), _)  => begin
                       (cache, subs) = prefixSubscripts(cache, env, inIH, pre, subs)
-                      crid = ComponentReference.makeCrefIdent(id, tp, subs)
+                      crid = CrefForHashTable.makeCrefIdent(id, tp, subs)
                       (cache, cr) = prefixSubscriptsInCrefWork(cache, env, inIH, pre, cr, _cons(crid, acc))
                     (cache, cr)
                   end
@@ -711,7 +709,7 @@
          #= Search for the prefix of the inner when the cref is
           an outer and add that instead of the given prefix!
           If the cref is an inner, prefix it normally. =#
-        function prefixCrefInnerOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inCref::DAE.ComponentRef, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ComponentRef}
+        function prefixCrefInnerOuter(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inCref::DAE.ComponentRef, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ComponentRef}
               local outCref::DAE.ComponentRef
               local outCache::FCore.Cache
 
@@ -728,65 +726,16 @@
                   local n::String
                 @match (inCache, inEnv, inIH, inCref, inPrefix) begin
                   (cache, _, ih, cref, pre)  => begin
-                      newCref = InnerOuter.prefixOuterCrefWithTheInnerPrefix(ih, cref, pre)
+                      newCref = prefixOuterCrefWithTheInnerPrefix(ih, cref, pre)
                     (cache, newCref)
                   end
                 end
               end
-               #= /*
-                   adrpo: prefix normally if we have an inner outer variable!
-                  case (cache,env,ih,cref,pre)
-                    equation
-                      (cache,DAE.ATTR(innerOuter = io),_,_,_,_) = Lookup.lookupVarLocal(cache, env, cref);
-                       fprintln(Flags.INNER_OUTER, printPrefixStr(inPrefix) + \"/\" + ComponentReference.printComponentRefStr(cref) +
-                         if_(AbsynUtil.isOuter(io), \" [outer] \", \" \") +
-                         if_(AbsynUtil.isInner(io), \" [inner] \", \" \"));
-                      true = AbsynUtil.isInner(io);
-                      false = AbsynUtil.isOuter(io);
-                       prefix normally
-                      newCref = prefixCref(pre, cref);
-                       fprintln(Flags.INNER_OUTER, \"INNER normally prefixed: \" + ComponentReference.printComponentRefStr(newCref));
-                    then
-                      (cache,newCref);
-
-                   adrpo: prefix with *CORRECT* prefix from inner if we have an outer variable!
-                  case (cache,env,ih,cref as DAE.CREF_IDENT(ident=_),pre)
-                    equation
-                      (cache,DAE.ATTR(innerOuter = io),_,_,_,_) = Lookup.lookupVarLocal(cache, env, cref);
-                       fprintln(Flags.INNER_OUTER, printPrefixStr(inPrefix) + \"/\" + ComponentReference.printComponentRefStr(cref) +
-                         if_(AbsynUtil.isOuter(io), \" [outer] \", \" \") +
-                         if_(AbsynUtil.isInner(io), \" [inner] \", \" \"));
-                      true = AbsynUtil.isOuter(io);
-                      n = ComponentReference.crefLastIdent(cref);
-                      lastCref = Expression.crefIdent(cref);
-                       search in the instance hierarchy for the *CORRECT* prefix for this outer variable!
-                      InnerOuter.INST_INNER(innerPrefix=innerPrefix, instResult=SOME(_)) =
-                         InnerOuter.lookupInnerVar(cache, env, ih, pre, n, io);
-                       prefix the cref with the prefix of the INNER!
-
-                      newCref = prefixCref(innerPrefix, lastCref);
-
-                       fprintln(Flags.INNER_OUTER, \"OUTER IDENT prefixed INNER : \" + ComponentReference.printComponentRefStr(newCref));
-                    then
-                      (cache,newCref);
-
-                   adrpo: we have a qualified cref, search for the prefix!
-                   bar2/world.someCrap
-                  case (cache,env,ih,cref as DAE.CREF_QUAL(ident=_),pre)
-                    equation
-                      (cache,DAE.ATTR(innerOuter = io),_,_,_,_) = Lookup.lookupVarLocal(cache, env, cref);
-                      true = AbsynUtil.isOuter(io);
-                      (cache,innerPrefix) = searchForInnerPrefix(cache,env,ih,cref,pre,io);
-                      newCref = prefixCref(innerPrefix, cref);
-                       fprintln(Flags.INNER_OUTER, \"OUTER QUAL prefixed INNER: \" + ComponentReference.printComponentRefStr(newCref));
-                    then
-                      (cache,newCref);
-                  */ =#
           (outCache, outCref)
         end
 
          #= Add the supplied prefix to all component references in an expression. =#
-        function prefixExp(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, exp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
+        function prefixExp(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuterTypes.InstHierarchy, exp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
 
 
 
@@ -800,7 +749,7 @@
         end
 
          #= Add the supplied prefix to all component references in an expression. =#
-        function prefixExpWork(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuter.InstHierarchy, inExp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
+        function prefixExpWork(cache::FCore.Cache, env::FCore.Graph, ih::InnerOuterTypes.InstHierarchy, inExp::DAE.Exp, pre::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.Exp}
               local outExp::DAE.Exp
 
 
@@ -885,7 +834,7 @@
                        =#
                       if System.getHasInnerOuterDefinitions() && ! listEmpty(ih)
                         try
-                          cr_1 = InnerOuter.prefixOuterCrefWithTheInnerPrefix(ih, cr, pre)
+                          cr_1 = prefixOuterCrefWithTheInnerPrefix(ih, cr, pre)
                           (cache, t) = prefixExpressionsInType(cache, env, ih, pre, t)
                           outExp = Expression.makeCrefExp(cr_1, t)
                           return
@@ -1100,7 +1049,7 @@
               local cr::DAE.ComponentRef
 
               @match DAE.CREF(componentRef = cr) = inCref
-              (is_iter, cache) = Lookup.isIterator(inCache, inEnv, cr)
+              (is_iter, cache) = LookupUtil.isIterator(inCache, inEnv, cr)
               (outCache, outCref) = prefixExpCref2(cache, inEnv, inIH, is_iter, inCref, inPrefix)
           (outCache, outCref)
         end
@@ -1181,7 +1130,7 @@
         end
 
          #= This function prefixes a list of expressions using the prefixExp function. =#
-        function prefixExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inExpExpLst::List{<:DAE.Exp}, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, List{DAE.Exp}}
+        function prefixExpList(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inExpExpLst::List{<:DAE.Exp}, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, List{DAE.Exp}}
               local outExpExpLst::List{DAE.Exp} = nil
               local outCache::FCore.Cache = inCache
 
@@ -1370,7 +1319,7 @@
           str
         end
 
-        function prefixExpressionsInType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, inTy::DAE.Type) ::Tuple{FCore.Cache, DAE.Type}
+        function prefixExpressionsInType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPre::Prefix.PrefixType, inTy::DAE.Type) ::Tuple{FCore.Cache, DAE.Type}
               local outTy::DAE.Type
               local outCache::FCore.Cache
 
@@ -1394,14 +1343,14 @@
 
          #= @author: adrpo
          this function prefixes all the expressions in types to be found by the back-end or code generation! =#
-        function prefixArrayDimensions(ty::DAE.Type, tpl::Tuple{<:FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}}
-              local otpl::Tuple{FCore.Cache, FCore.Graph, InnerOuter.InstHierarchy, Prefix.PrefixType}
+        function prefixArrayDimensions(ty::DAE.Type, tpl::Tuple{<:FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, Prefix.PrefixType}) ::Tuple{DAE.Type, Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, Prefix.PrefixType}}
+              local otpl::Tuple{FCore.Cache, FCore.Graph, InnerOuterTypes.InstHierarchy, Prefix.PrefixType}
               local oty::DAE.Type = ty
 
               (oty, otpl) = begin
                   local cache::FCore.Cache
                   local env::FCore.Graph
-                  local ih::InnerOuter.InstHierarchy
+                  local ih::InnerOuterTypes.InstHierarchy
                   local pre::Prefix.PrefixType
                   local dims::DAE.Dimensions
                 @match (oty, tpl) begin
@@ -1419,7 +1368,7 @@
           (oty, otpl)
         end
 
-        function prefixDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPre::Prefix.PrefixType, inDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
+        function prefixDimensions(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPre::Prefix.PrefixType, inDims::DAE.Dimensions) ::Tuple{FCore.Cache, DAE.Dimensions}
               local outDims::DAE.Dimensions
               local outCache::FCore.Cache
 
@@ -1484,7 +1433,7 @@
         end
 
          #= Add the supplied prefix to the clock kind =#
-        function prefixClockKind(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inClkKind::DAE.ClockKind, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ClockKind}
+        function prefixClockKind(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inClkKind::DAE.ClockKind, inPrefix::Prefix.PrefixType) ::Tuple{FCore.Cache, DAE.ClockKind}
               local outClkKind::DAE.ClockKind
               local outCache::FCore.Cache
 
@@ -1612,12 +1561,13 @@
           outPrefix
         end
 
+        #=
         function writeComponentPrefix(file::File.FILE, pre::Prefix.ComponentPrefix, escape::File.Escape = File.Escape.None)
               _ = begin
                 @match pre begin
                   Prefix.PRE(next = Prefix.NOCOMPPRE(__))  => begin
                       File.writeEscape(file, pre.prefix, escape)
-                      ComponentReference.writeSubscripts(file, pre.subscripts, escape)
+                      CrefForHashTable.writeSubscripts(file, pre.subscripts, escape)
                     ()
                   end
 
@@ -1626,7 +1576,7 @@
                        #=  Stored in reverse order...
                        =#
                       File.writeEscape(file, pre.prefix, escape)
-                      ComponentReference.writeSubscripts(file, pre.subscripts, escape)
+                      CrefForHashTable.writeSubscripts(file, pre.subscripts, escape)
                     ()
                   end
 
@@ -1636,6 +1586,7 @@
                 end
               end
         end
+        =#
 
          #= Function: crefHaveSubs
           Checks whether Prefix has any subscripts, recursive  =#
@@ -1659,6 +1610,142 @@
               end
           ob
         end
+
+        #= @author: adrpo
+         This function searches for outer crefs and prefixes them with the inner prefix =#
+       function prefixOuterCrefWithTheInnerPrefix(inIH::InnerOuterTypes.InstHierarchy, inOuterComponentRef::DAE.ComponentRef, inPrefix::Prefix.PrefixType) ::DAE.ComponentRef
+             local outInnerComponentRef::DAE.ComponentRef
+
+             outInnerComponentRef = begin
+                 local outerCrefPrefix::DAE.ComponentRef
+                 local fullCref::DAE.ComponentRef
+                 local innerCref::DAE.ComponentRef
+                 local innerCrefPrefix::DAE.ComponentRef
+                 local outerPrefixes::OuterPrefixes
+                  #=  we have no outer references, fail so prefixing can happen in the calling function
+                  =#
+               @match (inIH, inOuterComponentRef, inPrefix) begin
+                 ( nil(), _, _)  => begin
+                   fail()
+                 end
+
+                 (InnerOuterTypes.TOP_INSTANCE(_, _, outerPrefixes && _ <| _, _) <|  nil(), _, _)  => begin
+                     (_, fullCref) = prefixCref(FCoreUtil.emptyCache(), FCore.EG("empty"), emptyInstHierarchy, inPrefix, inOuterComponentRef)
+                     (outerCrefPrefix, innerCrefPrefix) = searchForInnerPrefix(fullCref, inOuterComponentRef, outerPrefixes)
+                     innerCref = changeOuterReferenceToInnerReference(fullCref, outerCrefPrefix, innerCrefPrefix)
+                   innerCref
+                 end
+
+                 _  => begin
+                     fail()
+                 end
+               end
+             end
+              #=  we have some outer references, search for our prefix + cref in them
+              =#
+              #=  this will fail if we don't find it so prefixing can happen in the calling function
+              =#
+              #=  fprintln(Flags.FAILTRACE, \"- InnerOuter.prefixOuterCrefWithTheInnerPrefix replaced cref \" + CrefForHashTable.printComponentRefStr(fullCref) + \" with cref: \" + CrefForHashTable.printComponentRefStr(innerCref));
+              =#
+              #=  failure
+              =#
+              #=  true = Flags.isSet(Flags.FAILTRACE);
+              =#
+              #=  Debug.traceln(\"- InnerOuter.prefixOuterCrefWithTheInnerPrefix failed to find prefix of inner for outer: prefix/cref \" + PrefixUtil.printPrefixStr(inPrefix) + \"/\" + CrefForHashTable.printComponentRefStr(inOuterComponentRef));
+              =#
+         outInnerComponentRef
+       end
+
+       #= @author: adrpo
+        This function replaces the outer prefix with the inner prefix in the full cref =#
+      function changeOuterReferenceToInnerReference(inFullCref::DAE.ComponentRef, inOuterCrefPrefix::DAE.ComponentRef, inInnerCrefPrefix::DAE.ComponentRef) ::DAE.ComponentRef
+            local outInnerCref::DAE.ComponentRef
+
+            outInnerCref = begin
+                local ifull::DAE.ComponentRef
+                local ocp::DAE.ComponentRef
+                local icp::DAE.ComponentRef
+                local ic::DAE.ComponentRef
+                local eifull::List{DAE.ComponentRef}
+                local eocp::List{DAE.ComponentRef}
+                local eicp::List{DAE.ComponentRef}
+                local epre::List{DAE.ComponentRef}
+                local erest::List{DAE.ComponentRef}
+                local esuffix::List{DAE.ComponentRef}
+                 #=  The full cref might contain subscripts that we wish to keep, so we use
+                 =#
+                 #=  the inner and outer prefix to extract the relevant parts of the full cref.
+                 =#
+                 #=
+                 =#
+                 #=  E.g. if we have a full cref a.b.c.d.e.f.g, an outer prefix a.b.c.d.e and
+                 =#
+                 #=  an inner prefix a.d.e, then we want a, d.e and f.g, resulting in a.d.e.f.g.
+                 =#
+              @match (inFullCref, inOuterCrefPrefix, inInnerCrefPrefix) begin
+                (ifull, ocp, icp)  => begin
+                    eifull = CrefForHashTable.explode(ifull)
+                    eicp = CrefForHashTable.explode(icp)
+                    (eocp, esuffix) = ListUtil.split(eifull, CrefForHashTable.identifierCount(ocp))
+                    (epre, erest) = ListUtil.splitEqualPrefix(eocp, eicp, CrefForHashTable.crefFirstIdentEqual)
+                    (_, eicp) = ListUtil.splitEqualPrefix(eicp, epre, CrefForHashTable.crefFirstIdentEqual)
+                    (erest, _) = ListUtil.splitEqualPrefix(listReverse(erest), listReverse(eicp), CrefForHashTable.crefFirstIdentEqual)
+                    erest = ListUtil.append_reverse(erest, esuffix)
+                    eifull = listAppend(epre, erest)
+                    ic = CrefForHashTable.implode(eifull)
+                  ic
+                end
+              end
+            end
+             #=  print(\"F:\" + CrefForHashTable.printComponentRefStr(ifull) + \"\\n\" + \"I:\" + CrefForHashTable.printComponentRefStr(icp) + \"\\n\" + \"O:\" + CrefForHashTable.printComponentRefStr(ocp) + \"\\n\");
+             =#
+             #=  Explode the crefs to lists so that they are easier to work with.
+             =#
+             #=  Split the full cref so that we get the part that is equal to the
+             =#
+             #=  outer prefix and the rest of the suffix.
+             =#
+             #=  Extract the common prefix of the outer and inner prefix.
+             =#
+             #=  remove the common prefix from the inner!
+             =#
+             #=  Extract the common suffix of the outer and inner prefix.
+             =#
+             #=  Combine the parts into a new cref.
+             =#
+             #=  print(\"C:\" + CrefForHashTable.printComponentRefStr(ic) + \"\\n\");
+             =#
+        outInnerCref
+      end
+
+      #= @author: adrpo
+       search in the outer prefixes and retrieve the outer/inner crefs =#
+     function searchForInnerPrefix(fullCref::DAE.ComponentRef, inOuterCref::DAE.ComponentRef, outerPrefixes::InnerOuterTypes.OuterPrefixes) ::Tuple{DAE.ComponentRef, DAE.ComponentRef}
+           local innerCrefPrefix::DAE.ComponentRef
+           local outerCrefPrefix::DAE.ComponentRef
+
+           local cr::DAE.ComponentRef
+           local id::DAE.ComponentRef
+           local b1::Bool = false
+           local b2::Bool = false
+
+            #=  print(\"L:\" + intString(listLength(outerPrefixes)) + \"\\n\");
+            =#
+           for op in outerPrefixes
+             @match InnerOuterTypes.OUTER(outerComponentRef = outerCrefPrefix) = op
+             b1 = CrefForHashTable.crefPrefixOfIgnoreSubscripts(outerCrefPrefix, fullCref)
+             if ! b1
+               cr = CrefForHashTable.crefStripLastIdent(outerCrefPrefix)
+               b2 = CrefForHashTable.crefLastIdent(outerCrefPrefix) == CrefForHashTable.crefFirstIdent(inOuterCref) && CrefForHashTable.crefPrefixOfIgnoreSubscripts(cr, fullCref)
+             end
+             if b1 || b2
+               @match InnerOuterTypes.OUTER(innerComponentRef = innerCrefPrefix) = op
+               return (outerCrefPrefix, innerCrefPrefix)
+             end
+           end
+           fail()
+       (outerCrefPrefix, innerCrefPrefix)
+     end
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

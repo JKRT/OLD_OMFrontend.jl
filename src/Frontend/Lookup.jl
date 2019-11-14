@@ -60,7 +60,7 @@
 
         import Builtin
 
-        import ComponentReference
+        import CrefForHashTable
 
         import Config
 
@@ -78,7 +78,7 @@
 
         import Flags
 
-        import FGraph
+        import FGraphUtil
 
         import FNode
 
@@ -90,7 +90,7 @@
 
         import InstUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import ListUtil
 
@@ -194,7 +194,7 @@
                   (_, env, path, SOME(info))  => begin
                       classname = AbsynUtil.pathString(path)
                       classname = stringAppend(classname, " (its type) ")
-                      scope = FGraph.printGraphPathStr(env)
+                      scope = FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(classname, scope), info)
                     fail()
                   end
@@ -250,7 +250,7 @@
 
                   (_, env, _, SOME(info))  => begin
                       classname = stringAppend(ident, " (its type) ")
-                      scope = FGraph.printGraphPathStr(env)
+                      scope = FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(classname, scope), info)
                     fail()
                   end
@@ -297,15 +297,15 @@
                   end
 
                   (cache, env_1, c && SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = r && SCode.R_ENUMERATION(__)))  => begin
-                      env_2 = FGraph.openScope(env_1, encflag, id, SOME(FCore.CLASS_SCOPE()))
-                      ci_state = ClassInf.start(r, FGraph.getGraphName(env_2))
+                      env_2 = FGraphUtil.openScope(env_1, encflag, id, SOME(FCore.CLASS_SCOPE()))
+                      ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env_2))
                       mod = Mod.getClassModifier(env_1, id)
-                      (cache, env_3, _, _, _, _, _, types, _, _, _, _) = Inst.instClassIn(cache, env_2, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
+                      (cache, env_3, _, _, _, _, _, types, _, _, _, _) = Inst.instClassIn(cache, env_2, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                       (_, names) = SCodeUtil.getClassComponents(c)
                       Types.checkEnumDuplicateLiterals(names, c.info)
-                      path = FGraph.getGraphName(env_3)
+                      path = FGraphUtil.getGraphName(env_3)
                       t = DAE.T_ENUMERATION(NONE(), path, names, types, nil)
-                      env_3 = FGraph.mkTypeNode(env_3, id, t)
+                      env_3 = FGraphUtil.mkTypeNode(env_3, id, t)
                     (cache, t, env_3)
                   end
 
@@ -336,15 +336,15 @@
 
                   (cache, env_1, c)  => begin
                       @match true = SCodeUtil.classIsExternalObject(c)
-                      (cache, env_1, _, _, _, _, _, _, _, _) = Inst.instClass(cache, env_1, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
+                      (cache, env_1, _, _, _, _, _, _, _, _) = Inst.instClass(cache, env_1, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), c, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       @match SCode.CLASS(name = id) = c
-                      (env_1, _) = FGraph.stripLastScopeRef(env_1)
+                      (env_1, _) = FGraphUtil.stripLastScopeRef(env_1)
                       (cache, t, env_2) = lookupTypeInEnv(cache, env_1, id)
                     (cache, t, env_2)
                   end
 
                   (cache, env_1, c && SCode.CLASS(name = id, restriction = SCode.R_FUNCTION(_)))  => begin
-                      (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuter.emptyInstHierarchy, c)
+                      (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuterTypes.emptyInstHierarchy, c)
                       (cache, t, env_3) = lookupTypeInEnv(cache, env_2, id)
                     (cache, t, env_3)
                   end
@@ -352,7 +352,7 @@
               end
                #=  lookup of an enumeration type
                =#
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraph.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraphUtil.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
                =#
                #=  build names
                =#
@@ -370,7 +370,7 @@
                =#
                #=  Classes that are external objects. Implicitly instantiate to get type
                =#
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraph.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraphUtil.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
                =#
                #=  If we find a class definition that is a function or external function
                =#
@@ -378,7 +378,7 @@
                =#
                #=  up the type.
                =#
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraph.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE ICD: \" + FGraphUtil.printGraphPathStr(env_1) + \" path:\" + AbsynUtil.pathString(path));
                =#
           (outCache, outType #= the found type =#, outEnv #= The environment the type was found in =#)
         end
@@ -470,11 +470,11 @@
                   local id::Absyn.Path
                   local name::String
                   local className::String
-                  local cenv::FGraph.Graph
+                  local cenv::FGraphUtil.Graph
                    #= /*
                       case (_,_,_,_)
                         equation
-                          print(\"CL: \" + AbsynUtil.pathString(inPath) + \" env: \" + FGraph.printGraphPathStr(inEnv) + \" msg: \" + boolString(msg) + \"\\n\");
+                          print(\"CL: \" + AbsynUtil.pathString(inPath) + \" env: \" + FGraphUtil.printGraphPathStr(inEnv) + \" msg: \" + boolString(msg) + \"\\n\");
                         then
                           fail();*/ =#
                    #=  see if the first path ident is a component
@@ -503,9 +503,9 @@
               end
                #=  normal case
                =#
-               #=  print(\"CLRET: \" + SCodeUtil.elementName(outClass) + \" outenv: \" + FGraph.printGraphPathStr(outEnv) + \"\\n\");
+               #=  print(\"CLRET: \" + SCodeUtil.elementName(outClass) + \" outenv: \" + FGraphUtil.printGraphPathStr(outEnv) + \"\\n\");
                =#
-               #=  print(\"Lookup C2: \" + \" outenv: \" + FGraph.printGraphPathStr(outEnv) + \"\\n\");
+               #=  print(\"Lookup C2: \" + \" outenv: \" + FGraphUtil.printGraphPathStr(outEnv) + \"\\n\");
                =#
           (outCache, outClass, outEnv)
         end
@@ -534,7 +534,7 @@
                 (outCache, outClass, outEnv, outPrevFrames) = lookupClass2(inCache, inEnv, inPath, inPrevFrames, inState, inInfo)
               catch
                 if isSome(inInfo) && errors == Error.getNumErrorMessages()
-                  Error.addSourceMessage(Error.LOOKUP_ERROR, list(AbsynUtil.pathString(inPath), FGraph.printGraphPathStr(inEnv)), Util.getOption(inInfo))
+                  Error.addSourceMessage(Error.LOOKUP_ERROR, list(AbsynUtil.pathString(inPath), FGraphUtil.printGraphPathStr(inEnv)), Util.getOption(inInfo))
                 end
                 fail()
               end
@@ -568,9 +568,9 @@
                    =#
                 @match (inCache, inEnv, inPath, inPrevFrames) begin
                   (cache, env, Absyn.FULLYQUALIFIED(path),  nil())  => begin
-                      @match _cons(r, prevFrames) = listReverse(FGraph.currentScope(env))
+                      @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
                       Mutable.update(inState, true)
-                      env = FGraph.setScope(env, list(r))
+                      env = FGraphUtil.setScope(env, list(r))
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env_1, prevFrames)
                   end
@@ -594,7 +594,7 @@
                #= /*
                   case (cache,env,p,_,_,_)
                     equation
-                      Debug.traceln(\"lookupClass failed \" + AbsynUtil.pathString(p) + \" \" + FGraph.printGraphPathStr(env));
+                      Debug.traceln(\"lookupClass failed \" + AbsynUtil.pathString(p) + \" \" + FGraphUtil.printGraphPathStr(env));
                     then fail();
                   */ =#
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
@@ -619,7 +619,7 @@
                 @match (inCache, inEnv, id, path, inOptFrame, inPrevFrames) begin
                   (cache, env, _, _, SOME(frame), prevFrames)  => begin
                       Mutable.update(inState, true)
-                      env = FGraph.pushScopeRef(env, frame)
+                      env = FGraphUtil.pushScopeRef(env, frame)
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
@@ -657,13 +657,13 @@
                   local mod::DAE.Mod
                 @matchcontinue (inCache, inEnv, path, inC, optFrame, inPrevFrames) begin
                   (cache, env, _, _, SOME(frame), prevFrames)  => begin
-                      env = FGraph.pushScopeRef(env, frame)
+                      env = FGraphUtil.pushScopeRef(env, frame)
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, prevFrames, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
 
                   (cache, env, _, SCode.CLASS(name = id), NONE(), _)  => begin
-                      r = FNode.child(FGraph.lastScopeRef(env), id)
+                      r = FNode.child(FGraphUtil.lastScopeRef(env), id)
                       @match FCore.CL(status = FCore.CLS_INSTANCE(_)) = FNode.refData(r)
                       (cache, env) = Inst.getCachedInstance(cache, env, id, r)
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, nil, inState, inInfo)
@@ -671,23 +671,23 @@
                   end
 
                   (cache, env, _, SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr), NONE(), _)  => begin
-                      env = FGraph.openScope(env, encflag, id, FGraph.restrictionToScopeType(restr))
-                      ci_state = ClassInf.start(restr, FGraph.getGraphName(env))
+                      env = FGraphUtil.openScope(env, encflag, id, FGraphUtil.restrictionToScopeType(restr))
+                      ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env))
                       mod = Mod.getClassModifier(inEnv, id)
-                      (cache, env, _, _, _) = Inst.partialInstClassIn(cache, env, InnerOuter.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, inC, SCode.PUBLIC(), nil, 0)
+                      (cache, env, _, _, _) = Inst.partialInstClassIn(cache, env, InnerOuterTypes.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, inC, SCode.PUBLIC(), nil, 0)
                       checkPartialScope(env, inEnv, cache, inInfo)
                       (cache, c, env, prevFrames) = lookupClass2(cache, env, path, nil, inState, inInfo)
                     (cache, c, env, prevFrames)
                   end
                 end
               end
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP CLASS QUALIFIED FRAME: \" + FGraph.printGraphPathStr(env) + \" path: \" + AbsynUtil.pathString(path) + \" class: \" + SCodeDump.shortElementStr(c));
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP CLASS QUALIFIED FRAME: \" + FGraphUtil.printGraphPathStr(env) + \" path: \" + AbsynUtil.pathString(path) + \" class: \" + SCodeDump.shortElementStr(c));
                =#
                #=  class is an instance of a component
                =#
                #=  fetch the env
                =#
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP CLASS QUALIFIED PARTIALICD: \" + FGraph.printGraphPathStr(env) + \" path: \" + AbsynUtil.pathString(path) + \" class: \" + SCodeDump.shortElementStr(c));
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP CLASS QUALIFIED PARTIALICD: \" + FGraphUtil.printGraphPathStr(env) + \" path: \" + AbsynUtil.pathString(path) + \" class: \" + SCodeDump.shortElementStr(c));
                =#
           (outCache, outClass, outEnv #= The environment in which the class was found (not the environment inside the class) =#, outPrevFrames)
         end
@@ -702,14 +702,14 @@
               local pre_info::SourceInfo
               local info::SourceInfo
 
-              if isSome(inInfo) && FGraph.isPartialScope(inEnv) && Config.languageStandardAtLeast(Config.LanguageStandard.S3_2)
-                @match FCore.N(data = FCore.CL(e = el, pre = pre)) = FNode.fromRef(FGraph.lastScopeRef(inEnv))
+              if isSome(inInfo) && FGraphUtil.isPartialScope(inEnv) && Config.languageStandardAtLeast(Config.LanguageStandard.S3_2)
+                @match FCore.N(data = FCore.CL(e = el, pre = pre)) = FNode.fromRef(FGraphUtil.lastScopeRef(inEnv))
                 name = SCodeUtil.elementName(el)
-                if FGraph.graphPrefixOf(inParentEnv, inEnv) && ! PrefixUtil.isNoPrefix(pre)
+                if FGraphUtil.graphPrefixOf(inParentEnv, inEnv) && ! PrefixUtil.isNoPrefix(pre)
                   pre_str = PrefixUtil.printPrefixStr(pre)
                   cls_info = SCodeUtil.elementInfo(el)
                   pre_info = PrefixUtil.getPrefixInfo(pre)
-                  cc_str = getConstrainingClass(el, FGraph.stripLastScopeRef(inEnv), inCache)
+                  cc_str = getConstrainingClass(el, FGraphUtil.stripLastScopeRef(inEnv), inCache)
                   Error.addMultiSourceMessage(Error.USE_OF_PARTIAL_CLASS, list(pre_str, name, cc_str), list(cls_info, pre_info))
                   fail()
                 else
@@ -744,7 +744,7 @@
                   end
 
                   _  => begin
-                      FGraph.printGraphPathStr(inEnv) + "." + SCodeUtil.elementName(inClass)
+                      FGraphUtil.printGraphPathStr(inEnv) + "." + SCodeUtil.elementName(inClass)
                   end
                 end
               end
@@ -791,12 +791,12 @@
                   (Absyn.QUAL_IMPORT(path = path) <| _, _)  => begin
                       id = AbsynUtil.pathLastIdent(path)
                       @match true = id == ident
-                    ComponentReference.pathToCref(path)
+                    CrefForHashTable.pathToCref(path)
                   end
 
                   (Absyn.NAMED_IMPORT(name = id, path = path) <| _, _)  => begin
                       @match true = id == ident
-                    ComponentReference.pathToCref(path)
+                    CrefForHashTable.pathToCref(path)
                   end
 
                   (_ <| rest, _)  => begin
@@ -829,10 +829,10 @@
                   local path::Absyn.Path
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| _, env, ident)  => begin
-                      @match _cons(f, prevFrames) = listReverse(FGraph.currentScope(env))
-                      cref = ComponentReference.pathToCref(path)
-                      cref = ComponentReference.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
-                      env = FGraph.setScope(env, list(f))
+                      @match _cons(f, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      cref = CrefForHashTable.pathToCref(path)
+                      cref = CrefForHashTable.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
+                      env = FGraphUtil.setScope(env, list(f))
                       (cache, _, _, _, _, _, _, _, _) = lookupVarInPackages(cache, env, cref, prevFrames, Mutable.create(false))
                     (cache, true)
                   end
@@ -889,10 +889,10 @@
                    =#
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| rest, env, ident)  => begin
-                      @match _cons(f, prevFrames) = listReverse(FGraph.currentScope(env))
-                      cref = ComponentReference.pathToCref(path)
-                      cref = ComponentReference.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
-                      env2 = FGraph.setScope(env, list(f))
+                      @match _cons(f, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      cref = CrefForHashTable.pathToCref(path)
+                      cref = CrefForHashTable.crefPrependIdent(cref, ident, nil, DAE.T_UNKNOWN_DEFAULT)
+                      env2 = FGraphUtil.setScope(env, list(f))
                       (cache, classEnv, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env2, cref, prevFrames, Mutable.create(false))
                       (cache, more) = moreLookupUnqualifiedImportedVarInFrame(cache, rest, env, ident)
                       unique = boolNot(more)
@@ -933,8 +933,8 @@
                   (cache, Absyn.QUAL_IMPORT(path = Absyn.IDENT(name = id)) <| _, env, ident, _)  => begin
                       @match true = id == ident #= For imported paths A, not possible to assert sub-path package =#
                       Mutable.update(inState, true)
-                      @match _cons(r, prevFrames) = listReverse(FGraph.currentScope(env))
-                      env = FGraph.setScope(env, list(r))
+                      @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      env = FGraphUtil.setScope(env, list(r))
                       (cache, c, env_1, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
@@ -943,8 +943,8 @@
                       id = AbsynUtil.pathLastIdent(path) #= For imported path A.B.C, assert A.B is package =#
                       @match true = id == ident
                       Mutable.update(inState, true)
-                      @match _cons(r, prevFrames) = listReverse(FGraph.currentScope(env))
-                      env = FGraph.setScope(env, list(r))
+                      @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      env = FGraphUtil.setScope(env, list(r))
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
@@ -952,8 +952,8 @@
                   (cache, Absyn.NAMED_IMPORT(name = id, path = path) <| _, env, ident, _)  => begin
                       @match true = id == ident #= Named imports =#
                       Mutable.update(inState, true)
-                      @match _cons(r, prevFrames) = listReverse(FGraph.currentScope(env))
-                      env = FGraph.setScope(env, list(r))
+                      @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      env = FGraphUtil.setScope(env, list(r))
                       (cache, c, env_1, prevFrames) = lookupClass2(cache, env, path, prevFrames, Mutable.create(false), inInfo)
                     (cache, c, env_1, prevFrames)
                   end
@@ -1005,14 +1005,14 @@
                    =#
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| _, env, ident)  => begin
-                      env = FGraph.topScope(env)
+                      env = FGraphUtil.topScope(env)
                       @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1) = lookupClass(cache, env, path)
-                      env2 = FGraph.openScope(env_1, encflag, id, FGraph.restrictionToScopeType(restr))
-                      ci_state = ClassInf.start(restr, FGraph.getGraphName(env2))
+                      env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
+                      ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
-                      (cache, env, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuter.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
-                      r = FGraph.lastScopeRef(env)
-                      env = FGraph.setScope(env, list(r))
+                      (cache, env, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuterTypes.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
+                      r = FGraphUtil.lastScopeRef(env)
+                      env = FGraphUtil.setScope(env, list(r))
                       (cache, _, _) = lookupClass(cache, env, Absyn.IDENT(ident))
                     (cache, true)
                   end
@@ -1027,7 +1027,7 @@
                   end
                 end
               end
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP MORE UNQUALIFIED IMPORTED ICD: \" + FGraph.printGraphPathStr(env) + \".\" + ident);
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP MORE UNQUALIFIED IMPORTED ICD: \" + FGraphUtil.printGraphPathStr(env) + \".\" + ident);
                =#
                #=  Look in the parent scope
                =#
@@ -1069,13 +1069,13 @@
                    =#
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| rest, env, ident)  => begin
-                      @match _cons(r, prevFrames) = listReverse(FGraph.currentScope(env))
-                      env3 = FGraph.setScope(env, list(r))
+                      @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                      env3 = FGraphUtil.setScope(env, list(r))
                       @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1, prevFrames) = lookupClass2(cache, env3, path, prevFrames, Mutable.create(false), inInfo)
-                      env2 = FGraph.openScope(env_1, encflag, id, FGraph.restrictionToScopeType(restr))
-                      ci_state = ClassInf.start(restr, FGraph.getGraphName(env2))
+                      env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
+                      ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
-                      (cache, env2, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuter.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
+                      (cache, env2, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuterTypes.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
                       (cache, c_1, env2, prevFrames) = lookupClassInEnv(cache, env2, ident, prevFrames, Mutable.create(true), inInfo) #= Restrict import to the imported scope only, not its parents... =#
                       (cache, more) = moreLookupUnqualifiedImportedClassInFrame(cache, rest, env, ident)
                       unique = boolNot(more)
@@ -1088,7 +1088,7 @@
                   end
                 end
               end
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP UNQUALIFIED IMPORTED ICD: \" + FGraph.printGraphPathStr(env) + \".\" + ident);
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP UNQUALIFIED IMPORTED ICD: \" + FGraphUtil.printGraphPathStr(env) + \".\" + ident);
                =#
                #=  Restrict import to the imported scope only, not its parents, thus {f} below
                =#
@@ -1254,7 +1254,7 @@
                    #= /*/ debugging
                       case (cache,env,cref)
                         equation
-                          print(\"CO: \" + ComponentReference.printComponentRefStr(cref) + \" env: \" + FGraph.printGraphPathStr(env) + \"\\n\");
+                          print(\"CO: \" + CrefForHashTable.printComponentRefStr(cref) + \" env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                         then
                           fail();*/ =#
                    #=  try the old lookupVarInternal
@@ -1284,8 +1284,8 @@
                   case (_,env,cref)
                     equation
                       fprintln(Flags.FAILTRACE,  \"- Lookup.lookupVar failed:\\n\" +
-                        ComponentReference.printComponentRefStr(cref) + \" in:\\n\" +
-                        FGraph.printGraphPathStr(env));
+                        CrefForHashTable.printComponentRefStr(cref) + \" in:\\n\" +
+                        FGraphUtil.printGraphPathStr(env));
                     then fail();*/ =#
           (outCache, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, outSplicedExpData, outClassEnv #= only used for package constants =#, outComponentEnv #= only used for package constants =#, name #= so the FQ path can be constructed =#)
         end
@@ -1322,7 +1322,7 @@
                   end
 
                   (cache, env)  => begin
-                      cref = ComponentReference.makeCrefIdent(ident, DAE.T_UNKNOWN_DEFAULT, ss)
+                      cref = CrefForHashTable.makeCrefIdent(ident, DAE.T_UNKNOWN_DEFAULT, ss)
                       (cache, classEnv, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cref, nil, Mutable.create(false))
                       checkPackageVariableConstant(env, classEnv, componentEnv, attr, ty, cref)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, classEnv, componentEnv, name)
@@ -1354,8 +1354,8 @@
                   end
 
                   _  => begin
-                        s1 = ComponentReference.printComponentRefStr(cref)
-                        s2 = FGraph.printGraphPathStr(classEnv)
+                        s1 = CrefForHashTable.printComponentRefStr(cref)
+                        s2 = FGraphUtil.printGraphPathStr(classEnv)
                         Error.addMessage(Error.PACKAGE_VARIABLE_NOT_CONSTANT, list(s1, s2))
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- Lookup.checkPackageVariableConstant failed: " + s1 + " in " + s2)
@@ -1366,9 +1366,9 @@
                #= /*/ do not fail if is a parameter in non-package
                   case (_, _, _,DAE.ATTR(variability = SCode.PARAM()),_,_)
                     equation
-                      FCore.CL(e = cl) = FNode.refData(FGraph.lastScopeRef(classEnv));
+                      FCore.CL(e = cl) = FNode.refData(FGraphUtil.lastScopeRef(classEnv));
                       false = SCodeUtil.isPackage(cl);
-                       print(\"cref:  \" + ComponentReference.printComponentRefStr(cref) + \"\\nprenv: \" + FGraph.getGraphNameStr(parentEnv) + \"\\nclenv: \" + FGraph.getGraphNameStr(classEnv) + \"\\ncoenv: \" + FGraph.getGraphNameStr(componentEnv) + \"\\n\");
+                       print(\"cref:  \" + CrefForHashTable.printComponentRefStr(cref) + \"\\nprenv: \" + FGraphUtil.getGraphNameStr(parentEnv) + \"\\nclenv: \" + FGraphUtil.getGraphNameStr(classEnv) + \"\\ncoenv: \" + FGraphUtil.getGraphNameStr(componentEnv) + \"\\n\");
                     then
                       ();*/ =#
                #=  fail if is not a constant
@@ -1411,15 +1411,15 @@
 
                   (cache, FCore.G(scope = r <| _), ref, _)  => begin
                       @match true = FNode.isImplicitRefName(r)
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name) = lookupVarInternal(cache, env, ref, searchStrategy)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
 
                   (cache, FCore.G(scope = _ <| _ <| _), ref, InstTypes.SEARCH_ALSO_BUILTIN(__))  => begin
                       @match true = Builtin.variableIsBuiltin(ref)
-                      env = FGraph.topScope(inEnv)
-                      ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
+                      env = FGraphUtil.topScope(inEnv)
+                      ht = FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env)))
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarF(cache, ht, ref, env)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
@@ -1468,15 +1468,15 @@
 
                   (cache, FCore.G(scope = r <| _), _)  => begin
                       @match true = FNode.isImplicitRefName(r)
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name) = lookupVarInternalIdent(cache, env, ident, ss, searchStrategy)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
 
                   (cache, FCore.G(scope = _ <| _ <| _), InstTypes.SEARCH_ALSO_BUILTIN(__))  => begin
                       @match true = Builtin.variableNameIsBuiltin(ident)
-                      env = FGraph.topScope(inEnv)
-                      ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
+                      env = FGraphUtil.topScope(inEnv)
+                      ht = FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env)))
                       (cache, attr, ty, binding, cnstForRange, splicedExpData, componentEnv, name) = lookupVarFIdent(cache, ht, ident, ss, env)
                     (cache, attr, ty, binding, cnstForRange, splicedExpData, env, componentEnv, name)
                   end
@@ -1577,28 +1577,28 @@
                         @match of begin
                           SOME(f)  => begin
                               Mutable.update(inState, true)
-                              env5 = FGraph.pushScopeRef(env, f)
+                              env5 = FGraphUtil.pushScopeRef(env, f)
                             ()
                           end
 
                           NONE()  => begin
                               @match (cache, (@match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c), env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
                               Mutable.update(inState, true)
-                              rr = FNode.child(FGraph.lastScopeRef(env2), id)
+                              rr = FNode.child(FGraphUtil.lastScopeRef(env2), id)
                               if FNode.isRefInstance(rr)
                                 (cache, env5) = Inst.getCachedInstance(cache, env2, id, rr)
                               else
-                                env3 = FGraph.openScope(env2, encflag, n, FGraph.restrictionToScopeType(r))
-                                ci_state = ClassInf.start(r, FGraph.getGraphName(env3))
+                                env3 = FGraphUtil.openScope(env2, encflag, n, FGraphUtil.restrictionToScopeType(r))
+                                ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env3))
                                 mod = Mod.getClassModifier(env2, n)
-                                (cache, env5, _, _, _, _, _, _, _, _, _, _) = Inst.instClassIn(cache, env3, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
+                                (cache, env5, _, _, _, _, _, _, _, _, _, _) = Inst.instClassIn(cache, env3, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, NONE())
                               end
                             ()
                           end
                         end
                       end
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env5, cref, prevFrames, inState)
-                      splicedExpData = prefixSplicedExp(ComponentReference.crefFirstCref(inComponentRef), splicedExpData)
+                      splicedExpData = prefixSplicedExp(CrefForHashTable.crefFirstCref(inComponentRef), splicedExpData)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
 
@@ -1608,14 +1608,14 @@
                   end
 
                   (cache, env, cr && DAE.CREF_QUAL(__), _, _)  => begin
-                      ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
+                      ht = FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env)))
                       (cache, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarF(cache, ht, cr, env)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
 
                   (cache, FCore.G(scope = f <| fs), cr && DAE.CREF_QUAL(__), prevFrames, _)  => begin
                       @match false = Mutable.access(inState)
-                      env = FGraph.setScope(inEnv, fs)
+                      env = FGraphUtil.setScope(inEnv, fs)
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cr, _cons(f, prevFrames), inState)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
@@ -1637,7 +1637,7 @@
                =#
                #= true = Flags.isSet(Flags.FAILTRACE);
                =#
-               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + ComponentReference.printComponentRefStr(cr) + \" in scope: \" + FGraph.printGraphPathStr(env));
+               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + CrefForHashTable.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
                =#
           (outCache, outClassEnv, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData #= currently not relevant for constants, but might be used in the future =#, outComponentEnv, name #= We only return the environment the component was found in; not its FQ name. =#)
         end
@@ -1710,26 +1710,26 @@
                   end
 
                   (cache, env, _, _)  => begin
-                      ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
+                      ht = FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env)))
                       (cache, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarFIdent(cache, ht, id, ss, env)
                     (cache, env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
 
                   (cache, env, prevFrames, _)  => begin
-                      node = FNode.fromRef(FGraph.lastScopeRef(env))
+                      node = FNode.fromRef(FGraphUtil.lastScopeRef(env))
                       (qimports, uqimports) = FNode.imports(node)
                       _ = begin
                         @matchcontinue (qimports, uqimports) begin
                           (_ <| _, _)  => begin
                               cr = lookupQualifiedImportedVarInFrame(qimports, id)
                               Mutable.update(inState, true)
-                              cr = if FNode.name(FNode.fromRef(FGraph.lastScopeRef(env))) == ComponentReference.crefFirstIdent(cr)
-                                    ComponentReference.crefStripFirstIdent(cr)
+                              cr = if FNode.name(FNode.fromRef(FGraphUtil.lastScopeRef(env))) == CrefForHashTable.crefFirstIdent(cr)
+                                    CrefForHashTable.crefStripFirstIdent(cr)
                                   else
                                     cr
                                   end
-                              @match _cons(f, prevFrames) = listReverse(FGraph.currentScope(env))
-                              env = FGraph.setScope(env, list(f))
+                              @match _cons(f, prevFrames) = listReverse(FGraphUtil.currentScope(env))
+                              env = FGraphUtil.setScope(env, list(f))
                               (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackages(cache, env, cr, prevFrames, inState)
                             ()
                           end
@@ -1747,7 +1747,7 @@
 
                   (cache, FCore.G(scope = f <| fs), prevFrames, _)  => begin
                       @match false = Mutable.access(inState)
-                      env = FGraph.setScope(inEnv, fs)
+                      env = FGraphUtil.setScope(inEnv, fs)
                       (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name) = lookupVarInPackagesIdent(cache, env, id, ss, _cons(f, prevFrames), inState)
                     (cache, p_env, attr, ty, bind, cnstForRange, splicedExpData, componentEnv, name)
                   end
@@ -1771,7 +1771,7 @@
                =#
                #= true = Flags.isSet(Flags.FAILTRACE);
                =#
-               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + ComponentReference.printComponentRefStr(cr) + \" in scope: \" + FGraph.printGraphPathStr(env));
+               #= Debug.traceln(\"- Lookup.lookupVarInPackages failed on exp:\" + CrefForHashTable.printComponentRefStr(cr) + \" in scope: \" + FGraphUtil.printGraphPathStr(env));
                =#
           (outCache, outClassEnv, outAttributes, outType, outBinding, constOfForIteratorRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData #= currently not relevant for constants, but might be used in the future =#, outComponentEnv, name #= We only return the environment the component was found in; not its FQ name. =#)
         end
@@ -1834,7 +1834,7 @@
 
                   (cache, FCore.G(scope = r <| _), id)  => begin
                       @match true = FNode.isImplicitRefName(r)
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (cache, fv, c, m, i, componentEnv) = lookupIdentLocal(cache, env, id)
                     (cache, fv, c, m, i, componentEnv)
                   end
@@ -1898,7 +1898,7 @@
                   end
 
                   (cache, FCore.G(scope = _ <| _), id)  => begin
-                      (e, _) = FGraph.stripLastScopeRef(inEnv)
+                      (e, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (cache, fv, c, m, i, e) = lookupIdent(cache, e, id)
                     (cache, fv, c, m, i, e)
                   end
@@ -1934,7 +1934,7 @@
                    #= /*
                       case (cache,env,id,info)
                         equation
-                          print(\"Looking up: \" + AbsynUtil.pathString(id) + \" in env: \" + FGraph.printGraphPathStr(env) + \"\\n\");
+                          print(\"Looking up: \" + AbsynUtil.pathString(id) + \" in env: \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                         then
                           fail();*/ =#
                    #= /*/ strip env if path is fully qualified in env
@@ -1961,7 +1961,7 @@
                   end
 
                   (cache, env, id, _)  => begin
-                      env = FGraph.selectScope(env, id)
+                      env = FGraphUtil.selectScope(env, id)
                       name = AbsynUtil.pathLastIdent(id)
                       (cache, res) = lookupFunctionsInEnv(cache, env, Absyn.IDENT(name), inInfo)
                     (cache, res)
@@ -1969,15 +1969,15 @@
 
                   (cache, env, Absyn.IDENT(name = str), info)  => begin
                       _ = Static.elabBuiltinHandler(str) #= Check for builtin operators =#
-                      env = FGraph.topScope(env)
-                      ht = FNode.children(FNode.fromRef(FGraph.lastScopeRef(env)))
-                      httypes = getHtTypes(FGraph.lastScopeRef(env))
+                      env = FGraphUtil.topScope(env)
+                      ht = FNode.children(FNode.fromRef(FGraphUtil.lastScopeRef(env)))
+                      httypes = getHtTypes(FGraphUtil.lastScopeRef(env))
                       (cache, res) = lookupFunctionsInFrame(cache, ht, httypes, env, str, info)
                     (cache, res)
                   end
 
                   (cache, env, Absyn.IDENT(name = str && "cardinality"), _)  => begin
-                      env = FGraph.topScope(env)
+                      env = FGraphUtil.topScope(env)
                       res = createGenericBuiltinFunctions(env, str)
                     (cache, res)
                   end
@@ -1989,7 +1989,7 @@
                   end
 
                   (cache, env, Absyn.FULLYQUALIFIED(id), info)  => begin
-                      env = FGraph.topScope(env)
+                      env = FGraphUtil.topScope(env)
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, true, info)
                     (cache, res)
                   end
@@ -2063,7 +2063,7 @@
                   end
 
                   (_, env, id <| _, _, _)  => begin
-                      str = AbsynUtil.pathString(id) + " not found in scope: " + FGraph.printGraphPathStr(env)
+                      str = AbsynUtil.pathString(id) + " not found in scope: " + FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
                     fail()
                   end
@@ -2114,7 +2114,7 @@
                       @match (cache, c, env_1) = lookupClass(cache, inEnv, id)
                       @match SCode.CLASS(name = str, restriction = restr) = c
                       @match true = SCodeUtil.isFunctionRestriction(restr)
-                      @match (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuter.emptyInstHierarchy, c)
+                      @match (cache, env_2, _) = InstFunction.implicitFunctionTypeInstantiation(cache, env_1, InnerOuterTypes.emptyInstHierarchy, c)
                       @match FCore.G(scope = r <| _) = env_2
                       ht = FNode.children(FNode.fromRef(r))
                       httypes = getHtTypes(r)
@@ -2125,14 +2125,14 @@
                   (cache, FCore.G(scope = r <| _), Absyn.QUALIFIED(name = pack, path = path), _, _)  => begin
                       @match (cache, c, env_1) = lookupClass(cache, inEnv, Absyn.IDENT(pack))
                       @match SCode.CLASS(name = str, encapsulatedPrefix = encflag, restriction = restr) = c
-                      r = FNode.child(FGraph.lastScopeRef(env_1), str)
+                      r = FNode.child(FGraphUtil.lastScopeRef(env_1), str)
                       if FNode.isRefInstance(r)
                         (cache, env2) = Inst.getCachedInstance(cache, env_1, str, r)
                       else
-                        env2 = FGraph.openScope(env_1, encflag, str, FGraph.restrictionToScopeType(restr))
-                        ci_state = ClassInf.start(restr, FGraph.getGraphName(env2))
+                        env2 = FGraphUtil.openScope(env_1, encflag, str, FGraphUtil.restrictionToScopeType(restr))
+                        ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                         mod = Mod.getClassModifier(env_1, str)
-                        (cache, env2, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuter.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
+                        (cache, env2, _, _, _) = Inst.partialInstClassIn(cache, env2, InnerOuterTypes.emptyInstHierarchy, mod, Prefix.NOPRE(), ci_state, c, SCode.PUBLIC(), nil, 0)
                       end
                       (cache, res) = lookupFunctionsInEnv2(cache, env2, path, true, info)
                     (cache, res)
@@ -2140,14 +2140,14 @@
 
                   (cache, FCore.G(scope = r <| _), id, false, _)  => begin
                       @match false = FNode.isEncapsulated(FNode.fromRef(r))
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, false, info)
                     (cache, res)
                   end
 
                   (cache, FCore.G(scope = r <| _), id && Absyn.IDENT(__), false, _)  => begin
                       @match true = FNode.isEncapsulated(FNode.fromRef(r))
-                      env = FGraph.topScope(inEnv)
+                      env = FGraphUtil.topScope(inEnv)
                       (cache, res) = lookupFunctionsInEnv2(cache, env, id, true, info)
                     (cache, res)
                   end
@@ -2211,9 +2211,9 @@
                   end
 
                   (cache, env && FCore.G(scope = r <| _))  => begin
-                      (env, _) = FGraph.stripLastScopeRef(env)
+                      (env, _) = FGraphUtil.stripLastScopeRef(env)
                       (cache, c, env_1) = lookupTypeInEnv(cache, env, id)
-                      env_1 = FGraph.pushScopeRef(env_1, r)
+                      env_1 = FGraphUtil.pushScopeRef(env_1, r)
                     (cache, c, env_1)
                   end
                 end
@@ -2312,7 +2312,7 @@
 
                   (cache, FCore.N(data = FCore.CL(e = cdef && SCode.CLASS(restriction = SCode.R_FUNCTION(_)))), env, id)  => begin
                       cenv = env
-                      (cache, env_1, _) = InstFunction.implicitFunctionInstantiation(cache, cenv, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil)
+                      (cache, env_1, _) = InstFunction.implicitFunctionInstantiation(cache, cenv, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil)
                       (cache, ty, env_3) = lookupTypeInEnv(cache, env_1, id)
                     (cache, ty, env_3)
                   end
@@ -2322,7 +2322,7 @@
                =#
                #=  Found function
                =#
-               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE IN FRAME ICD: \" + FGraph.printGraphPathStr(env) + \" id:\" + id);
+               #=  fprintln(Flags.INST_TRACE, \"LOOKUP TYPE IN FRAME ICD: \" + FGraphUtil.printGraphPathStr(env) + \" id:\" + id);
                =#
                #=  select the env if is the same as cenv as is updated!
                =#
@@ -2390,7 +2390,7 @@
                     FCore.CL(e = cl) where (SCodeUtil.isFunction(cl))  => begin
                          #=  A function, instantiate to get the type.
                          =#
-                        (cache, env) = InstFunction.implicitFunctionTypeInstantiation(inCache, inEnv, InnerOuter.emptyInstHierarchy, cl)
+                        (cache, env) = InstFunction.implicitFunctionTypeInstantiation(inCache, inEnv, InnerOuterTypes.emptyInstHierarchy, cl)
                         (cache, tps) = lookupFunctionsInEnv2(cache, env, Absyn.IDENT(inFuncName), true, inInfo)
                       (cache, tps)
                     end
@@ -2398,7 +2398,7 @@
                     FCore.CL(e = cl) where (SCodeUtil.classIsExternalObject(cl))  => begin
                          #=  An external object.
                          =#
-                        (cache, env) = Inst.instClass(inCache, inEnv, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cl, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
+                        (cache, env) = Inst.instClass(inCache, inEnv, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cl, nil, false, InstTypes.TOP_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                         (cache, ty) = lookupTypeInEnv(cache, env, inFuncName)
                       (cache, list(ty))
                     end
@@ -2414,12 +2414,12 @@
               outEnv = begin
                 @matchcontinue (inNewEnv, inOldEnv) begin
                   (_, _)  => begin
-                      @match true = FGraph.isTopScope(inNewEnv)
+                      @match true = FGraphUtil.isTopScope(inNewEnv)
                     inOldEnv
                   end
 
                   (_, _)  => begin
-                      @match true = stringEq(FGraph.getGraphNameStr(inNewEnv), FGraph.getGraphNameStr(inOldEnv))
+                      @match true = stringEq(FGraphUtil.getGraphNameStr(inNewEnv), FGraphUtil.getGraphNameStr(inOldEnv))
                     inNewEnv
                   end
 
@@ -2447,9 +2447,9 @@
 
               (outCache, _, cdef) = buildRecordConstructorClass(cache, env, icdef)
               name = SCodeUtil.className(cdef)
-               #=  fprintln(Flags.INST_TRACE\", \"LOOKUP BUILD RECORD TY ICD: \" + FGraph.printGraphPathStr(env) + \".\" + name);
+               #=  fprintln(Flags.INST_TRACE\", \"LOOKUP BUILD RECORD TY ICD: \" + FGraphUtil.printGraphPathStr(env) + \".\" + name);
                =#
-              (outCache, outEnv, _) = InstFunction.implicitFunctionTypeInstantiation(outCache, env, InnerOuter.emptyInstHierarchy, cdef)
+              (outCache, outEnv, _) = InstFunction.implicitFunctionTypeInstantiation(outCache, env, InnerOuterTypes.emptyInstHierarchy, cdef)
               (outCache, ftype, _) = lookupTypeInEnv(outCache, outEnv, name)
           (outCache, outEnv, ftype)
         end
@@ -2511,14 +2511,14 @@
                    =#
                 @matchcontinue (inCache, inEnv, cl, mods) begin
                   (cache, env, SCode.CLASS(name = name, info = info), _)  => begin
-                      (cache, env, _, elts, _, _, _, _, _) = InstExtends.instDerivedClasses(cache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, true, info)
-                      env = FGraph.openScope(env, SCode.NOT_ENCAPSULATED(), name, SOME(FCore.CLASS_SCOPE()))
-                      fpath = FGraph.getGraphName(env)
+                      (cache, env, _, elts, _, _, _, _, _) = InstExtends.instDerivedClasses(cache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), cl, true, info)
+                      env = FGraphUtil.openScope(env, SCode.NOT_ENCAPSULATED(), name, SOME(FCore.CLASS_SCOPE()))
+                      fpath = FGraphUtil.getGraphName(env)
                       (cdefelts, classExtendsElts, extendsElts, compElts) = InstUtil.splitElts(elts)
-                      (cache, env, _, _, eltsMods, _, _, _, _) = InstExtends.instExtendsAndClassExtendsList(cache, env, InnerOuter.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), extendsElts, classExtendsElts, elts, ClassInf.RECORD(fpath), name, true, false)
+                      (cache, env, _, _, eltsMods, _, _, _, _) = InstExtends.instExtendsAndClassExtendsList(cache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), extendsElts, classExtendsElts, elts, ClassInf.RECORD(fpath), name, true, false)
                       eltsMods = listAppend(eltsMods, InstUtil.addNomod(compElts))
-                      (cache, env1, _) = InstUtil.addClassdefsToEnv(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cdefelts, false, NONE())
-                      (cache, env1, _) = InstUtil.addComponentsToEnv(cache, env1, InnerOuter.emptyInstHierarchy, mods, Prefix.NOPRE(), ClassInf.RECORD(fpath), eltsMods, true)
+                      (cache, env1, _) = InstUtil.addClassdefsToEnv(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), cdefelts, false, NONE())
+                      (cache, env1, _) = InstUtil.addComponentsToEnv(cache, env1, InnerOuterTypes.emptyInstHierarchy, mods, Prefix.NOPRE(), ClassInf.RECORD(fpath), eltsMods, true)
                       (cache, env1, funcelts) = buildRecordConstructorElts(cache, env1, eltsMods, mods)
                     (cache, env1, funcelts, elts)
                   end
@@ -2614,12 +2614,12 @@
                   end
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f && SCode.FINAL(__), io, repl), SCode.ATTR(d, ct, prl, var, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
-                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
+                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
-                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
+                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
                       selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
@@ -2629,12 +2629,12 @@
                   end
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(vis, redecl, _, io, repl), SCode.ATTR(d, ct, prl, SCode.CONST(__), _, isf), tp, mod && SCode.NOMOD(__), comment, cond, info), cmod) <| rest, _)  => begin
-                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
+                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
-                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
+                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
                       selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
@@ -2646,12 +2646,12 @@
                   end
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, f, io, repl), SCode.ATTR(d, ct, prl, var && SCode.CONST(__), _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
-                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
+                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
-                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
+                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
                       selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
@@ -2661,12 +2661,12 @@
                   end
 
                   (cache, env, (SCode.COMPONENT(id, SCode.PREFIXES(_, redecl, _, io, repl), SCode.ATTR(d, ct, prl, _, _, isf), tp, mod, comment, cond, info), cmod) <| rest, _)  => begin
-                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
+                      (cache, mod_1) = Mod.elabMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), mod, true, Mod.COMPONENT(id), info)
                       mod_1 = Mod.myMerge(mods, mod_1)
                       compMod = Mod.lookupCompModification(mod_1, id)
                       fullMod = mod_1
                       selectedMod = selectModifier(compMod, fullMod)
-                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuter.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
+                      (cache, cmod) = Mod.updateMod(cache, env, InnerOuterTypes.emptyInstHierarchy, Prefix.NOPRE(), cmod, true, info)
                       selectedMod = Mod.myMerge(cmod, selectedMod)
                       umod = Mod.unelabMod(selectedMod)
                       (cache, env, res) = buildRecordConstructorElts(cache, env, rest, mods)
@@ -2806,7 +2806,7 @@
                       sid = FNode.refName(r)
                       @match true = FNode.isEncapsulated(frame)
                       @match true = stringEq(id, sid) #= Special case if looking up the class that -is- encapsulated. That must be allowed. =#
-                      (env, _) = FGraph.stripLastScopeRef(env)
+                      (env, _) = FGraphUtil.stripLastScopeRef(env)
                       (cache, c, env, prevFrames) = lookupClassInEnv(cache, env, id, _cons(r, prevFrames), inState, inInfo)
                       Mutable.update(inState, true)
                     (cache, c, env, prevFrames)
@@ -2816,9 +2816,9 @@
                       @match false = FNode.isRefTop(r)
                       frame = FNode.fromRef(r)
                       @match true = FNode.isEncapsulated(frame)
-                      i_env = FGraph.topScope(env)
+                      i_env = FGraphUtil.topScope(env)
                       @shouldFail (_, _, _, _) = lookupClassInEnv(cache, i_env, id, nil, inState, NONE())
-                      scope = FGraph.printGraphPathStr(env)
+                      scope = FGraphUtil.printGraphPathStr(env)
                       Error.addSourceMessage(Error.LOOKUP_ERROR, list(id, scope), info)
                     fail()
                   end
@@ -2826,7 +2826,7 @@
                   (cache, env && FCore.G(scope = r <| _), _, prevFrames, _, _)  => begin
                       frame = FNode.fromRef(r)
                       @match true = FNode.isEncapsulated(frame)
-                      i_env = FGraph.topScope(env)
+                      i_env = FGraphUtil.topScope(env)
                       (cache, c, env_1, prevFrames) = lookupClassInEnv(cache, i_env, id, nil, inState, inInfo)
                       Mutable.update(inState, true)
                     (cache, c, env_1, prevFrames)
@@ -2837,7 +2837,7 @@
                       frame = FNode.fromRef(r)
                       @match false = FNode.isEncapsulated(frame)
                       @match false = Mutable.access(inState)
-                      (env, _) = FGraph.stripLastScopeRef(env)
+                      (env, _) = FGraphUtil.stripLastScopeRef(env)
                       (cache, c, env_1, prevFrames) = lookupClassInEnv(cache, env, id, _cons(r, prevFrames), inState, inInfo)
                       Mutable.update(inState, true)
                     (cache, c, env_1, prevFrames)
@@ -2951,14 +2951,14 @@
               if ! FNode.isComponent(n) && Flags.isSet(Flags.LOOKUP)
                 @match false = Config.acceptMetaModelicaGrammar()
                 @match FCore.N(data = FCore.CL(e = SCode.CLASS(name = name))) = n
-                name = inIdent + " = " + FGraph.printGraphPathStr(inGraph) + "." + name
+                name = inIdent + " = " + FGraphUtil.printGraphPathStr(inGraph) + "." + name
                 Debug.traceln("- Lookup.lookupVar2 failed because we found a class instead of a variable: " + name)
                 fail()
               end
                #=  MetaModelica function references generate too much failtrace...
                =#
               @match FCore.N(data = FCore.CO(outElement, outMod, _, instStatus)) = n
-              outEnv = FGraph.setScope(inGraph, s)
+              outEnv = FGraphUtil.setScope(inGraph, s)
           (outVar, outElement, outMod, instStatus, outEnv)
         end
 
@@ -3145,7 +3145,7 @@
                       @match (DAE.TYPES_VAR(_, DAE.ATTR(variability = vt2), tyParent, parentBinding, _), _, _, _, componentEnv) = lookupVar2(ht, id, inEnv)
                        #=  leave just the last scope from component env as it SHOULD BE ONLY THERE, i.e. don't go on searching the parents!
                        =#
-                       #=  componentEnv = FGraph.setScope(componentEnv, List.create(FGraph.lastScopeRef(componentEnv)));
+                       #=  componentEnv = FGraphUtil.setScope(componentEnv, List.create(FGraphUtil.lastScopeRef(componentEnv)));
                        =#
                       (attr, ty, binding, cnstForRange, componentEnv, name) = begin
                         @match tyParent begin
@@ -3178,7 +3178,7 @@
                                         ty = sliceDimensionType(ty1, tyChild)
                                         ty2_2 = Types.simplifyType(tyParent)
                                         ss = addArrayDimensions(ty2_2, ss)
-                                        xCref = ComponentReference.makeCrefQual(id, ty2_2, ss, tCref)
+                                        xCref = CrefForHashTable.makeCrefQual(id, ty2_2, ss, tCref)
                                         eType = Types.simplifyType(ty)
                                         splicedExp = Expression.makeCrefExp(xCref, eType)
                                       SOME(splicedExp)
@@ -3229,7 +3229,7 @@
               ty_1 = checkSubscripts(ty, ss)
               tty = Types.simplifyType(ty)
               ss_1 = addArrayDimensions(tty, ss)
-              splicedExpData = InstTypes.SPLICEDEXPDATA(SOME(Expression.makeCrefExp(ComponentReference.makeCrefIdent(ident, tty, ss_1), tty)), ty)
+              splicedExpData = InstTypes.SPLICEDEXPDATA(SOME(Expression.makeCrefExp(CrefForHashTable.makeCrefIdent(ident, tty, ss_1), tty)), ty)
           (cache, attr, ty_1, bind, cnstForRange #= SOME(constant-ness) of the range if this is a for iterator, NONE() if this is not a for iterator =#, splicedExpData, componentEnv, name)
         end
 
@@ -3330,9 +3330,9 @@
                   end
                 end
               end
-               #=  print(\"CREF EB: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
+               #=  print(\"CREF EB: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
                =#
-               #=  print(\"CREF EB RESULT: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
+               #=  print(\"CREF EB RESULT: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
                =#
                #= /*
                   case (DAE.CREF_QUAL(id, _, ss, DAE.CREF_IDENT(cId, _, {})), _, _, DAE.EQBOUND(e, ov, c, s), _)
@@ -3344,9 +3344,9 @@
                        b = DAE.EQBOUND(e, NONE(), c, s);
                     then
                       inChildBinding;*/ =#
-               #=  print(\"CREF VB: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
+               #=  print(\"CREF VB: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nTyParent: \" + Types.printTypeStr(inParentType) + \"\\nParent:\\n\" + Types.printBindingStr(inParentBinding) + \"\\nChild:\\n\" + Types.printBindingStr(inChildBinding) + \"\\n\");
                =#
-               #=  print(\"CREF VB RESULT: \" + ComponentReference.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
+               #=  print(\"CREF VB RESULT: \" + CrefForHashTable.printComponentRefStr(inCref) + \"\\nBinding:\\n\" + Types.printBindingStr(b) + \"\\n\");
                =#
                #= /*
                   case (DAE.CREF_QUAL(id, _, ss, DAE.CREF_IDENT(cId, _, {})), _, _, DAE.VALBOUND(v, s), _)
@@ -3574,18 +3574,18 @@
               local typeVars::List{String}
 
               @match SCode.CLASS(name = id, restriction = SCode.R_METARECORD(name = utPath, index = index, singleton = singleton, typeVars = typeVars), classDef = SCode.PARTS(elementLst = els)) = cdef
-              env = FGraph.openScope(inEnv, SCode.NOT_ENCAPSULATED(), id, SOME(FCore.CLASS_SCOPE()))
-               #=  print(\"buildMetaRecordType \" + id + \" in scope \" + FGraph.printGraphPathStr(env) + \"\\n\");
+              env = FGraphUtil.openScope(inEnv, SCode.NOT_ENCAPSULATED(), id, SOME(FCore.CLASS_SCOPE()))
+               #=  print(\"buildMetaRecordType \" + id + \" in scope \" + FGraphUtil.printGraphPathStr(env) + \"\\n\");
                =#
               (cache, utPath) = Inst.makeFullyQualified(inCache, env, utPath)
               path = AbsynUtil.joinPaths(utPath, Absyn.IDENT(id))
-              (outCache, outEnv, _, _, _, _, _, varlst, _, _) = Inst.instElementList(cache, env, InnerOuter.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ClassInf.META_RECORD(Absyn.IDENT("")), ListUtil.map1(els, Util.makeTuple, DAE.NOMOD()), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
+              (outCache, outEnv, _, _, _, _, _, varlst, _, _) = Inst.instElementList(cache, env, InnerOuterTypes.emptyInstHierarchy, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), ClassInf.META_RECORD(Absyn.IDENT("")), ListUtil.map1(els, Util.makeTuple, DAE.NOMOD()), nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet, true)
               varlst = Types.boxVarLst(varlst)
                #=  for v in varlst loop print(Types.unparseType(v.ty)+\"\\n\"); end for;
                =#
               typeVarsType = list(DAE.T_METAPOLYMORPHIC(tv) for tv in typeVars)
               ftype = DAE.T_METARECORD(path, utPath, typeVarsType, index, varlst, singleton)
-               #=  print(\"buildMetaRecordType \" + id + \" in scope \" + FGraph.printGraphPathStr(env) + \" OK \" + Types.unparseType(ftype) +\"\\n\");
+               #=  print(\"buildMetaRecordType \" + id + \" in scope \" + FGraphUtil.printGraphPathStr(env) + \" OK \" + Types.unparseType(ftype) +\"\\n\");
                =#
           (outCache, outEnv, ftype)
         end
@@ -3615,7 +3615,7 @@
                        =#
                        #=  it exists and if it's an iterator or not.
                        =#
-                      id = ComponentReference.crefFirstIdent(inCref)
+                      id = CrefForHashTable.crefFirstIdent(inCref)
                       @match (DAE.TYPES_VAR(constOfForIteratorRange = ic), _, _, _, _) = lookupVar2(ht, id, inEnv)
                       b = isSome(ic)
                     (SOME(b), cache)
@@ -3625,7 +3625,7 @@
                        #=  If not found, look in the next scope only if the current scope is implicit.
                        =#
                       @match true = frameIsImplAddedScope(FNode.fromRef(ref))
-                      (env, _) = FGraph.stripLastScopeRef(inEnv)
+                      (env, _) = FGraphUtil.stripLastScopeRef(inEnv)
                       (res, cache) = isIterator(cache, env, inCref)
                     (res, cache)
                   end
@@ -3678,7 +3678,7 @@
                   local cref::DAE.ComponentRef
                 @match inSplicedExp begin
                   InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(cref, ety)), ty)  => begin
-                      cref = ComponentReference.joinCrefs(inCref, cref)
+                      cref = CrefForHashTable.joinCrefs(inCref, cref)
                     InstTypes.SPLICEDEXPDATA(SOME(DAE.CREF(cref, ety)), ty)
                   end
 

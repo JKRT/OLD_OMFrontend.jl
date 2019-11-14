@@ -46,9 +46,9 @@
 
         import FCoreUtil
 
-        import FGraph
+        import FGraphUtil
 
-        import InnerOuter
+        import InnerOuterTypes
 
         import SCode
 
@@ -83,7 +83,7 @@
 
         Ident = DAE.Ident  #= an identifier =#
 
-        InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
 
         InstDims = List
 
@@ -164,7 +164,7 @@
                           else
                             " full"
                           end
-                      print("DAE: parent: " + FGraph.getGraphNameStr(inParentEnv) + " class: " + FGraph.getGraphNameStr(inClassEnv) + " state: " + sstr + str + "\\n" + DAEDump.dumpStr(dae, DAE.AvlTreePathFunction.Tree.EMPTY()) + "\\n")
+                      print("DAE: parent: " + FGraphUtil.getGraphNameStr(inParentEnv) + " class: " + FGraphUtil.getGraphNameStr(inClassEnv) + " state: " + sstr + str + "\\n" + DAEDump.dumpStr(dae, DAE.AvlTreePathFunction.Tree.EMPTY()) + "\\n")
                     ()
                   end
 
@@ -254,7 +254,7 @@
                   end
 
                   (vn, DAE.T_SUBTYPE_BASIC(complexType = tp), ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, _, _, _)  => begin
-                      (_, dae_var_attr) = InstBinding.instDaeVariableAttributes(FCoreUtil.emptyCache(), FGraph.empty(), DAE.NOMOD(), tp, nil)
+                      (_, dae_var_attr) = InstBinding.instDaeVariableAttributes(FCoreUtil.emptyCache(), FCore.emptyGraph, DAE.NOMOD(), tp, nil)
                       dae = daeDeclare2(vn, tp, ct, kind, dir, daePrl, prot, e, inst_dims, start, dae_var_attr, comment, io, source, declareComplexVars)
                     dae
                   end

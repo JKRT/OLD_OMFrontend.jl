@@ -53,6 +53,8 @@ Apply = Function
 @importDBG Config
 @importDBG Flags
 @importDBG SCodeUtil
+@importDBG System
+@importDBG Global
 print("After imports in FNode")
 Name = FCore.Name
 Names = FCore.Names
@@ -912,6 +914,24 @@ function originalScope(inRef::MMRef) ::Scope
   outScope
 end
 
+
+function isTop(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.TOP(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
 #= @author:
 return the scope from this ref to the top as a list of references.
 NOTE:
@@ -1093,10 +1113,45 @@ function isRefExtends(inRef::MMRef) ::Bool
   b
 end
 
+function isDerived(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    local e::SCode.Element
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = e))  => begin
+        SCodeUtil.isDerivedClass(e)
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
 function isRefDerived(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isDerived(fromRef(inRef))
+  b
+end
+
+function isComponent(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CO(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
   b
 end
 

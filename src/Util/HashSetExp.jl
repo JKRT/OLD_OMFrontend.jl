@@ -1,4 +1,4 @@
-  module HashSetExp 
+  module HashSetExp
 
 
     using MetaModelica
@@ -52,15 +52,13 @@
 
         import DAE
 
-        import Expression
+        import CrefForHashTable
 
-        import ExpressionDump
+        Key = DAE.Exp
 
-        Key = DAE.Exp 
+        HashSetCrefFunctionsType = Tuple
 
-        HashSetCrefFunctionsType = Tuple 
-
-        HashSet = Tuple 
+        HashSet = Tuple
 
 
 
@@ -68,11 +66,11 @@
 
 
 
-         #= 
+         #=
           Returns an empty HashSet.
           Using the default bucketsize..
          =#
-        function emptyHashSet() ::HashSet 
+        function emptyHashSet() ::HashSet
               local hashSet::HashSet
 
               hashSet = emptyHashSetSized(BaseHashSet.defaultBucketSize)
@@ -81,10 +79,10 @@
 
          #= Returns an empty HashSet.
          Using the bucketsize size =#
-        function emptyHashSetSized(size::ModelicaInteger) ::HashSet 
+        function emptyHashSetSized(size::ModelicaInteger) ::HashSet
               local hashSet::HashSet
 
-              hashSet = BaseHashSet.emptyHashSetWork(size, (Expression.hashExpMod, Expression.expEqual, ExpressionDump.printExpStr))
+              hashSet = BaseHashSet.emptyHashSetWork(size, (CrefForHashTable.hashExpMod, CrefForHashTable.expEqual, CrefForHashTable.printExpStr))
           hashSet
         end
 

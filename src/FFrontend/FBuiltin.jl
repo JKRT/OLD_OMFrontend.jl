@@ -53,7 +53,7 @@ import FCore
 
 import FCoreUtil
 
-import FGraph
+import FGraphUtil
 
 import ClassInf
 
@@ -482,8 +482,8 @@ the type system, since they e.g. have arbitrary arguments, etc.
 - cat
 These operators are catched in the elabBuiltinHandler, along with all
 others. =#
-function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
-  local graph::FGraph.Graph
+function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraphUtil.Graph}
+  local graph::FGraphUtil.Graph
   local outCache::FCore.Cache
   local cache::FCore.Cache
   (outCache, graph) = begin
@@ -504,7 +504,7 @@ function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
       end
 
       cache  => begin
-        graph = FGraph.new("graph", FCore.dummyTopModel)
+        graph = FGraphUtil.new("graph", FCore.dummyTopModel)
         graph = FGraphBuild.mkProgramGraph(basicTypes, FCore.BASIC_TYPE(), graph)
         graph = initialGraphOptimica(graph, FGraphBuild.mkCompNode)
         graph = initialGraphMetaModelica(graph, FGraphBuild.mkTypeNode)
@@ -521,11 +521,11 @@ function initialGraph(inCache::FCore.Cache) ::Tuple{FCore.Cache, FGraph.Graph}
 end
 
 #= gets/sets the initial environment depending on grammar flags =#
-function getSetInitialGraph(inEnvOpt::Option{<:FGraph.Graph})::FGraph.Graph
-  local initialEnv::FGraph.Graph
+function getSetInitialGraph(inEnvOpt::Option{<:FGraphUtil.Graph})::FGraphUtil.Graph
+  local initialEnv::FGraphUtil.Graph
   initialEnv = begin
-    local assocLst::List{Tuple{ModelicaInteger, FGraph.Graph}}
-    local graph::FGraph.Graph
+    local assocLst::List{Tuple{ModelicaInteger, FGraphUtil.Graph}}
+    local graph::FGraphUtil.Graph
 
     @matchcontinue inEnvOpt begin
       _  => begin
@@ -570,23 +570,23 @@ end
 
 
 
-function initialGraphModelica(graph::FGraph.Graph, mkTypeNode::MakeTypeNode, mkCompNode::MakeCompNode) ::FGraph.Graph
+function initialGraphModelica(graph::FGraphUtil.Graph, mkTypeNode::MakeTypeNode, mkCompNode::MakeCompNode) ::FGraphUtil.Graph
   local enumeration2int::DAE.Type = DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ENUMERATION(NONE(), Absyn.IDENT(""), nil, nil, nil),
                                                                     DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())),
                                                    DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("Integer"))
-  graph = mkCompNode(timeComp, FGraph.top(graph), FCore.BUILTIN(), graph)
-  graph = FGraph.updateComp(graph, timeVar, FCore.VAR_UNTYPED(), FGraph.empty())
-  graph = mkTypeNode(list(DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), false))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality")), DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), true))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality"))), FGraph.top(graph), "cardinality", graph)
-  graph = mkTypeNode(list(enumeration2int), FGraph.top(graph), "Integer", graph)
-  graph = mkTypeNode(list(enumeration2int), FGraph.top(graph), "EnumToInteger", graph)
-  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("noEvent"))), FGraph.top(graph), "noEvent", graph)
-  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("actualStream"))), FGraph.top(graph), "actualStream", graph)
-  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("inStream"))), FGraph.top(graph), "inStream", graph)
-  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealXYZ, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("constrain")), DAE.T_FUNCTION(list(DAE.FUNCARG("x", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("y", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("z", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), T_REAL_ARRAY_1_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("constrain"))), FGraph.top(graph), "constrain", graph)
+  graph = mkCompNode(timeComp, FGraphUtil.top(graph), FCore.BUILTIN(), graph)
+  graph = FGraphUtil.updateComp(graph, timeVar, FCore.VAR_UNTYPED(), FCore.emptyGraph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), false))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality")), DAE.T_FUNCTION(list(DAE.FUNCARG("x", DAE.T_ANYTYPE(SOME(ClassInf.CONNECTOR(Absyn.IDENT("dummy"), true))), DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_INTEGER_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("cardinality"))), FGraphUtil.top(graph), "cardinality", graph)
+  graph = mkTypeNode(list(enumeration2int), FGraphUtil.top(graph), "Integer", graph)
+  graph = mkTypeNode(list(enumeration2int), FGraphUtil.top(graph), "EnumToInteger", graph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("noEvent"))), FGraphUtil.top(graph), "noEvent", graph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("actualStream"))), FGraphUtil.top(graph), "actualStream", graph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealX, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("inStream"))), FGraphUtil.top(graph), "inStream", graph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(argsRealXYZ, DAE.T_REAL_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("constrain")), DAE.T_FUNCTION(list(DAE.FUNCARG("x", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("y", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE()), DAE.FUNCARG("z", T_REAL_ARRAY_1_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), T_REAL_ARRAY_1_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("constrain"))), FGraphUtil.top(graph), "constrain", graph)
   graph
 end
 
-function initialGraphMetaModelica(graph::FGraph.Graph, mkTypeNode::MakeTypeNode) ::FGraph.Graph
+function initialGraphMetaModelica(graph::FGraphUtil.Graph, mkTypeNode::MakeTypeNode) ::FGraphUtil.Graph
 
 
   if ! Config.acceptMetaModelicaGrammar()
@@ -594,24 +594,24 @@ function initialGraphMetaModelica(graph::FGraph.Graph, mkTypeNode::MakeTypeNode)
   end
   #=  getGlobalRoot can not be represented by a regular function...
   =#
-  graph = mkTypeNode(list(DAE.T_FUNCTION(list(DAE.FUNCARG("index", DAE.T_INTEGER_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_METABOXED_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("getGlobalRoot"))), FGraph.top(graph), "getGlobalRoot", graph)
+  graph = mkTypeNode(list(DAE.T_FUNCTION(list(DAE.FUNCARG("index", DAE.T_INTEGER_DEFAULT, DAE.C_VAR(), DAE.NON_PARALLEL(), NONE())), DAE.T_METABOXED_DEFAULT, DAE.FUNCTION_ATTRIBUTES_BUILTIN, Absyn.IDENT("getGlobalRoot"))), FGraphUtil.top(graph), "getGlobalRoot", graph)
   graph
 end
 
-function initialGraphOptimica(graph::FGraph.Graph, mkCompNode::MakeCompNode) ::FGraph.Graph
+function initialGraphOptimica(graph::FGraphUtil.Graph, mkCompNode::MakeCompNode) ::FGraphUtil.Graph
   if ! Config.acceptOptimicaGrammar()
     return graph
   end
   #= If Optimica add the startTime,finalTime,objectiveIntegrand and objective \"builtin\" variables.
   =#
-  graph = mkCompNode(objectiveVarComp, FGraph.top(graph), FCore.BUILTIN(), graph)
-  graph = FGraph.updateComp(graph, objectiveVar, FCore.VAR_UNTYPED(), FGraph.empty())
-  graph = mkCompNode(objectiveIntegrandComp, FGraph.top(graph), FCore.BUILTIN(), graph)
-  graph = FGraph.updateComp(graph, objectiveIntegrandVar, FCore.VAR_UNTYPED(), FGraph.empty())
-  graph = mkCompNode(startTimeComp, FGraph.top(graph), FCore.BUILTIN(), graph)
-  graph = FGraph.updateComp(graph, startTimeVar, FCore.VAR_UNTYPED(), FGraph.empty())
-  graph = mkCompNode(finalTimeComp, FGraph.top(graph), FCore.BUILTIN(), graph)
-  graph = FGraph.updateComp(graph, finalTimeVar, FCore.VAR_UNTYPED(), FGraph.empty())
+  graph = mkCompNode(objectiveVarComp, FGraphUtil.top(graph), FCore.BUILTIN(), graph)
+  graph = FGraphUtil.updateComp(graph, objectiveVar, FCore.VAR_UNTYPED(), FCore.emptyGraph)
+  graph = mkCompNode(objectiveIntegrandComp, FGraphUtil.top(graph), FCore.BUILTIN(), graph)
+  graph = FGraphUtil.updateComp(graph, objectiveIntegrandVar, FCore.VAR_UNTYPED(), FCore.emptyGraph)
+  graph = mkCompNode(startTimeComp, FGraphUtil.top(graph), FCore.BUILTIN(), graph)
+  graph = FGraphUtil.updateComp(graph, startTimeVar, FCore.VAR_UNTYPED(), FCore.emptyGraph)
+  graph = mkCompNode(finalTimeComp, FGraphUtil.top(graph), FCore.BUILTIN(), graph)
+  graph = FGraphUtil.updateComp(graph, finalTimeVar, FCore.VAR_UNTYPED(), FCore.emptyGraph)
   graph
 end
 

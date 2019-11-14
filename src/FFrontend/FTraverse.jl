@@ -53,7 +53,7 @@
 
         import FVisit
 
-        import FGraph
+        import FGraphUtil
          #=  protected imports
          =#
 
@@ -63,7 +63,7 @@
         Ref = FNode.Ref 
         Data = FNode.Data 
         Visited = FVisit.Visited 
-        Graph = FGraph.Graph 
+        Graph = FGraphUtil.Graph 
         Extra = Any 
 
          @Uniontype WalkOptions begin

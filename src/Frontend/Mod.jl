@@ -50,17 +50,17 @@
 
         import FNode
 
-        import FGraph
+        import FGraphUtil
 
         import Prefix
 
         import SCode
 
-        import InnerOuter
+        import InnerOuterTypes
 
-        import ComponentReference
+        import CrefForHashTable
         println("MOD:1 before instancehierarchy")
-        const InstanceHierarchy = InnerOuter.InstHierarchy  #= an instance hierarchy =#
+        const InstanceHierarchy = InnerOuterTypes.InstHierarchy  #= an instance hierarchy =#
         println("MOD:2 after instancehierarchy")
         import Ceval
 
@@ -154,7 +154,7 @@
           turns them into global expressions.  This is done because the
           expressions in modifications must be elaborated on in the context
           they are provided in, and not the context they are used in. =#
-        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
+        function elabMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -334,7 +334,7 @@
 
          #=
           Same as elabMod, but if a named Mod is not part of a basic type, fail instead. =#
-        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
+        function elabModForBasicType(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::SCode.Mod, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -384,7 +384,7 @@
               end
         end
 
-        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod}
+        function elabModRedeclareElement(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, finalPrefix::SCode.Final, inElt::SCode.Element, impl::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{SCode.Element, DAE.Mod}
               local outMod::DAE.Mod
               local outElement::SCode.Element
 
@@ -427,7 +427,7 @@
                           true = stringEq(cn, bcn);
                           (c, _) = Lookup.lookupClassLocal(inEnv, bcn);
                           tp = SCodeUtil.getDerivedTypeSpec(c);
-                          c = SCodeUtil.myMergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
+                          c = SCodeUtil.mergeWithOriginal(SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i), c);
                           SCode.CLASS(cn,SCode.PREFIXES(vis,redecl,fi,io,repl),enc,p,restr,SCode.DERIVED(tp,mod,attr1),cmt,i) = c;
                           (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info);
                           (cache, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp);
@@ -445,7 +445,7 @@
                    =#
                 @matchcontinue inElt begin
                   SCode.CLASS(cn, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), enc, p, restr, SCode.DERIVED(tp, mod, attr1), cmt, i)  => begin
-                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, cn, tp)
                       mod = unelabMod(emod)
@@ -461,7 +461,7 @@
                   end
 
                   SCode.COMPONENT(compname, prefixes && SCode.PREFIXES(vis, redecl, fi, io, repl), attr, tp, mod, cmt, cond, i)  => begin
-                      mod = SCodeUtil.myMergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
+                      mod = SCodeUtil.mergeModifiers(mod, SCodeUtil.getConstrainedByModifiers(prefixes))
                       (cache, emod) = elabMod(inCache, inEnv, inIH, inPrefix, mod, impl, inModScope, info)
                       (_, tp1) = elabModQualifyTypespec(cache, inEnv, inIH, inPrefix, impl, info, compname, tp)
                       mod = unelabMod(emod)
@@ -494,7 +494,7 @@
          #= Help function to elabModRedeclareElements.
          This function makes sure that type specifiers, i.e. class names, in redeclarations are looked up in the correct environment.
          This is achieved by making them fully qualified. =#
-        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec}
+        function elabModQualifyTypespec(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, impl::Bool, info::SourceInfo, name::Absyn.Ident, tp::Absyn.TypeSpec) ::Tuple{FCore.Cache, Absyn.TypeSpec}
               local outTp::Absyn.TypeSpec
               local outCache::FCore.Cache
 
@@ -506,7 +506,7 @@
                   local p1::Absyn.Path
                   local cref::Absyn.ComponentRef
                   local edims::DAE.Dimensions
-                  local ih::InnerOuter.InstHierarchy
+                  local ih::InnerOuterTypes.InstHierarchy
                   local pre::Prefix.PrefixType
                    #=  no array dimensions
                    =#
@@ -680,7 +680,7 @@
 
          #= This function updates an untyped modification to a typed one, by looking
           up the type of the modifier in the environment and update it. =#
-        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
+        function updateMod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inBoolean::Bool, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Mod}
               local outMod::DAE.Mod
               local outCache::FCore.Cache
 
@@ -748,7 +748,7 @@
         end
 
          #=  =#
-        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
+        function updateSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inTypesSubModLst::List{<:DAE.SubMod}, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outTypesSubModLst::List{DAE.SubMod} = nil
               local outCache::FCore.Cache = inCache
               local m_1::DAE.Mod
@@ -825,7 +825,7 @@
         end
 
          #= This function helps elabMod by recursively elaborating on a list of submodifications. =#
-        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
+        function elabSubmods(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inSCodeSubModLst::List{<:SCode.SubMod}, inBoolean::Bool, inModScope::ModScope, info::SourceInfo) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outTypesSubModLst::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -837,7 +837,7 @@
         end
 
          #= This function elaborates a list of submodifications. =#
-        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}}
+        function elabSubmods2(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMods::List{<:SCode.SubMod}, inImpl::Bool, inInfo::SourceInfo, inAccumMods::List{<:DAE.SubMod}) ::Tuple{FCore.Cache, List{DAE.SubMod}}
               local outSubMods::List{DAE.SubMod}
               local outCache::FCore.Cache
 
@@ -990,7 +990,7 @@
 
          #= This function elaborates on a submodification, turning an
            SCode.SubMod into a DAE.SubMod. =#
-        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuter.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod}
+        function elabSubmod(inCache::FCore.Cache, inEnv::FCore.Graph, inIH::InnerOuterTypes.InstHierarchy, inPrefix::Prefix.PrefixType, inSubMod::SCode.SubMod, inBoolean::Bool, info::SourceInfo) ::Tuple{FCore.Cache, DAE.SubMod}
               local outSubMod::DAE.SubMod
               local outCache::FCore.Cache
 
@@ -1717,10 +1717,10 @@
                        #=  Redeclaration of component with constraining class on the inner modifier.
                        =#
                       smod1 = SCodeUtil.getConstrainedByModifiers(el1.prefixes)
-                      smod1 = SCodeUtil.myMergeModifiers(el1.modifications, smod1)
+                      smod1 = SCodeUtil.mergeModifiers(el1.modifications, smod1)
                       dmod1 = elabUntypedMod(smod1, COMPONENT(el1.name))
                       smod2 = SCodeUtil.getConstrainedByModifiers(el2.prefixes)
-                      smod2 = SCodeUtil.myMergeModifiers(el2.modifications, smod2)
+                      smod2 = SCodeUtil.mergeModifiers(el2.modifications, smod2)
                       dmod2 = elabUntypedMod(smod2, COMPONENT(el2.name))
                       dmod = myMerge(dmod1, dmod2, el1.name, inCheckFinal)
                       emod = myMerge(emod1, emod2, el1.name, inCheckFinal)
@@ -2655,8 +2655,8 @@
 
               @match DAE.REDECL(element = el) = inRedeclare
               id = SCodeUtil.elementName(el)
-              cref = ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil)
-              cref = ComponentReference.joinCrefs(inTopCref, cref)
+              cref = CrefForHashTable.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil)
+              cref = CrefForHashTable.joinCrefs(inTopCref, cref)
               outFullMod = MOD(cref, inRedeclare)
           outFullMod
         end
@@ -2689,7 +2689,7 @@
                   end
 
                   (_, subMod && DAE.NAMEMOD(id, mod) <| rest)  => begin
-                      cref = ComponentReference.joinCrefs(inTopCref, ComponentReference.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
+                      cref = CrefForHashTable.joinCrefs(inTopCref, CrefForHashTable.makeCrefIdent(id, DAE.T_UNKNOWN_DEFAULT, nil))
                       fullMods1 = getFullModsFromMod(cref, mod)
                       fullMods2 = getFullModsFromSubMods(inTopCref, rest)
                       fullMods = listAppend(if listEmpty(fullMods1)
@@ -2718,19 +2718,19 @@
                   local cr2::DAE.ComponentRef
                 @match (inFullMod1, inFullMod2) begin
                   (MOD(cr1, _), MOD(cr2, _))  => begin
-                    ComponentReference.crefEqualNoStringCompare(cr1, cr2)
+                    CrefForHashTable.crefEqualNoStringCompare(cr1, cr2)
                   end
 
                   (SUB_MOD(cr1, _), SUB_MOD(cr2, _))  => begin
-                    ComponentReference.crefEqualNoStringCompare(cr1, cr2)
+                    CrefForHashTable.crefEqualNoStringCompare(cr1, cr2)
                   end
 
                   (MOD(cr1, _), SUB_MOD(cr2, _))  => begin
-                    ComponentReference.crefEqualNoStringCompare(cr1, cr2)
+                    CrefForHashTable.crefEqualNoStringCompare(cr1, cr2)
                   end
 
                   (SUB_MOD(cr1, _), MOD(cr2, _))  => begin
-                    ComponentReference.crefEqualNoStringCompare(cr1, cr2)
+                    CrefForHashTable.crefEqualNoStringCompare(cr1, cr2)
                   end
                 end
               end
@@ -2749,12 +2749,12 @@
                   local str::String
                 @match (inFullMod, inDepth) begin
                   (MOD(cr, mod), _)  => begin
-                      str = ComponentReference.printComponentRefStr(cr) + ": " + prettyPrintMod(mod, inDepth)
+                      str = CrefForHashTable.printComponentRefStr(cr) + ": " + prettyPrintMod(mod, inDepth)
                     str
                   end
 
                   (SUB_MOD(cr, subMod), _)  => begin
-                      str = ComponentReference.printComponentRefStr(cr) + ": " + prettyPrintSubmod(subMod)
+                      str = CrefForHashTable.printComponentRefStr(cr) + ": " + prettyPrintSubmod(subMod)
                     str
                   end
                 end
@@ -3243,6 +3243,7 @@
           yes
         end
 
+
          #= return the modifier present in the environment for this class or DAE.NOMOD if ther is none =#
         function getClassModifier(inEnv::FCore.Graph, inName::FCore.Name) ::DAE.Mod
               local outMod::DAE.Mod
@@ -3253,8 +3254,8 @@
               outMod = begin
                 @matchcontinue (inEnv, inName) begin
                   (_, _)  => begin
-                      n = FNode.fromRef(FNode.child(FGraph.lastScopeRef(inEnv), inName))
-                      if ! FNode.isInstance(FNode.fromRef(FGraph.lastScopeRef(inEnv)))
+                      n = FNode.fromRef(FNode.child(FGraphUti.lastScopeRef(inEnv), inName))
+                      if ! FNode.isInstance(FNode.fromRef(FGraphUti.lastScopeRef(inEnv)))
                         @match FCore.N(data = FCore.CL(mod = mod)) = n
                         mod = Mod.removeMod(mod, inName)
                       else
