@@ -56,6 +56,8 @@
 
         import InnerOuterTypes
 
+        import InnerOuter
+
         import Prefix
 
         import SCode

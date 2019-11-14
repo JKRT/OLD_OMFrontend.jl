@@ -54,6 +54,8 @@
 
         import InnerOuterTypes
 
+        import InnerOuter
+
         import InstTypes
 
         import Mod

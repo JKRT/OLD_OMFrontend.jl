@@ -67,7 +67,7 @@ const Status = FCore.Status
 @importDBG Config
 @importDBG Debug
 @importDBG Error
-@importDBG FGraphBuild
+# @importDBG FGraphBuildEnv
 @importDBG FNode
 @importDBG Flags
 @importDBG Global
@@ -499,6 +499,75 @@ import MetaModelica.Dangerous
           outRef
         end
 
+        function mkRefNode(inName::Name, inTargetScope::Scope, inParentRef::MMRef, inGraph::Graph) ::Graph
+          local outGraph::Graph
+          outGraph = begin
+            local n::Node
+            local rn::MMRef
+            local rc::MMRef
+            local g::Graph
+            @match (inName, inTargetScope, inParentRef, inGraph) begin
+              (_, _, _, g)  => begin
+                (g, n) = node(g, inName, list(inParentRef), FCore.REF(inTargetScope))
+                rn = FNode.toRef(n)
+                FNode.addChildRef(inParentRef, inName, rn)
+                g
+              end
+            end
+          end
+          #=  make a ref
+          =#
+          #=  add the ref node
+          =#
+          outGraph
+        end
+
+        #= Extends the graph with a component =#
+        function mkCompNode(inComp::SCode.Element, inParentRef::MMRef, inKind::Kind, inGraph::Graph) ::Graph
+          local outGraph::Graph
+
+          local name::String
+          local g::Graph
+          local n::Node
+          local nr::MMRef
+          local m::SCode.Mod
+          local cnd::Option{Absyn.Exp}
+          local ad::Absyn.ArrayDim
+          local ts::Absyn.TypeSpec
+          local tad::Absyn.ArrayDim
+          local nd::Data
+          local i::DAE.Var
+
+          @match SCode.COMPONENT(name = name, attributes = SCode.ATTR(arrayDims = ad), typeSpec = ts, modifications = m, condition = cnd) = inComp
+          (nd, i) = FNode.element2Data(inComp, inKind)
+          (g, n) = FNode.node(inGraph, name, list(inParentRef), nd)
+          nr = FNode.toRef(n)
+          FNode.addChildRef(inParentRef, name, nr)
+          #=  add instance node
+          =#
+          g = mkInstNode(i, nr, g)
+          #=  add ref node
+          =#
+          g = mkRefNode(FNode.refNodeName, nil, nr, g)
+          outGraph = g
+          outGraph
+        end
+
+        #= Extends the graph with an inst node =#
+        function mkInstNode(inVar::DAE.Var, inParentRef::MMRef, inGraph::Graph) ::Graph
+          local outGraph::Graph
+
+          local nr::MMRef
+          local n::Node
+          local g::Graph
+
+          (g, n) = FNode.node(inGraph, FNode.itNodeName, list(inParentRef), FCore.IT(inVar))
+          nr = FNode.toRef(n)
+          FNode.addChildRef(inParentRef, FNode.itNodeName, nr)
+          outGraph = g
+          outGraph
+        end
+
          #= Adds a for loop iterator to the graph. =#
         function addForIterator(inGraph::Graph, name::String, ty::DAE.Type, binding::DAE.Binding, variability::SCode.Variability, constOfForIteratorRange::Option{<:DAE.Const}) ::Graph
               local outGraph::Graph
@@ -513,7 +582,7 @@ import MetaModelica.Dangerous
                       c = SCode.COMPONENT(name, SCode.defaultPrefixes, SCode.ATTR(nil, SCode.POTENTIAL(), SCode.NON_PARALLEL(), SCode.CONST(), Absyn.BIDIR(), Absyn.NONFIELD()), Absyn.TPATH(Absyn.IDENT(""), NONE()), SCode.NOMOD(), SCode.noComment, NONE(), AbsynUtil.dummyInfo)
                       v = DAE.TYPES_VAR(name, DAE.ATTR(DAE.NON_CONNECTOR(), SCode.NON_PARALLEL(), variability, Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC()), ty, binding, constOfForIteratorRange)
                       r = lastScopeRef(g)
-                      g = FGraphBuild.mkCompNode(c, r, FCore.BUILTIN(), g)
+                      g = mkCompNode(c, r, FCore.BUILTIN(), g)
                       g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), empty())
                     g
                   end
@@ -1046,7 +1115,7 @@ import MetaModelica.Dangerous
                   (g, v && DAE.TYPES_VAR(name = n), c, m, i, cg)  => begin
                       @match true = stringEq(n, SCodeUtil.elementName(c))
                       r = lastScopeRef(g)
-                      g = FGraphBuild.mkCompNode(c, r, FCore.USERDEFINED(), g)
+                      g = mkCompNode(c, r, FCore.USERDEFINED(), g)
                       g = updateVarAndMod(g, v, m, i, cg)
                     g
                   end

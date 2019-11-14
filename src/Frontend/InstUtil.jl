@@ -45,6 +45,7 @@
         import FCore
         import FCoreUtil
         import InnerOuterTypes
+        import InnerOuter
         import InstTypes
         import Mod
         import Prefix

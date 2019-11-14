@@ -34,9 +34,6 @@ module ExpressionUtil
 using MetaModelica
 using ExportAll
 
-FuncExpType = Function
-Type_a = Any
-
 @importDBG DAE
 @importDBG Error
 

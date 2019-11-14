@@ -6837,5 +6837,40 @@ end
 
 unparseType = LocalExpressionDumpTpl.local_unparseType
 
+#= author: PA
+ Returns true if prefixCref is a prefix of fullCref
+ For example, a.b is a prefix of a.b.c.
+ This function ignores the subscripts =#
+function crefPrefixOfIgnoreSubscripts(prefixCref::DAE.ComponentRef, fullCref::DAE.ComponentRef) ::Bool
+     local outPrefixOf::Bool
+
+     outPrefixOf = begin
+       @match (prefixCref, fullCref) begin
+         (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
+           prefixCref.ident == fullCref.ident && crefPrefixOfIgnoreSubscripts(prefixCref.componentRef, fullCref.componentRef)
+         end
+
+         (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
+           prefixCref.ident == fullCref.ident
+         end
+
+         (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
+           prefixCref.ident == fullCref.ident
+         end
+
+         _  => begin
+             false
+         end
+       end
+     end
+      #=  both are qualified, dive into
+      =#
+      #=  first is an ID, second is qualified, see if one is prefix of the other
+      =#
+      #=  they are not a prefix of one-another
+      =#
+ outPrefixOf
+end
+
     @exportAll()
 end
