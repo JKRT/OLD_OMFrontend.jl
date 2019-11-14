@@ -1113,10 +1113,45 @@ function isRefExtends(inRef::MMRef) ::Bool
   b
 end
 
+function isDerived(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    local e::SCode.Element
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = e))  => begin
+        SCodeUtil.isDerivedClass(e)
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
 function isRefDerived(inRef::MMRef) ::Bool
   local b::Bool
 
   b = isDerived(fromRef(inRef))
+  b
+end
+
+function isComponent(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CO(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
   b
 end
 
