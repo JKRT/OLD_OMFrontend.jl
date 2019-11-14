@@ -64,8 +64,8 @@ module Static
         import AbsynUtil
         import FGraphUtil
         import FNode
-        import InstMeta
-        import MetaUtil
+        # import InstMeta
+        # import MetaUtil
         import Util
          const SLOT_NOT_EVALUATED = 0::ModelicaInteger
          const SLOT_EVALUATING = 1::ModelicaInteger
@@ -804,7 +804,7 @@ module Static
               local ty2_str::String
 
               @match Absyn.CONS(e1, e2) = inExp
-              @match list(e1, e2) = MetaUtil.transformArrayNodesToListNodes(list(e1, e2))
+              # @match list(e1, e2) = MetaUtil.transformArrayNodesToListNodes(list(e1, e2))
                #=  Elaborate both sides of the cons expression.
                =#
               (outCache, exp1, prop1) = elabExpInExpression(outCache, inEnv, e1, inImplicit, inDoVect, inPrefix, inInfo)

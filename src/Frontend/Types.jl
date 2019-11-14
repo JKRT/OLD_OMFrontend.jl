@@ -32,6 +32,9 @@ function resultExps(inCases::List{<:DAE.MatchCase}) ::List{DAE.Exp}
   exps
 end
 
+function fixCaseReturnTypes2(inCases::List{<:DAE.MatchCase}, inExps::List{<:DAE.Exp}, inInfo::SourceInfo) ::List{DAE.MatchCase}
+end
+
 @exportAll
 end
 
@@ -152,7 +155,7 @@ module Types
 
         import MetaModelica.Dangerous.listReverseInPlace
 
-import TypesInterface
+        import .TypesInterface
 
          #= Succeeds for all the discrete types, Integer, String, Boolean and enumeration. =#
         function discreteType(inType::DAE.Type)

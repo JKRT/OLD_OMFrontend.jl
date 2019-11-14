@@ -103,8 +103,6 @@ module ExpressionSimplify
 
         import Prefix
 
-        import Static
-
         import Types
 
         import Util
@@ -1447,6 +1445,76 @@ module ExpressionSimplify
           outExp
         end
 
+        #=
+         function: elabBuiltinFill2
+         Helper function to: elabBuiltinFill
+
+         Public since it is used by ExpressionSimplify.simplifyBuiltinCalls.
+        =#
+       function elabBuiltinFill2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inType::DAE.Type, inValuesValueLst::List{<:Values.Value}, constVar::DAE.Const, inPrefix::Prefix.PrefixType, inDims::List{<:Absyn.Exp}, inInfo::SourceInfo) ::Tuple{FCore.Cache, DAE.Exp, DAE.Properties}
+             local outProperties::DAE.Properties
+             local outExp::DAE.Exp
+             local outCache::FCore.Cache
+
+             (outCache, outExp, outProperties) = begin
+                 local arraylist::List{DAE.Exp}
+                 local at::DAE.Type
+                 local a::Bool
+                 local env::FCore.Graph
+                 local s::DAE.Exp
+                 local exp::DAE.Exp
+                 local sty::DAE.Type
+                 local ty::DAE.Type
+                 local sty2::DAE.Type
+                 local v::ModelicaInteger
+                 local con::DAE.Const
+                 local rest::List{Values.Value}
+                 local cache::FCore.Cache
+                 local c1::DAE.Const
+                 local pre::Prefix.PrefixType
+                 local str::String
+                  #=  we might get here negative integers!
+                  =#
+               @matchcontinue (inCache, inEnv, inExp, inType, inValuesValueLst, constVar, inPrefix, inDims, inInfo) begin
+                 (cache, _, s, sty, Values.INTEGER(integer = v) <|  nil(), c1, _, _, _)  => begin
+                     @match true = intLt(v, 0)
+                     v = 0
+                     arraylist = ListUtil.fill(s, v)
+                     sty2 = DAE.T_ARRAY(sty, list(DAE.DIM_INTEGER(v)))
+                     at = Types.simplifyType(sty2)
+                     a = Types.isArray(sty2)
+                   (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
+                 end
+
+                 (cache, _, s, sty, Values.INTEGER(integer = v) <|  nil(), c1, _, _, _)  => begin
+                     arraylist = ListUtil.fill(s, v)
+                     sty2 = DAE.T_ARRAY(sty, list(DAE.DIM_INTEGER(v)))
+                     at = Types.simplifyType(sty2)
+                     a = Types.isArray(sty2)
+                   (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
+                 end
+
+                 (cache, env, s, sty, Values.INTEGER(integer = v) <| rest, c1, pre, _, _)  => begin
+                     @match (cache, exp, DAE.PROP(ty, _)) = elabBuiltinFill2(cache, env, s, sty, rest, c1, pre, inDims, inInfo)
+                     arraylist = ListUtil.fill(exp, v)
+                     sty2 = DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(v)))
+                     at = Types.simplifyType(sty2)
+                     a = Types.isArray(sty2)
+                   (cache, DAE.ARRAY(at, a, arraylist), DAE.PROP(sty2, c1))
+                 end
+
+                 _  => begin
+                       str = "elabBuiltinFill2 failed in component" + PrefixUtil.printPrefixStr3(inPrefix) + " and scope: " + FGraphUtil.printGraphPathStr(inEnv) + " for expression: fill(" + Dump.printExpLstStr(inDims) + ")"
+                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), inInfo)
+                     fail()
+                 end
+               end
+             end
+              #=  fill with 0 then!
+              =#
+         (outCache, outExp, outProperties)
+       end
+
          #= simplifies some builtin calls (with no constant expressions) =#
         function simplifyBuiltinCalls(exp::DAE.Exp) ::DAE.Exp
               local outExp::DAE.Exp
@@ -1594,7 +1662,7 @@ module ExpressionSimplify
 
                   DAE.CALL(path = Absyn.IDENT("fill"), expLst = e <| expl)  => begin
                       valueLst = ListUtil.map(expl, ValuesUtil.expValue)
-                      (_, outExp, _) = Static.elabBuiltinFill2(FCoreUtil.noCache(), FCore.emptyGraph, e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
+                      (_, outExp, _) = elabBuiltinFill2(FCoreUtil.noCache(), FCore.emptyGraph, e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
                     outExp
                   end
 

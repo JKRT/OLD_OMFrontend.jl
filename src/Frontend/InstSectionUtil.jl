@@ -1,4 +1,6 @@
-module InstInterface
+module InstSectionUtil
+
+# adrpo: we don't need this if is not MetaModelica
 
 using MetaModelica
 using ExportAll
