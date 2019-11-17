@@ -63,8 +63,6 @@
 
         @importDBG Dump
 
-        @importDBG ExpressionUtil
-
         @importDBG CrefForHashTable
 
         @importDBG ListUtil
@@ -1464,13 +1462,13 @@
                   DAE.CASE(patterns = patterns, body = body, result = SOME(result))  => begin
                       patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
                       resultStr = printExpStr(result)
-                      bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
+                      bodyStr = stringAppendList(ListUtil.map1(body, CrefForHashTable.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then ", resultStr, ";\\n"))
                   end
 
                   DAE.CASE(patterns = patterns, body = body, result = NONE())  => begin
                       patternsStr = patternStr(DAE.PAT_META_TUPLE(patterns))
-                      bodyStr = stringAppendList(ListUtil.map1(body, ExpressionUtil.ppStmtStr, 8))
+                      bodyStr = stringAppendList(ListUtil.map1(body, CrefForHashTable.ppStmtStr, 8))
                     stringAppendList(list("    case ", patternsStr, "\\n      algorithm\\n", bodyStr, "      then fail();\\n"))
                   end
                 end
@@ -2067,7 +2065,7 @@
                       new_level1 = level + 1
                       new_level2 = level + 1
                       sym = debugBinopSymbol(op)
-                      tp = ExpressionUtil.typeof(exp)
+                      tp = CrefForHashTable.typeOf(exp)
                       str = Types.unparseType(tp)
                       lt = dumpExpStr(e1, new_level1)
                       rt = dumpExpStr(e2, new_level2)
@@ -2080,7 +2078,7 @@
                       new_level1 = level + 1
                       sym = unaryopSymbol(op)
                       ct = dumpExpStr(e, new_level1)
-                      str = "expType:" + Types.unparseType(ExpressionUtil.typeof(e)) + " optype:" + Types.unparseType(ExpressionUtil.typeofOp(op))
+                      str = "expType:" + Types.unparseType(CrefForHashTable.typeOf(e)) + " optype:" + Types.unparseType(CrefForHashTable.typeofOp(op))
                       res_str = stringAppendList(list(gen_str, "UNARY ", sym, " ", str, "\\n", ct, ""))
                     res_str
                   end
@@ -2334,7 +2332,7 @@
         function printExpIfDiff(e1::DAE.Exp, e2::DAE.Exp) ::String
               local s::String
 
-              s = if ExpressionUtil.expEqual(e1, e2)
+              s = if CrefForHashTable.expEqual(e1, e2)
                     ""
                   else
                     printExpStr(e1) + " =!= " + printExpStr(e2) + "\\n"
@@ -2378,7 +2376,7 @@
 
               local ty::DAE.Type
 
-              ty = ExpressionUtil.typeof(inExp)
+              ty = CrefForHashTable.typeOf(inExp)
               str = Types.unparseType(ty)
           str
         end

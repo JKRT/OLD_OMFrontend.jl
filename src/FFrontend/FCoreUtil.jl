@@ -164,7 +164,7 @@ function getFunctionTree(cache::Cache) ::DAE.FunctionTree
       end
 
       _  => begin
-        DAE.AvlTreePathFunction.Tree.EMPTY()
+        DAE.AvlTreePathFunction.EMPTY()
       end
     end
   end

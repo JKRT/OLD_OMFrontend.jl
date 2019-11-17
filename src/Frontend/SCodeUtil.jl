@@ -3997,7 +3997,7 @@
                       for sm in submods
                         @match SCode.NAMEMOD(id, mod) = sm
                         if id == name
-                          return
+                          return mod
                         end
                       end
                     SCode.NOMOD()

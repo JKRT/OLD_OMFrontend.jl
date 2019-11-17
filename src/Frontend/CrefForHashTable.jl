@@ -13,6 +13,7 @@ module CrefForHashTable
 @importDBG Tpl
 @importDBG Print
 @importDBG System
+@importDBG Util
 import MetaModelica.Dangerous
 
 FuncCrefTypeA = Function
@@ -5530,7 +5531,7 @@ function indentStr(inInteger::ModelicaInteger) ::String
  outString
 end
 
-#= Helper function to typeof =#
+#= Helper function to typeOf =#
 function typeofOp(inOperator::DAE.Operator) ::DAE.Type
   local outType::DAE.Type
 
@@ -5670,7 +5671,7 @@ function typeofOp(inOperator::DAE.Operator) ::DAE.Type
 end
 
 #= Retrieves the Type of the Expression =#
-function typeof(inExp::DAE.Exp) ::DAE.Type
+function typeOf(inExp::DAE.Exp) ::DAE.Type
   local outType::DAE.Type
 
   outType = begin
@@ -5746,7 +5747,7 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
       end
 
       DAE.IFEXP(expThen = e2)  => begin
-        typeof(e2)
+        typeOf(e2)
       end
 
       DAE.CALL(attr = DAE.CALL_ATTR(ty = tp))  => begin
@@ -5788,7 +5789,7 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
 
       DAE.ASUB(exp = e, sub = explist)  => begin
         i = sum(1 for e in explist if isScalar(e))
-        tp = unliftArrayX(typeof(e), i)
+        tp = unliftArrayX(typeOf(e), i)
         tp
       end
 
@@ -5806,15 +5807,15 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
 
       DAE.REDUCTION(iterators = DAE.REDUCTIONITER(exp = iterExp, guardExp = NONE()) <|  nil(), expr = operExp, reductionInfo = DAE.REDUCTIONINFO(exprType = DAE.T_ARRAY(dims = dim <| _), path = Absyn.IDENT("array")))  => begin
         @match false = dimensionKnown(dim)
-        iterTp = typeof(iterExp)
-        operTp = typeof(operExp)
+        iterTp = typeOf(iterExp)
+        operTp = typeOf(operExp)
         @match DAE.T_ARRAY(dims = iterdims) = iterTp
-        tp = Types.liftTypeWithDims(operTp, iterdims)
+        tp = liftTypeWithDims(operTp, iterdims)
         tp
       end
 
       DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(exprType = ty))  => begin
-        Types.simplifyType(ty)
+        simplifyType(ty)
       end
 
       DAE.SIZE(_, NONE())  => begin
@@ -5834,12 +5835,12 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
       end
 
       DAE.META_TUPLE(exps)  => begin
-        tys = ListUtil.map(exps, typeof)
+        tys = ListUtil.map(exps, typeOf)
         DAE.T_METATYPE(DAE.T_METATUPLE(tys))
       end
 
       DAE.TUPLE(exps)  => begin
-        tys = ListUtil.map(exps, typeof)
+        tys = ListUtil.map(exps, typeOf)
         DAE.T_TUPLE(tys, NONE())
       end
 
@@ -5852,7 +5853,7 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
       end
 
       DAE.BOX(e)  => begin
-        DAE.T_METATYPE(DAE.T_METABOXED(typeof(e)))
+        DAE.T_METATYPE(DAE.T_METABOXED(typeOf(e)))
       end
 
       DAE.MATCHEXPRESSION(et = tp)  => begin
@@ -5864,7 +5865,7 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
       end
 
       DAE.SHARED_LITERAL(exp = e)  => begin
-        typeof(e)
+        typeOf(e)
       end
 
       DAE.EMPTY(ty = tp)  => begin
@@ -5872,7 +5873,7 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
       end
 
       e  => begin
-        msg = "- Expression.typeof failed for " + dump(e)
+        msg = "- Expression.typeOf failed for " + dump(e)
         Error.addMessage(Error.INTERNAL_ERROR, list(msg))
         fail()
       end
@@ -5883,10 +5884,11 @@ function typeof(inExp::DAE.Exp) ::DAE.Type
   #= /* array reduction with known size */ =#
   #=  MetaModelica extension
   =#
-#=  A little crazy, but sometimes we call typeof on things that will not be used in the end...
+#=  A little crazy, but sometimes we call typeOf on things that will not be used in the end...
 =#
 outType
 end
+
 #= Returns true if the two expressions are equal, otherwise false. =#
 function expEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
   local outEqual::Bool
@@ -6429,7 +6431,7 @@ module CompareWithGenericSubscript
                 (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                     res = stringCompare(cr1.ident, cr2.ident)
                     if compareSubscript == CompareWithSubsType.WithoutSubscripts || res != 0
-                      return
+                      return res
                     end
                   compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                 end
@@ -6437,12 +6439,12 @@ module CompareWithGenericSubscript
                 (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                     res = stringCompare(cr1.ident, cr2.ident)
                     if res != 0
-                      return
+                      return res
                     end
                     if compareSubscript != CompareWithSubsType.WithoutSubscripts
                       res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                       if res != 0
-                        return
+                        return res
                       end
                     end
                   cref_compare(cr1.componentRef, cr2.componentRef)
@@ -6451,13 +6453,13 @@ module CompareWithGenericSubscript
                 (DAE.CREF_QUAL(__), DAE.CREF_IDENT(__))  => begin
                     res = stringCompare(cr1.ident, cr2.ident)
                     if res != 0
-                      return
+                      return res
                     end
                     if compareSubscript != CompareWithSubsType.WithoutSubscripts
                       res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                     end
                     if res != 0
-                      return
+                      return res
                     end
                   1
                 end
@@ -6465,13 +6467,13 @@ module CompareWithGenericSubscript
                 (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                     res = stringCompare(cr1.ident, cr2.ident)
                     if res != 0
-                      return
+                      return res
                     end
                     if compareSubscript != CompareWithSubsType.WithoutSubscripts
                       res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                     end
                     if res != 0
-                      return
+                      return res
                     end
                   -1
                 end
@@ -6870,6 +6872,250 @@ function crefPrefixOfIgnoreSubscripts(prefixCref::DAE.ComponentRef, fullCref::DA
       #=  they are not a prefix of one-another
       =#
  outPrefixOf
+end
+
+#=
+ mahge: This function turns a type into an array of that type
+ by appening the new dimension at the end.  =#
+function liftTypeWithDims(inType::DAE.Type, inDims::DAE.Dimensions) ::DAE.Type
+     local outType::DAE.Type
+
+     outType = begin
+         local dims::List{DAE.Dimension}
+         local dims_::List{DAE.Dimension}
+         local ty::DAE.Type
+       @match inType begin
+         DAE.T_ARRAY(ty = DAE.T_ARRAY(__))  => begin
+             print("Can not handle this yet!!")
+           fail()
+         end
+
+         DAE.T_ARRAY(ty, dims)  => begin
+             dims_ = listAppend(dims, inDims)
+           if referenceEq(dims, dims_)
+                 inType
+               else
+                 DAE.T_ARRAY(ty, dims_)
+               end
+         end
+
+         _  => begin
+             DAE.T_ARRAY(inType, inDims)
+         end
+       end
+     end
+ outType
+end
+
+#= @author: adrpo
+ simplifies the given type, to be used in an expression or component reference =#
+function simplifyType(inType::DAE.Type) ::DAE.Type
+     local outExpType::DAE.Type
+
+     outExpType = begin
+         local str::String
+         local t::Type
+         local t_1::DAE.Type
+         local dims::DAE.Dimensions
+         local tys::List{DAE.Type}
+         local varLst::List{DAE.Var}
+         local CIS::ClassInf.SMNode
+         local ec::DAE.EqualityConstraint
+       @matchcontinue inType begin
+         DAE.T_FUNCTION(__)  => begin
+           DAE.T_FUNCTION_REFERENCE_VAR(inType)
+         end
+
+         DAE.T_METAUNIONTYPE(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METARECORD(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METAPOLYMORPHIC(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METALIST(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METAARRAY(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METAOPTION(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_METATUPLE(__)  => begin
+           DAE.T_METATYPE(inType)
+         end
+
+         DAE.T_UNKNOWN(__)  => begin
+           DAE.T_UNKNOWN_DEFAULT
+         end
+
+         DAE.T_ANYTYPE(__)  => begin
+           DAE.T_UNKNOWN_DEFAULT
+         end
+
+         t && DAE.T_ARRAY(__)  => begin
+             (t, dims) = flattenArrayType(t)
+             t_1 = simplifyType(t)
+           DAE.T_ARRAY(t_1, dims)
+         end
+
+         DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
+           inType
+         end
+
+         DAE.T_SUBTYPE_BASIC(complexType = t)  => begin
+           simplifyType(t)
+         end
+
+         DAE.T_INTEGER(__)  => begin
+           DAE.T_INTEGER_DEFAULT
+         end
+
+         DAE.T_REAL(__)  => begin
+           DAE.T_REAL_DEFAULT
+         end
+
+         DAE.T_BOOL(__)  => begin
+           DAE.T_BOOL_DEFAULT
+         end
+
+         DAE.T_CLOCK(__)  => begin
+           DAE.T_CLOCK_DEFAULT
+         end
+
+         DAE.T_STRING(__)  => begin
+           DAE.T_STRING_DEFAULT
+         end
+
+         DAE.T_NORETCALL(__)  => begin
+           DAE.T_NORETCALL_DEFAULT
+         end
+
+         DAE.T_TUPLE(types = tys)  => begin
+             tys = ListUtil.map(tys, simplifyType)
+           DAE.T_TUPLE(tys, inType.names)
+         end
+
+         DAE.T_ENUMERATION(__)  => begin
+           inType
+         end
+
+         DAE.T_COMPLEX(CIS, varLst, ec)  => begin
+             @match true = Config.acceptMetaModelicaGrammar()
+             varLst = list(simplifyVar(v) for v in varLst)
+           DAE.T_COMPLEX(CIS, varLst, ec)
+         end
+
+         DAE.T_COMPLEX(CIS && ClassInf.RECORD(__), varLst, ec)  => begin
+             varLst = list(simplifyVar(v) for v in varLst)
+           DAE.T_COMPLEX(CIS, varLst, ec)
+         end
+
+         DAE.T_COMPLEX(__)  => begin
+           inType
+         end
+
+         DAE.T_METABOXED(ty = t)  => begin
+             t_1 = simplifyType(t)
+           DAE.T_METABOXED(t_1)
+         end
+
+         _  => begin
+           DAE.T_UNKNOWN_DEFAULT
+         end
+
+         _  => begin
+               str = "simplifyType failed for: " + local_unparseType(inType)
+               Error.addMessage(Error.INTERNAL_ERROR, list(str))
+             fail()
+         end
+       end
+     end
+      #=  do NOT simplify out equality constraint
+      =#
+      #=  BTH watch out: Due to simplification some type info is lost here
+      =#
+      #=  for metamodelica we need this for some reson!
+      =#
+      #=  do this for records too, otherwise:
+      =#
+      #=  frame.R = Modelica.Mechanics.MultiBody.Frames.Orientation({const_matrix);
+      =#
+      #=  does not get expanded into the component equations.
+      =#
+      #=  otherwise just return the same!
+      =#
+      #=  This is the case when the type is currently UNTYPED
+      =#
+      #= /*
+             print(\" untyped \");
+             print(unparseType(inType));
+             print(\"\\n\");
+             */ =#
+ outExpType
+end
+
+function simplifyVar(inVar::DAE.Var) ::DAE.Var
+     local outVar::DAE.Var = inVar
+
+     outVar = begin
+       @match outVar begin
+         DAE.TYPES_VAR(__)  => begin
+             outVar.ty = simplifyType(outVar.ty)
+           outVar
+         end
+       end
+     end
+ outVar
+end
+
+#= Returns the element type of a Type and the dimensions of the type. =#
+function flattenArrayType(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimensions}
+     local outDimensions::DAE.Dimensions
+     local outType::DAE.Type
+
+     (outType, outDimensions) = begin
+         local ty::Type
+         local dims::DAE.Dimensions
+         local dim::DAE.Dimension
+          #=  Array type
+          =#
+       @match inType begin
+         DAE.T_ARRAY(__)  => begin
+             (ty, dims) = flattenArrayType(inType.ty)
+             dims = listAppend(inType.dims, dims)
+           (ty, dims)
+         end
+
+         DAE.T_SUBTYPE_BASIC(equalityConstraint = SOME(_))  => begin
+           (inType, nil)
+         end
+
+         DAE.T_SUBTYPE_BASIC(__)  => begin
+           flattenArrayType(inType.complexType)
+         end
+
+         _  => begin
+             (inType, nil)
+         end
+       end
+     end
+      #=  Complex type extending basetype with equality constraint
+      =#
+      #=  Complex type extending basetype.
+      =#
+      #=  Element type
+      =#
+ (outType, outDimensions)
 end
 
     @exportAll()

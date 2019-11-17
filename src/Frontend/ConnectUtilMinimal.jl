@@ -77,7 +77,7 @@ module ConnectUtilMinimal
 
          #= Test for face equality. =#
         function faceEqual(face1::Face, face2::Face) ::Bool
-              local sameFaces::Bool = valueConstructor(face1) == valueConstructor(face2)
+              local sameFaces::Bool = valueEq(face1, face2)
           sameFaces
         end
 

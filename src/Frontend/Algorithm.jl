@@ -373,7 +373,8 @@
               local e2::DAE.Exp
               local tp::DAE.Type
 
-              @match ((@match DAE.CREF(ty = tp) = e1), e2) = inTpl
+              @match (e1, e2) = inTpl
+              @match DAE.CREF(ty = tp) = e1
               outStmt = DAE.STMT_ASSIGN(tp, e1, e2, source)
           outStmt
         end

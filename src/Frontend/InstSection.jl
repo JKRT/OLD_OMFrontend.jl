@@ -229,7 +229,8 @@
                   ()  => begin
                       state = ClassInf.trans(inState, ClassInf.FOUND_EQUATION())
                       (outCache, outEnv, outIH, outDae, outSets, outState, outGraph) = instEquationCommonWork(inCache, inEnv, inIH, inPrefix, inSets, state, inEEquation, inInitial, inImpl, inGraph, DAE.FLATTEN(inEEquation, NONE()))
-                      outDae = DAEUtil.traverseDAE(outDae, DAE.AvlTreePathFunction.Tree.EMPTY(), Expression.traverseSubexpressionsHelper, (ExpressionSimplify.simplifyWork, ExpressionSimplifyTypes.optionSimplifyOnly))
+                      # TODO! FIXME! adrpo:re-enable this
+                      # outDae = DAEUtil.traverseDAE(outDae, DAE.AvlTreePathFunction.EMPTY(), Expression.traverseSubexpressionsHelper, (ExpressionSimplify.simplifyWork, ExpressionSimplifyTypes.optionSimplifyOnly))
                     ()
                   end
 
@@ -497,7 +498,7 @@
                   SCode.EQ_REINIT(cref = Absyn.CREF(componentRef = acr), info = info)  => begin
                        #=  Elaborate the cref.
                        =#
-                      @match (outCache, (@match DAE.CREF(cr, ty) = cr_exp), cr_prop, _) = Static.elabCrefNoEval(outCache, inEnv, acr, inImpl, false, inPrefix, info)
+                      @match (outCache, cr_exp && DAE.CREF(cr, ty), cr_prop, _) = Static.elabCrefNoEval(outCache, inEnv, acr, inImpl, false, inPrefix, info)
                       @match true = checkReinitType(ty, cr_prop, cr, info)
                        #=  Elaborate the reinit expression.
                        =#
@@ -796,8 +797,8 @@
                   (cache, env, ih, pre, csets, ci_state, SCode.EQ_NORETCALL(info = info, exp = Absyn.CALL(function_ = Absyn.CREF_QUAL("Connections",  nil(), Absyn.CREF_IDENT("branch",  nil())), functionArgs = Absyn.FUNCTIONARGS(Absyn.CREF(cr1) <| Absyn.CREF(cr2) <|  nil(),  nil()))), _, _, graph, _)  => begin
                       @match (cache, SOME((e_1, _, _))) = Static.elabCref(cache, env, cr1, false, false, pre, info)
                       @match (cache, SOME((e_2, _, _))) = Static.elabCref(cache, env, cr2, false, false, pre, info)
-                      b1 = Types.isZeroLengthArray(Expression.typeof(e_1))
-                      b2 = Types.isZeroLengthArray(Expression.typeof(e_2))
+                      b1 = Types.isZeroLengthArray(Expression.typeOf(e_1))
+                      b2 = Types.isZeroLengthArray(Expression.typeOf(e_2))
                       if boolOr(b1, b2)
                         s = SCodeDump.equationStr(inEEquation)
                         Error.addSourceMessage(Error.OVERCONSTRAINED_OPERATOR_SIZE_ZERO, list(s), info)
@@ -1586,8 +1587,8 @@
 
                   (_, _, DAE.T_ARRAY(ty = t, dims = _ <|  nil()), _, _, _)  => begin
                       @match false = Config.splitArrays()
-                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeof(lhs)
-                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeof(rhs)
+                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)
+                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeOf(rhs)
                       lhs_idxs = expandArrayDimension(lhs_dim, lhs)
                       rhs_idxs = expandArrayDimension(rhs_dim, rhs)
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
@@ -1597,8 +1598,8 @@
                   (_, _, DAE.T_ARRAY(ty = t, dims = dim <|  nil()), _, _, _)  => begin
                       @match true = Config.splitArrays()
                       @match true = Expression.dimensionKnown(dim)
-                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeof(lhs)
-                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeof(rhs)
+                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)
+                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeOf(rhs)
                       lhs_idxs = expandArrayDimension(lhs_dim, lhs)
                       rhs_idxs = expandArrayDimension(rhs_dim, rhs)
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
@@ -1629,8 +1630,8 @@
                       @match true = Config.splitArrays()
                       @match false = Expression.dimensionKnown(dim)
                       @match true = Flags.getConfigBool(Flags.CHECK_MODEL)
-                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeof(lhs)
-                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeof(rhs)
+                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)
+                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeOf(rhs)
                       lhs_idxs = expandArrayDimension(lhs_dim, lhs)
                       rhs_idxs = expandArrayDimension(rhs_dim, rhs)
                       dae = instArrayElEq(lhs, rhs, t, inConst, lhs_idxs, rhs_idxs, inSource, initial_)
@@ -3320,7 +3321,7 @@
                =#
                #=  get the dimensions from the ty1 type!
                =#
-               #=  fprintln(Flags.SHOW_EXPANDABLE_INFO, \"<<<< connect(expandable, existing)(\" + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + \".\" + Dump.printComponentRefStr(c1) + \", \" + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + \".\" + Dump.printComponentRefStr(c2) + \")\");  \\nDAE:\" + DAEDump.dumpStr(daeExpandable, DAE.AvlTreePathFunction.Tree.EMPTY()));
+               #=  fprintln(Flags.SHOW_EXPANDABLE_INFO, \"<<<< connect(expandable, existing)(\" + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + \".\" + Dump.printComponentRefStr(c1) + \", \" + PrefixUtil.printPrefixStrIgnoreNoPre(pre) + \".\" + Dump.printComponentRefStr(c2) + \")\");  \\nDAE:\" + DAEDump.dumpStr(daeExpandable, DAE.AvlTreePathFunction.EMPTY()));
                =#
                #=  both c1 and c2 are non expandable!
                =#
@@ -4732,8 +4733,8 @@
                       @match DAE.T_ARRAY(dims = list(_)) = t
                       rhs = e_1
                       Static.checkAssignmentToInput(var, attr, inEnv, false, info)
-                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeof(lhs)
-                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeof(rhs)
+                      @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)
+                      @match DAE.T_ARRAY(dims = _cons(rhs_dim, _)) = Expression.typeOf(rhs)
                       @match nil = expandArrayDimension(lhs_dim, lhs)
                       @match nil = expandArrayDimension(rhs_dim, rhs)
                     (cache, nil)

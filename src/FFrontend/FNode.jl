@@ -1466,7 +1466,8 @@ function clone(inNode::Node, inParentRef::MMRef, inGraph::Graph) ::Tuple{Graph, 
     @match (inNode, inParentRef, inGraph) begin
       (FCore.N(name, id, parents, children, data), _, g)  => begin
         parents = _cons(inParentRef, parents)
-        @match (g, (@match FCore.N(name, id, parents, _, data) = n)) = node(g, name, parents, data)
+        @match (g, n) = node(g, name, parents, data)
+        @match FCore.N(name, id, parents, _, data) = n
         r = toRef(n)
         (g, children) = cloneTree(children, r, g)
         r = updateRef(r, FCore.N(name, id, parents, children, data))
@@ -1850,6 +1851,338 @@ function node(inGraph::Graph, inName::Name, inParents::Parents, inData::Data) ::
     end
   end
   (outGraph, outNode)
+end
+
+function isEncapsulated(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = SCode.CLASS(encapsulatedPrefix = SCode.ENCAPSULATED(__))))  => begin
+        true
+      end
+
+      FCore.N(data = FCore.CO(__)) where (boolEq(Config.acceptMetaModelicaGrammar(), false) && boolNot(Flags.isSet(Flags.GRAPH_INST)))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isInstance(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(status = FCore.CLS_INSTANCE(_)))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isRedeclare(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = SCode.CLASS(prefixes = SCode.PREFIXES(redeclarePrefix = SCode.REDECLARE(__)))))  => begin
+        true
+      end
+
+      FCore.N(data = FCore.CO(e = SCode.COMPONENT(prefixes = SCode.PREFIXES(redeclarePrefix = SCode.REDECLARE(__)))))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isClassExtends(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__))))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isComponent(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CO(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isCref(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CR(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isBasicType(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(kind = FCore.BASIC_TYPE(__)))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isBuiltin(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(kind = FCore.BUILTIN(__)))  => begin
+        true
+      end
+
+      FCore.N(data = FCore.CO(kind = FCore.BUILTIN(__)))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isFunction(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    local e::SCode.Element
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = e)) where (SCodeUtil.isFunction(e) || SCodeUtil.isOperator(e))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isRecord(inNode::Node) ::Bool
+  local b::Bool = false
+
+  b = begin
+    local e::SCode.Element
+    @match inNode begin
+      FCore.N(data = FCore.CL(e = e)) where (SCodeUtil.isRecord(e))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isSection(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.AL(__))  => begin
+        true
+      end
+
+      FCore.N(data = FCore.EQ(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isMod(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.MO(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isModHolder(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    local n::Name
+    @match inNode begin
+      FCore.N(name = n, data = FCore.MO(__))  => begin
+        stringEq(n, modNodeName)
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+#= a node is a clone if its parent is a version node =#
+function isClone(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    local r::MMRef
+    @match inNode begin
+      FCore.N(parents = r <| _)  => begin
+        b = isRefVersion(r)
+        b
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isVersion(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.VR(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isDims(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.DIMS(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
+end
+
+function isIn(inNode::Node, inFunctionRefIs::FunctionRefIs) ::Bool
+  local b::Bool
+
+  b = begin
+    local s::Scope
+    local b1::Bool
+    local b2::Bool
+    @match (inNode, inFunctionRefIs) begin
+      (_, _)  => begin
+        s = originalScope(toRef(inNode))
+        b1 = ListUtil.applyAndFold(s, boolOr, inFunctionRefIs, false)
+        s = contextualScope(toRef(inNode))
+        b2 = ListUtil.applyAndFold(s, boolOr, inFunctionRefIs, false)
+        b = boolOr(b1, b2)
+        b
+      end
+    end
+  end
+  b
+end
+
+function isClass(inNode::Node) ::Bool
+  local b::Bool
+
+  b = begin
+    @match inNode begin
+      FCore.N(data = FCore.CL(__))  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  b
 end
 
 

@@ -1930,7 +1930,7 @@
                   end
 
                   (cr && DAE.CREF_IDENT(subscriptLst =  nil()), _, _, _)  => begin
-                      ty = Types.unflattenArrayType(Expression.typeof(ValuesUtil.valueExp(inNewValue)))
+                      ty = Types.unflattenArrayType(Expression.typeOf(ValuesUtil.valueExp(inNewValue)))
                       env = updateVariableBinding(cr, inEnv, ty, inNewValue)
                     (inCache, env)
                   end

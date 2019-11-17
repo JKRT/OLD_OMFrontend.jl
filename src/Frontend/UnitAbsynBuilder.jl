@@ -43,7 +43,7 @@
         import MMath
 
         import FCore
-        
+
         import FCoreUtil
 
         import HashTable
@@ -881,7 +881,7 @@
                                 (st, indx) = add(unit, st)
                                 ht = BaseHashTable.add((cr, indx), ht)
                                 outStore = UnitAbsyn.INSTSTORE(st, ht, res)
-                                return
+                                return outStore
                               ()
                             end
 
@@ -1329,7 +1329,7 @@
               while ! listEmpty(rest_ut)
                 @match _cons(ut1, _cons(ut2, rest_ut)) = rest_ut
                 @match _cons(e1, _cons(e2, rest_expl)) = rest_expl
-                ty = Expression.typeof(e1)
+                ty = Expression.typeOf(e1)
                 outUts = _cons(UnitAbsyn.EQN(ut1, ut2, DAE.ARRAY(ty, true, list(e1, e2))), outUts)
               end
               outUts = listReverse(outUts)
@@ -1555,7 +1555,7 @@
                         _ = begin
                           @match v begin
                             DAE.TYPES_VAR(name = "unit", binding = DAE.EQBOUND(exp = DAE.SCONST(str)))  => begin
-                                return
+                                return str
                               ()
                             end
 

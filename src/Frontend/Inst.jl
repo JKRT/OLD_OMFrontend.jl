@@ -214,7 +214,7 @@
                       pathstr = AbsynUtil.pathString(path)
                       (cache, env) = Builtin.initialGraph(cache)
                       env = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
-                      @match (cache, (@match SCode.CLASS(name = n) = cdef), env) = Lookup.lookupClass(cache, env, path, SOME(AbsynUtil.dummyInfo))
+                      @match (cache, cdef && SCode.CLASS(name = n), env) = Lookup.lookupClass(cache, env, path, SOME(AbsynUtil.dummyInfo))
                       if Flags.isSet(Flags.GC_PROF)
                         print(GC.profStatsStr(GC.getProfStats(), head = "GC stats after pre-frontend work (building graphs):") + "\\n")
                       end
@@ -727,8 +727,9 @@
                =#
               if Flags.isSet(Flags.CACHE)
                 try
-                  @match list(SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)), _) = InstHashTable.get(cache_path)
-                  @match (m, pre, csets, st, (@match SCode.CLASS() = e), dims, impl, scr, cs) = inputs
+                  @match SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)) <| _ <| nil = InstHashTable.get(cache_path)
+                  @match (m, pre, csets, st, e, dims, impl, scr, cs) = inputs
+                  @match SCode.CLASS() = e
                   InstUtil.prefixEqualUnlessBasicType(prefix, pre, cls)
                   if valueEq(dims, instDims) && impl == implicitInst && valueEq(m, mod) && valueEq(csets, sets) && valueEq(st, state) && valueEq(e, cls) && valueEq(scr, instSingleCref) && callingScopeCacheEq(cs, callingScope)
                     (env, dae, sets, state, vars, ty, optDerAttr, equalityConstraint, cached_graph) = outputs
@@ -736,7 +737,9 @@
                     showCacheInfo("Full Inst Hit: ", cache_path)
                     return (cache, env, ih, store, state, graph, sets, dae, vars, ty, optDerAttr, equalityConstraint)
                   end
-                catch
+                catch ex
+                  println("no inst full cache")
+                  showerror(stderr, ex, catch_backtrace())
                 end
               end
                #=  Are the important inputs the same?
@@ -751,7 +754,7 @@
                 outputs = (env, dae, sets, state, vars, ty, optDerAttr, equalityConstraint, graph)
                 showCacheInfo("Full Inst Add: ", cache_path)
                 InstHashTable.addToInstCache(cache_path, SOME(InstHashTable.FUNC_instClassIn(inputs, outputs)), NONE())
-              catch
+              catch ex
                 @match true = Flags.isSet(Flags.FAILTRACE)
                 Debug.traceln("- Inst.instClassIn2 failed on class: " + SCodeUtil.elementName(cls) + " in environment: " + FGraphUtil.printGraphPathStr(env))
                 fail()
@@ -1417,15 +1420,18 @@
                =#
               if Flags.isSet(Flags.CACHE)
                 try
-                  @match list(_, SOME(InstHashTable.FUNC_partialInstClassIn(inputs, outputs))) = InstHashTable.get(cache_path)
-                  @match (m, pre, st, (@match SCode.CLASS() = e), dims) = inputs
+                  @match _ <| SOME(InstHashTable.FUNC_partialInstClassIn(inputs, outputs)) <| nil = InstHashTable.get(cache_path)
+                  @match (m, pre, st, e, dims) = inputs
+                  @match SCode.CLASS() = e
                   InstUtil.prefixEqualUnlessBasicType(pre, prefix, cls)
                   if valueEq(dims, instDims) && valueEq(m, mod) && valueEq(st, state) && valueEq(e, cls)
                     (env, state, vars) = outputs
                     showCacheInfo("Partial Inst Hit: ", cache_path)
                     return (cache, env, ih, state, vars)
                   end
-                catch
+                catch ex
+                  println("no inst partial cache: ")
+                  showerror(stderr, ex, catch_backtrace())
                 end
               end
                #=  Are the important inputs the same?
@@ -1595,7 +1601,7 @@
                 @matchcontinue (inCache, inEnv, inIH, inStore, inMod2, inPrefix3, inState5, className, inClassDef6, inRestriction7, inVisibility, inInstDims9, inBoolean10, inGraph, inSets, instSingleCref, info, stopInst) begin
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.PARTS(elementLst = els, normalEquationLst =  nil(), initialEquationLst =  nil(), normalAlgorithmLst =  nil(), initialAlgorithmLst =  nil()), _, _, inst_dims, impl, graph, _, _, _, _)  => begin
                       ErrorExt.setCheckpoint("instClassdefBasicType1")
-                      @match (cdefelts, nil, (@match _cons(_, _) = extendselts), compelts) = InstUtil.splitElts(els) #= components should be empty, checked in instBasictypeBaseclass type below =#
+                      @match (cdefelts, nil, extendselts && _ <| _, compelts) = InstUtil.splitElts(els) #= components should be empty, checked in instBasictypeBaseclass type below =#
                       (cache, env1, ih) = InstUtil.addClassdefsToEnv(cache, env, ih, pre, cdefelts, impl, SOME(mods)) #= 1. CLASS & IMPORT nodes and COMPONENT nodes(add to env) =#
                       cdefelts_1 = InstUtil.addNomod(cdefelts) #= instantiate CDEFS so redeclares are carried out =#
                       env2 = env1
@@ -1947,7 +1953,9 @@
 
                   (cache, env, ih, store, mods, pre, _, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
-                      @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = (@match SCode.R_ENUMERATION() = r)) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match (cache, c, cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c
+                      @match SCode.R_ENUMERATION() = r
                       env3 = FGraphUtil.openScope(cenv, enc2, cn2, SOME(FCore.CLASS_SCOPE()))
                       ci_state2 = ClassInf.start(r, FGraphUtil.getGraphName(env3))
                       new_ci_state = ClassInf.start(r, FGraphUtil.getGraphName(env3))
@@ -1965,7 +1973,8 @@
 
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
-                      @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match (cache, c, cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c
                       @match true = InstUtil.checkDerivedRestriction(re, r, cn2)
                       valid_connector = ConnectUtil.checkShortConnectorDef(ci_state, DA, info)
                       Mutable.update(stopInst, ! valid_connector)
@@ -2029,7 +2038,8 @@
 
                   (cache, env, ih, store, mods, pre, ci_state, _, SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn, arrayDim = ad), modifications = mod, attributes = DA), re, vis, _, _, inst_dims, impl, callscope, graph, _, _, _, _, _)  => begin
                       @match false = Mutable.access(stopInst)
-                      @match (cache, (@match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match (cache, c, cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
+                      @match SCode.CLASS(name = cn2, encapsulatedPrefix = enc2, restriction = r) = c
                       @match false = InstUtil.checkDerivedRestriction(re, r, cn2)
                       cenv_2 = FGraphUtil.openScope(cenv, enc2, className, FGraphUtil.classInfToScopeType(ci_state))
                       new_ci_state = ClassInf.start(r, FGraphUtil.getGraphName(cenv_2))
@@ -2128,7 +2138,8 @@
                       @match (cache, SCode.CLASS(name = cn2, restriction = SCode.R_UNIONTYPE(typeVars = typeVars), classDef = classDef), cenv) = Lookup.lookupClass(cache, env, cn, SOME(info))
                       (cache, fq_class) = makeFullyQualifiedIdent(cache, cenv, cn2)
                       new_ci_state = ClassInf.META_UNIONTYPE(fq_class, typeVars)
-                      @match (cache, SOME((@match DAE.T_METAUNIONTYPE() = ty))) = InstMeta.fixUniontype(cache, env, new_ci_state, classDef)
+                      @match (cache, SOME(ty)) = InstMeta.fixUniontype(cache, env, new_ci_state, classDef)
+                      @match DAE.T_METAUNIONTYPE() = ty
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = list(Types.boxIfUnboxedType(t) for t in tys)
                       if ! listLength(tys) == listLength(typeVars)
@@ -2259,7 +2270,7 @@
                   end
 
                   (cache, env, ih, Absyn.TPATH(cn, _) <| restTypeSpecs, pre, dims, impl, localAccTypes, _)  => begin
-                      @match (cache, (@match SCode.CLASS() = c), cenv) = Lookup.lookupClass(cache, env, cn, SOME(inInfo))
+                      @match (cache, c && SCode.CLASS(), cenv) = Lookup.lookupClass(cache, env, cn, SOME(inInfo))
                       @match false = SCodeUtil.isFunction(c)
                       (cache, cenv, ih, _, _, csets, ty, _, oDA, _) = instClass(cache, cenv, ih, UnitAbsyn.noStore, DAE.NOMOD(), pre, c, dims, impl, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, inSets)
                       localAccTypes = _cons(ty, localAccTypes)
@@ -2521,7 +2532,7 @@
                       info = SCodeUtil.elementInfo(inClass)
                       has_dims = ! (isNone(class_dims) || valueEq(class_dims, SOME(nil)))
                       try
-                        @match (outCache, (@match SCode.CLASS() = cls), cenv) = Lookup.lookupClass(inCache, inEnv, class_path, SOME(info))
+                        @match (outCache, cls && SCode.CLASS(), cenv) = Lookup.lookupClass(inCache, inEnv, class_path, SOME(info))
                       catch
                         class_name = AbsynUtil.pathString(class_path)
                         scope_str = FGraphUtil.printGraphPathStr(inEnv)
@@ -2969,7 +2980,9 @@
                       mod = Mod.myMerge(mod, m_1, name, ! ClassInf.isRecord(ci_state))
                       mod = Mod.myMerge(cmod, mod, name)
                       mod = Mod.myMerge(mod, var_class_mod, name)
-                      @match (cache, env2, ih, SCode.COMPONENT(name, (@match SCode.PREFIXES(innerOuter = io) = prefixes), (@match SCode.ATTR(arrayDims = ad, direction = dir) = attr), Absyn.TPATH(t, _), _, comment, _, _), mod_1) = redeclareType(cache, env2, ih, mod, comp, pre, ci_state, impl, DAE.NOMOD())
+                      @match (cache, env2, ih, SCode.COMPONENT(name, prefixes, attr, Absyn.TPATH(t, _), _, comment, _, _), mod_1) = redeclareType(cache, env2, ih, mod, comp, pre, ci_state, impl, DAE.NOMOD())
+                      @match SCode.PREFIXES(innerOuter = io) = prefixes
+                      @match SCode.ATTR(arrayDims = ad, direction = dir) = attr
                       (cache, cls, cenv) = Lookup.lookupClass(cache, env2, t, SOME(info))
                       cls_mod = Mod.getClassModifier(cenv, SCodeUtil.className(cls))
                       if ! Mod.isEmptyMod(cls_mod)
@@ -3580,7 +3593,9 @@
 
                   (cache, env, ih, _, mods, _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
-                      @match (cache, _, SCode.COMPONENT(n, (@match SCode.PREFIXES(innerOuter = io, visibility = visibility) = pf), (@match SCode.ATTR(ad, ct, prl1, var1, dir) = attr), Absyn.TPATH(t, _), m, _, cond, info), cmod, _, idENV) = Lookup.lookupIdent(cache, env, id)
+                      @match (cache, _, SCode.COMPONENT(n, pf, attr, Absyn.TPATH(t, _), m, _, cond, info), cmod, _, idENV) = Lookup.lookupIdent(cache, env, id)
+                      @match SCode.PREFIXES(innerOuter = io, visibility = visibility) = pf
+                      @match SCode.ATTR(ad, ct, prl1, var1, dir) = attr
                       ci_state = InstUtil.updateClassInfState(cache, idENV, env, inCIState)
                       (cache, cl, cenv) = Lookup.lookupClass(cache, env, t)
                       updatedComps = getUpdatedCompsHashTable(inUpdatedComps)
@@ -4295,7 +4310,7 @@
                   (cache, ih, cdecls && _ <| _, path && Absyn.QUALIFIED(__))  => begin
                       (cache, env) = Builtin.initialGraph(cache)
                       env_1 = FGraphBuildEnv.mkProgramGraph(cdecls, FCore.USERDEFINED(), env)
-                      @match (cache, (@match SCode.CLASS() = cdef), env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
+                      @match (cache, cdef && SCode.CLASS(), env_2) = Lookup.lookupClass(cache, env_1, path, SOME(AbsynUtil.dummyInfo))
                       (cache, env_2, ih, _, dae, _, _, _, _, _) = instClass(cache, env_2, ih, UnitAbsyn.noStore, DAE.NOMOD(), Prefix.NOPRE(), cdef, nil, false, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet) #= impl =#
                       _ = AbsynUtil.pathString(path)
                     (cache, env_2, ih, dae)
@@ -4934,14 +4949,16 @@
               local inputs::InstHashTable.CachedInstItemInputs
 
               @match true = Flags.isSet(Flags.CACHE)
-              @match FCore.CL((@match SCode.CLASS(encapsulatedPrefix = enc, restriction = res) = cls), prefix) = FNode.refData(ref)
+              @match FCore.CL(cls && SCode.CLASS(encapsulatedPrefix = enc, restriction = res), prefix) = FNode.refData(ref)
               env2 = FGraphUtil.openScope(env, enc, name, FGraphUtil.restrictionToScopeType(res))
               try
                 cache_path = generateCachePath(env2, cls, prefix, InstTypes.INNER_CALL())
-                @match list(SOME(InstHashTable.FUNC_instClassIn(inputs, (env, _, _, _, _, _, _, _, _))), _) = InstHashTable.get(cache_path)
+                @match SOME(InstHashTable.FUNC_instClassIn(inputs, (env, _, _, _, _, _, _, _, _))) <| _ <| nil = InstHashTable.get(cache_path)
                 (_, prefix2, _, _, _, _, _, _, _) = inputs
                 @match true = PrefixUtil.isPrefix(prefix) && PrefixUtil.isPrefix(prefix2)
-              catch
+              catch ex
+                println("no inst cache: ")
+                showerror(stderr, ex, catch_backtrace())
                 env = FGraphUtil.pushScopeRef(env, ref)
               end
           (cache, env)

@@ -837,7 +837,7 @@
                           cr_1 = prefixOuterCrefWithTheInnerPrefix(ih, cr, pre)
                           (cache, t) = prefixExpressionsInType(cache, env, ih, pre, t)
                           outExp = Expression.makeCrefExp(cr_1, t)
-                          return
+                          return (cache, outExp)
                         catch
                         end
                       end

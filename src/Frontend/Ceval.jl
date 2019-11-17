@@ -848,7 +848,7 @@ module Ceval
                   end
 
                   (_, _, _, _, _, _) where (Config.getGraphicsExpMode())  => begin
-                      ty = Expression.typeof(inExp)
+                      ty = Expression.typeOf(inExp)
                       v = Types.typeToValue(ty)
                     (inCache, Values.EMPTY("#graphicsExp#", CrefForHashTable.printExpStr(inExp), v, Types.unparseType(ty)))
                   end
@@ -1792,7 +1792,7 @@ module Ceval
                   end
 
                   (cache, env, DAE.ARRAY(array = exp <| es), dimExp, impl, msg, _)  => begin
-                      _ = Expression.typeof(exp) #= Special case for array expressions with nonconstant
+                      _ = Expression.typeOf(exp) #= Special case for array expressions with nonconstant
                                                               values For now: only arrays of scalar elements:
                                                               TODO generalize to arbitrary dimensions =#
                       @match (cache, Values.INTEGER(1)) = ceval(cache, env, dimExp, impl, msg, numIter + 1)
@@ -3563,7 +3563,7 @@ module Ceval
                 @match (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, arr <|  nil(), impl, msg, _)  => begin
                       @match (cache, Values.ARRAY(valueLst = vals)) = ceval(cache, env, arr, impl, msg, numIter + 1)
-                      if Types.isInteger(Expression.typeof(arr))
+                      if Types.isInteger(Expression.typeOf(arr))
                         if listEmpty(vals)
                           v = Values.INTEGER(0)
                         else
@@ -3991,7 +3991,7 @@ module Ceval
                   local ty::DAE.Type
                 @matchcontinue (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, exp <|  nil(), impl, msg, _)  => begin
-                      @match DAE.T_ARRAY(ty = ty) = Expression.typeof(exp)
+                      @match DAE.T_ARRAY(ty = ty) = Expression.typeOf(exp)
                       @match (cache, Values.ARRAY(vals, list(dimension))) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       zero = ValuesUtil.makeZero(ty)
                       res = Values.ARRAY(list(Values.ARRAY(list(if i == j

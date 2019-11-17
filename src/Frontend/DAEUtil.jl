@@ -4070,7 +4070,7 @@
         end
 
         function verifyWhenEquation(cond::DAE.Exp, eqs::List{<:DAE.Element}, ew::Option{<:DAE.Element}, source::DAE.ElementSource)
-              if Types.isClockOrSubTypeClock(Expression.typeof(cond))
+              if Types.isClockOrSubTypeClock(Expression.typeOf(cond))
                 verifyClockWhenEquation(cond, eqs, ew, source)
               else
                 verifyBoolWhenEquation(cond, eqs, ew, source)
@@ -4105,7 +4105,7 @@
                     end
 
                     DAE.WHEN_EQUATION(cond, eqs, ew, source)  => begin
-                        if Types.isClockOrSubTypeClock(Expression.typeof(cond))
+                        if Types.isClockOrSubTypeClock(Expression.typeOf(cond))
                           info = ElementSource.getElementSourceFileInfo(ElementSource.getElementSource(el))
                           Error.addSourceMessageAndFail(Error.NESTED_CLOCKED_WHEN, nil, info)
                         end
@@ -4134,7 +4134,7 @@
               whenBranches = collectWhenEquationBranches(inElseWhen)
               for whenBranch in whenBranches
                 (cond, eqs) = whenBranch
-                if Types.isClockOrSubTypeClock(Expression.typeof(cond))
+                if Types.isClockOrSubTypeClock(Expression.typeOf(cond))
                   info = ElementSource.getElementSourceFileInfo(source)
                   Error.addSourceMessageAndFail(Error.CLOCKED_WHEN_BRANCH, nil, info)
                 end
@@ -4272,7 +4272,7 @@
 
                   DAE.WHEN_EQUATION(condition = e, source = source) <| _  => begin
                       info = ElementSource.getElementSourceFileInfo(source)
-                      if Types.isClockOrSubTypeClock(Expression.typeof(e))
+                      if Types.isClockOrSubTypeClock(Expression.typeOf(e))
                         Error.addSourceMessage(Error.CLOCKED_WHEN_IN_WHEN_EQ, nil, info)
                       else
                         Error.addSourceMessage(Error.NESTED_WHEN, nil, info)
@@ -4773,7 +4773,7 @@
         function renameUniqueOuterVars(dae::DAE.DAElist) ::DAE.DAElist
               local odae::DAE.DAElist
 
-              (odae, _, _) = traverseDAE(dae, DAE.AvlTreePathFunction.Tree.EMPTY(), Expression.traverseSubexpressionsHelper, (removeUniqieIdentifierFromCref, nil))
+              (odae, _, _) = traverseDAE(dae, DAE.AvlTreePathFunction.EMPTY(), Expression.traverseSubexpressionsHelper, (removeUniqieIdentifierFromCref, nil))
           odae
         end
 
@@ -4808,7 +4808,7 @@
         function nameUniqueOuterVars(dae::DAE.DAElist) ::DAE.DAElist
               local odae::DAE.DAElist
 
-              (odae, _, _) = traverseDAE(dae, DAE.AvlTreePathFunction.Tree.EMPTY(), Expression.traverseSubexpressionsHelper, (addUniqueIdentifierToCref, nil))
+              (odae, _, _) = traverseDAE(dae, DAE.AvlTreePathFunction.EMPTY(), Expression.traverseSubexpressionsHelper, (addUniqueIdentifierToCref, nil))
           odae
         end
 
@@ -6843,7 +6843,7 @@
          =#
          #=          ht = HashTable.emptyHashTable();
          =#
-         #=          (d,_,ht) = traverseDAE(dae,DAE.AvlTreePathFunction.Tree.EMPTY(),simpleInlineDerEuler,ht);
+         #=          (d,_,ht) = traverseDAE(dae,DAE.AvlTreePathFunction.EMPTY(),simpleInlineDerEuler,ht);
          =#
          #=        then d;
          =#
@@ -7905,7 +7905,7 @@
                   @match i begin
                     DAE.VAR(componentRef = cr, binding = obnd)  => begin
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7913,7 +7913,7 @@
                     DAE.DEFINE(componentRef = cr, exp = e)  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7921,7 +7921,7 @@
                     DAE.INITIALDEFINE(componentRef = cr, exp = e)  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7929,7 +7929,7 @@
                     DAE.EQUATION(exp = DAE.CREF(componentRef = cr), scalar = e)  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7937,7 +7937,7 @@
                     DAE.EQUATION(exp = e, scalar = DAE.CREF(componentRef = cr))  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7945,7 +7945,7 @@
                     DAE.INITIALEQUATION(exp1 = DAE.CREF(componentRef = cr), exp2 = e)  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end
@@ -7953,7 +7953,7 @@
                     DAE.INITIALEQUATION(exp1 = e, exp2 = DAE.CREF(componentRef = cr))  => begin
                         obnd = SOME(e)
                         if CrefForHashTable.crefEqualNoStringCompare(icr, cr)
-                          return
+                          return obnd
                         end
                       obnd
                     end

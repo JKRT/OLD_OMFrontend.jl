@@ -70,7 +70,6 @@ Type_a = Any
     @importDBG Dump
     @importDBG Error
     @importDBG CrefForHashTable
-    @importDBG ExpressionUtil
     @importDBG Flags
     @importDBG ListUtil
     import MetaModelica.Dangerous
@@ -109,8 +108,8 @@ Type_a = Any
 
 
 
-    function typeof(inExp::DAE.Exp) ::DAE.Type
-      ExpressionUtil.typeof(inExp)
+    function typeOf(inExp::DAE.Exp) ::DAE.Type
+      CrefForHashTable.typeOf(inExp)
     end
 
            #= new hashing that properly deals with subscripts so [1,2] and [2,1] hash to different values =#
@@ -806,7 +805,7 @@ Type_a = Any
                           (DAE.CREF_IDENT(__), DAE.CREF_IDENT(__))  => begin
                               res = stringCompare(cr1.ident, cr2.ident)
                               if compareSubscript == CompareWithSubsType.WithoutSubscripts || res != 0
-                                return
+                                return res
                               end
                             compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                           end
@@ -814,12 +813,12 @@ Type_a = Any
                           (DAE.CREF_QUAL(__), DAE.CREF_QUAL(__))  => begin
                               res = stringCompare(cr1.ident, cr2.ident)
                               if res != 0
-                                return
+                                return res
                               end
                               if compareSubscript != CompareWithSubsType.WithoutSubscripts
                                 res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                                 if res != 0
-                                  return
+                                  return res
                                 end
                               end
                             compare(cr1.componentRef, cr2.componentRef)
@@ -828,13 +827,13 @@ Type_a = Any
                           (DAE.CREF_QUAL(__), DAE.CREF_IDENT(__))  => begin
                               res = stringCompare(cr1.ident, cr2.ident)
                               if res != 0
-                                return
+                                return res
                               end
                               if compareSubscript != CompareWithSubsType.WithoutSubscripts
                                 res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                               end
                               if res != 0
-                                return
+                                return res
                               end
                             1
                           end
@@ -842,13 +841,13 @@ Type_a = Any
                           (DAE.CREF_IDENT(__), DAE.CREF_QUAL(__))  => begin
                               res = stringCompare(cr1.ident, cr2.ident)
                               if res != 0
-                                return
+                                return res
                               end
                               if compareSubscript != CompareWithSubsType.WithoutSubscripts
                                 res = compareSubs(cr1.subscriptLst, cr2.subscriptLst)
                               end
                               if res != 0
-                                return
+                                return res
                               end
                             -1
                           end
@@ -4273,7 +4272,7 @@ Type_a = Any
                       DAE.CREF_IDENT(__)  => begin
                           File.writeEscape(file, c.ident, escape)
                           writeSubscripts(file, c.subscriptLst, escape)
-                          return
+                          return nothing
                         fail()
                       end
 
@@ -4281,7 +4280,7 @@ Type_a = Any
                           File.write(file, "der(")
                           writeCref(file, c.componentRef, escape)
                           File.write(file, ")")
-                          return
+                          return nothing
                         fail()
                       end
 
@@ -4289,7 +4288,7 @@ Type_a = Any
                           File.write(file, "previous(")
                           writeCref(file, c.componentRef, escape)
                           File.write(file, ")")
-                          return
+                          return nothing
                         fail()
                       end
 
@@ -4310,7 +4309,7 @@ Type_a = Any
                 local exp::DAE.Exp
 
                 if listEmpty(subs)
-                  return
+                  return nothing
                 end
                 File.write(file, "[")
                 for s in subs
@@ -5394,7 +5393,7 @@ Type_a = Any
                   end
 
                   e  => begin
-                      t = ExpressionUtil.typeof(e)
+                      t = CrefForHashTable.typeOf(e)
                       outExp = begin
                         @match t begin
                           DAE.T_BOOL(__)  => begin
@@ -5658,7 +5657,7 @@ Type_a = Any
 
                   DAE.UNARY(exp = e)  => begin
                       e_1 = expStripLastSubs(e)
-                      ty = ExpressionUtil.typeof(e_1)
+                      ty = CrefForHashTable.typeOf(e_1)
                       b = expTypeArray(ty)
                       op1 = if b
                             DAE.UMINUS_ARR(ty)
@@ -5695,7 +5694,7 @@ Type_a = Any
 
                   DAE.UNARY(exp = e)  => begin
                       e_1 = expStripLastIdent(e)
-                      ty = ExpressionUtil.typeof(e_1)
+                      ty = CrefForHashTable.typeOf(e_1)
                       b = expTypeArray(ty)
                       op1 = if b
                             DAE.UMINUS_ARR(ty)
@@ -5933,7 +5932,7 @@ Type_a = Any
         function liftExp(inExp::DAE.Exp, inDimension::DAE.Dimension) ::DAE.Exp
               local outExp::DAE.Exp
 
-              outExp = DAE.ARRAY(Types.liftArray(ExpressionUtil.typeof(inExp), inDimension), false, ListUtil.fill(inExp, dimensionSize(inDimension)))
+              outExp = DAE.ARRAY(Types.liftArray(CrefForHashTable.typeOf(inExp), inDimension), false, ListUtil.fill(inExp, dimensionSize(inDimension)))
           outExp
         end
 
@@ -6172,7 +6171,7 @@ Type_a = Any
 
               local ty::Type
 
-              ty = ExpressionUtil.typeofOp(inOperator)
+              ty = CrefForHashTable.typeofOp(inOperator)
               ty = unliftArray(ty)
               outOperator = unliftOperator2(inOperator, ty)
           outOperator
@@ -6186,7 +6185,7 @@ Type_a = Any
 
               local ty::Type
 
-              ty = ExpressionUtil.typeofOp(inOperator)
+              ty = CrefForHashTable.typeofOp(inOperator)
               ty = unliftArrayX(ty, inX)
               outOperator = unliftOperator2(inOperator, ty)
           outOperator
@@ -6874,7 +6873,7 @@ Type_a = Any
                       else
                         expLst2 = makeASUBsForDimension(exp2)
                       end
-                      ty = ExpressionUtil.typeof(listHead(expLst1))
+                      ty = CrefForHashTable.typeOf(listHead(expLst1))
                       expLst = ListUtil.threadMap(expLst1, expLst2, fn -> makeBinaryExp(inOp = DAE.ADD(ty)))
                     expLst
                   end
@@ -7162,7 +7161,7 @@ Type_a = Any
                   local ty::Type
                 @matchcontinue inExp begin
                   DAE.BINARY(operator = op, exp1 = e1, exp2 = e2)  => begin
-                      ty = ExpressionUtil.typeofOp(op)
+                      ty = CrefForHashTable.typeofOp(op)
                       @match true = Types.isArray(ty)
                       e_1 = nthArrayExp(e1, inInteger)
                       e_2 = nthArrayExp(e2, inInteger)
@@ -8055,13 +8054,13 @@ Type_a = Any
 
                   DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2)  => begin
                       (p, q) = quotient(e1)
-                      tp = typeof(p)
+                      tp = CrefForHashTable.typeOf(p)
                     (DAE.BINARY(e2, DAE.MUL(tp), p), q)
                   end
 
                   DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2)  => begin
                       (p, q) = quotient(e2)
-                      tp = typeof(p)
+                      tp = CrefForHashTable.typeOf(p)
                     (DAE.BINARY(e1, DAE.MUL(tp), p), q)
                   end
                 end
@@ -8141,7 +8140,7 @@ Type_a = Any
                    =#
                 @matchcontinue inExp begin
                   DAE.BINARY(exp1 = e1, operator = DAE.POW(ty = tp), exp2 = e2)  => begin
-                      tp2 = typeof(e2)
+                      tp2 = CrefForHashTable.typeOf(e2)
                     DAE.BINARY(e1, DAE.POW(tp), DAE.UNARY(DAE.UMINUS(tp2), e2))
                   end
 
@@ -8152,7 +8151,7 @@ Type_a = Any
 
                   e  => begin
                       @match false = isZero(e)
-                      tp = typeof(e)
+                      tp = CrefForHashTable.typeOf(e)
                       e = begin
                         @match tp begin
                           DAE.T_REAL(__)  => begin
@@ -8848,7 +8847,7 @@ Type_a = Any
 
               local ty::DAE.Type
 
-              ty = typeof(listHead(inElements))
+              ty = CrefForHashTable.typeOf(listHead(inElements))
               outArray = DAE.ARRAY(DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(listLength(inElements)))), ! Types.isArray(ty), inElements)
           outArray
         end
@@ -8967,7 +8966,7 @@ Type_a = Any
                   end
 
                   (_, _)  => begin
-                      tp = typeof(e1)
+                      tp = CrefForHashTable.typeOf(e1)
                       @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
                       b = expTypeArray(tp) #=   array_elt_type(tp) => tp\\' =#
                       op = if b
@@ -8979,7 +8978,7 @@ Type_a = Any
                   end
 
                   _  => begin
-                        tp = typeof(e1)
+                        tp = CrefForHashTable.typeOf(e1)
                         @match true = Types.isEnumeration(tp)
                       DAE.BINARY(e1, DAE.ADD(tp), e2)
                   end
@@ -9070,7 +9069,7 @@ Type_a = Any
                   end
 
                   (_, _)  => begin
-                      tp = typeof(e1)
+                      tp = CrefForHashTable.typeOf(e1)
                       if Types.isIntegerOrRealOrSubTypeOfEither(tp)
                         b = expTypeArray(tp)
                         op = if b
@@ -9214,7 +9213,7 @@ Type_a = Any
               local op::DAE.Operator
 
               @match _cons(eLst, rest) = inExpLst
-              tp = typeof(eLst)
+              tp = CrefForHashTable.typeOf(eLst)
               op = if expTypeArray(tp)
                     DAE.ADD_ARR(tp)
                   else
@@ -9272,7 +9271,7 @@ Type_a = Any
                   end
 
                   e1 <| e2 <|  nil()  => begin
-                      tp = typeof(e1) #= Take type info from e1, ok since type checking already performed. =#
+                      tp = CrefForHashTable.typeOf(e1) #= Take type info from e1, ok since type checking already performed. =#
                       b = expTypeArray(tp)
                       op = if b
                             DAE.ADD_ARR(tp)
@@ -9285,7 +9284,7 @@ Type_a = Any
                   e1 <| rest  => begin
                       b1 = isZero(e1)
                       e2 = makeSum(rest)
-                      tp = typeof(e2)
+                      tp = CrefForHashTable.typeOf(e2)
                       b = expTypeArray(tp)
                       op = if b
                             DAE.ADD_ARR(tp)
@@ -9318,7 +9317,7 @@ Type_a = Any
                #= /*case ({e1,e2})
                     equation
                       b1 = isZero(e1);
-                      tp = typeof(e1) \"Take type info from e1, ok since type checking already performed.\" ;
+                      tp = CrefForHashTable.typeOf(e1) \"Take type info from e1, ok since type checking already performed.\" ;
                       res = DAE.BINARY(e1,DAE.ADD(tp),e2);
                       res = if_(b1,e2,res);
                     then
@@ -9380,10 +9379,10 @@ Type_a = Any
                   end
 
                   _  => begin
-                        tp = typeof(e1)
+                        tp = CrefForHashTable.typeOf(e1)
                         @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
                         b1 = expTypeArray(tp)
-                        tp = typeof(e2)
+                        tp = CrefForHashTable.typeOf(e2)
                         @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
                         b2 = expTypeArray(tp)
                         (e1_1, e2_1) = Util.swap(! b1 && b2, e1, e2)
@@ -9427,7 +9426,7 @@ Type_a = Any
                   end
 
                   (_, _) where (isZero(e2))  => begin
-                    makeConstOne(typeof(e1))
+                    makeConstOne(CrefForHashTable.typeOf(e1))
                   end
 
                   (_, _) where (isConstOne(e1))  => begin
@@ -9435,7 +9434,7 @@ Type_a = Any
                   end
 
                   (_, _) where (isZero(e1) && expIsPositive(e2))  => begin
-                    makeConstZero(typeof(e1))
+                    makeConstZero(CrefForHashTable.typeOf(e1))
                   end
 
                   (DAE.UNARY(DAE.UMINUS(__), e), _) where (isEven(e2))  => begin
@@ -9457,7 +9456,7 @@ Type_a = Any
                   end
 
                   _  => begin
-                        tp = typeof(e1)
+                        tp = CrefForHashTable.typeOf(e1)
                         b = expTypeArray(tp)
                         op = if b
                               DAE.POW_ARR(tp)
@@ -9500,7 +9499,7 @@ Type_a = Any
 
               local tp::Type
 
-              tp = typeof(e1)
+              tp = CrefForHashTable.typeOf(e1)
               outExp = DAE.CALL(Absyn.IDENT("max"), list(e1, e2), DAE.CALL_ATTR(tp, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL()))
           outExp
         end
@@ -9536,7 +9535,7 @@ Type_a = Any
               local tp::Type
               local b::Bool
 
-              tp = typeof(e1)
+              tp = CrefForHashTable.typeOf(e1)
               outExp = DAE.CALL(Absyn.IDENT("min"), list(e1, e2), DAE.CALL_ATTR(tp, false, true, false, false, DAE.NO_INLINE(), DAE.NO_TAIL()))
           outExp
         end
@@ -9704,7 +9703,7 @@ Type_a = Any
                       res = DAE.BINARY(p1, DAE.DIV(tp), e)
                       b_isZero = isZero(p1)
                       res = if b_isZero
-                            makeConstZero(typeof(e))
+                            makeConstZero(CrefForHashTable.typeOf(e))
                           else
                             res
                           end
@@ -9720,7 +9719,7 @@ Type_a = Any
                       b1 = isZero(e1)
                       b2 = isZero(e2)
                       b_isZero = boolOr(b1, b2)
-                      tp = typeof(e1) #= Take type info from e1, ok since type checking already performed. =#
+                      tp = CrefForHashTable.typeOf(e1) #= Take type info from e1, ok since type checking already performed. =#
                       tp = checkIfOther(tp)
                       res = DAE.BINARY(e1, DAE.MUL(tp), e2)
                       res = if b_isZero
@@ -9733,14 +9732,14 @@ Type_a = Any
 
                   e1 <| rest  => begin
                       e2 = makeProductLst(rest)
-                      tp = typeof(e1)
+                      tp = CrefForHashTable.typeOf(e1)
                       tp = checkIfOther(tp)
                       res = DAE.BINARY(e1, DAE.MUL(tp), e2)
                       b1 = isZero(e1)
                       b2 = isZero(e2)
                       b_isZero = boolOr(b1, b2)
                       res = if b_isZero
-                            makeConstZero(typeof(e1))
+                            makeConstZero(CrefForHashTable.typeOf(e1))
                           else
                             res
                           end
@@ -9797,7 +9796,7 @@ Type_a = Any
               local b::Bool
               local op::Operator
 
-              tp = typeof(e1)
+              tp = CrefForHashTable.typeOf(e1)
               @match true = Types.isIntegerOrRealOrSubTypeOfEither(tp)
               b = expTypeArray(tp)
               op = if b
@@ -9945,7 +9944,7 @@ Type_a = Any
          #= Generates a zero constant, using type from inExp =#
         function makeConstZeroE(iExp::DAE.Exp) ::DAE.Exp
               local constExpr::DAE.Exp
-              local tp::DAE.Type = typeof(iExp)
+              local tp::DAE.Type = CrefForHashTable.typeOf(iExp)
               constExpr = makeConstZero(tp)
           constExpr
         end
@@ -10107,7 +10106,7 @@ Type_a = Any
                   end
 
                   (exp <| _, _)  => begin
-                      ty = typeof(exp)
+                      ty = CrefForHashTable.typeOf(exp)
                       oExp = listToArray2(inList, dims, ty)
                     oExp
                   end
@@ -10216,7 +10215,7 @@ Type_a = Any
                   local dims::DAE.Dimensions
                 @match (iDims, inExp) begin
                   (d <|  nil(), _)  => begin
-                      ty = typeof(inExp)
+                      ty = CrefForHashTable.typeOf(inExp)
                       i = dimensionSize(d)
                       expl = ListUtil.fill(inExp, i)
                     DAE.ARRAY(DAE.T_ARRAY(ty, list(DAE.DIM_INTEGER(i))), true, expl)
@@ -14615,7 +14614,7 @@ Type_a = Any
         function isExpReal(e::DAE.Exp) ::Bool
               local re::Bool
 
-              re = isReal(typeof(e))
+              re = isReal(CrefForHashTable.typeOf(e))
           re
         end
 
@@ -15203,7 +15202,7 @@ Type_a = Any
         function isMetaArray(inExp::DAE.Exp) ::Bool
               local outB::Bool
 
-              outB = Types.isMetaArray(typeof(inExp))
+              outB = Types.isMetaArray(CrefForHashTable.typeOf(inExp))
           outB
         end
 
@@ -15678,7 +15677,7 @@ Type_a = Any
 
          #= Returns true if the two expressions are equal, otherwise false. =#
         function expEqual(inExp1::DAE.Exp, inExp2::DAE.Exp) ::Bool
-          ExpressionUtil.expEqual(inExp1, inExp2)
+          CrefForHashTable.expEqual(inExp1, inExp2)
         end
 
 
@@ -19650,7 +19649,7 @@ Type_a = Any
 
               local ty::DAE.Type
 
-              ty = typeof(exp)
+              ty = CrefForHashTable.typeOf(exp)
               outExp = if Types.isZeroLengthArray(ty)
                     DAE.CREF(DAE.WILD(), ty)
                   else
@@ -20087,7 +20086,7 @@ Type_a = Any
                   end
 
                   (_, _)  => begin
-                      ty = typeof(iExp1)
+                      ty = CrefForHashTable.typeOf(iExp1)
                       @match true = Types.isIntegerOrRealOrSubTypeOfEither(ty)
                       (N1, D1) = makeFraction(iExp1)
                       (N2, D2) = makeFraction(iExp2)
@@ -20105,21 +20104,21 @@ Type_a = Any
                   end
 
                   (_, _)  => begin
-                      ty = typeof(iExp1)
+                      ty = CrefForHashTable.typeOf(iExp1)
                       @match true = Types.isEnumeration(ty)
                       res = expSub(iExp1, iExp2)
                     res
                   end
 
                   (_, _)  => begin
-                      ty = typeof(iExp1)
+                      ty = CrefForHashTable.typeOf(iExp1)
                       @match true = Types.isBooleanOrSubTypeBoolean(ty)
                       res = DAE.LUNARY(DAE.NOT(ty), DAE.RELATION(iExp1, DAE.EQUAL(ty), iExp2, -1, NONE()))
                     res
                   end
 
                   (_, _)  => begin
-                      ty = typeof(iExp1)
+                      ty = CrefForHashTable.typeOf(iExp1)
                       @match true = Types.isStringOrSubTypeString(ty)
                       res = DAE.LUNARY(DAE.NOT(ty), DAE.RELATION(iExp1, DAE.EQUAL(ty), iExp2, -1, NONE()))
                     res
@@ -20157,7 +20156,7 @@ Type_a = Any
               local N::List{DAE.Exp}
               local D::List{DAE.Exp}
               local T::List{DAE.Exp}
-              local tp::DAE.Type = typeof(iExp)
+              local tp::DAE.Type = CrefForHashTable.typeOf(iExp)
 
               T = terms(iExp)
               T = ExpressionSimplify.simplifyList(T)
@@ -20362,7 +20361,7 @@ Type_a = Any
                   end
 
                   (DAE.CALL(path = Absyn.IDENT("log"), expLst = e1 <|  nil()), e2) where (Expression.isConst(e2))  => begin
-                      tp = Expression.typeof(iExp2)
+                      tp = Expression.typeOf(iExp2)
                       e = Expression.makePureBuiltinCall("exp", list(iExp2), tp)
                     (e1, e, true)
                   end
@@ -20488,7 +20487,7 @@ Type_a = Any
 
               local ty::DAE.Type
 
-              ty = typeof(inExp)
+              ty = CrefForHashTable.typeOf(inExp)
               ty = Types.setArrayElementType(ty, inType)
               outExp = typeCast(inExp, ty)
           outExp
@@ -20624,7 +20623,7 @@ Type_a = Any
                   end
 
                   _  => begin
-                      Types.isSimpleType(typeof(inExp))
+                      Types.isSimpleType(CrefForHashTable.typeOf(inExp))
                   end
                 end
               end
@@ -21337,6 +21336,10 @@ Type_a = Any
               end
           e
         end
+
+    function typeOf(inExp::DAE.Exp) ::DAE.Type
+      CrefForHashTable.typeOf(inExp)
+    end
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

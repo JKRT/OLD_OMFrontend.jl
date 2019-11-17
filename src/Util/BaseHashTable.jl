@@ -743,7 +743,7 @@
 
                     _  => begin
                           if ! workaroundForBug
-                            return
+                            return nothing
                           end
                         ()
                     end

@@ -247,7 +247,7 @@
         Author: BTH
         Create fresh equations for merging outer output variable definitions
          =#
-        function myMergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuterTypes.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element}
+        function mergeVariableDefinitions(inFlatSM::DAE.Element, inIH::InnerOuterTypes.InstHierarchy, inStartElementLst::List{<:DAE.Element}) ::List{DAE.Element}
               local outElementLst::List{DAE.Element}
 
               local outerOutputCrefToSMCompCref::HashTableCG.HashTable #= Table to map outer outputs to corresponding state =#
@@ -277,25 +277,25 @@
                #=  Create table that maps outer outputs to corresponding state
                =#
               outerOutputCrefToSMCompCref = ListUtil.fold(dAElist, collectOuterOutputs, HashTableCG.emptyHashTable())
-               #=  print(\"InstStateMachineUtil.myMergeVariableDefinitions OuterToSTATE:\\n\"); BaseHashTable.dumpHashTable(outerOutputCrefToSMCompCref);
+               #=  print(\"InstStateMachineUtil.mergeVariableDefinitions OuterToSTATE:\\n\"); BaseHashTable.dumpHashTable(outerOutputCrefToSMCompCref);
                =#
                #=  Create table that maps outer outputs crefs to corresponding inner crefs
                =#
               outerOutputCrefToInnerCref = ListUtil.fold1(BaseHashTable.hashTableKeyList(outerOutputCrefToSMCompCref), matchOuterWithInner, inIH, HashTableCG.emptyHashTable())
-               #=  print(\"InstStateMachineUtil.myMergeVariableDefinitions OuterToINNER:\\n\"); BaseHashTable.dumpHashTable(outerOutputCrefToInnerCref);
+               #=  print(\"InstStateMachineUtil.mergeVariableDefinitions OuterToINNER:\\n\"); BaseHashTable.dumpHashTable(outerOutputCrefToInnerCref);
                =#
                #=  Create table that maps inner crefs from above to a list of corresponding outer crefs
                =#
               hashEntries_outerOutputCrefToInnerCref = BaseHashTable.hashTableList(outerOutputCrefToInnerCref)
               uniqueHashValues = ListUtil.unique(BaseHashTable.hashTableValueList(outerOutputCrefToInnerCref))
-               #=  print(\"InstStateMachineUtil.myMergeVariableDefinitions uniqueHashValues: (\" + stringDelimitList(List.map(uniqueHashValues, ComponentReference.crefStr), \",\") + \")\\n\");
+               #=  print(\"InstStateMachineUtil.mergeVariableDefinitions uniqueHashValues: (\" + stringDelimitList(List.map(uniqueHashValues, ComponentReference.crefStr), \",\") + \")\\n\");
                =#
               innerCrefToOuterOutputCrefs = ListUtil.fold1(uniqueHashValues, collectCorrespondingKeys, hashEntries_outerOutputCrefToInnerCref, HashTable3.emptyHashTable())
-               #=  print(\"InstStateMachineUtil.myMergeVariableDefinitions: innerCrefToOuterOutputCrefs:\\n\"); BaseHashTable.dumpHashTable(innerCrefToOuterOutputCrefs);
+               #=  print(\"InstStateMachineUtil.mergeVariableDefinitions: innerCrefToOuterOutputCrefs:\\n\"); BaseHashTable.dumpHashTable(innerCrefToOuterOutputCrefs);
                =#
                #=  Substitute occurrences of previous(outerCref) by previous(innerCref)
                =#
-              emptyTree = DAE.AvlTreePathFunction.Tree.EMPTY()
+              emptyTree = DAE.AvlTreePathFunction.EMPTY()
               @match (DAE.DAE_LIST(dAElist), _, _) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist), emptyTree, traverserHelperSubsOuterByInnerExp, outerOutputCrefToInnerCref)
               if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
                 crefs = BaseHashTable.hashTableKeyList(outerOutputCrefToSMCompCref)
@@ -327,7 +327,7 @@
                =#
                #=  traverse dae expressions and search for der(cref) occurances
                =#
-               #=  print(\"InstStateMachineUtil.myMergeVariableDefinitions derCrefsAcc:\\n\" + stringDelimitList(List.map(derCrefsAcc, ComponentReference.crefStr), \", \") + \"\\n\");
+               #=  print(\"InstStateMachineUtil.mergeVariableDefinitions derCrefsAcc:\\n\" + stringDelimitList(List.map(derCrefsAcc, ComponentReference.crefStr), \", \") + \"\\n\");
                =#
                #=  Split the mapping from inner crefs to outer output crefs in a \"continuous\" part and the rest
                =#
@@ -548,7 +548,7 @@
 
          #=
         Author: BTH
-        Helper function to myMergeVariableDefinitions =#
+        Helper function to mergeVariableDefinitions =#
         function collectCorrespondingKeys(inInnerCref::DAE.ComponentRef, inHashEntries::List{<:Tuple{<:DAE.ComponentRef, DAE.ComponentRef}}, inInnerCrefToOuterOutputCrefs::HashTable3.HashTable) ::HashTable3.HashTable
               local outInnerCrefToOuterOutputCrefs::HashTable3.HashTable = inInnerCrefToOuterOutputCrefs
 
@@ -579,7 +579,7 @@
          #=
         Author: BTH
         Substitute outer variables in previous(x) by corresponding 'inner'.
-        Helper function to myMergeVariableDefinitions =#
+        Helper function to mergeVariableDefinitions =#
         function traverserHelperSubsOuterByInnerExp(inExp::DAE.Exp, inOuterToInner::HashTableCG.HashTable) ::Tuple{DAE.Exp, HashTableCG.HashTable}
               local outOuterToInner::HashTableCG.HashTable
               local outExp::DAE.Exp
@@ -616,7 +616,7 @@
 
          #=
         Author: BTH
-        Helper function to myMergeVariableDefinitions
+        Helper function to mergeVariableDefinitions
          =#
         function matchOuterWithInner(inOuterCref::DAE.ComponentRef, inIH::InnerOuterTypes.InstHierarchy, inOuterCrefToInnerCref::HashTableCG.HashTable) ::HashTableCG.HashTable
               local outOuterCrefToInnerCref::HashTableCG.HashTable = inOuterCrefToInnerCref
@@ -676,7 +676,7 @@
 
          #=
         Author: BTH
-        Helper function to myMergeVariableDefinitions.
+        Helper function to mergeVariableDefinitions.
          =#
         function collectOuterOutputs(inElem::DAE.Element, inOuterAcc::HashTableCG.HashTable) ::HashTableCG.HashTable
               local outOuterAcc::HashTableCG.HashTable = inOuterAcc

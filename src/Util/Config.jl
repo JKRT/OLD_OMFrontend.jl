@@ -538,7 +538,7 @@ function setLanguageStandardFromMSL(inLibraryName::String)
 
   current_std = getLanguageStandard()
   if current_std != LanguageStandard.latest
-    return
+    return nothing
   end
   #=  If we selected an MSL version manually, we respect that choice.
   =#
@@ -552,7 +552,7 @@ function setLanguageStandardFromMSL(inLibraryName::String)
         @match _cons("Modelica", _cons(version, _)) = System.strtok(inLibraryName, " ")
         new_std = versionStringToStd(version)
         if new_std == current_std
-          return
+          return nothing
         end
         setLanguageStandard(new_std)
         show_warning = hasLanguageStandardChanged(current_std)

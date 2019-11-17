@@ -135,7 +135,7 @@ module Types
 
         import Expression
 
-        import ExpressionSimplify
+        #import ExpressionSimplify
 
         import Flags
 
@@ -7102,7 +7102,7 @@ module Types
                 try
                   @match false = subtype(inActualType, inExpectedType)
                   (outExp, outType) = typeConvert(inExp, inActualType, inExpectedType, inPrintFailtrace)
-                  (outExp, _) = ExpressionSimplify.simplify1(outExp)
+                  #(outExp, _) = ExpressionSimplify.simplify1(outExp)
                 catch
                   printFailure(Flags.TYPES, "matchType", inExp, inActualType, inExpectedType)
                   fail()
@@ -7124,7 +7124,7 @@ module Types
               else
                 try
                   (outExp, outType) = typeConvert(inExp, inActualType, inExpectedType, false)
-                  (outExp, _) = ExpressionSimplify.simplify1(outExp)
+                  #(outExp, _) = ExpressionSimplify.simplify1(outExp)
                   outMatch = true
                 catch
                   outExp = inExp
@@ -9203,7 +9203,7 @@ module Types
                   DAE.T_ARRAY(ty = ty, dims = dim <|  nil())  => begin
                       idim = Expression.dimensionSize(dim)
                       exp = makeDummyExpFromType(ty)
-                      ety = Expression.typeof(exp)
+                      ety = Expression.typeOf(exp)
                       ety = Expression.liftArrayLeft(ety, dim)
                       expl = ListUtil.fill(exp, idim)
                     DAE.ARRAY(ety, true, expl)

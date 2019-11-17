@@ -1845,7 +1845,7 @@ function translateCommentList(inAnns::List{<:Absyn.Annotation}, inString::Option
       end
 
       (absann <| anns, _)  => begin
-        absann = ListUtil.fold(anns, AbsynUtil.myMergeAnnotations, absann)
+        absann = ListUtil.fold(anns, AbsynUtil.mergeAnnotations, absann)
         ann = translateAnnotation(absann)
         ostr = Util.applyOption(inString, System.unescapedString)
         SCode.COMMENT(ann, ostr)

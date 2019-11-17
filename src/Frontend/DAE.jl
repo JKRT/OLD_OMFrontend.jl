@@ -176,7 +176,7 @@ import Prefix
 end
 
 const emptyElementSource = SOURCE(AbsynUtil.dummyInfo, nil, Prefix.NOCOMPPRE(), nil, nil, nil, nil)::ElementSource
-println("Test test test")
+
 @Uniontype SymbolicOperation begin
   @Record FLATTEN begin
 
@@ -271,8 +271,6 @@ end
     rhs::Exp
   end
 end
-println("Test test test2")
-
 
 @Uniontype Function begin
   @Record FUNCTION begin
