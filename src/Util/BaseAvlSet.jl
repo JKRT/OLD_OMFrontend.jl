@@ -176,7 +176,6 @@
                   end
 
                   EMPTY(__)  => begin
-                      return
                     fail()
                   end
                 end

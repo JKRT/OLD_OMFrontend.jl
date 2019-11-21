@@ -271,7 +271,7 @@
               local emptyTree::DAE.FunctionTree
 
               @match DAE.SM_COMP(componentRef, dAElist1) = inSmComp
-              emptyTree = DAE.AvlTreePathFunction.Tree.EMPTY()
+              emptyTree = DAE.AvlTreePathFunction.EMPTY()
               @match (DAE.DAE_LIST(dAElist2), _, (_, (_, nOfHits))) = DAEUtil.traverseDAE(DAE.DAE_LIST(dAElist1), emptyTree, Expression.traverseSubexpressionsHelper, (traversingSubsTicksInState, (componentRef, 0)))
               outSmComp = DAE.SM_COMP(componentRef, dAElist2)
           outSmComp

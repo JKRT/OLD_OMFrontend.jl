@@ -53,8 +53,6 @@
          #=  protected imports
          =#
 
-        import CrefForHashTable
-
         import Config
 
         import DAEUtil

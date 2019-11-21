@@ -164,7 +164,7 @@
                           else
                             " full"
                           end
-                      print("DAE: parent: " + FGraphUtil.getGraphNameStr(inParentEnv) + " class: " + FGraphUtil.getGraphNameStr(inClassEnv) + " state: " + sstr + str + "\\n" + DAEDump.dumpStr(dae, DAE.AvlTreePathFunction.Tree.EMPTY()) + "\\n")
+                      print("DAE: parent: " + FGraphUtil.getGraphNameStr(inParentEnv) + " class: " + FGraphUtil.getGraphNameStr(inClassEnv) + " state: " + sstr + str + "\\n" + DAEDump.dumpStr(dae, DAE.AvlTreePathFunction.EMPTY()) + "\\n")
                     ()
                   end
 

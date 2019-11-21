@@ -5802,7 +5802,7 @@
                   @match p begin
                     Absyn.IDENT(__)  => begin
                         File.writeEscape(file, p.name, escape)
-                        return
+                        return nothing
                       fail()
                     end
 

@@ -358,13 +358,13 @@ module ConnectUtil
         end
 
          #= Checks if a DAE contains any expandable connectors. =#
-        function daeHasExpandableConnectors(DAE::DAE.DAElist) ::Bool
+        function daeHasExpandableConnectors(inDAE::DAE.DAElist) ::Bool
               local hasExpandable::Bool
 
               local vars::List{DAE.Element}
 
               if System.getHasExpandableConnectors()
-                @match DAE.DAE_LIST(vars) = DAE
+                @match DAE.DAE_LIST(vars) = inDAE
                 hasExpandable = ListUtil.exist(vars, isVarExpandable)
               else
                 hasExpandable = false
@@ -1895,7 +1895,7 @@ module ConnectUtil
          #= Dispatches to the correct equation generating function based on the type of
           the given set. =#
         function equationsDispatch(sets::List{<:CSet}, connected::DaeEdges, broken::DaeEdges) ::DAE.DAElist
-              local DAE::DAE.DAElist = DAE.emptyDae
+              local outDAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{ConnectorElement}
               local eqll::List{List{ConnectorElement}}
@@ -1903,10 +1903,10 @@ module ConnectUtil
               local dae::DAE.DAElist
 
               for set in sets
-                DAE = begin
+                outDAE = begin
                   @match set begin
                     DAE.SET_POINTER(__)  => begin
-                      DAE
+                      outDAE
                     end
 
                     DAE.SET(ty = DAE.EQU(__))  => begin
@@ -1916,17 +1916,17 @@ module ConnectUtil
                          =#
                         eqll = ConnectionGraph.removeBrokenConnects(set.elements, connected, broken)
                         for eql in eqll
-                          DAE = DAEUtil.joinDaes(generateEquEquations(eql), DAE)
+                          outDAE = DAEUtil.joinDaes(generateEquEquations(eql), outDAE)
                         end
-                      DAE
+                      outDAE
                     end
 
                     DAE.SET(ty = DAE.CFLOW(__), elements = eql)  => begin
-                      DAEUtil.joinDaes(generateFlowEquations(eql), DAE)
+                      DAEUtil.joinDaes(generateFlowEquations(eql), outDAE)
                     end
 
                     DAE.SET(ty = DAE.CSTREAM(__), elements = eql)  => begin
-                      DAEUtil.joinDaes(generateStreamEquations(eql, flowThreshold), DAE)
+                      DAEUtil.joinDaes(generateStreamEquations(eql, flowThreshold), outDAE)
                     end
 
                     DAE.SET(ty = DAE.CNO_TYPE(__))  => begin
@@ -1943,7 +1943,7 @@ module ConnectUtil
                   end
                 end
               end
-          DAE
+          outDAE
         end
 
          #= A non-flow connection set contains a number of components. Generating the
@@ -1953,7 +1953,7 @@ module ConnectUtil
            order of the equations depends on whether the compiler flag orderConnections
            is true or false. =#
         function generateEquEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist
-              local DAE::DAE.DAElist = DAE.emptyDae
+              local outDAE::DAE.DAElist = DAE.emptyDae
 
               local eql::List{DAE.Element} = nil
               local e1::ConnectorElement
@@ -1964,7 +1964,7 @@ module ConnectUtil
               local y::DAE.ComponentRef
 
               if listEmpty(elements)
-                return DAE
+                return outDAE
               end
               e1 = listHead(elements)
               if Config.orderConnections()
@@ -1982,8 +1982,8 @@ module ConnectUtil
                   e1 = e2
                 end
               end
-              DAE = DAE.DAE_LIST(listReverse(eql))
-          DAE
+              outDAE = DAE.DAE_LIST(listReverse(eql))
+          outDAE
         end
 
          #= If the flag +orderConnections=false is used, then we should keep the order of
@@ -2015,7 +2015,7 @@ module ConnectUtil
            creates a sum expression of all components (some of which will be negated),
            and the returns the equation where this sum is equal to 0.0. =#
         function generateFlowEquations(elements::List{<:ConnectorElement}) ::DAE.DAElist
-              local DAE::DAE.DAElist
+              local outDAE::DAE.DAElist
 
               local sum::DAE.Exp
               local src::DAE.ElementSource
@@ -2026,8 +2026,8 @@ module ConnectUtil
                 sum = Expression.makeRealAdd(sum, makeFlowExp(e))
                 src = ElementSource.myMergeSources(src, e.source)
               end
-              DAE = DAE.DAE_LIST(list(DAE.EQUATION(sum, DAE.RCONST(0.0), src)))
-          DAE
+              outDAE = DAE.DAE_LIST(list(DAE.EQUATION(sum, DAE.RCONST(0.0), src)))
+          outDAE
         end
 
          #= Creates an expression from a connector element, which is the element itself
@@ -2086,9 +2086,9 @@ module ConnectUtil
 
          #= Generates the equations for a stream connection set. =#
         function generateStreamEquations(elements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist
-              local DAE::DAE.DAElist
+              local outDAE::DAE.DAElist
 
-              DAE = begin
+              outDAE = begin
                   local cr1::DAE.ComponentRef
                   local cr2::DAE.ComponentRef
                   local src1::DAE.ElementSource
@@ -2151,7 +2151,7 @@ module ConnectUtil
                   end
                 end
               end
-          DAE
+          outDAE
         end
 
          #= Returns true if the connector element belongs to an outside connector. =#
@@ -2196,7 +2196,7 @@ module ConnectUtil
               local attr_exp::DAE.Exp
 
               flow_exp = flowExp(element)
-              ty = Expression.typeof(flow_exp)
+              ty = Expression.typeOf(flow_exp)
               attr_oexp = Types.lookupAttributeExp(Types.getAttributes(ty), attr)
               if isSome(attr_oexp)
                 @match SOME(attr_exp) = attr_oexp
@@ -2209,7 +2209,7 @@ module ConnectUtil
 
          #= Generates an equation for an outside stream connector element. =#
         function streamEquationGeneral(outsideElements::List{<:ConnectorElement}, insideElements::List{<:ConnectorElement}, flowThreshold::ModelicaReal) ::DAE.DAElist
-              local DAE::DAE.DAElist
+              local outDAE::DAE.DAElist
 
               local outside::List{ConnectorElement}
               local cref_exp::DAE.Exp
@@ -2226,8 +2226,8 @@ module ConnectUtil
                 src = ElementSource.addAdditionalComment(e.source, " equation generated by stream handling")
                 eql = _cons(DAE.EQUATION(cref_exp, res, src), eql)
               end
-              DAE = DAE.DAE_LIST(eql)
-          DAE
+              outDAE = DAE.DAE_LIST(eql)
+          outDAE
         end
 
          #= Generates the sum expression used by stream connector equations, given M
@@ -2335,7 +2335,7 @@ module ConnectUtil
               local streamTy::DAE.Type
 
               (stream_exp, flow_exp) = streamFlowExp(element)
-              flowTy = Expression.typeof(flow_exp)
+              flowTy = Expression.typeOf(flow_exp)
               flow_exp = DAE.UNARY(DAE.UMINUS(flowTy), flow_exp)
               flow_threshold = DAE.RCONST(flowThreshold)
               exp = Expression.expMul(makePositiveMaxCall(flow_exp, flow_threshold), stream_exp)
@@ -2365,7 +2365,7 @@ module ConnectUtil
               local flowTy::DAE.Type
 
               flow_exp = flowExp(element)
-              flowTy = Expression.typeof(flow_exp)
+              flowTy = Expression.typeOf(flow_exp)
               flow_exp = DAE.UNARY(DAE.UMINUS(flowTy), flow_exp)
               exp = makePositiveMaxCall(flow_exp, DAE.RCONST(flowThreshold))
           exp
@@ -2373,7 +2373,7 @@ module ConnectUtil
 
          #= Test for face equality. =#
         function faceEqual(face1::Face, face2::Face) ::Bool
-              local sameFaces::Bool = valueConstructor(face1) == valueConstructor(face2)
+              local sameFaces::Bool = valueEq(face1, face2)
           sameFaces
         end
 
@@ -2383,7 +2383,7 @@ module ConnectUtil
 
               local ty::DAE.Type
 
-              ty = Expression.typeof(streamExp)
+              ty = Expression.typeOf(streamExp)
               inStreamCall = Expression.makeBuiltinCall("inStream", list(streamExp), ty, false)
           inStreamCall
         end
@@ -2398,7 +2398,7 @@ module ConnectUtil
               local nominal_exp::DAE.Exp
               local flow_threshold::DAE.Exp
 
-              ty = Expression.typeof(flowExp)
+              ty = Expression.typeOf(flowExp)
               nominal_oexp = Types.lookupAttributeExp(Types.getAttributes(ty), "nominal")
               if isSome(nominal_oexp)
                 @match SOME(nominal_exp) = nominal_oexp
@@ -2413,7 +2413,7 @@ module ConnectUtil
 
          #= Evaluates connection operators inStream, actualStream and cardinality in the
            given DAE. =#
-        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:CSet}, DAE::DAE.DAElist) ::DAE.DAElist
+        function evaluateConnectionOperators(sets::Sets, setArray::Array{<:CSet}, dAE::DAE.DAElist) ::DAE.DAElist
 
 
               local flow_threshold::ModelicaReal
@@ -2423,10 +2423,10 @@ module ConnectUtil
                =#
               if System.getHasStreamConnectors() || has_cardinality
                 flow_threshold = Flags.getConfigReal(Flags.FLOW_THRESHOLD)
-                DAE = DAEUtil.traverseDAE(DAE, DAE.AvlTreePathFunction.Tree.EMPTY(), (has_cardinality, setArray, flow_threshold) -> evaluateConnectionOperators2(hasCardinality = has_cardinality, setArray = setArray, flowThreshold = flow_threshold), sets)
-                DAE = simplifyDAEElements(has_cardinality, DAE)
+                dAE = DAEUtil.traverseDAE(dAE, DAE.AvlTreePathFunction.EMPTY(), (has_cardinality, setArray, flow_threshold) -> evaluateConnectionOperators2(hasCardinality = has_cardinality, setArray = setArray, flowThreshold = flow_threshold), sets)
+                dAE = simplifyDAEElements(has_cardinality, dAE)
               end
-          DAE
+          dAE
         end
 
          #= Helper function to evaluateConnectionOperators. =#
@@ -2440,7 +2440,7 @@ module ConnectUtil
                #=  Only apply simplify if the expression changed *AND* we have cardinality.
                =#
               if changed && hasCardinality
-                exp = ExpressionSimplify.simplify(exp)
+                (exp, _) = ExpressionSimplify.simplify(exp)
               end
           (exp, sets)
         end
@@ -2580,7 +2580,7 @@ module ConnectUtil
                         e = streamSumEquationExp(outside, inside, flowThreshold)
                         if ! listEmpty(inside)
                           expr = streamFlowExp(ListUtil.first(inside))
-                          e = Expression.makePureBuiltinCall("OMCinStreamDiv", list(e, expr), Expression.typeof(e))
+                          e = Expression.makePureBuiltinCall("OMCinStreamDiv", list(e, expr), Expression.typeOf(e))
                         end
                          #=  Evaluate any inStream calls that were generated.
                          =#
@@ -2707,13 +2707,13 @@ module ConnectUtil
         end
 
          #= run this only if we have cardinality =#
-        function simplifyDAEElements(hasCardinality::Bool, DAE::DAE.DAElist) ::DAE.DAElist
+        function simplifyDAEElements(hasCardinality::Bool, dAE::DAE.DAElist) ::DAE.DAElist
 
 
               if hasCardinality
-                DAE = DAE.DAE_LIST(ListUtil.mapFlat(DAE.elementLst, simplifyDAEElement))
+                dAE = DAE.DAE_LIST(ListUtil.mapFlat(DAE.elementLst, simplifyDAEElement))
               end
-          DAE
+          dAE
         end
 
         function simplifyDAEElement(element::DAE.Element) ::List{DAE.Element}
@@ -3382,7 +3382,7 @@ module ConnectUtil
          7. substract (2) from (1)
          8. substract (6) from (7)
          9. remove (8) from the DAE (5) =#
-        function removeUnusedExpandableVariablesAndConnections(sets::List{<:CSet}, DAE::DAE.DAElist) ::Tuple{List{CSet}, DAE.DAElist}
+        function removeUnusedExpandableVariablesAndConnections(sets::List{<:CSet}, dAE::DAE.DAElist) ::Tuple{List{CSet}, DAE.DAElist}
 
 
 
@@ -3395,7 +3395,7 @@ module ConnectUtil
               local dae::DAE.DAElist
               local setsAsCrefs::List{List{DAE.ComponentRef}}
 
-              @match DAE.DAE_LIST(elems) = DAE
+              @match DAE.DAE_LIST(elems) = dAE
                #=  1 - get all expandable crefs
                =#
               expandableVars = getExpandableVariablesWithNoBinding(elems)
@@ -3403,7 +3403,7 @@ module ConnectUtil
                =#
                #=  2 - remove all expandable without binding from the dae
                =#
-              dae = DAEUtil.removeVariables(DAE, expandableVars)
+              dae = DAEUtil.removeVariables(dAE, expandableVars)
                #=  2 - get all expandable crefs used in the dae (without the expandable vars)
                =#
               usedInDAE = DAEUtil.getAllExpandableCrefsFromDAE(dae)
@@ -3426,7 +3426,7 @@ module ConnectUtil
                =#
                #=  5 - remove unnecessary variables form the DAE
                =#
-              DAE = DAEUtil.removeVariables(DAE, unnecessary)
+              dAE = DAEUtil.removeVariables(dAE, unnecessary)
                #=  5 - remove unnecessary variables form the connection sets
                =#
               sets = removeCrefsFromSets(sets, unnecessary)
@@ -3439,8 +3439,8 @@ module ConnectUtil
               unnecessary = ListUtil.setDifferenceOnTrue(expandableVars, equVars, ComponentReference.crefEqualWithoutSubs)
                #=  print(\"REMOVE: (7)-(6):\\n  \" + stringDelimitList(List.map(unnecessary, ComponentReference.printComponentRefStr), \"\\n  \") + \"\\n\");
                =#
-              DAE = DAEUtil.removeVariables(DAE, unnecessary)
-          (sets, DAE)
+              dAE = DAEUtil.removeVariables(dAE, unnecessary)
+          (sets, dAE)
         end
 
         function isEquType(ty::ConnectorType) ::Bool

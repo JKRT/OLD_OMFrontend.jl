@@ -167,7 +167,7 @@
                   local elems::List{DAE.Element}
                 @match (cache, env, dae, isTopCall) begin
                   (_, _, DAE.DAE_LIST(elementLst = elems), true)  => begin
-                      elems = listReverse(ListUtil.fold2r(elems, reEvaluateInitialIfEqns2, cache, env, nil))
+                      elems = listReverse(ListUtil.fold2r(elems, reEvaluateInitialIfEqns2, cache, env, nil, List{DAE.Element}))
                     DAE.DAE_LIST(elems)
                   end
 
@@ -5104,7 +5104,7 @@
               local i::ModelicaInteger
 
               if decl.language == "builtin"
-                return
+                return nothing
               end
               ListUtil.map2_0(els, checkExternalFunctionOutputAssigned, decl, name)
               checkFunctionInputUsed(els, SOME(decl), name)

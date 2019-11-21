@@ -713,7 +713,7 @@
                         source = ElementSource.addSymbolicTransformation(source, DAE.OP_INLINE(DAE.PARTIAL_EQUATION(e), DAE.PARTIAL_EQUATION(e_1)))
                         @match (DAE.PARTIAL_EQUATION(e_2), source) = ExpressionSimplify.simplifyAddSymbolicOperation(DAE.PARTIAL_EQUATION(e_1), source)
                       else
-                        e_2 = ExpressionSimplify.simplify(e_1)
+                        (e_2, _) = ExpressionSimplify.simplify(e_1)
                       end
                     (e_2, source, true, assrtLst)
                   end
@@ -823,8 +823,8 @@
                       if Config.acceptMetaModelicaGrammar()
                         b = true
                       else
-                        ty1 = Expression.typeof(inExp1)
-                        ty2 = Expression.typeof(inExp2)
+                        ty1 = Expression.typeOf(inExp1)
+                        ty2 = Expression.typeOf(inExp2)
                         (ty2, _) = Types.traverseType(ty2, -1, Types.makeExpDimensionsUnknown)
                         b = Types.equivtypesOrRecordSubtypeOf(ty1, ty2)
                       end
@@ -1240,7 +1240,7 @@
                             end
 
                             _  => begin
-                                  return
+                                  return binding
                                 ()
                             end
                           end
@@ -1384,7 +1384,7 @@
                   end
 
                   ((c, e) <| res, ht)  => begin
-                      @match DAE.T_COMPLEX(varLst = varLst) = Expression.typeof(e)
+                      @match DAE.T_COMPLEX(varLst = varLst) = Expression.typeOf(e)
                       crlst = ListUtil.map1(varLst, extendCrefRecords2, c)
                       creftpllst = ListUtil.map1(crlst, Util.makeTuple, c)
                       ht1 = ListUtil.fold(creftpllst, BaseHashTable.add, ht)

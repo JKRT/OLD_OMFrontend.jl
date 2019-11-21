@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    using Setfield
+
         import DAE
         import Prefix
 
@@ -79,7 +81,7 @@
                   local comment::SCode.Comment
                 @match (source, commentIn) begin
                   (DAE.SOURCE(_, _, _, _, _, _, _), SOME(comment))  => begin
-                      source.comment = _cons(comment, source.comment)
+                      @set source.comment = _cons(comment, source.comment)
                     source
                   end
 
@@ -758,7 +760,7 @@
                   (DAE.SOURCE(__), _)  => begin
                        #=  a NONE() means top level (equivalent to NO_PRE, SOME(cref) means subcomponent
                        =#
-                      source.instance = instanceOpt
+                      @set source.instance = instanceOpt
                     ()
                   end
                 end

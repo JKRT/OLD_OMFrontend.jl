@@ -48,6 +48,7 @@ import ParserExt
 import AbsynToSCode
 import System
 import Util
+import SCode
 
 #= Parse a mo-file =#
 function parse(filename::String, encoding::String, libraryPath::String = "", lveInstance::Option{<:ModelicaInteger} = NONE()) ::Absyn.Program

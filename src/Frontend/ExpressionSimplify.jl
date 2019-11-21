@@ -950,8 +950,8 @@ module ExpressionSimplify
                   end
 
                   (true, _, _)  => begin
-                      ty1 = Expression.typeof(before)
-                      ty2 = Expression.typeof(after)
+                      ty1 = Expression.typeOf(before)
+                      ty2 = Expression.typeOf(after)
                       b = valueEq(ty1, ty2)
                       if ! b
                         s1 = CrefForHashTable.printExpStr(before)
@@ -1399,7 +1399,7 @@ module ExpressionSimplify
 
                   (_, e, _)  => begin
                       t1 = Expression.arrayEltType(tp)
-                      t2 = Expression.arrayEltType(Expression.typeof(e))
+                      t2 = Expression.arrayEltType(Expression.typeOf(e))
                     if valueEq(t1, t2)
                           e
                         else
@@ -1562,7 +1562,7 @@ module ExpressionSimplify
                   DAE.CALL(path = Absyn.IDENT(name), expLst = DAE.ARRAY(array = expl && e <|  nil()) <|  nil()) where (name == "max" || name == "min")  => begin
                        #=  min/max function on arrays of only 1 element
                        =#
-                      if Expression.isArrayType(Expression.typeof(e))
+                      if Expression.isArrayType(Expression.typeOf(e))
                         exp.expLst = expl
                         e = exp
                       end
@@ -1649,20 +1649,20 @@ module ExpressionSimplify
                   e && DAE.CALL(path = Absyn.IDENT("cross"), expLst = expl)  => begin
                       @match list(DAE.ARRAY(array = v1), DAE.ARRAY(array = v2)) = expl
                       expl = simplifyCross(v1, v2)
-                      tp = Expression.typeof(e)
+                      tp = Expression.typeOf(e)
                       scalar = ! Expression.isArrayType(Expression.unliftArray(tp))
                     DAE.ARRAY(tp, scalar, expl)
                   end
 
                   e && DAE.CALL(path = Absyn.IDENT("skew"), expLst = DAE.ARRAY(array = v1) <|  nil())  => begin
                       mexpl = simplifySkew(v1)
-                      tp = Expression.typeof(e)
+                      tp = Expression.typeOf(e)
                     DAE.MATRIX(tp, 3, mexpl)
                   end
 
                   DAE.CALL(path = Absyn.IDENT("fill"), expLst = e <| expl)  => begin
                       valueLst = ListUtil.map(expl, ValuesUtil.expValue)
-                      (_, outExp, _) = elabBuiltinFill2(FCoreUtil.noCache(), FCore.emptyGraph, e, Expression.typeof(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
+                      (_, outExp, _) = elabBuiltinFill2(FCoreUtil.noCache(), FCore.emptyGraph, e, Expression.typeOf(e), valueLst, DAE.C_CONST(), Prefix.NOPRE(), nil, AbsynUtil.dummyInfo)
                     outExp
                   end
 
@@ -1885,7 +1885,7 @@ module ExpressionSimplify
                     e
                   end
 
-                  DAE.CALL(path = Absyn.IDENT("promote"), expLst = e1 <| DAE.ICONST(i) <|  nil()) where (Types.numberOfDimensions(Expression.typeof(e1)) == i)  => begin
+                  DAE.CALL(path = Absyn.IDENT("promote"), expLst = e1 <| DAE.ICONST(i) <|  nil()) where (Types.numberOfDimensions(Expression.typeOf(e1)) == i)  => begin
                     e1
                   end
 
@@ -1897,14 +1897,14 @@ module ExpressionSimplify
                     DAE.ARRAY(tp, false, es)
                   end
 
-                  DAE.CALL(path = Absyn.IDENT("promote"), expLst = e1 <| DAE.ICONST(i) <|  nil()) where (! Types.isArray(Expression.typeof(e1)))  => begin
+                  DAE.CALL(path = Absyn.IDENT("promote"), expLst = e1 <| DAE.ICONST(i) <|  nil()) where (! Types.isArray(Expression.typeOf(e1)))  => begin
                        #=  promote n-dim to n-dim
                        =#
                        #=  promote 1-dim to 2-dim
                        =#
                        #=  scalar to n-dim
                        =#
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                       for j in 1:i
                         tp1 = Types.liftArray(tp, DAE.DIM_INTEGER(1))
                         e1 = Expression.makeArray(list(e1), tp1, ! Types.isArray(tp))
@@ -1952,7 +1952,7 @@ module ExpressionSimplify
                   end
 
                   DAE.CALL(path = Absyn.IDENT("vector"), expLst = es && e <| _, attr = DAE.CALL_ATTR(ty = DAE.T_ARRAY(tp, _)))  => begin
-                      @match false = Types.isArray(Expression.typeof(e))
+                      @match false = Types.isArray(Expression.typeOf(e))
                       i = listLength(es)
                       tp = DAE.T_ARRAY(tp, list(DAE.DIM_INTEGER(i)))
                     DAE.ARRAY(tp, true, es)
@@ -2025,12 +2025,12 @@ module ExpressionSimplify
                   end
 
                   (DAE.SIZE(exp = exp, sz = NONE()), _)  => begin
-                      @match (_, list(_)) = Types.flattenArrayType(Expression.typeof(inExp))
+                      @match (_, list(_)) = Types.flattenArrayType(Expression.typeOf(inExp))
                     DAE.SIZE(exp, SOME(DAE.ICONST(1)))
                   end
 
                   _  => begin
-                        @match (_, nil) = Types.flattenArrayType(Expression.typeof(inExp))
+                        @match (_, nil) = Types.flattenArrayType(Expression.typeOf(inExp))
                       inExp
                   end
                 end
@@ -2605,7 +2605,7 @@ module ExpressionSimplify
 
                   DAE.CREF_QUAL(idn, DAE.T_METATYPE(ty = t2), ssl, cr)  => begin
                       exp = simplifyCrefMM1(idn, t2, ssl)
-                      exp = simplifyCrefMM(exp, Expression.typeof(exp), cr)
+                      exp = simplifyCrefMM(exp, Expression.typeOf(exp), cr)
                     exp
                   end
 
@@ -2710,7 +2710,7 @@ module ExpressionSimplify
                           else
                             DAE.ASUB(exp, list(Expression.subscriptIndexExp(s) for s in inCref.subscriptLst))
                           end
-                      exp = simplifyCrefMM(exp, Expression.typeof(exp), inCref.componentRef)
+                      exp = simplifyCrefMM(exp, Expression.typeOf(exp), inCref.componentRef)
                     exp
                   end
                 end
@@ -2742,7 +2742,7 @@ module ExpressionSimplify
 
               local ty::DAE.Type
 
-              ty = Expression.typeof(inExp)
+              ty = Expression.typeOf(inExp)
               if ! Expression.isIntegerOrReal(ty)
                 outExp = inExp
                 return outExp
@@ -2956,13 +2956,13 @@ module ExpressionSimplify
                   end
 
                   (e1, DAE.POW_ARR(__), e2)  => begin
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                       a1 = simplifyMatrixPow(e1, tp, e2)
                     a1
                   end
 
                   (e1, DAE.POW_ARR2(__), e2)  => begin
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                       a1 = simplifyVectorBinary(e1, DAE.POW_ARR2(tp), e2)
                     a1
                   end
@@ -3025,14 +3025,14 @@ module ExpressionSimplify
 
                   (e1, DAE.DIV_ARR(__), _)  => begin
                       @match true = Expression.isZero(e1)
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                       (a1, _) = Expression.makeZeroExpression(Expression.arrayDimension(tp))
                     a1
                   end
 
                   (e1, DAE.DIV_ARRAY_SCALAR(__), _)  => begin
                       @match true = Expression.isZero(e1)
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                       (a1, _) = Expression.makeZeroExpression(Expression.arrayDimension(tp))
                     a1
                   end
@@ -3229,7 +3229,7 @@ module ExpressionSimplify
               op = removeOperatorDimension(inOperator)
               res = ListUtil.threadMap1(lhs, rhs, simplifyMatrixBinary1, op)
               sz = listLength(res)
-              ty = Expression.typeof(inLhs)
+              ty = Expression.typeOf(inLhs)
               outResult = DAE.MATRIX(ty, sz, res)
           outResult
         end
@@ -3610,7 +3610,7 @@ module ExpressionSimplify
               local es::List{DAE.Exp}
 
               @match _cons(outExp, es) = inExpLst
-              tp = Expression.typeof(outExp)
+              tp = Expression.typeOf(outExp)
               for e in es
                 outExp = simplifyBinaryConst(DAE.ADD(tp), outExp, e)
               end
@@ -3626,7 +3626,7 @@ module ExpressionSimplify
               local tp::Type
 
               @match _cons(outExp, es) = inExpLst
-              tp = Expression.typeof(outExp)
+              tp = Expression.typeOf(outExp)
               for e in es
                 outExp = simplifyBinaryConst(DAE.MUL(tp), outExp, e)
               end
@@ -3831,7 +3831,7 @@ module ExpressionSimplify
                     end
 
                     (e, r)  => begin
-                        @match DAE.T_INTEGER() = Expression.typeof(e)
+                        @match DAE.T_INTEGER() = Expression.typeOf(e)
                         tmpInt = realInt(r)
                       _cons(DAE.BINARY(DAE.ICONST(tmpInt), DAE.MUL(DAE.T_INTEGER_DEFAULT), e), outExpLst)
                     end
@@ -3969,7 +3969,7 @@ module ExpressionSimplify
               local e::DAE.Exp
               local newE::DAE.Exp
               local sE::DAE.Exp
-              local tp::DAE.Type = Expression.typeofOp(iop)
+              local tp::DAE.Type = Expression.typeOfOp(iop)
 
               oExp = Expression.makeConstZero(tp)
               sE = oExp
@@ -4189,7 +4189,7 @@ module ExpressionSimplify
 
                   (DAE.UNARY(operator = DAE.UMINUS_ARR(__), exp = e), sub)  => begin
                       e_1 = simplifyAsub(e, sub)
-                      t2 = Expression.typeof(e_1)
+                      t2 = Expression.typeOf(e_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.UMINUS_ARR(t2)
@@ -4202,7 +4202,7 @@ module ExpressionSimplify
 
                   (DAE.LUNARY(operator = DAE.NOT(__), exp = e), sub)  => begin
                       e_1 = simplifyAsub(e, sub)
-                      t2 = Expression.typeof(e_1)
+                      t2 = Expression.typeOf(e_1)
                       exp = DAE.LUNARY(DAE.NOT(t2), e_1)
                     exp
                   end
@@ -4210,7 +4210,7 @@ module ExpressionSimplify
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB_ARR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.SUB_ARR(t2)
@@ -4223,7 +4223,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.MUL_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.MUL_ARRAY_SCALAR(t2)
@@ -4236,7 +4236,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.ADD_ARRAY_SCALAR(t2)
@@ -4249,7 +4249,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.SUB_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e2_1)
+                      t2 = Expression.typeOf(e2_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.SUB_SCALAR_ARRAY(t2)
@@ -4268,7 +4268,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e2_1)
+                      t2 = Expression.typeOf(e2_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.DIV_SCALAR_ARRAY(t2)
@@ -4281,7 +4281,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.DIV_ARRAY_SCALAR(t2)
@@ -4294,7 +4294,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.POW_SCALAR_ARRAY(__), exp2 = e2), sub)  => begin
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e2_1)
+                      t2 = Expression.typeOf(e2_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.POW_SCALAR_ARRAY(t2)
@@ -4307,7 +4307,7 @@ module ExpressionSimplify
 
                   (DAE.BINARY(exp1 = e1, operator = DAE.POW_ARRAY_SCALAR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op = if b
                             DAE.POW_ARRAY_SCALAR(t2)
@@ -4321,7 +4321,7 @@ module ExpressionSimplify
                   (DAE.BINARY(exp1 = e1, operator = DAE.ADD_ARR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.ADD_ARR(t2)
@@ -4335,7 +4335,7 @@ module ExpressionSimplify
                   (DAE.BINARY(exp1 = e1, operator = DAE.MUL_ARR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.MUL_ARR(t2)
@@ -4349,7 +4349,7 @@ module ExpressionSimplify
                   (DAE.BINARY(exp1 = e1, operator = DAE.DIV_ARR(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.DIV_ARR(t2)
@@ -4363,7 +4363,7 @@ module ExpressionSimplify
                   (DAE.BINARY(exp1 = e1, operator = DAE.POW_ARR2(__), exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       b = DAEUtilMinimal.expTypeArray(t2)
                       op2 = if b
                             DAE.POW_ARR2(t2)
@@ -4377,7 +4377,7 @@ module ExpressionSimplify
                   (DAE.LBINARY(exp1 = e1, operator = op, exp2 = e2), sub)  => begin
                       e1_1 = simplifyAsub(e1, sub)
                       e2_1 = simplifyAsub(e2, sub)
-                      t2 = Expression.typeof(e1_1)
+                      t2 = Expression.typeOf(e1_1)
                       op = Expression.setOpType(op, t2)
                       exp = DAE.LBINARY(e1_1, op, e2_1)
                     exp
@@ -4491,7 +4491,7 @@ module ExpressionSimplify
               for is in indices
                 for i in is
                   _ = begin
-                    @match Expression.typeof(i) begin
+                    @match Expression.typeOf(i) begin
                       DAE.T_INTEGER(__)  => begin
                         ()
                       end
@@ -4516,7 +4516,7 @@ module ExpressionSimplify
                #=  Make asubs from all combinations of the subscript indices.
                =#
               asubs = ListUtil.combinationMap1(indices, simplifyAsubSlicing2, inExp)
-              outAsubArray = Expression.makeScalarArray(asubs, Types.unliftArray(Expression.typeof(inExp)))
+              outAsubArray = Expression.makeScalarArray(asubs, Types.unliftArray(Expression.typeOf(inExp)))
           outAsubArray
         end
 
@@ -5045,7 +5045,7 @@ module ExpressionSimplify
 
                   (_, op2, DAE.CALL(path = Absyn.IDENT("abs"), expLst = e1 <|  nil()), DAE.CALL(path = Absyn.IDENT("abs"), expLst = e2 <|  nil()), _, _)  => begin
                       @match true = Expression.isMulOrDiv(op2)
-                      ty = Expression.typeof(e1)
+                      ty = Expression.typeOf(e1)
                       res = DAE.BINARY(e1, op2, e2)
                     Expression.makePureBuiltinCall("abs", list(res), ty)
                   end
@@ -5109,27 +5109,27 @@ module ExpressionSimplify
 
                   (_, DAE.DIV(__), DAE.BINARY(exp1 = DAE.UNARY(operator = DAE.UMINUS(__), exp = e1), operator = DAE.MUL(__), exp2 = e2), e3, _, _)  => begin
                       @match true = Expression.expEqual(e1, e3)
-                      tp2 = Expression.typeof(e2)
+                      tp2 = Expression.typeOf(e2)
                       e = DAE.UNARY(DAE.UMINUS(tp2), e2)
                     e
                   end
 
                   (_, DAE.DIV(__), DAE.BINARY(exp1 = DAE.UNARY(operator = DAE.UMINUS(__), exp = e1), operator = DAE.MUL(__), exp2 = e2), e3, _, _)  => begin
                       @match true = Expression.expEqual(e2, e3)
-                      tp2 = Expression.typeof(e1)
+                      tp2 = Expression.typeOf(e1)
                       e = DAE.UNARY(DAE.UMINUS(tp2), e1)
                     e
                   end
 
                   (_, DAE.DIV(__), DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2), DAE.UNARY(operator = DAE.UMINUS(__), exp = e3), _, _)  => begin
                       @match true = Expression.expEqual(e2, e3)
-                      tp2 = Expression.typeof(e1)
+                      tp2 = Expression.typeOf(e1)
                     DAE.UNARY(DAE.UMINUS(tp2), e1)
                   end
 
                   (_, DAE.DIV(__), DAE.BINARY(exp1 = e1, operator = DAE.MUL(__), exp2 = e2), DAE.UNARY(operator = DAE.UMINUS(__), exp = e3), _, _)  => begin
                       @match true = Expression.expEqual(e1, e3)
-                      tp2 = Expression.typeof(e2)
+                      tp2 = Expression.typeOf(e2)
                     DAE.UNARY(DAE.UMINUS(tp2), e2)
                   end
 
@@ -5270,7 +5270,7 @@ module ExpressionSimplify
 
                   (_, DAE.POW(__), e1, e, _, true)  => begin
                       @match true = Expression.isZero(e)
-                      tp = Expression.typeof(e1)
+                      tp = Expression.typeOf(e1)
                     Expression.makeConstOne(tp)
                   end
 
@@ -5914,7 +5914,7 @@ module ExpressionSimplify
               end
                #= /*
                 elseif b and not (Expression.isConstValue(rhs) or Expression.isConstValue(lhs)) then
-                  tp := Expression.typeof(oExp);
+                  tp := Expression.typeOf(oExp);
                   oExp := if Expression.isLesseqOrLess(inOp) then
                                DAE.RELATION(Expression.makeConstZero(tp), inOp, oExp, index,optionExpisASUB)
                           else DAE.RELATION(oExp, inOp,Expression.makeConstZero(tp),index,optionExpisASUB);
@@ -5929,7 +5929,7 @@ module ExpressionSimplify
         function simplifyBinaryDistributePow(inExpLst::List{<:DAE.Exp}, inExp::DAE.Exp) ::List{DAE.Exp}
               local outExpLst::List{DAE.Exp}
 
-              outExpLst = list(DAE.BINARY(e, DAE.POW(Expression.typeof(e)), inExp) for e in inExpLst if ! Expression.isConstOne(e))
+              outExpLst = list(DAE.BINARY(e, DAE.POW(Expression.typeOf(e)), inExp) for e in inExpLst if ! Expression.isConstOne(e))
           outExpLst
         end
 
@@ -6782,7 +6782,7 @@ module ExpressionSimplify
                 @matchcontinue (origExp, exp, optDim) begin
                   (_, _, SOME(dimExp))  => begin
                       i = Expression.expInt(dimExp)
-                      t = Expression.typeof(exp)
+                      t = Expression.typeOf(exp)
                       dims = Expression.arrayDimension(t)
                       dim = listGet(dims, i)
                       n = Expression.dimensionSize(dim)
@@ -6982,7 +6982,7 @@ module ExpressionSimplify
               local zero::DAE.Exp
 
               @match list(x1, x2, x3) = v1
-              zero = Expression.makeConstZero(Expression.typeof(x1))
+              zero = Expression.makeConstZero(Expression.typeOf(x1))
               res = list(list(zero, Expression.negate(x3), x2), list(x3, zero, Expression.negate(x1)), list(Expression.negate(x2), x1, zero))
           res
         end

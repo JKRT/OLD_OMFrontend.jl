@@ -81,6 +81,33 @@ import MetaModelica.Dangerous
 #@importDBG Types
 @importDBG Util
 
+
+
+#= get the top current scope from the graph =#
+function currentScope(inGraph::Graph) ::Scope
+     local outScope::Scope
+
+     outScope = begin
+       @match inGraph begin
+         FCore.G(scope = outScope)  => begin
+           outScope
+         end
+
+         FCore.EG(_)  => begin
+           nil
+         end
+       end
+     end
+ outScope
+end
+
+#= get the last ref from the current scope the graph =#
+function lastScopeRef(inGraph::Graph) ::MMRef
+     local outRef::MMRef
+     outRef = listHead(currentScope(inGraph))
+ outRef
+end
+
          #= @author: adrpo
          THE MOST IMPORTANT FUNCTION IN THE COMPILER :)
          This function works like this:
@@ -187,6 +214,26 @@ import MetaModelica.Dangerous
                             targetClassName + SCodeDump.printModStr(Mod.unelabMod(inMod), SCodeDump.defaultOptions) + \")\\n\\t\" +
                             newTargetClassName + \"\\n\");*/ =#
           (outVersionedTargetClassEnv, outVersionedTargetClass, outIH)
+        end
+
+        function isTargetClassBuiltin(inGraph::Graph, inClass::SCode.Element) ::Bool
+              local yes::Bool
+
+              yes = begin
+                  local r::MMRef
+                @matchcontinue (inGraph, inClass) begin
+                  (_, _)  => begin
+                      r = FNode.child(lastScopeRef(inGraph), SCodeUtil.elementName(inClass))
+                      yes = FNode.isRefBasicType(r) || FNode.isRefBuiltin(r)
+                    yes
+                  end
+
+                  _  => begin
+                      false
+                  end
+                end
+              end
+          yes
         end
 
         function createVersionScope(inSourceEnv::Graph, inSourceName::Name, inPrefix::Prefix.PrefixType, inMod::DAE.Mod, inTargetClassEnv::Graph, inTargetClass::SCode.Element, inIH::InnerOuterTypes.InstHierarchy) ::Tuple{Graph, SCode.Element, InnerOuterTypes.InstHierarchy}

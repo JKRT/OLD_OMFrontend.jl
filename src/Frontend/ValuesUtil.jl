@@ -1097,7 +1097,7 @@
                   
                   Values.RECORD(path, vallist, namelst, #= AbsynDumpTpl.dumpPattern: UNHANDLED Abyn.Exp  =#)  => begin
                       expl = ListUtil.map(vallist, valueExp)
-                      tpl = ListUtil.map(expl, Expression.typeof)
+                      tpl = ListUtil.map(expl, Expression.typeOf)
                       varlst = ListUtil.threadMap(namelst, tpl, Expression.makeVar)
                       t = DAE.T_COMPLEX(ClassInf.RECORD(path), varlst, NONE())
                     DAE.RECORD(path, expl, namelst, t)

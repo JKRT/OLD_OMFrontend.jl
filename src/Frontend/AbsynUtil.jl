@@ -5418,7 +5418,7 @@
                   local classAttr::List{NamedArg}
                 @match cl begin
                   CLASS(name, partialPrefix, finalPrefix, encapsulatedPrefix, R_FUNCTION(funcRest), PARTS(typeVars, classAttr, classParts, _, _), info)  => begin
-                      @match (@match _cons(_, _) = elts) = ListUtil.fold(listReverse(classParts), getFunctionInterfaceParts, nil)
+                      @match elts && _ <| _ = ListUtil.fold(listReverse(classParts), getFunctionInterfaceParts, nil)
                     CLASS(name, partialPrefix, finalPrefix, encapsulatedPrefix, R_FUNCTION(funcRest), PARTS(typeVars, classAttr, _cons(PUBLIC(elts), nil), nil, NONE()), info)
                   end
                 end
@@ -5743,7 +5743,7 @@
            will be changed according to the new definition. For instance,
            myMerge_annotations(annotation(x=1,y=2),annotation(x=3))
            => annotation(x=3,y=2) =#
-        function myMergeAnnotations(inAnnotation1::Annotation, inAnnotation2::Annotation) ::Annotation
+        function mergeAnnotations(inAnnotation1::Annotation, inAnnotation2::Annotation) ::Annotation
               local outAnnotation::Annotation
 
               outAnnotation = begin
@@ -5756,14 +5756,14 @@
                   end
 
                   (ANNOTATION(elementArgs = oldmods), ANNOTATION(elementArgs = newmods))  => begin
-                    ANNOTATION(myMergeAnnotations2(oldmods, newmods))
+                    ANNOTATION(mergeAnnotations2(oldmods, newmods))
                   end
                 end
               end
           outAnnotation
         end
 
-        function myMergeAnnotations2(oldmods::List{<:ElementArg}, newmods::List{<:ElementArg}) ::List{ElementArg}
+        function mergeAnnotations2(oldmods::List{<:ElementArg}, newmods::List{<:ElementArg}) ::List{ElementArg}
               local res::List{ElementArg} = listReverse(oldmods)
 
               local mods::List{ElementArg}
@@ -5787,7 +5787,7 @@
         end
 
          #= myMerges an annotation into a Comment option. =#
-        function myMergeCommentAnnotation(inAnnotation::Annotation, inComment::Option{<:Comment}) ::Option{Comment}
+        function mergeCommentAnnotation(inAnnotation::Annotation, inComment::Option{<:Comment}) ::Option{Comment}
               local outComment::Option{Comment}
 
               outComment = begin
@@ -5805,7 +5805,7 @@
                   end
 
                   SOME(COMMENT(annotation_ = SOME(ann), comment = cmt))  => begin
-                    SOME(COMMENT(SOME(myMergeAnnotations(ann, inAnnotation)), cmt))
+                    SOME(COMMENT(SOME(mergeAnnotations(ann, inAnnotation)), cmt))
                   end
                 end
               end
@@ -5873,7 +5873,7 @@
                       res = listReverse(res)
                        #=  myMerge the annotations
                        =#
-                      res = myMergeAnnotations2(res, args2)
+                      res = mergeAnnotations2(res, args2)
                       arg2.modification = SOME(CLASSMOD(res, eq2))
                     arg2
                   end

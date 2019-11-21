@@ -220,7 +220,7 @@
 
          #= Is the modification one that does not depend on the scope it is evaluated in? =#
         function isInvariantMod(mod::SCode.Mod) ::Bool
-              local b::Bool
+              local b::Bool = false
 
               local e::Absyn.Exp
               local mods::SCode.Mod
@@ -245,12 +245,12 @@
                         end
                       end
                       if ! b
-                        return
+                        return b
                       end
                       for sm in mod.subModLst
                         if ! isInvariantMod(sm.mod)
                           b = false
-                          return
+                          return b
                         end
                       end
                     true
@@ -305,12 +305,12 @@
                         end
                       end
                       if ! b
-                        return
+                        return b
                       end
                       for sm in mod.subModLst
                         if ! isInvariantDAEMod(sm.mod)
                           b = false
-                          return
+                          return b
                         end
                       end
                     true
@@ -553,7 +553,7 @@
                 try
                   (_, v) = Ceval.ceval(inCache, inEnv, inExp, false, msg, 0)
                   if ValuesUtil.isRecord(v)
-                    v = ValuesUtil.typeConvertRecord(v, Expression.typeof(inExp))
+                    v = ValuesUtil.typeConvertRecord(v, Expression.typeOf(inExp))
                   end
                   outValue = SOME(v)
                 catch
@@ -1264,7 +1264,7 @@
                   if name == inName
                     e = ValuesUtil.valueExp(v)
                     ae = Expression.unelabExp(e)
-                    ty = Types.complicateType(Expression.typeof(e))
+                    ty = Types.complicateType(Expression.typeOf(e))
                     eq_mod = DAE.TYPED(e, SOME(v), DAE.PROP(ty, DAE.C_CONST()), ae, info)
                     outMod = DAE.MOD(inFinal, inEach, nil, SOME(eq_mod), inInfo)
                     break
@@ -1585,7 +1585,7 @@
                       for i in inIndices
                         if ! Types.isArray(ty)
                           Error.addSourceMessage(Error.MODIFIER_NON_ARRAY_TYPE_WARNING, list(ExpressionDump.printExpStr(exp)), inInfo)
-                          return
+                          return outBinding
                         end
                         ty = Types.unliftArray(ty)
                         (exp, _) = ExpressionSimplify.simplify1(Expression.makeASUB(exp, list(i)))
@@ -3254,8 +3254,8 @@
               outMod = begin
                 @matchcontinue (inEnv, inName) begin
                   (_, _)  => begin
-                      n = FNode.fromRef(FNode.child(FGraphUti.lastScopeRef(inEnv), inName))
-                      if ! FNode.isInstance(FNode.fromRef(FGraphUti.lastScopeRef(inEnv)))
+                      n = FNode.fromRef(FNode.child(FGraphUtil.lastScopeRef(inEnv), inName))
+                      if ! FNode.isInstance(FNode.fromRef(FGraphUtil.lastScopeRef(inEnv)))
                         @match FCore.N(data = FCore.CL(mod = mod)) = n
                         mod = Mod.removeMod(mod, inName)
                       else

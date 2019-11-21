@@ -3006,7 +3006,7 @@
                   end
 
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = t), DAE.SLICE(exp = e) <| ys)  => begin
-                      @match DAE.T_ARRAY(dims = list(dim)) = Expression.typeof(e)
+                      @match DAE.T_ARRAY(dims = list(dim)) = Expression.typeOf(e)
                       t_1 = checkSubscripts(t, ys)
                     DAE.T_ARRAY(t_1, list(dim))
                   end
@@ -3340,7 +3340,7 @@
                       true = Types.isArray(inParentType);
                       tyElement = Types.arrayElementType(inParentType);
                       true = Types.isRecord(tyElement);
-                       e = Expression.makeCrefExp(inCref, Expression.typeof(e));
+                       e = Expression.makeCrefExp(inCref, Expression.typeOf(e));
                        b = DAE.EQBOUND(e, NONE(), c, s);
                     then
                       inChildBinding;*/ =#

@@ -2997,7 +2997,7 @@ module Static
               try
                 outExp = elabMatrixCatTwo2(e for e in listReverse(inExpl))
               catch
-                ty = Expression.typeof(listHead(inExpl))
+                ty = Expression.typeOf(listHead(inExpl))
                 outExp = Expression.makePureBuiltinCall("cat", _cons(DAE.ICONST(2), inExpl), ty)
               end
           outExp
@@ -3017,7 +3017,7 @@ module Static
               @match DAE.ARRAY(scalar = sc, array = expl1) = inExp1
               @match DAE.ARRAY(array = expl2) = inExp2
               expl1 = list(@do_threaded_for elabMatrixCatTwo3(e1, e2) (e1, e2) (expl1, expl2))
-              ty = Expression.typeof(listHead(expl1))
+              ty = Expression.typeOf(listHead(expl1))
               ty = Expression.liftArrayLeft(ty, DAE.DIM_INTEGER(listLength(expl1)))
               outExp = DAE.ARRAY(ty, sc, expl1)
           outExp
@@ -3052,7 +3052,7 @@ module Static
               try
                 outExp = ListUtil.reduce(inExpl, elabMatrixCatOne2)
               catch
-                ty = Expression.typeof(listHead(inExpl))
+                ty = Expression.typeOf(listHead(inExpl))
                 outExp = Expression.makePureBuiltinCall("cat", _cons(DAE.ICONST(1), inExpl), ty)
               end
           outExp
@@ -3291,7 +3291,7 @@ module Static
                   (cache, env, arraycr <| dim <|  nil(), impl, pre)  => begin
                       (cache, dimp, _) = elabExpInExpression(cache, env, dim, impl, true, pre, info)
                       (cache, arraycrefe, prop) = elabExpInExpression(cache, env, arraycr, impl, false, pre, info)
-                      ety = Expression.typeof(arraycrefe)
+                      ety = Expression.typeOf(arraycrefe)
                       dims1 = Expression.arrayDimension(ety)
                       (_, dims2) = Types.flattenArrayType(Types.getPropType(prop))
                       dims = if listLength(dims1) >= listLength(dims2)
@@ -3305,7 +3305,7 @@ module Static
 
                   (cache, env, arraycr <|  nil(), impl, pre)  => begin
                       @match (cache, arraycrefe, DAE.PROP(arrtp, _)) = elabExpInExpression(cache, env, arraycr, impl, false, pre, info)
-                      ety = Expression.typeof(arraycrefe)
+                      ety = Expression.typeOf(arraycrefe)
                       dims = Expression.arrayDimension(ety)
                       (exp, prop) = elabBuiltinSizeNoIndex(arraycrefe, ety, dims, arrtp, info)
                     (cache, exp, prop)
@@ -8189,7 +8189,7 @@ module Static
                   oes = _cons(e, oes)
                 else
                   name = Util.getTempVariableIndex()
-                  tp = Types.expTypetoTypesType(Expression.typeof(e))
+                  tp = Types.expTypetoTypesType(Expression.typeOf(e))
                   ofound = _cons(DAE.REDUCTIONITER(name, e, NONE(), tp), ofound)
                   oes = _cons(DAE.CREF(DAE.CREF_IDENT(name, ty, nil), ty), oes)
                 end
@@ -8638,7 +8638,7 @@ module Static
                 @matchcontinue inSlot begin
                   SLOT(defaultArg = DAE.FUNCARG(name = name), arg = SOME(exp))  => begin
                       @match false = Expression.expHasCref(exp, ComponentReference.makeCrefIdent(name, DAE.T_UNKNOWN_DEFAULT, nil))
-                      ty = Expression.typeof(exp)
+                      ty = Expression.typeOf(exp)
                       @match true = Types.dimensionsKnown(ty)
                       binding = DAE.EQBOUND(exp, NONE(), DAE.C_CONST(), DAE.BINDING_FROM_DEFAULT_VALUE())
                     DAE.TYPES_VAR(name, DAE.dummyAttrParam, ty, binding, NONE())
@@ -8651,7 +8651,7 @@ module Static
                        =#
                       (_, val) = Ceval.ceval(inCache, inEnv, exp, false, Absyn.NO_MSG(), 0)
                       exp = ValuesUtil.valueExp(val)
-                      ty = Expression.typeof(exp)
+                      ty = Expression.typeOf(exp)
                        #=  Create a binding from the evaluated expression.
                        =#
                       binding = DAE.EQBOUND(exp, SOME(val), DAE.C_CONST(), DAE.BINDING_FROM_DEFAULT_VALUE())
