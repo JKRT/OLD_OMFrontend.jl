@@ -18669,7 +18669,7 @@ Type_a = Any
                   end
 
                   Absyn.REAL(s)  => begin
-                      r = System.stringReal(s)
+                      r = stringReal(s)
                     DAE.RCONST(r)
                   end
 

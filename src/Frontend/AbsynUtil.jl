@@ -4160,12 +4160,12 @@
                    =#
                 @matchcontinue (exp1, exp2) begin
                   (INTEGER(i), REAL(r))  => begin
-                      b = realEq(intReal(i), System.stringReal(r))
+                      b = realEq(intReal(i), stringReal(r))
                     b
                   end
 
                   (REAL(r), INTEGER(i))  => begin
-                      b = realEq(intReal(i), System.stringReal(r))
+                      b = realEq(intReal(i), stringReal(r))
                     b
                   end
 

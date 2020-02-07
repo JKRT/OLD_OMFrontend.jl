@@ -244,6 +244,7 @@ module Static
               local outCache::FCore.Cache = inCache
 
               println("elabExp_BuiltinType")
+              @show inExp
 
               (outExp, outProperties) = begin
                 @match inExp begin
@@ -252,7 +253,7 @@ module Static
                   end
 
                   Absyn.REAL(__)  => begin
-                    (DAE.RCONST(System.stringReal(inExp.value)), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_CONST()))
+                    (DAE.RCONST(stringReal(inExp.value)), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_CONST()))
                   end
 
                   Absyn.STRING(__)  => begin
@@ -2308,7 +2309,7 @@ module Static
                   end
 
                   (cache, _, Absyn.REAL(value = s), _, _, _)  => begin
-                      r = System.stringReal(s)
+                      r = stringReal(s)
                     (cache, DAE.RCONST(r), DAE.PROP(DAE.T_REAL_DEFAULT, DAE.C_CONST()))
                   end
 
@@ -11943,7 +11944,7 @@ module Static
                =#
                #=  If the condition is not constant or ceval failed, create an if-expression.
                =#
-              exp_c = Types.constAnd(c for c in list(cond_c, false_c, true_c))
+              exp_c = Types.constAnd(Types.constAnd(cond_c, false_c), true_c)
               outExp = DAE.IFEXP(cond_exp, true_exp, false_exp)
               outProperties = DAE.PROP(exp_ty, exp_c)
           (outCache, outExp, outProperties)

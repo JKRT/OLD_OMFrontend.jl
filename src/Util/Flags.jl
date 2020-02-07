@@ -1083,7 +1083,7 @@
                   end
                   
                   (s <|  nil(), REAL_FLAG(__), _, _)  => begin
-                    REAL_FLAG(System.stringReal(s))
+                    REAL_FLAG(stringReal(s))
                   end
                   
                   (s <|  nil(), STRING_FLAG(__), SOME(options), _)  => begin
@@ -1217,7 +1217,7 @@
                =#
                #=   equation
                =#
-               #=     System.stringReal(s);
+               #=     stringReal(s);
                =#
                #=   then
                =#

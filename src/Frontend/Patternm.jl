@@ -277,7 +277,7 @@
 
                   (cache, _, Absyn.REAL(str), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_REAL_DEFAULT, inLhs, info)
-                      r = System.stringReal(str)
+                      r = stringReal(str)
                     (cache, DAE.PAT_CONSTANT(et, DAE.RCONST(r)))
                   end
 
@@ -289,7 +289,7 @@
 
                   (cache, _, Absyn.UNARY(Absyn.UMINUS(__), Absyn.REAL(str)), _, _, _)  => begin
                       et = validPatternType(ty, DAE.T_REAL_DEFAULT, inLhs, info)
-                      r = System.stringReal(str)
+                      r = stringReal(str)
                       r = realNeg(r)
                     (cache, DAE.PAT_CONSTANT(et, DAE.RCONST(r)))
                   end

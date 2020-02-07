@@ -70,11 +70,13 @@ module AbsynPrograms
   using MetaModelica
   import OpenModelicaParser
 
-path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+const path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
 
-path = joinpath(path, "lib", "omc", "HelloWorld.mo")
-const HelloWorld = OpenModelicaParser.parseFile(path)
-@show HelloWorld
+const name = "BouncingBall"
+const fileName = name + ".mo"
+const fullPath = joinpath(path, "lib", "omc", fileName)
+const AST = OpenModelicaParser.parseFile(fullPath)
+@show AST
 
 end
 
@@ -85,18 +87,8 @@ function run()
   # make sure we have all the flags loaded!
   Flags.new(Flags.emptyFlags)
 
-  @time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
+  @time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.AST)
   @show scode
-
-  #= Try the bouncing ball =#
-  #@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
-  #@show scode
-  #using Modelica_Standard_Library_AST
-  #using BenchmarkTools
-  #using Profile
-  # P = Modelica_Standard_Library_AST.Program
-  #@time AbsynToSCode.translateAbsyn2SCode(P)
-  #@time AbsynToSCode.translateAbsyn2SCode(P)
 
   println("*******************************")
   println("SCode done")
@@ -110,7 +102,7 @@ function run()
   # Flags.set(Flags.EXEC_STAT, true) # not yet working!
   cache = FCoreUtil.emptyCache()
   println("after empty cache")
-  className = Absyn.IDENT("HelloWorld")
+  className = Absyn.IDENT(AbsynPrograms.name)
   println("dive in inst")
   (cache,_,_,dae) = Inst.instantiateClass(cache, InnerOuterTypes.emptyInstHierarchy, scode, className)
   println("after inst")

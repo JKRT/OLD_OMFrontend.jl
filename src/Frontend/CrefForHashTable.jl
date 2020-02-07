@@ -5670,6 +5670,28 @@ function typeofOp(inOperator::DAE.Operator) ::DAE.Type
   outType
 end
 
+#= Boolean or array of boolean =#
+function typeofRelation(inType::DAE.Type) ::DAE.Type
+     local outType::DAE.Type
+
+     outType = begin
+         local ty::Type
+         local ty1::Type
+         local dims::DAE.Dimensions
+       @match inType begin
+         DAE.T_ARRAY(ty = ty, dims = dims)  => begin
+             _ = typeofRelation(ty)
+           DAE.T_ARRAY(ty, dims)
+         end
+
+         _  => begin
+             DAE.T_BOOL_DEFAULT
+         end
+       end
+     end
+ outType
+end
+
 #= Retrieves the Type of the Expression =#
 function typeOf(inExp::DAE.Exp) ::DAE.Type
   local outType::DAE.Type

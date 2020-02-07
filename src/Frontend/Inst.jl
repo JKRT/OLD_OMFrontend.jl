@@ -4102,7 +4102,10 @@
                   end
 
                   (cache, env, ih, pre, csets, ci_state, _, e <| es, impl, _, graph)  => begin
+                      @show instFunc
+                      @show e
                       (cache, env_1, ih, dae1, csets_1, ci_state_1, graph) = instFunc(cache, env, ih, pre, csets, ci_state, e, impl, unrollForLoops, graph)
+                      @show es
                       (cache, env_2, ih, dae2, csets_2, ci_state_2, graph) = instList(cache, env_1, ih, pre, csets_1, ci_state_1, instFunc, es, impl, unrollForLoops, graph)
                       dae = DAEUtil.joinDaes(dae1, dae2)
                     (cache, env_2, ih, dae, csets_2, ci_state_2, graph)
