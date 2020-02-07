@@ -2693,7 +2693,7 @@
                 else
                   tyEl = ty
                 end
-                exp = Types.matchType(exp, tyEl, DAE.T_BOOL_DEFAULT)
+                (exp, _) = Types.matchType(exp, tyEl, DAE.T_BOOL_DEFAULT)
               catch
                 Error.addSourceMessage(Error.IF_CONDITION_TYPE_ERROR, list(Dump.printExpStr(aexp), Types.unparseType(ty)), info)
                 fail()

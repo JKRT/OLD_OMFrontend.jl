@@ -914,8 +914,8 @@
                   local tp2::DAE.Type
                 @matchcontinue (inExp1, inExp2, inProperties3, inProperties4) begin
                   (var && DAE.CREF(__), val, DAE.PROP(tp1, _), DAE.PROP(tp2, _))  => begin
-                      val_1 = Types.matchType(val, tp2, DAE.T_REAL_DEFAULT, true)
-                      var_1 = Types.matchType(var, tp1, DAE.T_REAL_DEFAULT, true)
+                      (val_1, _) = Types.matchType(val, tp2, DAE.T_REAL_DEFAULT, true)
+                      (var_1, _) = Types.matchType(var, tp1, DAE.T_REAL_DEFAULT, true)
                     list(DAE.STMT_REINIT(var_1, val_1, source))
                   end
 

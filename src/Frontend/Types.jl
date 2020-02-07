@@ -5864,7 +5864,7 @@ module Types
 
                   (e, DAE.T_METABOXED(ty = t1), t2 && DAE.T_ENUMERATION(__), _)  => begin
                       @match true = subtype(t1, t2)
-                      matchType(e, t1, t2, printFailtrace)
+                      (_, _) = matchType(e, t1, t2, printFailtrace)
                       t = simplifyType(t2)
                     (DAE.UNBOX(e, t), t2)
                   end

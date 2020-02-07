@@ -481,9 +481,7 @@ end
 
 function languageStandardInt(inStandard::LanguageStandard.Ty) ::ModelicaInteger
   local outValue::ModelicaInteger
-
-  local lookup::ModelicaInteger[LanguageStandard.Size] = [10, 20, 30, 31, 32, 33, 1000]
-
+  local lookup::Array{ModelicaInteger, 1} = [10, 20, 30, 31, 32, 33, 1000]
   outValue = lookup[inStandard]
   outValue
 end
@@ -528,7 +526,7 @@ end
 function languageStandardString(inStandard::LanguageStandard.Ty) ::String
   local outString::String
 
-  local lookup::String[LanguageStandard] = ["1.x", "2.x", "3.0", "3.1", "3.2", "3.3", "3.3"]
+  local lookup::Array{String, 1} = ["1.x", "2.x", "3.0", "3.1", "3.2", "3.3", "3.3"]
   outString = lookup[inStandard]
   outString
 end

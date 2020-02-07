@@ -815,9 +815,9 @@ module Static
                 ty2 = Types.getUniontypeIfMetarecordReplaceAllSubtypes(ty2)
                 c1 = Types.propAllConst(prop1)
                 ty = Types.getUniontypeIfMetarecordReplaceAllSubtypes(Types.superType(Types.boxIfUnboxedType(ty1), Types.boxIfUnboxedType(ty2)))
-                exp1 = Types.matchType(exp1, ty1, ty, true)
+                (exp1, _) = Types.matchType(exp1, ty1, ty, true)
                 ty = DAE.T_METALIST(ty)
-                exp2 = Types.matchType(exp2, ty, DAE.T_METALIST(ty2), true)
+                (exp2, _) = Types.matchType(exp2, ty, DAE.T_METALIST(ty2), true)
                 outExp = DAE.CONS(exp1, exp2)
                 outProperties = DAE.PROP(ty, Types.constAnd(c1, c2))
               catch
@@ -2835,7 +2835,7 @@ module Static
               for ty in inTypes
                 @match exp <| rest_expl = rest_expl
                 if ! Types.equivtypes(ty, inExpectedType)
-                  exp = Types.matchType(exp, ty, inExpectedType, true)
+                  (exp, _) = Types.matchType(exp, ty, inExpectedType, true)
                 end
                 outExpl = _cons(exp, outExpl)
               end
@@ -6754,7 +6754,7 @@ module Static
                   try
                     @match Absyn.NAMEDARG(argValue = e) = arg
                     @match (outCache, outExp, DAE.PROP(type_ = ty)) = elabExpInExpression(inCache, inEnv, e, inImplicit, true, inPrefix, inInfo)
-                    outExp = Types.matchType(outExp, ty, inType, true)
+                    (outExp, _) = Types.matchType(outExp, ty, inType, true)
                   catch
                   end
                   break
