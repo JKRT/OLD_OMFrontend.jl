@@ -4341,7 +4341,7 @@ module Static
 
               for e in inExpl
                 @match prop <| rest_props = rest_props
-                e = Types.matchProp(e, prop, inProperties, true)
+                (e, _) = Types.matchProp(e, prop, inProperties, true)
                 outExpl = _cons(e, outExpl)
               end
               outExpl = listReverse(outExpl)

@@ -506,7 +506,7 @@
                       (outCache, exp, prop) = Ceval.cevalIfConstant(outCache, inEnv, exp, prop, inImpl, info)
                        #=  Check that the cref and the expression have matching types.
                        =#
-                      exp = Types.matchProp(exp, prop, cr_prop, true)
+                      (exp, _) = Types.matchProp(exp, prop, cr_prop, true)
                       (outCache, cr_exp, exp, cr_prop) = condenseArrayEquation(outCache, inEnv, inEEquation.cref, inEEquation.expReinit, cr_exp, exp, cr_prop, prop, inImpl, inPrefix, info)
                       (outCache, cr_exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, cr_exp, inPrefix)
                       (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
@@ -521,7 +521,7 @@
                       if isConnectionsOperator(inEEquation.exp)
                         (outCache, outEnv, outIH, outDae, outSets, outState, outGraph) = handleConnectionsOperators(inCache, inEnv, inIH, inPrefix, inSets, inState, inEEquation, inInitial, inImpl, inGraph, inFlattenOp)
                       else
-                        (outCache, exp) = Static.elabExp(inCache, inEnv, inEEquation.exp, inImpl, false, inPrefix, info)
+                        (outCache, exp, _) = Static.elabExp(inCache, inEnv, inEEquation.exp, inImpl, false, inPrefix, info)
                         (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
                         source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
                         outDae = instEquationNoRetCallVectorization(exp, inInitial, source)
@@ -2182,7 +2182,7 @@
                     end
 
                     SCode.ALG_NORETCALL(info = info)  => begin
-                        (outCache, exp) = Static.elabExp(outCache, inEnv, inStatement.exp, inImpl, true, inPrefix, info)
+                        (outCache, exp, _) = Static.elabExp(outCache, inEnv, inStatement.exp, inImpl, true, inPrefix, info)
                         checkValidNoRetcall(exp, info)
                         (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)

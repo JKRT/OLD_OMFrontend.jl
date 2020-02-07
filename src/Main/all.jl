@@ -72,7 +72,7 @@ module AbsynPrograms
 
 const path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
 
-const name = "BouncingBall"
+const name = "RLCircuit"
 const fileName = name + ".mo"
 const fullPath = joinpath(path, "lib", "omc", fileName)
 const AST = OpenModelicaParser.parseFile(fullPath)

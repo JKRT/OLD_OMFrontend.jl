@@ -315,7 +315,7 @@
                   local ea2::List{DAE.Exp}
                 @match lhs begin
                   DAE.CREF(__) where (! Types.isPropArray(lhprop))  => begin
-                      rhs_1 = Types.matchProp(rhs, rhprop, lhprop, true)
+                      (rhs_1, _) = Types.matchProp(rhs, rhprop, lhprop, true)
                       t = getPropExpType(lhprop)
                       _ = begin
                         @match rhs_1 begin
