@@ -522,6 +522,27 @@ end
   end
 end
 
+function isImplicitScope(inName::Name) ::Bool
+  local isImplicit::Bool
+
+  isImplicit = begin
+    local id::Name
+    @matchcontinue inName begin
+      id  => begin
+        stringGet(id, 1) == 36
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  #=  \"$\"
+  =#
+  isImplicit
+end
+
+
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()
 end
