@@ -565,7 +565,7 @@ module ConnectUtil
               _ = begin
                 @match dim begin
                   DAE.DIM_ENUM(__)  => begin
-                      dim.literals = listReverse(dim.literals)
+                      @set dim.literals = listReverse(dim.literals)
                     ()
                   end
 
@@ -1184,13 +1184,13 @@ module ConnectUtil
                 @match (cref, trie) begin
                   (DAE.CREF_QUAL(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
+                      @set trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
                     ()
                   end
 
                   (DAE.CREF_IDENT(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
+                      @set trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
                     ()
                   end
                 end
@@ -1763,7 +1763,7 @@ module ConnectUtil
                 element = begin
                   @match el begin
                     DAE.CONNECTOR_ELEMENT(ty = DAE.CSTREAM(NONE()))  => begin
-                        el.ty = DAE.CSTREAM(flowCref)
+                        @set el.ty = DAE.CSTREAM(flowCref)
                       SOME(el)
                     end
 
@@ -1801,7 +1801,7 @@ module ConnectUtil
                        =#
                        #=  it to the array.
                        =#
-                      el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
+                      @set el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
                     setArrayUpdate(sets, el.set, el)
                   end
                 end
