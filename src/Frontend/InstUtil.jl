@@ -4647,7 +4647,7 @@
               outElts = list(begin
                 @match fn begin
                   DAE.FUNCTION(__)  => begin
-                      fn.functions = addNameToDerivativeMappingFunctionDefs(fn.functions, path)
+                      @set fn.functions = addNameToDerivativeMappingFunctionDefs(fn.functions, path)
                     fn
                   end
 
@@ -4666,7 +4666,7 @@
               outFuncs = list(begin
                 @match fn begin
                   DAE.FUNCTION_DER_MAPPER(__)  => begin
-                      fn.lowerOrderDerivatives = _cons(path, fn.lowerOrderDerivatives)
+                      @set fn.lowerOrderDerivatives = _cons(path, fn.lowerOrderDerivatives)
                     fn
                   end
 
@@ -7027,7 +7027,7 @@
 
               mod = traverseModAddFinal(sub.mod)
               if ! referenceEq(sub.mod, mod)
-                sub.mod = mod
+                @set sub.mod = mod
               end
           sub
         end

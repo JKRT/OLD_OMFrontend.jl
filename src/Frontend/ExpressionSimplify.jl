@@ -5,7 +5,7 @@ module ExpressionSimplify
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    using Setfield
 
     GetArrayContents = Function
     MakeArrayFromList = Function
@@ -1563,7 +1563,7 @@ module ExpressionSimplify
                        #=  min/max function on arrays of only 1 element
                        =#
                       if Expression.isArrayType(Expression.typeOf(e))
-                        exp.expLst = expl
+                        @set exp.expLst = expl
                         e = exp
                       end
                     e
@@ -1766,7 +1766,7 @@ module ExpressionSimplify
                        =#
                        #=  We only match delay with 3 arguments in most places...
                        =#
-                      e.expLst = list(e1, e2, e2)
+                      @set e.expLst = list(e1, e2, e2)
                     e
                   end
 

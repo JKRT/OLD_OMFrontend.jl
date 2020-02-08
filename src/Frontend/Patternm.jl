@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    using Setfield
 
     Func = Function
 
@@ -962,8 +962,8 @@
                       @match c begin
                         DAE.CASE(patterns = pat && DAE.PAT_CALL(patterns = patl) <|  nil())  => begin
                             if allPatternsWild(patl)
-                              pat.knownSingleton = true
-                              c.patterns = list(pat)
+                              @set pat.knownSingleton = true
+                              @set c.patterns = list(pat)
                             end
                           c
                         end
@@ -2629,7 +2629,7 @@
                             DAE.CASE(__)  => begin
                                 (patterns, outT) = traversePatternList(case_.patterns, (func) -> traverseConstantPatternsHelper2(func = func), outT)
                                 if ! valueEq(case_.patterns, patterns)
-                                  case_.patterns = patterns
+                                  @set case_.patterns = patterns
                                 end
                               case_
                             end

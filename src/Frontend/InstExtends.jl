@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    using Setfield
 
     getIdentFn = Function
 
@@ -956,7 +956,7 @@
                       typeSpec2 = fixTypeSpec(inCache, env, typeSpec1, tree)
                       ad = fixArrayDim(inCache, env, attr.arrayDims, tree)
                       if ! referenceEq(ad, attr.arrayDims)
-                        attr.arrayDims = ad
+                        @set attr.arrayDims = ad
                       end
                       if ! (referenceEq(ad, attr.arrayDims) && referenceEq(typeSpec1, typeSpec2) && referenceEq(modifications1, modifications2))
                         elt2 = SCode.COMPONENT(name, prefixes, attr, typeSpec2, modifications2, comment, condition, info)
@@ -969,7 +969,7 @@
                       typeSpec2 = fixTypeSpec(inCache, env, elt.typeSpec, tree)
                       ad = fixArrayDim(inCache, env, attr.arrayDims, tree)
                       if ! referenceEq(ad, attr.arrayDims)
-                        attr.arrayDims = ad
+                        @set attr.arrayDims = ad
                       end
                       if ! (referenceEq(ad, attr.arrayDims) && referenceEq(elt.typeSpec, typeSpec2) && referenceEq(elt.modifications, modifications2))
                         elt = SCode.COMPONENT(elt.name, elt.prefixes, attr, typeSpec2, modifications2, elt.comment, elt.condition, elt.info)
@@ -1796,7 +1796,7 @@
                   SCode.REDECL(element = e && SCode.CLASS(classDef = cdef))  => begin
                       cdef = fixClassdef(inCache, inEnv, cdef, tree)
                       if ! referenceEq(cdef, e.classDef)
-                        e.classDef = cdef
+                        @set e.classDef = cdef
                         outMod.element = e
                       end
                     outMod

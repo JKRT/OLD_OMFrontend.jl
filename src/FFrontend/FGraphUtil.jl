@@ -37,6 +37,9 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 
+using Setfield
+
+
 @importDBG Absyn
 @importDBG AbsynUtil
 @importDBG SCode
@@ -1828,8 +1831,8 @@ import MetaModelica.Dangerous
                   @match node begin
                     FCore.N(data = data && FCore.CL(e = el))  => begin
                         el = SCodeUtil.makeClassPartial(el)
-                        data.e = el
-                        node.data = data
+                        @set data.e = el
+                        @set node.data = data
                       node
                     end
 

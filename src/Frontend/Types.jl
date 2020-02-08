@@ -5,6 +5,7 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+using Setfield
 
 import DAE
 
@@ -8368,7 +8369,7 @@ module Types
               (oty, str) = begin
                 @match oty begin
                   DAE.T_METAPOLYMORPHIC(__)  => begin
-                      oty.name = prefix + oty.name
+                      @set oty.name = prefix + oty.name
                     (oty, prefix)
                   end
 
@@ -8387,7 +8388,7 @@ module Types
               oty = begin
                 @match oty begin
                   DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil())  => begin
-                      oty.dims = list(DAE.DIM_UNKNOWN())
+                      @set oty.dims = list(DAE.DIM_UNKNOWN())
                     oty
                   end
 
@@ -8408,17 +8409,17 @@ module Types
                   local size::ModelicaInteger
                 @match oty begin
                   DAE.T_ARRAY(dims = DAE.DIM_BOOLEAN(__) <|  nil())  => begin
-                      oty.dims = list(DAE.DIM_INTEGER(2))
+                      @set oty.dims = list(DAE.DIM_INTEGER(2))
                     oty
                   end
 
                   DAE.T_ARRAY(dims = DAE.DIM_ENUM(size = size) <|  nil())  => begin
-                      oty.dims = list(DAE.DIM_INTEGER(size))
+                      @set oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
 
                   DAE.T_ARRAY(dims = DAE.DIM_EXP(exp = DAE.ICONST(size)) <|  nil())  => begin
-                      oty.dims = list(DAE.DIM_INTEGER(size))
+                      @set oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
 
@@ -8495,89 +8496,89 @@ module Types
 
                   oty && DAE.T_METABOXED(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_ARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METATYPE(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METALIST(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METAOPTION(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METAARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      oty.ty = tyInner
+                      @set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
-                      oty.functionType = tyInner
+                      @set oty.functionType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION_REFERENCE_FUNC(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
-                      oty.functionType = tyInner
+                      @set oty.functionType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METATUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
-                      oty.types = tys
+                      @set oty.types = tys
                     (oty, a)
                   end
 
                   oty && DAE.T_TUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
-                      oty.types = tys
+                      @set oty.types = tys
                     (oty, a)
                   end
 
                   oty && DAE.T_METARECORD(__)  => begin
                       (vars, a) = traverseVarTypes(oty.fields, a, fn)
-                      oty.fields = vars
+                      @set oty.fields = vars
                     (oty, a)
                   end
 
                   oty && DAE.T_COMPLEX(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
-                      oty.varLst = vars
+                      @set oty.varLst = vars
                     (oty, a)
                   end
 
                   oty && DAE.T_SUBTYPE_BASIC(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
                       (tyInner, a) = traverseType(oty.complexType, a, fn)
-                      oty.varLst = vars
-                      oty.complexType = tyInner
+                      @set oty.varLst = vars
+                      @set oty.complexType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION(__)  => begin
                       (farg, a) = traverseFuncArg(oty.funcArg, a, fn)
                       (tyInner, a) = traverseType(oty.funcResultType, a, fn)
-                      oty.funcArg = farg
-                      oty.funcResultType = tyInner
+                      @set oty.funcArg = farg
+                      @set oty.funcResultType = tyInner
                     (oty, a)
                   end
 
@@ -8661,7 +8662,7 @@ module Types
 
                   (arg && DAE.FUNCARG(__) <| args, a)  => begin
                       (ty, a) = traverseType(arg.ty, a, fn)
-                      arg.ty = ty
+                      @set arg.ty = ty
                       (args, a) = traverseFuncArg(args, a, fn)
                     (_cons(arg, args), a)
                   end

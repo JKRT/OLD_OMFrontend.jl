@@ -5,6 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    using Setfield    
 
     @UniontypeDecl ModScope
     @UniontypeDecl FullMod
@@ -1791,8 +1792,8 @@
                        =#
                        #=  from the submodifier instead.
                        =#
-                      val.orderd = listReverse(vals)
-                      eqmod.modifierAsValue = SOME(val)
+                      @set val.orderd = listReverse(vals)
+                      @set eqmod.modifierAsValue = SOME(val)
                       outMod.binding = SOME(eqmod)
                        #=  Remove all submodifier bindings, they have been myMerged into the
                        =#
@@ -1820,8 +1821,8 @@
                        =#
                        #=  for it. In that case, use the value from the submodifier instead.
                        =#
-                      val.orderd = listReverse(vals)
-                      eqmod.modifierAsValue = SOME(val)
+                      @set val.orderd = listReverse(vals)
+                      @set eqmod.modifierAsValue = SOME(val)
                       outMod.binding = SOME(eqmod)
                        #=  Remove all submodifier bindings, they have been myMerged into the
                        =#

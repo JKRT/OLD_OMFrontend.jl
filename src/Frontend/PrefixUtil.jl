@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    using Setfield
+    
          #= /*
          * This file is part of OpenModelica.
          *
@@ -922,7 +924,7 @@
                        #=  clocks
                        =#
                       (cache, es_1) = prefixExpList(cache, env, ih, e.expList, pre)
-                      e.expList = es_1
+                      @set e.expList = es_1
                     (cache, e)
                   end
 
@@ -1006,13 +1008,13 @@
 
                   (e && DAE.UNBOX(e1), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
-                      e.exp = e1
+                      @set e.exp = e1
                     (cache, e)
                   end
 
                   (e && DAE.BOX(e1), _)  => begin
                       (cache, e1) = prefixExpWork(cache, env, ih, e1, pre)
-                      e.exp = e1
+                      @set e.exp = e1
                     (cache, e)
                   end
 
@@ -1356,7 +1358,7 @@
                 @match (oty, tpl) begin
                   (DAE.T_ARRAY(__), (cache, env, ih, pre))  => begin
                       (cache, dims) = prefixDimensions(cache, env, ih, pre, oty.dims)
-                      oty.dims = dims
+                      @set oty.dims = dims
                     (oty, (cache, env, ih, pre))
                   end
 

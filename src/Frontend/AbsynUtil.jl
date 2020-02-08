@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    using Setfield
 
     FuncTplToTpl = Function
 
@@ -3956,8 +3956,8 @@
                   local cl::Class
                 @match inClass begin
                   cl && CLASS(info = info && SOURCEINFO(__))  => begin
-                      info.fileName = fileName
-                      cl.info = info
+                      @set info.fileName = fileName
+                      @set cl.info = info
                     cl
                   end
                 end
@@ -7101,7 +7101,7 @@
                 @match (inProgram, inPath, inFunc, inArg, inVisitProtected) begin
                   (p && PROGRAM(__), pa, visitor, args, traverse_prot)  => begin
                       (classes, pa_1, args_1) = traverseClasses2(p.classes, pa, visitor, args, traverse_prot)
-                      p.classes = classes
+                      @set p.classes = classes
                     (p, pa_1, args_1)
                   end
                 end

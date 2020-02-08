@@ -669,7 +669,7 @@
               if ! (Flags.isSet(Flags.INFO_XML_OPERATIONS) || Flags.isSet(Flags.VISUAL_XML))
                 return source
               end
-              source.partOfLst = _cons(withinPath, source.partOfLst)
+              @set source.partOfLst = _cons(withinPath, source.partOfLst)
           source
         end
 

@@ -4270,7 +4270,7 @@ module Static
                   local exp::DAE.Exp
                 @match inExp begin
                   DAE.CALL(expLst = exp && DAE.MATRIX(__) <|  nil())  => begin
-                      exp.matrix = list(makePreLst(row, inType) for row in exp.matrix)
+                      @set exp.matrix = list(makePreLst(row, inType) for row in exp.matrix)
                     exp
                   end
 
@@ -6896,7 +6896,7 @@ module Static
                 @matchcontinue (oty, inTpl) begin
                   (DAE.T_ARRAY(__), tpl)  => begin
                       (dims, tpl) = ListUtil.mapFold(oty.dims, elabCallArgsEvaluateArrayLength3, tpl)
-                      oty.dims = dims
+                      @set oty.dims = dims
                     (oty, tpl)
                   end
 
@@ -7608,7 +7608,7 @@ module Static
                       if ! listEmpty(bindings)
                         bindings = Types.solvePolymorphicBindings(bindings, inInfo, inType.path)
                         typeVars = list(Types.fixPolymorphicRestype(tv, bindings, inInfo) for tv in inType.typeVars)
-                        ty.typeVars = typeVars
+                        @set ty.typeVars = typeVars
                         prop = getProperties(ty, ty_const)
                       else
                         prop = getProperties(ty, ty_const)
@@ -8869,7 +8869,7 @@ module Static
                   end
 
                   ty && DAE.T_TUPLE(__)  => begin
-                      ty.types = ListUtil.map2(ty.types, evaluateFuncArgTypeDims, inEnv, inCache)
+                      @set ty.types = ListUtil.map2(ty.types, evaluateFuncArgTypeDims, inEnv, inCache)
                     ty
                   end
 
@@ -9319,8 +9319,8 @@ module Static
                           (exp, _, outPolymorphicBindings) = Types.matchTypePolymorphic(exp, ty, defarg.ty, FGraphUtil.getGraphPathNoImplicitScope(inEnv), outPolymorphicBindings, false)
                           @match true = Types.constEqualOrHigher(c, defarg.constType)
                           outConsts = _cons(c, outConsts)
-                          slot.slotFilled = true
-                          slot.arg = SOME(exp)
+                          @set slot.slotFilled = true
+                          @set slot.arg = SOME(exp)
                         slot
                       end
 

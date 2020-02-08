@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    using Setfield
+    
          #= /*
          * This file is part of OpenModelica.
          *
@@ -93,14 +95,14 @@
                 @match outClass begin
                   Absyn.CLASS(restriction = Absyn.R_UNIONTYPE(__), body = body && Absyn.PARTS(classParts = parts))  => begin
                       (parts, outMetaClasses) = fixClassParts(parts, outClass.name, body.typeVars)
-                      body.classParts = parts
+                      @set body.classParts = parts
                       outClass.body = body
                     ()
                   end
 
                   Absyn.CLASS(restriction = Absyn.R_UNIONTYPE(__), body = body && Absyn.CLASS_EXTENDS(parts = parts))  => begin
                       (parts, outMetaClasses) = fixClassParts(parts, outClass.name, nil)
-                      body.parts = parts
+                      @set body.parts = parts
                       outClass.body = body
                     ()
                   end
@@ -113,13 +115,13 @@
               _ = begin
                 @match outClass begin
                   Absyn.CLASS(body = body && Absyn.PARTS(__))  => begin
-                      body.classParts = createMetaClassesFromClassParts(body.classParts)
+                      @set body.classParts = createMetaClassesFromClassParts(body.classParts)
                       outClass.body = body
                     ()
                   end
 
                   Absyn.CLASS(body = body && Absyn.CLASS_EXTENDS(__))  => begin
-                      body.parts = createMetaClassesFromClassParts(body.parts)
+                      @set body.parts = createMetaClassesFromClassParts(body.parts)
                       outClass.body = body
                     ()
                   end
@@ -138,12 +140,12 @@
               outClassParts = list(begin
                 @match p begin
                   Absyn.PUBLIC(__)  => begin
-                      p.contents = createMetaClassesFromElementItems(p.contents)
+                      @set p.contents = createMetaClassesFromElementItems(p.contents)
                     p
                   end
 
                   Absyn.PROTECTED(__)  => begin
-                      p.contents = createMetaClassesFromElementItems(p.contents)
+                      @set p.contents = createMetaClassesFromElementItems(p.contents)
                     p
                   end
 
@@ -190,8 +192,8 @@
                   local es::Absyn.ElementSpec
                 @match outElementItem begin
                   Absyn.ELEMENTITEM(element = e && Absyn.ELEMENT(specification = es && Absyn.CLASSDEF(__)))  => begin
-                      es.class_ = inClass
-                      e.specification = es
+                      @set es.class_ = inClass
+                      @set e.specification = es
                       outElementItem.element = e
                     outElementItem
                   end
@@ -222,14 +224,14 @@
                 @match p begin
                   Absyn.PUBLIC(__)  => begin
                       (els, meta_classes) = fixElementItems(p.contents, inClassName, typeVars)
-                      p.contents = els
+                      @set p.contents = els
                       outMetaClasses = listAppend(meta_classes, outMetaClasses)
                     p
                   end
 
                   Absyn.PROTECTED(__)  => begin
                       (els, meta_classes) = fixElementItems(p.contents, inClassName, typeVars)
-                      p.contents = els
+                      @set p.contents = els
                       outMetaClasses = listAppend(meta_classes, outMetaClasses)
                     p
                   end
@@ -275,12 +277,12 @@
                        #=  Change the record into a metarecord and add it to the list of metaclasses.
                        =#
                       r = Absyn.R_METARECORD(Absyn.IDENT(inName), index, singleton, true, typeVars)
-                      c.restriction = r
+                      @set c.restriction = r
                       outMetaClasses = _cons(c, outMetaClasses)
                        #=  Change the record into a metarecord and update the original class.
                        =#
                       r = Absyn.R_METARECORD(Absyn.IDENT(inName), index, singleton, false, typeVars)
-                      c.restriction = r
+                      @set c.restriction = r
                       index = index + 1
                     setElementItemClass(e, c)
                   end

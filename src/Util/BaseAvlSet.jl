@@ -110,9 +110,9 @@
                   NODE(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
-                        tree.left = add(tree.left, inKey)
+                        @set tree.left = add(tree.left, inKey)
                       elseif key_comp == 1
-                        tree.right = add(tree.right, inKey)
+                        @set tree.right = add(tree.right, inKey)
                       end
                        #=  Replace left branch.
                        =#
