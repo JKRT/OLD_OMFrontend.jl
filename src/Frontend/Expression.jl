@@ -6821,7 +6821,7 @@ Type_a = Any
 
               dims = expDimensions(eIn)
               try
-                @match list(DAE.DIM_INTEGER(integer = size)) = dims
+                @match DAE.DIM_INTEGER(integer = size) <| nil = dims
                 for i in size:(-1):1
                   eLstOut = _cons(makeASUBSingleSub(eIn, DAE.ICONST(i)), eLstOut)
                 end

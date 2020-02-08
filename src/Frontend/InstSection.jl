@@ -4730,7 +4730,7 @@
                 @matchcontinue (inCache, var, value, props) begin
                   (cache, Absyn.CREF(cr), e_1, _)  => begin
                       @match (cache, (@match DAE.CREF(_, t) = lhs), _, attr) = Static.elabCrefNoEval(cache, inEnv, cr, inImpl, false, inPre, info)
-                      @match DAE.T_ARRAY(dims = list(_)) = t
+                      @match DAE.T_ARRAY(dims = _ <| nil) = t
                       rhs = e_1
                       Static.checkAssignmentToInput(var, attr, inEnv, false, info)
                       @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)

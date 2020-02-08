@@ -1949,7 +1949,7 @@ module Ceval
                           end
                         end
                       end
-                      @match list((_, iv_1)) = ListUtil.select(list((b1, 1), (b2, -1), (b3, 0)), Util.tuple21)
+                      @match (_, iv_1)  <| nil = ListUtil.select(list((b1, 1), (b2, -1), (b3, 0)), Util.tuple21)
                     (cache, Values.INTEGER(iv_1))
                   end
                 end
@@ -3500,7 +3500,7 @@ module Ceval
               local exp1::DAE.Exp
               local exp2::DAE.Exp
 
-              @match list(exp1, exp2) = inExpExpLst
+              @match exp1 <| exp2  <| nil = inExpExpLst
               (cache, v1) = ceval(cache, inEnv, exp1, impl, msg, numIter + 1)
               (cache, v2) = ceval(cache, inEnv, exp2, impl, msg, numIter + 1)
               outValue = begin
@@ -3992,7 +3992,7 @@ module Ceval
                 @matchcontinue (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, exp <|  nil(), impl, msg, _)  => begin
                       @match DAE.T_ARRAY(ty = ty) = Expression.typeOf(exp)
-                      @match (cache, Values.ARRAY(vals, list(dimension))) = ceval(cache, env, exp, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(vals, dimension <| nil)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       zero = ValuesUtil.makeZero(ty)
                       res = Values.ARRAY(list(Values.ARRAY(list(if i == j
                             listGet(vals, i)
@@ -4031,8 +4031,8 @@ module Ceval
                   local info::SourceInfo
                 @matchcontinue (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, xe <| ye <|  nil(), impl, msg, _)  => begin
-                      @match (cache, Values.ARRAY(xv, list(3))) = ceval(cache, env, xe, impl, msg, numIter + 1)
-                      @match (cache, Values.ARRAY(yv, list(3))) = ceval(cache, env, ye, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(xv, 3 <| nil)) = ceval(cache, env, xe, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(yv, 3 <| nil)) = ceval(cache, env, ye, impl, msg, numIter + 1)
                       res = ValuesUtil.crossProduct(xv, yv)
                     (cache, res)
                   end

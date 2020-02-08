@@ -1062,7 +1062,7 @@
                   end
 
                   (DAE.STMT_WHEN(exp = e, conditions = conditions, initialCall = initialCall, statementLst = stmts, elseWhen = SOME(ew), source = source), _, _, extraArg)  => begin
-                      @match (list(ew_1), extraArg) = traverseDAEEquationsStmtsList(list(ew), func, opt, extraArg)
+                      @match (ew_1 <| nil, extraArg) = traverseDAEEquationsStmtsList(list(ew), func, opt, extraArg)
                       (stmts2, extraArg) = traverseDAEEquationsStmtsList(stmts, func, opt, extraArg)
                       (e_1, extraArg) = func(e, extraArg)
                       x = if referenceEq(ew, ew_1) && referenceEq(e, e_1) && referenceEq(stmts, stmts2)
@@ -1336,7 +1336,7 @@
                   end
 
                   (x && DAE.STMT_WHEN(exp = e, conditions = conditions, initialCall = initialCall, statementLst = stmts, elseWhen = SOME(ew), source = source) <| xs, _, extraArg)  => begin
-                      @match (list(_), extraArg) = traverseDAEStmts(list(ew), func, extraArg)
+                      @match (_ <| nil, extraArg) = traverseDAEStmts(list(ew), func, extraArg)
                       (stmts2, extraArg) = traverseDAEStmts(stmts, func, extraArg)
                       (e_1, extraArg) = func(e, x, extraArg)
                       (xs_1, extraArg) = traverseDAEStmts(xs, func, extraArg)

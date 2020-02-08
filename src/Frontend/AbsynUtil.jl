@@ -5112,7 +5112,7 @@
         end
 
         function isDerCrefFail(exp::Exp)
-              @match CALL(CREF_IDENT("der", nil), FUNCTIONARGS(list(CREF()), nil)) = exp
+              @match CALL(CREF_IDENT("der", nil), FUNCTIONARGS(CREF() <| nil, nil)) = exp
         end
 
          #= author: adrpo

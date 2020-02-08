@@ -3006,7 +3006,7 @@
                   end
 
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = t), DAE.SLICE(exp = e) <| ys)  => begin
-                      @match DAE.T_ARRAY(dims = list(dim)) = Expression.typeOf(e)
+                      @match DAE.T_ARRAY(dims = dim <| nil) = Expression.typeOf(e)
                       t_1 = checkSubscripts(t, ys)
                     DAE.T_ARRAY(t_1, list(dim))
                   end

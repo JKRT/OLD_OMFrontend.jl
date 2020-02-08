@@ -92,7 +92,7 @@ module ConnectUtil
          =#
         import DAE.Face
         import DAE.ConnectorElement
-        import DAE.ConnectorType
+        import DAE.CConnectorType
         import DAE.SetTrieNode
         import DAE.SetTrie
         import DAE.SetConnection
@@ -101,6 +101,8 @@ module ConnectUtil
         import DAE.CSet
          #=  CSet graph represented as an adjacency list.
          =#
+
+        ConnectorType = DAE.CConnectorType
 
         DaeEdges = List # ConnectionGraph.DaeEdges # this doesn't seem to work, it says DaeEdges is undefined!
 
@@ -175,7 +177,7 @@ module ConnectUtil
                        =#
                       c1 = listAppend(c2, c1)
                       o1 = listAppend(o2, o1)
-                      node.nodes = _cons(childSets.sets, node.nodes)
+                      @set node.nodes = _cons(childSets.sets, node.nodes)
                     DAE.SETS(node, sc, c1, o1)
                   end
                 end
@@ -464,8 +466,8 @@ module ConnectUtil
               end
                #=  Stream variables and exactly one flow => add associations.
                =#
-              @match list(flow_var) = flowVars
-              @match list(flow_cr) = daeVarToCrefs(flow_var)
+              @match flow_var <| nil = flowVars
+              @match flow_cr <| nil = daeVarToCrefs(flow_var)
               flow_cr = PrefixUtil.prefixCrefNoContext(prefix, flow_cr)
               for stream_var in streamVars
                 stream_crs = daeVarToCrefs(stream_var)
@@ -624,7 +626,7 @@ module ConnectUtil
                 setTrieGetElement(cref, DAE.INSIDE(), sets.sets)
               catch
                 @set sets.setCount = sets.setCount + 1
-                e = newElement(cref, DAE.INSIDE(), DAE.FLOW(), source, sets.setCount)
+                e = newElement(cref, DAE.INSIDE(), DAE.CFLOW(), source, sets.setCount)
                 @set sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
@@ -650,7 +652,7 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      node.flowAssociation = SOME(flowCref)
+                      @set node.flowAssociation = SOME(flowCref)
                     ()
                   end
                 end
@@ -901,7 +903,7 @@ module ConnectUtil
         function setElementSetIndex(element::ConnectorElement, index::ModelicaInteger) ::ConnectorElement
 
 
-              element.set = index
+              @set element.set = index
           element
         end
 
@@ -917,7 +919,7 @@ module ConnectUtil
         function setElementName(element::ConnectorElement, name::DAE.ComponentRef) ::ConnectorElement
 
 
-              element.name = name
+              @set element.name = name
           element
         end
 
@@ -1074,7 +1076,7 @@ module ConnectUtil
 
               index = getElementSetIndex(set)
               e = setElementSetIndex(element, index)
-              sets.sets = setTrieAdd(e, sets.sets)
+              @set sets.sets = setTrieAdd(e, sets.sets)
           sets
         end
 
@@ -1116,12 +1118,12 @@ module ConnectUtil
                       _ = begin
                         @match element.face begin
                           DAE.INSIDE(__)  => begin
-                              node.insideElement = SOME(element)
+                              @set node.insideElement = SOME(element)
                             ()
                           end
 
                           DAE.OUTSIDE(__)  => begin
-                              node.outsideElement = SOME(element)
+                              @set node.outsideElement = SOME(element)
                             ()
                           end
                         end
@@ -1292,7 +1294,7 @@ module ConnectUtil
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
                       (nodes, arg) = ListUtil.map1Fold(node.nodes, setTrieTraverseLeaves, updateFunc, arg)
-                      node.nodes = nodes
+                      @set node.nodes = nodes
                     ()
                   end
 
@@ -1909,7 +1911,7 @@ module ConnectUtil
                       outDAE
                     end
 
-                    DAE.SET(ty = DAE.EQU(__))  => begin
+                    DAE.SET(ty = DAE.CEQU(__))  => begin
                          #=  A set pointer left from generateSetList, ignore it.
                          =#
                          #=  Here we do some overconstrained connection breaking.
@@ -2049,9 +2051,9 @@ module ConnectUtil
 
               if System.getUsesCardinality()
                 crefs = ComponentReference.expandCref(lhsCref, false)
-                sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                @set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
                 crefs = ComponentReference.expandCref(rhsCref, false)
-                sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                @set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
               end
           sets
         end
@@ -2071,12 +2073,12 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
-                      node.connectCount = node.connectCount + amount
+                      @set node.connectCount = node.connectCount + amount
                     ()
                   end
 
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      node.connectCount = node.connectCount + amount
+                      @set node.connectCount = node.connectCount + amount
                     ()
                   end
                 end
@@ -2557,7 +2559,7 @@ module ConnectUtil
                        =#
                        #=  inStream(c2) = c1;
                        =#
-                      @match list(DAE.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match DAE.CONNECTOR_ELEMENT(name = c) <| nil = removeStreamSetElement(streamCref, reducedStreams)
                       e = Expression.crefExp(c)
                     e
                   end
@@ -2567,7 +2569,7 @@ module ConnectUtil
                        =#
                        #=  inStream(c1) = inStream(c2);
                        =#
-                      @match list(DAE.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match DAE.CONNECTOR_ELEMENT(name = c) <| nil = removeStreamSetElement(streamCref, reducedStreams)
                       e = evaluateInStream(c, sets, setArray, flowThreshold)
                     e
                   end

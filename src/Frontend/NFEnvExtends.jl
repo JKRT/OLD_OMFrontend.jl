@@ -1,4 +1,4 @@
-  module NFEnvExtends 
+  module NFEnvExtends
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl ExtendsWrapper 
+    @UniontypeDecl ExtendsWrapper
 
          #= /*
          * This file is part of OpenModelica.
@@ -68,21 +68,21 @@
 
         import Util
 
-        Env = NFSCodeEnv.Env 
+        Env = NFSCodeEnv.Env
 
-        ClassType = NFSCodeEnv.ClassType 
+        ClassType = NFSCodeEnv.ClassType
 
-        Extends = NFSCodeEnv.Extends 
+        Extends = NFSCodeEnv.Extends
 
-        Frame = NFSCodeEnv.Frame 
+        Frame = NFSCodeEnv.Frame
 
-        FrameType = NFSCodeEnv.FrameType 
+        FrameType = NFSCodeEnv.FrameType
 
-        Import = Absyn.Import 
+        Import = Absyn.Import
 
-        Item = NFSCodeEnv.Item 
+        Item = NFSCodeEnv.Item
 
-        ExtendsTableArray = Array 
+        ExtendsTableArray = Array
         import NFSCodeEnv.EnvTree
 
          const BASECLASS_NOT_FOUND_ERROR = "1"::String
@@ -116,7 +116,7 @@
            things up in an incomplete environment. This includes fully qualifying the
            names of the extended classes, updating the class extends base classes and
            inserting element redeclares into the proper extends. =#
-        function update(inEnv::Env) ::Env 
+        function update(inEnv::Env) ::Env
               local outEnv::Env
 
               local env::Env
@@ -157,7 +157,7 @@
            and look for Modelica in A, etc. This means that we need to look up 2^n
            extends to find a relative name at the top scope. By fully qualifying the
            base class names we avoid these problems. =#
-        function qualify(inEnv::Env) ::Env 
+        function qualify(inEnv::Env) ::Env
               local outEnv::Env
 
               outEnv = begin
@@ -169,7 +169,7 @@
                       ext_table = createExtendsTable(ext_count)
                     qualify2(inEnv, NFSCodeEnv.USERDEFINED(), ext_table)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFEnvExtends.qualify failed.")
@@ -180,7 +180,7 @@
           outEnv
         end
 
-        function qualify2(inEnv::Env, inClassType::ClassType, inExtendsTable::ExtendsTableArray) ::Env 
+        function qualify2(inEnv::Env, inClassType::ClassType, inExtendsTable::ExtendsTableArray) ::Env
               local outEnv::Env
 
               local exts::List{Extends}
@@ -200,7 +200,7 @@
           outEnv
         end
 
-        function qualify3(name::String, item::Item, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Item 
+        function qualify3(name::String, item::Item, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Item
 
 
               item = begin
@@ -215,7 +215,7 @@
                       @match _cons(cls_env, _) = qualify2(env, cls_ty, inExtendsTable)
                     NFSCodeEnv.CLASS(cls, list(cls_env), cls_ty)
                   end
-                  
+
                   _  => begin
                       item
                   end
@@ -224,7 +224,7 @@
           item
         end
 
-        function qualifyLocalScope(inEnv::Env, inClassType::ClassType, inExtendsTable::ExtendsTableArray) ::Env 
+        function qualifyLocalScope(inEnv::Env, inClassType::ClassType, inExtendsTable::ExtendsTableArray) ::Env
               local outEnv::Env
 
               local exts::List{Extends}
@@ -237,7 +237,7 @@
           outEnv
         end
 
-        function qualifyExtendsList(inExtends::List{<:Extends}, inClassType::ClassType, inEnv::Env, inExtendsTable::ExtendsTableArray) ::List{Extends} 
+        function qualifyExtendsList(inExtends::List{<:Extends}, inClassType::ClassType, inEnv::Env, inExtendsTable::ExtendsTableArray) ::List{Extends}
               local outExtends::List{Extends}
 
               outExtends = begin
@@ -252,7 +252,7 @@
                       extl = ListUtil.map2Reverse(extl, qualifyExtends, inEnv, inExtendsTable)
                     _cons(ext, extl)
                   end
-                  
+
                   _  => begin
                         extl = ListUtil.map2Reverse(inExtends, qualifyExtends, inEnv, inExtendsTable)
                       extl
@@ -264,7 +264,7 @@
           outExtends
         end
 
-        function qualifyExtends(inExtends::Extends, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Extends 
+        function qualifyExtends(inExtends::Extends, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Extends
               local outExtends::Extends
 
               outExtends = begin
@@ -280,12 +280,12 @@
                       _ = NFSCodeLookup.lookupBuiltinType(id)
                     inExtends
                   end
-                  
+
                   (_, _, _)  => begin
                       @match SOME(ext) = qualifyExtends2(inExtends, inEnv, inExtendsTable)
                     ext
                   end
-                  
+
                   (NFSCodeEnv.EXTENDS(baseClass = bc), _, _)  => begin
                       @match true = Flags.isSet(Flags.FAILTRACE)
                       Debug.traceln("- NFEnvExtends.qualifyExtends failed on " + AbsynUtil.pathString(bc) + "\\n")
@@ -296,7 +296,7 @@
           outExtends
         end
 
-        function qualifyExtends2(inExtends::Extends, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Option{Extends} 
+        function qualifyExtends2(inExtends::Extends, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Option{Extends}
               local outExtends::Option{Extends}
 
               outExtends = begin
@@ -310,7 +310,7 @@
                   (NFSCodeEnv.EXTENDS(index = index), _, _)  => begin
                     lookupQualifiedExtends(index, inExtendsTable)
                   end
-                  
+
                   (NFSCodeEnv.EXTENDS(bc, rl, index, info), _, _)  => begin
                       addUnqualifiedToTable(inExtends, index, inExtendsTable)
                       env = NFSCodeEnv.removeExtendFromLocalScope(bc, inEnv)
@@ -329,7 +329,7 @@
           outExtends
         end
 
-        function qualifyExtends3(inBaseClass::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray, inIsFirst::Bool, inFullPath::Absyn.Path, inInfo::SourceInfo, inErrorPath::Option{<:Absyn.Path}) ::Absyn.Path 
+        function qualifyExtends3(inBaseClass::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray, inIsFirst::Bool, inFullPath::Absyn.Path, inInfo::SourceInfo, inErrorPath::Option{<:Absyn.Path}) ::Absyn.Path
               local outBaseClass::Absyn.Path
 
               outBaseClass = begin
@@ -343,18 +343,18 @@
                   (_, _, _, _, _, _, SOME(bc))  => begin
                     bc
                   end
-                  
+
                   (Absyn.IDENT(name = name), _, _, _, _, _, _)  => begin
                       (opath, env, ep) = qualifyExtendsPart(name, inEnv, inExtendsTable, inIsFirst, inFullPath, inInfo)
                     makeExtendsPath(opath, NONE(), env, ep, inIsFirst)
                   end
-                  
+
                   (Absyn.QUALIFIED(name = name, path = rest_path), _, _, _, _, _, _)  => begin
                       (opath, env, ep) = qualifyExtendsPart(name, inEnv, inExtendsTable, inIsFirst, inFullPath, inInfo)
                       rest_path = qualifyExtends3(rest_path, env, inExtendsTable, false, inFullPath, inInfo, ep)
                     makeExtendsPath(opath, SOME(rest_path), env, ep, inIsFirst)
                   end
-                  
+
                   (Absyn.FULLYQUALIFIED(path = rest_path), _, _, _, _, _, _)  => begin
                       env = NFSCodeEnv.getEnvTopScope(inEnv)
                     qualifyExtends3(rest_path, env, inExtendsTable, inIsFirst, rest_path, inInfo, NONE())
@@ -364,7 +364,7 @@
           outBaseClass
         end
 
-        function makeExtendsPath(inFirstPath::Option{<:Absyn.Path}, inRestPath::Option{<:Absyn.Path}, inEnv::Env, inErrorPath::Option{<:Absyn.Path}, inIsFirst::Bool) ::Absyn.Path 
+        function makeExtendsPath(inFirstPath::Option{<:Absyn.Path}, inRestPath::Option{<:Absyn.Path}, inEnv::Env, inErrorPath::Option{<:Absyn.Path}, inIsFirst::Bool) ::Absyn.Path
               local outPath::Absyn.Path
 
               outPath = begin
@@ -375,22 +375,22 @@
                   (_, _, _, SOME(path), _)  => begin
                     path
                   end
-                  
+
                   (_, SOME(path && Absyn.QUALIFIED(name = "$E")), _, _, _)  => begin
                     path
                   end
-                  
+
                   (_, SOME(path && Absyn.FULLYQUALIFIED(__)), _, _, _)  => begin
                     path
                   end
-                  
+
                   (_, _, _, _, true)  => begin
                       path = NFSCodeEnv.getEnvPath(inEnv)
                       path = AbsynUtil.joinPathsOptSuffix(path, inRestPath)
                       path = AbsynUtil.makeFullyQualified(path)
                     path
                   end
-                  
+
                   (SOME(path), _, _, _, _)  => begin
                     AbsynUtil.joinPathsOptSuffix(path, inRestPath)
                   end
@@ -407,7 +407,7 @@
           outPath
         end
 
-        function qualifyExtendsPart(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray, inIsFirst::Bool, inFullPath::Absyn.Path, inInfo::SourceInfo) ::Tuple{Option{Absyn.Path}, Env, Option{Absyn.Path}} 
+        function qualifyExtendsPart(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray, inIsFirst::Bool, inFullPath::Absyn.Path, inInfo::SourceInfo) ::Tuple{Option{Absyn.Path}, Env, Option{Absyn.Path}}
               local outErrorPath::Option{Absyn.Path}
               local outEnv::Env
               local outPath::Option{Absyn.Path}
@@ -421,7 +421,7 @@
           (outPath, outEnv, outErrorPath)
         end
 
-        function qualifyExtendsPart2(inPartName::Absyn.Path, inItem::Option{<:Item}, inFoundEnv::Option{<:Env}, inOriginEnv::Env, inIsFirst::Bool, inFromExtends::Bool, inFullPath::Absyn.Path) ::Tuple{Env, Option{Absyn.Path}} 
+        function qualifyExtendsPart2(inPartName::Absyn.Path, inItem::Option{<:Item}, inFoundEnv::Option{<:Env}, inOriginEnv::Env, inIsFirst::Bool, inFromExtends::Bool, inFullPath::Absyn.Path) ::Tuple{Env, Option{Absyn.Path}}
               local outErrorPath::Option{Absyn.Path}
               local outEnv::Env
 
@@ -435,7 +435,7 @@
                       env = NFSCodeEnv.myMergeItemEnv(item, env)
                     (env, ep)
                   end
-                  
+
                   _  => begin
                       (NFSCodeEnv.emptyEnv, makeExtendsError(inFullPath, inPartName, BASECLASS_NOT_FOUND_ERROR))
                   end
@@ -444,7 +444,7 @@
           (outEnv, outErrorPath)
         end
 
-        function makeExtendsError(inBaseClass::Absyn.Path, inPart::Absyn.Path, inError::String) ::Option{Absyn.Path} 
+        function makeExtendsError(inBaseClass::Absyn.Path, inPart::Absyn.Path, inError::String) ::Option{Absyn.Path}
               local outError::Option{Absyn.Path}
 
               outError = begin
@@ -467,7 +467,7 @@
            which the error occured in, and base_class is the path of the base class as
            declared in the code. This is used by printExtendsError to print an
            appropriate error when needed. =#
-        function checkExtendsPart(inIsFirst::Bool, inFromExtends::Bool, inPartName::Absyn.Path, inItem::Item, inBaseClass::Absyn.Path, inFoundEnv::Env, inOriginEnv::Env) ::Option{Absyn.Path} 
+        function checkExtendsPart(inIsFirst::Bool, inFromExtends::Bool, inPartName::Absyn.Path, inItem::Item, inBaseClass::Absyn.Path, inFoundEnv::Env, inOriginEnv::Env) ::Option{Absyn.Path}
               local outErrorPath::Option{Absyn.Path}
 
               outErrorPath = begin
@@ -478,16 +478,16 @@
                   (true, true, _, _, _, _, _)  => begin
                     makeExtendsError(inBaseClass, inPartName, BASECLASS_INHERITED_ERROR)
                   end
-                  
+
                   (_, _, _, NFSCodeEnv.CLASS(__), _, _, _)  => begin
                     NONE()
                   end
-                  
+
                   (_, _, _, NFSCodeEnv.VAR(__), _, _, _)  => begin
                       part = NFSCodeEnv.myMergePathWithEnvPath(inPartName, inFoundEnv)
                     makeExtendsError(inBaseClass, part, BASECLASS_IS_VAR_ERROR)
                   end
-                  
+
                   _  => begin
                       makeExtendsError(inBaseClass, inPartName, BASECLASS_UNKNOWN_ERROR)
                   end
@@ -504,7 +504,7 @@
           outErrorPath
         end
 
-        function splitExtendsErrorPath(inPath::Absyn.Path) ::Tuple{Absyn.Path, Absyn.Path} 
+        function splitExtendsErrorPath(inPath::Absyn.Path) ::Tuple{Absyn.Path, Absyn.Path}
               local outPartPath::Absyn.Path
               local outBaseClass::Absyn.Path
 
@@ -516,7 +516,7 @@
                   Absyn.QUALIFIED(part_str, Absyn.QUALIFIED("$bc", bc))  => begin
                     (bc, Absyn.IDENT(part_str))
                   end
-                  
+
                   Absyn.QUALIFIED(part_str, part)  => begin
                       (bc, part) = splitExtendsErrorPath(part)
                     (bc, Absyn.QUALIFIED(part_str, part))
@@ -526,7 +526,7 @@
           (outBaseClass, outPartPath)
         end
 
-        function printExtendsError(inErrorPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo)  
+        function printExtendsError(inErrorPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local err_str::String
                   local bc::Absyn.Path
@@ -539,7 +539,7 @@
                       printExtendsError2(err_str, bc, part, env, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFEnvExtends.printExtendsError failed to print error " + AbsynUtil.pathString(inErrorPath))
@@ -549,7 +549,7 @@
               end
         end
 
-        function printExtendsError2(inError::String, inBaseClass::Absyn.Path, inPartPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo)  
+        function printExtendsError2(inError::String, inBaseClass::Absyn.Path, inPartPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local bc_str::String
                   local env_str::String
@@ -565,7 +565,7 @@
                       Error.addSourceMessage(Error.LOOKUP_BASECLASS_ERROR, list(bc_str, env_str), inInfo)
                     ()
                   end
-                  
+
                   (_, _, Absyn.IDENT(part), _, _)  => begin
                       @match true = stringEq(inError, BASECLASS_INHERITED_ERROR)
                       bc_str = AbsynUtil.pathString(inBaseClass)
@@ -574,7 +574,7 @@
                       printInheritedExtendsError(part, exts, inEnv)
                     ()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match true = stringEq(inError, BASECLASS_REPLACEABLE_ERROR)
                       @match (NFSCodeEnv.CLASS(cls = SCode.CLASS(name = part, info = info)), _, _) = NFSCodeLookup.lookupFullyQualified(inPartPath, inEnv)
@@ -588,7 +588,7 @@
                       Error.addSourceMessage(msg, list(part, bc_str), info)
                     ()
                   end
-                  
+
                   (_, _, _, _, _)  => begin
                       @match true = stringEq(inError, BASECLASS_IS_VAR_ERROR)
                       @match (NFSCodeEnv.VAR(var = SCode.COMPONENT(name = part, info = info)), _, _) = NFSCodeLookup.lookupFullyQualified(inPartPath, inEnv)
@@ -601,7 +601,7 @@
               end
         end
 
-        function printInheritedExtendsError(inName::String, inExtends::List{<:Extends}, inEnv::Env)  
+        function printInheritedExtendsError(inName::String, inExtends::List{<:Extends}, inEnv::Env)
               _ = begin
                   local rest_ext::List{Extends}
                   local ext::Extends
@@ -622,12 +622,12 @@
                       printInheritedExtendsError(inName, rest_ext, inEnv)
                     ()
                   end
-                  
+
                   (_, _ <| rest_ext, _)  => begin
                       printInheritedExtendsError(inName, rest_ext, inEnv)
                     ()
                   end
-                  
+
                   (_,  nil(), _)  => begin
                     ()
                   end
@@ -635,7 +635,7 @@
               end
         end
 
-        function lookupSimpleName(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}, Bool} 
+        function lookupSimpleName(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}, Bool}
               local outFromExtends::Bool
               local outEnv::Option{Env}
               local outPath::Option{Absyn.Path}
@@ -653,13 +653,13 @@
                       (opt_item, opt_path, opt_env, fe) = lookupInLocalScope(inName, inEnv, inExtendsTable)
                     (opt_item, opt_path, opt_env, fe)
                   end
-                  
+
                   (_, NFSCodeEnv.FRAME(frameType = frame_type) <| env, _)  => begin
                       NFSCodeLookup.frameNotEncapsulated(frame_type)
                       (opt_item, opt_path, opt_env, _) = lookupSimpleName(inName, env, inExtendsTable)
                     (opt_item, opt_path, opt_env, false)
                   end
-                  
+
                   _  => begin
                       (NONE(), NONE(), NONE(), false)
                   end
@@ -668,7 +668,7 @@
           (outItem, outPath, outEnv, outFromExtends)
         end
 
-        function lookupInLocalScope(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}, Bool} 
+        function lookupInLocalScope(inName::String, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}, Bool}
               local outFromExtends::Bool
               local outEnv::Option{Env}
               local outPath::Option{Absyn.Path}
@@ -687,17 +687,17 @@
                       (item, env) = NFSCodeLookup.lookupInClass(inName, inEnv)
                     (SOME(item), SOME(Absyn.IDENT(inName)), SOME(env), false)
                   end
-                  
+
                   (_, NFSCodeEnv.FRAME(extendsTable = NFSCodeEnv.EXTENDS_TABLE(baseClasses = bcl && _ <| _)) <| _, _)  => begin
                       (oitem, oenv) = lookupInBaseClasses(inName, bcl, inEnv, inExtendsTable)
                     (oitem, SOME(Absyn.IDENT(inName)), oenv, true)
                   end
-                  
+
                   (_, NFSCodeEnv.FRAME(importTable = NFSCodeEnv.IMPORT_TABLE(hidden = false, qualifiedImports = imps)) <| _, _)  => begin
                       (oitem, opath, oenv) = lookupInQualifiedImports(inName, imps, inEnv, inExtendsTable)
                     (oitem, opath, oenv, false)
                   end
-                  
+
                   (_, NFSCodeEnv.FRAME(importTable = NFSCodeEnv.IMPORT_TABLE(hidden = false, unqualifiedImports = imps)) <| _, _)  => begin
                       (oitem, opath, oenv) = lookupInUnqualifiedImports(inName, imps, inEnv, inExtendsTable)
                     (oitem, opath, oenv, false)
@@ -707,7 +707,7 @@
           (outItem, outPath, outEnv, outFromExtends)
         end
 
-        function lookupInBaseClasses(inName::String, inExtends::List{<:Extends}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Env}} 
+        function lookupInBaseClasses(inName::String, inExtends::List{<:Extends}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Env}}
               local outEnv::Option{Env}
               local outItem::Option{Item}
 
@@ -725,7 +725,7 @@
                       (opt_item, opt_env) = lookupInBaseClasses2(inName, opt_ext, env, inExtendsTable)
                     (opt_item, opt_env)
                   end
-                  
+
                   (_, _ <| rest_ext, _, _)  => begin
                       (opt_item, opt_env) = lookupInBaseClasses(inName, rest_ext, inEnv, inExtendsTable)
                     (opt_item, opt_env)
@@ -739,7 +739,7 @@
           (outItem, outEnv)
         end
 
-        function lookupInBaseClasses2(inName::String, inExtends::Option{<:Extends}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Env}} 
+        function lookupInBaseClasses2(inName::String, inExtends::Option{<:Extends}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Env}}
               local outEnv::Option{Env}
               local outItem::Option{Item}
 
@@ -766,7 +766,7 @@
           (outItem, outEnv)
         end
 
-        function lookupInQualifiedImports(inName::String, inImports::List{<:Import}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}} 
+        function lookupInQualifiedImports(inName::String, inImports::List{<:Import}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}}
               local outEnv::Option{Env}
               local outPath::Option{Absyn.Path}
               local outItem::Option{Item}
@@ -786,7 +786,7 @@
                       (opt_item, opt_path, opt_env) = lookupInQualifiedImports(inName, rest_imps, inEnv, inExtendsTable)
                     (opt_item, opt_path, opt_env)
                   end
-                  
+
                   (_, Absyn.NAMED_IMPORT(name = name, path = path) <| _, _, _)  => begin
                       @match true = stringEqual(inName, name)
                       (item, env) = lookupFullyQualified(path, inEnv, inExtendsTable)
@@ -794,7 +794,7 @@
                       path = AbsynUtil.makeFullyQualified(path)
                     (SOME(item), SOME(path), SOME(env))
                   end
-                  
+
                   (_, Absyn.NAMED_IMPORT(name = name) <| _, _, _)  => begin
                       @match true = stringEqual(inName, name)
                     (NONE(), NONE(), NONE())
@@ -804,7 +804,7 @@
           (outItem, outPath, outEnv)
         end
 
-        function lookupInUnqualifiedImports(inName::Absyn.Ident, inImports::List{<:Import}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}} 
+        function lookupInUnqualifiedImports(inName::Absyn.Ident, inImports::List{<:Import}, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Option{Item}, Option{Absyn.Path}, Option{Env}}
               local outEnv::Option{Env}
               local outPath::Option{Absyn.Path}
               local outItem::Option{Item}
@@ -826,7 +826,7 @@
                       path = AbsynUtil.makeFullyQualified(path)
                     (SOME(item), SOME(path), SOME(env))
                   end
-                  
+
                   (_, _ <| rest_imps, _, _)  => begin
                       (opt_item, opt_path, opt_env) = lookupInUnqualifiedImports(inName, rest_imps, inEnv, inExtendsTable)
                     (opt_item, opt_path, opt_env)
@@ -836,7 +836,7 @@
           (outItem, outPath, outEnv)
         end
 
-        function lookupFullyQualified(inName::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Item, Env} 
+        function lookupFullyQualified(inName::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Item, Env}
               local outEnv::Env
               local outItem::Item
 
@@ -847,7 +847,7 @@
           (outItem, outEnv)
         end
 
-        function lookupFullyQualified2(inName::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Item, Env} 
+        function lookupFullyQualified2(inName::Absyn.Path, inEnv::Env, inExtendsTable::ExtendsTableArray) ::Tuple{Item, Env}
               local outEnv::Env
               local outItem::Item
 
@@ -861,7 +861,7 @@
                       @match (SOME(item), _, SOME(env), _) = lookupInLocalScope(name, inEnv, inExtendsTable)
                     (item, env)
                   end
-                  
+
                   (Absyn.QUALIFIED(name = name, path = rest_path), _, _)  => begin
                       @match (SOME(item), _, SOME(env), _) = lookupInLocalScope(name, inEnv, inExtendsTable)
                       env = NFSCodeEnv.myMergeItemEnv(item, env)
@@ -873,14 +873,14 @@
           (outItem, outEnv)
         end
 
-        function createExtendsTable(inSize::ModelicaInteger) ::ExtendsTableArray 
+        function createExtendsTable(inSize::ModelicaInteger) ::ExtendsTableArray
               local outTable::ExtendsTableArray
 
               outTable = arrayCreate(inSize, NO_EXTENDS())
           outTable
         end
 
-        function lookupQualifiedExtends(inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray) ::Option{Extends} 
+        function lookupQualifiedExtends(inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray) ::Option{Extends}
               local outExtends::Option{Extends}
 
               local ext::ExtendsWrapper
@@ -890,7 +890,7 @@
           outExtends
         end
 
-        function lookupQualifiedExtends2(inExtends::ExtendsWrapper, inExtendsTable::ExtendsTableArray) ::Option{Extends} 
+        function lookupQualifiedExtends2(inExtends::ExtendsWrapper, inExtendsTable::ExtendsTableArray) ::Option{Extends}
               local outExtends::Option{Extends}
 
               outExtends = begin
@@ -900,7 +900,7 @@
                   (QUALIFIED_EXTENDS(ext = ext), _)  => begin
                     SOME(ext)
                   end
-                  
+
                   (UNQUALIFIED_EXTENDS(ext = NFSCodeEnv.EXTENDS(__)), _)  => begin
                     NONE()
                   end
@@ -909,15 +909,15 @@
           outExtends
         end
 
-        function addUnqualifiedToTable(inExtends::Extends, inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray)  
+        function addUnqualifiedToTable(inExtends::Extends, inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray)
               _ = arrayUpdate(inExtendsTable, inIndex, UNQUALIFIED_EXTENDS(inExtends))
         end
 
-        function updateQualifiedInTable(inExtends::Extends, inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray)  
+        function updateQualifiedInTable(inExtends::Extends, inIndex::ModelicaInteger, inExtendsTable::ExtendsTableArray)
               _ = arrayUpdate(inExtendsTable, inIndex, QUALIFIED_EXTENDS(inExtends))
         end
 
-        function update2(inEnv::Env) ::Env 
+        function update2(inEnv::Env) ::Env
               local outEnv::Env
 
               local env::Env
@@ -937,7 +937,7 @@
           outEnv
         end
 
-        function update3(name::String, item::Item, inEnv::Env) ::Item 
+        function update3(name::String, item::Item, inEnv::Env) ::Item
 
 
               () = begin
@@ -960,7 +960,7 @@
                       item = NFSCodeEnv.CLASS(cls, list(cls_env), cls_ty)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -969,7 +969,7 @@
           item
         end
 
-        function updateClassExtends(inClass::SCode.Element, inEnv::Env, inClassType::ClassType) ::Tuple{SCode.Element, Env} 
+        function updateClassExtends(inClass::SCode.Element, inEnv::Env, inClassType::ClassType) ::Tuple{SCode.Element, Env}
               local outEnv::Env
               local outClass::SCode.Element
 
@@ -986,7 +986,7 @@
                       (cls, env) = updateClassExtends2(inClass, name, mods, info, inEnv)
                     (cls, env)
                   end
-                  
+
                   _  => begin
                       (inClass, inEnv)
                   end
@@ -995,7 +995,7 @@
           (outClass, outEnv)
         end
 
-        function updateClassExtends2(inClass::SCode.Element, inName::String, inMods::SCode.Mod, inInfo::SourceInfo, inEnv::Env) ::Tuple{SCode.Element, Env} 
+        function updateClassExtends2(inClass::SCode.Element, inName::String, inMods::SCode.Mod, inInfo::SourceInfo, inEnv::Env) ::Tuple{SCode.Element, Env}
               local outEnv::Env
               local outClass::SCode.Element
 
@@ -1010,11 +1010,11 @@
                   (_, _, _, _, cls_frame <| env)  => begin
                       (path, _) = lookupClassExtendsBaseClass(inName, env, inInfo)
                       ext = SCode.EXTENDS(path, SCode.PUBLIC(), inMods, NONE(), inInfo)
-                      @match list(cls_frame) = NFSCodeEnv.extendEnvWithExtends(ext, list(cls_frame))
+                      @match cls_frame <| nil = NFSCodeEnv.extendEnvWithExtends(ext, list(cls_frame))
                       cls = SCodeUtil.addElementToClass(ext, inClass)
                     (cls, _cons(cls_frame, env))
                   end
-                  
+
                   _  => begin
                       (inClass, inEnv)
                   end
@@ -1028,7 +1028,7 @@
            class of a class extends, and not the alias introduced when adding replaceable
            classes to the environment in NFSCodeEnv.extendEnvWithClassDef. It returns the
            path and the item for that base class. =#
-        function lookupClassExtendsBaseClass(inName::String, inEnv::Env, inInfo::SourceInfo) ::Tuple{Absyn.Path, Item} 
+        function lookupClassExtendsBaseClass(inName::String, inEnv::Env, inInfo::SourceInfo) ::Tuple{Absyn.Path, Item}
               local outItem::Item
               local outPath::Absyn.Path
 
@@ -1045,13 +1045,13 @@
                       path = Absyn.QUALIFIED("ce", Absyn.IDENT(basename))
                     (path, item)
                   end
-                  
+
                   (_, _, _)  => begin
                       (item, _) = NFSCodeLookup.lookupInheritedName(inName, inEnv)
                       path = Absyn.IDENT(inName)
                     (path, item)
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.INVALID_REDECLARATION_OF_CLASS, list(inName), inInfo)
                       fail()
@@ -1076,7 +1076,7 @@
         end
 
          #= Extends the environment with the given class extends element. =#
-        function extendEnvWithClassExtends(inClassExtends::SCode.Element, inEnv::Env) ::Env 
+        function extendEnvWithClassExtends(inClassExtends::SCode.Element, inEnv::Env) ::Env
               local outEnv::Env
 
               outEnv = begin
@@ -1121,7 +1121,7 @@
                       env = NFSCodeEnv.extendEnvWithItem(NFSCodeEnv.newClassItem(cls, cls_env, NFSCodeEnv.CLASS_EXTENDS()), inEnv, name)
                     env
                   end
-                  
+
                   (_, _)  => begin
                       info = SCodeUtil.elementInfo(inClassExtends)
                       el_str = SCodeDump.unparseElementStr(inClassExtends, SCodeDump.defaultOptions)
@@ -1142,7 +1142,7 @@
         end
 
          #= Adds a class extends to the environment. =#
-        function addClassExtendsInfoToEnv(inClassExtends::SCode.Element, inEnv::Env) ::Env 
+        function addClassExtendsInfoToEnv(inClassExtends::SCode.Element, inEnv::Env) ::Env
               local outEnv::Env
 
               outEnv = begin
@@ -1156,7 +1156,7 @@
                       ext = NFSCodeEnv.EXTENDS_TABLE(bcl, re, SOME(inClassExtends))
                     NFSCodeEnv.setEnvExtendsTable(ext, inEnv)
                   end
-                  
+
                   _  => begin
                         estr = "- NFEnvExtends.addClassExtendsInfoToEnv: Trying to overwrite " + "existing class extends information, this should not happen!."
                         Error.addMessage(Error.INTERNAL_ERROR, list(estr))

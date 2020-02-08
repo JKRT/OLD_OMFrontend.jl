@@ -3648,7 +3648,7 @@
                   end
 
                   (cache, env, ih, pre, SCode.CLASS(classDef = SCode.PARTS(elementLst = els, normalEquationLst =  nil(), initialEquationLst =  nil(), normalAlgorithmLst =  nil(), initialAlgorithmLst =  nil())), _, impl)  => begin
-                      @match (_, _, list(SCode.EXTENDS(path, _, mod, _, info)), nil) = splitElts(els)
+                      @match (_, _, SCode.EXTENDS(path, _, mod, _, info) <| nil, nil) = splitElts(els)
                       (cache, mod_1) = Mod.elabModForBasicType(cache, env, ih, pre, mod, impl, Mod.EXTENDS(path), info)
                       (cache, cl, _) = Lookup.lookupClass(cache, env, path)
                       (cache, res, cl, type_mods) = getUsertypeDimensions(cache, env, ih, pre, cl, nil, impl)
@@ -4808,7 +4808,7 @@
                   end
 
                   (SCode.NAMEMOD("noDerivative", m && SCode.MOD(__)) <| subs, _, _, _, _, _, _)  => begin
-                      @match (cache, DAE.MOD(subModLst = list(sub))) = Mod.elabMod(inCache, inEnv, inIH, inPrefix, m, false, Mod.COMPONENT("noDerivative"), info)
+                      @match (cache, DAE.MOD(subModLst = sub <| nil)) = Mod.elabMod(inCache, inEnv, inIH, inPrefix, m, false, Mod.COMPONENT("noDerivative"), info)
                       (name, cond) = extractNameAndExp(sub)
                       outconds = getDeriveCondition(subs, elemDecl, cache, inEnv, inIH, inPrefix, info)
                       varPos = setFunctionInputIndex(elemDecl, name, 1)

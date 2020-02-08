@@ -1,4 +1,4 @@
-  module NFSCodeFlattenImports 
+  module NFSCodeFlattenImports
 
 
     using MetaModelica
@@ -44,7 +44,7 @@
 
         import NFSCodeEnv
 
-        Env = NFSCodeEnv.Env 
+        Env = NFSCodeEnv.Env
 
         import Debug
 
@@ -59,15 +59,15 @@
         import System
         import SCodeUtil
 
-        Item = NFSCodeEnv.Item 
+        Item = NFSCodeEnv.Item
 
-        Extends = NFSCodeEnv.Extends 
+        Extends = NFSCodeEnv.Extends
 
-        FrameType = NFSCodeEnv.FrameType 
+        FrameType = NFSCodeEnv.FrameType
 
-        Import = Absyn.Import 
+        Import = Absyn.Import
 
-        function flattenProgram(inProgram::SCode.Program, inEnv::Env) ::Tuple{SCode.Program, Env} 
+        function flattenProgram(inProgram::SCode.Program, inEnv::Env) ::Tuple{SCode.Program, Env}
               local outEnv::Env
               local outProgram::SCode.Program
 
@@ -75,7 +75,7 @@
           (outProgram, outEnv)
         end
 
-        function flattenClass(inClass::SCode.Element, inEnv::Env) ::Tuple{SCode.Element, Env} 
+        function flattenClass(inClass::SCode.Element, inEnv::Env) ::Tuple{SCode.Element, Env}
               local outEnv::Env
               local outClass::SCode.Element
 
@@ -90,7 +90,7 @@
                   local cls_ty::NFSCodeEnv.ClassType
                 @matchcontinue (inClass, inEnv) begin
                   (SCode.CLASS(name = name, classDef = cdef, info = info), _)  => begin
-                      @match (NFSCodeEnv.CLASS(env = list(cls_env), classType = cls_ty), _) = NFSCodeLookup.lookupInClass(name, inEnv)
+                      @match (NFSCodeEnv.CLASS(env = cls_env <| nil, classType = cls_ty), _) = NFSCodeLookup.lookupInClass(name, inEnv)
                       env = NFSCodeEnv.enterFrame(cls_env, inEnv)
                       (cdef, _cons(cls_env, env)) = flattenClassDef(cdef, env, info)
                       cls = SCodeUtil.setElementClassDefinition(cdef, inClass)
@@ -98,7 +98,7 @@
                       env = NFSCodeEnv.updateItemInEnv(item, env, name)
                     (cls, env)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeFlattenImports.flattenClass failed on " + SCodeUtil.elementName(inClass) + " in " + NFSCodeEnv.getEnvName(inEnv))
@@ -109,7 +109,7 @@
           (outClass, outEnv)
         end
 
-        function flattenClassDef(inClassDef::SCode.ClassDef, inEnv::Env, inInfo::SourceInfo) ::Tuple{SCode.ClassDef, Env} 
+        function flattenClassDef(inClassDef::SCode.ClassDef, inEnv::Env, inInfo::SourceInfo) ::Tuple{SCode.ClassDef, Env}
               local outEnv::Env
               local outClassDef::SCode.ClassDef
 
@@ -142,20 +142,20 @@
                       nco = ListUtil.map2(nco, flattenConstraints, env, inInfo)
                     (SCode.PARTS(el, neql, ieql, nal, ial, nco, clats, extdecl), env)
                   end
-                  
+
                   (SCode.CLASS_EXTENDS(mods, cdef), _, _)  => begin
                       (cdef, env) = flattenClassDef(cdef, inEnv, inInfo)
                       mods = flattenModifier(mods, env, inInfo)
                     (SCode.CLASS_EXTENDS(mods, cdef), env)
                   end
-                  
+
                   (SCode.DERIVED(ty, mods, attr), env, _)  => begin
                       mods = flattenModifier(mods, env, inInfo)
                       env = NFSCodeEnv.removeExtendsFromLocalScope(env)
                       ty = flattenTypeSpec(ty, env, inInfo)
                     (SCode.DERIVED(ty, mods, attr), inEnv)
                   end
-                  
+
                   _  => begin
                       (inClassDef, inEnv)
                   end
@@ -172,7 +172,7 @@
           (outClassDef, outEnv)
         end
 
-        function flattenDerivedClassDef(inClassDef::SCode.ClassDef, inEnv::Env, inInfo::SourceInfo) ::SCode.ClassDef 
+        function flattenDerivedClassDef(inClassDef::SCode.ClassDef, inEnv::Env, inInfo::SourceInfo) ::SCode.ClassDef
               local outClassDef::SCode.ClassDef
 
               local ty::Absyn.TypeSpec
@@ -186,7 +186,7 @@
           outClassDef
         end
 
-        function isNotImport(inElement::SCode.Element) ::Bool 
+        function isNotImport(inElement::SCode.Element) ::Bool
               local outB::Bool
 
               outB = begin
@@ -194,7 +194,7 @@
                   SCode.IMPORT(__)  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -203,7 +203,7 @@
           outB
         end
 
-        function flattenElement(inElement::SCode.Element, inEnv::Env) ::Tuple{SCode.Element, Env} 
+        function flattenElement(inElement::SCode.Element, inEnv::Env) ::Tuple{SCode.Element, Env}
               local outEnv::Env
               local outElement::SCode.Element
 
@@ -221,16 +221,16 @@
                       env = NFSCodeEnv.updateItemInEnv(item, inEnv, name)
                     (elem, env)
                   end
-                  
+
                   (SCode.CLASS(__), _)  => begin
                       (elem, env) = flattenClass(inElement, inEnv)
                     (elem, env)
                   end
-                  
+
                   (SCode.EXTENDS(__), _)  => begin
                     (flattenExtends(inElement, inEnv), inEnv)
                   end
-                  
+
                   _  => begin
                       (inElement, inEnv)
                   end
@@ -243,7 +243,7 @@
           (outElement, outEnv)
         end
 
-        function flattenComponent(inComponent::SCode.Element, inEnv::Env) ::SCode.Element 
+        function flattenComponent(inComponent::SCode.Element, inEnv::Env) ::SCode.Element
               local outComponent::SCode.Element
 
               local name::SCode.Ident
@@ -266,7 +266,7 @@
           outComponent
         end
 
-        function flattenAttributes(inAttributes::SCode.Attributes, inEnv::Env, inInfo::SourceInfo) ::SCode.Attributes 
+        function flattenAttributes(inAttributes::SCode.Attributes, inEnv::Env, inInfo::SourceInfo) ::SCode.Attributes
               local outAttributes::SCode.Attributes
 
               local ad::Absyn.ArrayDim
@@ -282,7 +282,7 @@
           outAttributes
         end
 
-        function flattenTypeSpec(inTypeSpec::Absyn.TypeSpec, inEnv::Env, inInfo::SourceInfo) ::Absyn.TypeSpec 
+        function flattenTypeSpec(inTypeSpec::Absyn.TypeSpec, inEnv::Env, inInfo::SourceInfo) ::Absyn.TypeSpec
               local outTypeSpec::Absyn.TypeSpec
 
               outTypeSpec = begin
@@ -296,11 +296,11 @@
                       (_, path, _) = NFSCodeLookup.lookupClassName(path, inEnv, inInfo)
                     Absyn.TPATH(path, ad)
                   end
-                  
+
                   (Absyn.TCOMPLEX(path = Absyn.IDENT("polymorphic")), _, _)  => begin
                     inTypeSpec
                   end
-                  
+
                   (Absyn.TCOMPLEX(path = path, typeSpecs = tys, arrayDim = ad), _, _)  => begin
                       tys = ListUtil.map2(tys, flattenTypeSpec, inEnv, inInfo)
                     Absyn.TCOMPLEX(path, tys, ad)
@@ -314,7 +314,7 @@
           outTypeSpec
         end
 
-        function flattenExtends(inExtends::SCode.Element, inEnv::Env) ::SCode.Element 
+        function flattenExtends(inExtends::SCode.Element, inEnv::Env) ::SCode.Element
               local outExtends::SCode.Element
 
               local path::Absyn.Path
@@ -332,7 +332,7 @@
           outExtends
         end
 
-        function flattenEquation(inEquation::SCode.Equation, inEnv::Env) ::SCode.Equation 
+        function flattenEquation(inEquation::SCode.Equation, inEnv::Env) ::SCode.Equation
               local outEquation::SCode.Equation
 
               local equ::SCode.EEquation
@@ -343,7 +343,7 @@
           outEquation
         end
 
-        function flattenEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Env}) ::Tuple{SCode.EEquation, Env} 
+        function flattenEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Env}) ::Tuple{SCode.EEquation, Env}
               local outTuple::Tuple{SCode.EEquation, Env}
 
               outTuple = begin
@@ -361,14 +361,14 @@
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
                     (equ, env)
                   end
-                  
+
                   (SCode.EQ_REINIT(cref = crefExp && Absyn.CREF(componentRef = cref), expReinit = exp, comment = cmt, info = info), env)  => begin
                       cref = NFSCodeLookup.lookupComponentRef(cref, env, info)
                       equ = SCode.EQ_REINIT(crefExp, exp, cmt, info)
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
                     (equ, env)
                   end
-                  
+
                   (equ, env)  => begin
                       info = SCodeUtil.getEEquationInfo(equ)
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
@@ -379,7 +379,7 @@
           outTuple
         end
 
-        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -387,7 +387,7 @@
           (outExp, outTuple)
         end
 
-        function flattenConstraints(inConstraints::SCode.ConstraintSection, inEnv::Env, inInfo::SourceInfo) ::SCode.ConstraintSection 
+        function flattenConstraints(inConstraints::SCode.ConstraintSection, inEnv::Env, inInfo::SourceInfo) ::SCode.ConstraintSection
               local outConstraints::SCode.ConstraintSection
 
               local exps::List{Absyn.Exp}
@@ -398,7 +398,7 @@
           outConstraints
         end
 
-        function flattenAlgorithm(inAlgorithm::SCode.AlgorithmSection, inEnv::Env) ::SCode.AlgorithmSection 
+        function flattenAlgorithm(inAlgorithm::SCode.AlgorithmSection, inEnv::Env) ::SCode.AlgorithmSection
               local outAlgorithm::SCode.AlgorithmSection
 
               local statements::List{SCode.Statement}
@@ -409,14 +409,14 @@
           outAlgorithm
         end
 
-        function flattenStatement(inStatement::SCode.Statement, inEnv::Env) ::SCode.Statement 
+        function flattenStatement(inStatement::SCode.Statement, inEnv::Env) ::SCode.Statement
               local outStatement::SCode.Statement
 
               (outStatement, _) = SCodeUtil.traverseStatements(inStatement, (flattenStatementTraverser, inEnv))
           outStatement
         end
 
-        function flattenStatementTraverser(inTuple::Tuple{<:SCode.Statement, Env}) ::Tuple{SCode.Statement, Env} 
+        function flattenStatementTraverser(inTuple::Tuple{<:SCode.Statement, Env}) ::Tuple{SCode.Statement, Env}
               local outTuple::Tuple{SCode.Statement, Env}
 
               outTuple = begin
@@ -430,13 +430,13 @@
                       (stmt, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
                     (stmt, env)
                   end
-                  
+
                   (stmt && SCode.ALG_PARFOR(index = iter_name, info = info), env)  => begin
                       env = NFSCodeEnv.extendEnvWithIterators(list(Absyn.ITERATOR(iter_name, NONE(), NONE())), System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), env)
                       (stmt, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
                     (stmt, env)
                   end
-                  
+
                   (stmt, env)  => begin
                       info = SCodeUtil.getStatementInfo(stmt)
                       (stmt, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
@@ -447,7 +447,7 @@
           outTuple
         end
 
-        function flattenModifier(inMod::SCode.Mod, inEnv::Env, inInfo::SourceInfo) ::SCode.Mod 
+        function flattenModifier(inMod::SCode.Mod, inEnv::Env, inInfo::SourceInfo) ::SCode.Mod
               local outMod::SCode.Mod
 
               outMod = begin
@@ -463,12 +463,12 @@
                       sub_mods = ListUtil.map2(sub_mods, flattenSubMod, inEnv, inInfo)
                     SCode.MOD(fp, ep, sub_mods, opt_exp, info)
                   end
-                  
+
                   (SCode.REDECL(fp, ep, el), _, _)  => begin
                       el = flattenRedeclare(el, inEnv)
                     SCode.REDECL(fp, ep, el)
                   end
-                  
+
                   (SCode.NOMOD(__), _, _)  => begin
                     inMod
                   end
@@ -477,7 +477,7 @@
           outMod
         end
 
-        function flattenModOptExp(inOptExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo) ::Option{Absyn.Exp} 
+        function flattenModOptExp(inOptExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo) ::Option{Absyn.Exp}
               local outOptExp::Option{Absyn.Exp}
 
               outOptExp = begin
@@ -487,7 +487,7 @@
                       exp = flattenExp(exp, inEnv, inInfo)
                     SOME(exp)
                   end
-                  
+
                   _  => begin
                       inOptExp
                   end
@@ -496,7 +496,7 @@
           outOptExp
         end
 
-        function flattenSubMod(inSubMod::SCode.SubMod, inEnv::Env, inInfo::SourceInfo) ::SCode.SubMod 
+        function flattenSubMod(inSubMod::SCode.SubMod, inEnv::Env, inInfo::SourceInfo) ::SCode.SubMod
               local outSubMod::SCode.SubMod
 
               outSubMod = begin
@@ -513,7 +513,7 @@
           outSubMod
         end
 
-        function flattenRedeclare(inElement::SCode.Element, inEnv::Env) ::SCode.Element 
+        function flattenRedeclare(inElement::SCode.Element, inEnv::Env) ::SCode.Element
               local outElement::SCode.Element
 
               outElement = begin
@@ -532,16 +532,16 @@
                       cdef2 = flattenDerivedClassDef(cdef, inEnv, info)
                     SCode.CLASS(name, prefixes, ep, pp, res, cdef2, cmt, info)
                   end
-                  
+
                   (SCode.CLASS(classDef = SCode.ENUMERATION(__)), _)  => begin
                     inElement
                   end
-                  
+
                   (SCode.COMPONENT(__), _)  => begin
                       element = flattenComponent(inElement, inEnv)
                     element
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("Unknown redeclare in NFSCodeFlattenImports.flattenRedeclare"))
                       fail()
@@ -551,7 +551,7 @@
           outElement
         end
 
-        function flattenSubscript(inSub::SCode.Subscript, inEnv::Env, inInfo::SourceInfo) ::SCode.Subscript 
+        function flattenSubscript(inSub::SCode.Subscript, inEnv::Env, inInfo::SourceInfo) ::SCode.Subscript
               local outSub::SCode.Subscript
 
               outSub = begin
@@ -561,7 +561,7 @@
                       exp = flattenExp(exp, inEnv, inInfo)
                     Absyn.SUBSCRIPT(exp)
                   end
-                  
+
                   (Absyn.NOSUB(__), _, _)  => begin
                     inSub
                   end
@@ -570,14 +570,14 @@
           outSub
         end
 
-        function flattenExp(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo) ::Absyn.Exp 
+        function flattenExp(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo) ::Absyn.Exp
               local outExp::Absyn.Exp
 
               (outExp, _) = AbsynUtil.traverseExpBidir(inExp, flattenExpTraverserEnter, flattenExpTraverserExit, (inEnv, inInfo))
           outExp
         end
 
-        function flattenOptExp(inExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo) ::Option{Absyn.Exp} 
+        function flattenOptExp(inExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo) ::Option{Absyn.Exp}
               local outExp::Option{Absyn.Exp}
 
               outExp = begin
@@ -587,7 +587,7 @@
                       exp = flattenExp(exp, inEnv, inInfo)
                     SOME(exp)
                   end
-                  
+
                   _  => begin
                       inExp
                   end
@@ -596,7 +596,7 @@
           outExp
         end
 
-        function flattenExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function flattenExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -614,33 +614,33 @@
                       cref = NFSCodeLookup.lookupComponentRef(cref, env, info)
                     (Absyn.CREF(cref), tup)
                   end
-                  
+
                   (Absyn.CALL(function_ = cref, functionArgs = Absyn.FOR_ITER_FARG(exp = exp, iterType = iterType, iterators = iters)), (env, info))  => begin
                       cref = NFSCodeLookup.lookupComponentRef(cref, env, info)
                       env = NFSCodeEnv.extendEnvWithIterators(iters, System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), env)
                       exp = flattenExp(exp, env, info)
                     (Absyn.CALL(cref, Absyn.FOR_ITER_FARG(exp, iterType, iters)), (env, info))
                   end
-                  
+
                   (Absyn.CALL(function_ = Absyn.CREF_IDENT(name = "SOME")), _)  => begin
                     (inExp, inTuple)
                   end
-                  
+
                   (Absyn.CALL(function_ = cref, functionArgs = args), tup && (env, info))  => begin
                       cref = NFSCodeLookup.lookupComponentRef(cref, env, info)
                     (Absyn.CALL(cref, args), tup)
                   end
-                  
+
                   (Absyn.PARTEVALFUNCTION(function_ = cref, functionArgs = args), tup && (env, info))  => begin
                       cref = NFSCodeLookup.lookupComponentRef(cref, env, info)
                     (Absyn.PARTEVALFUNCTION(cref, args), tup)
                   end
-                  
+
                   (exp && Absyn.MATCHEXP(__), (env, info))  => begin
                       env = NFSCodeEnv.extendEnvWithMatch(exp, System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), env)
                     (exp, (env, info))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -653,7 +653,7 @@
           (outExp, outTuple)
         end
 
-        function flattenExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function flattenExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -665,11 +665,11 @@
                   (Absyn.CALL(functionArgs = Absyn.FOR_ITER_FARG(__)), (NFSCodeEnv.FRAME(frameType = NFSCodeEnv.IMPLICIT_SCOPE(__)) <| env, info))  => begin
                     (inExp, (env, info))
                   end
-                  
+
                   (Absyn.MATCHEXP(__), (NFSCodeEnv.FRAME(frameType = NFSCodeEnv.IMPLICIT_SCOPE(__)) <| env, info))  => begin
                     (inExp, (env, info))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -678,7 +678,7 @@
           (outExp, outTuple)
         end
 
-        function flattenComponentRefSubs(inCref::Absyn.ComponentRef, inEnv::Env, inInfo::SourceInfo) ::Absyn.ComponentRef 
+        function flattenComponentRefSubs(inCref::Absyn.ComponentRef, inEnv::Env, inInfo::SourceInfo) ::Absyn.ComponentRef
               local outCref::Absyn.ComponentRef
 
               outCref = begin
@@ -690,13 +690,13 @@
                       subs = ListUtil.map2(subs, flattenSubscript, inEnv, inInfo)
                     Absyn.CREF_IDENT(name, subs)
                   end
-                  
+
                   (Absyn.CREF_QUAL(name, subs, cref), _, _)  => begin
                       subs = ListUtil.map2(subs, flattenSubscript, inEnv, inInfo)
                       cref = flattenComponentRefSubs(cref, inEnv, inInfo)
                     Absyn.CREF_QUAL(name, subs, cref)
                   end
-                  
+
                   (Absyn.CREF_FULLYQUALIFIED(componentRef = cref), _, _)  => begin
                       cref = flattenComponentRefSubs(cref, inEnv, inInfo)
                     AbsynUtil.crefMakeFullyQualified(cref)

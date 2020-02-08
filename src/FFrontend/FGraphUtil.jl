@@ -68,6 +68,7 @@ const Status = FCore.Status
 @importDBG Debug
 @importDBG Error
 @importDBG FGraphBuild
+@importDBG FGraphBuildEnv
 @importDBG FNode
 @importDBG Flags
 @importDBG Global
@@ -1153,7 +1154,7 @@ import MetaModelica.Dangerous
 
                   (g, SCode.CLASS(__), _, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuild.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
+                      g = FGraphBuildEnv.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
                     g
                   end
                 end

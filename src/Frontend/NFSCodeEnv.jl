@@ -257,7 +257,7 @@ function enterScope(inEnv::Env, inName::SCode.Ident) ::Env
     @matchcontinue (inEnv, inName) begin
       (_, _)  => begin
         (item, _) = NFSCodeLookup.lookupInClass(inName, inEnv)
-        @match list(cls_env) = getItemEnv(item)
+        @match cls_env <| nil = getItemEnv(item)
         outEnv = enterFrame(cls_env, inEnv)
         outEnv
       end
@@ -1679,13 +1679,13 @@ function getDerivedClassRedeclares(inDerivedName::SCode.Ident, inTypeSpec::Absyn
     =#
     @matchcontinue (inDerivedName, inTypeSpec, inEnv) begin
       (_, Absyn.TPATH(path, _), _)  => begin
-        @match list(EXTENDS(baseClass = bc, redeclareModifiers = rm)) = getEnvExtendsFromTable(inEnv)
+        @match EXTENDS(baseClass = bc, redeclareModifiers = rm) <| nil = getEnvExtendsFromTable(inEnv)
         @match true = AbsynUtil.pathSuffixOf(path, bc)
         rm
       end
 
       (_, Absyn.TPATH(path, _), _)  => begin
-        @match list(EXTENDS(baseClass = bc, redeclareModifiers = rm)) = getEnvExtendsFromTable(inEnv)
+        @match EXTENDS(baseClass = bc, redeclareModifiers = rm) <| nil = getEnvExtendsFromTable(inEnv)
         @match false = AbsynUtil.pathSuffixOf(path, bc)
         print("Derived paths are not the same: " + AbsynUtil.pathString(path) + " != " + AbsynUtil.pathString(bc) + "\\n")
         rm

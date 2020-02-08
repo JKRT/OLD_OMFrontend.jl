@@ -5400,7 +5400,7 @@ module Types
                 (outExp, outType, outBindings) = matchTypePolymorphic(inExp, inExpType, vec_type, fnPath, nil, true)
                 outDims = listReverse(inDims)
               catch
-                @match DAE.T_ARRAY(ty = cur_type, dims = list(dim)) = inCurrentType
+                @match DAE.T_ARRAY(ty = cur_type, dims = dim <| nil) = inCurrentType
                 (outExp, outType, outDims, outBindings) = vectorizableType2(inExp, inExpType, cur_type, _cons(dim, inDims), inExpectedType, fnPath)
               end
           (outExp, outType, outDims, outBindings)
@@ -7578,7 +7578,7 @@ module Types
                   end
 
                   ty1  => begin
-                      @match (list(e), list(ty2)) = makeDummyExpAndTypeLists(list(ty1))
+                      @match (e <| nil, ty2 <| nil) = makeDummyExpAndTypeLists(list(ty1))
                       (_, ty) = matchType(e, ty1, ty2, false)
                     ty
                   end
@@ -7889,19 +7889,19 @@ module Types
                   end
 
                   (DAE.T_METAOPTION(ty = ty1) <| _, DAE.T_METAOPTION(ty = ty2) <| tys2, solvedBindings)  => begin
-                      @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
+                      @match (ty1 <| nil, solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METAOPTION(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
 
                   (DAE.T_METALIST(ty = ty1) <| _, DAE.T_METALIST(ty = ty2) <| tys2, solvedBindings)  => begin
-                      @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
+                      @match (ty1 <| nil, solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METALIST(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
 
                   (DAE.T_METAARRAY(ty = ty1) <| _, DAE.T_METAARRAY(ty = ty2) <| tys2, solvedBindings)  => begin
-                      @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
+                      @match (ty1 <| nil, solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       ty1 = DAE.T_METAARRAY(ty1)
                     (_cons(ty1, tys2), solvedBindings)
                   end
@@ -7953,7 +7953,7 @@ module Types
                   local tys2::List{DAE.Type}
                 @matchcontinue (itys1, itys2, changed, isolvedBindings) begin
                   (ty1 <| tys1, ty2 <| tys2, _, solvedBindings)  => begin
-                      @match (list(ty1), solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
+                      @match (ty1 <| nil, solvedBindings) = solveBindings(list(ty1), list(ty2), solvedBindings)
                       (tys2, solvedBindings) = solveBindingsThread(tys1, tys2, true, solvedBindings)
                     (_cons(ty1, tys2), solvedBindings)
                   end
@@ -8057,7 +8057,7 @@ module Types
                   end
 
                   (DAE.T_METAPOLYMORPHIC(name = id), solvedBindings)  => begin
-                      @match list(ty) = polymorphicBindingsLookup(id, solvedBindings)
+                      @match ty <| nil = polymorphicBindingsLookup(id, solvedBindings)
                     ty
                   end
                 end

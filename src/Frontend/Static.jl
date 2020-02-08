@@ -526,7 +526,7 @@ module Static
                 (outCache, outExp, outProperties) = elabExpInExpression(inCache, inEnv, Absyn.CREF(cref), inImplicit, inDoVect, inPrefix, inInfo)
               else
                 path = AbsynUtil.crefToPath(cref)
-                @match (outCache, list(tty)) = Lookup.lookupFunctionsInEnv(inCache, inEnv, path, inInfo)
+                @match (outCache, tty <| nil) = Lookup.lookupFunctionsInEnv(inCache, inEnv, path, inInfo)
                 tty = Types.makeFunctionPolymorphicReference(tty)
                 (outCache, args, consts, _, tty, _, slots) = elabTypes(outCache, inEnv, pos_args, named_args, list(tty), true, true, inImplicit, inPrefix, inInfo)
                 if ! Types.isFunctionPointer(tty)
@@ -805,7 +805,7 @@ module Static
               local ty2_str::String
 
               @match Absyn.CONS(e1, e2) = inExp
-              # @match list(e1, e2) = MetaUtil.transformArrayNodesToListNodes(list(e1, e2))
+              # @match e1 <| e2 <| nil = MetaUtil.transformArrayNodesToListNodes(list(e1, e2))
                #=  Elaborate both sides of the cons expression.
                =#
               (outCache, exp1, prop1) = elabExpInExpression(outCache, inEnv, e1, inImplicit, inDoVect, inPrefix, inInfo)
@@ -2540,13 +2540,13 @@ module Static
                   end
 
                   (_, NONE(), _)  => begin
-                      @match (list(outStart, outStop), _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (inStopExp, inStopType)))
+                      @match (outStart <| outStop <| nil, _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (inStopExp, inStopType)))
                     (outStart, NONE(), outStop, DAE.T_REAL_DEFAULT)
                   end
 
                   (_, SOME(step_ty), _)  => begin
                       @match SOME(step_exp) = inStepExp
-                      @match (list(outStart, step_exp, outStop), _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (step_exp, step_ty), (inStopExp, inStopType)))
+                      @match (outStart <| step_exp <| outStop <| nil, _) = OperatorOverloading.elabArglist(list(DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT, DAE.T_REAL_DEFAULT), list((inStartExp, inStartType), (step_exp, step_ty), (inStopExp, inStopType)))
                     (outStart, SOME(step_exp), outStop, DAE.T_REAL_DEFAULT)
                   end
                 end
@@ -3179,12 +3179,13 @@ module Static
               local e::Absyn.Exp
               local ty::DAE.Type
 
-              @match list(e) = inExpl
+              @match e <| nil = inExpl
               (outCache, _, outProperties) = elabExpInExpression(inCache, inEnv, e, inImplicit, true, inPrefix, inInfo)
               ty = Types.getPropType(outProperties)
               ty = Types.arrayElementType(ty)
               @match true = inTypeChecker(ty)
-              @match (outCache, outExp, (@match DAE.PROP() = outProperties)) = elabCallArgs(outCache, inEnv, Absyn.FULLYQUALIFIED(Absyn.IDENT(inFnName)), list(e), nil, inImplicit, inPrefix, inInfo)
+              @match (outCache, outExp, outProperties) = elabCallArgs(outCache, inEnv, Absyn.FULLYQUALIFIED(Absyn.IDENT(inFnName)), list(e), nil, inImplicit, inPrefix, inInfo)
+              @match DAE.PROP() = outProperties
           (outCache, outExp, outProperties)
         end
 
@@ -3199,7 +3200,7 @@ module Static
               local e::Absyn.Exp
 
               checkBuiltinCallArgs(inPosArgs, inNamedArgs, 1, "cardinality", inInfo)
-              @match list(e) = inPosArgs
+              @match e <| nil = inPosArgs
               (outCache, outExp, outProperties) = elabExpInExpression(inCache, inEnv, e, inImplicit, true, inPrefix, inInfo)
               @match DAE.PROP(type_ = ty) = outProperties
               ty = Types.liftArrayListDims(DAE.T_INTEGER_DEFAULT, Types.getDimensions(ty))
@@ -3233,7 +3234,7 @@ module Static
                 msg_str = ", expected smooth(p, expr)"
                 printBuiltinFnArgError("smooth", msg_str, inPosArgs, inNamedArgs, inPrefix, inInfo)
               end
-              @match list(p, expr) = inPosArgs
+              @match p <| expr <| nil = inPosArgs
               @match (outCache, dp, DAE.PROP(ty, c)) = elabExpInExpression(inCache, inEnv, p, inImplicit, true, inPrefix, inInfo)
               if ! Types.isParameterOrConstant(c) || ! Types.isInteger(ty)
                 msg_str = ", first argument must be a constant or parameter expression of type Integer"
@@ -3697,7 +3698,7 @@ module Static
                   local pre::Prefix.PrefixType
                 @match (inCache, inEnv, inAbsynExpLst, inNamedArg, inBoolean, inPrefix, info) begin
                   (cache, env, matexp <|  nil(), _, impl, pre, _)  => begin
-                      @match (cache, exp_1, DAE.PROP(DAE.T_ARRAY(dims = list(d1), ty = DAE.T_ARRAY(dims = list(d2), ty = eltp)), c)) = elabExpInExpression(cache, env, matexp, impl, true, pre, info)
+                      @match (cache, exp_1, DAE.PROP(DAE.T_ARRAY(dims = d1 <| nil, ty = DAE.T_ARRAY(dims = d2 <| nil, ty = eltp)), c)) = elabExpInExpression(cache, env, matexp, impl, true, pre, info)
                       newtp = DAE.T_ARRAY(DAE.T_ARRAY(eltp, list(d1)), list(d2))
                       tp = Types.simplifyType(newtp)
                       exp = Expression.makePureBuiltinCall("symmetric", list(exp_1), tp)
@@ -3807,7 +3808,7 @@ module Static
                #=  Replace homotopy if Flags.REPLACE_HOMOTOPY is \"actual\" or \"simplified\"
                =#
               if replaceWith == "actual" || replaceWith == "simplified"
-                @match list(e1, e2) = getHomotopyArguments(inPosArgs, inNamedArgs)
+                @match e1 <| e2 <| nil = getHomotopyArguments(inPosArgs, inNamedArgs)
                 e = if replaceWith == "actual"
                       e1
                     else
@@ -3879,7 +3880,7 @@ module Static
                 msg_str = ", expected DynamicSelect(staticExp, dynamicExp)"
                 printBuiltinFnArgError("DynamicSelect", msg_str, inPosArgs, inNamedArgs, inPrefix, inInfo)
               end
-              @match list(astatic, adynamic) = inPosArgs
+              @match astatic <| adynamic <| nil = inPosArgs
               @match (outCache, dstatic, (@match DAE.PROP(ty, _) = outProperties)) = elabExpInExpression(inCache, inEnv, astatic, inImplicit, true, inPrefix, inInfo)
               try
                 outExp = begin
@@ -3947,11 +3948,11 @@ module Static
               local d1::DAE.Dimension
               local d2::DAE.Dimension
 
-              @match list(aexp) = inPosArgs
+              @match aexp <| nil = inPosArgs
               @match (outCache, exp, DAE.PROP(ty, c)) = elabExpInExpression(inCache, inEnv, aexp, inImpl, true, inPrefix, inInfo)
                #=  Transpose the type.
                =#
-              @match DAE.T_ARRAY(DAE.T_ARRAY(el_ty, list(d1)), list(d2)) = ty
+              @match DAE.T_ARRAY(DAE.T_ARRAY(el_ty, d1 <| nil), d2 <| nil) = ty
               ty = DAE.T_ARRAY(DAE.T_ARRAY(el_ty, list(d2)), list(d1))
               outProperties = DAE.PROP(ty, c)
                #=  Simplify the type and make a call to transpose.
@@ -4045,7 +4046,8 @@ module Static
                   end
 
                   (cache, env, arrexp <|  nil(), impl, pre)  => begin
-                      @match (cache, exp_1, DAE.PROP((@match DAE.T_ARRAY(dims = list(_), ty = tp) = t), c)) = elabExpInExpression(cache, env, arrexp, impl, true, pre, info)
+                      @match (cache, exp_1, DAE.PROP(t, c)) = elabExpInExpression(cache, env, arrexp, impl, true, pre, info)
+                      @match DAE.T_ARRAY(dims = _ <| nil, ty = tp) = t
                       tp = Types.arrayElementType(t)
                       etp = Types.simplifyType(tp)
                       exp_2 = Expression.makePureBuiltinCall("product", list(exp_1), etp)
@@ -4166,7 +4168,7 @@ module Static
               local exp::DAE.Exp
               local ty::DAE.Type
 
-              @match list(e) = inArgs
+              @match e <| nil = inArgs
               (outCache, exp, outProperties) = elabExpInExpression(inCache, inEnv, e, inImpl, true, inPrefix, inInfo)
               ty = Types.getPropType(outProperties)
               outExp = elabBuiltinStreamOperator(outCache, inEnv, "inStream", exp, ty, inInfo)
@@ -4189,7 +4191,7 @@ module Static
               local exp::DAE.Exp
               local ty::DAE.Type
 
-              @match list(e) = inArgs
+              @match e <| nil = inArgs
               (outCache, exp, outProperties) = elabExpInExpression(inCache, inEnv, e, inImpl, true, inPrefix, inInfo)
               ty = Types.getPropType(outProperties)
               outExp = elabBuiltinStreamOperator(outCache, inEnv, "actualStream", exp, ty, inInfo)
@@ -10057,7 +10059,7 @@ module Static
                       path = AbsynUtil.crefToPath(c)
                        #=  call the lookup function that removes errors when it fails!
                        =#
-                      @match (cache, list(t)) = lookupFunctionsInEnvNoError(cache, env, path, info)
+                      @match (cache, t <| nil) = lookupFunctionsInEnvNoError(cache, env, path, info)
                       (isBuiltin, isBuiltinFn, path) = isBuiltinFunc(path, t)
                       isBuiltinFnOrInlineBuiltin = ! valueEq(DAE.FUNCTION_NOT_BUILTIN(), isBuiltin)
                        #=  some builtin functions store {} there
@@ -10565,8 +10567,9 @@ module Static
                        =#
                        #=  data:={Common.SingleGasesData.N2,Common.SingleGasesData.H2,Common.SingleGasesData.CO,Common.SingleGasesData.O2,Common.SingleGasesData.H2O, Common.SingleGasesData.CO2}
                        =#
-                      @match list(DAE.INDEX(DAE.CREF(componentRef = subCr2)), DAE.SLICE(exp = e)) = ComponentReference.crefLastSubs(cr)
-                      @match list(DAE.INDEX((@match DAE.CREF(componentRef = subCr1) = index))) = ComponentReference.crefLastSubs(inCref)
+                      @match DAE.INDEX(DAE.CREF(componentRef = subCr2)) <| DAE.SLICE(exp = e) <| nil = ComponentReference.crefLastSubs(cr)
+                      @match DAE.INDEX(index) <| nil = ComponentReference.crefLastSubs(inCref)
+                      @match DAE.CREF(componentRef = subCr1) = index
                       @match true = ComponentReference.crefEqual(subCr1, subCr2)
                       @match true = Expression.isArray(e) || Expression.isRange(e)
                       e = ValuesUtil.valueExp(v)

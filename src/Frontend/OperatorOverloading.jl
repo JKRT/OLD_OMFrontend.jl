@@ -600,7 +600,7 @@ function binaryUserdef(inCache::FCore.Cache, inEnv::FCore.Graph, inOper::Absyn.O
         exps = deoverloadBinaryUserdefNoConstructor(types, exp1, exp2, type1, type2, nil)
         (cache, exps) = binaryCastConstructor(cache, env, inExp1, inExp2, inType1, inType2, exps, types, info)
         (cache, exps) = binaryUserdefArray(cache, env, exps, bool1 || bool2, inOper, inExp1, inExp2, inType1, inType2, impl, pre, info)
-        @match list((daeExp, foldType)) = exps
+        @match (daeExp, foldType) <| nil = exps
         (cache, daeExp, foldType, Expression.typeOf(daeExp))
       end
     end

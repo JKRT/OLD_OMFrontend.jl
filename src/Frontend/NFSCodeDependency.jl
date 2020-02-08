@@ -1,4 +1,4 @@
-  module NFSCodeDependency 
+  module NFSCodeDependency
 
 
     using MetaModelica
@@ -46,7 +46,7 @@
 
         import NFSCodeEnv
 
-        Env = NFSCodeEnv.Env 
+        Env = NFSCodeEnv.Env
 
         import Config
 
@@ -73,13 +73,13 @@
 
         import Util
 
-        Item = NFSCodeEnv.Item 
+        Item = NFSCodeEnv.Item
 
-        Extends = NFSCodeEnv.Extends 
+        Extends = NFSCodeEnv.Extends
 
-        FrameType = NFSCodeEnv.FrameType 
+        FrameType = NFSCodeEnv.FrameType
 
-        Import = Absyn.Import 
+        Import = Absyn.Import
 
         import NFSCodeEnv.EnvTree
 
@@ -89,7 +89,7 @@
           they contain any class extends, and if so it checks of those class extends are
           used or not. Finally it collects the used elements and builds a new program
           and environment that only contains those elements. =#
-        function analyse(inClassName::Absyn.Path, inEnv::Env, inProgram::SCode.Program) ::Tuple{SCode.Program, Env} 
+        function analyse(inClassName::Absyn.Path, inEnv::Env, inProgram::SCode.Program) ::Tuple{SCode.Program, Env}
               local outEnv::Env
               local outProgram::SCode.Program
 
@@ -101,7 +101,7 @@
 
          #= Analyses a class by looking up the class, marking it as used and recursively
           analysing it's contents. =#
-        function analyseClass(inClassName::Absyn.Path, inEnv::Env, inInfo::SourceInfo)  
+        function analyseClass(inClassName::Absyn.Path, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local item::Item
                   local env::Env
@@ -112,7 +112,7 @@
                       analyseItem(item, env)
                     ()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeDependency.analyseClass failed for " + AbsynUtil.pathString(inClassName) + " in " + NFSCodeEnv.getEnvName(inEnv))
@@ -125,7 +125,7 @@
          #= Lookup a class in the environment. The reason why SCodeLookup is not used
           directly is because we need to look up each part of the class path and mark
           them as used. =#
-        function lookupClass(inPath::Absyn.Path, inEnv::Env, inBuiltinPossible::Bool #= True if the path can be a builtin, otherwise false. =#, inInfo::SourceInfo, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env} 
+        function lookupClass(inPath::Absyn.Path, inEnv::Env, inBuiltinPossible::Bool #= True if the path can be a builtin, otherwise false. =#, inInfo::SourceInfo, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env}
               local outEnv::Env
               local outItem::Item
 
@@ -141,7 +141,7 @@
                       (item, env, _) = NFSCodeEnv.resolveRedeclaredItem(item, env)
                     (item, env)
                   end
-                  
+
                   (_, _, _, _, SOME(error_id))  => begin
                       name_str = AbsynUtil.pathString(inPath)
                       env_str = NFSCodeEnv.getEnvName(inEnv)
@@ -154,7 +154,7 @@
         end
 
          #= Help function to lookupClass, does the actual look up. =#
-        function lookupClass2(inPath::Absyn.Path, inEnv::Env, inBuiltinPossible::Bool, inInfo::SourceInfo, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env} 
+        function lookupClass2(inPath::Absyn.Path, inEnv::Env, inBuiltinPossible::Bool, inInfo::SourceInfo, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env}
               local outEnv::Env
               local outItem::Item
 
@@ -168,17 +168,17 @@
                       (item, _, env) = NFSCodeLookup.lookupNameSilent(inPath, inEnv, inInfo)
                     (item, env)
                   end
-                  
+
                   (Absyn.IDENT(__), _, false, _, _)  => begin
                       (item, _, env) = NFSCodeLookup.lookupNameSilentNoBuiltin(inPath, inEnv, inInfo)
                     (item, env)
                   end
-                  
+
                   (Absyn.QUALIFIED(name = "$ce", path = Absyn.IDENT(name = id)), _ <| env, _, _, _)  => begin
                       (item, env) = NFSCodeLookup.lookupInheritedName(id, env)
                     (item, env)
                   end
-                  
+
                   (Absyn.QUALIFIED(name = id, path = rest_path), _, _, _, _)  => begin
                       (item, _, env) = NFSCodeLookup.lookupNameSilent(Absyn.IDENT(id), inEnv, inInfo)
                       (item, env, _) = NFSCodeEnv.resolveRedeclaredItem(item, env)
@@ -186,7 +186,7 @@
                       (item, env) = lookupNameInItem(rest_path, item, env, inErrorType)
                     (item, env)
                   end
-                  
+
                   (Absyn.FULLYQUALIFIED(path = rest_path), _, _, _, _)  => begin
                       env = NFSCodeEnv.getEnvTopScope(inEnv)
                       (item, env) = lookupClass2(rest_path, env, false, inInfo, inErrorType)
@@ -201,7 +201,7 @@
           (outItem, outEnv)
         end
 
-        function lookupNameInItem(inName::Absyn.Path, inItem::Item, inEnv::Env, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env} 
+        function lookupNameInItem(inName::Absyn.Path, inItem::Item, inEnv::Env, inErrorType::Option{<:Error.Message}) ::Tuple{Item, Env}
               local outEnv::Env
               local outItem::Item
 
@@ -218,7 +218,7 @@
                   (_, _,  nil(), _)  => begin
                     (inItem, inEnv)
                   end
-                  
+
                   (_, NFSCodeEnv.VAR(var = SCode.COMPONENT(typeSpec = Absyn.TPATH(path = type_path), modifications = mods, info = info)), _, _)  => begin
                       (item, type_env) = lookupClass(type_path, inEnv, true, info, inErrorType)
                       @match true = NFSCodeEnv.isClassItem(item)
@@ -227,7 +227,7 @@
                       (item, env) = lookupNameInItem(inName, item, type_env, inErrorType)
                     (item, env)
                   end
-                  
+
                   (_, NFSCodeEnv.CLASS(cls = SCode.CLASS(info = info), env = class_env <|  nil()), _, _)  => begin
                       env = NFSCodeEnv.enterFrame(class_env, inEnv)
                       (item, env) = lookupClass(inName, env, false, info, inErrorType)
@@ -240,7 +240,7 @@
 
          #= Checks that the found item really is a class, otherwise prints an error
           message. =#
-        function checkItemIsClass(inItem::Item)  
+        function checkItemIsClass(inItem::Item)
               _ = begin
                   local name::String
                   local info::SourceInfo
@@ -248,7 +248,7 @@
                   NFSCodeEnv.CLASS(__)  => begin
                     ()
                   end
-                  
+
                   NFSCodeEnv.VAR(var = SCode.COMPONENT(name = name, info = info))  => begin
                       Error.addSourceMessage(Error.LOOKUP_TYPE_FOUND_COMP, list(name), info)
                     fail()
@@ -262,11 +262,11 @@
         end
 
          #= Analyses an item. =#
-        function analyseItem(inItem::Item, inEnv::Env)  
+        function analyseItem(inItem::Item, inEnv::Env)
                #=  Check if the item is already marked as used, then we can stop here.
                =#
               if NFSCodeEnv.isItemUsed(inItem)
-                return 
+                return
               end
               _ = begin
                   local cdef::SCode.ClassDef
@@ -283,11 +283,11 @@
                       markItemAsUsed(inItem, env)
                     ()
                   end
-                  
+
                   (NFSCodeEnv.CLASS(classType = NFSCodeEnv.BASIC_TYPE(__)), _)  => begin
                     ()
                   end
-                  
+
                   (NFSCodeEnv.CLASS(cls = cls && SCode.CLASS(classDef = cdef, restriction = res, info = info, cmt = cmt), env = cls_env <|  nil()), env)  => begin
                       markItemAsUsed(inItem, env)
                       env = NFSCodeEnv.enterFrame(cls_env, env)
@@ -297,7 +297,7 @@
                                 NFSCodeEnv.FRAME(name = NONE()) <|  nil()  => begin
                                   true
                                 end
-                                
+
                                 _  => begin
                                     false
                                 end
@@ -315,7 +315,7 @@
                       analyseRedeclaredClass(cls, env)
                     ()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeDependency.analyseItem failed on " + NFSCodeEnv.getItemName(inItem) + " in " + NFSCodeEnv.getEnvName(inEnv))
@@ -326,7 +326,7 @@
         end
 
          #= Analyses an item again if there were some redeclares applied to the environment =#
-        function analyseItemIfRedeclares(inRepls::NFSCodeFlattenRedeclare.Replacements, inItem::Item, inEnv::Env)  
+        function analyseItemIfRedeclares(inRepls::NFSCodeFlattenRedeclare.Replacements, inItem::Item, inEnv::Env)
               _ = begin
                   local i::Item
                   local cls_frm::NFSCodeEnv.Frame
@@ -337,7 +337,7 @@
                   ( nil(), _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, _)  => begin
                       @match _cons(_, env) = inEnv
                       analyseItemNoStopOnUsed(inItem, env)
@@ -350,7 +350,7 @@
         end
 
          #= Analyses an item. =#
-        function analyseItemNoStopOnUsed(inItem::Item, inEnv::Env)  
+        function analyseItemNoStopOnUsed(inItem::Item, inEnv::Env)
               _ = begin
                   local cdef::SCode.ClassDef
                   local cls_env::NFSCodeEnv.Frame
@@ -366,11 +366,11 @@
                       markItemAsUsed(inItem, env)
                     ()
                   end
-                  
+
                   (NFSCodeEnv.CLASS(classType = NFSCodeEnv.BASIC_TYPE(__)), _)  => begin
                     ()
                   end
-                  
+
                   (NFSCodeEnv.CLASS(cls = cls && SCode.CLASS(classDef = cdef, restriction = res, info = info, cmt = cmt), env = cls_env <|  nil()), env)  => begin
                       markItemAsUsed(inItem, env)
                       env = NFSCodeEnv.enterFrame(cls_env, env)
@@ -381,7 +381,7 @@
                       analyseRedeclaredClass(cls, env)
                     ()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeDependency.analyseItemNoStopOnUsed failed on " + NFSCodeEnv.getItemName(inItem) + " in " + NFSCodeEnv.getEnvName(inEnv))
@@ -398,7 +398,7 @@
         end
 
          #= Marks an item and it's environment as used. =#
-        function markItemAsUsed(inItem::Item, inEnv::Env)  
+        function markItemAsUsed(inItem::Item, inEnv::Env)
               _ = begin
                   local cls_env::NFSCodeEnv.Frame
                   local is_used::MutableType #= {Bool} =#
@@ -409,11 +409,11 @@
                       markEnvAsUsed(inEnv)
                     ()
                   end
-                  
+
                   (NFSCodeEnv.VAR(isUsed = NONE()), _)  => begin
                     ()
                   end
-                  
+
                   (NFSCodeEnv.CLASS(env = cls_env <|  nil(), cls = SCode.CLASS(__)), _)  => begin
                       markFrameAsUsed(cls_env)
                       markEnvAsUsed(inEnv)
@@ -424,7 +424,7 @@
         end
 
          #= Marks a single frame as used. =#
-        function markFrameAsUsed(inFrame::NFSCodeEnv.Frame)  
+        function markFrameAsUsed(inFrame::NFSCodeEnv.Frame)
               _ = begin
                   local is_used::MutableType #= {Bool} =#
                 @match inFrame begin
@@ -432,7 +432,7 @@
                       Mutable.update(is_used, true)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -443,7 +443,7 @@
          #= Marks an environment as used. This is done by marking each frame as used, and
           for each frame we also analyse the class it represents to make sure we don't
           miss anything in the enclosing scopes of an item. =#
-        function markEnvAsUsed(inEnv::Env)  
+        function markEnvAsUsed(inEnv::Env)
               _ = begin
                   local is_used::MutableType #= {Bool} =#
                   local rest_env::Env
@@ -456,7 +456,7 @@
                       markEnvAsUsed(rest_env)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -466,14 +466,14 @@
 
          #= Helper function to markEnvAsUsed. Checks if the given frame belongs to a
           class, and if that's the case calls analyseClass on that class. =#
-        function markEnvAsUsed2(inFrame::NFSCodeEnv.Frame, inEnv::NFSCodeEnv.Env)  
+        function markEnvAsUsed2(inFrame::NFSCodeEnv.Frame, inEnv::NFSCodeEnv.Env)
               _ = begin
                   local name::String
                 @match (inFrame, inEnv) begin
                   (NFSCodeEnv.FRAME(frameType = NFSCodeEnv.IMPLICIT_SCOPE(__)), _)  => begin
                     ()
                   end
-                  
+
                   (NFSCodeEnv.FRAME(name = SOME(name)), _)  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, AbsynUtil.dummyInfo)
                     ()
@@ -483,7 +483,7 @@
         end
 
          #= Analyses the contents of a class definition. =#
-        function analyseClassDef(inClassDef::SCode.ClassDef, inRestriction::SCode.Restriction, inEnv::Env, inInModifierScope::Bool, inInfo::SourceInfo)  
+        function analyseClassDef(inClassDef::SCode.ClassDef, inRestriction::SCode.Restriction, inEnv::Env, inInModifierScope::Bool, inInfo::SourceInfo)
               _ = begin
                   local el::List{SCode.Element}
                   local bc::Absyn.Ident
@@ -516,19 +516,19 @@
                       analyseExternalDecl(ext_decl, inEnv, inInfo)
                     ()
                   end
-                  
+
                   (SCode.PARTS(elementLst = el), _, _, _, _)  => begin
                       isExternalObject(el, inEnv, inInfo)
                       analyseClass(Absyn.IDENT("constructor"), inEnv, inInfo)
                       analyseClass(Absyn.IDENT("destructor"), inEnv, inInfo)
                     ()
                   end
-                  
+
                   (SCode.CLASS_EXTENDS(__), _, _, _, _)  => begin
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list("NFSCodeDependency.analyseClassDef failed on CLASS_EXTENDS"), inInfo)
                     fail()
                   end
-                  
+
                   (SCode.DERIVED(typeSpec = ty, modifications = mods), _, _ <| env, _, _)  => begin
                       env = if inInModifierScope
                             inEnv
@@ -546,11 +546,11 @@
                       analyseModifier(mods, inEnv, ty_env, inInfo)
                     ()
                   end
-                  
+
                   (SCode.ENUMERATION(__), _, _, _, _)  => begin
                     ()
                   end
-                  
+
                   (SCode.OVERLOAD(pathLst = paths), _, _, _, _)  => begin
                        #=  The previous case failed, which might happen for an external object.
                        =#
@@ -571,7 +571,7 @@
                       end
                     ()
                   end
-                  
+
                   (SCode.PDER(__), _, _, _, _)  => begin
                     ()
                   end
@@ -580,7 +580,7 @@
         end
 
          #= Checks if a class definition is an external object. =#
-        function isExternalObject(inElements::List{<:SCode.Element}, inEnv::Env, inInfo::SourceInfo)  
+        function isExternalObject(inElements::List{<:SCode.Element}, inEnv::Env, inInfo::SourceInfo)
               local el::List{SCode.Element}
               local el_names::List{String}
 
@@ -598,7 +598,7 @@
               checkExternalObject(el_names, inEnv, inInfo)
         end
 
-        function elementName(inElement::SCode.Element) ::String 
+        function elementName(inElement::SCode.Element) ::String
               local outString::String
 
               outString = begin
@@ -608,15 +608,15 @@
                   SCode.COMPONENT(name = name)  => begin
                     name
                   end
-                  
+
                   SCode.CLASS(name = name)  => begin
                     name
                   end
-                  
+
                   SCode.DEFINEUNIT(name = name)  => begin
                     name
                   end
-                  
+
                   SCode.EXTENDS(baseClassPath = bc)  => begin
                       name = AbsynUtil.pathString(bc)
                       name = "extends " + name
@@ -628,7 +628,7 @@
         end
 
          #= False on 'extends ExternalObject', otherwise true. =#
-        function isNotExternalObject(inElement::SCode.Element) ::Bool 
+        function isNotExternalObject(inElement::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -636,7 +636,7 @@
                   SCode.EXTENDS(baseClassPath = Absyn.IDENT("ExternalObject"))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -647,7 +647,7 @@
 
          #= Checks that an external object is valid, i.e. has exactly one constructor and
           one destructor. =#
-        function checkExternalObject(inElements::List{<:String}, inEnv::Env, inInfo::SourceInfo)  
+        function checkExternalObject(inElements::List{<:String}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local env_str::String
                   local has_con::Bool
@@ -658,11 +658,11 @@
                   ("constructor" <| "destructor" <|  nil(), _, _)  => begin
                     ()
                   end
-                  
+
                   ("destructor" <| "constructor" <|  nil(), _, _)  => begin
                     ()
                   end
-                  
+
                   _  => begin
                         has_con = ListUtil.isMemberOnTrue("constructor", inElements, stringEqual)
                         has_des = ListUtil.isMemberOnTrue("destructor", inElements, stringEqual)
@@ -678,7 +678,7 @@
 
          #= Helper function to checkExternalObject. Prints an error message depending on
           what the external object contained. =#
-        function checkExternalObject2(inElements::List{<:String}, inHasConstructor::Bool, inHasDestructor::Bool, inObjectName::String, inInfo::SourceInfo)  
+        function checkExternalObject2(inElements::List{<:String}, inHasConstructor::Bool, inHasDestructor::Bool, inObjectName::String, inInfo::SourceInfo)
               _ = begin
                   local el::List{String}
                   local el_str::String
@@ -695,17 +695,17 @@
                       Error.addSourceMessage(Error.INVALID_EXTERNAL_OBJECT, list(inObjectName, el_str), inInfo)
                     ()
                   end
-                  
+
                   (_, false, true, _, _)  => begin
                       Error.addSourceMessage(Error.INVALID_EXTERNAL_OBJECT, list(inObjectName, "missing constructor"), inInfo)
                     ()
                   end
-                  
+
                   (_, true, false, _, _)  => begin
                       Error.addSourceMessage(Error.INVALID_EXTERNAL_OBJECT, list(inObjectName, "missing destructor"), inInfo)
                     ()
                   end
-                  
+
                   (_, false, false, _, _)  => begin
                       Error.addSourceMessage(Error.INVALID_EXTERNAL_OBJECT, list(inObjectName, "missing both constructor and destructor"), inInfo)
                     ()
@@ -725,7 +725,7 @@
         end
 
          #= If a metarecord is analysed we need to also analyse it's parent uniontype. =#
-        function analyseMetaType(inRestriction::SCode.Restriction, inEnv::Env, inInfo::SourceInfo)  
+        function analyseMetaType(inRestriction::SCode.Restriction, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local union_name::Absyn.Path
                 @match (inRestriction, inEnv, inInfo) begin
@@ -733,7 +733,7 @@
                       analyseClass(union_name, inEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -743,7 +743,7 @@
 
          #= If a class is a redeclaration of an inherited class we need to also analyse
           the inherited class. =#
-        function analyseRedeclaredClass(inClass::SCode.Element, inEnv::Env)  
+        function analyseRedeclaredClass(inClass::SCode.Element, inEnv::Env)
               _ = begin
                   local item::Item
                   local name::String
@@ -752,7 +752,7 @@
                       @match false = SCodeUtil.isElementRedeclare(inClass)
                     ()
                   end
-                  
+
                   (SCode.CLASS(__), _)  => begin
                       item = NFSCodeEnv.CLASS(inClass, NFSCodeEnv.emptyEnv, NFSCodeEnv.USERDEFINED())
                       analyseRedeclaredClass2(item, inEnv)
@@ -762,7 +762,7 @@
               end
         end
 
-        function analyseRedeclaredClass2(inItem::Item, inEnv::Env)  
+        function analyseRedeclaredClass2(inItem::Item, inEnv::Env)
               _ = begin
                   local name::String
                   local item::Item
@@ -775,7 +775,7 @@
                       analyseItem(item, env)
                     ()
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeDependency.analyseRedeclaredClass2 failed for " + NFSCodeEnv.getItemName(inItem) + " in " + NFSCodeEnv.getEnvName(inEnv))
@@ -785,14 +785,14 @@
               end
         end
 
-        function analyseElements(inElements::List{<:SCode.Element}, inEnv::Env, inClassRestriction::SCode.Restriction)  
+        function analyseElements(inElements::List{<:SCode.Element}, inEnv::Env, inClassRestriction::SCode.Restriction)
               local exts::List{Extends}
 
               exts = NFSCodeEnv.getEnvExtendsFromTable(inEnv)
               analyseElements2(inElements, inEnv, exts, inClassRestriction)
         end
 
-        function analyseElements2(inElements::List{<:SCode.Element}, inEnv::Env, inExtends::List{<:Extends}, inClassRestriction::SCode.Restriction)  
+        function analyseElements2(inElements::List{<:SCode.Element}, inEnv::Env, inExtends::List{<:Extends}, inClassRestriction::SCode.Restriction)
               _ = begin
                   local el::SCode.Element
                   local rest_el::List{SCode.Element}
@@ -803,7 +803,7 @@
                       analyseElements2(rest_el, inEnv, exts, inClassRestriction)
                     ()
                   end
-                  
+
                   ( nil(), _, _, _)  => begin
                     ()
                   end
@@ -812,7 +812,7 @@
         end
 
          #= Analyses an element. =#
-        function analyseElement(inElement::SCode.Element, inEnv::Env, inExtends::List{<:Extends}, inClassRestriction::SCode.Restriction) ::List{Extends} 
+        function analyseElement(inElement::SCode.Element, inEnv::Env, inExtends::List{<:Extends}, inClassRestriction::SCode.Restriction) ::List{Extends}
               local outExtends::List{Extends}
 
               outExtends = begin
@@ -840,7 +840,7 @@
                   (SCode.EXTENDS(baseClassPath = Absyn.IDENT("ExternalObject")), _, _, _)  => begin
                     fail()
                   end
-                  
+
                   (SCode.EXTENDS(modifications = mods, info = info), _, NFSCodeEnv.EXTENDS(baseClass = bc) <| exts, _)  => begin
                       (ty_item, _, ty_env) = NFSCodeLookup.lookupBaseClassName(bc, inEnv, info)
                       analyseExtends(bc, inEnv, info)
@@ -848,7 +848,7 @@
                       analyseModifier(mods, inEnv, ty_env, info)
                     exts
                   end
-                  
+
                   (SCode.COMPONENT(name = name, attributes = attr, typeSpec = ty, modifications = mods, condition = cond_exp, prefixes = prefixes, info = info), _, _, _)  => begin
                       markAsUsedOnRestriction(name, inClassRestriction, inEnv, info)
                       analyseAttributes(attr, inEnv, info)
@@ -864,62 +864,62 @@
                       analyseConstrainClass(SCodeUtil.replaceableOptConstraint(SCodeUtil.prefixesReplaceable(prefixes)), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = SCode.R_OPERATOR(__), info = info), _, _, SCode.R_RECORD(true))  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = SCode.R_OPERATOR(__), info = info), _, _, _)  => begin
                       str = SCodeDump.restrString(inClassRestriction)
                       Error.addSourceMessage(Error.OPERATOR_FUNCTION_NOT_EXPECTED, list(name, str), info)
                     fail()
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__)), info = info), _, _, SCode.R_RECORD(true))  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = SCode.R_FUNCTION(SCode.FR_OPERATOR_FUNCTION(__)), info = info), _, _, _)  => begin
                       str = SCodeDump.restrString(inClassRestriction)
                       Error.addSourceMessage(Error.OPERATOR_FUNCTION_NOT_EXPECTED, list(name, str), info)
                     fail()
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = res, info = info), _, _, SCode.R_OPERATOR(__))  => begin
                       @match true = SCodeUtil.isFunctionOrExtFunctionRestriction(res)
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, restriction = res, info = info), _, _, SCode.R_OPERATOR(__))  => begin
                       @match false = SCodeUtil.isFunctionOrExtFunctionRestriction(res)
                       str = SCodeDump.restrString(res)
                       Error.addSourceMessage(Error.OPERATOR_FUNCTION_EXPECTED, list(name, str), info)
                     fail()
                   end
-                  
+
                   (SCode.CLASS(name = name && "equalityConstraint", info = info), _, _, _)  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, info = info, classDef = SCode.CLASS_EXTENDS(__)), _, _, _)  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, prefixes = SCode.PREFIXES(innerOuter = Absyn.INNER(__)), info = info), _, _, _)  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   (SCode.CLASS(name = name, prefixes = SCode.PREFIXES(innerOuter = Absyn.INNER_OUTER(__)), info = info), _, _, _)  => begin
                       analyseClass(Absyn.IDENT(name), inEnv, info)
                     inExtends
                   end
-                  
+
                   _  => begin
                       inExtends
                   end
@@ -964,7 +964,7 @@
           outExtends
         end
 
-        function markAsUsedOnConstant(inName::SCode.Ident, inAttr::SCode.Attributes, inEnv::Env, inInfo::SourceInfo)  
+        function markAsUsedOnConstant(inName::SCode.Ident, inAttr::SCode.Attributes, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local cls_and_vars::EnvTree.Tree
                   local is_used::MutableType #= {Bool} =#
@@ -976,7 +976,7 @@
                       Mutable.update(is_used, true)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -984,7 +984,7 @@
               end
         end
 
-        function markAsUsedOnRestriction(inName::SCode.Ident, inRestriction::SCode.Restriction, inEnv::Env, inInfo::SourceInfo)  
+        function markAsUsedOnRestriction(inName::SCode.Ident, inRestriction::SCode.Restriction, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local cls_and_vars::EnvTree.Tree
                   local is_used::MutableType #= {Bool} =#
@@ -995,7 +995,7 @@
                       Mutable.update(is_used, true)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1003,7 +1003,7 @@
               end
         end
 
-        function markAsUsedOnRestriction2(inRestriction::SCode.Restriction) ::Bool 
+        function markAsUsedOnRestriction2(inRestriction::SCode.Restriction) ::Bool
               local isRestricted::Bool
 
               isRestricted = begin
@@ -1011,11 +1011,11 @@
                   SCode.R_CONNECTOR(__)  => begin
                     true
                   end
-                  
+
                   SCode.R_RECORD(_)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -1025,7 +1025,7 @@
         end
 
          #= Analyses an extends-clause. =#
-        function analyseExtends(inClassName::Absyn.Path, inEnv::Env, inInfo::SourceInfo)  
+        function analyseExtends(inClassName::Absyn.Path, inEnv::Env, inInfo::SourceInfo)
               local item::Item
               local env::Env
 
@@ -1034,7 +1034,7 @@
         end
 
          #= Analyses a components attributes (actually only the array dimensions). =#
-        function analyseAttributes(inAttributes::SCode.Attributes, inEnv::Env, inInfo::SourceInfo)  
+        function analyseAttributes(inAttributes::SCode.Attributes, inEnv::Env, inInfo::SourceInfo)
               local ad::Absyn.ArrayDim
 
               @match SCode.ATTR(arrayDims = ad) = inAttributes
@@ -1042,7 +1042,7 @@
         end
 
          #= Analyses a modifier. =#
-        function analyseModifier(inModifier::SCode.Mod, inEnv::Env, inTypeEnv::Env, inInfo::SourceInfo)  
+        function analyseModifier(inModifier::SCode.Mod, inEnv::Env, inTypeEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local el::SCode.Element
                   local sub_mods::List{SCode.SubMod}
@@ -1053,13 +1053,13 @@
                   (SCode.NOMOD(__), _, _, _)  => begin
                     ()
                   end
-                  
+
                   (SCode.MOD(subModLst = sub_mods, binding = bind_exp), _, _, _)  => begin
                       ListUtil.map2_0(sub_mods, analyseSubMod, (inEnv, inTypeEnv), inInfo)
                       analyseModBinding(bind_exp, inEnv, inInfo)
                     ()
                   end
-                  
+
                   (SCode.REDECL(element = el), _, _, _)  => begin
                       analyseRedeclareModifier(el, inEnv, inTypeEnv)
                     ()
@@ -1073,7 +1073,7 @@
         end
 
          #= Analyses a redeclaration modifier element. =#
-        function analyseRedeclareModifier(inElement::SCode.Element, inEnv::Env, inTypeEnv::Env)  
+        function analyseRedeclareModifier(inElement::SCode.Element, inEnv::Env, inTypeEnv::Env)
               _ = begin
                   local cdef::SCode.ClassDef
                   local info::SourceInfo
@@ -1090,7 +1090,7 @@
                       analyseConstrainClass(SCodeUtil.replaceableOptConstraint(SCodeUtil.prefixesReplaceable(prefixes)), inEnv, info)
                     ()
                   end
-                  
+
                   _  => begin
                         _ = analyseElement(inElement, inEnv, nil, SCode.R_CLASS())
                       ()
@@ -1102,7 +1102,7 @@
         end
 
          #= Analyses a constrain class, i.e. given by constrainedby. =#
-        function analyseConstrainClass(inCC::Option{<:SCode.ConstrainClass}, inEnv::Env, inInfo::SourceInfo)  
+        function analyseConstrainClass(inCC::Option{<:SCode.ConstrainClass}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local path::Absyn.Path
                   local mod::SCode.Mod
@@ -1114,7 +1114,7 @@
                       analyseModifier(mod, inEnv, env, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1123,7 +1123,7 @@
         end
 
          #= Analyses a submodifier. =#
-        function analyseSubMod(inSubMod::SCode.SubMod, inEnv::Tuple{<:Env, Env}, inInfo::SourceInfo)  
+        function analyseSubMod(inSubMod::SCode.SubMod, inEnv::Tuple{<:Env, Env}, inInfo::SourceInfo)
               _ = begin
                   local ident::SCode.Ident
                   local m::SCode.Mod
@@ -1139,7 +1139,7 @@
               end
         end
 
-        function analyseNameMod(inIdent::SCode.Ident, inEnv::Env, inTypeEnv::Env, inMod::SCode.Mod, inInfo::SourceInfo)  
+        function analyseNameMod(inIdent::SCode.Ident, inEnv::Env, inTypeEnv::Env, inMod::SCode.Mod, inInfo::SourceInfo)
               local item::Option{Item}
               local env::Option{Env}
 
@@ -1147,7 +1147,7 @@
               analyseNameMod2(inIdent, item, env, inEnv, inTypeEnv, inMod, inInfo)
         end
 
-        function analyseNameMod2(inIdent::SCode.Ident, inItem::Option{<:Item}, inItemEnv::Option{<:Env}, inEnv::Env, inTypeEnv::Env, inModifier::SCode.Mod, inInfo::SourceInfo)  
+        function analyseNameMod2(inIdent::SCode.Ident, inItem::Option{<:Item}, inItemEnv::Option{<:Env}, inEnv::Env, inTypeEnv::Env, inModifier::SCode.Mod, inInfo::SourceInfo)
               _ = begin
                   local item::Item
                   local env::Env
@@ -1159,7 +1159,7 @@
                       analyseModifier(inModifier, inEnv, env, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                         analyseModifier(inModifier, inEnv, inTypeEnv, inInfo)
                       ()
@@ -1168,7 +1168,7 @@
               end
         end
 
-        function lookupNameMod(inPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo) ::Tuple{Option{Item}, Option{Env}} 
+        function lookupNameMod(inPath::Absyn.Path, inEnv::Env, inInfo::SourceInfo) ::Tuple{Option{Item}, Option{Env}}
               local outEnv::Option{Env}
               local outItem::Option{Item}
 
@@ -1181,7 +1181,7 @@
                       (item, env, _) = NFSCodeEnv.resolveRedeclaredItem(item, env)
                     (SOME(item), SOME(env))
                   end
-                  
+
                   _  => begin
                       (NONE(), NONE())
                   end
@@ -1191,14 +1191,14 @@
         end
 
          #= Analyses a subscript. =#
-        function analyseSubscript(inSubscript::SCode.Subscript, inEnv::Env, inInfo::SourceInfo)  
+        function analyseSubscript(inSubscript::SCode.Subscript, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local sub_exp::Absyn.Exp
                 @match (inSubscript, inEnv, inInfo) begin
                   (Absyn.NOSUB(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (Absyn.SUBSCRIPT(sub_exp), _, _)  => begin
                       analyseExp(sub_exp, inEnv, inInfo)
                     ()
@@ -1208,14 +1208,14 @@
         end
 
          #= Analyses an optional modifier binding. =#
-        function analyseModBinding(inBinding::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo)  
+        function analyseModBinding(inBinding::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local bind_exp::Absyn.Exp
                 @match inBinding begin
                   NONE()  => begin
                     ()
                   end
-                  
+
                   SOME(bind_exp)  => begin
                       analyseExp(bind_exp, inEnv, inInfo)
                     ()
@@ -1225,7 +1225,7 @@
         end
 
          #= Analyses a type specificer. =#
-        function analyseTypeSpec(inTypeSpec::Absyn.TypeSpec, inEnv::Env, inInfo::SourceInfo)  
+        function analyseTypeSpec(inTypeSpec::Absyn.TypeSpec, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local type_path::Absyn.Path
                   local tys::List{Absyn.TypeSpec}
@@ -1238,11 +1238,11 @@
                       analyseTypeSpecDims(ad, inEnv, inInfo)
                     ()
                   end
-                  
+
                   (Absyn.TCOMPLEX(path = Absyn.IDENT("polymorphic")), _, _)  => begin
                     ()
                   end
-                  
+
                   (Absyn.TCOMPLEX(typeSpecs = tys), _, _)  => begin
                       ListUtil.map2_0(tys, analyseTypeSpec, inEnv, inInfo)
                     ()
@@ -1255,7 +1255,7 @@
                =#
         end
 
-        function analyseTypeSpecDims(inDims::Option{<:Absyn.ArrayDim}, inEnv::Env, inInfo::SourceInfo)  
+        function analyseTypeSpecDims(inDims::Option{<:Absyn.ArrayDim}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local dims::Absyn.ArrayDim
                 @match (inDims, inEnv, inInfo) begin
@@ -1263,7 +1263,7 @@
                       ListUtil.map2_0(dims, analyseTypeSpecDim, inEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1271,14 +1271,14 @@
               end
         end
 
-        function analyseTypeSpecDim(inDim::Absyn.Subscript, inEnv::Env, inInfo::SourceInfo)  
+        function analyseTypeSpecDim(inDim::Absyn.Subscript, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local dim::Absyn.Exp
                 @match (inDim, inEnv, inInfo) begin
                   (Absyn.NOSUB(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (Absyn.SUBSCRIPT(subscript = dim), _, _)  => begin
                       analyseExp(dim, inEnv, inInfo)
                     ()
@@ -1288,7 +1288,7 @@
         end
 
          #= Analyses an external declaration. =#
-        function analyseExternalDecl(inExtDecl::Option{<:SCode.ExternalDecl}, inEnv::Env, inInfo::SourceInfo)  
+        function analyseExternalDecl(inExtDecl::Option{<:SCode.ExternalDecl}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local ann::SCode.Annotation
                   local args::List{Absyn.Exp}
@@ -1299,13 +1299,13 @@
                       ListUtil.map2_0(args, analyseExp, inEnv, inInfo)
                     ()
                   end
-                  
+
                   (SOME(SCode.EXTERNALDECL(args = args, annotation_ = SOME(ann))), _, _)  => begin
                       ListUtil.map2_0(args, analyseExp, inEnv, inInfo)
                       analyseAnnotation(ann, inEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1316,7 +1316,7 @@
         end
 
          #= Analyses an optional comment. =#
-        function analyseComment(inComment::SCode.Comment, inEnv::Env, inInfo::SourceInfo)  
+        function analyseComment(inComment::SCode.Comment, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local ann::SCode.Annotation
                    #=  A comment might have an annotation that we need to analyse.
@@ -1326,7 +1326,7 @@
                       analyseAnnotation(ann, inEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1335,7 +1335,7 @@
         end
 
          #= Analyses an annotation. =#
-        function analyseAnnotation(inAnnotation::SCode.Annotation, inEnv::Env, inInfo::SourceInfo)  
+        function analyseAnnotation(inAnnotation::SCode.Annotation, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local mods::SCode.Mod
                   local sub_mods::List{SCode.SubMod}
@@ -1349,7 +1349,7 @@
         end
 
          #= Analyses an annotation modifier. =#
-        function analyseAnnotationMod(inMod::SCode.SubMod, inEnv::Env, inInfo::SourceInfo)  
+        function analyseAnnotationMod(inMod::SCode.SubMod, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local mods::SCode.Mod
                   local id::String
@@ -1362,13 +1362,13 @@
                       analyseModifier(mods, inEnv, NFSCodeEnv.emptyEnv, inInfo)
                     ()
                   end
-                  
+
                   (SCode.NAMEMOD(ident = id, mod = mods), _, _)  => begin
                       analyseAnnotationName(id, inEnv, inInfo)
                       analyseModifier(mods, inEnv, NFSCodeEnv.emptyEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1383,7 +1383,7 @@
         end
 
          #= Analyses an annotation name, such as Icon or Line. =#
-        function analyseAnnotationName(inName::SCode.Ident, inEnv::Env, inInfo::SourceInfo)  
+        function analyseAnnotationName(inName::SCode.Ident, inEnv::Env, inInfo::SourceInfo)
               local item::Item
               local env::Env
 
@@ -1393,12 +1393,12 @@
         end
 
          #= Recursively analyses an expression. =#
-        function analyseExp(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo)  
+        function analyseExp(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo)
               (_, _) = AbsynUtil.traverseExpBidir(inExp, analyseExpTraverserEnter, analyseExpTraverserExit, (inEnv, inInfo))
         end
 
          #= Recursively analyses an optional expression. =#
-        function analyseOptExp(inExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo)  
+        function analyseOptExp(inExp::Option{<:Absyn.Exp}, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local exp::Absyn.Exp
                 @match (inExp, inEnv, inInfo) begin
@@ -1406,7 +1406,7 @@
                       analyseExp(exp, inEnv, inInfo)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1415,7 +1415,7 @@
         end
 
          #= Traversal enter function for use in analyseExp. =#
-        function analyseExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function analyseExpTraverserEnter(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -1430,7 +1430,7 @@
         end
 
          #= Helper function to analyseExp, does the actual work. =#
-        function analyseExp2(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo) ::Env 
+        function analyseExp2(inExp::Absyn.Exp, inEnv::Env, inInfo::SourceInfo) ::Env
               local outEnv::Env
 
               outEnv = begin
@@ -1443,28 +1443,28 @@
                       analyseCref(cref, inEnv, inInfo)
                     inEnv
                   end
-                  
+
                   (Absyn.CALL(function_ = cref, functionArgs = Absyn.FOR_ITER_FARG(iterators = iters)), _, _)  => begin
                       analyseCref(cref, inEnv, inInfo)
                       env = NFSCodeEnv.extendEnvWithIterators(iters, System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), inEnv)
                     env
                   end
-                  
+
                   (Absyn.CALL(function_ = cref), _, _)  => begin
                       analyseCref(cref, inEnv, inInfo)
                     inEnv
                   end
-                  
+
                   (Absyn.PARTEVALFUNCTION(function_ = cref), _, _)  => begin
                       analyseCref(cref, inEnv, inInfo)
                     inEnv
                   end
-                  
+
                   (Absyn.MATCHEXP(__), _, _)  => begin
                       env = NFSCodeEnv.extendEnvWithMatch(inExp, System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), inEnv)
                     env
                   end
-                  
+
                   _  => begin
                       inEnv
                   end
@@ -1476,7 +1476,7 @@
         end
 
          #= Analyses a component reference. =#
-        function analyseCref(inCref::Absyn.ComponentRef, inEnv::Env, inInfo::SourceInfo)  
+        function analyseCref(inCref::Absyn.ComponentRef, inEnv::Env, inInfo::SourceInfo)
               _ = begin
                   local path::Absyn.Path
                   local item::Item
@@ -1485,14 +1485,14 @@
                   (Absyn.WILD(__), _, _)  => begin
                     ()
                   end
-                  
+
                   (_, _, _)  => begin
                       path = AbsynUtil.crefToPathIgnoreSubs(inCref)
                       (item, env) = lookupClass(path, inEnv, true, inInfo, NONE())
                       analyseItem(item, env)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1505,7 +1505,7 @@
         end
 
          #= Traversal exit function for use in analyseExp. =#
-        function analyseExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function analyseExpTraverserExit(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -1519,11 +1519,11 @@
                   (Absyn.CALL(functionArgs = Absyn.FOR_ITER_FARG(__)), (NFSCodeEnv.FRAME(frameType = NFSCodeEnv.IMPLICIT_SCOPE(__)) <| env, info))  => begin
                     (inExp, (env, info))
                   end
-                  
+
                   (Absyn.MATCHEXP(__), (NFSCodeEnv.FRAME(frameType = NFSCodeEnv.IMPLICIT_SCOPE(__)) <| env, info))  => begin
                     (inExp, (env, info))
                   end
-                  
+
                   _  => begin
                       (inExp, inTuple)
                   end
@@ -1533,7 +1533,7 @@
         end
 
          #= Analyses an equation. =#
-        function analyseEquation(inEquation::SCode.Equation, inEnv::Env)  
+        function analyseEquation(inEquation::SCode.Equation, inEnv::Env)
               local equ::SCode.EEquation
 
               @match SCode.EQUATION(equ) = inEquation
@@ -1541,7 +1541,7 @@
         end
 
          #= Traversal function for use in analyseEquation. =#
-        function analyseEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Env}) ::Tuple{SCode.EEquation, Env} 
+        function analyseEEquationTraverser(inTuple::Tuple{<:SCode.EEquation, Env}) ::Tuple{SCode.EEquation, Env}
               local outTuple::Tuple{SCode.EEquation, Env}
 
               outTuple = begin
@@ -1556,13 +1556,13 @@
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
                     (equ, env)
                   end
-                  
+
                   (equ && SCode.EQ_REINIT(cref = Absyn.CREF(componentRef = cref1), info = info), env)  => begin
                       analyseCref(cref1, env, info)
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
                     (equ, env)
                   end
-                  
+
                   (equ, env)  => begin
                       info = SCodeUtil.getEEquationInfo(equ)
                       (equ, _) = SCodeUtil.traverseEEquationExps(equ, traverseExp, (env, info))
@@ -1575,7 +1575,7 @@
 
          #= Traversal function used by analyseEEquationTraverser and
           analyseStatementTraverser. =#
-        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}} 
+        function traverseExp(inExp::Absyn.Exp, inTuple::Tuple{<:Env, SourceInfo}) ::Tuple{Absyn.Exp, Tuple{Env, SourceInfo}}
               local outTuple::Tuple{Env, SourceInfo}
               local outExp::Absyn.Exp
 
@@ -1584,7 +1584,7 @@
         end
 
          #= Analyses an algorithm. =#
-        function analyseAlgorithm(inAlgorithm::SCode.AlgorithmSection, inEnv::Env)  
+        function analyseAlgorithm(inAlgorithm::SCode.AlgorithmSection, inEnv::Env)
               local stmts::List{SCode.Statement}
 
               @match SCode.ALGORITHM(stmts) = inAlgorithm
@@ -1592,12 +1592,12 @@
         end
 
          #= Analyses a statement in an algorithm. =#
-        function analyseStatement(inStatement::SCode.Statement, inEnv::Env)  
+        function analyseStatement(inStatement::SCode.Statement, inEnv::Env)
               (_, _) = SCodeUtil.traverseStatements(inStatement, (analyseStatementTraverser, inEnv))
         end
 
          #= Traversal function used by analyseStatement. =#
-        function analyseStatementTraverser(inTuple::Tuple{<:SCode.Statement, Env}) ::Tuple{SCode.Statement, Env} 
+        function analyseStatementTraverser(inTuple::Tuple{<:SCode.Statement, Env}) ::Tuple{SCode.Statement, Env}
               local outTuple::Tuple{SCode.Statement, Env}
 
               outTuple = begin
@@ -1612,13 +1612,13 @@
                       (_, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
                     (stmt, env)
                   end
-                  
+
                   (stmt && SCode.ALG_PARFOR(index = iter_name, info = info), env)  => begin
                       env = NFSCodeEnv.extendEnvWithIterators(list(Absyn.ITERATOR(iter_name, NONE(), NONE())), System.tmpTickIndex(NFSCodeEnv.tmpTickIndex), env)
                       (_, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
                     (stmt, env)
                   end
-                  
+
                   (stmt, env)  => begin
                       info = SCodeUtil.getStatementInfo(stmt)
                       (_, _) = SCodeUtil.traverseStatementExps(stmt, traverseExp, (env, info))
@@ -1644,7 +1644,7 @@
           base class. So we might get some extra dependencies that are actually not
           used, but it's still better then marking all class extends in the program as
           used. =#
-        function analyseClassExtends(inEnv::Env)  
+        function analyseClassExtends(inEnv::Env)
               local tree::EnvTree.Tree
 
               @match _cons(NFSCodeEnv.FRAME(clsAndVars = tree), _) = inEnv
@@ -1652,7 +1652,7 @@
         end
 
          #= Helper function to analyseClassExtends. Analyses a value in the EnvTree. =#
-        function analyseAvlValue(key::String, value::Item, env::Env) ::Tuple{Env, Bool} 
+        function analyseAvlValue(key::String, value::Item, env::Env) ::Tuple{Env, Bool}
               local cont::Bool
 
 
@@ -1672,14 +1672,14 @@
                       @match false = Mutable.access(is_used)
                     false
                   end
-                  
+
                   (NFSCodeEnv.CLASS(cls = cls, env = cls_env <|  nil(), classType = cls_ty), _)  => begin
                       env2 = NFSCodeEnv.enterFrame(cls_env, env)
                       analyseClassExtendsDef(cls, cls_ty, env2)
                       analyseClassExtends(env2)
                     true
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -1691,7 +1691,7 @@
         end
 
          #= Analyses a class extends definition. =#
-        function analyseClassExtendsDef(inClass::SCode.Element, inClassType::NFSCodeEnv.ClassType, inEnv::Env)  
+        function analyseClassExtendsDef(inClass::SCode.Element, inClassType::NFSCodeEnv.ClassType, inEnv::Env)
               _ = begin
                   local item::Item
                   local info::SourceInfo
@@ -1706,7 +1706,7 @@
                       analyseClass(Absyn.IDENT(cls_name), env, info)
                     ()
                   end
-                  
+
                   (SCode.CLASS(name = cls_name, info = info), NFSCodeEnv.USERDEFINED(__), _)  => begin
                       @match true = SCodeUtil.isElementRedeclare(inClass)
                       @match _cons(_, env) = inEnv
@@ -1716,7 +1716,7 @@
                       analyseClass(Absyn.IDENT(cls_name), env, info)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1733,7 +1733,7 @@
          #= Entry point for the second phase in the dependency analysis. Goes through the
            environment and collects the used elements in a new program and environment.
            Also returns a list of all global constants. =#
-        function collectUsedProgram(inEnv::Env, inProgram::SCode.Program, inClassName::Absyn.Path) ::Tuple{Env, SCode.Program} 
+        function collectUsedProgram(inEnv::Env, inProgram::SCode.Program, inClassName::Absyn.Path) ::Tuple{Env, SCode.Program}
               local outProgram::SCode.Program
               local outEnv::Env
 
@@ -1751,7 +1751,7 @@
           of the classes in the new program. Another alternative would have been to just
           traverse the environment and collect the used classes, which would have been a
           bit faster but would not have preserved the order of the program. =#
-        function collectUsedProgram2(clsAndVars::EnvTree.Tree, inEnv::Env, inProgram::SCode.Program, inClassName::Absyn.Path, inAccumEnv::Env) ::Tuple{SCode.Program, Env} 
+        function collectUsedProgram2(clsAndVars::EnvTree.Tree, inEnv::Env, inProgram::SCode.Program, inClassName::Absyn.Path, inAccumEnv::Env) ::Tuple{SCode.Program, Env}
               local outAccumEnv::Env
               local outProgram::SCode.Program
 
@@ -1767,13 +1767,13 @@
                   (_, _,  nil(), _, _)  => begin
                     (inProgram, inAccumEnv)
                   end
-                  
+
                   (_, _, cls && SCode.CLASS(name = name) <| rest_prog, _, env)  => begin
                       @match ((@match SCode.CLASS() = cls_el), env) = collectUsedClass(cls, inEnv, clsAndVars, inClassName, env, Absyn.IDENT(name))
                       (rest_prog, env) = collectUsedProgram2(clsAndVars, inEnv, rest_prog, inClassName, env)
                     (_cons(cls_el, rest_prog), env)
                   end
-                  
+
                   (_, _, SCode.CLASS(__) <| rest_prog, _, env)  => begin
                       (rest_prog, env) = collectUsedProgram2(clsAndVars, inEnv, rest_prog, inClassName, env)
                     (rest_prog, env)
@@ -1789,7 +1789,7 @@
 
          #= Checks if the given class is used in the program, and if that's the case it
           adds the class to the accumulated environment. Otherwise it just fails. =#
-        function collectUsedClass(inClass::SCode.Element, inEnv::Env, inClsAndVars::EnvTree.Tree, inClassName::Absyn.Path, inAccumEnv::Env, inAccumPath::Absyn.Path) ::Tuple{SCode.Element, Env} 
+        function collectUsedClass(inClass::SCode.Element, inEnv::Env, inClsAndVars::EnvTree.Tree, inClassName::Absyn.Path, inAccumEnv::Env, inAccumPath::Absyn.Path) ::Tuple{SCode.Element, Env}
               local outAccumEnv::Env
               local outClass::SCode.Element
 
@@ -1816,7 +1816,7 @@
                       item = EnvTree.get(inClsAndVars, name)
                       (resolved_item, _) = NFSCodeLookup.resolveAlias(item, inEnv)
                       @match true = checkClassUsed(resolved_item, cdef)
-                      @match list(class_frame) = NFSCodeEnv.getItemEnv(resolved_item)
+                      @match class_frame <| nil = NFSCodeEnv.getItemEnv(resolved_item)
                       enclosing_env = NFSCodeEnv.enterScope(inEnv, name)
                       (cdef, class_env) = collectUsedClassDef(cdef, enclosing_env, class_frame, inClassName, inAccumPath)
                       cls = SCode.CLASS(name, prefixes, ep, pp, res, cdef, cmt, info)
@@ -1826,12 +1826,12 @@
                       env = NFSCodeEnv.extendEnvWithItem(item, env, name)
                     (cls, env)
                   end
-                  
+
                   (SCode.CLASS(name, prefixes, ep, pp, res, cdef, cmt, info), _, _, _, _, _)  => begin
                       _ = SCodeUtil.replaceableOptConstraint(SCodeUtil.prefixesReplaceable(prefixes))
                       item = EnvTree.get(inClsAndVars, name)
                       @match true = checkClassUsed(item, cdef)
-                      @match list(class_frame) = NFSCodeEnv.getItemEnv(item)
+                      @match class_frame <| nil = NFSCodeEnv.getItemEnv(item)
                       enclosing_env = NFSCodeEnv.enterScope(inEnv, name)
                       (cdef, class_env) = collectUsedClassDef(cdef, enclosing_env, class_frame, inClassName, inAccumPath)
                       cls = SCode.CLASS(name, prefixes, ep, pp, res, cdef, cmt, info)
@@ -1862,7 +1862,7 @@
 
          #= Given the environment item and definition for a class, returns whether the
           class is used or not. =#
-        function checkClassUsed(inItem::Item, inClassDef::SCode.ClassDef) ::Bool 
+        function checkClassUsed(inItem::Item, inClassDef::SCode.ClassDef) ::Bool
               local isUsed::Bool
 
               isUsed = begin
@@ -1870,7 +1870,7 @@
                   (NFSCodeEnv.CLASS(cls = SCode.CLASS(name = "GraphicalAnnotationsProgram____")), _)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       NFSCodeEnv.isItemUsed(inItem)
                   end
@@ -1889,7 +1889,7 @@
 
          #= Replaces the class and environment in an environment item, preserving the
           item's type. =#
-        function updateItemEnv(inItem::Item, inClass::SCode.Element, inEnv::Env) ::Item 
+        function updateItemEnv(inItem::Item, inClass::SCode.Element, inEnv::Env) ::Item
               local outItem::Item
 
               outItem = begin
@@ -1904,7 +1904,7 @@
         end
 
          #= Collects the contents of a class definition. =#
-        function collectUsedClassDef(classDef::SCode.ClassDef, env::Env, inClassEnv::NFSCodeEnv.Frame, inClassName::Absyn.Path, inAccumPath::Absyn.Path) ::Tuple{SCode.ClassDef, Env} 
+        function collectUsedClassDef(classDef::SCode.ClassDef, env::Env, inClassEnv::NFSCodeEnv.Frame, inClassName::Absyn.Path, inAccumPath::Absyn.Path) ::Tuple{SCode.ClassDef, Env}
 
 
 
@@ -1917,13 +1917,13 @@
                       classDef.elementLst = el
                     ()
                   end
-                  
+
                   SCode.CLASS_EXTENDS(composition = cdef)  => begin
                       (cdef, env) = collectUsedClassDef(cdef, env, inClassEnv, inClassName, inAccumPath)
                       classDef.composition = cdef
                     ()
                   end
-                  
+
                   _  => begin
                         env = list(inClassEnv)
                       ()
@@ -1934,7 +1934,7 @@
         end
 
          #= Collects a class definition's elements. =#
-        function collectUsedElements(inElements::List{<:SCode.Element}, inEnv::Env, inClassEnv::NFSCodeEnv.Frame, inClassName::Absyn.Path, inAccumPath::Absyn.Path) ::Tuple{List{SCode.Element}, Env} 
+        function collectUsedElements(inElements::List{<:SCode.Element}, inEnv::Env, inClassEnv::NFSCodeEnv.Frame, inClassName::Absyn.Path, inAccumPath::Absyn.Path) ::Tuple{List{SCode.Element}, Env}
               local outNewEnv::Env
               local outUsedElements::List{SCode.Element}
 
@@ -1957,7 +1957,7 @@
 
          #= Helper function to collectUsedElements2. Goes through the given list of
           elements and tries to collect them. =#
-        function collectUsedElements2(inElements::List{<:SCode.Element}, inEnclosingEnv::Env, inClsAndVars::EnvTree.Tree, inAccumElements::List{<:SCode.Element}, inAccumEnv::Env, inClassName::Absyn.Path, inAccumPath::Absyn.Path, inCollectConstants::Bool) ::Tuple{List{SCode.Element}, Env} 
+        function collectUsedElements2(inElements::List{<:SCode.Element}, inEnclosingEnv::Env, inClsAndVars::EnvTree.Tree, inAccumElements::List{<:SCode.Element}, inAccumEnv::Env, inClassName::Absyn.Path, inAccumPath::Absyn.Path, inCollectConstants::Bool) ::Tuple{List{SCode.Element}, Env}
               local accum_env::Env = inAccumEnv
               local outAccumElements::List{SCode.Element} = nil
 
@@ -1977,7 +1977,7 @@
         end
 
          #= Collects a class element. =#
-        function collectUsedElement(inElement::SCode.Element, inEnclosingEnv::Env, inClsAndVars::EnvTree.Tree, inAccumEnv::Env, inClassName::Absyn.Path, inAccumPath::Absyn.Path, inCollectConstants::Bool) ::Tuple{SCode.Element, Env} 
+        function collectUsedElement(inElement::SCode.Element, inEnclosingEnv::Env, inClsAndVars::EnvTree.Tree, inAccumEnv::Env, inClassName::Absyn.Path, inAccumPath::Absyn.Path, inCollectConstants::Bool) ::Tuple{SCode.Element, Env}
               local outAccumEnv::Env
               local outElement::SCode.Element
 
@@ -1995,20 +1995,20 @@
                       (cls, env) = collectUsedClass(inElement, inEnclosingEnv, inClsAndVars, inClassName, env, cls_path)
                     (cls, env)
                   end
-                  
+
                   (SCode.COMPONENT(name = name, attributes = SCode.ATTR(variability = SCode.CONST(__))), _, _, _, _, _, _)  => begin
                       item = EnvTree.get(inClsAndVars, name)
                       @match true = inCollectConstants || NFSCodeEnv.isItemUsed(item)
                       env = NFSCodeEnv.extendEnvWithItem(item, inAccumEnv, name)
                     (inElement, env)
                   end
-                  
+
                   (SCode.COMPONENT(name = name), _, _, _, _, _, _)  => begin
                       item = NFSCodeEnv.newVarItem(inElement, true)
                       env = NFSCodeEnv.extendEnvWithItem(item, inAccumEnv, name)
                     (inElement, env)
                   end
-                  
+
                   _  => begin
                       (inElement, inAccumEnv)
                   end
@@ -2026,7 +2026,7 @@
          #= An unused element might be redeclared, but it's still not actually used. This
            function removes such redeclares from extends clauses, so that it's safe to
            remove those elements. =#
-        function removeUnusedRedeclares(inEnv::Env, inTotalEnv::Env) ::Env 
+        function removeUnusedRedeclares(inEnv::Env, inTotalEnv::Env) ::Env
               local outEnv::Env
 
               local name::Option{String}
@@ -2039,14 +2039,14 @@
               local is_used::Option{MutableType #= {Bool} =#}
               local env::Env
 
-              @match list(NFSCodeEnv.FRAME(name, ty, cls_and_vars, NFSCodeEnv.EXTENDS_TABLE(bcl, re, cei), imps, is_used)) = inEnv
+              @match NFSCodeEnv.FRAME(name, ty, cls_and_vars, NFSCodeEnv.EXTENDS_TABLE(bcl, re, cei), imps, is_used) <| nil = inEnv
               env = NFSCodeEnv.removeRedeclaresFromLocalScope(inTotalEnv)
               bcl = ListUtil.map1(bcl, removeUnusedRedeclares2, env)
               outEnv = list(NFSCodeEnv.FRAME(name, ty, cls_and_vars, NFSCodeEnv.EXTENDS_TABLE(bcl, re, cei), imps, is_used))
           outEnv
         end
 
-        function removeUnusedRedeclares2(inExtends::NFSCodeEnv.Extends, inEnv::Env) ::NFSCodeEnv.Extends 
+        function removeUnusedRedeclares2(inExtends::NFSCodeEnv.Extends, inEnv::Env) ::NFSCodeEnv.Extends
               local outExtends::NFSCodeEnv.Extends
 
               local bc::Absyn.Path
@@ -2061,7 +2061,7 @@
           outExtends
         end
 
-        function removeUnusedRedeclares3(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Env)  
+        function removeUnusedRedeclares3(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Env)
               local name::String
               local item::Item
 

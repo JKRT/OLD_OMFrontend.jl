@@ -3598,7 +3598,7 @@
                   local attr::SCode.Attributes
                 @match (inAttributes, inClass) begin
                   (_, SCode.CLASS(classDef = SCode.DERIVED(attributes = cls_attr)))  => begin
-                      @match SOME(attr) = myMergeAttributes(inAttributes, SOME(cls_attr))
+                      @match SOME(attr) = mergeAttributes(inAttributes, SOME(cls_attr))
                     attr
                   end
 

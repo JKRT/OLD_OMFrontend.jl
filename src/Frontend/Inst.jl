@@ -2080,7 +2080,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
-                      @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
+                      @match (cache, _, ih, ty <| nil, csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAOPTION(ty))
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
@@ -2102,7 +2102,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
-                      @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
+                      @match (cache, _, ih, ty <| nil, csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAARRAY(ty))
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
@@ -4236,25 +4236,25 @@
                   local attrs::DAE.DAElist
                 @match (inAttrs, attrName, inAttrExp) begin
                   (attrs, "objective", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(SOME(inAttrExp), objectiveIntegrandE, startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "objectiveIntegrand", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, SOME(inAttrExp), startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "startTime", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, SOME(inAttrExp), finalTimeE))))
                     attrs
                   end
 
                   (attrs, "finalTime", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, SOME(inAttrExp)))))
                     attrs
                   end

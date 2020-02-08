@@ -49,7 +49,7 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import InnerOuterTypes
@@ -291,7 +291,7 @@
                 @match (inCache, inEnv, inIH, inMod, inPrefix, inClass, inInstDims) begin
                   (cache, env, ih, mod, pre, c && SCode.CLASS(name = n, restriction = SCode.R_RECORD(_), partialPrefix = pPrefix), inst_dims)  => begin
                       (cache, c, cenv) = Lookup.lookupRecordConstructorClass(cache, env, Absyn.IDENT(n))
-                      @match (cache, env, ih, list(DAE.FUNCTION(fpath, _, ty1, _, _, _, _, source, _))) = implicitFunctionInstantiation2(cache, cenv, ih, mod, pre, c, inst_dims, true)
+                      @match (cache, env, ih, DAE.FUNCTION(fpath, _, ty1, _, _, _, _, source, _) <| nil) = implicitFunctionInstantiation2(cache, cenv, ih, mod, pre, c, inst_dims, true)
                       fun = DAE.RECORD_CONSTRUCTOR(fpath, ty1, source)
                       cache = InstUtil.addFunctionsToDAE(cache, list(fun), pPrefix)
                     (cache, env, ih)

@@ -1,4 +1,4 @@
-  module StackOverflow 
+  module StackOverflow
 
 
     using MetaModelica
@@ -39,7 +39,7 @@
         import Config
         import System
 
-        function unmangle(inSymbol::String) ::String 
+        function unmangle(inSymbol::String) ::String
               local outSymbol::String
 
               outSymbol = inSymbol
@@ -54,7 +54,7 @@
           outSymbol
         end
 
-        function stripAddresses(inSymbol::String) ::String 
+        function stripAddresses(inSymbol::String) ::String
               local outSymbol::String
 
               local n::ModelicaInteger
@@ -66,12 +66,12 @@
                =#
               (n, strs) = System.regex(inSymbol, "^([^(]*)[(]([^+]*[^+]*)[+][^)]*[)] *[[]0x[0-9a-fA-F]*[]]", 3, extended = true)
               if n == 3
-                @match list(_, so, fun) = strs
+                @match _ <| so <| fun <| nil = strs
                 outSymbol = so + "(" + unmangle(fun) + ")"
               else
                 (n, strs) = System.regex(inSymbol, "^[0-9 ]*([A-Za-z0-9.]*) *0x[0-9a-fA-F]* ([A-Za-z0-9_]*) *[+] *[0-9]*", 3, extended = true)
                 if n == 3
-                  @match list(_, so, fun) = strs
+                  @match _ <| so <| fun <| nil = strs
                   outSymbol = so + "(" + unmangle(fun) + ")"
                 else
                   outSymbol = inSymbol
@@ -82,11 +82,11 @@
           outSymbol
         end
 
-        function triggerStackOverflow()  
+        function triggerStackOverflow()
             #= TODO: Defined in the runtime =#
         end
 
-        function generateReadableMessage(numFrames::ModelicaInteger = 1000, numSkip::ModelicaInteger = 4, delimiter::String = "\\n") ::String 
+        function generateReadableMessage(numFrames::ModelicaInteger = 1000, numSkip::ModelicaInteger = 4, delimiter::String = "\\n") ::String
               local str::String
 
               StackOverflow.setStacktraceMessages(numSkip, numFrames)
@@ -94,14 +94,14 @@
           str
         end
 
-        function getReadableMessage(delimiter::String = "\\n") ::String 
+        function getReadableMessage(delimiter::String = "\\n") ::String
               local str::String
 
               str = stringDelimitList(StackOverflow.readableStacktraceMessages(), delimiter)
           str
         end
 
-        function readableStacktraceMessages() ::List{String} 
+        function readableStacktraceMessages() ::List{String}
               local symbols::List{String} = nil
 
               local prev::String = ""
@@ -136,25 +136,25 @@
           symbols
         end
 
-        function getStacktraceMessages() ::List{String} 
+        function getStacktraceMessages() ::List{String}
               local symbols::List{String}
 
             #= TODO: Defined in the runtime =#
           symbols
         end
 
-        function setStacktraceMessages(numSkip::ModelicaInteger, numFrames::ModelicaInteger)  
+        function setStacktraceMessages(numSkip::ModelicaInteger, numFrames::ModelicaInteger)
             #= TODO: Defined in the runtime =#
         end
 
-        function hasStacktraceMessages() ::Bool 
+        function hasStacktraceMessages() ::Bool
               local b::Bool
 
             #= TODO: Defined in the runtime =#
           b
         end
 
-        function clearStacktraceMessages()  
+        function clearStacktraceMessages()
             #= TODO: Defined in the runtime =#
         end
 
