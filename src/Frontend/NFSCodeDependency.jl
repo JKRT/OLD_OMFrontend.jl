@@ -1914,13 +1914,13 @@
                 @match classDef begin
                   SCode.PARTS(elementLst = el)  => begin
                       (el, env) = collectUsedElements(el, env, inClassEnv, inClassName, inAccumPath)
-                      classDef.elementLst = el
+                      Setfield.@set classDef.elementLst = el
                     ()
                   end
 
                   SCode.CLASS_EXTENDS(composition = cdef)  => begin
                       (cdef, env) = collectUsedClassDef(cdef, env, inClassEnv, inClassName, inAccumPath)
-                      classDef.composition = cdef
+                      Setfield.@set classDef.composition = cdef
                     ()
                   end
 

@@ -5,7 +5,7 @@ module ConnectUtil
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
 
     UpdateFunc = Function
@@ -177,7 +177,7 @@ module ConnectUtil
                        =#
                       c1 = listAppend(c2, c1)
                       o1 = listAppend(o2, o1)
-                      @set node.nodes = _cons(childSets.sets, node.nodes)
+                      Setfield.@set node.nodes = _cons(childSets.sets, node.nodes)
                     DAE.SETS(node, sc, c1, o1)
                   end
                 end
@@ -565,7 +565,7 @@ module ConnectUtil
               _ = begin
                 @match dim begin
                   DAE.DIM_ENUM(__)  => begin
-                      @set dim.literals = listReverse(dim.literals)
+                      Setfield.@set dim.literals = listReverse(dim.literals)
                     ()
                   end
 
@@ -625,9 +625,9 @@ module ConnectUtil
               try
                 setTrieGetElement(cref, DAE.INSIDE(), sets.sets)
               catch
-                @set sets.setCount = sets.setCount + 1
+                Setfield.@set sets.setCount = sets.setCount + 1
                 e = newElement(cref, DAE.INSIDE(), DAE.CFLOW(), source, sets.setCount)
-                @set sets.sets = setTrieAdd(e, sets.sets)
+                Setfield.@set sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
                =#
@@ -652,7 +652,7 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      @set node.flowAssociation = SOME(flowCref)
+                      Setfield.@set node.flowAssociation = SOME(flowCref)
                     ()
                   end
                 end
@@ -680,7 +680,7 @@ module ConnectUtil
                =#
               if ! ListUtil.exist2(sets.outerConnects, outerConnectionMatches, cr1, cr2)
                 new_oc = DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
-                @set sets.outerConnects = _cons(new_oc, sets.outerConnects)
+                Setfield.@set sets.outerConnects = _cons(new_oc, sets.outerConnects)
               end
           sets
         end
@@ -903,7 +903,7 @@ module ConnectUtil
         function setElementSetIndex(element::ConnectorElement, index::ModelicaInteger) ::ConnectorElement
 
 
-              @set element.set = index
+              Setfield.@set element.set = index
           element
         end
 
@@ -919,7 +919,7 @@ module ConnectUtil
         function setElementName(element::ConnectorElement, name::DAE.ComponentRef) ::ConnectorElement
 
 
-              @set element.name = name
+              Setfield.@set element.name = name
           element
         end
 
@@ -1062,8 +1062,8 @@ module ConnectUtil
               e2 = setElementSetIndex(element2, sc)
               node = sets.sets
               node = setTrieAdd(e1, node)
-              @set sets.sets = setTrieAdd(e2, node)
-              @set sets.setCount = sc
+              Setfield.@set sets.sets = setTrieAdd(e2, node)
+              Setfield.@set sets.setCount = sc
           sets
         end
 
@@ -1076,7 +1076,7 @@ module ConnectUtil
 
               index = getElementSetIndex(set)
               e = setElementSetIndex(element, index)
-              @set sets.sets = setTrieAdd(e, sets.sets)
+              Setfield.@set sets.sets = setTrieAdd(e, sets.sets)
           sets
         end
 
@@ -1092,7 +1092,7 @@ module ConnectUtil
                #=  Add a new connection if the elements don't belong to the same set already.
                =#
               if set1 != set2
-                @set sets.connections = _cons((set1, set2), sets.connections)
+                Setfield.@set sets.connections = _cons((set1, set2), sets.connections)
               end
           sets
         end
@@ -1118,12 +1118,12 @@ module ConnectUtil
                       _ = begin
                         @match element.face begin
                           DAE.INSIDE(__)  => begin
-                              @set node.insideElement = SOME(element)
+                              Setfield.@set node.insideElement = SOME(element)
                             ()
                           end
 
                           DAE.OUTSIDE(__)  => begin
-                              @set node.outsideElement = SOME(element)
+                              Setfield.@set node.outsideElement = SOME(element)
                             ()
                           end
                         end
@@ -1171,7 +1171,7 @@ module ConnectUtil
 
          #= Updates a trie leaf in the sets with the given update function. =#
         function updateSetLeaf(sets::Sets, cref::DAE.ComponentRef, arg::Arg, updateFunc::UpdateFunc)  where {Arg}
-          @set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
+          Setfield.@set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
           sets
         end
 
@@ -1184,13 +1184,13 @@ module ConnectUtil
                 @match (cref, trie) begin
                   (DAE.CREF_QUAL(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      @set trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
+                      Setfield.@set trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
                     ()
                   end
 
                   (DAE.CREF_IDENT(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      @set trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
+                      Setfield.@set trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
                     ()
                   end
                 end
@@ -1280,7 +1280,7 @@ module ConnectUtil
               local node::SetTrieNode
 
               (node, arg) = setTrieTraverseLeaves(sets.sets, updateFunc, arg)
-              @set sets.sets = node
+              Setfield.@set sets.sets = node
           (sets, arg)
         end
 
@@ -1294,7 +1294,7 @@ module ConnectUtil
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
                       (nodes, arg) = ListUtil.map1Fold(node.nodes, setTrieTraverseLeaves, updateFunc, arg)
-                      @set node.nodes = nodes
+                      Setfield.@set node.nodes = nodes
                     ()
                   end
 
@@ -1763,7 +1763,7 @@ module ConnectUtil
                 element = begin
                   @match el begin
                     DAE.CONNECTOR_ELEMENT(ty = DAE.CSTREAM(NONE()))  => begin
-                        @set el.ty = DAE.CSTREAM(flowCref)
+                        Setfield.@set el.ty = DAE.CSTREAM(flowCref)
                       SOME(el)
                     end
 
@@ -1801,7 +1801,7 @@ module ConnectUtil
                        =#
                        #=  it to the array.
                        =#
-                      @set el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
+                      Setfield.@set el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
                     setArrayUpdate(sets, el.set, el)
                   end
                 end
@@ -2051,9 +2051,9 @@ module ConnectUtil
 
               if System.getUsesCardinality()
                 crefs = ComponentReference.expandCref(lhsCref, false)
-                @set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                Setfield.@set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
                 crefs = ComponentReference.expandCref(rhsCref, false)
-                @set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                Setfield.@set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
               end
           sets
         end
@@ -2073,12 +2073,12 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
-                      @set node.connectCount = node.connectCount + amount
+                      Setfield.@set node.connectCount = node.connectCount + amount
                     ()
                   end
 
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      @set node.connectCount = node.connectCount + amount
+                      Setfield.@set node.connectCount = node.connectCount + amount
                     ()
                   end
                 end

@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-    using Setfield
+    import Setfield
     
          #= /*
          * This file is part of OpenModelica.
@@ -2367,7 +2367,7 @@
                         ty = begin
                           @match ty begin
                             DAE.T_FUNCTION(__)  => begin
-                                @set ty.path = Absyn.IDENT(inFuncName)
+                                Setfield.@set ty.path = Absyn.IDENT(inFuncName)
                               ty
                             end
                           end

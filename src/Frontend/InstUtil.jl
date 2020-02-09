@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-    using Setfield
+    import Setfield
 
          #= /*
          * This file is part of OpenModelica.
@@ -2620,7 +2620,7 @@
                         ty_path = AbsynUtil.typeSpecPath(comp.typeSpec)
                         local_mod = Mod.lookupModificationP(mod, ty_path)
                         if SCodeUtil.finalBool(SCodeUtil.prefixesFinal(prefs))
-                          @set comp.modifications = traverseModAddFinal(comp.modifications)
+                          Setfield.@set comp.modifications = traverseModAddFinal(comp.modifications)
                         end
                         (cache, env, ih, comp2, mod2) = Inst.redeclareType(cache, env, ih, local_mod, comp, prefix, state, impl, cmod)
                         comp_mod = Mod.lookupCompModification(mod, comp.name)
@@ -4647,7 +4647,7 @@
               outElts = list(begin
                 @match fn begin
                   DAE.FUNCTION(__)  => begin
-                      @set fn.functions = addNameToDerivativeMappingFunctionDefs(fn.functions, path)
+                      Setfield.@set fn.functions = addNameToDerivativeMappingFunctionDefs(fn.functions, path)
                     fn
                   end
 
@@ -4666,7 +4666,7 @@
               outFuncs = list(begin
                 @match fn begin
                   DAE.FUNCTION_DER_MAPPER(__)  => begin
-                      @set fn.lowerOrderDerivatives = _cons(path, fn.lowerOrderDerivatives)
+                      Setfield.@set fn.lowerOrderDerivatives = _cons(path, fn.lowerOrderDerivatives)
                     fn
                   end
 
@@ -4957,7 +4957,7 @@
                   local tp::DAE.Type
                 @match inType begin
                   resType && DAE.T_FUNCTION(__)  => begin
-                      @set resType.path = path
+                      Setfield.@set resType.path = path
                     resType
                   end
 
@@ -7027,7 +7027,7 @@
 
               mod = traverseModAddFinal(sub.mod)
               if ! referenceEq(sub.mod, mod)
-                @set sub.mod = mod
+                Setfield.@set sub.mod = mod
               end
           sub
         end
@@ -7690,7 +7690,7 @@
                   @matchcontinue v begin
                     v1 && DAE.VAR(__)  => begin
                         (e, i) = findCorrespondingBinding(v1.componentRef, equations)
-                        @set v1.binding = SOME(e)
+                        Setfield.@set v1.binding = SOME(e)
                         is = _cons(i, is)
                       v1
                     end
@@ -7727,7 +7727,7 @@
                             DAE.VAR(binding = NONE()) where (ComponentReference.crefPrefixOf(cr, v.componentRef))  => begin
                                  #=  Moving parameter bindings into initial equation section means we need to force fixed=false...
                                  =#
-                                @set v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
+                                Setfield.@set v.variableAttributesOption = DAEUtil.setFixedAttr(v.variableAttributesOption, SOME(DAE.BCONST(false)))
                                 Error.addSourceMessage(Error.MOVING_PARAMETER_BINDING_TO_INITIAL_EQ_SECTION, list(ComponentReference.printComponentRefStr(v.componentRef)), eq.source.info)
                               v
                             end
@@ -8368,8 +8368,8 @@
                       if Flags.isSet(Flags.TAIL)
                         Error.addSourceMessage(Error.COMPILER_NOTIFICATION, list(str), ElementSource.getElementSourceFileInfo(source))
                       end
-                      @set attr.tailCall = DAE.TAIL(vars, lhsVars)
-                      @set call.attr = attr
+                      Setfield.@set attr.tailCall = DAE.TAIL(vars, lhsVars)
+                      Setfield.@set call.attr = attr
                     (call, true)
                   end
 

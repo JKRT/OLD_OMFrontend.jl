@@ -38,6 +38,7 @@ module Expression
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
     using ExpressionPriority # for shouldParenthesize
 
@@ -9846,7 +9847,7 @@ Type_a = Any
               outExp = begin
                 @match outExp begin
                   DAE.ASUB(__)  => begin
-                      outExp.sub = listAppend(outExp.sub, list(DAE.ICONST(indx)))
+                      Setfield.@set outExp.sub = listAppend(outExp.sub, list(DAE.ICONST(indx)))
                     outExp
                   end
 
@@ -10733,7 +10734,7 @@ Type_a = Any
                        =#
                       (e1_1, ext_arg) = traverseExpBottomUp(e1.exp, inFunc, inExtArg)
                       if ! referenceEq(e1.exp, e1_1)
-                        e1.exp = e1_1
+                        Setfield.@set e1.exp = e1_1
                       end
                       (e1, ext_arg) = inFunc(e1, ext_arg)
                     (e1, ext_arg)
@@ -11439,7 +11440,7 @@ Type_a = Any
                        =#
                       (e1_1, ext_arg_1) = traverseExpTopDown(e1.exp, rel, ext_arg)
                       if ! referenceEq(e1.exp, e1_1)
-                        e1.exp = e1_1
+                        Setfield.@set e1.exp = e1_1
                       end
                     (e1, ext_arg_1)
                   end
@@ -12872,7 +12873,7 @@ Type_a = Any
 
                   e1 && DAE.RSUB(__)  => begin
                       (e2, arg) = traverseExpBidir(e1.exp, inEnterFunc, inExitFunc, inArg)
-                      e1.exp = e2
+                      Setfield.@set e1.exp = e2
                     (e1, arg)
                   end
 

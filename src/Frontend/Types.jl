@@ -5,7 +5,7 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-using Setfield
+import Setfield
 
 import DAE
 
@@ -47,7 +47,7 @@ module Types
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    using Setfield
+    import Setfield
 
     TypeFn = Function
 
@@ -1866,7 +1866,7 @@ module Types
               outV = begin
                 @match outV begin
                   DAE.TYPES_VAR(__)  => begin
-                      outV.ty = ty
+                      Setfield.@set outV.ty = ty
                     outV
                   end
                 end
@@ -5026,7 +5026,7 @@ module Types
               outVar = begin
                 @match outVar begin
                   DAE.TYPES_VAR(__)  => begin
-                      outVar.ty = simplifyType(outVar.ty)
+                      Setfield.@set outVar.ty = simplifyType(outVar.ty)
                     outVar
                   end
                 end
@@ -5056,19 +5056,19 @@ module Types
                   end
 
                   DAE.T_TUPLE(__)  => begin
-                      outType.types = list(complicateType(t) for t in outType.types)
+                      Setfield.@set outType.types = list(complicateType(t) for t in outType.types)
                     outType
                   end
 
                   DAE.T_COMPLEX(__)  => begin
                       if isRecord(inType) || Config.acceptMetaModelicaGrammar()
-                        outType.varLst = list(complicateVar(v) for v in outType.varLst)
+                        Setfield.@set outType.varLst = list(complicateVar(v) for v in outType.varLst)
                       end
                     outType
                   end
 
                   DAE.T_METABOXED(__)  => begin
-                      outType.ty = complicateType(outType.ty)
+                      Setfield.@set outType.ty = complicateType(outType.ty)
                     outType
                   end
 
@@ -5086,7 +5086,7 @@ module Types
               outVar = begin
                 @match outVar begin
                   DAE.TYPES_VAR(__)  => begin
-                      outVar.ty = complicateType(outVar.ty)
+                      Setfield.@set outVar.ty = complicateType(outVar.ty)
                     outVar
                   end
                 end
@@ -6832,7 +6832,7 @@ module Types
                   end
 
                   t && DAE.T_ARRAY(__)  => begin
-                      @set t.ty = unboxedType(t.ty)
+                      Setfield.@set t.ty = unboxedType(t.ty)
                     t
                   end
 
@@ -7302,12 +7302,12 @@ module Types
                   end
 
                   (t1 && DAE.T_ARRAY(__), _, _, _)  => begin
-                      @set t1.ty = fixPolymorphicRestype2(t1.ty, prefix, bindings, info)
+                      Setfield.@set t1.ty = fixPolymorphicRestype2(t1.ty, prefix, bindings, info)
                     t1
                   end
 
                   (t1 && DAE.T_TUPLE(__), _, _, _)  => begin
-                      @set t1.types = ListUtil.map3(t1.types, fixPolymorphicRestype2, prefix, bindings, info)
+                      Setfield.@set t1.types = ListUtil.map3(t1.types, fixPolymorphicRestype2, prefix, bindings, info)
                     t1
                   end
 
@@ -7570,7 +7570,7 @@ module Types
                   ty && DAE.T_TUPLE(tys)  => begin
                       (dummyExpList, dummyBoxedTypeList) = makeDummyExpAndTypeLists(tys)
                       (_, tys) = matchTypeTuple(dummyExpList, tys, dummyBoxedTypeList, false)
-                      @set ty.types = tys
+                      Setfield.@set ty.types = tys
                     ty
                   end
 
@@ -8369,7 +8369,7 @@ module Types
               (oty, str) = begin
                 @match oty begin
                   DAE.T_METAPOLYMORPHIC(__)  => begin
-                      @set oty.name = prefix + oty.name
+                      Setfield.@set oty.name = prefix + oty.name
                     (oty, prefix)
                   end
 
@@ -8388,7 +8388,7 @@ module Types
               oty = begin
                 @match oty begin
                   DAE.T_ARRAY(dims = DAE.DIM_EXP(__) <|  nil())  => begin
-                      @set oty.dims = list(DAE.DIM_UNKNOWN())
+                      Setfield.@set oty.dims = list(DAE.DIM_UNKNOWN())
                     oty
                   end
 
@@ -8409,17 +8409,17 @@ module Types
                   local size::ModelicaInteger
                 @match oty begin
                   DAE.T_ARRAY(dims = DAE.DIM_BOOLEAN(__) <|  nil())  => begin
-                      @set oty.dims = list(DAE.DIM_INTEGER(2))
+                      Setfield.@set oty.dims = list(DAE.DIM_INTEGER(2))
                     oty
                   end
 
                   DAE.T_ARRAY(dims = DAE.DIM_ENUM(size = size) <|  nil())  => begin
-                      @set oty.dims = list(DAE.DIM_INTEGER(size))
+                      Setfield.@set oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
 
                   DAE.T_ARRAY(dims = DAE.DIM_EXP(exp = DAE.ICONST(size)) <|  nil())  => begin
-                      @set oty.dims = list(DAE.DIM_INTEGER(size))
+                      Setfield.@set oty.dims = list(DAE.DIM_INTEGER(size))
                     oty
                   end
 
@@ -8496,89 +8496,89 @@ module Types
 
                   oty && DAE.T_METABOXED(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_ARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METATYPE(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METALIST(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METAOPTION(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METAARRAY(__)  => begin
                       (tyInner, a) = traverseType(oty.ty, a, fn)
-                      @set oty.ty = tyInner
+                      Setfield.@set oty.ty = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION_REFERENCE_VAR(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
-                      @set oty.functionType = tyInner
+                      Setfield.@set oty.functionType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION_REFERENCE_FUNC(__)  => begin
                       (tyInner, a) = traverseType(oty.functionType, a, fn)
-                      @set oty.functionType = tyInner
+                      Setfield.@set oty.functionType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_METATUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
-                      @set oty.types = tys
+                      Setfield.@set oty.types = tys
                     (oty, a)
                   end
 
                   oty && DAE.T_TUPLE(__)  => begin
                       (tys, a) = traverseTupleType(oty.types, a, fn)
-                      @set oty.types = tys
+                      Setfield.@set oty.types = tys
                     (oty, a)
                   end
 
                   oty && DAE.T_METARECORD(__)  => begin
                       (vars, a) = traverseVarTypes(oty.fields, a, fn)
-                      @set oty.fields = vars
+                      Setfield.@set oty.fields = vars
                     (oty, a)
                   end
 
                   oty && DAE.T_COMPLEX(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
-                      @set oty.varLst = vars
+                      Setfield.@set oty.varLst = vars
                     (oty, a)
                   end
 
                   oty && DAE.T_SUBTYPE_BASIC(__)  => begin
                       (vars, a) = traverseVarTypes(oty.varLst, a, fn)
                       (tyInner, a) = traverseType(oty.complexType, a, fn)
-                      @set oty.varLst = vars
-                      @set oty.complexType = tyInner
+                      Setfield.@set oty.varLst = vars
+                      Setfield.@set oty.complexType = tyInner
                     (oty, a)
                   end
 
                   oty && DAE.T_FUNCTION(__)  => begin
                       (farg, a) = traverseFuncArg(oty.funcArg, a, fn)
                       (tyInner, a) = traverseType(oty.funcResultType, a, fn)
-                      @set oty.funcArg = farg
-                      @set oty.funcResultType = tyInner
+                      Setfield.@set oty.funcArg = farg
+                      Setfield.@set oty.funcResultType = tyInner
                     (oty, a)
                   end
 
@@ -8662,7 +8662,7 @@ module Types
 
                   (arg && DAE.FUNCARG(__) <| args, a)  => begin
                       (ty, a) = traverseType(arg.ty, a, fn)
-                      @set arg.ty = ty
+                      Setfield.@set arg.ty = ty
                       (args, a) = traverseFuncArg(args, a, fn)
                     (_cons(arg, args), a)
                   end
@@ -9546,42 +9546,42 @@ module Types
               ty = begin
                 @match ty begin
                   DAE.T_REAL(__)  => begin
-                      @set ty.varLst = inVars
+                      Setfield.@set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_INTEGER(__)  => begin
-                      @set ty.varLst = inVars
+                      Setfield.@set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_STRING(__)  => begin
-                      @set ty.varLst = inVars
+                      Setfield.@set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_BOOL(__)  => begin
-                      @set ty.varLst = inVars
+                      Setfield.@set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_CLOCK(__)  => begin
-                      @set ty.varLst = inVars
+                      Setfield.@set ty.varLst = inVars
                     ty
                   end
 
                   DAE.T_ENUMERATION(__)  => begin
-                      @set ty.attributeLst = inVars
+                      Setfield.@set ty.attributeLst = inVars
                     ty
                   end
 
                   DAE.T_ARRAY(__)  => begin
-                      @set ty.ty = setTypeVars(ty.ty, inVars)
+                      Setfield.@set ty.ty = setTypeVars(ty.ty, inVars)
                     ty
                   end
 
                   DAE.T_SUBTYPE_BASIC(__)  => begin
-                      @set ty.complexType = setTypeVars(ty.complexType, inVars)
+                      Setfield.@set ty.complexType = setTypeVars(ty.complexType, inVars)
                     ty
                   end
                 end
@@ -9908,8 +9908,8 @@ module Types
                   local attr::DAE.FunctionAttributes
                 @match oty begin
                   DAE.T_FUNCTION(functionAttributes = attr && DAE.FUNCTION_ATTRIBUTES(isFunctionPointer = false))  => begin
-                      @set attr.isFunctionPointer = true
-                      @set oty.functionAttributes = attr
+                      Setfield.@set attr.isFunctionPointer = true
+                      Setfield.@set oty.functionAttributes = attr
                     oty
                   end
 
@@ -10548,12 +10548,12 @@ module Types
               oty = begin
                 @match ty begin
                   oty && DAE.T_METAUNIONTYPE(__)  => begin
-                      @set oty.typeVars = typeVars
+                      Setfield.@set oty.typeVars = typeVars
                     oty
                   end
 
                   oty && DAE.T_METARECORD(__)  => begin
-                      @set oty.typeVars = typeVars
+                      Setfield.@set oty.typeVars = typeVars
                     oty
                   end
 

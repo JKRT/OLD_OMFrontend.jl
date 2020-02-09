@@ -45,5 +45,9 @@ function setKeyForAvlSetCR(key)
   Key = key
 end
 
+function BaseAvlSet.LEAF(key::Key)::BaseAvlSet.Tree
+  BaseAvlSet.LEAF(key,nothing)
+end
+
 @exportAll()
 end

@@ -4,6 +4,9 @@
    behaves like an ordinary array, which means all elements can get accessed via
    index. When the array runs out of space, it get automatically resized. It is
    also possible to delete an element from any position. =#
+
+   import Setfield
+
    @Uniontype ExpandableArray begin
          #= /*
          * This file is part of OpenModelica.
@@ -50,7 +53,7 @@
 
          #= O(n)
           Creates a new empty ExpandableArray with a certain capacity. =#
-        function new(capacity::ModelicaInteger, dummy::T #= This is needed to determine the type information, the actual value is not used =#) ::ExpandableArray{T} 
+        function new(capacity::ModelicaInteger, dummy::T #= This is needed to determine the type information, the actual value is not used =#) ::ExpandableArray{T}
               local exarray::ExpandableArray{T}
 
               exarray = EXPANDABLE_ARRAY(arrayCreate(1, 0), arrayCreate(1, 0), arrayCreate(1, capacity), arrayCreate(1, arrayCreate(capacity, NONE())))
@@ -59,7 +62,7 @@
 
          #= O(n)
           Deletes all elements. =#
-        function clear(exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function clear(exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local n::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -80,20 +83,20 @@
           exarray
         end
 
-        function copy(inExarray::ExpandableArray{<:T}, dummy::T #= This is needed to determine the type information, the actual value is not used =#) ::ExpandableArray{T} 
+        function copy(inExarray::ExpandableArray{<:T}, dummy::T #= This is needed to determine the type information, the actual value is not used =#) ::ExpandableArray{T}
               local outExarray::ExpandableArray{T}
 
               outExarray = new(inExarray.capacity[1], dummy)
-              outExarray.numberOfElements = arrayCopy(inExarray.numberOfElements)
-              outExarray.lastUsedIndex = arrayCopy(inExarray.lastUsedIndex)
-              outExarray.capacity = arrayCopy(inExarray.capacity)
-              outExarray.data = arrayCreate(1, arrayCopy(Dangerous.arrayGetNoBoundsChecking(inExarray.data, 1)))
+              Setfield.@set outExarray.numberOfElements = arrayCopy(inExarray.numberOfElements)
+              Setfield.@set outExarray.lastUsedIndex = arrayCopy(inExarray.lastUsedIndex)
+              Setfield.@set outExarray.capacity = arrayCopy(inExarray.capacity)
+              Setfield.@set outExarray.data = arrayCreate(1, arrayCopy(Dangerous.arrayGetNoBoundsChecking(inExarray.data, 1)))
           outExarray
         end
 
          #= O(1)
           Returns if the element at the given index is occupied or not. =#
-        function occupied(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::Bool 
+        function occupied(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::Bool
               local b::Bool
 
               local lastUsedIndex::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.lastUsedIndex, 1)
@@ -106,7 +109,7 @@
          #= O(1)
           Returns the value of the element at the given index.
           Fails if there is nothing assigned to the given index. =#
-        function get(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::T 
+        function get(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::T
               local value::T
 
               local data::Array{Option{T}} = Dangerous.arrayGetNoBoundsChecking(exarray.data, 1)
@@ -122,7 +125,7 @@
          #= O(n)
           Expands an array to the given size, or does nothing if the array is already
           large enough. =#
-        function expandToSize(minCapacity::ModelicaInteger, exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function expandToSize(minCapacity::ModelicaInteger, exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local capacity::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.capacity, 1)
@@ -139,7 +142,7 @@
          #= if index <= capacity then O(1) otherwise O(n)
           Sets the element at the given index to the given value.
           Fails if the index is already used. =#
-        function set(index::ModelicaInteger, value::T, exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function set(index::ModelicaInteger, value::T, exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -165,7 +168,7 @@
 
          #= if index <= capacity then O(1) otherwise O(n)
           Sets the first unused element to the given value. =#
-        function add(value::T, exarray::ExpandableArray{<:T}) ::Tuple{ExpandableArray{T}, ModelicaInteger} 
+        function add(value::T, exarray::ExpandableArray{<:T}) ::Tuple{ExpandableArray{T}, ModelicaInteger}
               local index::ModelicaInteger
 
 
@@ -179,7 +182,7 @@
          #= O(1)
           Deletes the value of the element at the given index.
           Fails if there is no value stored at the given index. =#
-        function delete(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function delete(index::ModelicaInteger, exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -205,7 +208,7 @@
          #= O(1)
           Overrides the value of the element at the given index.
           Fails if there is no value stored at the given index. =#
-        function update(index::ModelicaInteger, value::T, exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function update(index::ModelicaInteger, value::T, exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local lastUsedIndex::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.lastUsedIndex, 1)
@@ -219,7 +222,7 @@
           exarray
         end
 
-        function toList(exarray::ExpandableArray{<:T}) ::List{T} 
+        function toList(exarray::ExpandableArray{<:T}) ::List{T}
               local listT::List{T}
 
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -239,7 +242,7 @@
          #= O(n)
           Reorders the elements in order to remove all the gaps.
           Be careful: This changes the indices of the elements. =#
-        function compress(exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function compress(exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -265,7 +268,7 @@
          #= O(n)
           Reduces the capacity of the ExpandableArray to the number of elements.
           Be careful: This may change the indices of the elements. =#
-        function shrink(exarray::ExpandableArray{<:T}) ::ExpandableArray{T} 
+        function shrink(exarray::ExpandableArray{<:T}) ::ExpandableArray{T}
 
 
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
@@ -284,7 +287,7 @@
 
          #= O(n)
           Dumps all elements with the given print function. =#
-        function dump(exarray::ExpandableArray{<:T}, header::String, func::PrintFunction)  
+        function dump(exarray::ExpandableArray{<:T}, header::String, func::PrintFunction)
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
               local capacity::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.capacity, 1)
               local value::T
@@ -301,29 +304,29 @@
                     numberOfElements = numberOfElements - 1
                     print(intString(i) + ": " + func(value) + "\\n")
                     if numberOfElements == 0
-                      return 
+                      return
                     end
                   end
                 end
               end
         end
 
-        function getNumberOfElements(exarray::ExpandableArray{<:T}) ::ModelicaInteger 
+        function getNumberOfElements(exarray::ExpandableArray{<:T}) ::ModelicaInteger
               local numberOfElements::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.numberOfElements, 1)
           numberOfElements
         end
 
-        function getLastUsedIndex(exarray::ExpandableArray{<:T}) ::ModelicaInteger 
+        function getLastUsedIndex(exarray::ExpandableArray{<:T}) ::ModelicaInteger
               local lastUsedIndex::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.lastUsedIndex, 1)
           lastUsedIndex
         end
 
-        function getCapacity(exarray::ExpandableArray{<:T}) ::ModelicaInteger 
+        function getCapacity(exarray::ExpandableArray{<:T}) ::ModelicaInteger
               local capacity::ModelicaInteger = Dangerous.arrayGetNoBoundsChecking(exarray.capacity, 1)
           capacity
         end
 
-        function getData(exarray::ExpandableArray{<:T}) ::Array{Option{T}} 
+        function getData(exarray::ExpandableArray{<:T}) ::Array{Option{T}}
               local data::Array{Option{T}} = Dangerous.arrayGetNoBoundsChecking(exarray.data, 1)
           data
         end

@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
 
     FilterFunc = Function
@@ -121,7 +121,7 @@
               mod = begin
                 @match mod begin
                   SCode.MOD(__)  => begin
-                      @set mod.subModLst = list(m for m in mod.subModLst if filter(m))
+                      Setfield.@set mod.subModLst = list(m for m in mod.subModLst if filter(m))
                     begin
                       @match mod begin
                         SCode.MOD(subModLst =  nil(), binding = NONE())  => begin
@@ -1664,7 +1664,7 @@
               outClass = begin
                 @match outClass begin
                   SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL(__))  => begin
-                      outClass.partialPrefix = SCode.PARTIAL()
+                      Setfield.@set outClass.partialPrefix = SCode.PARTIAL()
                     outClass
                   end
 
@@ -3819,7 +3819,7 @@
         function prefixesSetInnerOuter(prefixes::SCode.Prefixes, innerOuter::Absyn.InnerOuter) ::SCode.Prefixes
 
 
-              @set prefixes.innerOuter = innerOuter
+              Setfield.@set prefixes.innerOuter = innerOuter
           prefixes
         end
 
@@ -3840,7 +3840,7 @@
         function setAttributesDirection(attributes::SCode.Attributes, direction::Absyn.Direction) ::SCode.Attributes
 
 
-              @set attributes.direction = direction
+              Setfield.@set attributes.direction = direction
           attributes
         end
 
@@ -3862,7 +3862,7 @@
         function setAttributesVariability(attributes::SCode.Attributes, variability::SCode.Variability) ::SCode.Attributes
 
 
-              @set attributes.variability = variability
+              Setfield.@set attributes.variability = variability
           attributes
         end
 
@@ -4594,7 +4594,7 @@
                   SCode.PARTS(__)  => begin
                        #=  a parts
                        =#
-                      classDef.elementLst = inElements
+                      Setfield.@set classDef.elementLst = inElements
                     NONE()
                   end
 
@@ -4603,7 +4603,7 @@
                        =#
                       (composition, outElementOpt) = replaceElementsInClassDef(inProgram, composition, inElements)
                       if isNone(outElementOpt)
-                        classDef.composition = composition
+                        Setfield.@set classDef.composition = composition
                       end
                     outElementOpt
                   end
@@ -6359,21 +6359,21 @@
                 @match element begin
                   SCode.EXTENDS(__)  => begin
                       if stripAnn
-                        @set element.ann = NONE()
+                        Setfield.@set element.ann = NONE()
                       end
-                      @set element.modifications = stripCommentsFromMod(element.modifications, stripAnn, stripCmt)
+                      Setfield.@set element.modifications = stripCommentsFromMod(element.modifications, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.CLASS(__)  => begin
-                      @set element.classDef = stripCommentsFromClassDef(element.classDef, stripAnn, stripCmt)
-                      @set element.cmt = stripCommentsFromComment(element.cmt, stripAnn, stripCmt)
+                      Setfield.@set element.classDef = stripCommentsFromClassDef(element.classDef, stripAnn, stripCmt)
+                      Setfield.@set element.cmt = stripCommentsFromComment(element.cmt, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.COMPONENT(__)  => begin
-                      @set element.modifications = stripCommentsFromMod(element.modifications, stripAnn, stripCmt)
-                      @set element.comment = stripCommentsFromComment(element.comment, stripAnn, stripCmt)
+                      Setfield.@set element.modifications = stripCommentsFromMod(element.modifications, stripAnn, stripCmt)
+                      Setfield.@set element.comment = stripCommentsFromComment(element.comment, stripAnn, stripCmt)
                     ()
                   end
 
@@ -6391,12 +6391,12 @@
               () = begin
                 @match mod begin
                   SCode.MOD(__)  => begin
-                      @set mod.subModLst = list(stripCommentsFromSubMod(m, stripAnn, stripCmt) for m in mod.subModLst)
+                      Setfield.@set mod.subModLst = list(stripCommentsFromSubMod(m, stripAnn, stripCmt) for m in mod.subModLst)
                     ()
                   end
 
                   SCode.REDECL(__)  => begin
-                      @set mod.element = stripCommentsFromElement(mod.element, stripAnn, stripCmt)
+                      Setfield.@set mod.element = stripCommentsFromElement(mod.element, stripAnn, stripCmt)
                     ()
                   end
 
@@ -6411,7 +6411,7 @@
         function stripCommentsFromSubMod(submod::SCode.SubMod, stripAnn::Bool, stripCmt::Bool) ::SCode.SubMod
 
 
-              @set submod.mod = stripCommentsFromMod(submod.mod, stripAnn, stripCmt)
+              Setfield.@set submod.mod = stripCommentsFromMod(submod.mod, stripAnn, stripCmt)
           submod
         end
 
@@ -6437,18 +6437,18 @@
                   end
 
                   SCode.CLASS_EXTENDS(__)  => begin
-                      @set cdef.modifications = stripCommentsFromMod(cdef.modifications, stripAnn, stripCmt)
-                      @set cdef.composition = stripCommentsFromClassDef(cdef.composition, stripAnn, stripCmt)
+                      Setfield.@set cdef.modifications = stripCommentsFromMod(cdef.modifications, stripAnn, stripCmt)
+                      Setfield.@set cdef.composition = stripCommentsFromClassDef(cdef.composition, stripAnn, stripCmt)
                     cdef
                   end
 
                   SCode.DERIVED(__)  => begin
-                      @set cdef.modifications = stripCommentsFromMod(cdef.modifications, stripAnn, stripCmt)
+                      Setfield.@set cdef.modifications = stripCommentsFromMod(cdef.modifications, stripAnn, stripCmt)
                     cdef
                   end
 
                   SCode.ENUMERATION(__)  => begin
-                      @set cdef.enumLst = list(stripCommentsFromEnum(e, stripAnn, stripCmt) for e in cdef.enumLst)
+                      Setfield.@set cdef.enumLst = list(stripCommentsFromEnum(e, stripAnn, stripCmt) for e in cdef.enumLst)
                     cdef
                   end
 
@@ -6463,7 +6463,7 @@
         function stripCommentsFromEnum(enum::SCode.Enum, stripAnn::Bool, stripCmt::Bool) ::SCode.Enum
 
 
-              @set enum.comment = stripCommentsFromComment(enum.comment, stripAnn, stripCmt)
+              Setfield.@set enum.comment = stripCommentsFromComment(enum.comment, stripAnn, stripCmt)
           enum
         end
 
@@ -6471,10 +6471,10 @@
 
 
               if stripAnn
-                @set cmt.annotation_ = NONE()
+                Setfield.@set cmt.annotation_ = NONE()
               end
               if stripCmt
-                @set cmt.comment = NONE()
+                Setfield.@set cmt.comment = NONE()
               end
           cmt
         end
@@ -6486,7 +6486,7 @@
 
               if isSome(extDecl) && stripAnn
                 @match SOME(ext_decl) = extDecl
-                @set ext_decl.annotation_ = NONE()
+                Setfield.@set ext_decl.annotation_ = NONE()
                 extDecl = SOME(ext_decl)
               end
           extDecl
@@ -6495,7 +6495,7 @@
         function stripCommentsFromEquation(eq::SCode.Equation, stripAnn::Bool, stripCmt::Bool) ::SCode.Equation
 
 
-              @set eq.eEquation = stripCommentsFromEEquation(eq.eEquation, stripAnn, stripCmt)
+              Setfield.@set eq.eEquation = stripCommentsFromEEquation(eq.eEquation, stripAnn, stripCmt)
           eq
         end
 
@@ -6505,57 +6505,57 @@
               () = begin
                 @match eq begin
                   SCode.EQ_IF(__)  => begin
-                      @set eq.thenBranch = list(list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in branch) for branch in eq.thenBranch)
-                      @set eq.elseBranch = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.elseBranch)
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.thenBranch = list(list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in branch) for branch in eq.thenBranch)
+                      Setfield.@set eq.elseBranch = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.elseBranch)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_EQUALS(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_PDE(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_CONNECT(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_FOR(__)  => begin
-                      @set eq.eEquationLst = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.eEquationLst)
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.eEquationLst = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.eEquationLst)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_WHEN(__)  => begin
-                      @set eq.eEquationLst = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.eEquationLst)
-                      @set eq.elseBranches = list(stripCommentsFromWhenEqBranch(b, stripAnn, stripCmt) for b in eq.elseBranches)
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.eEquationLst = list(stripCommentsFromEEquation(e, stripAnn, stripCmt) for e in eq.eEquationLst)
+                      Setfield.@set eq.elseBranches = list(stripCommentsFromWhenEqBranch(b, stripAnn, stripCmt) for b in eq.elseBranches)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_ASSERT(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_TERMINATE(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_REINIT(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.EQ_NORETCALL(__)  => begin
-                      @set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
+                      Setfield.@set eq.comment = stripCommentsFromComment(eq.comment, stripAnn, stripCmt)
                     ()
                   end
                 end
@@ -6578,7 +6578,7 @@
         function stripCommentsFromAlgorithm(alg::SCode.AlgorithmSection, stripAnn::Bool, stripCmt::Bool) ::SCode.AlgorithmSection
 
 
-              @set alg.statements = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in alg.statements)
+              Setfield.@set alg.statements = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in alg.statements)
           alg
         end
 
@@ -6588,86 +6588,86 @@
               () = begin
                 @match stmt begin
                   SCode.ALG_ASSIGN(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_IF(__)  => begin
-                      @set stmt.trueBranch = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.trueBranch)
-                      @set stmt.elseIfBranch = list(stripCommentsFromStatementBranch(b, stripAnn, stripCmt) for b in stmt.elseIfBranch)
-                      @set stmt.elseBranch = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.elseBranch)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.trueBranch = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.trueBranch)
+                      Setfield.@set stmt.elseIfBranch = list(stripCommentsFromStatementBranch(b, stripAnn, stripCmt) for b in stmt.elseIfBranch)
+                      Setfield.@set stmt.elseBranch = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.elseBranch)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_FOR(__)  => begin
-                      @set stmt.forBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.forBody)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.forBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.forBody)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_PARFOR(__)  => begin
-                      @set stmt.parforBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.parforBody)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.parforBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.parforBody)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_WHILE(__)  => begin
-                      @set stmt.whileBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.whileBody)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.whileBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.whileBody)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_WHEN_A(__)  => begin
-                      @set stmt.branches = list(stripCommentsFromStatementBranch(b, stripAnn, stripCmt) for b in stmt.branches)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.branches = list(stripCommentsFromStatementBranch(b, stripAnn, stripCmt) for b in stmt.branches)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.Statement.ALG_ASSERT(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_TERMINATE(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_REINIT(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_NORETCALL(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_RETURN(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_BREAK(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_FAILURE(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_TRY(__)  => begin
-                      @set stmt.body = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.body)
-                      @set stmt.elseBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.elseBody)
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.body = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.body)
+                      Setfield.@set stmt.elseBody = list(stripCommentsFromStatement(s, stripAnn, stripCmt) for s in stmt.elseBody)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
 
                   SCode.ALG_CONTINUE(__)  => begin
-                      @set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
+                      Setfield.@set stmt.comment = stripCommentsFromComment(stmt.comment, stripAnn, stripCmt)
                     ()
                   end
                 end

@@ -6,6 +6,7 @@ module CrefForHashTable
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
 @importDBG Absyn
 @importDBG AbsynUtil
@@ -7092,7 +7093,7 @@ function simplifyVar(inVar::DAE.Var) ::DAE.Var
      outVar = begin
        @match outVar begin
          DAE.TYPES_VAR(__)  => begin
-             outVar.ty = simplifyType(outVar.ty)
+             Setfield.@set outVar.ty = simplifyType(outVar.ty)
            outVar
          end
        end

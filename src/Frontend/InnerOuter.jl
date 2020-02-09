@@ -36,7 +36,7 @@ module InnerOuter
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     @UniontypeDecl InstResult
     @UniontypeDecl InstInner
@@ -232,7 +232,7 @@ module InnerOuter
 
          #= changes inner to outer and outer to inner where needed =#
         function changeInnerOuterInOuterConnect(sets::DAE.Sets) ::DAE.Sets
-          @set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
+          Setfield.@set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
           sets
         end
 
@@ -491,7 +491,7 @@ module InnerOuter
 
               @match DAE.SETS(outerConnects = oc) = inSets
               (oc, outSets, outInnerOuterConnects, outCGraph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, oc, inSets, inTopCall, inCGraph)
-              @set outSets.outerConnects = oc
+              Setfield.@set outSets.outerConnects = oc
           (outSets, outInnerOuterConnects, outCGraph)
         end
 
@@ -1377,7 +1377,7 @@ module InnerOuter
               _ = begin
                 @match outNode begin
                   FCore.N(__)  => begin
-                      outNode.children = FNode.RefTree.map(outNode.children, (inCr) -> switchInnerToOuterInChild(cr = inCr))
+                      Setfield.@set outNode.children = FNode.RefTree.map(outNode.children, (inCr) -> switchInnerToOuterInChild(cr = inCr))
                     ()
                   end
 

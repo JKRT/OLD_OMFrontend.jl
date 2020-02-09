@@ -41,6 +41,19 @@ module AvlSetString
         #extends BaseAvlSet
    using BaseAvlSet
    Key = String
+
+   function BaseAvlSet.LEAF(key::Key)::BaseAvlSet.Tree
+     BaseAvlSet.LEAF(key,nothing)
+   end
+
+   function BaseAvlSet.keyStr(s)::String
+     s
+   end
+
+   function BaseAvlSet.keyCompare(key1::String, key2::String)
+     stringCompare(key1, key2)
+   end
+
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()
   end

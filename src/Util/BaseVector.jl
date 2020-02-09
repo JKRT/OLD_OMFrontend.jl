@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     @UniontypeDecl VectorInternal
 
@@ -95,10 +95,10 @@
               local vec::VectorInternal = inVector[1]
               local capacity::ModelicaInteger
 
-              @set vec.size = vec.size + 1
+              Setfield.@set vec.size = vec.size + 1
               if vec.size > vec.capacity
-                @set vec.capacity = integer(ceil(intReal(vec.capacity) * growthFactor))
-                @set vec.data = copyArray(vec.data, vec.capacity)
+                Setfield.@set vec.capacity = integer(ceil(intReal(vec.capacity) * growthFactor))
+                Setfield.@set vec.data = copyArray(vec.data, vec.capacity)
               end
               Dangerous.arrayUpdateNoBoundsChecking(vec.data, vec.size, inValue)
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
@@ -111,7 +111,7 @@
               if freePolicy == FreePolicy.ON_DELETION
                 arrayUpdate(vec.data, vec.size, defaultValue)
               end
-              @set vec.size = max(vec.size - 1, 0)
+              Setfield.@set vec.size = max(vec.size - 1, 0)
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
         end
 
@@ -186,8 +186,8 @@
               local vec::VectorInternal = inVector[1]
 
               if inSize > vec.capacity
-                @set vec.data = copyArray(vec.data, inSize)
-                @set vec.capacity = inSize
+                Setfield.@set vec.data = copyArray(vec.data, inSize)
+                Setfield.@set vec.capacity = inSize
                 Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
               end
         end
@@ -204,8 +204,8 @@
                 fail()
               elseif inNewSize > vec.size
                 if inNewSize > vec.capacity
-                  @set vec.data = copyArray(vec.data, inNewSize)
-                  @set vec.capacity = inNewSize
+                  Setfield.@set vec.data = copyArray(vec.data, inNewSize)
+                  Setfield.@set vec.capacity = inNewSize
                 end
                 fillArray(vec.data, inFillValue, vec.size + 1, inNewSize)
               elseif freePolicy == FreePolicy.ON_DELETION
@@ -215,7 +215,7 @@
                =#
                #=  Fill the space between the last element and the new end of the array.
                =#
-              @set vec.size = inNewSize
+              Setfield.@set vec.size = inNewSize
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
         end
 
@@ -228,8 +228,8 @@
               local vec::VectorInternal = inVector[1]
 
               if vec.size < integer(intReal(vec.capacity) * inThreshold)
-                @set vec.data = copyArray(vec.data, vec.size)
-                @set vec.capacity = vec.size
+                Setfield.@set vec.data = copyArray(vec.data, vec.size)
+                Setfield.@set vec.capacity = vec.size
                 Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
               end
         end
@@ -349,7 +349,7 @@
 
               local vec::VectorInternal = inVector[1]
 
-              @set vec.data = arrayCopy(vec.data)
+              Setfield.@set vec.data = arrayCopy(vec.data)
               outVector = arrayCreate(1, vec)
           outVector
         end

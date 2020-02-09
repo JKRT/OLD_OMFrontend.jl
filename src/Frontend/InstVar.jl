@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-    using Setfield
+    import Setfield
 
          #= /*
          * This file is part of OpenModelica.
@@ -522,7 +522,7 @@
               outSubMod = begin
                 @match outSubMod begin
                   DAE.NAMEMOD(__)  => begin
-                      outSubMod.mod = liftUserTypeMod(outSubMod.mod, inDims)
+                      Setfield.@set outSubMod.mod = liftUserTypeMod(outSubMod.mod, inDims)
                     outSubMod
                   end
                 end
@@ -544,10 +544,10 @@
               eq = begin
                 @match eq begin
                   DAE.TYPED(__)  => begin
-                      @set eq.modifierAsExp = Expression.liftExpList(eq.modifierAsExp, inDims)
-                      @set eq.modifierAsValue = Util.applyOption1(eq.modifierAsValue, ValuesUtil.liftValueList, inDims)
+                      Setfield.@set eq.modifierAsExp = Expression.liftExpList(eq.modifierAsExp, inDims)
+                      Setfield.@set eq.modifierAsValue = Util.applyOption1(eq.modifierAsValue, ValuesUtil.liftValueList, inDims)
                       ty = Types.getPropType(eq.properties)
-                      @set eq.properties = Types.setPropType(eq.properties, Types.liftArrayListDims(ty, inDims))
+                      Setfield.@set eq.properties = Types.setPropType(eq.properties, Types.liftArrayListDims(ty, inDims))
                     eq
                   end
 

@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-    using Setfield
+    import Setfield
     
          #= /*
          * This file is part of OpenModelica.
@@ -288,7 +288,7 @@
                   (vn, tty && DAE.T_FUNCTION(__), ct, kind, dir, daePrl, prot, e, inst_dims, _, dae_var_attr, comment, _, _, _)  => begin
                       finst_dims = ListUtil.flatten(inst_dims)
                       path = ComponentReference.crefToPath(vn)
-                      @set tty.path = path
+                      Setfield.@set tty.path = path
                     DAE.DAE_LIST(list(DAE.VAR(vn, kind, dir, daePrl, prot, tty, e, finst_dims, ct, source, dae_var_attr, comment, io)))
                   end
 

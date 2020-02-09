@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    import Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -2785,7 +2787,7 @@
                   local ty::DAE.Type
                 @match (outValue, inType) begin
                   (Values.RECORD(__), DAE.T_COMPLEX(__))  => begin
-                      outValue.orderd = list(@do_threaded_for typeConvertRecord(val, Types.getVarType(var)) (val, var) (outValue.orderd, inType.varLst))
+                      Setfield.@set outValue.orderd = list(@do_threaded_for typeConvertRecord(val, Types.getVarType(var)) (val, var) (outValue.orderd, inType.varLst))
                     outValue
                   end
 
@@ -2795,7 +2797,7 @@
 
                   (Values.ARRAY(__), DAE.T_ARRAY(__))  => begin
                       ty = Expression.unliftArray(inType)
-                      outValue.valueLst = list(typeConvertRecord(v, ty) for v in outValue.valueLst)
+                      Setfield.@set outValue.valueLst = list(typeConvertRecord(v, ty) for v in outValue.valueLst)
                     outValue
                   end
 

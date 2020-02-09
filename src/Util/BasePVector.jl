@@ -1,13 +1,15 @@
-  #=TODO: Originally partial =# module BasePVector 
+  #=TODO: Originally partial =# module BasePVector
 
 
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
-    @UniontypeDecl Vector 
-    @UniontypeDecl Node 
+
+    @UniontypeDecl Vector
+    @UniontypeDecl Node
 
     MapFunc = Function
 
@@ -51,7 +53,7 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        T = ModelicaInteger 
+        T = ModelicaInteger
          #=  Should be Any.
          =#
         import ListUtil
@@ -94,13 +96,13 @@
          const EMPTY_VEC = VECTOR(EMPTY_NODE, arrayCreate(0, EMPTY()), 0, 5)::Vector
 
          #= Returns a new empty Vector. =#
-        function new() ::Vector 
+        function new() ::Vector
               local outVector::Vector = EMPTY_VEC
           outVector
         end
 
          #= Appends a value to the end of the Vector. =#
-        function add(inVector::Vector, inValue::T) ::Vector 
+        function add(inVector::Vector, inValue::T) ::Vector
               local outVector::Vector = inVector
 
               outVector = begin
@@ -114,11 +116,11 @@
                    =#
                 @match outVector begin
                   VECTOR(tail = tail) where (arrayLength(tail) < 32)  => begin
-                      outVector.tail = tailAdd(tail, VALUE(inValue))
-                      outVector.size = outVector.size + 1
+                      Setfield.@set outVector.tail = tailAdd(tail, VALUE(inValue))
+                      Setfield.@set outVector.size = outVector.size + 1
                     outVector
                   end
-                  
+
                   VECTOR(root, tail, sz, shift)  => begin
                        #=  No space left in the tail. Push the tail into the tree and create a new
                        =#
@@ -136,7 +138,7 @@
          #= Appends a list of values to the end of the Vector. This function is more
            efficient than calling add multiple times, since it doesn't need to create a
            new Vector for each added element. =#
-        function addList(inVector::Vector, inList::List{<:T}) ::Vector 
+        function addList(inVector::Vector, inList::List{<:T}) ::Vector
               local outVector::Vector = inVector
 
               local tail::Array{Node}
@@ -206,7 +208,7 @@
         end
 
          #= Returns the element at the given index. Fails if the index is out of bounds. =#
-        function get(inVector::Vector, inIndex::ModelicaInteger) ::T 
+        function get(inVector::Vector, inIndex::ModelicaInteger) ::T
               local outValue::T
 
               local tail_off::ModelicaInteger = tailOffset(length(inVector))
@@ -228,7 +230,7 @@
 
          #= Sets the element at the given index to the given value. Fails if the index is
            out of bounds. =#
-        function set(inVector::Vector, inIndex::ModelicaInteger, inValue::T) ::Vector 
+        function set(inVector::Vector, inIndex::ModelicaInteger, inValue::T) ::Vector
               local outVector::Vector = inVector
 
               outVector = begin
@@ -238,9 +240,9 @@
                       @match true = inIndex > 0 && inIndex <= outVector.size
                       tail_off = tailOffset(outVector.size)
                       if inIndex <= tail_off
-                        outVector.root = nodeSet(outVector.root, inIndex, VALUE(inValue), outVector.shift)
+                        Setfield.@set outVector.root = nodeSet(outVector.root, inIndex, VALUE(inValue), outVector.shift)
                       else
-                        outVector.tail = arrayCopy(outVector.tail)
+                        Setfield.@set outVector.tail = arrayCopy(outVector.tail)
                         arrayUpdate(outVector.tail, inIndex - tail_off, VALUE(inValue))
                       end
                        #=  The element is in the tree.
@@ -255,7 +257,7 @@
         end
 
          #= Returns the last value in the Vector. Fails if the Vector is empty. =#
-        function last(inVector::Vector) ::T 
+        function last(inVector::Vector) ::T
               local outValue::T
 
               local tail::Array{Node}
@@ -266,7 +268,7 @@
         end
 
          #= Removes the last value in the Vector. Fails if the Vector is empty. =#
-        function pop(inVector::Vector) ::Vector 
+        function pop(inVector::Vector) ::Vector
               local outVector::Vector = inVector
 
               outVector = begin
@@ -281,21 +283,21 @@
                   VECTOR(size = 0)  => begin
                     fail()
                   end
-                  
+
                   VECTOR(size = 1)  => begin
                     EMPTY_VEC
                   end
-                  
+
                   VECTOR(tail = tail) where (arrayLength(tail) > 1)  => begin
                        #=  Vector with one element => empty Vector.
                        =#
                        #=  Tail contains more than one element, remove the last of them.
                        =#
-                      outVector.tail = tailPop(tail)
-                      outVector.size = outVector.size - 1
+                      Setfield.@set outVector.tail = tailPop(tail)
+                      Setfield.@set outVector.size = outVector.size - 1
                     outVector
                   end
-                  
+
                   VECTOR(root, tail, sz, shift)  => begin
                        #=  Tail contains one element. Remove the last added tail from the tree, and
                        =#
@@ -328,14 +330,14 @@
 
          #= Returns a new Vector where the given function has been applied to each
            element in sequential order. =#
-        function map(inVector::Vector, inFunc::MapFunc) ::Vector 
+        function map(inVector::Vector, inFunc::MapFunc) ::Vector
               local outVector::Vector = inVector
 
               outVector = begin
                 @match outVector begin
                   VECTOR(__)  => begin
-                      outVector.root = mapNode(outVector.root, inFunc)
-                      outVector.tail = mapNodeArray(outVector.tail, inFunc)
+                      Setfield.@set outVector.root = mapNode(outVector.root, inFunc)
+                      Setfield.@set outVector.tail = mapNodeArray(outVector.tail, inFunc)
                     outVector
                   end
                 end
@@ -358,7 +360,7 @@
         end
 
          #= Returns the number of elements in the Vector. =#
-        function size(inVector::Vector) ::ModelicaInteger 
+        function size(inVector::Vector) ::ModelicaInteger
               local outSize::ModelicaInteger
 
               @match VECTOR(size = outSize) = inVector
@@ -372,7 +374,7 @@
           @ExtendedFunction length size()
 
          #= Returns true if the Vector is empty, otherwise false. =#
-        function isEmpty(inVector::Vector) ::Bool 
+        function isEmpty(inVector::Vector) ::Bool
               local outIsEmpty::Bool
 
               local sz::ModelicaInteger
@@ -383,35 +385,35 @@
         end
 
          #= Creates a Vector from a list. =#
-        function fromList(inList::List{<:T}) ::Vector 
+        function fromList(inList::List{<:T}) ::Vector
               local outVector::Vector = addList(EMPTY_VEC, inList)
           outVector
         end
 
          #= Creates a list from a Vector. =#
-        function toList(inVector::Vector) ::List{T} 
+        function toList(inVector::Vector) ::List{T}
               local outList::List{T} = listReverse(toReversedList(inVector))
           outList
         end
 
-        function toReversedList(inVector::Vector) ::List{T} 
+        function toReversedList(inVector::Vector) ::List{T}
               local outList::List{T} = fold(inVector, cons, nil)
           outList
         end
 
          #= Creates a Vector from an array. =#
-        function fromArray(inArray::Array{<:T}) ::Vector 
+        function fromArray(inArray::Array{<:T}) ::Vector
               local outVector::Vector = addList(EMPTY_VEC, arrayList(inArray))
           outVector
         end
 
          #= Creates an array from a Vector. =#
-        function toArray(inVector::Vector) ::Array{T} 
+        function toArray(inVector::Vector) ::Array{T}
               local outArray::Array{T} = listArray(toList(inVector))
           outArray
         end
 
-        function printDebug(inVector::Vector)  
+        function printDebug(inVector::Vector)
               local root::Node
               local tail::Array{Node}
               local sz::ModelicaInteger
@@ -428,7 +430,7 @@
               print("\\n")
         end
 
-        function printDebugNode(inNode::Node, inIndent::String)  
+        function printDebugNode(inNode::Node, inIndent::String)
               _ = begin
                 @match inNode begin
                   NODE(__)  => begin
@@ -439,12 +441,12 @@
                       print("],")
                     ()
                   end
-                  
+
                   VALUE(__)  => begin
                       print(anyString(inNode.value) + ", ")
                     ()
                   end
-                  
+
                   EMPTY(__)  => begin
                       print("E, ")
                     ()
@@ -454,7 +456,7 @@
         end
 
          #= Helper function to set. =#
-        function nodeSet(inNode::Node, inIndex::ModelicaInteger, inValue::Node, inLevel::ModelicaInteger) ::Node 
+        function nodeSet(inNode::Node, inIndex::ModelicaInteger, inValue::Node, inLevel::ModelicaInteger) ::Node
               local outNode::Node
 
               local children::Array{Node}
@@ -477,7 +479,7 @@
         end
 
          #= Helper function to add. Adds a node to the end of the tail. =#
-        function tailAdd(inTail::Array{<:Node}, inNode::Node) ::Array{Node} 
+        function tailAdd(inTail::Array{<:Node}, inNode::Node) ::Array{Node}
               local outTail::Array{Node}
 
               local new_len::ModelicaInteger = arrayLength(inTail) + 1
@@ -491,7 +493,7 @@
         end
 
          #= Helper function to add. Pushed a tail into the tree as a new node. =#
-        function pushTail(inRoot::Node, inTail::Array{<:Node}, inSize::ModelicaInteger, inShift::ModelicaInteger) ::Tuple{Node, ModelicaInteger} 
+        function pushTail(inRoot::Node, inTail::Array{<:Node}, inSize::ModelicaInteger, inShift::ModelicaInteger) ::Tuple{Node, ModelicaInteger}
               local outShift::ModelicaInteger
               local outRoot::Node
 
@@ -520,7 +522,7 @@
         end
 
          #= Helper function to pushTail. Does the actual pushing. =#
-        function pushTail2(inNode::Node, inLevel::ModelicaInteger, inSize::ModelicaInteger, inTail::Node) ::Node 
+        function pushTail2(inNode::Node, inLevel::ModelicaInteger, inSize::ModelicaInteger, inTail::Node) ::Node
               local outNode::Node
 
               outNode = begin
@@ -541,7 +543,7 @@
                       arrayUpdate(children, idx, node)
                     NODE(children)
                   end
-                  
+
                   EMPTY(__)  => begin
                     newPath(inTail, inLevel)
                   end
@@ -553,7 +555,7 @@
         end
 
          #= Returns a new tail array with the last element removed. =#
-        function tailPop(inTail::Array{<:Node}) ::Array{Node} 
+        function tailPop(inTail::Array{<:Node}) ::Array{Node}
               local outTail::Array{Node}
 
               local new_len::ModelicaInteger = arrayLength(inTail) - 1
@@ -566,7 +568,7 @@
         end
 
          #= Removes the last tail added to the given node. =#
-        function popTail(inNode::Node, inLevel::ModelicaInteger, inSize::ModelicaInteger) ::Node 
+        function popTail(inNode::Node, inLevel::ModelicaInteger, inSize::ModelicaInteger) ::Node
               local outNode::Node
 
               local idx::ModelicaInteger
@@ -587,11 +589,11 @@
                       end
                     outNode
                   end
-                  
+
                   _ where (idx == 1)  => begin
                     EMPTY()
                   end
-                  
+
                   NODE(children = children)  => begin
                        #=  Popping the last node, return empty node.
                        =#
@@ -607,7 +609,7 @@
         end
 
          #= Returns the parent to the node with the given index. =#
-        function nodeParent(inVector::Vector, inIndex::ModelicaInteger) ::Node 
+        function nodeParent(inVector::Vector, inIndex::ModelicaInteger) ::Node
               local outNode::Node
 
               local node::Node
@@ -624,7 +626,7 @@
 
          #= Returns the tail offset, i.e. the number of elements in the vector - the
            number of elements in the tail. =#
-        function tailOffset(inSize::ModelicaInteger) ::ModelicaInteger 
+        function tailOffset(inSize::ModelicaInteger) ::ModelicaInteger
               local outOffset::ModelicaInteger = if inSize < 32
                     0
                   else
@@ -634,7 +636,7 @@
         end
 
          #= Creates a new node and sets the given node as the first child in the new node. =#
-        function liftNode(inNode::Node) ::Node 
+        function liftNode(inNode::Node) ::Node
               local outNode::Node
 
               local nodes::Array{Node}
@@ -646,7 +648,7 @@
         end
 
          #= Creates a new path of a given length with the given node as leaf. =#
-        function newPath(inNode::Node, inLevel::ModelicaInteger) ::Node 
+        function newPath(inNode::Node, inLevel::ModelicaInteger) ::Node
               local outNode::Node
 
               outNode = if inLevel > 0
@@ -658,7 +660,7 @@
         end
 
          #= Returns true if the given node is empty, otherwise false. =#
-        function isEmptyNode(inNode::Node) ::Bool 
+        function isEmptyNode(inNode::Node) ::Bool
               local outIsEmpty::Bool
 
               outIsEmpty = begin
@@ -666,7 +668,7 @@
                   EMPTY(__)  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -676,7 +678,7 @@
         end
 
          #= Helper function to map, maps over a single node. =#
-        function mapNode(inNode::Node, inFunc::MapFunc) ::Node 
+        function mapNode(inNode::Node, inFunc::MapFunc) ::Node
               local outNode::Node
 
               outNode = begin
@@ -684,11 +686,11 @@
                   NODE(__)  => begin
                     NODE(mapNodeArray(inNode.children, inFunc))
                   end
-                  
+
                   VALUE(__)  => begin
                     VALUE(inFunc(inNode.value))
                   end
-                  
+
                   _  => begin
                       inNode
                   end
@@ -698,7 +700,7 @@
         end
 
          #= Helper function to map, maps over an array of nodes. =#
-        function mapNodeArray(inNodes::Array{<:Node}, inFunc::MapFunc) ::Array{Node} 
+        function mapNodeArray(inNodes::Array{<:Node}, inFunc::MapFunc) ::Array{Node}
               local outNodes::Array{Node}
 
               outNodes = arrayCopy(inNodes)
@@ -717,11 +719,11 @@
                   NODE(__)  => begin
                     foldNodeArray(inNode.children, inFunc, inStartValue)
                   end
-                  
+
                   VALUE(__)  => begin
                     inFunc(inNode.value, inStartValue)
                   end
-                  
+
                   _  => begin
                       inStartValue
                   end

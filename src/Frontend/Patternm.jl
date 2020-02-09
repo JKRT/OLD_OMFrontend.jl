@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     Func = Function
 
@@ -962,8 +962,8 @@
                       @match c begin
                         DAE.CASE(patterns = pat && DAE.PAT_CALL(patterns = patl) <|  nil())  => begin
                             if allPatternsWild(patl)
-                              @set pat.knownSingleton = true
-                              @set c.patterns = list(pat)
+                              Setfield.@set pat.knownSingleton = true
+                              Setfield.@set c.patterns = list(pat)
                             end
                           c
                         end
@@ -2629,7 +2629,7 @@
                             DAE.CASE(__)  => begin
                                 (patterns, outT) = traversePatternList(case_.patterns, (func) -> traverseConstantPatternsHelper2(func = func), outT)
                                 if ! valueEq(case_.patterns, patterns)
-                                  @set case_.patterns = patterns
+                                  Setfield.@set case_.patterns = patterns
                                 end
                               case_
                             end
@@ -2639,7 +2639,7 @@
                       end
                       cases2 = Dangerous.listReverseInPlace(cases2)
                       if ! valueEq(cases, cases2)
-                        outExp.cases = cases2
+                        Setfield.@set outExp.cases = cases2
                       end
                       (outExp, outT) = func(outExp, outT)
                     outExp
@@ -2664,7 +2664,7 @@
                   outPattern && DAE.PAT_CONSTANT(__)  => begin
                       (exp, extra) = func(outPattern.exp, extra)
                       if ! referenceEq(outPattern.exp, exp)
-                        outPattern.exp = exp
+                        Setfield.@set outPattern.exp = exp
                       end
                     outPattern
                   end

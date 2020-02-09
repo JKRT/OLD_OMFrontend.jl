@@ -10,7 +10,7 @@ module Static
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     @UniontypeDecl Slot
     PartialElabExpFunc = Function
@@ -4270,7 +4270,7 @@ module Static
                   local exp::DAE.Exp
                 @match inExp begin
                   DAE.CALL(expLst = exp && DAE.MATRIX(__) <|  nil())  => begin
-                      @set exp.matrix = list(makePreLst(row, inType) for row in exp.matrix)
+                      Setfield.@set exp.matrix = list(makePreLst(row, inType) for row in exp.matrix)
                     exp
                   end
 
@@ -6896,7 +6896,7 @@ module Static
                 @matchcontinue (oty, inTpl) begin
                   (DAE.T_ARRAY(__), tpl)  => begin
                       (dims, tpl) = ListUtil.mapFold(oty.dims, elabCallArgsEvaluateArrayLength3, tpl)
-                      @set oty.dims = dims
+                      Setfield.@set oty.dims = dims
                     (oty, tpl)
                   end
 
@@ -7608,7 +7608,7 @@ module Static
                       if ! listEmpty(bindings)
                         bindings = Types.solvePolymorphicBindings(bindings, inInfo, inType.path)
                         typeVars = list(Types.fixPolymorphicRestype(tv, bindings, inInfo) for tv in inType.typeVars)
-                        @set ty.typeVars = typeVars
+                        Setfield.@set ty.typeVars = typeVars
                         prop = getProperties(ty, ty_const)
                       else
                         prop = getProperties(ty, ty_const)
@@ -8323,7 +8323,7 @@ module Static
                   local tty::DAE.Type
                 @match inType begin
                   tty && DAE.T_FUNCTION(functionAttributes = DAE.FUNCTION_ATTRIBUTES(isBuiltin = DAE.FUNCTION_BUILTIN(SOME(name))))  => begin
-                      @set tty.path = Absyn.IDENT(name)
+                      Setfield.@set tty.path = Absyn.IDENT(name)
                     (tty.path, tty)
                   end
 
@@ -8404,7 +8404,7 @@ module Static
                         (ListUtil.map(outArgs, Expression.unboxExp), list(begin
                           @match slot begin
                             SLOT(arg = SOME(arg))  => begin
-                                @set slot.arg = SOME(Expression.unboxExp(arg))
+                                Setfield.@set slot.arg = SOME(Expression.unboxExp(arg))
                               slot
                             end
 
@@ -8415,7 +8415,7 @@ module Static
                         end for slot in outSlots), list(begin
                           @match p begin
                             funcarg  => begin
-                                @set funcarg.ty = Types.unboxedType(Types.fixPolymorphicRestype(p.ty, pb, inInfo))
+                                Setfield.@set funcarg.ty = Types.unboxedType(Types.fixPolymorphicRestype(p.ty, pb, inInfo))
                               funcarg
                             end
                           end
@@ -8869,7 +8869,7 @@ module Static
                   end
 
                   ty && DAE.T_TUPLE(__)  => begin
-                      @set ty.types = ListUtil.map2(ty.types, evaluateFuncArgTypeDims, inEnv, inCache)
+                      Setfield.@set ty.types = ListUtil.map2(ty.types, evaluateFuncArgTypeDims, inEnv, inCache)
                     ty
                   end
 
@@ -8899,7 +8899,7 @@ module Static
                   (DAE.T_FUNCTION(__), _)  => begin
                        #=  When not checking types, create function type by looking at the filled slots
                        =#
-                      outTp.funcArg = funcArgsFromSlots(slots)
+                      Setfield.@set outTp.funcArg = funcArgsFromSlots(slots)
                     outTp
                   end
                 end
@@ -9319,8 +9319,8 @@ module Static
                           (exp, _, outPolymorphicBindings) = Types.matchTypePolymorphic(exp, ty, defarg.ty, FGraphUtil.getGraphPathNoImplicitScope(inEnv), outPolymorphicBindings, false)
                           @match true = Types.constEqualOrHigher(c, defarg.constType)
                           outConsts = _cons(c, outConsts)
-                          @set slot.slotFilled = true
-                          @set slot.arg = SOME(exp)
+                          Setfield.@set slot.slotFilled = true
+                          Setfield.@set slot.arg = SOME(exp)
                         slot
                       end
 

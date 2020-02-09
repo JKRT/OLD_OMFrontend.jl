@@ -5,7 +5,7 @@ module Ceval
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     ReductionOperator = Function
 
@@ -963,7 +963,7 @@ module Ceval
                       (_, v) = ceval(inCache, inEnv, e, true, Absyn.MSG(inInfo), numIter + 1)
                       ty = Types.typeOfValue(v)
                       cevalType = Types.simplifyType(ty)
-                      @set attr.ty = cevalType
+                      Setfield.@set attr.ty = cevalType
                     (DAE.CALL(p, el, attr), DAE.PROP(ty, DAE.C_PARAM()))
                   end
                 end

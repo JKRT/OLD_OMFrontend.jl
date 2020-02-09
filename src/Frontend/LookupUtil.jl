@@ -71,7 +71,36 @@
              end
          b
        end
+       #= Helper function to lookupVarF and lookupIdent. =#
+      function lookupVar2(inBinTree::FCore.Children, inIdent::SCode.Ident, inGraph::FCore.Graph) ::Tuple{DAE.Var, SCode.Element, DAE.Mod, FCore.Status, FCore.Graph}
+            local outEnv::FCore.Graph
+            local instStatus::FCore.Status
+            local outMod::DAE.Mod
+            local outElement::SCode.Element
+            local outVar::DAE.Var
 
+            local r::FCore.MMRef
+            local s::FCore.Scope
+            local n::FCore.Node
+            local name::String
+
+            r = FCore.RefTree.get(inBinTree, inIdent)
+            outVar = FNode.refInstVar(r)
+            s = FNode.refRefTargetScope(r)
+            n = FNode.fromRef(r)
+            if ! FNode.isComponent(n) && Flags.isSet(Flags.LOOKUP)
+              @match false = Config.acceptMetaModelicaGrammar()
+              @match FCore.N(data = FCore.CL(e = SCode.CLASS(name = name))) = n
+              name = inIdent + " = " + FGraphUtil.printGraphPathStr(inGraph) + "." + name
+              Debug.traceln("- Lookup.lookupVar2 failed because we found a class instead of a variable: " + name)
+              fail()
+            end
+             #=  MetaModelica function references generate too much failtrace...
+             =#
+            @match FCore.N(data = FCore.CO(outElement, outMod, _, instStatus)) = n
+            outEnv = FGraphUtil.setScope(inGraph, s)
+        (outVar, outElement, outMod, instStatus, outEnv)
+      end
          #= Looks up a cref and returns SOME(true) if it references an iterator,
            SOME(false) if it references an element in the current scope, and NONE() if
            the name couldn't be found in the current scope at all. =#

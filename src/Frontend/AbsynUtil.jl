@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     FuncTplToTpl = Function
 
@@ -3547,17 +3547,17 @@
               outCref = begin
                 @match outCref begin
                   CREF_IDENT(__)  => begin
-                      outCref.subscripts = inSubscripts
+                      Setfield.@set outCref.subscripts = inSubscripts
                     outCref
                   end
 
                   CREF_QUAL(__)  => begin
-                      outCref.componentRef = crefSetLastSubs(outCref.componentRef, inSubscripts)
+                      Setfield.@set outCref.componentRef = crefSetLastSubs(outCref.componentRef, inSubscripts)
                     outCref
                   end
 
                   CREF_FULLYQUALIFIED(__)  => begin
-                      outCref.componentRef = crefSetLastSubs(outCref.componentRef, inSubscripts)
+                      Setfield.@set outCref.componentRef = crefSetLastSubs(outCref.componentRef, inSubscripts)
                     outCref
                   end
                 end
@@ -3956,8 +3956,8 @@
                   local cl::Class
                 @match inClass begin
                   cl && CLASS(info = info && SOURCEINFO(__))  => begin
-                      @set info.fileName = fileName
-                      @set cl.info = info
+                      Setfield.@set info.fileName = fileName
+                      Setfield.@set cl.info = info
                     cl
                   end
                 end
@@ -3973,7 +3973,7 @@
               outClass = begin
                 @match outClass begin
                   CLASS(__)  => begin
-                      outClass.name = newName
+                      Setfield.@set outClass.name = newName
                     outClass
                   end
                 end
@@ -3987,7 +3987,7 @@
               outClass = begin
                 @match outClass begin
                   CLASS(__)  => begin
-                      outClass.body = inBody
+                      Setfield.@set outClass.body = inBody
                     outClass
                   end
                 end
@@ -5502,12 +5502,12 @@
                   local elts::List{ElementItem}
                 @match (classPart, inClassParts) begin
                   (PUBLIC(elts), classParts)  => begin
-                      classPart.contents = ListUtil.filterOnFalse(elts, isElementItemClass)
+                      Setfield.@set classPart.contents = ListUtil.filterOnFalse(elts, isElementItemClass)
                     _cons(classPart, classParts)
                   end
 
                   (PROTECTED(elts), classParts)  => begin
-                      classPart.contents = ListUtil.filterOnFalse(elts, isElementItemClass)
+                      Setfield.@set classPart.contents = ListUtil.filterOnFalse(elts, isElementItemClass)
                     _cons(classPart, classParts)
                   end
 
@@ -5874,7 +5874,7 @@
                        #=  myMerge the annotations
                        =#
                       res = mergeAnnotations2(res, args2)
-                      arg2.modification = SOME(CLASSMOD(res, eq2))
+                      Setfield.@set arg2.modification = SOME(CLASSMOD(res, eq2))
                     arg2
                   end
                 end
@@ -6329,7 +6329,7 @@
                   CLASS(__)  => begin
                       (body, outArg) = traverseClassDef(outClass.body, (inFunc) -> traverseClassPartComponents(inFunc = inFunc), inArg)
                       if ! referenceEq(body, outClass.body)
-                        outClass.body = body
+                        Setfield.@set outClass.body = body
                       end
                     outClass
                   end
@@ -6381,13 +6381,13 @@
                 @match outClassPart begin
                   PUBLIC(__)  => begin
                       (items, outArg, outContinue) = traverseListGeneric(outClassPart.contents, (inFunc) -> traverseElementItemComponents(inFunc = inFunc), inArg)
-                      outClassPart.contents = items
+                      Setfield.@set outClassPart.contents = items
                     ()
                   end
 
                   PROTECTED(__)  => begin
                       (items, outArg, outContinue) = traverseListGeneric(outClassPart.contents, (inFunc) -> traverseElementItemComponents(inFunc = inFunc), inArg)
-                      outClassPart.contents = items
+                      Setfield.@set outClassPart.contents = items
                     ()
                   end
 
@@ -6436,7 +6436,7 @@
                   ELEMENT(__)  => begin
                       (spec, outArg, outContinue) = traverseElementSpecComponents(outElement.specification, inFunc, inArg)
                       if ! referenceEq(spec, outElement.specification)
-                        outElement.specification = spec
+                        Setfield.@set outElement.specification = spec
                       end
                     (outElement, outArg, outContinue)
                   end
@@ -6461,7 +6461,7 @@
                   COMPONENTS(__)  => begin
                       (comps, outArg, outContinue) = inFunc(outSpec.components, inArg)
                       if ! referenceEq(comps, outSpec.components)
-                        outSpec.components = comps
+                        Setfield.@set outSpec.components = comps
                       end
                     (outSpec, outArg, outContinue)
                   end
@@ -6484,13 +6484,13 @@
                 @match outClassDef begin
                   PARTS(__)  => begin
                       (parts, outArg, outContinue) = traverseListGeneric(outClassDef.classParts, inFunc, inArg)
-                      outClassDef.classParts = parts
+                      Setfield.@set outClassDef.classParts = parts
                     ()
                   end
 
                   CLASS_EXTENDS(__)  => begin
                       (parts, outArg, outContinue) = traverseListGeneric(outClassDef.parts, inFunc, inArg)
-                      outClassDef.parts = parts
+                      Setfield.@set outClassDef.parts = parts
                     ()
                   end
 
@@ -6630,92 +6630,92 @@
                   local e2::Exp
                 @match outExp begin
                   BINARY(__)  => begin
-                      outExp.exp1 = inFunc(outExp.exp1, inArg)
-                      outExp.exp2 = inFunc(outExp.exp2, inArg)
+                      Setfield.@set outExp.exp1 = inFunc(outExp.exp1, inArg)
+                      Setfield.@set outExp.exp2 = inFunc(outExp.exp2, inArg)
                     ()
                   end
 
                   UNARY(__)  => begin
-                      outExp.exp = inFunc(outExp.exp, inArg)
+                      Setfield.@set outExp.exp = inFunc(outExp.exp, inArg)
                     ()
                   end
 
                   LBINARY(__)  => begin
-                      outExp.exp1 = inFunc(outExp.exp1, inArg)
-                      outExp.exp2 = inFunc(outExp.exp2, inArg)
+                      Setfield.@set outExp.exp1 = inFunc(outExp.exp1, inArg)
+                      Setfield.@set outExp.exp2 = inFunc(outExp.exp2, inArg)
                     ()
                   end
 
                   LUNARY(__)  => begin
-                      outExp.exp = inFunc(outExp.exp, inArg)
+                      Setfield.@set outExp.exp = inFunc(outExp.exp, inArg)
                     ()
                   end
 
                   RELATION(__)  => begin
-                      outExp.exp1 = inFunc(outExp.exp1, inArg)
-                      outExp.exp2 = inFunc(outExp.exp2, inArg)
+                      Setfield.@set outExp.exp1 = inFunc(outExp.exp1, inArg)
+                      Setfield.@set outExp.exp2 = inFunc(outExp.exp2, inArg)
                     ()
                   end
 
                   IFEXP(__)  => begin
-                      outExp.ifExp = inFunc(outExp.ifExp, inArg)
-                      outExp.trueBranch = inFunc(outExp.trueBranch, inArg)
-                      outExp.elseBranch = inFunc(outExp.elseBranch, inArg)
-                      outExp.elseIfBranch = list((inFunc(Util.tuple21(e), inArg), inFunc(Util.tuple22(e), inArg)) for e in outExp.elseIfBranch)
+                      Setfield.@set outExp.ifExp = inFunc(outExp.ifExp, inArg)
+                      Setfield.@set outExp.trueBranch = inFunc(outExp.trueBranch, inArg)
+                      Setfield.@set outExp.elseBranch = inFunc(outExp.elseBranch, inArg)
+                      Setfield.@set outExp.elseIfBranch = list((inFunc(Util.tuple21(e), inArg), inFunc(Util.tuple22(e), inArg)) for e in outExp.elseIfBranch)
                     ()
                   end
 
                   CALL(__)  => begin
-                      outExp.functionArgs = traverseExpShallowFuncArgs(outExp.functionArgs, inArg, inFunc)
+                      Setfield.@set outExp.functionArgs = traverseExpShallowFuncArgs(outExp.functionArgs, inArg, inFunc)
                     ()
                   end
 
                   PARTEVALFUNCTION(__)  => begin
-                      outExp.functionArgs = traverseExpShallowFuncArgs(outExp.functionArgs, inArg, inFunc)
+                      Setfield.@set outExp.functionArgs = traverseExpShallowFuncArgs(outExp.functionArgs, inArg, inFunc)
                     ()
                   end
 
                   ARRAY(__)  => begin
-                      outExp.arrayExp = list(inFunc(e, inArg) for e in outExp.arrayExp)
+                      Setfield.@set outExp.arrayExp = list(inFunc(e, inArg) for e in outExp.arrayExp)
                     ()
                   end
 
                   MATRIX(__)  => begin
-                      outExp.matrix = list(list(inFunc(e, inArg) for e in lst) for lst in outExp.matrix)
+                      Setfield.@set outExp.matrix = list(list(inFunc(e, inArg) for e in lst) for lst in outExp.matrix)
                     ()
                   end
 
                   RANGE(__)  => begin
-                      outExp.start = inFunc(outExp.start, inArg)
-                      outExp.step = Util.applyOption1(outExp.step, inFunc, inArg)
-                      outExp.stop = inFunc(outExp.stop, inArg)
+                      Setfield.@set outExp.start = inFunc(outExp.start, inArg)
+                      Setfield.@set outExp.step = Util.applyOption1(outExp.step, inFunc, inArg)
+                      Setfield.@set outExp.stop = inFunc(outExp.stop, inArg)
                     ()
                   end
 
                   TUPLE(__)  => begin
-                      outExp.expressions = list(inFunc(e, inArg) for e in outExp.expressions)
+                      Setfield.@set outExp.expressions = list(inFunc(e, inArg) for e in outExp.expressions)
                     ()
                   end
 
                   AS(__)  => begin
-                      outExp.exp = inFunc(outExp.exp, inArg)
+                      Setfield.@set outExp.exp = inFunc(outExp.exp, inArg)
                     ()
                   end
 
                   CONS(__)  => begin
-                      outExp.head = inFunc(outExp.head, inArg)
-                      outExp.rest = inFunc(outExp.rest, inArg)
+                      Setfield.@set outExp.head = inFunc(outExp.head, inArg)
+                      Setfield.@set outExp.rest = inFunc(outExp.rest, inArg)
                     ()
                   end
 
                   LIST(__)  => begin
-                      outExp.exps = list(inFunc(e, inArg) for e in outExp.exps)
+                      Setfield.@set outExp.exps = list(inFunc(e, inArg) for e in outExp.exps)
                     ()
                   end
 
                   DOT(__)  => begin
-                      outExp.exp = inFunc(outExp.exp, inArg)
-                      outExp.index = inFunc(outExp.index, inArg)
+                      Setfield.@set outExp.exp = inFunc(outExp.exp, inArg)
+                      Setfield.@set outExp.index = inFunc(outExp.index, inArg)
                     ()
                   end
 
@@ -6733,13 +6733,13 @@
               outArgs = begin
                 @match outArgs begin
                   FUNCTIONARGS(__)  => begin
-                      outArgs.args = list(inFunc(arg, inArg) for arg in outArgs.args)
+                      Setfield.@set outArgs.args = list(inFunc(arg, inArg) for arg in outArgs.args)
                     outArgs
                   end
 
                   FOR_ITER_FARG(__)  => begin
-                      outArgs.exp = inFunc(outArgs.exp, inArg)
-                      outArgs.iterators = list(traverseExpShallowIterator(it, inArg, inFunc) for it in outArgs.iterators)
+                      Setfield.@set outArgs.exp = inFunc(outArgs.exp, inArg)
+                      Setfield.@set outArgs.iterators = list(traverseExpShallowIterator(it, inArg, inFunc) for it in outArgs.iterators)
                     outArgs
                   end
                 end
@@ -7101,7 +7101,7 @@
                 @match (inProgram, inPath, inFunc, inArg, inVisitProtected) begin
                   (p && PROGRAM(__), pa, visitor, args, traverse_prot)  => begin
                       (classes, pa_1, args_1) = traverseClasses2(p.classes, pa, visitor, args, traverse_prot)
-                      @set p.classes = classes
+                      Setfield.@set p.classes = classes
                     (p, pa_1, args_1)
                   end
                 end
