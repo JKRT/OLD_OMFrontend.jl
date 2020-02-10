@@ -266,12 +266,12 @@ end
                   end
 
                   (_, _, _, _, _, _, _)  => begin
-                      @match true = Config.acceptMetaModelicaGrammar() || isTargetClassBuiltin(inTargetClassEnv, inTargetClass) || inFunctionScope(inSourceEnv) || SCodeUtil.isOperatorRecord(inTargetClass)
+                      @match true = Config.acceptMetaModelicaGrammar() || isTargetClassBuiltin(inTargetClassEnv, inTargetClass) || FGraphUtil.inFunctionScope(inSourceEnv) || SCodeUtil.isOperatorRecord(inTargetClass)
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
 
                   (_, _, _, _, _, _, _)  => begin
-                      @match true = stringEq(AbsynUtil.pathFirstIdent(getGraphName(inTargetClassEnv)), "OpenModelica")
+                      @match true = stringEq(AbsynUtil.pathFirstIdent(FGraphUtil.getGraphName(inTargetClassEnv)), "OpenModelica")
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
 
@@ -376,7 +376,7 @@ end
                =#
                #=  name = inTargetClassName + \"$\" + ComponentReference.printComponentRefStr(prefixToCref(crefPrefix));
                =#
-               #=  + \"$\" + AbsynUtil.pathString2NoLeadingDot(getGraphName(inSourceEnv), \"$\");
+               #=  + \"$\" + AbsynUtil.pathString2NoLeadingDot(FGraphUtil.getGraphName(inSourceEnv), \"$\");
                =#
                #=  name = \"'$\" + inTargetClassName + \"@\" + AbsynUtil.pathString(AbsynUtil.stringListPath(listReverse(AbsynUtil.pathToStringList(prefixToPath(crefPrefix))))) + \"'\";
                =#

@@ -391,6 +391,9 @@
           (outCache, outEnv, outIH, outDae)
         end
 
+        function fnBreak(s)
+          println(s)
+        end
          #= Instantiation of a class can be either implicit or normal.
           This function is used in both cases. When implicit instantiation
           is performed, the last argument is true, otherwise it is false.
@@ -3587,7 +3590,7 @@
                   (cache, env, ih, _, _, _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       (cache, _, _, _, is, _) = Lookup.lookupIdent(cache, env, id)
-                      @match true = FCore.isTyped(is) #= If InstStatus is typed, return =#
+                      @match true = FCoreUtil.isTyped(is) #= If InstStatus is typed, return =#
                     (cache, env, ih, inUpdatedComps)
                   end
 

@@ -1006,12 +1006,15 @@
         end
 
         function elabUntypedSubmods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{DAE.SubMod}
-              local outSubMods::List{DAE.SubMod}
+              local outSubMods::List{DAE.SubMod} = nil
 
               local submods::List{SCode.SubMod}
 
               submods = compactSubMods(inSubMods, inModScope)
-              outSubMods = listAppend(elabUntypedSubmod(m) for m in listReverse(submods))
+              for m in listReverse(submods)
+                z = elabUntypedSubmod(m)
+                outSubMods = listAppend(outSubMods, z)
+              end
           outSubMods
         end
 

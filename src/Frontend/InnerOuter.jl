@@ -1654,22 +1654,57 @@ module InnerOuter
           outIH
         end
 
-function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
-  function getGraphNameStr(inGraph::FCore.Graph) ::String
-    local outString::String
-    outString = begin
-      @matchcontinue inGraph begin
-        _  => begin
-          AbsynUtil.pathString(getGraphName(inGraph))
-        end
-        _  => begin
-          "."
-        end
-      end
-    end
-    outString
-  end
+        #= get the top current scope from the graph =#
+       function currentScope(inGraph::FCore.Graph) ::Scope
+             local outScope::Scope
 
+             outScope = begin
+               @match inGraph begin
+                 FCore.G(scope = outScope)  => begin
+                   outScope
+                 end
+
+                 FCore.EG(_)  => begin
+                   nil
+                 end
+               end
+             end
+         outScope
+       end
+
+        #= Returns the FQ name of the environment. =#
+       function getGraphName(inGraph::FCore.Graph) ::Absyn.Path
+             local outPath::Absyn.Path
+
+             local p::Absyn.Path
+             local s::Scope
+             local r::MMRef
+
+             @match _cons(r, s) = currentScope(inGraph)
+             p = AbsynUtil.makeIdentPathFromString(FNode.refName(r))
+             for r in s
+               p = Absyn.QUALIFIED(FNode.refName(r), p)
+             end
+             @match Absyn.QUALIFIED(_, outPath) = p
+         outPath
+       end
+
+       function getGraphNameStr(inGraph::FCore.Graph) ::String
+         local outString::String
+         outString = begin
+           @matchcontinue inGraph begin
+             _  => begin
+               AbsynUtil.pathString(getGraphName(inGraph))
+             end
+             _  => begin
+               "."
+             end
+           end
+         end
+         outString
+       end
+
+function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
 
               local outIH::InstHierarchy
               outIH = begin

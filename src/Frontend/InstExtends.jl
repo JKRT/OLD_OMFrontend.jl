@@ -1,6 +1,5 @@
   module InstExtends
 
-  Type_A = Any
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
@@ -20,6 +19,8 @@
 
     FixAFn = Function
     FixBFn = Function
+    Type_A = Any
+    Type_B = Any
 
          #= /*
          * This file is part of OpenModelica.
@@ -1829,6 +1830,9 @@
               end
           subMod
         end
+        function fixSubMod(subMod::SCode.SubMod; inCache::Array{<:FCore.Cache}, inEnv::FCore.Graph, tree::AvlSetString.Tree)::SCode.SubMod
+           fixSubMod(inCache, inEnv, subMod, tree)
+        end
 
          #=  All of the fix functions do the following:
           Analyzes the SCode datastructure and replace paths with a new path (from
@@ -1900,12 +1904,12 @@
         end
 
          #=  Generic function to fix an optional element. =#
-        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Option{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::Option{Type_A}
+        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Type_A, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
+              local outA::Option{Any}
 
               outA = begin
-                  local A1::Type_A
-                  local A2::Type_A
+                  local A1::Any
+                  local A2::Any
                 @match inA begin
                   NONE()  => begin
                     inA
@@ -1926,14 +1930,17 @@
 
          #=  Generic function to fix a list of elements. =#
         function fixList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::List{Type_A}
+              local outA::List{Type_A} = nil
 
               if listEmpty(inA)
                 outA = inA
                 return outA
               end
-              outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree) -> fixA(inCache = inCache, inEnv = inEnv, tree = tree))
-          outA
+              # outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree) -> fixA(inCache = inCache, inEnv = inEnv, tree = tree))
+              for e in inA
+                  outA = _cons(fixA(inCache, inEnv, e, tree), outA)
+              end
+          listReverse(outA)
         end
 
          #=  Generic function to fix a list of elements. =#
@@ -1944,8 +1951,11 @@
                 outA = nil
                 return outA
               end
-              outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree, fixA) -> fixList(inCache = inCache, inEnv = inEnv, tree = tree, fixA = fixA))
-          outA
+              # outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree, fixA) -> fixList(inCache = inCache, inEnv = inEnv, tree = tree, fixA = fixA))
+              for e in inA
+                  outA = _cons(fixList(inCache, inEnv, e, tree, fixA), outA)
+              end
+          listReverse(outA)
         end
 
          #=  Generic function to fix a list of elements. =#
