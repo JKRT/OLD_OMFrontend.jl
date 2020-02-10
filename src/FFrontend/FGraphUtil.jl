@@ -587,7 +587,7 @@ import MetaModelica.Dangerous
                       v = DAE.TYPES_VAR(name, DAE.ATTR(DAE.NON_CONNECTOR(), SCode.NON_PARALLEL(), variability, Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC()), ty, binding, constOfForIteratorRange)
                       r = lastScopeRef(g)
                       g = mkCompNode(c, r, FCore.BUILTIN(), g)
-                      g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), empty())
+                      g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), FCore.emptyGraph)
                     g
                   end
                 end

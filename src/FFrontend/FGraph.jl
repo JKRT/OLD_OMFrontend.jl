@@ -169,7 +169,7 @@ end
                       classRef = FNode.copyRefNoUpdate(classRef)
                       @match FCore.CL(e = c) = FNode.refData(classRef)
                       c = SCodeUtil.setClassName(newTargetClassName, c)
-                      classRef = updateClassElement(classRef, c, crefPrefix, inMod, FCore.CLS_INSTANCE(targetClassName), empty())
+                      classRef = FGraphUtil.updateClassElement(classRef, c, crefPrefix, inMod, FCore.CLS_INSTANCE(targetClassName), FCore.emptyGraph)
                       FNode.addChildRef(targetClassParentRef, newTargetClassName, classRef)
                       sourceRef = updateSourceTargetScope(sourceRef, _cons(classRef, currentScope(gclass)))
                       ih = inIH
