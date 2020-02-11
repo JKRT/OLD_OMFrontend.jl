@@ -588,6 +588,10 @@
                 strings = _cons(stringAppendList(listReverse(cur)), strings)
               end
               strings = listReverse(strings)
+              # adrpo, if no split possible retunr the string
+              if listEmpty(strings)
+                strings = list(string)
+              end
           strings
         end
 
