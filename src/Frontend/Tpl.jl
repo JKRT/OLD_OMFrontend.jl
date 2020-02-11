@@ -2285,7 +2285,7 @@
         function booleanString(b::Bool) ::String
               local s::String
 
-              s = String(b)
+              s = StringFunction(b)
           s
         end
 

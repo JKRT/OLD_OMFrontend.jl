@@ -113,4 +113,8 @@ end
 
 using Juno
 
-Juno.@run OMCompiler.run("Influenza")
+function runJuno(modelName::String)
+  Juno.@run OMCompiler.run(modelName)
+end
+
+runJuno("Influenza")

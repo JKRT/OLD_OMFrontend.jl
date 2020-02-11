@@ -2887,11 +2887,11 @@ module ConnectUtil
               @match true = checkConnectorBalance2(potentials, flows, streams, path, info)
                #= print(AbsynUtil.pathString(path) + \" has:\\n\\t\" +
                =#
-               #=   String(potentials) + \" potential variables\\n\\t\" +
+               #=   StringFunction(potentials) + \" potential variables\\n\\t\" +
                =#
-               #=   String(flows) + \" flow variables\\n\\t\" +
+               #=   StringFunction(flows) + \" flow variables\\n\\t\" +
                =#
-               #=   String(streams) + \" stream variables\\n\\n\");
+               #=   StringFunction(streams) + \" stream variables\\n\\n\");
                =#
         end
 
@@ -2917,8 +2917,8 @@ module ConnectUtil
                #=  input, output, stream nor flow.
                =#
               if potentialVars != flowVars
-                flow_str = String(flowVars)
-                potential_str = String(potentialVars)
+                flow_str = StringFunction(flowVars)
+                potential_str = StringFunction(potentialVars)
                 class_str = AbsynUtil.pathString(path)
                 error_str = stringAppendList(list("The number of potential variables (", potential_str, ") is not equal to the number of flow variables (", flow_str, ")."))
                 Error.addSourceMessage(Error.UNBALANCED_CONNECTOR, list(class_str, error_str), info)
@@ -2932,7 +2932,7 @@ module ConnectUtil
                #=  A stream connector must have exactly one scalar variable with the flow prefix.
                =#
               if streamVars > 0 && flowVars != 1
-                flow_str = String(flowVars)
+                flow_str = StringFunction(flowVars)
                 class_str = AbsynUtil.pathString(path)
                 error_str = stringAppendList(list("A stream connector must have exactly one flow variable, this connector has ", flow_str, " flow variables."))
                 Error.addSourceMessage(Error.INVALID_STREAM_CONNECTOR, list(class_str, error_str), info)
@@ -3178,7 +3178,7 @@ module ConnectUtil
         function printSetsStr(sets::Sets) ::String
               local string::String
 
-              string = String(sets.setCount) + " sets:\\n"
+              string = StringFunction(sets.setCount) + " sets:\\n"
               string = string + printSetTrieStr(sets.sets, "\\t")
               string = string + "Connected sets:\\n"
               string = string + printSetConnections(sets.connections) + "\\n"
@@ -3225,7 +3225,7 @@ module ConnectUtil
                 @match element begin
                   SOME(e && DAE.CONNECTOR_ELEMENT(__))  => begin
                       res = " " + printFaceStr(e.face) + " "
-                      res = res + printConnectorTypeStr(e.ty) + " [" + String(e.set) + "]"
+                      res = res + printConnectorTypeStr(e.ty) + " [" + StringFunction(e.set) + "]"
                     res
                   end
 
@@ -3243,7 +3243,7 @@ module ConnectUtil
 
               string = ComponentReference.printComponentRefStr(element.name) + " "
               string = string + printFaceStr(element.face) + " "
-              string = string + printConnectorTypeStr(element.ty) + " [" + String(element.set) + "]"
+              string = string + printConnectorTypeStr(element.ty) + " [" + StringFunction(element.set) + "]"
           string
         end
 
@@ -3326,7 +3326,7 @@ module ConnectUtil
               local set2::ModelicaInteger
 
               (set1, set2) = connection
-              string = "\\t" + String(set1) + " connected to " + intString(set2) + "\\n"
+              string = "\\t" + StringFunction(set1) + " connected to " + intString(set2) + "\\n"
           string
         end
 

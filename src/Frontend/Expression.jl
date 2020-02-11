@@ -21100,7 +21100,7 @@ Type_a = Any
                   end
 
                   _  => begin
-                        Error.addInternalError("Expression.compare failed: ctor:" + String(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
+                        Error.addInternalError("Expression.compare failed: ctor:" + StringFunction(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
                       fail()
                   end
                 end

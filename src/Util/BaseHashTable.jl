@@ -195,9 +195,9 @@
                       print("index list lengths:\\n")
                       print(stringDelimitList(list(intString(listLength(l)) for l in hvec), ","))
                       print("\\n")
-                      print("non-zero: " + String(sum(1 for l in hvec if ! listEmpty(l))) + "/" + String(arrayLength(hvec)) + "\\n")
-                      print("max element: " + String(max(listLength(l) for l in hvec)) + "\\n")
-                      print("total entries: " + String(sum(listLength(l) for l in hvec)) + "\\n")
+                      print("non-zero: " + StringFunction(sum(1 for l in hvec if ! listEmpty(l))) + "/" + StringFunction(arrayLength(hvec)) + "\\n")
+                      print("max element: " + StringFunction(max(listLength(l) for l in hvec)) + "\\n")
+                      print("total entries: " + StringFunction(sum(listLength(l) for l in hvec)) + "\\n")
                     ()
                   end
                 end
@@ -596,7 +596,7 @@
                   end
 
                   ((_, size, arr), _, _)  => begin
-                      Error.addInternalError("HashTable.valueArraySet(pos=" + String(pos) + ") size=" + String(size) + " arrSize=" + String(arrayLength(arr)) + " failed\\n", sourceInfo())
+                      Error.addInternalError("HashTable.valueArraySet(pos=" + StringFunction(pos) + ") size=" + StringFunction(size) + " arrSize=" + StringFunction(arrayLength(arr)) + " failed\\n", sourceInfo())
                     fail()
                   end
                 end

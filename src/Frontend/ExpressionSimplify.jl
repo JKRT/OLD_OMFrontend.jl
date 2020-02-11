@@ -2205,7 +2205,7 @@ module ExpressionSimplify
               for i in 1:dim - 1
                 j = min(listHead(d) for d in dimsLst)
                 if j != max(listHead(d) for d in dimsLst)
-                  Error.assertion(false, getInstanceName() + ": cat got uneven dimensions for dim=" + String(i) + " " + stringDelimitList(list(toString(e) for e in exps), ", "), sourceInfo())
+                  Error.assertion(false, getInstanceName() + ": cat got uneven dimensions for dim=" + StringFunction(i) + " " + stringDelimitList(list(toString(e) for e in exps), ", "), sourceInfo())
                 end
                 firstDims = _cons(j, firstDims)
                 dimsLst = list(listRest(d) for d in dimsLst)
@@ -2324,7 +2324,7 @@ module ExpressionSimplify
         end
 
          #=
-        stringAppendList({abc,def,String(time),ghi,jkl}) => stringAppendList({abcdef,String(time),ghijkl})
+        stringAppendList({abc,def,StringFunction(time),ghi,jkl}) => stringAppendList({abcdef,StringFunction(time),ghijkl})
         stringAppendList({abc,def,ghi,jkl}) => abcdefghijkl
         stringAppendList({}) => abcdefghijkl
          =#

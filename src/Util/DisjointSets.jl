@@ -363,11 +363,11 @@
               for p in entries
                 (e, i) = p
                 print("[")
-                print(String(i))
+                print(StringFunction(i))
                 print("]")
                 print(EntryString(e))
                 print(" -> ")
-                print(String(nodes[i]))
+                print(StringFunction(nodes[i]))
                 print("\\n")
               end
         end

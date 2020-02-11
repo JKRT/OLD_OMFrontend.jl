@@ -231,7 +231,7 @@
                   y = y + 1
                 end
               end
-               #=  print(\"Try only additions\"+String(x)+\",\"+String(y)+\"\\n\");
+               #=  print(\"Try only additions\"+StringFunction(x)+\",\"+StringFunction(y)+\"\\n\");
                =#
                #=  print(\"1: \" + System.trim(toString(arr1[start1+x]))+\"\\n\");
                =#
@@ -290,7 +290,7 @@
                   x = x + 1
                 end
               end
-               #=  print(\"Try only removals\"+String(x)+\",\"+String(y)+\"\\n\");
+               #=  print(\"Try only removals\"+StringFunction(x)+\",\"+StringFunction(y)+\"\\n\");
                =#
                #=  print(\"1: \" + System.trim(toString(arr1[start1+x]))+\"\\n\");
                =#

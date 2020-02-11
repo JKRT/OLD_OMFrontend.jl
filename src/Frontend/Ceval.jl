@@ -2137,8 +2137,8 @@ module Ceval
 
          #=
           author: PA
-          Evaluates the String operator String(r), String(i), String(b), String(e).
-          TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
+          Evaluates the String operator StringFunction(r), StringFunction(i), StringFunction(b), StringFunction(e).
+          TODO: Also evaluate StringFunction(r, significantDigits=d), and StringFunction(r, format=s). =#
         function cevalBuiltinSubstring(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
@@ -2169,8 +2169,8 @@ module Ceval
 
          #=
           author: PA
-          Evaluates the String operator String(r), String(i), String(b), String(e).
-          TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
+          Evaluates the String operator StringFunction(r), StringFunction(i), StringFunction(b), StringFunction(e).
+          TODO: Also evaluate StringFunction(r, significantDigits=d), and StringFunction(r, format=s). =#
         function cevalBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache

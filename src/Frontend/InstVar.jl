@@ -790,7 +790,7 @@
                   end
 
                   (_, _, _, _, _, DAE.NOMOD(__), _, n, _, _, _, DAE.DIM_UNKNOWN(__) <| _, _, _, _, _, info, _, _)  => begin
-                      Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_NO_MOD, list(String(listLength(inSubscripts) + 1), n), info)
+                      Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_NO_MOD, list(StringFunction(listLength(inSubscripts) + 1), n), info)
                     fail()
                   end
 

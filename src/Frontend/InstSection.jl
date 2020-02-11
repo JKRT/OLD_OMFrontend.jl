@@ -2870,7 +2870,7 @@
 
               outCref = ComponentReference.toExpCref(connectorCref)
               @match (DAE.ATTR(connectorType = connectorType, variability = variability, innerOuter = innerOuter), ty, status, is_expandable) = Lookup.lookupConnectorVar(env, outCref)
-              deleted = FCore.isDeletedComp(status)
+              deleted = FCoreUtil.isDeletedComp(status)
               if deleted || is_expandable
                 face = DAE.NO_FACE()
                 outAttr = DAE.dummyAttrVar

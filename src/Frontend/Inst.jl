@@ -1444,7 +1444,7 @@
                #=  Check that we don't have an instantiation loop.
                =#
               if numIter >= Global.recursionDepthLimit
-                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(String(Global.recursionDepthLimit), FGraphUtil.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
+                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(StringFunction(Global.recursionDepthLimit), FGraphUtil.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
                 fail()
               end
                #=  Instantiate the class and add it to the cache.
@@ -2146,7 +2146,7 @@
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = list(Types.boxIfUnboxedType(t) for t in tys)
                       if ! listLength(tys) == listLength(typeVars)
-                        Error.addSourceMessage(Error.UNIONTYPE_WRONG_NUM_TYPEVARS, list(AbsynUtil.pathString(fq_class), String(listLength(typeVars)), String(listLength(tys))), info)
+                        Error.addSourceMessage(Error.UNIONTYPE_WRONG_NUM_TYPEVARS, list(AbsynUtil.pathString(fq_class), StringFunction(listLength(typeVars)), StringFunction(listLength(tys))), info)
                         fail()
                       end
                       ty = Types.setTypeVariables(ty, tys)

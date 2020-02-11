@@ -6380,7 +6380,7 @@ function compare(inExp1::DAE.Exp, inExp2::DAE.Exp) ::ModelicaInteger
           end
 
           _  => begin
-                Error.addInternalError("Expression.compare failed: ctor:" + String(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
+                Error.addInternalError("Expression.compare failed: ctor:" + StringFunction(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
               fail()
           end
         end

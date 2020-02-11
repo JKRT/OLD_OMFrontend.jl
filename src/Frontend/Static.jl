@@ -5886,11 +5886,11 @@ module Static
                =#
                #=  Elaborate the first argument so we know what type we're dealing with.
                =#
-               #=  Try the String(val, <option>) format.
+               #=  Try the StringFunction(val, <option>) format.
                =#
-               #=  Only String(Real) has the significantDigits option.
+               #=  Only StringFunction(Real) has the significantDigits option.
                =#
-               #=  Try the String(val, format = s) format.
+               #=  Try the StringFunction(val, format = s) format.
                =#
           (outCache, outExp, outProperties)
         end

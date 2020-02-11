@@ -115,8 +115,8 @@
               for symbol in list(stripAddresses(s) for s in getStacktraceMessages())
                 if prev == ""
                 elseif symbol != prev
-                  symbols = _cons("[bt] #" + String(prevN) + (if n != prevN
-                        "..." + String(n)
+                  symbols = _cons("[bt] #" + StringFunction(prevN) + (if n != prevN
+                        "..." + StringFunction(n)
                       else
                         ""
                       end) + " " + prev, symbols)
@@ -127,8 +127,8 @@
                 end
                 prev = symbol
               end
-              symbols = _cons("[bt] #" + String(prevN) + (if n != prevN
-                    "..." + String(n)
+              symbols = _cons("[bt] #" + StringFunction(prevN) + (if n != prevN
+                    "..." + StringFunction(n)
                   else
                     ""
                   end) + " " + prev, symbols)
