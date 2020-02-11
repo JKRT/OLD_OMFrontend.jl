@@ -117,4 +117,4 @@ function runJuno(modelName::String)
   Juno.@run OMCompiler.run(modelName)
 end
 
-runJuno("Influenza")
+runJuno("RLCircuit")

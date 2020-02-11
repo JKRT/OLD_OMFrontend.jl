@@ -543,6 +543,24 @@ function isImplicitScope(inName::Name) ::Bool
   isImplicit
 end
 
+#= Returns true if the status indicates a deleted conditional component,
+otherwise false. =#
+function isDeletedComp(status::Status) ::Bool
+  local isDeleted::Bool
+
+  isDeleted = begin
+    @match status begin
+      VAR_DELETED(__)  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  isDeleted
+end
 
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()

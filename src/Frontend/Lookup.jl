@@ -46,6 +46,8 @@
 
         import DAE
 
+        import DAEUtil
+
         import FCore
 
         import HashTableStringToPath
@@ -1148,7 +1150,7 @@
 
                   DAE.CREF_QUAL(__)  => begin
                       @match (DAE.TYPES_VAR(attributes = parent_attr, ty = ty), status, comp_env) = lookupConnectorVar2(env, cr.ident)
-                      if FCoreUtil.isDeletedComp(status)
+                      if FCore.isDeletedComp(status)
                         attr = parent_attr
                       else
                         try
