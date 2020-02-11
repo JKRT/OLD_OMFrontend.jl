@@ -2746,7 +2746,8 @@
 
                   (cache, _, ld, _, _, _)  => begin
                       ld2 = AbsynToSCode.translateEitemlist(ld, SCode.PROTECTED())
-                      @match (@match _cons(_, _) = ld2) = ListUtil.filterOnTrue(ld2, SCodeUtil.isNotComponent)
+                      @match ld2 = ListUtil.filterOnTrue(ld2, SCodeUtil.isNotComponent)
+                      @match _cons(_, _) = ld2
                       str = stringDelimitList(ListUtil.map1(ld2, SCodeDump.unparseElementStr, SCodeDump.defaultOptions), ", ")
                       Error.addSourceMessage(Error.META_INVALID_LOCAL_ELEMENT, list(str), info)
                     (cache, NONE())

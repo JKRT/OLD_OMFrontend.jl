@@ -38,11 +38,17 @@ using ExportAll
 
 import BaseAvlSet
 using BaseAvlSet
-#import ComponentReference
-Key = Int
+import CrefForHashTable
+import DAE
 
-function setKeyForAvlSetCR(key)
-  Key = key
+Key = DAE.ComponentRef
+
+function BaseAvlSet.keyStr(inKey::Key)
+  CrefForHashTable.printComponentRefStr(inKey)
+end
+
+function BaseAvlSet.keyCompare(inKey1::Key, inKey2::Key)
+  CrefForHashTable.crefCompareGenericNotAlphabetic(inKey1, inKey2)
 end
 
 function BaseAvlSet.LEAF(key::Key)::BaseAvlSet.Tree

@@ -1624,6 +1624,27 @@ Type_a = Any
             outCR
           end
 
+          #= Return the last subscripts of a ComponentRef =#
+         function crefLastSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript}
+               local outSubscriptLst::List{DAE.Subscript}
+
+               outSubscriptLst = begin
+                   local id::DAE.Ident
+                   local subs::List{DAE.Subscript}
+                   local cr::DAE.ComponentRef
+                 @match inComponentRef begin
+                   DAE.CREF_IDENT(subscriptLst = subs)  => begin
+                     subs
+                   end
+
+                   DAE.CREF_QUAL(componentRef = cr)  => begin
+                     crefLastSubs(cr)
+                   end
+                 end
+               end
+           outSubscriptLst
+         end
+
            #= This function returns true for component references that
             are arrays and references the first element of the array.
             like for instance a.b{1,1} and a{1} returns true but

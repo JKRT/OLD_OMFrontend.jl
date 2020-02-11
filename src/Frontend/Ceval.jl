@@ -4605,7 +4605,7 @@ module Ceval
                       @match true = SCodeUtil.isParameterOrConst(variability) || inImpl || FGraphUtil.inForLoopScope(inEnv)
                       @match false = crefEqualValue(inCref, inBinding)
                       (cache, v) = cevalCrefBinding(inCache, inEnv, inCref, inBinding, inImpl, inMsg, numIter)
-                      cache = FCore.addEvaluatedCref(cache, variability, CrefForHashTable.crefStripLastSubs(inCref))
+                      cache = FCoreUtil.addEvaluatedCref(cache, variability, CrefForHashTable.crefStripLastSubs(inCref))
                     (cache, v)
                   end
                 end
@@ -4699,7 +4699,7 @@ module Ceval
                   end
 
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
-                      @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = list(DAE.REDUCTIONITER())) = exp
+                      @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = DAE.REDUCTIONITER() <| nil) = exp
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)

@@ -100,6 +100,7 @@ end
 
 
 balance = BaseAvlSet.balance
+new = BaseAvlSet.new
 
 #= Inserts a new node in the tree. =#
 function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree

@@ -65,29 +65,25 @@ import Inst
 import InstHashTable
 import InnerOuterTypes
 
-module AbsynPrograms
-  using Absyn
-  using MetaModelica
-  import OpenModelicaParser
+using Absyn
+using MetaModelica
+import OpenModelicaParser
 
-const path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+function run(modelName::String)
 
-const name = "RLCircuit"
-const fileName = name + ".mo"
-const fullPath = joinpath(path, "lib", "omc", fileName)
-const AST = OpenModelicaParser.parseFile(fullPath)
-@show AST
-
-end
-
-function run()
+  path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+  name = modelName
+  fileName = name + ".mo"
+  fullPath = joinpath(path, "lib", "omc", fileName)
+  AST = OpenModelicaParser.parseFile(fullPath)
+  @show AST
 
   # initialize globals
   Global.initialize()
   # make sure we have all the flags loaded!
   Flags.new(Flags.emptyFlags)
 
-  @time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.AST)
+  @time scode = AbsynToSCode.translateAbsyn2SCode(AST)
   @show scode
 
   println("*******************************")
@@ -102,7 +98,7 @@ function run()
   # Flags.set(Flags.EXEC_STAT, true) # not yet working!
   cache = FCoreUtil.emptyCache()
   println("after empty cache")
-  className = Absyn.IDENT(AbsynPrograms.name)
+  className = Absyn.IDENT(name)
   println("dive in inst")
   (cache,_,_,dae) = Inst.instantiateClass(cache, InnerOuterTypes.emptyInstHierarchy, scode, className)
   println("after inst")
@@ -114,3 +110,7 @@ function run()
 end
 
 end
+
+using Juno
+
+Juno.@run OMCompiler.run("Influenza")

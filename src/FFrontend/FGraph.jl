@@ -171,7 +171,7 @@ end
                       c = SCodeUtil.setClassName(newTargetClassName, c)
                       classRef = FGraphUtil.updateClassElement(classRef, c, crefPrefix, inMod, FCore.CLS_INSTANCE(targetClassName), FCore.emptyGraph)
                       FNode.addChildRef(targetClassParentRef, newTargetClassName, classRef)
-                      sourceRef = updateSourceTargetScope(sourceRef, _cons(classRef, currentScope(gclass)))
+                      sourceRef = FGraphUtil.updateSourceTargetScope(sourceRef, _cons(classRef, currentScope(gclass)))
                       ih = inIH
                     (gclass, c, ih)
                   end

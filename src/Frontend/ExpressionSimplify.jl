@@ -5384,7 +5384,8 @@ module ExpressionSimplify
                   end
 
                   (_, DAE.POW(__), e1, e2, _, true)  => begin
-                      @match (@match _cons(_, _cons(_, _cons(_, _))) = exp_lst) = Expression.factors(e1)
+                      @match exp_lst = Expression.factors(e1)
+                      @match _cons(_, _cons(_, _cons(_, _))) = exp_lst
                       @match true = ListUtil.exist(exp_lst, Expression.isConstValue)
                       exp_lst_1 = simplifyBinaryDistributePow(exp_lst, e2)
                     Expression.makeProductLst(exp_lst_1)

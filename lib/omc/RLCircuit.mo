@@ -94,7 +94,7 @@ package Modelica  "Modelica Standard Library - Version 3.2.3"
           extends Modelica.Electrical.Analog.Interfaces.ConditionalHeatPort(T = T_ref);
           SI.Resistance R_actual "Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))";
         equation
-          assert(1 + alpha * (T_heatPort - T_ref) >= Modelica.Constants.eps, "Temperature outside scope of model!");
+          // assert(1 + alpha * (T_heatPort - T_ref) >= Modelica.Constants.eps, "Temperature outside scope of model!");
           R_actual = R * (1 + alpha * (T_heatPort - T_ref));
           v = R_actual * i;
           LossPower = v * i;

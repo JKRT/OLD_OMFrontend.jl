@@ -1769,7 +1769,8 @@
                   end
 
                   (_, _, cls && SCode.CLASS(name = name) <| rest_prog, _, env)  => begin
-                      @match ((@match SCode.CLASS() = cls_el), env) = collectUsedClass(cls, inEnv, clsAndVars, inClassName, env, Absyn.IDENT(name))
+                      @match (cls_el, env) = collectUsedClass(cls, inEnv, clsAndVars, inClassName, env, Absyn.IDENT(name))
+                      @match SCode.CLASS() = cls_el
                       (rest_prog, env) = collectUsedProgram2(clsAndVars, inEnv, rest_prog, inClassName, env)
                     (_cons(cls_el, rest_prog), env)
                   end

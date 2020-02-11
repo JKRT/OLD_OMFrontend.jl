@@ -2794,7 +2794,7 @@
                 isDeleted = ! cond_val
                 if isDeleted == true
                   var = DAE.TYPES_VAR(el_name, DAE.dummyAttrVar, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE())
-                  env = FGraphUtil.updateComp(env, var, FCore.VAR_DELETED(), FGraphUtil.emptyGraph)
+                  env = FGraphUtil.updateComp(env, var, FCore.VAR_DELETED(), FCore.emptyGraph)
                 end
               else
                 isDeleted = false

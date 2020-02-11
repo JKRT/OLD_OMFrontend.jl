@@ -6876,7 +6876,8 @@
 
                   (cache, _, ih, pre, SOME(DAE.MOD(subModLst = lsm)), SCode.CLASS(name = str))  => begin
                       (mo2, _) = extractCorrectClassMod2(lsm, str, nil)
-                      @match (cache, env2, ih, (@match SCode.CLASS() = sele2), _) = Inst.redeclareType(cache, env, ih, mo2, sele, pre, ClassInf.MODEL(Absyn.IDENT(str)), true, DAE.NOMOD())
+                      @match (cache, env2, ih, sele2, _) = Inst.redeclareType(cache, env, ih, mo2, sele, pre, ClassInf.MODEL(Absyn.IDENT(str)), true, DAE.NOMOD())
+                      @match SCode.CLASS() = sele2
                     (cache, env2, ih, sele2)
                   end
                 end

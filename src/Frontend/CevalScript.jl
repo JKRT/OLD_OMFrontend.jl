@@ -2878,7 +2878,8 @@
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(builtin = false)), vallst, _, msg, _)  => begin
                       @match true = Flags.isSet(Flags.EVAL_FUNC)
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
-                      @match (cache, (@match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc), env) = Lookup.lookupClass(cache, env, funcpath)
+                      @match (cache, sc, env) = Lookup.lookupClass(cache, env, funcpath)
+                      @match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc
                       isCevaluableFunction(sc)
                       (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
                       func = FCoreUtil.getCachedInstFunc(cache, funcpath)

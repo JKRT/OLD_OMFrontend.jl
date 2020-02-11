@@ -7059,8 +7059,10 @@ module Static
                        */ =#
                 @matchcontinue (inCache, inEnv, inPath, inAbsynExpLst, inAbsynNamedArgLst, inBoolean, inPrefix) begin
                   (cache, env, fn, args, nargs, impl, pre)  => begin
-                      @match (cache, (@match SCode.CLASS(restriction = SCode.R_PACKAGE()) = cl), _) = Lookup.lookupClassIdent(cache, env, "GraphicalAnnotationsProgram____")
-                      @match (cache, (@match SCode.CLASS(restriction = SCode.R_RECORD(_)) = cl), env_1) = Lookup.lookupClass(cache, env, fn)
+                      @match (cache, cl, _) = Lookup.lookupClassIdent(cache, env, "GraphicalAnnotationsProgram____")
+                      @match SCode.CLASS(restriction = SCode.R_PACKAGE()) = cl
+                      @match (cache, cl, env_1) = Lookup.lookupClass(cache, env, fn)
+                      @match SCode.CLASS(restriction = SCode.R_RECORD(_)) = cl
                       (cache, cl, env_2) = Lookup.lookupRecordConstructorClass(cache, env_1, fn)
                       (_, _ <| names) = SCodeUtil.getClassComponents(cl)
                       fargs = ListUtil.map(names, createDummyFarg)
@@ -10040,7 +10042,8 @@ module Static
                   (cache, env, c, _, _)  => begin
                       c = replaceEnd(c)
                       path = AbsynUtil.crefToPath(c)
-                      @match (cache, (@match SCode.CLASS(restriction = SCode.R_ENUMERATION()) = cl), env) = Lookup.lookupClass(cache, env, path)
+                      @match (cache, cl, env) = Lookup.lookupClass(cache, env, path)
+                      @match SCode.CLASS(restriction = SCode.R_ENUMERATION()) = cl
                       typeStr = AbsynUtil.pathLastIdent(path)
                       path = FGraphUtil.joinScopePath(env, Absyn.IDENT(typeStr))
                       enum_lit_strs = SCodeUtil.componentNames(cl)

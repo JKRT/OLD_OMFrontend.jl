@@ -952,7 +952,9 @@
                        =#
                        #=  lookup as it might have been redeclared!!!
                        =#
-                      @match (_, _, (@match SCode.COMPONENT(name, prefixes, (@match SCode.ATTR() = attr), typeSpec1, modifications1, comment, condition, info) = elt2), _, _, env) = Lookup.lookupIdentLocal(arrayGet(inCache, 1), env, elt.name)
+                      @match (_, _, elt2, _, _, env) = Lookup.lookupIdentLocal(arrayGet(inCache, 1), env, elt.name)
+                      @match SCode.COMPONENT(name, prefixes, attr, typeSpec1, modifications1, comment, condition, info) = elt2
+                      @match SCode.ATTR() = attr
                       modifications2 = fixModifications(inCache, env, modifications1, tree)
                       typeSpec2 = fixTypeSpec(inCache, env, typeSpec1, tree)
                       ad = fixArrayDim(inCache, env, attr.arrayDims, tree)

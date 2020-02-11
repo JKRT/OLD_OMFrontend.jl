@@ -6,7 +6,7 @@
     using ExportAll
 
     import Setfield
-    
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -1008,7 +1008,8 @@
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| _, env, ident)  => begin
                       env = FGraphUtil.topScope(env)
-                      @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1) = lookupClass(cache, env, path)
+                      @match (cache, c, env_1) = lookupClass(cache, env, path)
+                      @match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c
                       env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
                       ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
@@ -1073,7 +1074,8 @@
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| rest, env, ident)  => begin
                       @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
                       env3 = FGraphUtil.setScope(env, list(r))
-                      @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1, prevFrames) = lookupClass2(cache, env3, path, prevFrames, Mutable.create(false), inInfo)
+                      @match (cache, c, env_1, prevFrames) = lookupClass2(cache, env3, path, prevFrames, Mutable.create(false), inInfo)
+                      @match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c
                       env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
                       ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
@@ -1584,7 +1586,8 @@
                           end
 
                           NONE()  => begin
-                              @match (cache, (@match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c), env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
+                              @match (cache, c, env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
+                              @match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c
                               Mutable.update(inState, true)
                               rr = FNode.child(FGraphUtil.lastScopeRef(env2), id)
                               if FNode.isRefInstance(rr)
