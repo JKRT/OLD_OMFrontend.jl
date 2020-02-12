@@ -44,6 +44,7 @@
         import AvlSetPath
         import BaseHashTable
         import DAE
+        import DAEUtil
         import HashTableCG
         import SCode
         import Util

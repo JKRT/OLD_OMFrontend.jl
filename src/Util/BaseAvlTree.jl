@@ -37,7 +37,7 @@ using MetaModelica
 using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-using Setfield
+import Setfield
 
 valueStr = Function
 ConflictFunc = Function
@@ -100,6 +100,7 @@ end
 
 
 balance = BaseAvlSet.balance
+new = BaseAvlSet.new
 
 #= Inserts a new node in the tree. =#
 function add(inTree::Tree, inKey::Key, inValue::Value, conflictFunc::ConflictFunc = addConflictDefault #= Used to resolve conflicts. =#) ::Tree
@@ -400,15 +401,15 @@ function mymap(inTree::Tree, inFunc::MapFunc) ::Tree
             NODE(key = key, value = value)  => begin
                 new_branch = mymap(outTree.left, inFunc)
                 if ! referenceEq(new_branch, outTree.left)
-                    @set outTree.left = new_branch
+                    Setfield.@set outTree.left = new_branch
                 end
                 new_value = inFunc(key, value)
                 if ! referenceEq(value, new_value)
-                    @set outTree.value = new_value
+                    Setfield.@set outTree.value = new_value
                 end
                 new_branch = mymap(outTree.right, inFunc)
                 if ! referenceEq(new_branch, outTree.right)
-                    @set outTree.right = new_branch
+                    Setfield.@set outTree.right = new_branch
                 end
                 outTree
             end
@@ -416,7 +417,7 @@ function mymap(inTree::Tree, inFunc::MapFunc) ::Tree
             LEAF(key = key, value = value)  => begin
                 new_value = inFunc(key, value)
                 if ! referenceEq(value, new_value)
-                    @set outTree.value = new_value
+                    Setfield.@set outTree.value = new_value
                 end
                 outTree
             end
@@ -532,15 +533,15 @@ function mapFold(inTree::Tree, inFunc::MapFunc, inStartValue::FT)  where {FT}
             NODE(key = key, value = value)  => begin
                 (new_branch, outResult) = mapFold(outTree.left, inFunc, outResult)
                 if ! referenceEq(new_branch, outTree.left)
-                    outTree.left = new_branch
+                    Setfield.@set outTree.left = new_branch
                 end
                 (new_value, outResult) = inFunc(key, value, outResult)
                 if ! referenceEq(value, new_value)
-                    outTree.value = new_value
+                    Setfield.@set outTree.value = new_value
                 end
                 (new_branch, outResult) = mapFold(outTree.right, inFunc, outResult)
                 if ! referenceEq(new_branch, outTree.right)
-                    outTree.right = new_branch
+                    Setfield.@set outTree.right = new_branch
                 end
                 outTree
             end
@@ -548,7 +549,7 @@ function mapFold(inTree::Tree, inFunc::MapFunc, inStartValue::FT)  where {FT}
             LEAF(key = key, value = value)  => begin
                 (new_value, outResult) = inFunc(key, value, outResult)
                 if ! referenceEq(value, new_value)
-                    outTree.value = new_value
+                    Setfield.@set outTree.value = new_value
                 end
                 outTree
             end

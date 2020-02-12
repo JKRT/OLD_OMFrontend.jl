@@ -37,6 +37,9 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
 using ExportAll
 
+import Setfield
+
+
 @importDBG Absyn
 @importDBG AbsynUtil
 @importDBG SCode
@@ -68,6 +71,7 @@ const Status = FCore.Status
 @importDBG Debug
 @importDBG Error
 @importDBG FGraphBuild
+@importDBG FGraphBuildEnv
 @importDBG FNode
 @importDBG Flags
 @importDBG Global
@@ -138,7 +142,7 @@ import MetaModelica.Dangerous
               outGraph = begin
                 @match outGraph begin
                   FCore.G(__)  => begin
-                      outGraph.scope = _cons(inRef, listRest(outGraph.scope))
+                      Setfield.@set outGraph.scope = _cons(inRef, listRest(outGraph.scope))
                     outGraph
                   end
 
@@ -583,7 +587,7 @@ import MetaModelica.Dangerous
                       v = DAE.TYPES_VAR(name, DAE.ATTR(DAE.NON_CONNECTOR(), SCode.NON_PARALLEL(), variability, Absyn.BIDIR(), Absyn.NOT_INNER_OUTER(), SCode.PUBLIC()), ty, binding, constOfForIteratorRange)
                       r = lastScopeRef(g)
                       g = mkCompNode(c, r, FCore.BUILTIN(), g)
-                      g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), empty())
+                      g = updateVarAndMod(g, v, DAE.NOMOD(), FCore.VAR_UNTYPED(), FCore.emptyGraph)
                     g
                   end
                 end
@@ -1153,7 +1157,7 @@ import MetaModelica.Dangerous
 
                   (g, SCode.CLASS(__), _, _)  => begin
                       r = lastScopeRef(g)
-                      g = FGraphBuild.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
+                      g = FGraphBuildEnv.mkClassNode(inClass, inPrefix, inMod, r, FCore.USERDEFINED(), g, checkDuplicate)
                     g
                   end
                 end
@@ -1827,8 +1831,8 @@ import MetaModelica.Dangerous
                   @match node begin
                     FCore.N(data = data && FCore.CL(e = el))  => begin
                         el = SCodeUtil.makeClassPartial(el)
-                        data.e = el
-                        node.data = data
+                        Setfield.@set data.e = el
+                        Setfield.@set node.data = data
                       node
                     end
 

@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    import Setfield
 
     FuncTypeElementTo = Function
 
@@ -1423,7 +1423,7 @@
               v = begin
                 @match v begin
                   DAE.VAR(__)  => begin
-                      v.variableAttributesOption = varOpt
+                      Setfield.@set v.variableAttributesOption = varOpt
                     v
                   end
                 end
@@ -1440,7 +1440,7 @@
                   local va::DAE.VariableAttributes
                 @match attr begin
                   SOME(va && DAE.VAR_ATTR_REAL(__))  => begin
-                      va.stateSelectOption = SOME(s)
+                      Setfield.@set va.stateSelectOption = SOME(s)
                     SOME(va)
                   end
 
@@ -1474,7 +1474,7 @@
                       if valueEq(va.start, start)
                         at = attr
                       else
-                        va.start = start
+                        Setfield.@set va.start = start
                         at = SOME(va)
                       end
                     at
@@ -1484,7 +1484,7 @@
                       if valueEq(va.start, start)
                         at = attr
                       else
-                        va.start = start
+                        Setfield.@set va.start = start
                         at = SOME(va)
                       end
                     at
@@ -1494,7 +1494,7 @@
                       if valueEq(va.start, start)
                         at = attr
                       else
-                        va.start = start
+                        Setfield.@set va.start = start
                         at = SOME(va)
                       end
                     at
@@ -1504,7 +1504,7 @@
                       if valueEq(va.start, start)
                         at = attr
                       else
-                        va.start = start
+                        Setfield.@set va.start = start
                         at = SOME(va)
                       end
                     at
@@ -1514,7 +1514,7 @@
                       if valueEq(va.start, start)
                         at = attr
                       else
-                        va.start = start
+                        Setfield.@set va.start = start
                         at = SOME(va)
                       end
                     at
@@ -1541,27 +1541,27 @@
                   local va::DAE.VariableAttributes
                 @match attr begin
                   SOME(va && DAE.VAR_ATTR_REAL(__))  => begin
-                      va.startOrigin = startOrigin
+                      Setfield.@set va.startOrigin = startOrigin
                     SOME(va)
                   end
 
                   SOME(va && DAE.VAR_ATTR_INT(__))  => begin
-                      va.startOrigin = startOrigin
+                      Setfield.@set va.startOrigin = startOrigin
                     SOME(va)
                   end
 
                   SOME(va && DAE.VAR_ATTR_BOOL(__))  => begin
-                      va.startOrigin = startOrigin
+                      Setfield.@set va.startOrigin = startOrigin
                     SOME(va)
                   end
 
                   SOME(va && DAE.VAR_ATTR_STRING(__))  => begin
-                      va.startOrigin = startOrigin
+                      Setfield.@set va.startOrigin = startOrigin
                     SOME(va)
                   end
 
                   SOME(va && DAE.VAR_ATTR_ENUMERATION(__))  => begin
-                      va.startOrigin = startOrigin
+                      Setfield.@set va.startOrigin = startOrigin
                     SOME(va)
                   end
 
@@ -1606,7 +1606,7 @@
                   local va::DAE.VariableAttributes
                 @match attr begin
                   SOME(va && DAE.VAR_ATTR_REAL(__))  => begin
-                      va.nominal = SOME(nominal)
+                      Setfield.@set va.nominal = SOME(nominal)
                     SOME(va)
                   end
 
@@ -1660,7 +1660,7 @@
               e = begin
                 @match e begin
                   DAE.VAR(__)  => begin
-                      e.protection = visibility
+                      Setfield.@set e.protection = visibility
                     e
                   end
 
@@ -1680,7 +1680,7 @@
               e = begin
                 @match e begin
                   DAE.VAR(__)  => begin
-                      e.direction = direction
+                      Setfield.@set e.direction = direction
                     e
                   end
 
@@ -1699,7 +1699,7 @@
               e = begin
                 @match e begin
                   DAE.VAR(__)  => begin
-                      e.binding = binding
+                      Setfield.@set e.binding = binding
                     e
                   end
 
@@ -3388,7 +3388,7 @@
                   DAE.WHEN_EQUATION(condition = e1, equations = welts, elsewhen_ = SOME(elt), source = source) <| elts  => begin
                       e1_1 = toModelicaFormExp(e1)
                       welts_1 = toModelicaFormElts(welts)
-                      @match list(elt_1) = toModelicaFormElts(list(elt))
+                      @match elt_1 <| nil = toModelicaFormElts(list(elt))
                       elts_1 = toModelicaFormElts(elts)
                     _cons(DAE.WHEN_EQUATION(e1_1, welts_1, SOME(elt_1), source), elts_1)
                   end
@@ -4980,7 +4980,7 @@
               local el::List{DAE.Element}
 
               (el, arg) = traverseDAEElementList(dae.elementLst, func, arg)
-              dae.elementLst = el
+              Setfield.@set dae.elementLst = el
               (functionTree, arg) = DAE.AvlTreePathFunction.mapFold(functionTree, (func) -> traverseDAEFuncHelper(func = func), arg)
           (dae, functionTree, arg)
         end
@@ -5036,8 +5036,8 @@
                   DAE.FUNCTION(functions = fdef && DAE.FUNCTION_DEF(__) <| rest_defs)  => begin
                       (el, arg) = traverseDAEElementList(fdef.body, func, arg)
                       if ! referenceEq(fdef.body, el)
-                        fdef.body = el
-                        daeFunction.functions = _cons(fdef, rest_defs)
+                        Setfield.@set fdef.body = el
+                        Setfield.@set daeFunction.functions = _cons(fdef, rest_defs)
                       end
                     ()
                   end
@@ -5045,8 +5045,8 @@
                   DAE.FUNCTION(functions = fdef && DAE.FUNCTION_EXT(__) <| rest_defs)  => begin
                       (el, arg) = traverseDAEElementList(fdef.body, func, arg)
                       if ! referenceEq(fdef.body, el)
-                        fdef.body = el
-                        daeFunction.functions = _cons(fdef, rest_defs)
+                        Setfield.@set fdef.body = el
+                        Setfield.@set daeFunction.functions = _cons(fdef, rest_defs)
                       end
                     ()
                   end
@@ -5113,10 +5113,10 @@
                       if Expression.isCref(e1)
                         new_cr1 = Expression.expCref(e1)
                         if ! referenceEq(cr1, new_cr1)
-                          element.componentRef = new_cr1
+                          Setfield.@set element.componentRef = new_cr1
                         end
                       end
-                      element.dims = list(begin
+                      Setfield.@set element.dims = list(begin
                         @match d begin
                           DAE.DIM_EXP(e1)  => begin
                               (new_e1, arg) = func(e1, arg)
@@ -5143,7 +5143,7 @@
                                       (e2, arg) = func(daebinding.exp, arg)
                                       if ! referenceEq(daebinding.exp, e2)
                                         daebinding = DAE.EQBOUND(e2, NONE(), daebinding.constant_, daebinding.source)
-                                        v.binding = daebinding
+                                        Setfield.@set v.binding = daebinding
                                         changed = true
                                       end
                                     v
@@ -5154,7 +5154,7 @@
                                       (e2, arg) = func(e1, arg)
                                       if ! referenceEq(e1, e2)
                                         new_daebinding = DAE.EQBOUND(e2, NONE(), DAE.C_CONST(), daebinding.source)
-                                        v.binding = new_daebinding
+                                        Setfield.@set v.binding = new_daebinding
                                         changed = true
                                       end
                                     v
@@ -5166,7 +5166,7 @@
                                 end
                               end for v in ty.varLst)
                               if ! referenceEq(varLst, ty.varLst)
-                                ty.varLst = varLst
+                                Setfield.@set ty.varLst = varLst
                               end
                             ty
                           end
@@ -5177,15 +5177,15 @@
                         end
                       end
                       if ! referenceEq(element.ty, new_ty)
-                        element.ty = new_ty
+                        Setfield.@set element.ty = new_ty
                       end
                       (new_binding, arg) = traverseDAEOptExp(binding, func, arg)
                       if ! referenceEq(binding, new_binding)
-                        element.binding = new_binding
+                        Setfield.@set element.binding = new_binding
                       end
                       (new_attr, arg) = traverseDAEVarAttr(attr, func, arg)
                       if ! referenceEq(attr, new_attr)
-                        element.variableAttributesOption = new_attr
+                        Setfield.@set element.variableAttributesOption = new_attr
                       end
                     ()
                   end
@@ -5193,11 +5193,11 @@
                   DAE.DEFINE(componentRef = cr1, exp = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
-                        element.componentRef = new_cr1
+                        Setfield.@set element.componentRef = new_cr1
                       end
                     ()
                   end
@@ -5205,11 +5205,11 @@
                   DAE.INITIALDEFINE(componentRef = cr1, exp = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
-                        element.componentRef = new_cr1
+                        Setfield.@set element.componentRef = new_cr1
                       end
                     ()
                   end
@@ -5217,11 +5217,11 @@
                   DAE.EQUEQUATION(cr1 = cr1, cr2 = cr2)  => begin
                       @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
-                        element.cr1 = new_cr1
+                        Setfield.@set element.cr1 = new_cr1
                       end
                       @match (DAE.CREF(new_cr2), arg) = func(Expression.crefExp(cr2), arg)
                       if ! referenceEq(cr2, new_cr2)
-                        element.cr2 = new_cr2
+                        Setfield.@set element.cr2 = new_cr2
                       end
                     ()
                   end
@@ -5229,11 +5229,11 @@
                   DAE.EQUATION(exp = e1, scalar = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.scalar = new_e2
+                        Setfield.@set element.scalar = new_e2
                       end
                     ()
                   end
@@ -5241,11 +5241,11 @@
                   DAE.INITIALEQUATION(exp1 = e1, exp2 = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp1 = new_e1
+                        Setfield.@set element.exp1 = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.exp2 = new_e2
+                        Setfield.@set element.exp2 = new_e2
                       end
                     ()
                   end
@@ -5253,11 +5253,11 @@
                   DAE.COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.lhs = new_e1
+                        Setfield.@set element.lhs = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.rhs = new_e2
+                        Setfield.@set element.rhs = new_e2
                       end
                     ()
                   end
@@ -5265,11 +5265,11 @@
                   DAE.INITIAL_COMPLEX_EQUATION(lhs = e1, rhs = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.lhs = new_e1
+                        Setfield.@set element.lhs = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.rhs = new_e2
+                        Setfield.@set element.rhs = new_e2
                       end
                     ()
                   end
@@ -5277,11 +5277,11 @@
                   DAE.ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.array = new_e2
+                        Setfield.@set element.array = new_e2
                       end
                     ()
                   end
@@ -5289,11 +5289,11 @@
                   DAE.INITIAL_ARRAY_EQUATION(exp = e1, array = e2)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.array = new_e2
+                        Setfield.@set element.array = new_e2
                       end
                     ()
                   end
@@ -5301,17 +5301,17 @@
                   DAE.WHEN_EQUATION(condition = e1, equations = el)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.condition = new_e1
+                        Setfield.@set element.condition = new_e1
                       end
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.equations = new_el
+                        Setfield.@set element.equations = new_el
                       end
                       if isSome(element.elsewhen_)
                         @match SOME(e) = element.elsewhen_
                         (new_e, arg) = traverseDAEElement(e, func, arg)
                         if ! referenceEq(e, new_e)
-                          element.elsewhen_ = SOME(new_e)
+                          Setfield.@set element.elsewhen_ = SOME(new_e)
                         end
                       end
                     ()
@@ -5320,11 +5320,11 @@
                   DAE.FOR_EQUATION(range = e1, equations = el)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.range = new_e1
+                        Setfield.@set element.range = new_e1
                       end
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.equations = new_el
+                        Setfield.@set element.equations = new_el
                       end
                     ()
                   end
@@ -5332,7 +5332,7 @@
                   DAE.COMP(dAElist = el)  => begin
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.dAElist = new_el
+                        Setfield.@set element.dAElist = new_el
                       end
                     ()
                   end
@@ -5344,15 +5344,15 @@
                   DAE.ASSERT(condition = e1, message = e2, level = e3)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.condition = new_e1
+                        Setfield.@set element.condition = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.message = new_e2
+                        Setfield.@set element.message = new_e2
                       end
                       (new_e3, arg) = func(e3, arg)
                       if ! referenceEq(e3, new_e3)
-                        element.level = new_e3
+                        Setfield.@set element.level = new_e3
                       end
                     ()
                   end
@@ -5360,15 +5360,15 @@
                   DAE.INITIAL_ASSERT(condition = e1, message = e2, level = e3)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.condition = new_e1
+                        Setfield.@set element.condition = new_e1
                       end
                       (new_e2, arg) = func(e2, arg)
                       if ! referenceEq(e2, new_e2)
-                        element.message = new_e2
+                        Setfield.@set element.message = new_e2
                       end
                       (new_e3, arg) = func(e3, arg)
                       if ! referenceEq(e3, new_e3)
-                        element.level = new_e3
+                        Setfield.@set element.level = new_e3
                       end
                     ()
                   end
@@ -5376,7 +5376,7 @@
                   DAE.TERMINATE(message = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.message = new_e1
+                        Setfield.@set element.message = new_e1
                       end
                     ()
                   end
@@ -5384,7 +5384,7 @@
                   DAE.INITIAL_TERMINATE(message = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.message = new_e1
+                        Setfield.@set element.message = new_e1
                       end
                     ()
                   end
@@ -5392,7 +5392,7 @@
                   DAE.NORETCALL(exp = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                     ()
                   end
@@ -5400,7 +5400,7 @@
                   DAE.INITIAL_NORETCALL(exp = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                     ()
                   end
@@ -5408,11 +5408,11 @@
                   DAE.REINIT(componentRef = cr1, exp = e1)  => begin
                       (new_e1, arg) = func(e1, arg)
                       if ! referenceEq(e1, new_e1)
-                        element.exp = new_e1
+                        Setfield.@set element.exp = new_e1
                       end
                       @match (DAE.CREF(new_cr1), arg) = func(Expression.crefExp(cr1), arg)
                       if ! referenceEq(cr1, new_cr1)
-                        element.componentRef = new_cr1
+                        Setfield.@set element.componentRef = new_cr1
                       end
                     ()
                   end
@@ -5420,7 +5420,7 @@
                   DAE.ALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(stmts))  => begin
                       (new_stmts, arg) = traverseDAEEquationsStmts(stmts, func, arg)
                       if ! referenceEq(stmts, new_stmts)
-                        element.algorithm_ = DAE.ALGORITHM_STMTS(new_stmts)
+                        Setfield.@set element.algorithm_ = DAE.ALGORITHM_STMTS(new_stmts)
                       end
                     ()
                   end
@@ -5428,7 +5428,7 @@
                   DAE.INITIALALGORITHM(algorithm_ = DAE.ALGORITHM_STMTS(stmts))  => begin
                       (new_stmts, arg) = traverseDAEEquationsStmts(stmts, func, arg)
                       if ! referenceEq(stmts, new_stmts)
-                        element.algorithm_ = DAE.ALGORITHM_STMTS(new_stmts)
+                        Setfield.@set element.algorithm_ = DAE.ALGORITHM_STMTS(new_stmts)
                       end
                     ()
                   end
@@ -5436,7 +5436,7 @@
                   DAE.CONSTRAINT(constraints = DAE.CONSTRAINT_EXPS(expl))  => begin
                       (new_expl, arg) = traverseDAEExpList(expl, func, arg)
                       if ! referenceEq(expl, new_expl)
-                        element.constraints = DAE.CONSTRAINT_EXPS(new_expl)
+                        Setfield.@set element.constraints = DAE.CONSTRAINT_EXPS(new_expl)
                       end
                     ()
                   end
@@ -5448,15 +5448,15 @@
                   DAE.IF_EQUATION(condition1 = expl, equations2 = eqll, equations3 = el)  => begin
                       (new_expl, arg) = traverseDAEExpList(expl, func, arg)
                       if ! referenceEq(expl, new_expl)
-                        element.condition1 = new_expl
+                        Setfield.@set element.condition1 = new_expl
                       end
                       (new_eqll, arg) = traverseDAEList(eqll, func, arg)
                       if ! referenceEq(eqll, new_eqll)
-                        element.equations2 = new_eqll
+                        Setfield.@set element.equations2 = new_eqll
                       end
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.equations3 = new_el
+                        Setfield.@set element.equations3 = new_el
                       end
                     ()
                   end
@@ -5464,15 +5464,15 @@
                   DAE.INITIAL_IF_EQUATION(condition1 = expl, equations2 = eqll, equations3 = el)  => begin
                       (new_expl, arg) = traverseDAEExpList(expl, func, arg)
                       if ! referenceEq(expl, new_expl)
-                        element.condition1 = new_expl
+                        Setfield.@set element.condition1 = new_expl
                       end
                       (new_eqll, arg) = traverseDAEList(eqll, func, arg)
                       if ! referenceEq(eqll, new_eqll)
-                        element.equations2 = new_eqll
+                        Setfield.@set element.equations2 = new_eqll
                       end
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.equations3 = new_el
+                        Setfield.@set element.equations3 = new_el
                       end
                     ()
                   end
@@ -5480,7 +5480,7 @@
                   DAE.FLAT_SM(dAElist = el)  => begin
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.dAElist = new_el
+                        Setfield.@set element.dAElist = new_el
                       end
                     ()
                   end
@@ -5488,7 +5488,7 @@
                   DAE.SM_COMP(dAElist = el)  => begin
                       (new_el, arg) = traverseDAEElementList(el, func, arg)
                       if ! referenceEq(el, new_el)
-                        element.dAElist = new_el
+                        Setfield.@set element.dAElist = new_el
                       end
                     ()
                   end
@@ -5738,7 +5738,7 @@
                   end
 
                   (DAE.STMT_WHEN(exp = e, conditions = conditions, initialCall = initialCall, statementLst = stmts, elseWhen = SOME(ew), source = source), _, _, extraArg)  => begin
-                      @match (list(ew_1), extraArg) = traverseDAEEquationsStmtsList(list(ew), func, opt, extraArg)
+                      @match (ew_1 <| nil, extraArg) = traverseDAEEquationsStmtsList(list(ew), func, opt, extraArg)
                       (stmts2, extraArg) = traverseDAEEquationsStmtsList(stmts, func, opt, extraArg)
                       (e_1, extraArg) = func(e, extraArg)
                       x = if referenceEq(ew, ew_1) && referenceEq(e, e_1) && referenceEq(stmts, stmts2)
@@ -6012,7 +6012,7 @@
                   end
 
                   (x && DAE.STMT_WHEN(exp = e, conditions = conditions, initialCall = initialCall, statementLst = stmts, elseWhen = SOME(ew), source = source) <| xs, _, extraArg)  => begin
-                      @match (list(_), extraArg) = traverseDAEStmts(list(ew), func, extraArg)
+                      @match (_ <| nil, extraArg) = traverseDAEStmts(list(ew), func, extraArg)
                       (stmts2, extraArg) = traverseDAEStmts(stmts, func, extraArg)
                       (e_1, extraArg) = func(e, x, extraArg)
                       (xs_1, extraArg) = traverseDAEStmts(xs, func, extraArg)
@@ -6322,7 +6322,7 @@
                   local source::DAE.ElementSource
                 @match elt begin
                   DAE.VAR(__)  => begin
-                      elt.source = ElementSource.addElementSourceType(elt.source, inPath)
+                      Setfield.@set elt.source = ElementSource.addElementSourceType(elt.source, inPath)
                     elt
                   end
 
@@ -7119,7 +7119,7 @@
               _ = begin
                 @match func begin
                   DAE.FUNCTION(__)  => begin
-                      func.functions = ListUtil.appendElt(iFuncDef, func.functions)
+                      Setfield.@set func.functions = ListUtil.appendElt(iFuncDef, func.functions)
                     ()
                   end
 
@@ -7221,7 +7221,7 @@
         function setAttrVariability(attr::DAE.Attributes, var::SCode.Variability) ::DAE.Attributes
 
 
-              attr.variability = var
+              Setfield.@set attr.variability = var
           attr
         end
 
@@ -7236,7 +7236,7 @@
         function setAttrDirection(attr::DAE.Attributes, dir::Absyn.Direction) ::DAE.Attributes
 
 
-              attr.direction = dir
+              Setfield.@set attr.direction = dir
           attr
         end
 
@@ -7249,7 +7249,7 @@
         function setAttrInnerOuter(attr::DAE.Attributes, io::Absyn.InnerOuter) ::DAE.Attributes
 
 
-              attr.innerOuter = io
+              Setfield.@set attr.innerOuter = io
           attr
         end
 
@@ -7672,10 +7672,10 @@
         function replaceCallAttrType(caIn::DAE.CallAttributes, typeIn::DAE.Type) ::DAE.CallAttributes
               local caOut::DAE.CallAttributes
 
-              caOut = caIn
-              caOut.ty = typeIn
+              Setfield.@set caOut = caIn
+              Setfield.@set caOut.ty = typeIn
               if Types.isTuple(typeIn)
-                caOut.tuple_ = true
+                Setfield.@set caOut.tuple_ = true
               end
           caOut
         end

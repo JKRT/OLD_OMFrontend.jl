@@ -5,7 +5,7 @@ module ExpressionSimplify
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    import Setfield
 
     GetArrayContents = Function
     MakeArrayFromList = Function
@@ -1563,7 +1563,7 @@ module ExpressionSimplify
                        #=  min/max function on arrays of only 1 element
                        =#
                       if Expression.isArrayType(Expression.typeOf(e))
-                        exp.expLst = expl
+                        Setfield.@set exp.expLst = expl
                         e = exp
                       end
                     e
@@ -1647,7 +1647,7 @@ module ExpressionSimplify
                   end
 
                   e && DAE.CALL(path = Absyn.IDENT("cross"), expLst = expl)  => begin
-                      @match list(DAE.ARRAY(array = v1), DAE.ARRAY(array = v2)) = expl
+                      @match DAE.ARRAY(array = v1) <| DAE.ARRAY(array = v2) <| nil = expl
                       expl = simplifyCross(v1, v2)
                       tp = Expression.typeOf(e)
                       scalar = ! Expression.isArrayType(Expression.unliftArray(tp))
@@ -1692,16 +1692,16 @@ module ExpressionSimplify
 
                   DAE.CALL(path = Absyn.IDENT("exp"), expLst = DAE.UNARY(DAE.UMINUS(__), e1) <|  nil())  => begin
                       expl = Expression.expandFactors(e1)
-                      @match (list(e2), es) = ListUtil.split1OnTrue(expl, Expression.isFunCall, "log")
-                      @match DAE.CALL(expLst = list(e)) = e2
+                      @match (e2 <| nil, es) = ListUtil.split1OnTrue(expl, Expression.isFunCall, "log")
+                      @match DAE.CALL(expLst = e <| nil) = e2
                       e3 = Expression.makeProductLst(es)
                     Expression.expPow(e, Expression.negate(e3))
                   end
 
                   DAE.CALL(path = Absyn.IDENT("exp"), expLst = e1 <|  nil())  => begin
                       expl = Expression.expandFactors(e1)
-                      @match (list(e2), es) = ListUtil.split1OnTrue(expl, Expression.isFunCall, "log")
-                      @match DAE.CALL(expLst = list(e)) = e2
+                      @match (e2 <| nil, es) = ListUtil.split1OnTrue(expl, Expression.isFunCall, "log")
+                      @match DAE.CALL(expLst = e <| nil) = e2
                       e3 = Expression.makeProductLst(es)
                     Expression.expPow(e, e3)
                   end
@@ -1766,7 +1766,7 @@ module ExpressionSimplify
                        =#
                        #=  We only match delay with 3 arguments in most places...
                        =#
-                      e.expLst = list(e1, e2, e2)
+                      Setfield.@set e.expLst = list(e1, e2, e2)
                     e
                   end
 
@@ -2025,7 +2025,7 @@ module ExpressionSimplify
                   end
 
                   (DAE.SIZE(exp = exp, sz = NONE()), _)  => begin
-                      @match (_, list(_)) = Types.flattenArrayType(Expression.typeOf(inExp))
+                      @match (_, _ <| nil) = Types.flattenArrayType(Expression.typeOf(inExp))
                     DAE.SIZE(exp, SOME(DAE.ICONST(1)))
                   end
 
@@ -2205,7 +2205,7 @@ module ExpressionSimplify
               for i in 1:dim - 1
                 j = min(listHead(d) for d in dimsLst)
                 if j != max(listHead(d) for d in dimsLst)
-                  Error.assertion(false, getInstanceName() + ": cat got uneven dimensions for dim=" + String(i) + " " + stringDelimitList(list(toString(e) for e in exps), ", "), sourceInfo())
+                  Error.assertion(false, getInstanceName() + ": cat got uneven dimensions for dim=" + StringFunction(i) + " " + stringDelimitList(list(toString(e) for e in exps), ", "), sourceInfo())
                 end
                 firstDims = _cons(j, firstDims)
                 dimsLst = list(listRest(d) for d in dimsLst)
@@ -2324,7 +2324,7 @@ module ExpressionSimplify
         end
 
          #=
-        stringAppendList({abc,def,String(time),ghi,jkl}) => stringAppendList({abcdef,String(time),ghijkl})
+        stringAppendList({abc,def,StringFunction(time),ghi,jkl}) => stringAppendList({abcdef,StringFunction(time),ghijkl})
         stringAppendList({abc,def,ghi,jkl}) => abcdefghijkl
         stringAppendList({}) => abcdefghijkl
          =#
@@ -5384,7 +5384,8 @@ module ExpressionSimplify
                   end
 
                   (_, DAE.POW(__), e1, e2, _, true)  => begin
-                      @match (@match _cons(_, _cons(_, _cons(_, _))) = exp_lst) = Expression.factors(e1)
+                      @match exp_lst = Expression.factors(e1)
+                      @match _cons(_, _cons(_, _cons(_, _))) = exp_lst
                       @match true = ListUtil.exist(exp_lst, Expression.isConstValue)
                       exp_lst_1 = simplifyBinaryDistributePow(exp_lst, e2)
                     Expression.makeProductLst(exp_lst_1)
@@ -6981,7 +6982,7 @@ module ExpressionSimplify
               local x3::DAE.Exp
               local zero::DAE.Exp
 
-              @match list(x1, x2, x3) = v1
+              @match x1 <| x2 <| x3 <| nil = v1
               zero = Expression.makeConstZero(Expression.typeOf(x1))
               res = list(list(zero, Expression.negate(x3), x2), list(x3, zero, Expression.negate(x1)), list(Expression.negate(x2), x1, zero))
           res
@@ -6998,8 +6999,8 @@ module ExpressionSimplify
               local y2::DAE.Exp
               local y3::DAE.Exp
 
-              @match list(x1, x2, x3) = v1
-              @match list(y1, y2, y3) = v2
+              @match x1 <| x2 <| x3 <| nil = v1
+              @match y1 <| y2 <| y3 <| nil = v2
                #=  res = {x[2]*y[3] - x[3]*y[2], x[3]*y[1] - x[1]*y[3], x[1]*y[2] - x[2]*y[1]}
                =#
               res = list(Expression.makeDiff(Expression.makeProduct(x2, y3), Expression.makeProduct(x3, y2)), Expression.makeDiff(Expression.makeProduct(x3, y1), Expression.makeProduct(x1, y3)), Expression.makeDiff(Expression.makeProduct(x1, y2), Expression.makeProduct(x2, y1)))

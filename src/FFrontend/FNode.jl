@@ -1929,23 +1929,6 @@ function isClassExtends(inNode::Node) ::Bool
   b
 end
 
-function isComponent(inNode::Node) ::Bool
-  local b::Bool
-
-  b = begin
-    @match inNode begin
-      FCore.N(data = FCore.CO(__))  => begin
-        true
-      end
-
-      _  => begin
-        false
-      end
-    end
-  end
-  b
-end
-
 function isCref(inNode::Node) ::Bool
   local b::Bool
 

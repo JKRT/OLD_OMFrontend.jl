@@ -1,4 +1,4 @@
-  module NFSCodeFlatten 
+  module NFSCodeFlatten
 
 
     using MetaModelica
@@ -58,10 +58,10 @@
 
         import System
 
-        Env = NFSCodeEnv.Env 
+        Env = NFSCodeEnv.Env
 
          #= Flattens the last class in a program. =#
-        function flattenProgram(inProgram::SCode.Program) ::SCode.Program 
+        function flattenProgram(inProgram::SCode.Program) ::SCode.Program
               local outProgram::SCode.Program
 
               local cls_path::Absyn.Path
@@ -72,7 +72,7 @@
         end
 
          #= Returns the name of the last class in the program. =#
-        function getLastClassNameInProgram(inProgram::SCode.Program) ::Absyn.Path 
+        function getLastClassNameInProgram(inProgram::SCode.Program) ::Absyn.Path
               local outClassName::Absyn.Path
 
               local prog::SCode.Program
@@ -85,7 +85,7 @@
         end
 
          #= Checks if the given SCode.Class is a class, i.e. not a function. =#
-        function isClass(inClass::SCode.Element) ::Bool 
+        function isClass(inClass::SCode.Element) ::Bool
               local outIsClass::Bool
 
               outIsClass = begin
@@ -93,7 +93,7 @@
                   SCode.CLASS(restriction = SCode.R_FUNCTION(_))  => begin
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -103,15 +103,15 @@
         end
 
          #= Flattens a single class. =#
-        function flattenClass(inClass::SCode.Element) ::SCode.Element 
+        function flattenClass(inClass::SCode.Element) ::SCode.Element
               local outClass::SCode.Element
 
-              @match list(outClass) = flattenProgram(list(inClass))
+              @match outClass <| nil = flattenProgram(list(inClass))
           outClass
         end
 
          #= Flattens a specific class in a program. =#
-        function flattenClassInProgram(inClassName::Absyn.Path, inProgram::SCode.Program) ::Tuple{SCode.Program, Env} 
+        function flattenClassInProgram(inClassName::Absyn.Path, inProgram::SCode.Program) ::Tuple{SCode.Program, Env}
               local outEnv::Env
               local outProgram::SCode.Program
 
@@ -132,7 +132,7 @@
                       end
                     (prog, env)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("NFSCodeFlatten.flattenClassInProgram failed on " + AbsynUtil.pathString(inClassName))
@@ -149,7 +149,7 @@
           (outProgram, outEnv)
         end
 
-        function flattenCompleteProgram(inProgram::SCode.Program) ::SCode.Program 
+        function flattenCompleteProgram(inProgram::SCode.Program) ::SCode.Program
               local outProgram::SCode.Program
 
               outProgram = begin
@@ -163,7 +163,7 @@
                       (prog, env) = NFSCodeFlattenImports.flattenProgram(prog, env)
                     prog
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("NFSCodeFlatten.flattenCompleteProgram failed\\n")

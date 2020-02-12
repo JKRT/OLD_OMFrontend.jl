@@ -1277,7 +1277,7 @@ function translateDefineunitParam2(inArgs::List{<:Absyn.NamedArg}, inArg::String
     local args::List{Absyn.NamedArg}
     @match (inArgs, inArg) begin
       (Absyn.NAMEDARG(name, Absyn.REAL(s)) <| _, arg) where (name == arg)  => begin
-        r = System.stringReal(s)
+        r = stringReal(s)
         SOME(r)
       end
 

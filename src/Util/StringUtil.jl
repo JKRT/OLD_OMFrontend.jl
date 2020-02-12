@@ -342,15 +342,15 @@
               local kB::ModelicaReal = 1024
 
               if bytes > maxSizeInUnit * GB
-                str = String(bytes / TB, significantDigits = significantDigits) + " TB"
+                str = StringFunction(bytes / TB, significantDigits = significantDigits) + " TB"
               elseif bytes > maxSizeInUnit * MB
-                str = String(bytes / GB, significantDigits = significantDigits) + " GB"
+                str = StringFunction(bytes / GB, significantDigits = significantDigits) + " GB"
               elseif bytes > maxSizeInUnit * kB
-                str = String(bytes / MB, significantDigits = significantDigits) + " MB"
+                str = StringFunction(bytes / MB, significantDigits = significantDigits) + " MB"
               elseif bytes > maxSizeInUnit
-                str = String(bytes / kB, significantDigits = significantDigits) + " kB"
+                str = StringFunction(bytes / kB, significantDigits = significantDigits) + " kB"
               else
-                str = String(integer(bytes))
+                str = StringFunction(integer(bytes))
               end
           str
         end

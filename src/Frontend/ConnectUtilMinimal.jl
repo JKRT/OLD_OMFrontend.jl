@@ -5,7 +5,7 @@ module ConnectUtilMinimal
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
 
     UpdateFunc = Function

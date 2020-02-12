@@ -1,11 +1,10 @@
   module InstExtends
 
-  Type_A = Any
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    import Setfield
 
     getIdentFn = Function
 
@@ -20,6 +19,8 @@
 
     FixAFn = Function
     FixBFn = Function
+    Type_A = Any
+    Type_B = Any
 
          #= /*
          * This file is part of OpenModelica.
@@ -951,12 +952,14 @@
                        =#
                        #=  lookup as it might have been redeclared!!!
                        =#
-                      @match (_, _, (@match SCode.COMPONENT(name, prefixes, (@match SCode.ATTR() = attr), typeSpec1, modifications1, comment, condition, info) = elt2), _, _, env) = Lookup.lookupIdentLocal(arrayGet(inCache, 1), env, elt.name)
+                      @match (_, _, elt2, _, _, env) = Lookup.lookupIdentLocal(arrayGet(inCache, 1), env, elt.name)
+                      @match SCode.COMPONENT(name, prefixes, attr, typeSpec1, modifications1, comment, condition, info) = elt2
+                      @match SCode.ATTR() = attr
                       modifications2 = fixModifications(inCache, env, modifications1, tree)
                       typeSpec2 = fixTypeSpec(inCache, env, typeSpec1, tree)
                       ad = fixArrayDim(inCache, env, attr.arrayDims, tree)
                       if ! referenceEq(ad, attr.arrayDims)
-                        attr.arrayDims = ad
+                        Setfield.@set attr.arrayDims = ad
                       end
                       if ! (referenceEq(ad, attr.arrayDims) && referenceEq(typeSpec1, typeSpec2) && referenceEq(modifications1, modifications2))
                         elt2 = SCode.COMPONENT(name, prefixes, attr, typeSpec2, modifications2, comment, condition, info)
@@ -969,7 +972,7 @@
                       typeSpec2 = fixTypeSpec(inCache, env, elt.typeSpec, tree)
                       ad = fixArrayDim(inCache, env, attr.arrayDims, tree)
                       if ! referenceEq(ad, attr.arrayDims)
-                        attr.arrayDims = ad
+                        Setfield.@set attr.arrayDims = ad
                       end
                       if ! (referenceEq(ad, attr.arrayDims) && referenceEq(elt.typeSpec, typeSpec2) && referenceEq(elt.modifications, modifications2))
                         elt = SCode.COMPONENT(elt.name, elt.prefixes, attr, typeSpec2, modifications2, elt.comment, elt.condition, elt.info)
@@ -1776,11 +1779,11 @@
                   SCode.MOD(__)  => begin
                       subModLst = fixList(inCache, inEnv, outMod.subModLst, tree, fixSubMod)
                       if ! referenceEq(outMod.subModLst, subModLst)
-                        outMod.subModLst = subModLst
+                        Setfield.@set outMod.subModLst = subModLst
                       end
                       exp = fixOption(inCache, inEnv, outMod.binding, tree, fixExp)
                       if ! referenceEq(exp, outMod.binding)
-                        outMod.binding = exp
+                        Setfield.@set outMod.binding = exp
                       end
                     outMod
                   end
@@ -1788,7 +1791,7 @@
                   SCode.REDECL(element = SCode.COMPONENT(__))  => begin
                       e = fixElement(inCache, inEnv, outMod.element, tree)
                       if ! referenceEq(e, outMod.element)
-                        outMod.element = e
+                        Setfield.@set outMod.element = e
                       end
                     outMod
                   end
@@ -1796,8 +1799,8 @@
                   SCode.REDECL(element = e && SCode.CLASS(classDef = cdef))  => begin
                       cdef = fixClassdef(inCache, inEnv, cdef, tree)
                       if ! referenceEq(cdef, e.classDef)
-                        e.classDef = cdef
-                        outMod.element = e
+                        Setfield.@set e.classDef = cdef
+                        Setfield.@set outMod.element = e
                       end
                     outMod
                   end
@@ -1828,6 +1831,9 @@
                 subMod = SCode.NAMEMOD(ident, mod2)
               end
           subMod
+        end
+        function fixSubMod(subMod::SCode.SubMod; inCache::Array{<:FCore.Cache}, inEnv::FCore.Graph, tree::AvlSetString.Tree)::SCode.SubMod
+           fixSubMod(inCache, inEnv, subMod, tree)
         end
 
          #=  All of the fix functions do the following:
@@ -1900,12 +1906,12 @@
         end
 
          #=  Generic function to fix an optional element. =#
-        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Option{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::Option{Type_A}
+        function fixOption(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::Type_A, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
+              local outA::Option{Any}
 
               outA = begin
-                  local A1::Type_A
-                  local A2::Type_A
+                  local A1::Any
+                  local A2::Any
                 @match inA begin
                   NONE()  => begin
                     inA
@@ -1926,14 +1932,17 @@
 
          #=  Generic function to fix a list of elements. =#
         function fixList(inCache::Array{FCore.Cache}, inEnv::FCore.Graph, inA::List{Type_A}, tree::AvlSetString.Tree, fixA::FixAFn)  where {Type_A}
-              local outA::List{Type_A}
+              local outA::List{Type_A} = nil
 
               if listEmpty(inA)
                 outA = inA
                 return outA
               end
-              outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree) -> fixA(inCache = inCache, inEnv = inEnv, tree = tree))
-          outA
+              # outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree) -> fixA(inCache = inCache, inEnv = inEnv, tree = tree))
+              for e in inA
+                  outA = _cons(fixA(inCache, inEnv, e, tree), outA)
+              end
+          listReverse(outA)
         end
 
          #=  Generic function to fix a list of elements. =#
@@ -1944,8 +1953,11 @@
                 outA = nil
                 return outA
               end
-              outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree, fixA) -> fixList(inCache = inCache, inEnv = inEnv, tree = tree, fixA = fixA))
-          outA
+              # outA = ListUtil.mapCheckReferenceEq(inA, (inCache, inEnv, tree, fixA) -> fixList(inCache = inCache, inEnv = inEnv, tree = tree, fixA = fixA))
+              for e in inA
+                  outA = _cons(fixList(inCache, inEnv, e, tree, fixA), outA)
+              end
+          listReverse(outA)
         end
 
          #=  Generic function to fix a list of elements. =#

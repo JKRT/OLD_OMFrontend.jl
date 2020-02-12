@@ -5,6 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
     @UniontypeDecl ModScope
     @UniontypeDecl FullMod
@@ -1005,12 +1006,15 @@
         end
 
         function elabUntypedSubmods(inSubMods::List{<:SCode.SubMod}, inModScope::ModScope) ::List{DAE.SubMod}
-              local outSubMods::List{DAE.SubMod}
+              local outSubMods::List{DAE.SubMod} = nil
 
               local submods::List{SCode.SubMod}
 
               submods = compactSubMods(inSubMods, inModScope)
-              outSubMods = listAppend(elabUntypedSubmod(m) for m in listReverse(submods))
+              for m in listReverse(submods)
+                z = elabUntypedSubmod(m)
+                outSubMods = listAppend(outSubMods, z)
+              end
           outSubMods
         end
 
@@ -1353,7 +1357,7 @@
               outMod = begin
                 @match (outMod, inBinding) begin
                   (DAE.REDECL(__), DAE.MOD(subModLst =  nil(), binding = SOME(_)))  => begin
-                      outMod.mod = myMerge(inBinding, outMod.mod)
+                      Setfield.@set outMod.mod = myMerge(inBinding, outMod.mod)
                     outMod
                   end
                 end
@@ -1726,11 +1730,11 @@
                       emod = myMerge(emod1, emod2, el1.name, inCheckFinal)
                        #=  If we have a constraining class we don't need the mod.
                        =#
-                      el1.modifications = unelabMod(dmod)
-                      el1.prefixes = SCodeUtil.propagatePrefixes(el2.prefixes, el1.prefixes)
-                      el1.attributes = SCodeUtil.propagateAttributes(el2.attributes, el1.attributes)
-                      outMod.element = el1
-                      outMod.mod = emod
+                      Setfield.@set el1.modifications = unelabMod(dmod)
+                      Setfield.@set el1.prefixes = SCodeUtil.propagatePrefixes(el2.prefixes, el1.prefixes)
+                      Setfield.@set el1.attributes = SCodeUtil.propagateAttributes(el2.attributes, el1.attributes)
+                      Setfield.@set outMod.element = el1
+                      Setfield.@set outMod.mod = emod
                     outMod
                   end
 
@@ -1750,19 +1754,19 @@
                       dmod2 = elabUntypedMod(smod2, COMPONENT(el2.name))
                       emod2 = myMerge(emod2, dmod2, el1.name, inCheckFinal)
                       emod = myMerge(emod1, emod2, el1.name, inCheckFinal)
-                      el1.prefixes = SCodeUtil.propagatePrefixes(el2.prefixes, el2.prefixes)
+                      Setfield.@set el1.prefixes = SCodeUtil.propagatePrefixes(el2.prefixes, el2.prefixes)
                       (res, info) = SCodeUtil.checkSameRestriction(el1.restriction, el2.restriction, el1.info, el2.info)
-                      el1.restriction = res
-                      el1.info = info
-                      outMod.element = el1
-                      outMod.mod = emod
+                      Setfield.@set el1.restriction = res
+                      Setfield.@set el1.info = info
+                      Setfield.@set outMod.element = el1
+                      Setfield.@set outMod.mod = emod
                     outMod
                   end
 
                   (DAE.REDECL(element = el1, mod = emod), DAE.MOD(__))  => begin
                       emod = myMerge(emod, inModInner, "", inCheckFinal)
-                      outMod.element = el1
-                      outMod.mod = emod
+                      Setfield.@set outMod.element = el1
+                      Setfield.@set outMod.mod = emod
                     outMod
                   end
 
@@ -1791,14 +1795,14 @@
                        =#
                        #=  from the submodifier instead.
                        =#
-                      val.orderd = listReverse(vals)
-                      eqmod.modifierAsValue = SOME(val)
-                      outMod.binding = SOME(eqmod)
+                      Setfield.@set val.orderd = listReverse(vals)
+                      Setfield.@set eqmod.modifierAsValue = SOME(val)
+                      Setfield.@set outMod.binding = SOME(eqmod)
                        #=  Remove all submodifier bindings, they have been myMerged into the
                        =#
                        #=  record binding.
                        =#
-                      outMod.subModLst = stripSubModBindings(inModInner.subModLst)
+                      Setfield.@set outMod.subModLst = stripSubModBindings(inModInner.subModLst)
                     outMod
                   end
 
@@ -1820,20 +1824,20 @@
                        =#
                        #=  for it. In that case, use the value from the submodifier instead.
                        =#
-                      val.orderd = listReverse(vals)
-                      eqmod.modifierAsValue = SOME(val)
-                      outMod.binding = SOME(eqmod)
+                      Setfield.@set val.orderd = listReverse(vals)
+                      Setfield.@set eqmod.modifierAsValue = SOME(val)
+                      Setfield.@set outMod.binding = SOME(eqmod)
                        #=  Remove all submodifier bindings, they have been myMerged into the
                        =#
                        #=  record binding.
                        =#
-                      outMod.subModLst = stripSubModBindings(outMod.subModLst)
+                      Setfield.@set outMod.subModLst = stripSubModBindings(outMod.subModLst)
                     outMod
                   end
 
                   (DAE.MOD(__), DAE.MOD(__))  => begin
-                      outMod.subModLst = myMergeSubs(outMod.subModLst, inModInner.subModLst, inCheckFinal)
-                      outMod.binding = myMergeEq(outMod.binding, inModInner.binding)
+                      Setfield.@set outMod.subModLst = myMergeSubs(outMod.subModLst, inModInner.subModLst, inCheckFinal)
+                      Setfield.@set outMod.binding = myMergeEq(outMod.binding, inModInner.binding)
                     outMod
                   end
                 end
@@ -2522,7 +2526,7 @@
               outMod = begin
                 @match outMod begin
                   DAE.MOD(__)  => begin
-                      outMod.subModLst = list(renameNamedSubMod(s, oldIdent, newIdent) for s in outMod.subModLst)
+                      Setfield.@set outMod.subModLst = list(renameNamedSubMod(s, oldIdent, newIdent) for s in outMod.subModLst)
                     outMod
                   end
 
@@ -2881,7 +2885,7 @@
               outMod = begin
                 @match outMod begin
                   DAE.MOD(__)  => begin
-                      outMod.subModLst = nil
+                      Setfield.@set outMod.subModLst = nil
                     outMod
                   end
 
@@ -3309,7 +3313,7 @@
               outMod = begin
                 @match outMod begin
                   DAE.MOD(__)  => begin
-                      outMod.binding = inEqMod
+                      Setfield.@set outMod.binding = inEqMod
                     outMod
                   end
 
@@ -3344,8 +3348,8 @@
               outMod = begin
                 @match outMod begin
                   DAE.MOD(__)  => begin
-                      outMod.subModLst = filterRedeclaresSubMods(outMod.subModLst)
-                      outMod.binding = NONE()
+                      Setfield.@set outMod.subModLst = filterRedeclaresSubMods(outMod.subModLst)
+                      Setfield.@set outMod.binding = NONE()
                     if listEmpty(outMod.subModLst)
                           DAE.NOMOD()
                         else

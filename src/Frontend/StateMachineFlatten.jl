@@ -228,11 +228,11 @@
                =#
               (smCompsLst, otherLst1) = ListUtil.extractOnTrue(dAElist, isSMComp)
               (transitionLst, otherLst2) = ListUtil.extractOnTrue(otherLst1, isTransition)
-              @match (list(initialStateOp), otherLst3) = ListUtil.extractOnTrue(otherLst2, isInitialState)
+              @match (initialStateOp <| nil, otherLst3) = ListUtil.extractOnTrue(otherLst2, isInitialState)
               (eqnLst, otherLst4) = ListUtil.extractOnTrue(otherLst3, isEquation)
               assert(listLength(otherLst4) == 0, "Internal compiler error. Unexpected elements in flat state machine.")
-              @match DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("initialState"), expLst = list(DAE.CREF(componentRef = crefInitialState)))) = initialStateOp
-              @match (list(initialStateComp), smCompsLst2) = ListUtil.extract1OnTrue(smCompsLst, sMCompEqualsRef, crefInitialState)
+              @match DAE.NORETCALL(exp = DAE.CALL(path = Absyn.IDENT("initialState"), expLst = DAE.CREF(componentRef = crefInitialState) <| nil)) = initialStateOp
+              @match (initialStateComp <| nil, smCompsLst2) = ListUtil.extract1OnTrue(smCompsLst, sMCompEqualsRef, crefInitialState)
                #=  Create basic semantic equations (MLS 17.3.4 Semantics Summary)
                =#
               flatSmSemanticsBasics = basicFlatSmSemantics(ident, _cons(initialStateComp, smCompsLst2), transitionLst)
@@ -657,7 +657,7 @@
               catch
                 try
                   if Flags.getConfigBool(Flags.CT_STATE_MACHINES)
-                    @match DAE.CALL(Absyn.IDENT("der"), list(DAE.CREF(componentRef = crefLHS, ty = tyLHS)), attr) = exp
+                    @match DAE.CALL(Absyn.IDENT("der"), DAE.CREF(componentRef = crefLHS, ty = tyLHS) <| nil, attr) = exp
                     try
                       varDecl = ListUtil.find1(dAElist, isCrefInVar, crefLHS)
                     catch
@@ -1135,7 +1135,7 @@
 
               @match DAE.EQUATION(exp, scalar, source) = inEqn
               try
-                @match DAE.CALL(Absyn.IDENT("der"), list(DAE.CREF(componentRef = cref, ty = ty)), _) = exp
+                @match DAE.CALL(Absyn.IDENT("der"), DAE.CREF(componentRef = cref, ty = ty) <| nil, _) = exp
               catch
                 Error.addCompilerError("The LHS of equations in state machines needs to be a component reference, e.g., x = .., or its derivative, e.g., der(x) = ..")
                 fail()

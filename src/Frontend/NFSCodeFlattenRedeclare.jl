@@ -1,4 +1,4 @@
-  module NFSCodeFlattenRedeclare 
+  module NFSCodeFlattenRedeclare
 
 
     using MetaModelica
@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    @UniontypeDecl Replacement 
+    @UniontypeDecl Replacement
 
          #= /*
          * This file is part of OpenModelica.
@@ -53,13 +53,13 @@
 
         import NFSCodeLookup
 
-        Env = NFSCodeEnv.Env 
+        Env = NFSCodeEnv.Env
 
-        Item = NFSCodeEnv.Item 
+        Item = NFSCodeEnv.Item
 
-        Extends = NFSCodeEnv.Extends 
+        Extends = NFSCodeEnv.Extends
 
-        Prefix = NFInstTypes.Prefix 
+        Prefix = NFInstTypes.Prefix
         import NFSCodeEnv.EnvTree
 
          @Uniontype Replacement begin
@@ -82,7 +82,7 @@
               end
          end
 
-        Replacements = List 
+        Replacements = List
 
          const emptyReplacements = nil::Replacements
 
@@ -101,14 +101,14 @@
         import SCodeDump
         import SCodeUtil
 
-        function addElementRedeclarationsToEnv(inRedeclares::List{<:SCode.Element}, inEnv::Env) ::Env 
+        function addElementRedeclarationsToEnv(inRedeclares::List{<:SCode.Element}, inEnv::Env) ::Env
               local outEnv::Env
 
               outEnv = ListUtil.fold(inRedeclares, addElementRedeclarationsToEnv2, inEnv)
           outEnv
         end
 
-        function addElementRedeclarationsToEnv2(inRedeclare::SCode.Element, inEnv::Env) ::Env 
+        function addElementRedeclarationsToEnv2(inRedeclare::SCode.Element, inEnv::Env) ::Env
               local outEnv::Env
 
               outEnv = begin
@@ -128,7 +128,7 @@
                       env = addRedeclareToEnvExtendsTable(item, ext_pathl, inEnv, info)
                     env
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeFlattenRedeclare.addElementRedeclarationsToEnv failed for " + SCodeUtil.elementName(inRedeclare) + " in " + NFSCodeEnv.getEnvName(inEnv) + "\\n")
@@ -139,7 +139,7 @@
           outEnv
         end
 
-        function lookupElementRedeclaration(inName::SCode.Ident, inEnv::Env, inInfo::SourceInfo) ::List{Absyn.Path} 
+        function lookupElementRedeclaration(inName::SCode.Ident, inEnv::Env, inInfo::SourceInfo) ::List{Absyn.Path}
               local outPaths::List{Absyn.Path}
 
               outPaths = begin
@@ -149,7 +149,7 @@
                       paths = NFSCodeLookup.lookupBaseClasses(inName, inEnv)
                     paths
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.REDECLARE_NONEXISTING_ELEMENT, list(inName), inInfo)
                       fail()
@@ -159,7 +159,7 @@
           outPaths
         end
 
-        function addRedeclareToEnvExtendsTable(inRedeclaredElement::Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Env, inInfo::SourceInfo) ::Env 
+        function addRedeclareToEnvExtendsTable(inRedeclaredElement::Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Env, inInfo::SourceInfo) ::Env
               local outEnv::Env
 
               local bcl::List{Extends}
@@ -172,7 +172,7 @@
           outEnv
         end
 
-        function addRedeclareToEnvExtendsTable2(inRedeclaredElement::Item, inBaseClasses::List{<:Absyn.Path}, inExtends::List{<:Extends}) ::List{Extends} 
+        function addRedeclareToEnvExtendsTable2(inRedeclaredElement::Item, inBaseClasses::List{<:Absyn.Path}, inExtends::List{<:Extends}) ::List{Extends}
               local outExtends::List{Extends}
 
               outExtends = begin
@@ -194,11 +194,11 @@
                       exl = addRedeclareToEnvExtendsTable2(inRedeclaredElement, rest_bc, exl)
                     _cons(ex, exl)
                   end
-                  
+
                   (_,  nil(), _)  => begin
                     inExtends
                   end
-                  
+
                   (_, _, ex <| exl)  => begin
                       exl = addRedeclareToEnvExtendsTable2(inRedeclaredElement, inBaseClasses, exl)
                     _cons(ex, exl)
@@ -209,7 +209,7 @@
         end
 
          #= Processes a raw redeclare modifier into a processed form. =#
-        function processRedeclare(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Env, inPrefix::NFInstTypes.Prefix) ::NFSCodeEnv.Redeclaration 
+        function processRedeclare(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Env, inPrefix::NFInstTypes.Prefix) ::NFSCodeEnv.Redeclaration
               local outRedeclare::NFSCodeEnv.Redeclaration
 
               outRedeclare = begin
@@ -224,17 +224,17 @@
                       redecl_item = NFSCodeEnv.REDECLARED_ITEM(el_item, inEnv)
                     NFSCodeEnv.PROCESSED_MODIFIER(redecl_item)
                   end
-                  
+
                   (NFSCodeEnv.RAW_MODIFIER(modifier = el && SCode.COMPONENT(__)), _, _)  => begin
                       el_item = NFSCodeEnv.newVarItem(el, true)
                       redecl_item = NFSCodeEnv.REDECLARED_ITEM(el_item, inEnv)
                     NFSCodeEnv.PROCESSED_MODIFIER(redecl_item)
                   end
-                  
+
                   (NFSCodeEnv.PROCESSED_MODIFIER(__), _, _)  => begin
                     inRedeclare
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.traceln("- NFSCodeFlattenRedeclare.processRedeclare failed on " + SCodeDump.unparseElementStr(NFSCodeEnv.getRedeclarationElement(inRedeclare), SCodeDump.defaultOptions) + " in " + AbsynUtil.pathString(NFSCodeEnv.getEnvPath(inEnv)))
@@ -251,7 +251,7 @@
            (used to qualify the redeclares). The redeclares are then either replaced if
            they can be found in the immediate local environment of the class, or pushed
            into the correct extends clauses if they are inherited. =#
-        function replaceRedeclares(inRedeclares::List{<:NFSCodeEnv.Redeclaration}, inClassItem::Item #= The item of the class to be modified. =#, inClassEnv::Env #= The environment of the class to be modified. =#, inElementEnv::Env #= The environment in which the modified element was declared. =#, inReplaceRedeclares::NFSCodeLookup.RedeclareReplaceStrategy) ::Tuple{Option{Item}, Option{Env}} 
+        function replaceRedeclares(inRedeclares::List{<:NFSCodeEnv.Redeclaration}, inClassItem::Item #= The item of the class to be modified. =#, inClassEnv::Env #= The environment of the class to be modified. =#, inElementEnv::Env #= The environment in which the modified element was declared. =#, inReplaceRedeclares::NFSCodeLookup.RedeclareReplaceStrategy) ::Tuple{Option{Item}, Option{Env}}
               local outEnv::Option{Env}
               local outItem::Option{Item}
 
@@ -262,12 +262,12 @@
                   (_, _, _, _, NFSCodeLookup.IGNORE_REDECLARES(__))  => begin
                     (SOME(inClassItem), SOME(inClassEnv))
                   end
-                  
+
                   (_, _, _, _, NFSCodeLookup.INSERT_REDECLARES(__))  => begin
                       (item, env, _) = replaceRedeclaredElementsInEnv(inRedeclares, inClassItem, inClassEnv, inElementEnv, NFInstPrefix.emptyPrefix)
                     (SOME(item), SOME(env))
                   end
-                  
+
                   _  => begin
                       (NONE(), NONE())
                   end
@@ -281,7 +281,7 @@
            lookup finds the right classes. This function takes a list of redeclares from
            an elements' modifications and applies them to the environment of the
            elements type. =#
-        function replaceRedeclaredElementsInEnv(inRedeclares::List{<:NFSCodeEnv.Redeclaration} #= The redeclares from the modifications. =#, inItem::Item #= The type of the element. =#, inTypeEnv::Env #= The enclosing scopes of the type. =#, inElementEnv::Env #= The environment in which the element was declared. =#, inPrefix::NFInstTypes.Prefix) ::Tuple{Item, Env, Replacements} 
+        function replaceRedeclaredElementsInEnv(inRedeclares::List{<:NFSCodeEnv.Redeclaration} #= The redeclares from the modifications. =#, inItem::Item #= The type of the element. =#, inTypeEnv::Env #= The enclosing scopes of the type. =#, inElementEnv::Env #= The environment in which the element was declared. =#, inPrefix::NFInstTypes.Prefix) ::Tuple{Item, Env, Replacements}
               local outReplacements::Replacements #= what replacements where performed if any =#
               local outEnv::Env
               local outItem::Item
@@ -299,7 +299,7 @@
                   ( nil(), _, _, _, _)  => begin
                     (inItem, inTypeEnv, nil)
                   end
-                  
+
                   (_, NFSCodeEnv.CLASS(cls = cls, env = item_env <|  nil(), classType = cls_ty), _, _, _)  => begin
                       env = NFSCodeEnv.enterFrame(item_env, inTypeEnv)
                       redecls = ListUtil.map2(inRedeclares, processRedeclare, inElementEnv, inPrefix)
@@ -307,7 +307,7 @@
                       @match _cons(item_env, env) = env
                     (NFSCodeEnv.CLASS(cls, list(item_env), cls_ty), env, repl)
                   end
-                  
+
                   _  => begin
                         @match true = Flags.isSet(Flags.FAILTRACE)
                         Debug.trace("- NFSCodeFlattenRedeclare.replaceRedeclaredElementsInEnv failed for:\\n\\t")
@@ -324,7 +324,7 @@
         end
 
          #= Returns a list of redeclare elements given a redeclaration modifier. =#
-        function extractRedeclaresFromModifier(inMod::SCode.Mod) ::List{NFSCodeEnv.Redeclaration} 
+        function extractRedeclaresFromModifier(inMod::SCode.Mod) ::List{NFSCodeEnv.Redeclaration}
               local outRedeclares::List{NFSCodeEnv.Redeclaration}
 
               outRedeclares = begin
@@ -335,7 +335,7 @@
                       redeclares = ListUtil.fold(sub_mods, extractRedeclareFromSubMod, nil)
                     redeclares
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -346,7 +346,7 @@
 
          #= Checks a submodifier and adds the redeclare element to the list of redeclares
           if the modifier is a redeclaration modifier. =#
-        function extractRedeclareFromSubMod(inMod::SCode.SubMod, inRedeclares::List{<:NFSCodeEnv.Redeclaration}) ::List{NFSCodeEnv.Redeclaration} 
+        function extractRedeclareFromSubMod(inMod::SCode.SubMod, inRedeclares::List{<:NFSCodeEnv.Redeclaration}) ::List{NFSCodeEnv.Redeclaration}
               local outRedeclares::List{NFSCodeEnv.Redeclaration}
 
               outRedeclares = begin
@@ -358,7 +358,7 @@
                       NFSCodeCheck.checkDuplicateRedeclarations(redecl, inRedeclares)
                     _cons(redecl, inRedeclares)
                   end
-                  
+
                   _  => begin
                       inRedeclares
                   end
@@ -370,7 +370,7 @@
         end
 
          #= Replaces a redeclaration in the environment. =#
-        function replaceRedeclaredElementInEnv(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements} 
+        function replaceRedeclaredElementInEnv(inRedeclare::NFSCodeEnv.Redeclaration, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements}
               local outEnv::Tuple{Env, Replacements}
 
               outEnv = begin
@@ -388,13 +388,13 @@
                       envRpl = pushRedeclareIntoExtendsNoFail(name, item, inEnv)
                     replaceElementInScope(name, item, envRpl)
                   end
-                  
+
                   (NFSCodeEnv.PROCESSED_MODIFIER(modifier = item), _)  => begin
                       name = NFSCodeEnv.getItemName(item)
                       bcl = NFSCodeLookup.lookupBaseClasses(name, Util.tuple21(inEnv))
                     pushRedeclareIntoExtends(name, item, bcl, inEnv)
                   end
-                  
+
                   (NFSCodeEnv.PROCESSED_MODIFIER(modifier = item), _)  => begin
                       scope_name = NFSCodeEnv.getScopeName(Util.tuple21(inEnv))
                       name = NFSCodeEnv.getItemName(item)
@@ -425,7 +425,7 @@
 
          #= Pushes a redeclare into the given extends in the environment if it can.
          if not just returns the same tuple<env, repl> =#
-        function pushRedeclareIntoExtendsNoFail(inName::SCode.Ident, inRedeclare::Item, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements} 
+        function pushRedeclareIntoExtendsNoFail(inName::SCode.Ident, inRedeclare::Item, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements}
               local outEnv::Tuple{Env, Replacements}
 
               outEnv = begin
@@ -437,7 +437,7 @@
                       envRpl = pushRedeclareIntoExtends(inName, inRedeclare, bcl, inEnv)
                     envRpl
                   end
-                  
+
                   _  => begin
                       inEnv
                   end
@@ -447,7 +447,7 @@
         end
 
          #= Pushes a redeclare into the given extends in the environment. =#
-        function pushRedeclareIntoExtends(inName::SCode.Ident, inRedeclare::Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements} 
+        function pushRedeclareIntoExtends(inName::SCode.Ident, inRedeclare::Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements}
               local outEnv::Tuple{Env, Replacements}
 
               local exts::List{NFSCodeEnv.Extends}
@@ -460,7 +460,8 @@
               local repl::Replacements
 
               (env, repl) = inEnv
-              @match _cons(NFSCodeEnv.FRAME(extendsTable = (@match NFSCodeEnv.EXTENDS_TABLE(exts, re, cei) = etOld)), _) = env
+              @match _cons(NFSCodeEnv.FRAME(extendsTable = etOld), _) = env
+              @match NFSCodeEnv.EXTENDS_TABLE(exts, re, cei) = etOld
               exts = pushRedeclareIntoExtends2(inName, inRedeclare, inBaseClasses, exts)
               etNew = NFSCodeEnv.EXTENDS_TABLE(exts, re, cei)
               env = NFSCodeEnv.setEnvExtendsTable(etNew, env)
@@ -476,7 +477,7 @@
            extends and pushes the redeclare into each one that's in the list of the
            base class paths. It assumes that the list of base class paths and extends
            are sorted in the same order. =#
-        function pushRedeclareIntoExtends2(inName::String, inRedeclare::Item, inBaseClasses::List{<:Absyn.Path}, inExtends::List{<:NFSCodeEnv.Extends}) ::List{NFSCodeEnv.Extends} 
+        function pushRedeclareIntoExtends2(inName::String, inRedeclare::Item, inBaseClasses::List{<:Absyn.Path}, inExtends::List{<:NFSCodeEnv.Extends}) ::List{NFSCodeEnv.Extends}
               local outExtends::List{NFSCodeEnv.Extends}
 
               outExtends = begin
@@ -501,16 +502,16 @@
                       rest_exts = pushRedeclareIntoExtends2(inName, inRedeclare, rest_bc, rest_exts)
                     _cons(NFSCodeEnv.EXTENDS(bc2, redecls, index, info), rest_exts)
                   end
-                  
+
                   (_, _, rest_bc, ext <| rest_exts)  => begin
                       rest_exts = pushRedeclareIntoExtends2(inName, inRedeclare, rest_bc, rest_exts)
                     _cons(ext, rest_exts)
                   end
-                  
+
                   (_, _,  nil(), _)  => begin
                     inExtends
                   end
-                  
+
                   (_, _, _,  nil())  => begin
                       bc_strl = list(AbsynUtil.pathString(p) for p in inBaseClasses)
                       bcl_str = stringDelimitList(bc_strl, ", ")
@@ -534,7 +535,7 @@
          #= Given the item and name of a redeclare, try to find the redeclare in the
            given list of redeclares. If found, replace the redeclare in the list.
            Otherwise, add a new redeclare to the list. =#
-        function pushRedeclareIntoExtends3(inRedeclare::Item, inName::String, inRedeclares::List{<:NFSCodeEnv.Redeclaration}, inOutRedeclares::List{<:NFSCodeEnv.Redeclaration}) ::List{NFSCodeEnv.Redeclaration} 
+        function pushRedeclareIntoExtends3(inRedeclare::Item, inName::String, inRedeclares::List{<:NFSCodeEnv.Redeclaration}, inOutRedeclares::List{<:NFSCodeEnv.Redeclaration}) ::List{NFSCodeEnv.Redeclaration}
               local outRedeclares::List{NFSCodeEnv.Redeclaration}
 
               outRedeclares = begin
@@ -546,11 +547,11 @@
                   (_, _, NFSCodeEnv.PROCESSED_MODIFIER(modifier = item) <| rest_redecls) where (stringEqual(NFSCodeEnv.getItemName(item), inName))  => begin
                     ListUtil.append_reverse(inOutRedeclares, _cons(NFSCodeEnv.PROCESSED_MODIFIER(inRedeclare), rest_redecls))
                   end
-                  
+
                   (_, _, redecl <| rest_redecls)  => begin
                     pushRedeclareIntoExtends3(inRedeclare, inName, rest_redecls, _cons(redecl, inOutRedeclares))
                   end
-                  
+
                   (_, _,  nil())  => begin
                     listReverse(_cons(NFSCodeEnv.PROCESSED_MODIFIER(inRedeclare), inOutRedeclares))
                   end
@@ -560,7 +561,7 @@
         end
 
          #= Replaces an element in the current scope. =#
-        function replaceElementInScope(inElementName::SCode.Ident, inElement::Item, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements} 
+        function replaceElementInScope(inElementName::SCode.Ident, inElement::Item, inEnv::Tuple{<:Env, Replacements}) ::Tuple{Env, Replacements}
               local outEnv::Tuple{Env, Replacements}
 
               outEnv = begin
@@ -590,7 +591,7 @@
           outEnv
         end
 
-        function propagateItemPrefixes(inOriginalItem::Item, inNewItem::Item) ::Item 
+        function propagateItemPrefixes(inOriginalItem::Item, inNewItem::Item) ::Item
               local outNewItem::Item
 
               outNewItem = begin
@@ -608,29 +609,29 @@
                       el2 = propagateAttributesVar(el1, el2)
                     NFSCodeEnv.VAR(el2, iu2)
                   end
-                  
+
                   (NFSCodeEnv.CLASS(cls = el1), NFSCodeEnv.CLASS(cls = el2, env = env2, classType = ty2))  => begin
                       el2 = propagateAttributesClass(el1, el2)
                     NFSCodeEnv.CLASS(el2, env2, ty2)
                   end
-                  
+
                   (NFSCodeEnv.ALIAS(__), _)  => begin
                     inNewItem
                   end
-                  
+
                   (_, NFSCodeEnv.ALIAS(__))  => begin
                     inNewItem
                   end
-                  
+
                   (NFSCodeEnv.REDECLARED_ITEM(item = item), _)  => begin
                     propagateItemPrefixes(item, inNewItem)
                   end
-                  
+
                   (_, NFSCodeEnv.REDECLARED_ITEM(item = item, declaredEnv = env1))  => begin
                       item = propagateItemPrefixes(inOriginalItem, item)
                     NFSCodeEnv.REDECLARED_ITEM(item, env1)
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.INTERNAL_ERROR, list("NFSCodeFlattenRedeclare.propagateAttributes failed on unknown item."))
                       fail()
@@ -650,7 +651,7 @@
           outNewItem
         end
 
-        function propagateAttributesVar(inOriginalVar::SCode.Element, inNewVar::SCode.Element) ::SCode.Element 
+        function propagateAttributesVar(inOriginalVar::SCode.Element, inNewVar::SCode.Element) ::SCode.Element
               local outNewVar::SCode.Element
 
               local name::SCode.Ident
@@ -672,7 +673,7 @@
           outNewVar
         end
 
-        function propagateAttributesClass(inOriginalClass::SCode.Element, inNewClass::SCode.Element) ::SCode.Element 
+        function propagateAttributesClass(inOriginalClass::SCode.Element, inNewClass::SCode.Element) ::SCode.Element
               local outNewClass::SCode.Element
 
               local name::SCode.Ident
@@ -692,7 +693,7 @@
           outNewClass
         end
 
-        function propagatePrefixes(inOriginalPrefixes::SCode.Prefixes, inNewPrefixes::SCode.Prefixes) ::SCode.Prefixes 
+        function propagatePrefixes(inOriginalPrefixes::SCode.Prefixes, inNewPrefixes::SCode.Prefixes) ::SCode.Prefixes
               local outNewPrefixes::SCode.Prefixes
 
               local vis1::SCode.Visibility
@@ -710,7 +711,7 @@
           outNewPrefixes
         end
 
-        function propagatePrefixInnerOuter(inOriginalIO::Absyn.InnerOuter, inIO::Absyn.InnerOuter) ::Absyn.InnerOuter 
+        function propagatePrefixInnerOuter(inOriginalIO::Absyn.InnerOuter, inIO::Absyn.InnerOuter) ::Absyn.InnerOuter
               local outIO::Absyn.InnerOuter
 
               outIO = begin
@@ -718,7 +719,7 @@
                   (_, Absyn.NOT_INNER_OUTER(__))  => begin
                     inOriginalIO
                   end
-                  
+
                   _  => begin
                       inIO
                   end
@@ -727,7 +728,7 @@
           outIO
         end
 
-        function propagateAttributes(inOriginalAttributes::SCode.Attributes, inNewAttributes::SCode.Attributes) ::SCode.Attributes 
+        function propagateAttributes(inOriginalAttributes::SCode.Attributes, inNewAttributes::SCode.Attributes) ::SCode.Attributes
               local outNewAttributes::SCode.Attributes
 
               local dims1::Absyn.ArrayDim
@@ -755,7 +756,7 @@
           outNewAttributes
         end
 
-        function propagateArrayDimensions(inOriginalDims::Absyn.ArrayDim, inNewDims::Absyn.ArrayDim) ::Absyn.ArrayDim 
+        function propagateArrayDimensions(inOriginalDims::Absyn.ArrayDim, inNewDims::Absyn.ArrayDim) ::Absyn.ArrayDim
               local outNewDims::Absyn.ArrayDim
 
               outNewDims = begin
@@ -763,7 +764,7 @@
                   (_,  nil())  => begin
                     inOriginalDims
                   end
-                  
+
                   _  => begin
                       inNewDims
                   end
@@ -772,7 +773,7 @@
           outNewDims
         end
 
-        function propagateConnectorType(inOriginalConnectorType::SCode.ConnectorType, inNewConnectorType::SCode.ConnectorType) ::SCode.ConnectorType 
+        function propagateConnectorType(inOriginalConnectorType::SCode.ConnectorType, inNewConnectorType::SCode.ConnectorType) ::SCode.ConnectorType
               local outNewConnectorType::SCode.ConnectorType
 
               outNewConnectorType = begin
@@ -780,7 +781,7 @@
                   (_, SCode.POTENTIAL(__))  => begin
                     inOriginalConnectorType
                   end
-                  
+
                   _  => begin
                       inNewConnectorType
                   end
@@ -789,7 +790,7 @@
           outNewConnectorType
         end
 
-        function propagateParallelism(inOriginalParallelism::SCode.Parallelism, inNewParallelism::SCode.Parallelism) ::SCode.Parallelism 
+        function propagateParallelism(inOriginalParallelism::SCode.Parallelism, inNewParallelism::SCode.Parallelism) ::SCode.Parallelism
               local outNewParallelism::SCode.Parallelism
 
               outNewParallelism = begin
@@ -797,7 +798,7 @@
                   (_, SCode.NON_PARALLEL(__))  => begin
                     inOriginalParallelism
                   end
-                  
+
                   _  => begin
                       inNewParallelism
                   end
@@ -806,7 +807,7 @@
           outNewParallelism
         end
 
-        function propagateVariability(inOriginalVariability::SCode.Variability, inNewVariability::SCode.Variability) ::SCode.Variability 
+        function propagateVariability(inOriginalVariability::SCode.Variability, inNewVariability::SCode.Variability) ::SCode.Variability
               local outNewVariability::SCode.Variability
 
               outNewVariability = begin
@@ -814,7 +815,7 @@
                   (_, SCode.VAR(__))  => begin
                     inOriginalVariability
                   end
-                  
+
                   _  => begin
                       inNewVariability
                   end
@@ -823,7 +824,7 @@
           outNewVariability
         end
 
-        function propagateDirection(inOriginalDirection::Absyn.Direction, inNewDirection::Absyn.Direction) ::Absyn.Direction 
+        function propagateDirection(inOriginalDirection::Absyn.Direction, inNewDirection::Absyn.Direction) ::Absyn.Direction
               local outNewDirection::Absyn.Direction
 
               outNewDirection = begin
@@ -831,7 +832,7 @@
                   (_, Absyn.BIDIR(__))  => begin
                     inOriginalDirection
                   end
-                  
+
                   _  => begin
                       inNewDirection
                   end
@@ -840,7 +841,7 @@
           outNewDirection
         end
 
-        function propagateIsField(inOriginalIsField::Absyn.IsField, inNewIsField::Absyn.IsField) ::Absyn.IsField 
+        function propagateIsField(inOriginalIsField::Absyn.IsField, inNewIsField::Absyn.IsField) ::Absyn.IsField
               local outNewIsField::Absyn.IsField
 
               outNewIsField = begin
@@ -848,7 +849,7 @@
                   (_, Absyn.NONFIELD(__))  => begin
                     inOriginalIsField
                   end
-                  
+
                   _  => begin
                       inNewIsField
                   end
@@ -860,7 +861,7 @@
          #= @author: adrpo
          good for debugging redeclares.
          uncomment it in replaceElementInScope to activate it =#
-        function traceReplaceElementInScope(inElementName::SCode.Ident, inOldItem::Item, inNewItem::Item, inEnv::Env)  
+        function traceReplaceElementInScope(inElementName::SCode.Ident, inOldItem::Item, inNewItem::Item, inEnv::Env)
               _ = begin
                 @matchcontinue (inElementName, inOldItem, inNewItem, inEnv) begin
                   (_, _, _, _)  => begin
@@ -869,7 +870,7 @@
                       print("New Element:" + NFSCodeEnv.itemStr(inNewItem) + " env: " + NFSCodeEnv.getEnvName(NFSCodeEnv.getItemEnvNoFail(inNewItem)) + "\\n===============\\n")
                     ()
                   end
-                  
+
                   _  => begin
                         print("traceReplaceElementInScope failed on element: " + inElementName + "\\n")
                       ()
@@ -881,7 +882,7 @@
          #= @author: adrpo
          good for debugging redeclares.
          uncomment it in pushRedeclareIntoExtends to activate it =#
-        function tracePushRedeclareIntoExtends(inName::SCode.Ident, inRedeclare::NFSCodeEnv.Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Env, inEtNew::NFSCodeEnv.ExtendsTable, inEtOld::NFSCodeEnv.ExtendsTable)  
+        function tracePushRedeclareIntoExtends(inName::SCode.Ident, inRedeclare::NFSCodeEnv.Item, inBaseClasses::List{<:Absyn.Path}, inEnv::Env, inEtNew::NFSCodeEnv.ExtendsTable, inEtOld::NFSCodeEnv.ExtendsTable)
               _ = begin
                 @matchcontinue (inName, inRedeclare, inBaseClasses, inEnv, inEtNew, inEtOld) begin
                   (_, _, _, _, _, _)  => begin
@@ -891,7 +892,7 @@
                       print("-----------------\\n")
                     ()
                   end
-                  
+
                   _  => begin
                         print("tracePushRedeclareIntoExtends failed on element: " + inName + "\\n")
                       ()

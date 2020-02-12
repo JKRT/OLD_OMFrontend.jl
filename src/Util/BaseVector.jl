@@ -1,12 +1,13 @@
-  #=TODO: Originally partial =# module BaseVector 
+  #=TODO: Originally partial =# module BaseVector
 
 
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
-    @UniontypeDecl VectorInternal 
+    @UniontypeDecl VectorInternal
 
     MapFunc = Function
 
@@ -42,7 +43,7 @@
          * See the full OSMC Public License conditions for more details.
          *
          */ =#
-        T = ModelicaInteger 
+        T = ModelicaInteger
          #=  Should be Any.
          =#
          const defaultValue::T
@@ -54,7 +55,7 @@
 
          #=  The Vector type is an array of one VectorInternal, to make it completely mutable.
          =#
-        Vector = Array 
+        Vector = Array
 
          @Uniontype VectorInternal begin
               @Record VECTOR begin
@@ -66,7 +67,7 @@
          end
 
          #= Creates a new empty Vector with a certain capacity. =#
-        function new(inSize::ModelicaInteger = 1) ::Vector 
+        function new(inSize::ModelicaInteger = 1) ::Vector
               local outVector::Vector
 
               local data::Array{T}
@@ -78,7 +79,7 @@
         end
 
          #= Creates a new Vector filled with the given value. =#
-        function newFill(inSize::ModelicaInteger, inFillValue::T) ::Vector 
+        function newFill(inSize::ModelicaInteger, inFillValue::T) ::Vector
               local outVector::Vector
 
               local data::Array{T}
@@ -90,33 +91,33 @@
         end
 
          #= Appends a value to the end of the Vector. =#
-        function add(inVector::Vector, inValue::T)  
+        function add(inVector::Vector, inValue::T)
               local vec::VectorInternal = inVector[1]
               local capacity::ModelicaInteger
 
-              vec.size = vec.size + 1
+              Setfield.@set vec.size = vec.size + 1
               if vec.size > vec.capacity
-                vec.capacity = integer(ceil(intReal(vec.capacity) * growthFactor))
-                vec.data = copyArray(vec.data, vec.capacity)
+                Setfield.@set vec.capacity = integer(ceil(intReal(vec.capacity) * growthFactor))
+                Setfield.@set vec.data = copyArray(vec.data, vec.capacity)
               end
               Dangerous.arrayUpdateNoBoundsChecking(vec.data, vec.size, inValue)
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
         end
 
          #= Removes the last element in the Vector. =#
-        function pop(inVector::Vector)  
+        function pop(inVector::Vector)
               local vec::VectorInternal = inVector[1]
 
               if freePolicy == FreePolicy.ON_DELETION
                 arrayUpdate(vec.data, vec.size, defaultValue)
               end
-              vec.size = max(vec.size - 1, 0)
+              Setfield.@set vec.size = max(vec.size - 1, 0)
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
         end
 
          #= Sets the element at the given index to the given value. Fails if the index is
            out of bounds. =#
-        function set(inVector::Vector, inIndex::ModelicaInteger, inValue::T)  
+        function set(inVector::Vector, inIndex::ModelicaInteger, inValue::T)
               local vec::VectorInternal = inVector[1]
 
               if inIndex > 0 && inIndex <= vec.size
@@ -128,7 +129,7 @@
 
          #= Returns the value of the element at the given index. Fails if the index is
            out of bounds. =#
-        function get(inVector::Vector, inIndex::ModelicaInteger) ::T 
+        function get(inVector::Vector, inIndex::ModelicaInteger) ::T
               local outValue::T
 
               local vec::VectorInternal = inVector[1]
@@ -141,7 +142,7 @@
           outValue
         end
 
-        function last(inVector::Vector) ::T 
+        function last(inVector::Vector) ::T
               local outValue::T
 
               local vec::VectorInternal = inVector[1]
@@ -155,7 +156,7 @@
         end
 
          #= Returns the number of elements in the Vector. =#
-        function size(inVector::Vector) ::ModelicaInteger 
+        function size(inVector::Vector) ::ModelicaInteger
               local outSize::ModelicaInteger = inVector.size
           outSize
         end
@@ -168,25 +169,25 @@
 
          #= Return the number of elements the Vector can store without having to allocate
            more memory. =#
-        function capacity(inVector::Vector) ::ModelicaInteger 
+        function capacity(inVector::Vector) ::ModelicaInteger
               local outCapacity::ModelicaInteger = inVector.capacity
           outCapacity
         end
 
          #= Returns true if the Vector is empty, otherwise false. =#
-        function isEmpty(inVector::Vector) ::Bool 
+        function isEmpty(inVector::Vector) ::Bool
               local outIsEmpty::Bool = inVector.size == 0
           outIsEmpty
         end
 
          #= Increases the capacity of the Vector to the given amount of elements.
            Does nothing if the Vector's capacity is already large enough. =#
-        function reserve(inVector::Vector, inSize::ModelicaInteger)  
+        function reserve(inVector::Vector, inSize::ModelicaInteger)
               local vec::VectorInternal = inVector[1]
 
               if inSize > vec.capacity
-                vec.data = copyArray(vec.data, inSize)
-                vec.capacity = inSize
+                Setfield.@set vec.data = copyArray(vec.data, inSize)
+                Setfield.@set vec.capacity = inSize
                 Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
               end
         end
@@ -196,15 +197,15 @@
            This can trigger a reallocation. If the new size is smaller than the previous
            size, then the Vector is shrunk to the given size. This only shrinks the size
            of the Vector, not its capacity. =#
-        function resize(inVector::Vector, inNewSize::ModelicaInteger, inFillValue::T = defaultValue)  
+        function resize(inVector::Vector, inNewSize::ModelicaInteger, inFillValue::T = defaultValue)
               local vec::VectorInternal = inVector[1]
 
               if inNewSize <= 0
                 fail()
               elseif inNewSize > vec.size
                 if inNewSize > vec.capacity
-                  vec.data = copyArray(vec.data, inNewSize)
-                  vec.capacity = inNewSize
+                  Setfield.@set vec.data = copyArray(vec.data, inNewSize)
+                  Setfield.@set vec.capacity = inNewSize
                 end
                 fillArray(vec.data, inFillValue, vec.size + 1, inNewSize)
               elseif freePolicy == FreePolicy.ON_DELETION
@@ -214,7 +215,7 @@
                =#
                #=  Fill the space between the last element and the new end of the array.
                =#
-              vec.size = inNewSize
+              Setfield.@set vec.size = inNewSize
               Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
         end
 
@@ -223,19 +224,19 @@
            this is only done when the size is smaller than the capacity by a certain
            threshold. The default threshold is 0.9, i.e. the Vector is only trimmed if
            it's less than 90% full. =#
-        function trim(inVector::Vector, inThreshold::ModelicaReal = 0.9)  
+        function trim(inVector::Vector, inThreshold::ModelicaReal = 0.9)
               local vec::VectorInternal = inVector[1]
 
               if vec.size < integer(intReal(vec.capacity) * inThreshold)
-                vec.data = copyArray(vec.data, vec.size)
-                vec.capacity = vec.size
+                Setfield.@set vec.data = copyArray(vec.data, vec.size)
+                Setfield.@set vec.capacity = vec.size
                 Dangerous.arrayUpdateNoBoundsChecking(inVector, 1, vec)
               end
         end
 
          #= Fills the given interval with the given value. Fails if the start or end
            position is out of bounds. Does nothing if start is larger than end. =#
-        function fill(inVector::Vector, inFillValue::T, inStart::ModelicaInteger = 1, inEnd::ModelicaInteger = length(inVector))  
+        function fill(inVector::Vector, inFillValue::T, inStart::ModelicaInteger = 1, inEnd::ModelicaInteger = length(inVector))
               local vec::VectorInternal = inVector[1]
 
               if inStart < 1 || inEnd < 1 || inEnd > length(inVector)
@@ -245,13 +246,13 @@
         end
 
          #= Creates a Vector from a list. =#
-        function fromList(inList::List{<:T}) ::Vector 
+        function fromList(inList::List{<:T}) ::Vector
               local outVector::Vector = fromArray(listArray(inList))
           outVector
         end
 
          #= Converts a Vector to a list. =#
-        function toList(inVector::Vector) ::List{T} 
+        function toList(inVector::Vector) ::List{T}
               local outList::List{T}
 
               local data::Array{T}
@@ -273,7 +274,7 @@
 
          #= Creates a Vector from an array. The array is copied, so changes to the
            Vector's internal array will not affect the given array. =#
-        function fromArray(inArray::Array{<:T}) ::Vector 
+        function fromArray(inArray::Array{<:T}) ::Vector
               local outVector::Vector
 
               local sz::ModelicaInteger = arrayLength(inArray)
@@ -284,7 +285,7 @@
 
          #= Converts a Vector to an array. This makes a copy of the Vector's internal
            array, so changing the returned array will not affect the Vector. =#
-        function toArray(inVector::Vector) ::Array{T} 
+        function toArray(inVector::Vector) ::Array{T}
               local outArray::Array{T}
 
               local data::Array{T}
@@ -311,7 +312,7 @@
 
          #= Applies the given function to each element in the Vector, changing each
            element's value to the result of the call. =#
-        function map(inVector::Vector, inFunc::MapFunc)  
+        function map(inVector::Vector, inFunc::MapFunc)
               local data::Array{T}
               local sz::ModelicaInteger
               local old_val::T
@@ -343,12 +344,12 @@
         end
 
          #= Creates a clone of the given Vector. =#
-        function clone(inVector::Vector) ::Vector 
+        function clone(inVector::Vector) ::Vector
               local outVector::Vector
 
               local vec::VectorInternal = inVector[1]
 
-              vec.data = arrayCopy(vec.data)
+              Setfield.@set vec.data = arrayCopy(vec.data)
               outVector = arrayCreate(1, vec)
           outVector
         end
@@ -356,7 +357,7 @@
          #= Allocates a new array with the given size, and copies elements from the given
            array to the new array until either all elements have been copied or the new
            array has been filled. =#
-        function copyArray(inArray::Array{<:T}, inNewSize::ModelicaInteger) ::Array{T} 
+        function copyArray(inArray::Array{<:T}, inNewSize::ModelicaInteger) ::Array{T}
               local outArray::Array{T}
 
               outArray = Dangerous.arrayCreateNoInit(inNewSize, defaultValue)
@@ -367,7 +368,7 @@
         end
 
          #= Fills an array with the given value. =#
-        function fillArray(inArray::Array{<:T}, inValue::T, inStart::ModelicaInteger, inEnd::ModelicaInteger)  
+        function fillArray(inArray::Array{<:T}, inValue::T, inStart::ModelicaInteger, inEnd::ModelicaInteger)
               for i in inStart:inEnd
                 Dangerous.arrayUpdateNoBoundsChecking(inArray, i, inValue)
               end

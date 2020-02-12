@@ -391,6 +391,9 @@
           (outCache, outEnv, outIH, outDae)
         end
 
+        function fnBreak(s)
+          println(s)
+        end
          #= Instantiation of a class can be either implicit or normal.
           This function is used in both cases. When implicit instantiation
           is performed, the last argument is true, otherwise it is false.
@@ -1441,7 +1444,7 @@
                #=  Check that we don't have an instantiation loop.
                =#
               if numIter >= Global.recursionDepthLimit
-                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(String(Global.recursionDepthLimit), FGraphUtil.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
+                Error.addSourceMessage(Error.RECURSION_DEPTH_REACHED, list(StringFunction(Global.recursionDepthLimit), FGraphUtil.printGraphPathStr(env)), SCodeUtil.elementInfo(cls))
                 fail()
               end
                #=  Instantiate the class and add it to the cache.
@@ -2080,7 +2083,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
-                      @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
+                      @match (cache, _, ih, ty <| nil, csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAOPTION(ty))
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
@@ -2102,7 +2105,7 @@
                       @match true = Config.acceptMetaModelicaGrammar()
                       @match false = Mutable.access(stopInst)
                       @match true = Mod.emptyModOrEquality(mods) && SCodeUtil.emptyModOrEquality(mod)
-                      @match (cache, _, ih, list(ty), csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
+                      @match (cache, _, ih, ty <| nil, csets, oDA) = instClassDefHelper(cache, env, ih, list(tSpec), pre, inst_dims, impl, nil, inSets, info)
                       ty = Types.boxIfUnboxedType(ty)
                       bc = SOME(DAE.T_METAARRAY(ty))
                       oDA = SCodeUtil.mergeAttributes(DA, oDA)
@@ -2143,7 +2146,7 @@
                       (cache, _, ih, tys, csets, oDA) = instClassDefHelper(cache, env, ih, tSpecs, pre, inst_dims, impl, nil, inSets, info)
                       tys = list(Types.boxIfUnboxedType(t) for t in tys)
                       if ! listLength(tys) == listLength(typeVars)
-                        Error.addSourceMessage(Error.UNIONTYPE_WRONG_NUM_TYPEVARS, list(AbsynUtil.pathString(fq_class), String(listLength(typeVars)), String(listLength(tys))), info)
+                        Error.addSourceMessage(Error.UNIONTYPE_WRONG_NUM_TYPEVARS, list(AbsynUtil.pathString(fq_class), StringFunction(listLength(typeVars)), StringFunction(listLength(tys))), info)
                         fail()
                       end
                       ty = Types.setTypeVariables(ty, tys)
@@ -2791,7 +2794,7 @@
                 isDeleted = ! cond_val
                 if isDeleted == true
                   var = DAE.TYPES_VAR(el_name, DAE.dummyAttrVar, DAE.T_UNKNOWN_DEFAULT, DAE.UNBOUND(), NONE())
-                  env = FGraphUtil.updateComp(env, var, FCore.VAR_DELETED(), FGraphUtil.emptyGraph)
+                  env = FGraphUtil.updateComp(env, var, FCore.VAR_DELETED(), FCore.emptyGraph)
                 end
               else
                 isDeleted = false
@@ -3587,7 +3590,7 @@
                   (cache, env, ih, _, _, _, _, _, _, _)  => begin
                       id = AbsynUtil.crefFirstIdent(cref)
                       (cache, _, _, _, is, _) = Lookup.lookupIdent(cache, env, id)
-                      @match true = FCore.isTyped(is) #= If InstStatus is typed, return =#
+                      @match true = FCoreUtil.isTyped(is) #= If InstStatus is typed, return =#
                     (cache, env, ih, inUpdatedComps)
                   end
 
@@ -4102,7 +4105,10 @@
                   end
 
                   (cache, env, ih, pre, csets, ci_state, _, e <| es, impl, _, graph)  => begin
+                      @show instFunc
+                      @show e
                       (cache, env_1, ih, dae1, csets_1, ci_state_1, graph) = instFunc(cache, env, ih, pre, csets, ci_state, e, impl, unrollForLoops, graph)
+                      @show es
                       (cache, env_2, ih, dae2, csets_2, ci_state_2, graph) = instList(cache, env_1, ih, pre, csets_1, ci_state_1, instFunc, es, impl, unrollForLoops, graph)
                       dae = DAEUtil.joinDaes(dae1, dae2)
                     (cache, env_2, ih, dae, csets_2, ci_state_2, graph)
@@ -4233,25 +4239,25 @@
                   local attrs::DAE.DAElist
                 @match (inAttrs, attrName, inAttrExp) begin
                   (attrs, "objective", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(_, objectiveIntegrandE, startTimeE, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(SOME(inAttrExp), objectiveIntegrandE, startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "objectiveIntegrand", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, _, startTimeE, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, SOME(inAttrExp), startTimeE, finalTimeE))))
                     attrs
                   end
 
                   (attrs, "startTime", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, _, finalTimeE)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, SOME(inAttrExp), finalTimeE))))
                     attrs
                   end
 
                   (attrs, "finalTime", _)  => begin
-                      @match DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)))) = attrs
+                      @match DAE.DAE_LIST(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, _)) <| nil) = attrs
                       attrs = DAE.DAE_LIST(list(DAE.CLASS_ATTRIBUTES(DAE.OPTIMIZATION_ATTRS(objectiveE, objectiveIntegrandE, startTimeE, SOME(inAttrExp)))))
                     attrs
                   end

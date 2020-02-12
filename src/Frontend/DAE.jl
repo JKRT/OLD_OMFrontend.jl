@@ -535,6 +535,7 @@ using MetaModelica
 using ExportAll
 using BaseAvlTree
 import Absyn
+import AbsynUtil
 Key = Absyn.Path
 Value = Option
 

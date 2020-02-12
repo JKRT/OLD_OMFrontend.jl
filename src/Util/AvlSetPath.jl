@@ -1,4 +1,4 @@
-  module AvlSetPath 
+  module AvlSetPath
 
 
     using MetaModelica
@@ -39,11 +39,11 @@
         import AbsynUtil
         import BaseAvlSet
         using BaseAvlSet
-        Key = Absyn.Path 
+        Key = Absyn.Path
 
-
-
-
+        function BaseAvlSet.LEAF(key::Key)::BaseAvlSet.Tree
+          BaseAvlSet.LEAF(key,nothing)
+        end
 
     #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
     @exportAll()

@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    import Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -64,7 +66,7 @@
                         (c, meta_classes) = createMetaClasses(c)
                         classes = _cons(c, listAppend(meta_classes, classes))
                       end
-                      outProgram.classes = Dangerous.listReverseInPlace(classes)
+                      Setfield.@set outProgram.classes = Dangerous.listReverseInPlace(classes)
                        #=  print(Dump.unparseStr(outProgram));
                        =#
                     ()
@@ -93,15 +95,15 @@
                 @match outClass begin
                   Absyn.CLASS(restriction = Absyn.R_UNIONTYPE(__), body = body && Absyn.PARTS(classParts = parts))  => begin
                       (parts, outMetaClasses) = fixClassParts(parts, outClass.name, body.typeVars)
-                      body.classParts = parts
-                      outClass.body = body
+                      Setfield.@set body.classParts = parts
+                      Setfield.@set outClass.body = body
                     ()
                   end
 
                   Absyn.CLASS(restriction = Absyn.R_UNIONTYPE(__), body = body && Absyn.CLASS_EXTENDS(parts = parts))  => begin
                       (parts, outMetaClasses) = fixClassParts(parts, outClass.name, nil)
-                      body.parts = parts
-                      outClass.body = body
+                      Setfield.@set body.parts = parts
+                      Setfield.@set outClass.body = body
                     ()
                   end
 
@@ -113,14 +115,14 @@
               _ = begin
                 @match outClass begin
                   Absyn.CLASS(body = body && Absyn.PARTS(__))  => begin
-                      body.classParts = createMetaClassesFromClassParts(body.classParts)
-                      outClass.body = body
+                      Setfield.@set body.classParts = createMetaClassesFromClassParts(body.classParts)
+                      Setfield.@set outClass.body = body
                     ()
                   end
 
                   Absyn.CLASS(body = body && Absyn.CLASS_EXTENDS(__))  => begin
-                      body.parts = createMetaClassesFromClassParts(body.parts)
-                      outClass.body = body
+                      Setfield.@set body.parts = createMetaClassesFromClassParts(body.parts)
+                      Setfield.@set outClass.body = body
                     ()
                   end
 
@@ -138,12 +140,12 @@
               outClassParts = list(begin
                 @match p begin
                   Absyn.PUBLIC(__)  => begin
-                      p.contents = createMetaClassesFromElementItems(p.contents)
+                      Setfield.@set p.contents = createMetaClassesFromElementItems(p.contents)
                     p
                   end
 
                   Absyn.PROTECTED(__)  => begin
-                      p.contents = createMetaClassesFromElementItems(p.contents)
+                      Setfield.@set p.contents = createMetaClassesFromElementItems(p.contents)
                     p
                   end
 
@@ -190,9 +192,9 @@
                   local es::Absyn.ElementSpec
                 @match outElementItem begin
                   Absyn.ELEMENTITEM(element = e && Absyn.ELEMENT(specification = es && Absyn.CLASSDEF(__)))  => begin
-                      es.class_ = inClass
-                      e.specification = es
-                      outElementItem.element = e
+                      Setfield.@set es.class_ = inClass
+                      Setfield.@set e.specification = es
+                      Setfield.@set outElementItem.element = e
                     outElementItem
                   end
 
@@ -222,14 +224,14 @@
                 @match p begin
                   Absyn.PUBLIC(__)  => begin
                       (els, meta_classes) = fixElementItems(p.contents, inClassName, typeVars)
-                      p.contents = els
+                      Setfield.@set p.contents = els
                       outMetaClasses = listAppend(meta_classes, outMetaClasses)
                     p
                   end
 
                   Absyn.PROTECTED(__)  => begin
                       (els, meta_classes) = fixElementItems(p.contents, inClassName, typeVars)
-                      p.contents = els
+                      Setfield.@set p.contents = els
                       outMetaClasses = listAppend(meta_classes, outMetaClasses)
                     p
                   end
@@ -275,12 +277,12 @@
                        #=  Change the record into a metarecord and add it to the list of metaclasses.
                        =#
                       r = Absyn.R_METARECORD(Absyn.IDENT(inName), index, singleton, true, typeVars)
-                      c.restriction = r
+                      Setfield.@set c.restriction = r
                       outMetaClasses = _cons(c, outMetaClasses)
                        #=  Change the record into a metarecord and update the original class.
                        =#
                       r = Absyn.R_METARECORD(Absyn.IDENT(inName), index, singleton, false, typeVars)
-                      c.restriction = r
+                      Setfield.@set c.restriction = r
                       index = index + 1
                     setElementItemClass(e, c)
                   end

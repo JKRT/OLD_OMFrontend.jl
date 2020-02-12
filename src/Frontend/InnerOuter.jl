@@ -36,7 +36,7 @@ module InnerOuter
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
     @UniontypeDecl InstResult
     @UniontypeDecl InstInner
@@ -232,7 +232,7 @@ module InnerOuter
 
          #= changes inner to outer and outer to inner where needed =#
         function changeInnerOuterInOuterConnect(sets::DAE.Sets) ::DAE.Sets
-          @set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
+          Setfield.@set sets.outerConnects = ListUtil.map(sets.outerConnects, changeInnerOuterInOuterConnect2)
           sets
         end
 
@@ -491,7 +491,7 @@ module InnerOuter
 
               @match DAE.SETS(outerConnects = oc) = inSets
               (oc, outSets, outInnerOuterConnects, outCGraph) = retrieveOuterConnections2(inCache, inEnv, inIH, inPrefix, oc, inSets, inTopCall, inCGraph)
-              @set outSets.outerConnects = oc
+              Setfield.@set outSets.outerConnects = oc
           (outSets, outInnerOuterConnects, outCGraph)
         end
 
@@ -1377,7 +1377,7 @@ module InnerOuter
               _ = begin
                 @match outNode begin
                   FCore.N(__)  => begin
-                      outNode.children = FNode.RefTree.map(outNode.children, (inCr) -> switchInnerToOuterInChild(cr = inCr))
+                      Setfield.@set outNode.children = FNode.RefTree.map(outNode.children, (inCr) -> switchInnerToOuterInChild(cr = inCr))
                     ()
                   end
 
@@ -1654,22 +1654,57 @@ module InnerOuter
           outIH
         end
 
-function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
-  function getGraphNameStr(inGraph::FCore.Graph) ::String
-    local outString::String
-    outString = begin
-      @matchcontinue inGraph begin
-        _  => begin
-          AbsynUtil.pathString(getGraphName(inGraph))
-        end
-        _  => begin
-          "."
-        end
-      end
-    end
-    outString
-  end
+        #= get the top current scope from the graph =#
+       function currentScope(inGraph::FCore.Graph) ::Scope
+             local outScope::Scope
 
+             outScope = begin
+               @match inGraph begin
+                 FCore.G(scope = outScope)  => begin
+                   outScope
+                 end
+
+                 FCore.EG(_)  => begin
+                   nil
+                 end
+               end
+             end
+         outScope
+       end
+
+        #= Returns the FQ name of the environment. =#
+       function getGraphName(inGraph::FCore.Graph) ::Absyn.Path
+             local outPath::Absyn.Path
+
+             local p::Absyn.Path
+             local s::Scope
+             local r::MMRef
+
+             @match _cons(r, s) = currentScope(inGraph)
+             p = AbsynUtil.makeIdentPathFromString(FNode.refName(r))
+             for r in s
+               p = Absyn.QUALIFIED(FNode.refName(r), p)
+             end
+             @match Absyn.QUALIFIED(_, outPath) = p
+         outPath
+       end
+
+       function getGraphNameStr(inGraph::FCore.Graph) ::String
+         local outString::String
+         outString = begin
+           @matchcontinue inGraph begin
+             _  => begin
+               AbsynUtil.pathString(getGraphName(inGraph))
+             end
+             _  => begin
+               "."
+             end
+           end
+         end
+         outString
+       end
+
+function addClassIfInner(inClass::SCode.Element, inPrefix::Prefix.PrefixType, inScope::FCore.Graph, inIH::InstHierarchy) ::InstHierarchy
 
               local outIH::InstHierarchy
               outIH = begin

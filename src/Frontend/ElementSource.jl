@@ -5,7 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
-    using Setfield
+    import Setfield
 
         import DAE
         import Prefix
@@ -81,7 +81,7 @@
                   local comment::SCode.Comment
                 @match (source, commentIn) begin
                   (DAE.SOURCE(_, _, _, _, _, _, _), SOME(comment))  => begin
-                      @set source.comment = _cons(comment, source.comment)
+                      Setfield.@set source.comment = _cons(comment, source.comment)
                     source
                   end
 
@@ -669,7 +669,7 @@
               if ! (Flags.isSet(Flags.INFO_XML_OPERATIONS) || Flags.isSet(Flags.VISUAL_XML))
                 return source
               end
-              source.partOfLst = _cons(withinPath, source.partOfLst)
+              Setfield.@set source.partOfLst = _cons(withinPath, source.partOfLst)
           source
         end
 
@@ -699,7 +699,7 @@
         function addElementSourceFileInfo(source::DAE.ElementSource, fileInfo::SourceInfo) ::DAE.ElementSource
               local outSource::DAE.ElementSource = source
 
-              outSource.info = fileInfo
+              Setfield.@set outSource.info = fileInfo
           outSource
         end
 
@@ -760,7 +760,7 @@
                   (DAE.SOURCE(__), _)  => begin
                        #=  a NONE() means top level (equivalent to NO_PRE, SOME(cref) means subcomponent
                        =#
-                      @set source.instance = instanceOpt
+                      Setfield.@set source.instance = instanceOpt
                     ()
                   end
                 end

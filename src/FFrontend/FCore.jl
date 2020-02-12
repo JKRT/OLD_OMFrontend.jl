@@ -35,6 +35,7 @@ using MetaModelica
 #= ExportAll is not good practice but it makes it so that we do not have to write export after each functixon :( =#
 using ExportAll
   #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+import Setfield
 
 @UniontypeDecl ImportTable
 @UniontypeDecl Node
@@ -520,6 +521,45 @@ end
   @Record PARALLEL_SCOPE begin
 
   end
+end
+
+function isImplicitScope(inName::Name) ::Bool
+  local isImplicit::Bool
+
+  isImplicit = begin
+    local id::Name
+    @matchcontinue inName begin
+      id  => begin
+        stringGet(id, 1) == 36
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  #=  \"$\"
+  =#
+  isImplicit
+end
+
+#= Returns true if the status indicates a deleted conditional component,
+otherwise false. =#
+function isDeletedComp(status::Status) ::Bool
+  local isDeleted::Bool
+
+  isDeleted = begin
+    @match status begin
+      VAR_DELETED(__)  => begin
+        true
+      end
+
+      _  => begin
+        false
+      end
+    end
+  end
+  isDeleted
 end
 
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#

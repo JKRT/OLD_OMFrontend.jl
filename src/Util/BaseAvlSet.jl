@@ -6,7 +6,7 @@
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
 
-    using Setfield
+    import Setfield
 
     @UniontypeDecl Tree
     keyStr = Function
@@ -110,9 +110,9 @@
                   NODE(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
-                        tree.left = add(tree.left, inKey)
+                        Setfield.@set tree.left = add(tree.left, inKey)
                       elseif key_comp == 1
-                        tree.right = add(tree.right, inKey)
+                        Setfield.@set tree.right = add(tree.right, inKey)
                       end
                        #=  Replace left branch.
                        =#
@@ -128,9 +128,9 @@
                   LEAF(key = key)  => begin
                       key_comp = keyCompare(inKey, key)
                       if key_comp == (-1)
-                        outTree = NODE(tree.key, 2, LEAF(inKey), EMPTY())
+                        outTree = NODE(tree.key, nothing, 2, LEAF(inKey), EMPTY())
                       elseif key_comp == 1
-                        outTree = NODE(tree.key, 2, EMPTY(), LEAF(inKey))
+                        outTree = NODE(tree.key, nothing, 2, EMPTY(), LEAF(inKey))
                       else
                         outTree = tree
                       end
@@ -466,7 +466,7 @@
                               rotateRight(outTree)
                             end
                       elseif outTree.height != max(lh, rh) + 1
-                        @set outTree.height = max(lh, rh) + 1
+                        Setfield.@set outTree.height = max(lh, rh) + 1
                         balanced_tree = outTree
                       else
                         balanced_tree = outTree

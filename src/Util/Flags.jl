@@ -1,17 +1,18 @@
-  module Flags 
+  module Flags
 
 
     using MetaModelica
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
-    @UniontypeDecl DebugFlag 
-    @UniontypeDecl ConfigFlag 
-    @UniontypeDecl FlagData 
-    @UniontypeDecl FlagVisibility 
-    @UniontypeDecl Flag 
-    @UniontypeDecl ValidOptions 
+    @UniontypeDecl DebugFlag
+    @UniontypeDecl ConfigFlag
+    @UniontypeDecl FlagData
+    @UniontypeDecl FlagVisibility
+    @UniontypeDecl Flag
+    @UniontypeDecl ValidOptions
 
          #= /*
          * This file is part of OpenModelica.
@@ -65,7 +66,7 @@
         import StringUtil
 
         import System
-        
+
         const emptyFlags = nil ::List{String};
 
          @Uniontype DebugFlag begin
@@ -532,7 +533,7 @@
          const allConfigFlags = list(DEBUG, HELP, RUNNING_TESTSUITE, SHOW_VERSION, TARGET, GRAMMAR, ANNOTATION_VERSION, LANGUAGE_STANDARD, SHOW_ERROR_MESSAGES, SHOW_ANNOTATIONS, NO_SIMPLIFY, PRE_OPT_MODULES, CHEAPMATCHING_ALGORITHM, MATCHING_ALGORITHM, INDEX_REDUCTION_METHOD, POST_OPT_MODULES, SIMCODE_TARGET, ORDER_CONNECTIONS, TYPE_INFO, KEEP_ARRAYS, MODELICA_OUTPUT, SILENT, CORBA_SESSION, NUM_PROC, LATENCY, BANDWIDTH, INST_CLASS, VECTORIZATION_LIMIT, SIMULATION_CG, EVAL_PARAMS_IN_ANNOTATIONS, CHECK_MODEL, CEVAL_EQUATION, UNIT_CHECKING, TRANSLATE_DAE_STRING, GENERATE_LABELED_SIMCODE, REDUCE_TERMS, REDUCTION_METHOD, DEMO_MODE, LOCALE_FLAG, DEFAULT_OPENCL_DEVICE, MAXTRAVERSALS, DUMP_TARGET, DELAY_BREAK_LOOP, TEARING_METHOD, TEARING_HEURISTIC, DISABLE_LINEAR_TEARING, SCALARIZE_MINMAX, RUNNING_WSM_TESTSUITE, SCALARIZE_BINDINGS, CORBA_OBJECT_REFERENCE_FILE_PATH, HPCOM_SCHEDULER, HPCOM_CODE, REWRITE_RULES_FILE, REPLACE_HOMOTOPY, GENERATE_SYMBOLIC_JACOBIAN, GENERATE_SYMBOLIC_LINEARIZATION, INT_ENUM_CONVERSION, PROFILING_LEVEL, RESHUFFLE, GENERATE_DYN_OPTIMIZATION_PROBLEM, CSE_CALL, CSE_BINARY, CSE_EACHCALL, MAX_SIZE_FOR_SOLVE_LINIEAR_SYSTEM, CPP_FLAGS, REMOVE_SIMPLE_EQUATIONS, DYNAMIC_TEARING, SYM_SOLVER, ADD_TIME_AS_STATE, LOOP2CON, FORCE_TEARING, SIMPLIFY_LOOPS, RTEARING, FLOW_THRESHOLD, MATRIX_FORMAT, PARTLINTORN, INIT_OPT_MODULES, MAX_MIXED_DETERMINED_INDEX, USE_LOCAL_DIRECTION, DEFAULT_OPT_MODULES_ORDERING, PRE_OPT_MODULES_ADD, PRE_OPT_MODULES_SUB, POST_OPT_MODULES_ADD, POST_OPT_MODULES_SUB, INIT_OPT_MODULES_ADD, INIT_OPT_MODULES_SUB, PERMISSIVE, HETS, DEFAULT_CLOCK_PERIOD, INST_CACHE_SIZE, MAX_SIZE_LINEAR_TEARING, MAX_SIZE_NONLINEAR_TEARING, NO_TEARING_FOR_COMPONENT, CT_STATE_MACHINES, DAE_MODE, INLINE_METHOD, SET_TEARING_VARS, SET_RESIDUAL_EQNS, IGNORE_COMMAND_LINE_OPTIONS_ANNOTATION, CALCULATE_SENSITIVITIES, ALARM, TOTAL_TEARING, IGNORE_SIMULATION_FLAGS_ANNOTATION, DYNAMIC_TEARING_FOR_INITIALIZATION, PREFER_TVARS_WITH_START_VALUE, EQUATIONS_PER_FILE, EVALUATE_FINAL_PARAMS, EVALUATE_PROTECTED_PARAMS, REPLACE_EVALUATED_PARAMS, CONDENSE_ARRAYS, WFC_ADVANCED, GRAPHICS_EXP_MODE, TEARING_STRICTNESS, INTERACTIVE, ZEROMQ_FILE_SUFFIX, HOMOTOPY_APPROACH, IGNORE_REPLACEABLE, LABELED_REDUCTION, DISABLE_EXTRA_LABELING, LOAD_MSL_MODEL, Load_PACKAGE_FILE, BUILDING_FMU, BUILDING_MODEL, POST_OPT_MODULES_DAE, EVAL_LOOP_LIMIT, EVAL_RECURSION_LIMIT, SINGLE_INSTANCE_AGLSOLVER, SHOW_STRUCTURAL_ANNOTATIONS, INITIAL_STATE_SELECTION, STRICT)::List
 
          #= Create a new flags structure and read the given arguments. =#
-        function new(inArgs::List{<:String}) ::List{String} 
+        function new(inArgs::List{<:String}) ::List{String}
               local outArgs::List{String}
 
               _ = loadFlags()
@@ -541,11 +542,11 @@
         end
 
          #= Saves the flags with setGlobalRoot. =#
-        function saveFlags(inFlags::Flag)  
+        function saveFlags(inFlags::Flag)
               setGlobalRoot(Global.flagsIndex, inFlags)
         end
 
-        function createConfigFlags() ::Array{FlagData} 
+        function createConfigFlags() ::Array{FlagData}
               local configFlags::Array{FlagData}
 
               local count::ModelicaInteger
@@ -555,7 +556,7 @@
           configFlags
         end
 
-        function createDebugFlags() ::Array{Bool} 
+        function createDebugFlags() ::Array{Bool}
               local debugFlags::Array{Bool}
 
               debugFlags = listArray(list(flag.default for flag in allDebugFlags))
@@ -564,7 +565,7 @@
 
          #= Loads the flags with getGlobalRoot. Creates a new flags structure if it
            hasn't been created yet. =#
-        function loadFlags(initialize::Bool = true) ::Flag 
+        function loadFlags(initialize::Bool = true) ::Flag
               local flags::Flag
 
               local debug_flags::Array{Bool}
@@ -587,7 +588,7 @@
         end
 
          #= Creates a copy of the existing flags. =#
-        function backupFlags() ::Flag 
+        function backupFlags() ::Flag
               local outFlags::Flag
 
               local debug_flags::Array{Bool}
@@ -599,7 +600,7 @@
         end
 
          #= Resets all debug flags to their default values. =#
-        function resetDebugFlags()  
+        function resetDebugFlags()
               local debug_flags::Array{Bool}
               local config_flags::Array{FlagData}
 
@@ -609,17 +610,17 @@
         end
 
          #= Resets all configuration flags to their default values. =#
-        function resetConfigFlags()  
+        function resetConfigFlags()
               local debug_flags::Array{Bool}
               local config_flags::Array{FlagData}
 
               @match FLAGS(debug_flags, _) = loadFlags()
               config_flags = createConfigFlags()
               saveFlags(FLAGS(debug_flags, config_flags))
-        end        
+        end
 
          #= Checks that the flags listed in allDebugFlags have sequential and unique indices. =#
-        function checkDebugFlags()  
+        function checkDebugFlags()
               local index::ModelicaInteger = 0
               local err_str::String
 
@@ -637,7 +638,7 @@
         end
 
          #= Checks that the flags listed in allConfigFlags have sequential and unique indices. =#
-        function checkConfigFlags()  
+        function checkConfigFlags()
               local index::ModelicaInteger = 0
               local err_str::String
 
@@ -655,7 +656,7 @@
         end
 
          #= Sets the value of a debug flag, and returns the old value. =#
-        function set(inFlag::DebugFlag, inValue::Bool) ::Bool 
+        function set(inFlag::DebugFlag, inValue::Bool) ::Bool
               local outOldValue::Bool
 
               local debug_flags::Array{Bool}
@@ -669,7 +670,7 @@
         end
 
          #= Checks if a debug flag is set. =#
-        function isSet(inFlag::DebugFlag) ::Bool 
+        function isSet(inFlag::DebugFlag) ::Bool
               local outValue::Bool
 
               local debug_flags::Array{Bool}
@@ -684,7 +685,7 @@
         end
 
          #= Enables a debug flag. =#
-        function enableDebug(inFlag::DebugFlag) ::Bool 
+        function enableDebug(inFlag::DebugFlag) ::Bool
               local outOldValue::Bool
 
               outOldValue = set(inFlag, true)
@@ -692,7 +693,7 @@
         end
 
          #= Disables a debug flag. =#
-        function disableDebug(inFlag::DebugFlag) ::Bool 
+        function disableDebug(inFlag::DebugFlag) ::Bool
               local outOldValue::Bool
 
               outOldValue = set(inFlag, false)
@@ -700,7 +701,7 @@
         end
 
          #= Updates the value of a debug flag in the debug flag array. =#
-        function updateDebugFlagArray(inFlags::Array{<:Bool}, inValue::Bool, inFlag::DebugFlag) ::Tuple{Array{Bool}, Bool} 
+        function updateDebugFlagArray(inFlags::Array{<:Bool}, inValue::Bool, inFlag::DebugFlag) ::Tuple{Array{Bool}, Bool}
               local outOldValue::Bool
               local outFlags::Array{Bool}
 
@@ -713,7 +714,7 @@
         end
 
          #= Updates the value of a configuration flag in the configuration flag array. =#
-        function updateConfigFlagArray(inFlags::Array{<:FlagData}, inValue::FlagData, inFlag::ConfigFlag) ::Array{FlagData} 
+        function updateConfigFlagArray(inFlags::Array{<:FlagData}, inValue::FlagData, inFlag::ConfigFlag) ::Array{FlagData}
               local outFlags::Array{FlagData}
 
               local index::ModelicaInteger
@@ -727,7 +728,7 @@
          #= Reads the command line arguments to the compiler and sets the flags
           accordingly. Returns a list of arguments that were not consumed, such as the
           model filename. =#
-        function readArgs(inArgs::List{<:String}) ::List{String} 
+        function readArgs(inArgs::List{<:String}) ::List{String}
               local outArgs::List{String} = nil
 
               local flags::Flag
@@ -758,7 +759,7 @@
 
          #= Reads a single command line argument. Returns true if the argument was not
           consumed, otherwise false. =#
-        function readArg(inArg::String, inFlags::Flag) ::Bool 
+        function readArg(inArg::String, inFlags::Flag) ::Bool
               local outConsumed::Bool
 
               local flagtype::String
@@ -820,7 +821,7 @@
         end
 
          #= Parses a single flag. =#
-        function parseFlag(inFlag::String, inFlags::Flag, inFlagPrefix::String = "")  
+        function parseFlag(inFlag::String, inFlags::Flag, inFlagPrefix::String = "")
               local flag::String
               local values::List{String}
 
@@ -830,7 +831,7 @@
         end
 
          #= Tries to look up the flag with the given name, and set it to the given value. =#
-        function parseConfigFlag(inFlag::String, inValues::List{<:String}, inFlags::Flag, inFlagPrefix::String)  
+        function parseConfigFlag(inFlag::String, inValues::List{<:String}, inFlags::Flag, inFlagPrefix::String)
               local config_flag::ConfigFlag
 
               config_flag = lookupConfigFlag(inFlag, inFlagPrefix)
@@ -838,7 +839,7 @@
         end
 
          #= Lookup up the flag with the given name in the list of configuration flags. =#
-        function lookupConfigFlag(inFlag::String, inFlagPrefix::String) ::ConfigFlag 
+        function lookupConfigFlag(inFlag::String, inFlagPrefix::String) ::ConfigFlag
               local outFlag::ConfigFlag
 
               try
@@ -850,7 +851,7 @@
           outFlag
         end
 
-        function configFlagEq(inFlag1::ConfigFlag, inFlag2::ConfigFlag) ::Bool 
+        function configFlagEq(inFlag1::ConfigFlag, inFlag2::ConfigFlag) ::Bool
               local eq::Bool
 
               eq = begin
@@ -865,7 +866,7 @@
           eq
         end
 
-        function setAdditionalOptModules(inFlag::ConfigFlag, inOppositeFlag::ConfigFlag, inValues::List{<:String})  
+        function setAdditionalOptModules(inFlag::ConfigFlag, inOppositeFlag::ConfigFlag, inValues::List{<:String})
               local values::List{String}
 
               for value in inValues
@@ -883,7 +884,7 @@
         end
 
          #= Evaluates a given flag and it's arguments. =#
-        function evaluateConfigFlag(inFlag::ConfigFlag, inValues::List{<:String}, inFlags::Flag)  
+        function evaluateConfigFlag(inFlag::ConfigFlag, inValues::List{<:String}, inFlags::Flag)
               _ = begin
                   local debug_flags::Array{Bool}
                   local config_flags::Array{FlagData}
@@ -895,7 +896,7 @@
                       ListUtil.map1_0(inValues, setDebugFlag, debug_flags)
                     ()
                   end
-                  
+
                   (CONFIG_FLAG(index = 2), _)  => begin
                       values = ListUtil.map(inValues, System.tolower)
                       System.gettextInit(if getConfigString(RUNNING_TESTSUITE) == ""
@@ -907,37 +908,37 @@
                       setConfigString(HELP, "omc")
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, PRE_OPT_MODULES_ADD))  => begin
                       setAdditionalOptModules(PRE_OPT_MODULES_ADD, PRE_OPT_MODULES_SUB, inValues)
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, PRE_OPT_MODULES_SUB))  => begin
                       setAdditionalOptModules(PRE_OPT_MODULES_SUB, PRE_OPT_MODULES_ADD, inValues)
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, POST_OPT_MODULES_ADD))  => begin
                       setAdditionalOptModules(POST_OPT_MODULES_ADD, POST_OPT_MODULES_SUB, inValues)
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, POST_OPT_MODULES_SUB))  => begin
                       setAdditionalOptModules(POST_OPT_MODULES_SUB, POST_OPT_MODULES_ADD, inValues)
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, INIT_OPT_MODULES_ADD))  => begin
                       setAdditionalOptModules(INIT_OPT_MODULES_ADD, INIT_OPT_MODULES_SUB, inValues)
                     ()
                   end
-                  
+
                   (_, _) where (configFlagEq(inFlag, INIT_OPT_MODULES_SUB))  => begin
                       setAdditionalOptModules(INIT_OPT_MODULES_SUB, INIT_OPT_MODULES_ADD, inValues)
                     ()
                   end
-                  
+
                   (_, FLAGS(configFlags = config_flags))  => begin
                       setConfigFlag(inFlag, config_flags, inValues)
                     ()
@@ -963,7 +964,7 @@
         end
 
          #= Enables a debug flag given as a string, or disables it if it's prefixed with -. =#
-        function setDebugFlag(inFlag::String, inFlags::Array{<:Bool})  
+        function setDebugFlag(inFlag::String, inFlags::Array{<:Bool})
               local negated::Bool
               local neg1::Bool
               local neg2::Bool
@@ -985,7 +986,7 @@
               setDebugFlag2(flag_str, ! negated, inFlags)
         end
 
-        function setDebugFlag2(inFlag::String, inValue::Bool, inFlags::Array{<:Bool})  
+        function setDebugFlag2(inFlag::String, inValue::Bool, inFlags::Array{<:Bool})
               _ = begin
                   local flag::DebugFlag
                 @matchcontinue (inFlag, inValue, inFlags) begin
@@ -994,7 +995,7 @@
                       (_, _) = updateDebugFlagArray(inFlags, inValue, flag)
                     ()
                   end
-                  
+
                   _  => begin
                         Error.addMessage(Error.UNKNOWN_DEBUG_FLAG, list(inFlag))
                       fail()
@@ -1004,7 +1005,7 @@
         end
 
          #= Returns true if the given flag has the given name, otherwise false. =#
-        function matchDebugFlag(inFlagName::String, inFlag::DebugFlag) ::Bool 
+        function matchDebugFlag(inFlagName::String, inFlag::DebugFlag) ::Bool
               local outMatches::Bool
 
               local name::String
@@ -1015,7 +1016,7 @@
         end
 
          #= Returns true if the given flag has the given name, otherwise false. =#
-        function matchConfigFlag(inFlagName::String, inFlag::ConfigFlag) ::Bool 
+        function matchConfigFlag(inFlagName::String, inFlag::ConfigFlag) ::Bool
               local outMatches::Bool
 
               local opt_shortname::Option{String}
@@ -1032,7 +1033,7 @@
 
          #= Sets the value of a configuration flag, where the value is given as a list of
           strings. =#
-        function setConfigFlag(inFlag::ConfigFlag, inConfigData::Array{<:FlagData}, inValues::List{<:String})  
+        function setConfigFlag(inFlag::ConfigFlag, inConfigData::Array{<:FlagData}, inValues::List{<:String})
               local data::FlagData
               local default_value::FlagData
               local name::String
@@ -1045,7 +1046,7 @@
 
          #= Converts a list of strings into a FlagData value. The expected type is also
            given so that the value can be typechecked. =#
-        function stringFlagData(inValues::List{<:String}, inExpectedType::FlagData, validOptions::Option{<:ValidOptions}, inName::String) ::FlagData 
+        function stringFlagData(inValues::List{<:String}, inExpectedType::FlagData, validOptions::Option{<:ValidOptions}, inName::String) ::FlagData
               local outValue::FlagData
 
               outValue = begin
@@ -1066,52 +1067,52 @@
                       b = Util.stringBool(s)
                     BOOL_FLAG(b)
                   end
-                  
+
                   ( nil(), BOOL_FLAG(__), _, _)  => begin
                     BOOL_FLAG(true)
                   end
-                  
+
                   (s <|  nil(), INT_FLAG(__), _, _)  => begin
                       i = stringInt(s)
                       @match true = stringEq(intString(i), s)
                     INT_FLAG(i)
                   end
-                  
+
                   (slst, INT_LIST_FLAG(__), _, _)  => begin
                       ilst = ListUtil.map(slst, stringInt)
                     INT_LIST_FLAG(ilst)
                   end
-                  
+
                   (s <|  nil(), REAL_FLAG(__), _, _)  => begin
-                    REAL_FLAG(System.stringReal(s))
+                    REAL_FLAG(stringReal(s))
                   end
-                  
+
                   (s <|  nil(), STRING_FLAG(__), SOME(options), _)  => begin
                       flags = getValidStringOptions(options)
                       @match true = listMember(s, flags)
                     STRING_FLAG(s)
                   end
-                  
+
                   (s <|  nil(), STRING_FLAG(__), NONE(), _)  => begin
                     STRING_FLAG(s)
                   end
-                  
+
                   (_, STRING_LIST_FLAG(__), _, _)  => begin
                     STRING_LIST_FLAG(inValues)
                   end
-                  
+
                   (s <|  nil(), ENUM_FLAG(validValues = enums), _, _)  => begin
                       i = Util.assoc(s, enums)
                     ENUM_FLAG(i, enums)
                   end
-                  
+
                   (_, _, NONE(), _)  => begin
                       et = printExpectedTypeStr(inExpectedType)
                       at = printActualTypeStr(inValues)
                       Error.addMessage(Error.INVALID_FLAG_TYPE, list(inName, et, at))
                     fail()
                   end
-                  
+
                   (_, _, SOME(options), _)  => begin
                       flags = getValidStringOptions(options)
                       et = stringDelimitList(flags, ", ")
@@ -1141,7 +1142,7 @@
         end
 
          #= Prints the expected type as a string. =#
-        function printExpectedTypeStr(inType::FlagData) ::String 
+        function printExpectedTypeStr(inType::FlagData) ::String
               local outTypeStr::String
 
               outTypeStr = begin
@@ -1151,23 +1152,23 @@
                   BOOL_FLAG(__)  => begin
                     "a boolean value"
                   end
-                  
+
                   INT_FLAG(__)  => begin
                     "an integer value"
                   end
-                  
+
                   REAL_FLAG(__)  => begin
                     "a floating-point value"
                   end
-                  
+
                   STRING_FLAG(__)  => begin
                     "a string"
                   end
-                  
+
                   STRING_LIST_FLAG(__)  => begin
                     "a comma-separated list of strings"
                   end
-                  
+
                   ENUM_FLAG(validValues = enums)  => begin
                       enum_strs = ListUtil.map(enums, Util.tuple21)
                     "one of the values {" + stringDelimitList(enum_strs, ", ") + "}"
@@ -1178,7 +1179,7 @@
         end
 
          #= Prints the actual type as a string. =#
-        function printActualTypeStr(inType::List{<:String}) ::String 
+        function printActualTypeStr(inType::List{<:String}) ::String
               local outTypeStr::String
 
               outTypeStr = begin
@@ -1188,22 +1189,22 @@
                    nil()  => begin
                     "nothing"
                   end
-                  
+
                   s <|  nil()  => begin
                       Util.stringBool(s)
                     "the boolean value " + s
                   end
-                  
+
                   s <|  nil()  => begin
                       i = stringInt(s)
                       @match true = stringEq(intString(i), s)
                     "the number " + intString(i)
                   end
-                  
+
                   s <|  nil()  => begin
                     "the string \\" + s + "\\"
                   end
-                  
+
                   _  => begin
                       "a list of values."
                   end
@@ -1217,7 +1218,7 @@
                =#
                #=   equation
                =#
-               #=     System.stringReal(s);
+               #=     stringReal(s);
                =#
                #=   then
                =#
@@ -1227,7 +1228,7 @@
         end
 
          #= Checks if two config flags have the same index. =#
-        function configFlagsIsEqualIndex(inFlag1::ConfigFlag, inFlag2::ConfigFlag) ::Bool 
+        function configFlagsIsEqualIndex(inFlag1::ConfigFlag, inFlag2::ConfigFlag) ::Bool
               local outEqualIndex::Bool
 
               local index1::ModelicaInteger
@@ -1240,7 +1241,7 @@
         end
 
          #= Some flags have side effects, which are handled by this function. =#
-        function applySideEffects(inFlag::ConfigFlag, inValue::FlagData)  
+        function applySideEffects(inFlag::ConfigFlag, inValue::FlagData)
               _ = begin
                   local value::Bool
                   local corba_name::String
@@ -1255,21 +1256,21 @@
                       ErrorExt.setShowErrorMessages(value)
                     ()
                   end
-                  
+
                   (_, _)  => begin
                       @match true = configFlagsIsEqualIndex(inFlag, CORBA_OBJECT_REFERENCE_FILE_PATH)
                       @match STRING_FLAG(data = corba_objid_path) = inValue
                       Corba.setObjectReferenceFilePath(corba_objid_path)
                     ()
                   end
-                  
+
                   (_, _)  => begin
                       @match true = configFlagsIsEqualIndex(inFlag, CORBA_SESSION)
                       @match STRING_FLAG(data = corba_name) = inValue
                       Corba.setSessionName(corba_name)
                     ()
                   end
-                  
+
                   _  => begin
                       ()
                   end
@@ -1282,7 +1283,7 @@
         end
 
          #= Sets the value of a configuration flag. =#
-        function setConfigValue(inFlag::ConfigFlag, inValue::FlagData)  
+        function setConfigValue(inFlag::ConfigFlag, inValue::FlagData)
               local debug_flags::Array{Bool}
               local config_flags::Array{FlagData}
               local flags::Flag
@@ -1294,32 +1295,32 @@
         end
 
          #= Sets the value of a boolean configuration flag. =#
-        function setConfigBool(inFlag::ConfigFlag, inValue::Bool)  
+        function setConfigBool(inFlag::ConfigFlag, inValue::Bool)
               setConfigValue(inFlag, BOOL_FLAG(inValue))
         end
 
          #= Sets the value of an integer configuration flag. =#
-        function setConfigInt(inFlag::ConfigFlag, inValue::ModelicaInteger)  
+        function setConfigInt(inFlag::ConfigFlag, inValue::ModelicaInteger)
               setConfigValue(inFlag, INT_FLAG(inValue))
         end
 
          #= Sets the value of a real configuration flag. =#
-        function setConfigReal(inFlag::ConfigFlag, inValue::ModelicaReal)  
+        function setConfigReal(inFlag::ConfigFlag, inValue::ModelicaReal)
               setConfigValue(inFlag, REAL_FLAG(inValue))
         end
 
          #= Sets the value of a string configuration flag. =#
-        function setConfigString(inFlag::ConfigFlag, inValue::String)  
+        function setConfigString(inFlag::ConfigFlag, inValue::String)
               setConfigValue(inFlag, STRING_FLAG(inValue))
         end
 
          #= Sets the value of a multiple-string configuration flag. =#
-        function setConfigStringList(inFlag::ConfigFlag, inValue::List{<:String})  
+        function setConfigStringList(inFlag::ConfigFlag, inValue::List{<:String})
               setConfigValue(inFlag, STRING_LIST_FLAG(inValue))
         end
 
          #= Sets the value of an enumeration configuration flag. =#
-        function setConfigEnum(inFlag::ConfigFlag, inValue::ModelicaInteger)  
+        function setConfigEnum(inFlag::ConfigFlag, inValue::ModelicaInteger)
               local valid_values::List{Tuple{String, ModelicaInteger}}
 
               @match CONFIG_FLAG(defaultValue = ENUM_FLAG(validValues = valid_values)) = inFlag
@@ -1327,7 +1328,7 @@
         end
 
          #= Returns the value of a configuration flag. =#
-        function getConfigValue(inFlag::ConfigFlag) ::FlagData 
+        function getConfigValue(inFlag::ConfigFlag) ::FlagData
               local outValue::FlagData
 
               local config_flags::Array{FlagData}
@@ -1343,7 +1344,7 @@
         end
 
          #= Returns the value of a boolean configuration flag. =#
-        function getConfigBool(inFlag::ConfigFlag) ::Bool 
+        function getConfigBool(inFlag::ConfigFlag) ::Bool
               local outValue::Bool
 
               @match BOOL_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1351,7 +1352,7 @@
         end
 
          #= Returns the value of an integer configuration flag. =#
-        function getConfigInt(inFlag::ConfigFlag) ::ModelicaInteger 
+        function getConfigInt(inFlag::ConfigFlag) ::ModelicaInteger
               local outValue::ModelicaInteger
               val = getConfigValue(inFlag)
               @match INT_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1359,7 +1360,7 @@
         end
 
          #= Returns the value of an integer configuration flag. =#
-        function getConfigIntList(inFlag::ConfigFlag) ::List{ModelicaInteger} 
+        function getConfigIntList(inFlag::ConfigFlag) ::List{ModelicaInteger}
               local outValue::List{ModelicaInteger}
 
               @match INT_LIST_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1367,7 +1368,7 @@
         end
 
          #= Returns the value of a real configuration flag. =#
-        function getConfigReal(inFlag::ConfigFlag) ::ModelicaReal 
+        function getConfigReal(inFlag::ConfigFlag) ::ModelicaReal
               local outValue::ModelicaReal
 
               @match REAL_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1375,7 +1376,7 @@
         end
 
          #= Returns the value of a string configuration flag. =#
-        function getConfigString(inFlag::ConfigFlag) ::String 
+        function getConfigString(inFlag::ConfigFlag) ::String
               local outValue::String
 
               @match STRING_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1383,7 +1384,7 @@
         end
 
          #= Returns the value of a multiple-string configuration flag. =#
-        function getConfigStringList(inFlag::ConfigFlag) ::List{String} 
+        function getConfigStringList(inFlag::ConfigFlag) ::List{String}
               local outValue::List{String}
 
               @match STRING_LIST_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1391,7 +1392,7 @@
         end
 
          #= Returns the valid options of a single-string configuration flag. =#
-        function getConfigOptionsStringList(inFlag::ConfigFlag) ::Tuple{List{String}, List{String}} 
+        function getConfigOptionsStringList(inFlag::ConfigFlag) ::Tuple{List{String}, List{String}}
               local outComments::List{String}
               local outOptions::List{String}
 
@@ -1402,7 +1403,7 @@
                   CONFIG_FLAG(validOptions = SOME(STRING_DESC_OPTION(options)))  => begin
                     (ListUtil.map(options, Util.tuple21), ListUtil.mapMap(options, Util.tuple22, Util.translateContent))
                   end
-                  
+
                   CONFIG_FLAG(validOptions = SOME(STRING_OPTION(flags)))  => begin
                     (flags, ListUtil.fill("", listLength(flags)))
                   end
@@ -1412,7 +1413,7 @@
         end
 
          #= Returns the value of an enumeration configuration flag. =#
-        function getConfigEnum(inFlag::ConfigFlag) ::ModelicaInteger 
+        function getConfigEnum(inFlag::ConfigFlag) ::ModelicaInteger
               local outValue::ModelicaInteger
 
               @match ENUM_FLAG(data = outValue) = getConfigValue(inFlag)
@@ -1425,7 +1426,7 @@
          const descriptionIndent = "                            "::String
 
          #= Prints out help for the given list of topics. =#
-        function printHelp(inTopics::List{<:String}) ::String 
+        function printHelp(inTopics::List{<:String}) ::String
               local help::String
 
               help = begin
@@ -1461,15 +1462,15 @@
                    nil()  => begin
                     printUsage()
                   end
-                  
+
                   "omc" <|  nil()  => begin
                     printUsage()
                   end
-                  
+
                   "omcall-sphinxoutput" <|  nil()  => begin
                     printUsageSphinxAll()
                   end
-                  
+
                   "topics" <|  nil()  => begin
                       topics = list(("omc", System.gettext("The command-line options available for omc.")), ("debug", System.gettext("Flags that enable debugging, diagnostics, and research prototypes.")), ("optmodules", System.gettext("Flags that determine which symbolic methods are used to produce the causalized equation system.")), ("simulation", System.gettext("The command-line options available for simulation executables generated by OpenModelica.")), ("<flagname>", System.gettext("Displays option descriptions for multi-option flag <flagname>.")), ("topics", System.gettext("This help-text.")))
                       str = System.gettext("The available topics (help(\\topics\\)) are as follows:\\n")
@@ -1477,17 +1478,17 @@
                       help = str + stringDelimitList(strs, "\\n") + "\\n"
                     help
                   end
-                  
+
                   "simulation" <|  nil()  => begin
                       help = System.gettext("The simulation executable takes the following flags:\\n\\n") + System.getSimulationHelpText(true)
                     help
                   end
-                  
+
                   "simulation-sphinxoutput" <|  nil()  => begin
                       help = System.gettext("The simulation executable takes the following flags:\\n\\n") + System.getSimulationHelpText(true, sphinx = true)
                     help
                   end
-                  
+
                   "debug" <|  nil()  => begin
                       str1 = System.gettext("The debug flag takes a comma-separated list of flags which are used by the\\ncompiler for debugging or experimental purposes.\\nFlags prefixed with \\-\\ or \\no\\ will be disabled.\\n")
                       str2 = System.gettext("The available flags are (+ are enabled by default, - are disabled):\\n\\n")
@@ -1495,7 +1496,7 @@
                       help = stringAppendList(_cons(str1, _cons(str2, strs)))
                     help
                   end
-                  
+
                   "optmodules" <|  nil()  => begin
                       str1 = System.gettext("The --preOptModules flag sets the optimization modules which are used before the\\nmatching and index reduction in the back end. These modules are specified as a comma-separated list.")
                       str1 = stringAppendList(StringUtil.wordWrap(str1, System.getTerminalWidth(), "\\n"))
@@ -1530,7 +1531,7 @@
                       help = stringAppendList(list(str1, "\\n\\n", str1a, "\\n\\n", str1b, "\\n", str2, "\\n", str3, "\\n\\n", str3a, "\\n\\n", str3b, "\\n", str4, "\\n", str5, "\\n\\n", str5a, "\\n\\n", str5b, "\\n", str6, "\\n", str7, "\\n\\n", str7a, "\\n\\n", str7b, "\\n", str8, "\\n", str9, "\\n\\n", str9a, "\\n\\n", str9b, "\\n", str10, "\\n"))
                     help
                   end
-                  
+
                   str <|  nil()  => begin
                       @match (@match CONFIG_FLAG(name = name, description = desc) = config_flag) = ListUtil.getMemberOnTrue(str, allConfigFlags, matchConfigFlag)
                       str1 = "-" + name
@@ -1539,11 +1540,11 @@
                       help = stringAppendList(list(str1, "\\n", str2, "\\n", str))
                     help
                   end
-                  
+
                   str <|  nil()  => begin
                     "I'm sorry, I don't know what " + str + " is.\\n"
                   end
-                  
+
                   str <| rest_topics && _ <| _  => begin
                       str = printHelp(list(str)) + "\\n"
                       help = printHelp(rest_topics)
@@ -1568,7 +1569,7 @@
           help
         end
 
-        function getValidOptionsAndDescription(flagName::String) ::Tuple{List{String}, String, List{String}} 
+        function getValidOptionsAndDescription(flagName::String) ::Tuple{List{String}, String, List{String}}
               local descriptions::List{String}
               local mainDescriptionStr::String
               local validStrings::List{String}
@@ -1582,7 +1583,7 @@
           (validStrings, mainDescriptionStr, descriptions)
         end
 
-        function getValidOptionsAndDescription2(validOptions::ValidOptions) ::Tuple{List{String}, List{String}} 
+        function getValidOptionsAndDescription2(validOptions::ValidOptions) ::Tuple{List{String}, List{String}}
               local descriptions::List{String}
               local validStrings::List{String}
 
@@ -1592,7 +1593,7 @@
                   STRING_OPTION(validStrings)  => begin
                     (validStrings, nil)
                   end
-                  
+
                   STRING_DESC_OPTION(options)  => begin
                       validStrings = ListUtil.map(options, Util.tuple21)
                       descriptions = ListUtil.mapMap(options, Util.tuple22, Util.translateContent)
@@ -1603,7 +1604,7 @@
           (validStrings, descriptions)
         end
 
-        function compareDebugFlags(flag1::DebugFlag, flag2::DebugFlag) ::Bool 
+        function compareDebugFlags(flag1::DebugFlag, flag2::DebugFlag) ::Bool
               local b::Bool
 
               local name1::String
@@ -1615,7 +1616,7 @@
           b
         end
 
-        function makeTopicString(topic::Tuple{<:String, String}) ::String 
+        function makeTopicString(topic::Tuple{<:String, String}) ::String
               local str::String
 
               local str1::String
@@ -1628,7 +1629,7 @@
         end
 
          #= Prints out the usage text for the compiler. =#
-        function printUsage() ::String 
+        function printUsage() ::String
               local usage::String
 
               Print.clearBuf()
@@ -1667,7 +1668,7 @@
         end
 
          #= Prints out the usage text for the compiler. =#
-        function printUsageSphinxAll() ::String 
+        function printUsageSphinxAll() ::String
               local usage::String
 
               local s::String
@@ -1722,7 +1723,7 @@
         end
 
          #= Prints all configuration flags to a string. =#
-        function printAllConfigFlags() ::String 
+        function printAllConfigFlags() ::String
               local outString::String
 
               outString = stringAppendList(ListUtil.map(allConfigFlags, printConfigFlag))
@@ -1730,7 +1731,7 @@
         end
 
          #= Prints a configuration flag to a string. =#
-        function printConfigFlag(inFlag::ConfigFlag) ::String 
+        function printConfigFlag(inFlag::ConfigFlag) ::String
               local outString::String
 
               outString = begin
@@ -1745,7 +1746,7 @@
                   CONFIG_FLAG(visibility = INTERNAL(__))  => begin
                     ""
                   end
-                  
+
                   CONFIG_FLAG(description = desc)  => begin
                       desc_str = Util.translateContent(desc)
                       name = Util.stringPadRight(printConfigFlagName(inFlag)[1], 28, " ")
@@ -1762,7 +1763,7 @@
         end
 
          #= Prints a configuration flag to a restructured text string. =#
-        function printConfigFlagSphinx(inFlag::ConfigFlag) ::String 
+        function printConfigFlagSphinx(inFlag::ConfigFlag) ::String
               local outString::String
 
               outString = begin
@@ -1778,7 +1779,7 @@
                   CONFIG_FLAG(visibility = INTERNAL(__))  => begin
                     ""
                   end
-                  
+
                   CONFIG_FLAG(description = desc)  => begin
                       desc_str = Util.translateContent(desc)
                       desc_str = System.stringReplace(desc_str, "--help=debug", ":ref:`--help=debug <omcflag-debug-section>`")
@@ -1795,7 +1796,7 @@
 
          #= Prints out the name of a configuration flag, formatted for use by
            printConfigFlag. =#
-        function printConfigFlagName(inFlag::ConfigFlag, sphinx::Bool = false) ::Tuple{String, String} 
+        function printConfigFlagName(inFlag::ConfigFlag, sphinx::Bool = false) ::Tuple{String, String}
               local longName::String
               local outString::String
 
@@ -1811,7 +1812,7 @@
                           end
                     (stringAppendList(list(shortname, ", --", name)), name)
                   end
-                  
+
                   CONFIG_FLAG(name = name, shortname = NONE())  => begin
                     ((if sphinx
                           "--"
@@ -1825,7 +1826,7 @@
         end
 
          #= Prints out the valid options of a configuration flag to a string. =#
-        function printValidOptions(inFlag::ConfigFlag) ::String 
+        function printValidOptions(inFlag::ConfigFlag) ::String
               local outString::String
 
               outString = begin
@@ -1836,7 +1837,7 @@
                   CONFIG_FLAG(validOptions = NONE())  => begin
                     ""
                   end
-                  
+
                   CONFIG_FLAG(validOptions = SOME(STRING_OPTION(options = strl)))  => begin
                       opt_str = descriptionIndent + "   " + System.gettext("Valid options:") + " " + stringDelimitList(strl, ", ")
                       strl = StringUtil.wordWrap(opt_str, System.getTerminalWidth(), descriptionIndent + "     ")
@@ -1844,7 +1845,7 @@
                       opt_str = "\\n" + opt_str
                     opt_str
                   end
-                  
+
                   CONFIG_FLAG(validOptions = SOME(STRING_DESC_OPTION(options = descl)))  => begin
                       opt_str = "\\n" + descriptionIndent + "   " + System.gettext("Valid options:") + "\\n" + stringAppendList(list(printFlagOptionDescShort(d) for d in descl))
                     opt_str
@@ -1855,7 +1856,7 @@
         end
 
          #= Prints out the valid options of a configuration flag to a string. =#
-        function printValidOptionsSphinx(inFlag::ConfigFlag) ::String 
+        function printValidOptionsSphinx(inFlag::ConfigFlag) ::String
               local outString::String
 
               outString = begin
@@ -1866,12 +1867,12 @@
                   CONFIG_FLAG(validOptions = NONE())  => begin
                     "\\n" + defaultFlagSphinx(inFlag.defaultValue) + "\\n"
                   end
-                  
+
                   CONFIG_FLAG(validOptions = SOME(STRING_OPTION(options = strl)))  => begin
                       opt_str = "\\n" + defaultFlagSphinx(inFlag.defaultValue) + " " + System.gettext("Valid options") + ":\\n\\n" + sum("* " + s + "\\n" for s in strl)
                     opt_str
                   end
-                  
+
                   CONFIG_FLAG(validOptions = SOME(STRING_DESC_OPTION(options = descl)))  => begin
                       opt_str = "\\n" + defaultFlagSphinx(inFlag.defaultValue) + " " + System.gettext("Valid options") + ":\\n\\n" + sum(printFlagOptionDesc(s, sphinx = true) for s in descl)
                     opt_str
@@ -1881,7 +1882,7 @@
           outString
         end
 
-        function defaultFlagSphinx(flag::FlagData) ::String 
+        function defaultFlagSphinx(flag::FlagData) ::String
               local str::String
 
               str = begin
@@ -1890,42 +1891,42 @@
                   BOOL_FLAG(__)  => begin
                     System.gettext("Boolean (default") + " ``" + boolString(flag.data) + "``)."
                   end
-                  
+
                   INT_FLAG(__)  => begin
                     System.gettext("Integer (default") + " ``" + intString(flag.data) + "``)."
                   end
-                  
+
                   REAL_FLAG(__)  => begin
                     System.gettext("Real (default") + " ``" + realString(flag.data) + "``)."
                   end
-                  
+
                   STRING_FLAG("")  => begin
                     System.gettext("String (default *empty*).")
                   end
-                  
+
                   STRING_FLAG(__)  => begin
                     System.gettext("String (default") + " " + flag.data + ")."
                   end
-                  
+
                   STRING_LIST_FLAG(data =  nil())  => begin
                     System.gettext("String list (default *empty*).")
                   end
-                  
+
                   STRING_LIST_FLAG(__)  => begin
                     System.gettext("String list (default") + " " + stringDelimitList(flag.data, ",") + ")."
                   end
-                  
+
                   ENUM_FLAG(__)  => begin
                       for f in flag.validValues
                         (str, i) = f
                         if i == flag.data
                           str = System.gettext("String (default ") + " " + str + ")."
-                          return 
+                          return
                         end
                       end
                     "#ENUM_FLAG Failed#" + anyString(flag)
                   end
-                  
+
                   _  => begin
                       "Unknown default value" + anyString(flag)
                   end
@@ -1935,7 +1936,7 @@
         end
 
          #= Prints out the name of a flag option. =#
-        function printFlagOptionDescShort(inOption::Tuple{<:String, Util.TranslatableContent}, sphinx::Bool = false) ::String 
+        function printFlagOptionDescShort(inOption::Tuple{<:String, Util.TranslatableContent}, sphinx::Bool = false) ::String
               local outString::String
 
               local name::String
@@ -1951,7 +1952,7 @@
 
          #= Prints out the names and descriptions of the valid options for a
            configuration flag. =#
-        function printFlagValidOptionsDesc(inFlag::ConfigFlag) ::String 
+        function printFlagValidOptionsDesc(inFlag::ConfigFlag) ::String
               local outString::String
 
               local options::List{Tuple{String, Util.TranslatableContent}}
@@ -1961,7 +1962,7 @@
           outString
         end
 
-        function sphinxMathMode(s::String) ::String 
+        function sphinxMathMode(s::String) ::String
               local o::String = s
 
               local i::ModelicaInteger
@@ -1978,7 +1979,7 @@
           o
         end
 
-        function removeSphinxMathMode(s::String) ::String 
+        function removeSphinxMathMode(s::String) ::String
               local o::String = s
 
               local i::ModelicaInteger
@@ -1995,7 +1996,7 @@
         end
 
          #= Helper function to printFlagValidOptionsDesc. =#
-        function printFlagOptionDesc(inOption::Tuple{<:String, Util.TranslatableContent}, sphinx::Bool = false) ::String 
+        function printFlagOptionDesc(inOption::Tuple{<:String, Util.TranslatableContent}, sphinx::Bool = false) ::String
               local outString::String
 
               local desc::Util.TranslatableContent
@@ -2016,7 +2017,7 @@
         end
 
          #= Prints out name and description of a debug flag. =#
-        function printDebugFlag(inFlag::DebugFlag, sphinx::Bool = false) ::String 
+        function printDebugFlag(inFlag::DebugFlag, sphinx::Bool = false) ::String
               local outString::String
 
               local desc::Util.TranslatableContent
@@ -2045,7 +2046,7 @@
         end
 
          #= Prints out name of a debug flag. =#
-        function debugFlagName(inFlag::DebugFlag) ::String 
+        function debugFlagName(inFlag::DebugFlag) ::String
               local name::String
 
               @match DEBUG_FLAG(name = name) = inFlag
@@ -2053,14 +2054,14 @@
         end
 
          #= Prints out name of a debug flag. =#
-        function configFlagName(inFlag::ConfigFlag) ::String 
+        function configFlagName(inFlag::ConfigFlag) ::String
               local name::String
 
               @match CONFIG_FLAG(name = name) = inFlag
           name
         end
 
-        function getValidStringOptions(inOptions::ValidOptions) ::List{String} 
+        function getValidStringOptions(inOptions::ValidOptions) ::List{String}
               local validOptions::List{String}
 
               validOptions = begin
@@ -2069,7 +2070,7 @@
                   STRING_OPTION(validOptions)  => begin
                     validOptions
                   end
-                  
+
                   STRING_DESC_OPTION(options)  => begin
                     ListUtil.map(options, Util.tuple21)
                   end
@@ -2078,7 +2079,7 @@
           validOptions
         end
 
-        function flagDataEq(data1::FlagData, data2::FlagData) ::Bool 
+        function flagDataEq(data1::FlagData, data2::FlagData) ::Bool
               local eq::Bool
 
               eq = begin
@@ -2086,35 +2087,35 @@
                   (EMPTY_FLAG(__), EMPTY_FLAG(__))  => begin
                     true
                   end
-                  
+
                   (BOOL_FLAG(__), BOOL_FLAG(__))  => begin
                     data1.data == data2.data
                   end
-                  
+
                   (INT_FLAG(__), INT_FLAG(__))  => begin
                     data1.data == data2.data
                   end
-                  
+
                   (INT_LIST_FLAG(__), INT_LIST_FLAG(__))  => begin
                     ListUtil.isEqualOnTrue(data1.data, data2.data, intEq)
                   end
-                  
+
                   (REAL_FLAG(__), REAL_FLAG(__))  => begin
                     data1.data == data2.data
                   end
-                  
+
                   (STRING_FLAG(__), STRING_FLAG(__))  => begin
                     data1.data == data2.data
                   end
-                  
+
                   (STRING_LIST_FLAG(__), STRING_LIST_FLAG(__))  => begin
                     ListUtil.isEqualOnTrue(data1.data, data2.data, stringEq)
                   end
-                  
+
                   (ENUM_FLAG(__), ENUM_FLAG(__))  => begin
                     referenceEq(data1.validValues, data2.validValues) && data1.data == data2.data
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -2123,7 +2124,7 @@
           eq
         end
 
-        function flagDataString(flagData::FlagData) ::String 
+        function flagDataString(flagData::FlagData) ::String
               local str::String
 
               str = begin
@@ -2131,31 +2132,31 @@
                   BOOL_FLAG(__)  => begin
                     boolString(flagData.data)
                   end
-                  
+
                   INT_FLAG(__)  => begin
                     intString(flagData.data)
                   end
-                  
+
                   INT_LIST_FLAG(__)  => begin
                     ListUtil.toString(flagData.data, intString, "", "", ",", "", false)
                   end
-                  
+
                   REAL_FLAG(__)  => begin
                     realString(flagData.data)
                   end
-                  
+
                   STRING_FLAG(__)  => begin
                     flagData.data
                   end
-                  
+
                   STRING_LIST_FLAG(__)  => begin
                     stringDelimitList(flagData.data, ",")
                   end
-                  
+
                   ENUM_FLAG(__)  => begin
                     Util.tuple21(listGet(flagData.validValues, flagData.data))
                   end
-                  
+
                   _  => begin
                       ""
                   end
@@ -2166,7 +2167,7 @@
 
          #= Goes through all the existing flags, and returns a list of all flags with
            values that differ from the default. The format of each string is flag=value. =#
-        function unparseFlags() ::List{String} 
+        function unparseFlags() ::List{String}
               local flagStrings::List{String} = nil
 
               local flags::Flag
@@ -2187,7 +2188,7 @@
                       SOME(name)  => begin
                         "-" + name
                       end
-                      
+
                       _  => begin
                           "--" + f.name
                       end

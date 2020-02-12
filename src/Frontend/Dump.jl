@@ -2117,7 +2117,7 @@
         end
 
          #= This function simply converts a Path to a string. =#
-        function pathString(path::Absyn.Path, delimiter::String = ".", usefq::Bool = true, reverse::Bool = false) ::String
+        function pathString(path::Absyn.Path, delimiter::String = "."; usefq::Bool = true, reverse::Bool = false) ::String
               local s::String
               local p1::Absyn.Path
               local p2::Absyn.Path
@@ -2226,7 +2226,9 @@
           s
         end
 
-        @ExtendedFunction pathStringNoQual pathString(usefq = false)
+        function pathStringNoQual(path::Absyn.Path, delimiter::String = "."; usefq::Bool = false, reverse::Bool = false)
+           pathString(path, delimiter, usefq = usefq, reverse = reverse)
+        end
 
         function pathStringDefault(path::Absyn.Path) ::String
               local s::String = pathString(path)

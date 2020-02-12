@@ -6,6 +6,7 @@ module CrefForHashTable
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
 @importDBG Absyn
 @importDBG AbsynUtil
@@ -5670,6 +5671,28 @@ function typeofOp(inOperator::DAE.Operator) ::DAE.Type
   outType
 end
 
+#= Boolean or array of boolean =#
+function typeofRelation(inType::DAE.Type) ::DAE.Type
+     local outType::DAE.Type
+
+     outType = begin
+         local ty::Type
+         local ty1::Type
+         local dims::DAE.Dimensions
+       @match inType begin
+         DAE.T_ARRAY(ty = ty, dims = dims)  => begin
+             _ = typeofRelation(ty)
+           DAE.T_ARRAY(ty, dims)
+         end
+
+         _  => begin
+             DAE.T_BOOL_DEFAULT
+         end
+       end
+     end
+ outType
+end
+
 #= Retrieves the Type of the Expression =#
 function typeOf(inExp::DAE.Exp) ::DAE.Type
   local outType::DAE.Type
@@ -6357,7 +6380,7 @@ function compare(inExp1::DAE.Exp, inExp2::DAE.Exp) ::ModelicaInteger
           end
 
           _  => begin
-                Error.addInternalError("Expression.compare failed: ctor:" + String(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
+                Error.addInternalError("Expression.compare failed: ctor:" + StringFunction(valueConstructor(inExp1)) + " " + printExpStr(inExp1) + " " + printExpStr(inExp2), sourceInfo())
               fail()
           end
         end
@@ -7070,7 +7093,7 @@ function simplifyVar(inVar::DAE.Var) ::DAE.Var
      outVar = begin
        @match outVar begin
          DAE.TYPES_VAR(__)  => begin
-             outVar.ty = simplifyType(outVar.ty)
+             Setfield.@set outVar.ty = simplifyType(outVar.ty)
            outVar
          end
        end
@@ -7117,6 +7140,28 @@ function flattenArrayType(inType::DAE.Type) ::Tuple{DAE.Type, DAE.Dimensions}
       =#
  (outType, outDimensions)
 end
+
+#= Return the last subscripts of a ComponentRef =#
+function crefLastSubs(inComponentRef::DAE.ComponentRef) ::List{DAE.Subscript}
+     local outSubscriptLst::List{DAE.Subscript}
+
+     outSubscriptLst = begin
+         local id::DAE.Ident
+         local subs::List{DAE.Subscript}
+         local cr::DAE.ComponentRef
+       @match inComponentRef begin
+         DAE.CREF_IDENT(subscriptLst = subs)  => begin
+           subs
+         end
+
+         DAE.CREF_QUAL(componentRef = cr)  => begin
+           crefLastSubs(cr)
+         end
+       end
+     end
+ outSubscriptLst
+end
+
 
     @exportAll()
 end

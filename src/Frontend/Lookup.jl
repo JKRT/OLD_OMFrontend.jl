@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    import Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -43,6 +45,8 @@
         import ClassInf
 
         import DAE
+
+        import DAEUtil
 
         import FCore
 
@@ -1006,7 +1010,8 @@
                 @matchcontinue (inCache, inImports, inEnv, inIdent) begin
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| _, env, ident)  => begin
                       env = FGraphUtil.topScope(env)
-                      @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1) = lookupClass(cache, env, path)
+                      @match (cache, c, env_1) = lookupClass(cache, env, path)
+                      @match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c
                       env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
                       ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
@@ -1071,7 +1076,8 @@
                   (cache, Absyn.UNQUAL_IMPORT(path = path) <| rest, env, ident)  => begin
                       @match _cons(r, prevFrames) = listReverse(FGraphUtil.currentScope(env))
                       env3 = FGraphUtil.setScope(env, list(r))
-                      @match (cache, (@match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c), env_1, prevFrames) = lookupClass2(cache, env3, path, prevFrames, Mutable.create(false), inInfo)
+                      @match (cache, c, env_1, prevFrames) = lookupClass2(cache, env3, path, prevFrames, Mutable.create(false), inInfo)
+                      @match SCode.CLASS(name = id, encapsulatedPrefix = encflag, restriction = restr) = c
                       env2 = FGraphUtil.openScope(env_1, encflag, id, FGraphUtil.restrictionToScopeType(restr))
                       ci_state = ClassInf.start(restr, FGraphUtil.getGraphName(env2))
                       mod = Mod.getClassModifier(env_1, id)
@@ -1582,7 +1588,8 @@
                           end
 
                           NONE()  => begin
-                              @match (cache, (@match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c), env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
+                              @match (cache, c, env2, prevFrames) = lookupClassInEnv(cache, env, id, prevFrames, Mutable.create(true), NONE())
+                              @match SCode.CLASS(name = n, encapsulatedPrefix = encflag, restriction = r) = c
                               Mutable.update(inState, true)
                               rr = FNode.child(FGraphUtil.lastScopeRef(env2), id)
                               if FNode.isRefInstance(rr)
@@ -2365,7 +2372,7 @@
                         ty = begin
                           @match ty begin
                             DAE.T_FUNCTION(__)  => begin
-                                ty.path = Absyn.IDENT(inFuncName)
+                                Setfield.@set ty.path = Absyn.IDENT(inFuncName)
                               ty
                             end
                           end
@@ -3006,7 +3013,7 @@
                   end
 
                   (DAE.T_ARRAY(dims = _ <|  nil(), ty = t), DAE.SLICE(exp = e) <| ys)  => begin
-                      @match DAE.T_ARRAY(dims = list(dim)) = Expression.typeOf(e)
+                      @match DAE.T_ARRAY(dims = dim <| nil) = Expression.typeOf(e)
                       t_1 = checkSubscripts(t, ys)
                     DAE.T_ARRAY(t_1, list(dim))
                   end

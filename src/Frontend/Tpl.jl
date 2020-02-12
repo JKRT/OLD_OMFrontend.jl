@@ -5,6 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
     @UniontypeDecl Text
     @UniontypeDecl BlockTypeFileText
@@ -412,7 +413,7 @@
                        #= at start of line - nothing
                        =#
                       if ! isAtStartOfLine(txt)
-                        txt.tokens = _cons(ST_NEW_LINE(), toks)
+                        Setfield.@set txt.tokens = _cons(ST_NEW_LINE(), toks)
                       end
                        #= otherwise put normal new-line
                        =#
@@ -2284,7 +2285,7 @@
         function booleanString(b::Bool) ::String
               local s::String
 
-              s = String(b)
+              s = StringFunction(b)
           s
         end
 

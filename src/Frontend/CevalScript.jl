@@ -1,4 +1,4 @@
-  module CevalScript 
+  module CevalScript
 
 
     using MetaModelica
@@ -107,12 +107,12 @@
         import ComponentReference
         import ErrorExt
 
-         #= 
+         #=
           This is a wrapper funtion to Ceval.ceval. The purpose of this
           function is to concetrate all the calls to Ceval.ceval made from
           the Script files. This will simplify the separation of the scripting
           environment from the FrontEnd =#
-        function ceval(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function ceval(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inBoolean::Bool #= impl =#, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -136,12 +136,12 @@
                       (cache, newval) = cevalCallFunction(cache, env, e, vallst, impl, msg, numIter + 1)
                     (cache, newval)
                   end
-                  
+
                   (cache, env, e && DAE.CALL(__), true, msg, _)  => begin
                       (cache, value) = cevalInteractiveFunctions(cache, env, e, msg, numIter + 1)
                     (cache, value)
                   end
-                  
+
                   (cache, env, e, impl, msg, _)  => begin
                       (cache, value) = Ceval.ceval(cache, env, e, impl, msg, numIter + 1)
                     (cache, value)
@@ -161,7 +161,7 @@
          - not partial
          - not replaceable (without redeclare)
          - replaceable and called functions are not partial or not replaceable (without redeclare) =#
-        function isCompleteFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncPath::Absyn.Path) ::Bool 
+        function isCompleteFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inFuncPath::Absyn.Path) ::Bool
               local isComplete::Bool
 
               isComplete = begin
@@ -175,17 +175,17 @@
                       @match (_, SCode.CLASS(classDef = SCode.PARTS(externalDecl = SOME(_))), _) = Lookup.lookupClass(cache, env, fpath)
                     true
                   end
-                  
+
                   (_, _, _)  => begin
                       @match true = System.getPartialInstantiation()
                     false
                   end
-                  
+
                   (cache, env, fpath)  => begin
                       @match (_, SCode.CLASS(partialPrefix = SCode.PARTIAL()), _) = Lookup.lookupClass(cache, env, fpath)
                     false
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -199,7 +199,7 @@
         end
 
          #= Compiles a model given a file-prefix, helper function to buildModel. =#
-        function compileModel(fileprefix::String, libs::List{<:String}, workingDir::String = "", makeVars::List{<:String} = nil)  
+        function compileModel(fileprefix::String, libs::List{<:String}, workingDir::String = "", makeVars::List{<:String} = nil)
               local omhome::String = Settings.getInstallationDirectoryPath()
               local omhome_1::String = System.stringReplace(omhome, "\\", "")
               local pd::String = Autoconf.pathDelimiter
@@ -316,7 +316,7 @@
         end
 
          #= load the file or the directory structure if the file is named package.mo =#
-        function loadFile(name::String, encoding::String, p::Absyn.Program, checkUses::Bool) ::Absyn.Program 
+        function loadFile(name::String, encoding::String, p::Absyn.Program, checkUses::Bool) ::Absyn.Program
               local outProgram::Absyn.Program
 
               local dir::String
@@ -347,7 +347,7 @@
           outProgram
         end
 
-        function checkUsesAndUpdateProgram(newp::Absyn.Program, p::Absyn.Program, checkUses::Bool, modelicaPath::String) ::Absyn.Program 
+        function checkUsesAndUpdateProgram(newp::Absyn.Program, p::Absyn.Program, checkUses::Bool, modelicaPath::String) ::Absyn.Program
 
 
               local modelsToLoad::List{Tuple{Absyn.Path, List{String}, Bool}}
@@ -362,7 +362,7 @@
           p
         end
 
-        LoadModelFoldArg = Tuple 
+        LoadModelFoldArg = Tuple
          #= /*modelicaPath*/ =#
          #= /*forceLoad*/ =#
          #= /*notifyLoad*/ =#
@@ -370,7 +370,7 @@
          #= /*requireExactVersion*/ =#
          #= /*encrypted*/ =#
 
-        function loadModel(imodelsToLoad::List{<:Tuple{<:Absyn.Path, List{<:String}, Bool}}, modelicaPath::String, ip::Absyn.Program, forceLoad::Bool, notifyLoad::Bool, checkUses::Bool, requireExactVersion::Bool, encrypted::Bool = false) ::Tuple{Absyn.Program, Bool} 
+        function loadModel(imodelsToLoad::List{<:Tuple{<:Absyn.Path, List{<:String}, Bool}}, modelicaPath::String, ip::Absyn.Program, forceLoad::Bool, notifyLoad::Bool, checkUses::Bool, requireExactVersion::Bool, encrypted::Bool = false) ::Tuple{Absyn.Program, Bool}
               local success::Bool
               local pnew::Absyn.Program
 
@@ -380,7 +380,7 @@
           (pnew, success)
         end
 
-        function loadModel1(modelToLoad::Tuple{<:Absyn.Path, List{<:String}, Bool}, inArg::LoadModelFoldArg, inTpl::Tuple{<:Absyn.Program, Bool}) ::Tuple{Absyn.Program, Bool} 
+        function loadModel1(modelToLoad::Tuple{<:Absyn.Path, List{<:String}, Bool}, inArg::LoadModelFoldArg, inTpl::Tuple{<:Absyn.Program, Bool}) ::Tuple{Absyn.Program, Bool}
               local outTpl::Tuple{Absyn.Program, Bool}
 
               local modelsToLoad::List{Tuple{Absyn.Path, List{String}, Bool}}
@@ -448,7 +448,7 @@
           outTpl
         end
 
-        function checkModelLoaded(tpl::Tuple{<:Absyn.Path, List{<:String}, Bool}, p::Absyn.Program, forceLoad::Bool, failNonLoad::Option{<:String}) ::Bool 
+        function checkModelLoaded(tpl::Tuple{<:Absyn.Path, List{<:String}, Bool}, p::Absyn.Program, forceLoad::Bool, failNonLoad::Option{<:String}) ::Bool
               local loaded::Bool
 
               loaded = begin
@@ -461,18 +461,18 @@
                   (_, _, true, _)  => begin
                     false
                   end
-                  
+
                   ((path, str1 <| _, _), _, false, _)  => begin
                       cdef = Interactive.getPathedClassInProgram(path, p)
                       ostr2 = AbsynUtil.getNamedAnnotationInClass(cdef, Absyn.IDENT("version"), Interactive.getAnnotationStringValueOrFail)
                       checkValidVersion(path, str1, ostr2)
                     true
                   end
-                  
+
                   (_, _, _, NONE())  => begin
                     false
                   end
-                  
+
                   ((path, _, _), _, _, SOME(str2))  => begin
                       str1 = AbsynUtil.pathString(path)
                       Error.addMessage(Error.INST_NON_LOADED, list(str1, str2))
@@ -483,7 +483,7 @@
           loaded
         end
 
-        function checkValidVersion(path::Absyn.Path, version::String, actualVersion::Option{<:String})  
+        function checkValidVersion(path::Absyn.Path, version::String, actualVersion::Option{<:String})
               _ = begin
                   local pathStr::String
                   local str1::String
@@ -493,13 +493,13 @@
                       @match true = stringEq(str1, str2)
                     ()
                   end
-                  
+
                   (_, str1, SOME(str2))  => begin
                       pathStr = AbsynUtil.pathString(path)
                       Error.addMessage(Error.LOAD_MODEL_DIFFERENT_VERSIONS, list(pathStr, str1, str2))
                     ()
                   end
-                  
+
                   (_, str1, NONE())  => begin
                       pathStr = AbsynUtil.pathString(path)
                       Error.addMessage(Error.LOAD_MODEL_DIFFERENT_VERSIONS, list(pathStr, str1, "unknown"))
@@ -510,7 +510,7 @@
         end
 
          #= defined in the interactive environment. =#
-        function cevalInteractiveFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp #= expression to evaluate =#, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalInteractiveFunctions(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp #= expression to evaluate =#, msg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -535,7 +535,7 @@
                       t = t2 - t1
                     (cache, Values.REAL(t))
                   end
-                  
+
                   (cache, env, DAE.CALL(path = Absyn.IDENT(name), attr = DAE.CALL_ATTR(builtin = true), expLst = eLst), _, _)  => begin
                       (cache, valLst) = Ceval.cevalList(cache, env, eLst, true, msg, numIter)
                       valLst = ListUtil.map1(valLst, evalCodeTypeName, env)
@@ -548,7 +548,7 @@
         end
 
          #= defined in the interactive environment. =#
-        function cevalInteractiveFunctions2(inCache::FCore.Cache, inEnv::FCore.Graph, inFunctionName::String, inVals::List{<:Values.Value}, msg::Absyn.Msg) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalInteractiveFunctions2(inCache::FCore.Cache, inEnv::FCore.Graph, inFunctionName::String, inVals::List{<:Values.Value}, msg::Absyn.Msg) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -782,7 +782,7 @@
                   local dumpExtractionSteps::Bool
                   local requireExactVersion::Bool
                   local uses::List{Tuple{Absyn.Path, List{String}}}
-                  local oldLanguageStd::Config.LanguageStandard
+                  local oldLanguageStd::Config.LanguageStandard.Ty
                   local cl::SCode.Element
                   local cls::List{SCode.Element}
                   local elts::List{SCode.Element}
@@ -824,11 +824,11 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "parseString", _, _)  => begin
                     (cache, ValuesUtil.makeArray(nil))
                   end
-                  
+
                   (cache, _, "parseFile", Values.STRING(str1) <| Values.STRING(encoding) <|  nil(), _)  => begin
                       Error.clearMessages() #= Clear messages =#
                       Print.clearErrorBuf() #= Clear error buffer =#
@@ -836,7 +836,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "loadFileInteractiveQualified", Values.STRING(str1) <| Values.STRING(encoding) <|  nil(), _)  => begin
                       Error.clearMessages() #= Clear messages =#
                       Print.clearErrorBuf() #= Clear error buffer =#
@@ -844,19 +844,19 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "loadFileInteractive", Values.STRING(str1) <| Values.STRING(encoding) <|  nil(), _)  => begin
                       pnew = loadFile(str1, encoding, SymbolTable.getAbsyn(), false) #= System.regularFileExists(name) => 0 &    Parser.parse(name) => p1 & =#
                       vals = ListUtil.map(Interactive.getTopClassnames(pnew), ValuesUtil.makeCodeTypeName)
                       SymbolTable.setAbsyn(pnew)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "getSourceFile", Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       str = Interactive.getSourceFile(path, SymbolTable.getAbsyn())
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setSourceFile", Values.CODE(Absyn.C_TYPENAME(path)) <| Values.STRING(str) <|  nil(), _)  => begin
                       @match Values.ENUM_LITERAL(index = access) = Interactive.checkAccessAnnotationAndEncryption(path, SymbolTable.getAbsyn())
                       if access >= 9
@@ -868,43 +868,43 @@
                       end
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "basename", Values.STRING(str) <|  nil(), _)  => begin
                       str = System.basename(str)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "dirname", Values.STRING(str) <|  nil(), _)  => begin
                       str = System.dirname(str)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "codeToString", Values.CODE(codeNode) <|  nil(), _)  => begin
                       str = Dump.printCodeStr(codeNode)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "typeOf", Values.CODE(Absyn.C_VARIABLENAME(Absyn.CREF_IDENT(name = varid))) <|  nil(), _)  => begin
                       tp = Interactive.getTypeOfVariable(varid, SymbolTable.getVars())
                       str = Types.unparseType(tp)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "GC_gcollect_and_unmap",  nil(), _)  => begin
                       GC.gcollectAndUnmap()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "GC_expand_hp", Values.INTEGER(i) <|  nil(), _)  => begin
                       b = GC.expandHeap(i)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "GC_set_max_heap_size", Values.INTEGER(i) <|  nil(), _)  => begin
                       GC.setMaxHeapSize(i)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "GC_get_prof_stats",  nil(), _)  => begin
                       gcStats = GC.getProfStats()
                       gcStatRec = begin
@@ -916,29 +916,29 @@
                       end
                     (cache, gcStatRec)
                   end
-                  
+
                   (cache, _, "clear",  nil(), _)  => begin
                       SymbolTable.reset()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "clearProgram",  nil(), _)  => begin
                       SymbolTable.clearProgram()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "clearVariables",  nil(), _)  => begin
                       SymbolTable.setVars(nil)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "list", _, _)  => begin
                       p = SymbolTable.getAbsyn()
                       @match true = Interactive.astContainsEncryptedClass(p)
                       Error.addMessage(Error.ACCESS_ENCRYPTED_PROTECTED_CONTENTS, nil)
                     (cache, Values.STRING(""))
                   end
-                  
+
                   (cache, _, "list", Values.CODE(Absyn.C_TYPENAME(Absyn.IDENT("AllLoadedClasses"))) <| Values.BOOL(false) <| Values.BOOL(false) <| Values.ENUM_LITERAL(name = path) <|  nil(), _)  => begin
                       name = AbsynUtil.pathLastIdent(path)
                       str = begin
@@ -946,19 +946,19 @@
                           "Absyn"  => begin
                             Dump.unparseStr(SymbolTable.getAbsyn(), false)
                           end
-                          
+
                           "SCode"  => begin
                             SCodeDump.programStr(SymbolTable.getSCode())
                           end
-                          
+
                           "MetaModelicaInterface"  => begin
                             SCodeDump.programStr(SymbolTable.getSCode(), SCodeDump.OPTIONS(true, false, true, true, true, true, true, true, true))
                           end
-                          
+
                           "Internal"  => begin
                             System.anyStringCode(SymbolTable.getAbsyn())
                           end
-                          
+
                           _  => begin
                               ""
                           end
@@ -966,7 +966,7 @@
                       end
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "list", Values.CODE(Absyn.C_TYPENAME(className)) <| Values.BOOL(b1) <| Values.BOOL(b2) <| Values.ENUM_LITERAL(name = path) <|  nil(), _)  => begin
                       @match false = valueEq(Absyn.IDENT("AllLoadedClasses"), className)
                       name = AbsynUtil.pathLastIdent(path)
@@ -990,19 +990,19 @@
                           "Absyn"  => begin
                             Dump.unparseStr(p, false)
                           end
-                          
+
                           "SCode"  => begin
                             SCodeDump.unparseElementStr(cl)
                           end
-                          
+
                           "MetaModelicaInterface"  => begin
                             SCodeDump.unparseElementStr(cl, SCodeDump.OPTIONS(true, false, true, true, true, true, true, true, true))
                           end
-                          
+
                           "Internal"  => begin
                             System.anyStringCode(p)
                           end
-                          
+
                           _  => begin
                               ""
                           end
@@ -1010,18 +1010,18 @@
                       end
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "list", _, _)  => begin
                     (cache, Values.STRING(""))
                   end
-                  
+
                   (cache, _, "listFile", Values.CODE(Absyn.C_TYPENAME(className)) <| Values.BOOL(b) <|  nil(), _)  => begin
                       path = begin
                         @match className begin
                           Absyn.FULLYQUALIFIED(__)  => begin
                             className.path
                           end
-                          
+
                           _  => begin
                               className
                           end
@@ -1040,7 +1040,7 @@
                             Absyn.IDENT(__)  => begin
                               Absyn.TOP()
                             end
-                            
+
                             _  => begin
                                 Absyn.WITHIN(AbsynUtil.stripLast(path))
                             end
@@ -1052,202 +1052,202 @@
                       end
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "listFile", _, _)  => begin
                     (cache, Values.STRING(""))
                   end
-                  
+
                   (cache, _, "sortStrings", Values.ARRAY(valueLst = vals) <|  nil(), _)  => begin
                       strs = ListUtil.map(vals, ValuesUtil.extractValueString)
                       strs = ListUtil.sort(strs, Util.strcmpBool)
                       v = ValuesUtil.makeArray(ListUtil.map(strs, ValuesUtil.makeString))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "listVariables",  nil(), _)  => begin
                       v = ValuesUtil.makeArray(getVariableNames(SymbolTable.getVars(), nil))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "setCompileCommand", Values.STRING(cmd) <|  nil(), _)  => begin
                       Settings.setCompileCommand(cmd)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getCompileCommand",  nil(), _)  => begin
                       res = Settings.getCompileCommand()
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "setTempDirectoryPath", Values.STRING(cmd) <|  nil(), _)  => begin
                       Settings.setTempDirectoryPath(cmd)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getTempDirectoryPath",  nil(), _)  => begin
                       res = Settings.getTempDirectoryPath()
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "setEnvironmentVar", Values.STRING(varid) <| Values.STRING(str) <|  nil(), _)  => begin
                       b = 0 == System.setEnv(varid, str, true)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "getEnvironmentVar", Values.STRING(varid) <|  nil(), _)  => begin
                       res = Util.makeValueOrDefault(System.readEnv, varid, "")
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "setInstallationDirectoryPath", Values.STRING(cmd) <|  nil(), _)  => begin
                       Settings.setInstallationDirectoryPath(cmd)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getInstallationDirectoryPath",  nil(), _)  => begin
                       res = Settings.getInstallationDirectoryPath()
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "getModelicaPath",  nil(), _)  => begin
                       res = Settings.getModelicaPath(Config.getRunningTestsuite())
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "setModelicaPath", Values.STRING(cmd) <|  nil(), _)  => begin
                       Settings.setModelicaPath(cmd)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "setModelicaPath", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "getLanguageStandard",  nil(), _)  => begin
                       res = Config.languageStandardString(Config.getLanguageStandard())
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "reopenStandardStream", Values.ENUM_LITERAL(index = i) <| Values.STRING(filename) <|  nil(), _)  => begin
                       b = System.reopenStandardStream(i - 1, filename)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "iconv", Values.STRING(str) <| Values.STRING(from) <| Values.STRING(to) <|  nil(), _)  => begin
                       str = System.iconv(str, from, to)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "getCompiler",  nil(), _)  => begin
                       str = System.getCCompiler()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setCFlags", Values.STRING(str) <|  nil(), _)  => begin
                       System.setCFlags(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getCFlags",  nil(), _)  => begin
                       str = System.getCFlags()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setCompiler", Values.STRING(str) <|  nil(), _)  => begin
                       System.setCCompiler(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getCXXCompiler",  nil(), _)  => begin
                       str = System.getCXXCompiler()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setCXXCompiler", Values.STRING(str) <|  nil(), _)  => begin
                       System.setCXXCompiler(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "setCompilerFlags", Values.STRING(str) <|  nil(), _)  => begin
                       System.setCFlags(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getLinker",  nil(), _)  => begin
                       str = System.getLinker()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setLinker", Values.STRING(str) <|  nil(), _)  => begin
                       System.setLinker(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getLinkerFlags",  nil(), _)  => begin
                       str = System.getLDFlags()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "setLinkerFlags", Values.STRING(str) <|  nil(), _)  => begin
                       System.setLDFlags(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (_, _, "setCommandLineOptions", Values.STRING(str) <|  nil(), _)  => begin
                       args = System.strtok(str, " ")
                       @match nil = Flags.readArgs(args)
                     (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "setCommandLineOptions", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "getCommandLineOptions",  nil(), _)  => begin
                     (cache, ValuesUtil.makeStringArray(Flags.unparseFlags()))
                   end
-                  
+
                   (cache, _, "getCommandLineOptions", _, _)  => begin
                     (cache, Values.META_FAIL())
                   end
-                  
+
                   (cache, _, "clearCommandLineOptions",  nil(), _)  => begin
                       Flags.resetDebugFlags()
                       Flags.resetConfigFlags()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "clearCommandLineOptions", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "enableNewInstantiation", _, _)  => begin
                       Flags.enableDebug(Flags.SCODE_INST)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "enableNewInstantiation", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "disableNewInstantiation", _, _)  => begin
                       Flags.disableDebug(Flags.SCODE_INST)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "disableNewInstantiation", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "clearDebugFlags", _, _)  => begin
                       Flags.resetDebugFlags()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "clearDebugFlags", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "getConfigFlagValidOptions", Values.STRING(str) <|  nil(), _)  => begin
                       (strs1, str, strs2) = Flags.getValidOptionsAndDescription(str)
                       v1 = ValuesUtil.makeArray(ListUtil.map(strs1, ValuesUtil.makeString))
@@ -1256,7 +1256,7 @@
                       v = Values.TUPLE(list(v1, v2, v3))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "getConfigFlagValidOptions", Values.STRING(_) <|  nil(), _)  => begin
                       v1 = ValuesUtil.makeArray(nil)
                       v2 = Values.STRING("")
@@ -1264,12 +1264,12 @@
                       v = Values.TUPLE(list(v1, v2, v3))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "cd", Values.STRING("") <|  nil(), _)  => begin
                       str_1 = System.pwd()
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "cd", Values.STRING(str) <|  nil(), _)  => begin
                       resI = System.cd(str)
                       if ! resI == 0
@@ -1278,102 +1278,102 @@
                       str_1 = System.pwd()
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "cd", Values.STRING(str) <|  nil(), _)  => begin
                       @shouldFail @match true = System.directoryExists(str)
                       res = stringAppendList(list("Error, directory ", str, " does not exist,"))
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "mkdir", Values.STRING(str) <|  nil(), _)  => begin
                       @match true = System.directoryExists(str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "mkdir", Values.STRING(str) <|  nil(), _)  => begin
                       b = Util.createDirectoryTree(str)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "copy", Values.STRING(str1) <| Values.STRING(str2) <|  nil(), _)  => begin
                       b = System.copyFile(str1, str2)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "remove", Values.STRING(str) <|  nil(), _)  => begin
                       b = System.removeDirectory(str)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "getVersion", Values.CODE(Absyn.C_TYPENAME(Absyn.IDENT("OpenModelica"))) <|  nil(), _)  => begin
                       str_1 = Settings.getVersionNr()
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "getVersion", Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       str_1 = getPackageVersion(path, SymbolTable.getAbsyn())
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "getTempDirectoryPath",  nil(), _)  => begin
                       str_1 = Settings.getTempDirectoryPath()
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "system", Values.STRING(str) <| Values.STRING(filename) <|  nil(), _)  => begin
                       resI = System.systemCall(str, filename)
                     (cache, Values.INTEGER(resI))
                   end
-                  
+
                   (cache, _, "system_parallel", Values.ARRAY(valueLst = vals) <| Values.INTEGER(i) <|  nil(), _)  => begin
                       strs = ListUtil.map(vals, ValuesUtil.extractValueString)
                       v = ValuesUtil.makeIntArray(System.systemCallParallel(strs, i))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "timerClear", Values.INTEGER(i) <|  nil(), _)  => begin
                       System.realtimeClear(i)
                     (cache, Values.NORETCALL())
                   end
-                  
+
                   (cache, _, "timerTick", Values.INTEGER(i) <|  nil(), _)  => begin
                       System.realtimeTick(i)
                     (cache, Values.NORETCALL())
                   end
-                  
+
                   (cache, _, "timerTock", Values.INTEGER(i) <|  nil(), _)  => begin
                       @match true = System.realtimeNtick(i) > 0
                       r = System.realtimeTock(i)
                     (cache, Values.REAL(r))
                   end
-                  
+
                   (cache, _, "timerTock", _, _)  => begin
                     (cache, Values.REAL(-1.0))
                   end
-                  
+
                   (cache, _, "readFile", Values.STRING(str) <|  nil(), _)  => begin
                       str_1 = System.readFile(str)
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "readFile", _, _)  => begin
                     (cache, Values.STRING(""))
                   end
-                  
+
                   (cache, _, "writeFile", Values.STRING(str) <| Values.STRING(str1) <| Values.BOOL(false) <|  nil(), _)  => begin
                       System.writeFile(str, str1)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "writeFile", Values.STRING(str) <| Values.STRING(str1) <| Values.BOOL(true) <|  nil(), _)  => begin
                       System.appendFile(str, str1)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "writeFile", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "deleteFile", Values.STRING(str) <|  nil(), _)  => begin
                       b = if System.removeFile(str) == 0
                             true
@@ -1382,12 +1382,12 @@
                           end
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "compareFiles", Values.STRING(str1) <| Values.STRING(str2) <|  nil(), _)  => begin
                       b = System.fileContentsEqual(str1, str2)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "compareFilesAndMove", Values.STRING(str1) <| Values.STRING(str2) <|  nil(), _)  => begin
                       @match true = System.regularFileExists(str1)
                       b = System.regularFileExists(str2) && System.fileContentsEqual(str1, str2)
@@ -1398,94 +1398,94 @@
                           end
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "compareFilesAndMove", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "readFileNoNumeric", Values.STRING(str) <|  nil(), _)  => begin
                       str_1 = System.readFileNoNumeric(str)
                     (cache, Values.STRING(str_1))
                   end
-                  
+
                   (cache, _, "getErrorString", Values.BOOL(b) <|  nil(), _)  => begin
                       str = Error.printMessagesStr(b)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "countMessages", _, _)  => begin
                       i1 = Error.getNumMessages()
                       i2 = Error.getNumErrorMessages()
                       i3 = ErrorExt.getNumWarningMessages()
                     (cache, Values.TUPLE(list(Values.INTEGER(i1), Values.INTEGER(i2), Values.INTEGER(i3))))
                   end
-                  
+
                   (cache, _, "clearMessages",  nil(), _)  => begin
                       Error.clearMessages()
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "getMessagesStringInternal", Values.BOOL(true) <|  nil(), _)  => begin
                       messages = ListUtil.unique(Error.getMessages())
                       v = ValuesUtil.makeArray(ListUtil.map(messages, errorToValue))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "getMessagesStringInternal", Values.BOOL(false) <|  nil(), _)  => begin
                       v = ValuesUtil.makeArray(ListUtil.map(Error.getMessages(), errorToValue))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "stringTypeName", Values.STRING(str) <|  nil(), _)  => begin
                       path = Parser.stringPath(str)
                     (cache, Values.CODE(Absyn.C_TYPENAME(path)))
                   end
-                  
+
                   (cache, _, "stringVariableName", Values.STRING(str) <|  nil(), _)  => begin
                       cr = Parser.stringCref(str)
                     (cache, Values.CODE(Absyn.C_VARIABLENAME(cr)))
                   end
-                  
+
                   (cache, _, "typeNameString", Values.CODE(A = Absyn.C_TYPENAME(path = path)) <|  nil(), _)  => begin
                       str = AbsynUtil.pathString(path)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "typeNameStrings", Values.CODE(A = Absyn.C_TYPENAME(path = path)) <|  nil(), _)  => begin
                       v = ValuesUtil.makeArray(ListUtil.map(AbsynUtil.pathToStringList(path), ValuesUtil.makeString))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "generateHeader", Values.STRING(filename) <|  nil(), _)  => begin
                       str = Tpl.tplString(Unparsing.programExternalHeader, SymbolTable.getSCode())
                       System.writeFile(filename, str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "generateHeader", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "generateJuliaHeader", Values.STRING(filename) <|  nil(), _)  => begin
                       str = Tpl.tplString(Unparsing.programExternalHeaderJulia, SymbolTable.getSCode())
                       System.writeFile(filename, str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "generateJuliaHeader", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, env, "generateCode", Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       @match (cache, Util.SUCCESS()) = Static.instantiateDaeFunction(cache, env, path, false, NONE(), true)
                       (cache, _, _) = cevalGenerateFunction(cache, env, SymbolTable.getAbsyn(), path)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "generateCode", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, env, "generateScriptingAPI", Values.CODE(Absyn.C_TYPENAME(className)) <| Values.STRING(name) <|  nil(), _)  => begin
                        #=  cmd = Util.rawStringToInputString(cmd);
                        =#
@@ -1501,7 +1501,7 @@
                           SCode.CLASS(classDef = SCode.PARTS(elementLst = elts))  => begin
                             elts
                           end
-                          
+
                           cl  => begin
                               Error.addSourceMessage(Error.INTERNAL_ERROR, list(AbsynUtil.pathString(className) + " does not contain SCode.PARTS"), SCodeUtil.elementInfo(cl))
                             fail()
@@ -1520,7 +1520,7 @@
                                 end
                               ()
                             end
-                            
+
                             _  => begin
                                 ()
                             end
@@ -1532,21 +1532,21 @@
                       s3 = Tpl.tplString2(GenerateAPIFunctionsTpl.getQtInterfaceHeaders, tys, name)
                     (cache, Values.TUPLE(list(Values.BOOL(true), Values.STRING(s1), Values.STRING(s2), Values.STRING(s3))))
                   end
-                  
+
                   (cache, _, "generateScriptingAPI", _, _)  => begin
                     (cache, Values.TUPLE(list(Values.BOOL(false), Values.STRING(""), Values.STRING(""))))
                   end
-                  
+
                   (cache, _, "generateEntryPoint", Values.STRING(filename) <| Values.CODE(Absyn.C_TYPENAME(path)) <| Values.STRING(str) <|  nil(), _)  => begin
                       str = Tpl.tplString2(CodegenCFunctions.generateEntryPoint, path, str)
                       System.writeFile(filename, str)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "generateEntryPoint", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "checkInterfaceOfPackages", Values.CODE(Absyn.C_TYPENAME(path)) <| Values.ARRAY(valueLst = vals) <|  nil(), _)  => begin
                       sp = SymbolTable.getSCode()
                       cl = SCodeUtil.getElementWithPath(sp, path)
@@ -1555,11 +1555,11 @@
                       ListUtil.map1_0(sp, verifyInterfaceType, interfaceType)
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "checkInterfaceOfPackages", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "generateSeparateCodeDependenciesMakefile", Values.STRING(filename) <| Values.STRING(prefix) <| Values.STRING(suffix) <|  nil(), _)  => begin
                       sp = SymbolTable.getSCode()
                       names = ListUtil.filterMap(sp, SCodeUtil.getElementName)
@@ -1568,11 +1568,11 @@
                       System.writeFile(filename, stringDelimitList(strs, "\\n"))
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "generateSeparateCodeDependenciesMakefile", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "generateSeparateCodeDependencies", Values.STRING(suffix) <|  nil(), _)  => begin
                       sp = SymbolTable.getSCode()
                       names = ListUtil.filterMap(sp, SCodeUtil.getElementName)
@@ -1593,11 +1593,11 @@
                       v = ValuesUtil.makeArray(ListUtil.map(names, ValuesUtil.makeString))
                     (cache, v)
                   end
-                  
+
                   (cache, _, "generateSeparateCodeDependencies", _, _)  => begin
                     (cache, Values.META_FAIL())
                   end
-                  
+
                   (cache, env, "generateSeparateCode", v <| Values.BOOL(b) <|  nil(), _)  => begin
                       p = SymbolTable.getAbsyn()
                       sp = SymbolTable.getSCode()
@@ -1608,7 +1608,7 @@
                       setGlobalRoot(Global.instOnlyForcedFunctions, NONE())
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (_, _, "generateSeparateCode", v <| Values.BOOL(_) <|  nil(), _)  => begin
                       sp = SymbolTable.getSCode()
                       name = getTypeNameIdent(v)
@@ -1616,12 +1616,12 @@
                       Error.addMessage(Error.LOOKUP_ERROR, list(name, "<TOP>"))
                     fail()
                   end
-                  
+
                   (cache, _, "generateSeparateCode", _, _)  => begin
                       setGlobalRoot(Global.instOnlyForcedFunctions, NONE())
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (_, _, "loadModel", Values.CODE(Absyn.C_TYPENAME(path)) <| Values.ARRAY(valueLst = cvars) <| Values.BOOL(b) <| Values.STRING(str) <| Values.BOOL(requireExactVersion) <|  nil(), _)  => begin
                       p = SymbolTable.getAbsyn()
                       execStatReset()
@@ -1641,13 +1641,13 @@
                       execStat("loadModel(" + AbsynUtil.pathString(path) + ")")
                     (FCoreUtil.emptyCache(), Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "loadModel", Values.CODE(Absyn.C_TYPENAME(path)) <| _, _)  => begin
                       pathstr = AbsynUtil.pathString(path)
                       Error.addMessage(Error.LOAD_MODEL_ERROR, list(pathstr))
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (_, _, "loadFile", Values.STRING(name) <| Values.STRING(encoding) <| Values.BOOL(b) <| _, _)  => begin
                       execStatReset()
                       name = Util.testsuiteFriendlyPath(name)
@@ -1656,11 +1656,11 @@
                       SymbolTable.setAbsyn(newp)
                     (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "loadFile", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (_, _, "loadFiles", Values.ARRAY(valueLst = vals) <| Values.STRING(encoding) <| Values.INTEGER(i) <| _, _)  => begin
                       strs = ListUtil.mapMap(vals, ValuesUtil.extractValueString, Util.testsuiteFriendlyPath)
                       newps = Parser.parallelParseFilesToProgramList(strs, encoding, numThreads = i)
@@ -1668,11 +1668,11 @@
                       SymbolTable.setAbsyn(newp)
                     (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "loadFiles", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "parseEncryptedPackage", Values.STRING(filename) <| Values.STRING(workdir) <| _, _)  => begin
                       if System.regularFileExists(filename)
                         if Util.endsWith(filename, ".mol")
@@ -1723,7 +1723,7 @@
                       end
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (_, _, "loadEncryptedPackage", Values.STRING(filename) <| Values.STRING(workdir) <| _, _)  => begin
                       b = false
                       if System.regularFileExists(filename)
@@ -1778,16 +1778,16 @@
                       end
                     (FCoreUtil.emptyCache(), Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "loadEncryptedPackage", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "alarm", Values.INTEGER(i) <|  nil(), _)  => begin
                       i = System.alarm(i)
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, _, "getClassNames", Values.CODE(Absyn.C_TYPENAME(Absyn.IDENT("AllLoadedClasses"))) <| Values.BOOL(false) <| _ <| Values.BOOL(sort) <| Values.BOOL(builtin) <| Values.BOOL(_) <| _ <|  nil(), _)  => begin
                       (ip, _) = FBuiltin.getInitialFunctions()
                       p = SymbolTable.getAbsyn()
@@ -1805,7 +1805,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "getClassNames", Values.CODE(Absyn.C_TYPENAME(path)) <| Values.BOOL(false) <| Values.BOOL(b) <| Values.BOOL(sort) <| Values.BOOL(builtin) <| Values.BOOL(showProtected) <| Values.BOOL(includeConstants) <|  nil(), _)  => begin
                       (ip, _) = FBuiltin.getInitialFunctions()
                       p = SymbolTable.getAbsyn()
@@ -1828,7 +1828,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "getClassNames", Values.CODE(Absyn.C_TYPENAME(Absyn.IDENT("AllLoadedClasses"))) <| Values.BOOL(true) <| _ <| Values.BOOL(sort) <| Values.BOOL(builtin) <| Values.BOOL(showProtected) <| Values.BOOL(includeConstants) <|  nil(), _)  => begin
                       (ip, _) = FBuiltin.getInitialFunctions()
                       p = SymbolTable.getAbsyn()
@@ -1847,7 +1847,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "getClassNames", Values.CODE(Absyn.C_TYPENAME(path)) <| Values.BOOL(true) <| _ <| Values.BOOL(sort) <| Values.BOOL(builtin) <| Values.BOOL(showProtected) <| Values.BOOL(includeConstants) <|  nil(), _)  => begin
                       (ip, _) = FBuiltin.getInitialFunctions()
                       p = SymbolTable.getAbsyn()
@@ -1866,7 +1866,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   (cache, _, "reloadClass", Values.CODE(Absyn.C_TYPENAME(classpath)) <| Values.STRING(encoding) <|  nil(), _)  => begin
                       @match Absyn.CLASS(info = SOURCEINFO(fileName = filename, lastModification = r2)) = Interactive.getPathedClassInProgram(classpath, SymbolTable.getAbsyn())
                       @match (true, _, r1) = System.stat(filename)
@@ -1876,18 +1876,18 @@
                       end
                     (cache, Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "reloadClass", Values.CODE(Absyn.C_TYPENAME(classpath)) <| _ <|  nil(), _)  => begin
                       @shouldFail _ = Interactive.getPathedClassInProgram(classpath, SymbolTable.getAbsyn())
                       str = AbsynUtil.pathString(classpath)
                       Error.addMessage(Error.LOAD_MODEL_ERROR, list(str))
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "reloadClass", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (_, _, "loadString", Values.STRING(str) <| Values.STRING(name) <| Values.STRING(encoding) <| Values.BOOL(myMergeAST) <| _, _)  => begin
                       str = if ! encoding == "UTF-8"
                             System.iconv(str, encoding, "UTF-8")
@@ -1899,70 +1899,70 @@
                       SymbolTable.setAbsyn(newp)
                     (FCoreUtil.emptyCache(), Values.BOOL(true))
                   end
-                  
+
                   (cache, _, "loadString", _, _)  => begin
                     (cache, Values.BOOL(false))
                   end
-                  
+
                   (cache, _, "help", Values.STRING("") <|  nil(), _)  => begin
                       str = Flags.printUsage()
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "help", Values.STRING(str) <|  nil(), _)  => begin
                       str = Flags.printHelp(list(str))
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "getTimeStamp", Values.CODE(Absyn.C_TYPENAME(classpath)) <|  nil(), _)  => begin
                       @match Absyn.CLASS(info = SOURCEINFO(lastModification = r)) = Interactive.getPathedClassInProgram(classpath, SymbolTable.getAbsyn())
                       str = System.ctime(r)
                     (cache, Values.TUPLE(list(Values.REAL(r), Values.STRING(str))))
                   end
-                  
+
                   (cache, _, "getTimeStamp", _, _)  => begin
                     (cache, Values.TUPLE(list(Values.REAL(0.0), Values.STRING(""))))
                   end
-                  
+
                   (cache, _, "getClassRestriction", Values.CODE(Absyn.C_TYPENAME(classpath)) <|  nil(), _)  => begin
                       str = Interactive.getClassRestriction(classpath, SymbolTable.getAbsyn())
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "classAnnotationExists", Values.CODE(Absyn.C_TYPENAME(classpath)) <| Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       b = Interactive.getNamedAnnotation(classpath, SymbolTable.getAbsyn(), path, SOME(false), isSome)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (cache, _, "getBooleanClassAnnotation", Values.CODE(Absyn.C_TYPENAME(classpath)) <| Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       @match Absyn.BOOL(b) = Interactive.getNamedAnnotation(classpath, SymbolTable.getAbsyn(), path, NONE(), Interactive.getAnnotationExp)
                     (cache, Values.BOOL(b))
                   end
-                  
+
                   (_, _, "getBooleanClassAnnotation", Values.CODE(Absyn.C_TYPENAME(classpath)) <| Values.CODE(Absyn.C_TYPENAME(path)) <|  nil(), _)  => begin
                       str1 = AbsynUtil.pathString(path)
                       str2 = AbsynUtil.pathString(classpath)
                       Error.addMessage(Error.CLASS_ANNOTATION_DOES_NOT_EXIST, list(str1, str2))
                     fail()
                   end
-                  
+
                   (cache, _, "strtok", Values.STRING(str) <| Values.STRING(token) <|  nil(), _)  => begin
                       vals = ListUtil.map(System.strtok(str, token), ValuesUtil.makeString)
                       i = listLength(vals)
                     (cache, Values.ARRAY(vals, list(i)))
                   end
-                  
+
                   (cache, _, "stringSplit", Values.STRING(str) <| Values.STRING(token) <|  nil(), _)  => begin
                       vals = ListUtil.map(Util.stringSplitAtChar(str, token), ValuesUtil.makeString)
                       i = listLength(vals)
                     (cache, Values.ARRAY(vals, list(i)))
                   end
-                  
+
                   (cache, _, "stringReplace", Values.STRING(str1) <| Values.STRING(str2) <| Values.STRING(str3) <|  nil(), _)  => begin
                       str = System.stringReplace(str1, str2, str3)
                     (cache, Values.STRING(str))
                   end
-                  
+
                   (cache, _, "checkSettings",  nil(), _)  => begin
                       vars_1 = list("OPENMODELICAHOME", "OPENMODELICALIBRARY", "OMC_PATH", "SYSTEM_PATH", "OMDEV_PATH", "OMC_FOUND", "MODELICAUSERCFLAGS", "WORKING_DIRECTORY", "CREATE_FILE_WORKS", "REMOVE_FILE_WORKS", "OS", "SYSTEM_INFO", "RTLIBS", "C_COMPILER", "C_COMPILER_VERSION", "C_COMPILER_RESPONDING", "HAVE_CORBA", "CONFIGURE_CMDLINE")
                       omhome = Settings.getInstallationDirectoryPath()
@@ -1990,7 +1990,7 @@
                       vals = list(Values.STRING(omhome), Values.STRING(omlib), Values.STRING(omcpath), Values.STRING(systemPath), Values.STRING(omdev), Values.BOOL(omcfound), Values.STRING(usercflags), Values.STRING(workdir), Values.BOOL(touch_res), Values.BOOL(rm_res), Values.STRING(os), Values.STRING(uname), Values.STRING(senddata), Values.STRING(gcc), Values.STRING(gccVersion), Values.BOOL(gcc_res), Values.BOOL(have_corba), Values.STRING(confcmd))
                     (cache, Values.RECORD(Absyn.IDENT("OpenModelica.Scripting.CheckSettingsResult"), vals, vars_1, -1))
                   end
-                  
+
                   (cache, _, "echo", v && Values.BOOL(bval) <|  nil(), _)  => begin
                       Settings.setEcho(if bval
                             1
@@ -1999,34 +1999,34 @@
                           end)
                     (cache, v)
                   end
-                  
+
                   (cache, _, "numProcessors",  nil(), _)  => begin
                       i = Config.noProc()
                     (cache, Values.INTEGER(i))
                   end
-                  
+
                   (cache, _, "runScript", Values.STRING(str) <|  nil(), _)  => begin
                       str = Util.testsuiteFriendlyPath(str)
                       istmts = Parser.parseexp(str)
                       res = Interactive.evaluate(istmts, true)
                     (cache, Values.STRING(res))
                   end
-                  
+
                   (cache, _, "runScript", _, _)  => begin
                     (cache, Values.STRING("Failed"))
                   end
-                  
+
                   (_, _, "exit", Values.INTEGER(i) <|  nil(), _)  => begin
                       System.exit(i)
                     fail()
                   end
-                  
+
                   (cache, _, "getMemorySize",  nil(), _)  => begin
                       r = System.getMemorySize()
                       v = Values.REAL(r)
                     (cache, v)
                   end
-                  
+
                   (cache, _, "getAllSubtypeOf", Values.CODE(Absyn.C_TYPENAME(parentClass)) <| Values.CODE(Absyn.C_TYPENAME(path)) <| Values.BOOL(qualified) <| Values.BOOL(includePartial) <| Values.BOOL(sort) <|  nil(), _)  => begin
                       paths = InteractiveUtil.getAllSubtypeOf(parentClass, path, SymbolTable.getAbsyn(), qualified, includePartial)
                       paths = listReverse(paths)
@@ -2038,7 +2038,7 @@
                       vals = ListUtil.map(paths, ValuesUtil.makeCodeTypeName)
                     (cache, ValuesUtil.makeArray(vals))
                   end
-                  
+
                   _  => begin
                          #= /* Checks the installation of OpenModelica and tries to find common errors */ =#
                          #=  _ = System.platform();
@@ -2052,7 +2052,7 @@
           (outCache, outValue)
         end
 
-        function evalCodeTypeName(val::Values.Value, env::FCore.Graph) ::Values.Value 
+        function evalCodeTypeName(val::Values.Value, env::FCore.Graph) ::Values.Value
               local res::Values.Value
 
               res = begin
@@ -2062,7 +2062,7 @@
                       @match (_, _, _, DAE.VALBOUND(valBound = (@match Values.CODE(A = Absyn.C_TYPENAME()) = res)), _, _, _, _, _) = Lookup.lookupVar(FCoreUtil.emptyCache(), env, ComponentReference.pathToCref(path))
                     res
                   end
-                  
+
                   _  => begin
                       val
                   end
@@ -2072,7 +2072,7 @@
           res
         end
 
-        function getVariableNames(vars::List{<:GlobalScript.Variable}, acc::List{<:Values.Value}) ::List{Values.Value} 
+        function getVariableNames(vars::List{<:GlobalScript.Variable}, acc::List{<:Values.Value}) ::List{Values.Value}
               local ovars::List{Values.Value}
 
               ovars = begin
@@ -2082,11 +2082,11 @@
                   ( nil(), _)  => begin
                     listReverse(acc)
                   end
-                  
+
                   (GlobalScript.IVAR(varIdent = "$echo") <| vs, _)  => begin
                     getVariableNames(vs, acc)
                   end
-                  
+
                   (GlobalScript.IVAR(varIdent = p) <| vs, _)  => begin
                     getVariableNames(vs, _cons(Values.CODE(Absyn.C_VARIABLENAME(Absyn.CREF_IDENT(p, nil))), acc))
                   end
@@ -2095,7 +2095,7 @@
           ovars
         end
 
-        function getPackageVersion(path::Absyn.Path, p::Absyn.Program) ::String 
+        function getPackageVersion(path::Absyn.Path, p::Absyn.Program) ::String
               local version::String = ""
 
               local evalParamAnn::Bool
@@ -2111,7 +2111,7 @@
           version
         end
 
-        function errorToValue(err::Error.TotalMessage) ::Values.Value 
+        function errorToValue(err::Error.TotalMessage) ::Values.Value
               local val::Values.Value
 
               val = begin
@@ -2141,7 +2141,7 @@
           val
         end
 
-        function infoToValue(info::SourceInfo) ::Values.Value 
+        function infoToValue(info::SourceInfo) ::Values.Value
               local val::Values.Value
 
               val = begin
@@ -2164,14 +2164,14 @@
           val
         end
 
-        function makeErrorEnumLiteral(enumName::String, enumField::String, index::ModelicaInteger) ::Values.Value 
+        function makeErrorEnumLiteral(enumName::String, enumField::String, index::ModelicaInteger) ::Values.Value
               local val::Values.Value
 
               val = Values.ENUM_LITERAL(Absyn.FULLYQUALIFIED(Absyn.QUALIFIED("OpenModelica", Absyn.QUALIFIED("Scripting", Absyn.QUALIFIED(enumName, Absyn.IDENT(enumField))))), index)
           val
         end
 
-        function errorTypeToValue(ty::Error.MessageType) ::Values.Value 
+        function errorTypeToValue(ty::Error.MessageType) ::Values.Value
               local val::Values.Value
 
               val = begin
@@ -2179,27 +2179,27 @@
                   Error.SYNTAX(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "syntax", 1)
                   end
-                  
+
                   Error.GRAMMAR(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "grammar", 2)
                   end
-                  
+
                   Error.TRANSLATION(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "translation", 3)
                   end
-                  
+
                   Error.SYMBOLIC(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "symbolic", 4)
                   end
-                  
+
                   Error.SIMULATION(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "runtime", 5)
                   end
-                  
+
                   Error.SCRIPTING(__)  => begin
                     makeErrorEnumLiteral("ErrorKind", "scripting", 6)
                   end
-                  
+
                   _  => begin
                         print("errorTypeToValue failed\\n")
                       fail()
@@ -2209,7 +2209,7 @@
           val
         end
 
-        function errorLevelToValue(severity::Error.Severity) ::Values.Value 
+        function errorLevelToValue(severity::Error.Severity) ::Values.Value
               local val::Values.Value
 
               val = begin
@@ -2217,15 +2217,15 @@
                   Error.ERROR(__)  => begin
                     makeErrorEnumLiteral("ErrorLevel", "error", 1)
                   end
-                  
+
                   Error.WARNING(__)  => begin
                     makeErrorEnumLiteral("ErrorLevel", "warning", 2)
                   end
-                  
+
                   Error.NOTIFICATION(__)  => begin
                     makeErrorEnumLiteral("ErrorLevel", "notification", 3)
                   end
-                  
+
                   _  => begin
                         print("errorLevelToValue failed\\n")
                       fail()
@@ -2237,7 +2237,7 @@
 
          #= @author adrpo:
          generate the function name from a path. =#
-        function generateFunctionName(functionPath::Absyn.Path) ::String 
+        function generateFunctionName(functionPath::Absyn.Path) ::String
               local functionName::String
 
               functionName = AbsynUtil.pathStringUnquoteReplaceDot(functionPath, "_")
@@ -2246,7 +2246,7 @@
 
          #= @author adrpo:
          generate the function name from a path. =#
-        function generateFunctionFileName(functionPath::Absyn.Path) ::String 
+        function generateFunctionFileName(functionPath::Absyn.Path) ::String
               local functionName::String
 
               functionName = begin
@@ -2265,7 +2265,7 @@
                       name = name + "_" + intString(tick())
                     name
                   end
-                  
+
                   _  => begin
                         name = AbsynUtil.pathStringUnquoteReplaceDot(functionPath, "_")
                       name
@@ -2278,7 +2278,7 @@
         end
 
          #= returns all function dependencies as paths, also the main function and the function tree =#
-        function getFunctionDependencies(cache::FCore.Cache, functionName::Absyn.Path) ::Tuple{DAE.Function, List{Absyn.Path}, DAE.FunctionTree} 
+        function getFunctionDependencies(cache::FCore.Cache, functionName::Absyn.Path) ::Tuple{DAE.Function, List{Absyn.Path}, DAE.FunctionTree}
               local funcs::DAE.FunctionTree #= the function tree =#
               local dependencies::List{Absyn.Path} #= the dependencies as paths =#
               local mainFunction::DAE.Function #= the main function =#
@@ -2292,7 +2292,7 @@
         end
 
          #= collects all function dependencies, also the main function, uniontypes, metarecords =#
-        function collectDependencies(inCache::FCore.Cache, env::FCore.Graph, functionName::Absyn.Path) ::Tuple{FCore.Cache, DAE.Function, List{DAE.Function}, List{DAE.Type}} 
+        function collectDependencies(inCache::FCore.Cache, env::FCore.Graph, functionName::Absyn.Path) ::Tuple{FCore.Cache, DAE.Function, List{DAE.Function}, List{DAE.Type}}
               local metarecordTypes::List{DAE.Type}
               local dependencies::List{DAE.Function}
               local mainFunction::DAE.Function
@@ -2313,7 +2313,7 @@
         end
 
          #= Generates code for a given function name. =#
-        function cevalGenerateFunction(inCache::FCore.Cache, inEnv::FCore.Graph, program::Absyn.Program, inPath::Absyn.Path) ::Tuple{FCore.Cache, String, String} 
+        function cevalGenerateFunction(inCache::FCore.Cache, inEnv::FCore.Graph, program::Absyn.Program, inPath::Absyn.Path) ::Tuple{FCore.Cache, String, String}
               local functionFileName::String
               local functionName::String
               local outCache::FCore.Cache
@@ -2341,7 +2341,7 @@
                       compileModel(fileName, nil)
                     (cache, pathstr, fileName)
                   end
-                  
+
                   (cache, _, _, path)  => begin
                       @match true = Flags.isSet(Flags.GEN)
                       @match true = Flags.isSet(Flags.GENERATE_CODE_CHEAT)
@@ -2352,7 +2352,7 @@
                       SimCodeFunction.translateFunctions(program, fileName, NONE(), d, nil, nil)
                     (cache, pathstr, fileName)
                   end
-                  
+
                   (cache, env, _, path)  => begin
                       @match true = Flags.isSet(Flags.GEN)
                       @match true = Flags.isSet(Flags.FAILTRACE)
@@ -2382,7 +2382,7 @@
         end
 
          #= Collects the packages used by the functions =#
-        function matchQualifiedCalls(inExp::DAE.Exp, inAcc::List{<:String}) ::Tuple{DAE.Exp, List{String}} 
+        function matchQualifiedCalls(inExp::DAE.Exp, inAcc::List{<:String}) ::Tuple{DAE.Exp, List{String}}
               local outAcc::List{String}
               local outExp::DAE.Exp = inExp
 
@@ -2392,19 +2392,19 @@
                   DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.FULLYQUALIFIED(Absyn.QUALIFIED(name = name))))  => begin
                     ListUtil.consOnTrue(! listMember(name, inAcc), name, inAcc)
                   end
-                  
+
                   DAE.CALL(path = Absyn.FULLYQUALIFIED(Absyn.QUALIFIED(name = name)), attr = DAE.CALL_ATTR(builtin = false))  => begin
                     ListUtil.consOnTrue(! listMember(name, inAcc), name, inAcc)
                   end
-                  
+
                   DAE.CREF(componentRef = DAE.CREF_QUAL(ident = name), ty = DAE.T_FUNCTION_REFERENCE_FUNC(builtin = false))  => begin
                     ListUtil.consOnTrue(! listMember(name, inAcc), name, inAcc)
                   end
-                  
+
                   DAE.PARTEVALFUNCTION(path = Absyn.FULLYQUALIFIED(Absyn.QUALIFIED(name = name)))  => begin
                     ListUtil.consOnTrue(! listMember(name, inAcc), name, inAcc)
                   end
-                  
+
                   _  => begin
                       inAcc
                   end
@@ -2413,7 +2413,7 @@
           (outExp, outAcc)
         end
 
-        function instantiateDaeFunctions(icache::FCore.Cache, ienv::FCore.Graph, ipaths::List{<:Absyn.Path}) ::FCore.Cache 
+        function instantiateDaeFunctions(icache::FCore.Cache, ienv::FCore.Graph, ipaths::List{<:Absyn.Path}) ::FCore.Cache
               local outCache::FCore.Cache
 
               outCache = begin
@@ -2425,7 +2425,7 @@
                   (cache, _,  nil())  => begin
                     cache
                   end
-                  
+
                   (cache, env, path <| paths)  => begin
                       @match (cache, Util.SUCCESS()) = Static.instantiateDaeFunctionForceInst(cache, env, path, false, NONE(), true)
                       cache = instantiateDaeFunctions(cache, env, paths)
@@ -2440,7 +2440,7 @@
           outCache
         end
 
-        function generateFunctions(icache::FCore.Cache, ienv::FCore.Graph, p::Absyn.Program, fullScodeProgram::SCode.Program, isp::List{<:SCode.Element}, cleanCache::Bool) ::Tuple{FCore.Cache, FCore.Graph} 
+        function generateFunctions(icache::FCore.Cache, ienv::FCore.Graph, p::Absyn.Program, fullScodeProgram::SCode.Program, isp::List{<:SCode.Element}, cleanCache::Bool) ::Tuple{FCore.Cache, FCore.Graph}
               local env::FCore.Graph
               local cache::FCore.Cache
 
@@ -2465,18 +2465,18 @@
                   (cache, env, _,  nil(), _)  => begin
                     (cache, env)
                   end
-                  
+
                   (cache, env, _, cl && SCode.CLASS(name = name, encapsulatedPrefix = SCode.ENCAPSULATED(__), restriction = restr, info = info) <| sp, _)  => begin
                       _ = begin
                         @match restr begin
                           SCode.R_PACKAGE(__)  => begin
                             ()
                           end
-                          
+
                           SCode.R_UNIONTYPE(__)  => begin
                             ()
                           end
-                          
+
                           _  => begin
                                 Error.addSourceMessage(Error.INTERNAL_ERROR, list("Only package and uniontype is supported as top-level classes in OpenModelica."), info)
                               fail()
@@ -2487,7 +2487,7 @@
                       (cache, env) = generateFunctions(cache, env, p, fullScodeProgram, sp, cleanCache)
                     (cache, env)
                   end
-                  
+
                   (_, _, _, SCode.CLASS(encapsulatedPrefix = SCode.NOT_ENCAPSULATED(__), name = name, info = info && SOURCEINFO(fileName = file)) <| _, _)  => begin
                       (n, _) = System.regex(file, "ModelicaBuiltin.mo", 1, false, false)
                       Error.assertion(n > 0, "Not an encapsulated class (required for separate compilation): " + name, info)
@@ -2498,7 +2498,7 @@
           (cache, env)
         end
 
-        function generateFunctions2(icache::FCore.Cache, ienv::FCore.Graph, p::Absyn.Program, sp::SCode.Program, cl::SCode.Element, name::String, info::SourceInfo, cleanCache::Bool) ::Tuple{FCore.Cache, FCore.Graph} 
+        function generateFunctions2(icache::FCore.Cache, ienv::FCore.Graph, p::Absyn.Program, sp::SCode.Program, cl::SCode.Element, name::String, info::SourceInfo, cleanCache::Bool) ::Tuple{FCore.Cache, FCore.Graph}
               local env::FCore.Graph
               local cache::FCore.Cache
 
@@ -2528,7 +2528,7 @@
                       @match (1, _) = System.regex(file, "ModelicaBuiltin.mo", 1, false, false)
                     (cache, env)
                   end
-                  
+
                   (cache, env, _, _, _, _, _)  => begin
                       cache = if cleanCache
                             FCoreUtil.emptyCache()
@@ -2571,7 +2571,7 @@
                           end
                     (cache, env)
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.SEPARATE_COMPILATION_PACKAGE_FAILED, list(name), info)
                       fail()
@@ -2581,7 +2581,7 @@
           (cache, env)
         end
 
-        function findFunctionsToCompile(elt::SCode.Element, pathPrefix::Absyn.Path, sp::SCode.Program, acc::List{<:Absyn.Path}, accMetarecord::List{<:Absyn.Path}) ::Tuple{List{Absyn.Path}, List{Absyn.Path}} 
+        function findFunctionsToCompile(elt::SCode.Element, pathPrefix::Absyn.Path, sp::SCode.Program, acc::List{<:Absyn.Path}, accMetarecord::List{<:Absyn.Path}) ::Tuple{List{Absyn.Path}, List{Absyn.Path}}
               local pathsMetarecord::List{Absyn.Path}
               local paths::List{Absyn.Path}
 
@@ -2601,7 +2601,7 @@
                   SCode.CLASS(restriction = SCode.R_METARECORD(__))  => begin
                     _cons(path, accMetarecord)
                   end
-                  
+
                   _  => begin
                       accMetarecord
                   end
@@ -2613,7 +2613,7 @@
         end
 
          #= Gets the non-partial elements returned by instantiating the given path =#
-        function getNonPartialElementsForInstantiatedClass(sp::SCode.Program, cl::SCode.Element, p::Absyn.Path) ::List{SCode.Element} 
+        function getNonPartialElementsForInstantiatedClass(sp::SCode.Program, cl::SCode.Element, p::Absyn.Path) ::List{SCode.Element}
               local elts::List{SCode.Element}
 
               local env::FCore.Graph
@@ -2626,11 +2626,11 @@
                   SCode.CLASS(classDef = SCode.CLASS_EXTENDS(__))  => begin
                     false
                   end
-                  
+
                   SCode.CLASS(classDef = SCode.PARTS(elementLst = eltsTmp))  => begin
                     ! ListUtil.exist(eltsTmp, SCodeUtil.isElementExtendsOrClassExtends)
                   end
-                  
+
                   _  => begin
                       true
                   end
@@ -2656,7 +2656,7 @@
                   SCode.CLASS(classDef = SCode.PARTS(elementLst = elts))  => begin
                     list(e for e in elts if ! SCodeUtil.isPartial(e) && SCodeUtil.isClass(e))
                   end
-                  
+
                   _  => begin
                       nil
                   end
@@ -2665,7 +2665,7 @@
           elts
         end
 
-        function addNonPartialClassRef(name::FCore.Name, ref::FCore.MMRef, accum::List{<:SCode.Element}) ::List{SCode.Element} 
+        function addNonPartialClassRef(name::FCore.Name, ref::FCore.MMRef, accum::List{<:SCode.Element}) ::List{SCode.Element}
               local classes::List{SCode.Element}
 
               local e::SCode.Element
@@ -2675,7 +2675,7 @@
                   FCore.N(data = FCore.CL(e = e && SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL(__))))  => begin
                     _cons(e, accum)
                   end
-                  
+
                   _  => begin
                       accum
                   end
@@ -2687,7 +2687,7 @@
          #= This function evaluates CALL expressions, i.e. function calls.
           They are currently evaluated by generating code for the function and
           then dynamicly load the function and call it. =#
-        function cevalCallFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCallFunction(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2720,13 +2720,13 @@
                       (cache, newval) = Ceval.cevalKnownExternalFuncs(cache, env, funcpath, vallst, msg)
                     (cache, newval)
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath), _, _, msg, _)  => begin
                       @match true = FGraphUtil.isNotEmpty(env)
                       cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                     fail()
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(ty = DAE.T_COMPLEX(complexClassType = ClassInf.RECORD(complexName), varLst = varLst))), pubVallst, _, msg, _)  => begin
                       if Flags.isSet(Flags.DYN_LOAD)
                         Debug.traceln("CALL: record constructor: func: " + AbsynUtil.pathString(funcpath) + " type path: " + AbsynUtil.pathString(complexName))
@@ -2741,7 +2741,7 @@
                       vallst = listAppend(pubVallst, proVallst)
                     (cache, Values.RECORD(funcpath, vallst, varNames, -1))
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(ty = ty, builtin = false)), _, _, msg, _)  => begin
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                       if Flags.isSet(Flags.DYN_LOAD)
@@ -2759,7 +2759,7 @@
                       (cache, newval) = cevalCallFunctionEvaluateOrGenerate(inCache, inEnv, inExp, inValuesValueLst, impl, inMsg, bIsCompleteFunction)
                     (cache, newval)
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(builtin = false)), _, _, msg, _)  => begin
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                       @match false = isCompleteFunction(cache, env, funcpath)
@@ -2768,7 +2768,7 @@
                       end
                     fail()
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(ty = ty, builtin = false)), _, _, msg && Absyn.MSG(info), _)  => begin
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
                       @match true = isCompleteFunction(cache, env, funcpath)
@@ -2785,7 +2785,7 @@
          #= This function evaluates CALL expressions, i.e. function calls.
           They are currently evaluated by generating code for the function and
           then dynamicly load the function and call it. =#
-        function cevalCallFunctionEvaluateOrGenerate(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, bIsCompleteFunction::Bool) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCallFunctionEvaluateOrGenerate(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, bIsCompleteFunction::Bool) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2808,7 +2808,7 @@
                       Absyn.MSG(info)  => begin
                         info
                       end
-                      
+
                       _  => begin
                           sourceInfo()
                       end
@@ -2830,7 +2830,7 @@
          #= This function evaluates CALL expressions, i.e. function calls.
           They are currently evaluated by generating code for the function and
           then dynamicly load the function and call it. =#
-        function cevalCallFunctionEvaluateOrGenerate2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, bIsCompleteFunction::Bool) ::Tuple{FCore.Cache, Values.Value} 
+        function cevalCallFunctionEvaluateOrGenerate2(inCache::FCore.Cache, inEnv::FCore.Graph, inExp::DAE.Exp, inValuesValueLst::List{<:Values.Value}, impl::Bool, inMsg::Absyn.Msg, bIsCompleteFunction::Bool) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
 
@@ -2878,14 +2878,15 @@
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(builtin = false)), vallst, _, msg, _)  => begin
                       @match true = Flags.isSet(Flags.EVAL_FUNC)
                       @shouldFail cevalIsExternalObjectConstructor(cache, funcpath, env, msg)
-                      @match (cache, (@match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc), env) = Lookup.lookupClass(cache, env, funcpath)
+                      @match (cache, sc, env) = Lookup.lookupClass(cache, env, funcpath)
+                      @match SCode.CLASS(partialPrefix = SCode.NOT_PARTIAL()) = sc
                       isCevaluableFunction(sc)
                       (cache, env, _) = InstFunction.implicitFunctionInstantiation(cache, env, InnerOuterTypes.emptyInstHierarchy, DAE.NOMOD(), Prefix.NOPRE(), sc, nil)
                       func = FCoreUtil.getCachedInstFunc(cache, funcpath)
                       (cache, newval) = CevalFunction.evaluate(cache, env, func, vallst)
                     (cache, newval)
                   end
-                  
+
                   (cache, env, DAE.CALL(path = funcpath, attr = DAE.CALL_ATTR(builtin = false)), vallst, _, msg, _) where (bIsCompleteFunction && Flags.isSet(Flags.GEN))  => begin
                        #=  bcall1(Flags.isSet(Flags.DYN_LOAD), print,\"[dynload]: try constant evaluation: \" + AbsynUtil.pathString(funcpath) + \"\\n\");
                        =#
@@ -2925,7 +2926,7 @@
                       end
                     (cache, newval)
                   end
-                  
+
                   (_, _, DAE.CALL(path = funcpath), _, _, _, _)  => begin
                       if Flags.isSet(Flags.DYN_LOAD)
                         print("[dynload]: FAILED to constant evaluate function: " + AbsynUtil.pathString(funcpath) + "\\n")
@@ -2944,7 +2945,7 @@
           (outCache, outValue)
         end
 
-        function cevalIsExternalObjectConstructor(cache::FCore.Cache, funcpath::Absyn.Path, env::FCore.Graph, msg::Absyn.Msg)  
+        function cevalIsExternalObjectConstructor(cache::FCore.Cache, funcpath::Absyn.Path, env::FCore.Graph, msg::Absyn.Msg)
               local funcpath2::Absyn.Path
               local tp::DAE.Type
               local info::Option{SourceInfo}
@@ -2954,7 +2955,7 @@
                   (_, _, FCore.EG(_), Absyn.NO_MSG(__))  => begin
                     fail()
                   end
-                  
+
                   (_, _, _, Absyn.NO_MSG(__))  => begin
                       @match (funcpath2, Absyn.IDENT("constructor")) = AbsynUtil.splitQualAndIdentPath(funcpath)
                       info = if valueEq(msg, Absyn.NO_MSG())
@@ -2970,7 +2971,7 @@
               end
         end
 
-        function checkLibraryUsage(inLibrary::String, inExp::Absyn.Exp) ::Bool 
+        function checkLibraryUsage(inLibrary::String, inExp::Absyn.Exp) ::Bool
               local isUsed::Bool
 
               isUsed = begin
@@ -2980,7 +2981,7 @@
                   (_, Absyn.STRING(s))  => begin
                     stringEq(s, inLibrary)
                   end
-                  
+
                   (_, Absyn.ARRAY(exps))  => begin
                     ListUtil.isMemberOnTrue(inLibrary, exps, checkLibraryUsage)
                   end
@@ -2991,7 +2992,7 @@
 
          #= Checks if an element is a function or external function that can be evaluated
           by CevalFunction. =#
-        function isCevaluableFunction(inElement::SCode.Element)  
+        function isCevaluableFunction(inElement::SCode.Element)
               _ = begin
                   local fid::String
                   local mod::SCode.Mod
@@ -3005,7 +3006,7 @@
                       isCevaluableFunction2(fid)
                     ()
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_FUNCTION(_))  => begin
                     ()
                   end
@@ -3017,7 +3018,7 @@
 
          #= Checks if a function name belongs to a known external function that we can
           constant evaluate. =#
-        function isCevaluableFunction2(inFuncName::String)  
+        function isCevaluableFunction2(inFuncName::String)
               _ = begin
                    #=  Lapack functions.
                    =#
@@ -3025,59 +3026,59 @@
                   "dgbsv"  => begin
                     ()
                   end
-                  
+
                   "dgeev"  => begin
                     ()
                   end
-                  
+
                   "dgegv"  => begin
                     ()
                   end
-                  
+
                   "dgels"  => begin
                     ()
                   end
-                  
+
                   "dgelsx"  => begin
                     ()
                   end
-                  
+
                   "dgelsy"  => begin
                     ()
                   end
-                  
+
                   "dgeqpf"  => begin
                     ()
                   end
-                  
+
                   "dgesv"  => begin
                     ()
                   end
-                  
+
                   "dgesvd"  => begin
                     ()
                   end
-                  
+
                   "dgetrf"  => begin
                     ()
                   end
-                  
+
                   "dgetri"  => begin
                     ()
                   end
-                  
+
                   "dgetrs"  => begin
                     ()
                   end
-                  
+
                   "dgglse"  => begin
                     ()
                   end
-                  
+
                   "dgtsv"  => begin
                     ()
                   end
-                  
+
                   "dorgqr"  => begin
                     ()
                   end
@@ -3085,7 +3086,7 @@
               end
         end
 
-        function isSimpleAPIFunction(ty::DAE.Type) ::Bool 
+        function isSimpleAPIFunction(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -3099,7 +3100,7 @@
                       end
                     end for fa in ty.funcArg)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3108,7 +3109,7 @@
           b
         end
 
-        function isSimpleAPIFunctionArg(ty::DAE.Type) ::Bool 
+        function isSimpleAPIFunctionArg(ty::DAE.Type) ::Bool
               local b::Bool
 
               b = begin
@@ -3116,35 +3117,35 @@
                   DAE.T_INTEGER(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_REAL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_BOOL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_STRING(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_NORETCALL(__)  => begin
                     true
                   end
-                  
+
                   DAE.T_ARRAY(__)  => begin
                     isSimpleAPIFunctionArg(ty.ty)
                   end
-                  
+
                   DAE.T_CODE(ty = DAE.C_TYPENAME(__))  => begin
                     true
                   end
-                  
+
                   DAE.T_TUPLE(__)  => begin
                     min(isSimpleAPIFunctionArg(t) for t in ty.types)
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3153,7 +3154,7 @@
           b
         end
 
-        function verifyInterfaceType(elt::SCode.Element, expected::List{<:String})  
+        function verifyInterfaceType(elt::SCode.Element, expected::List{<:String})
               _ = begin
                   local str::String
                   local name::String
@@ -3163,13 +3164,13 @@
                   (SCode.CLASS(restriction = SCode.R_METARECORD(moved = true)), _)  => begin
                     ()
                   end
-                  
+
                   (SCode.CLASS(cmt = SCode.COMMENT(annotation_ = SOME(ann))), name <| _)  => begin
                       @match (Absyn.STRING(str), info) = SCodeUtil.getNamedAnnotation(ann, "__OpenModelica_Interface")
                       Error.assertionOrAddSourceMessage(listMember(str, expected), Error.MISMATCHING_INTERFACE_TYPE, list(str, name), info)
                     ()
                   end
-                  
+
                   _  => begin
                         print(SCodeDump.unparseElementStr(elt) + "\\n")
                         Error.addSourceMessage(Error.MISSING_INTERFACE_TYPE, nil, SCodeUtil.elementInfo(elt))
@@ -3179,7 +3180,7 @@
               end
         end
 
-        function getInterfaceType(elt::SCode.Element, assoc::List{<:Tuple{<:String, List{<:String}}}) ::List{String} 
+        function getInterfaceType(elt::SCode.Element, assoc::List{<:Tuple{<:String, List{<:String}}}) ::List{String}
               local it::List{String}
 
               it = begin
@@ -3193,7 +3194,7 @@
                       it = Util.assoc(str, assoc)
                     it
                   end
-                  
+
                   _  => begin
                         Error.addSourceMessage(Error.MISSING_INTERFACE_TYPE, nil, SCodeUtil.elementInfo(elt))
                       fail()
@@ -3203,7 +3204,7 @@
           it
         end
 
-        function getInterfaceTypeAssocElt(val::Values.Value, info::SourceInfo) ::Tuple{String, List{String}} 
+        function getInterfaceTypeAssocElt(val::Values.Value, info::SourceInfo) ::Tuple{String, List{String}}
               local assoc::Tuple{String, List{String}}
 
               assoc = begin
@@ -3215,7 +3216,7 @@
                       Error.addSourceMessage(Error.MISSING_INTERFACE_TYPE, nil, info)
                     fail()
                   end
-                  
+
                   (Values.ARRAY(valueLst = Values.STRING(str) <| vals), _)  => begin
                       strs = ListUtil.select(ListUtil.map(vals, ValuesUtil.extractValueString), Util.isNotEmptyString)
                     (str, _cons(str, strs))
@@ -3225,7 +3226,7 @@
           assoc
         end
 
-        function buildDependencyGraph(name::String, sp::SCode.Program) ::List{String} 
+        function buildDependencyGraph(name::String, sp::SCode.Program) ::List{String}
               local edges::List{String}
 
               edges = begin
@@ -3241,7 +3242,7 @@
           edges
         end
 
-        function buildDependencyGraphPublicImports(name::String, sp::SCode.Program) ::List{String} 
+        function buildDependencyGraphPublicImports(name::String, sp::SCode.Program) ::List{String}
               local edges::List{String}
 
               edges = begin
@@ -3257,7 +3258,7 @@
           edges
         end
 
-        function buildTransitiveDependencyGraph(name::String, oldgraph::List{<:Tuple{<:String, List{<:String}}}) ::List{String} 
+        function buildTransitiveDependencyGraph(name::String, oldgraph::List{<:Tuple{<:String, List{<:String}}}) ::List{String}
               local edges::List{String}
 
               edges = begin
@@ -3266,7 +3267,7 @@
                   (_, _)  => begin
                     ListUtil.setDifference(Graph.allReachableNodes((list(name), nil), oldgraph, stringEq), list(name))
                   end
-                  
+
                   _  => begin
                         str = "CevalScript.buildTransitiveDependencyGraph failed: " + name
                         Error.addMessage(Error.INTERNAL_ERROR, list(str))
@@ -3277,7 +3278,7 @@
           edges
         end
 
-        function importDepenency(simp::SCode.Element) ::String 
+        function importDepenency(simp::SCode.Element) ::String
               local name::String
 
               name = begin
@@ -3289,23 +3290,23 @@
                   SCode.IMPORT(imp = Absyn.NAMED_IMPORT(path = path))  => begin
                     AbsynUtil.pathFirstIdent(path)
                   end
-                  
+
                   SCode.IMPORT(imp = Absyn.NAMED_IMPORT(path = path))  => begin
                     AbsynUtil.pathFirstIdent(path)
                   end
-                  
+
                   SCode.IMPORT(imp = Absyn.QUAL_IMPORT(path = path))  => begin
                     AbsynUtil.pathFirstIdent(path)
                   end
-                  
+
                   SCode.IMPORT(imp = Absyn.UNQUAL_IMPORT(path = path))  => begin
                     AbsynUtil.pathFirstIdent(path)
                   end
-                  
+
                   SCode.IMPORT(imp = Absyn.GROUP_IMPORT(prefix = path))  => begin
                     AbsynUtil.pathFirstIdent(path)
                   end
-                  
+
                   SCode.IMPORT(imp = imp, info = info)  => begin
                       str = "CevalScript.importDepenency could not handle:" + Dump.unparseImportStr(imp)
                       Error.addSourceMessage(Error.INTERNAL_ERROR, list(str), info)
@@ -3316,7 +3317,7 @@
           name
         end
 
-        function compareNumberOfDependencies(node1::Tuple{<:String, List{<:String}}, node2::Tuple{<:String, List{<:String}}) ::Bool 
+        function compareNumberOfDependencies(node1::Tuple{<:String, List{<:String}}, node2::Tuple{<:String, List{<:String}}) ::Bool
               local cmp::Bool
 
               local deps1::List{String}
@@ -3328,7 +3329,7 @@
           cmp
         end
 
-        function compareDependencyNode(node1::Tuple{<:String, List{<:String}}, node2::Tuple{<:String, List{<:String}}) ::Bool 
+        function compareDependencyNode(node1::Tuple{<:String, List{<:String}}, node2::Tuple{<:String, List{<:String}}) ::Bool
               local cmp::Bool
 
               local s1::String
@@ -3340,7 +3341,7 @@
           cmp
         end
 
-        function dependencyString(deps::Tuple{<:String, List{<:String}}) ::String 
+        function dependencyString(deps::Tuple{<:String, List{<:String}}) ::String
               local str::String
 
               local strs::List{String}
@@ -3350,7 +3351,7 @@
           str
         end
 
-        function transitiveDependencyString(deps::Tuple{<:String, List{<:String}}) ::String 
+        function transitiveDependencyString(deps::Tuple{<:String, List{<:String}}) ::String
               local str::String
 
               local strs::List{String}
@@ -3360,7 +3361,7 @@
           str
         end
 
-        function containsPublicInterface(elt::SCode.Element) ::Bool 
+        function containsPublicInterface(elt::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -3370,7 +3371,7 @@
                   SCode.CLASS(restriction = SCode.R_PACKAGE(__), encapsulatedPrefix = SCode.ENCAPSULATED(__), classDef = SCode.PARTS(elementLst = elts))  => begin
                     ListUtil.exist(elts, containsPublicInterface2)
                   end
-                  
+
                   _  => begin
                         name = SCodeUtil.elementName(elt)
                         name = "CevalScript.containsPublicInterface failed: " + name
@@ -3383,7 +3384,7 @@
         end
 
          #= If the package contains a public type or constant, we depend on this package also through other modules =#
-        function containsPublicInterface2(elt::SCode.Element) ::Bool 
+        function containsPublicInterface2(elt::SCode.Element) ::Bool
               local b::Bool
 
               b = begin
@@ -3392,23 +3393,23 @@
                   SCode.IMPORT(__)  => begin
                     false
                   end
-                  
+
                   SCode.EXTENDS(__)  => begin
                     false
                   end
-                  
+
                   SCode.CLASS(restriction = SCode.R_FUNCTION(_))  => begin
                     false
                   end
-                  
+
                   SCode.COMPONENT(prefixes = SCode.PREFIXES(visibility = SCode.PUBLIC(__)))  => begin
                     true
                   end
-                  
+
                   SCode.CLASS(prefixes = SCode.PREFIXES(visibility = SCode.PUBLIC(__)))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3421,7 +3422,7 @@
           b
         end
 
-        function containsImport(elt::SCode.Element, visibility::SCode.Visibility) ::Bool 
+        function containsImport(elt::SCode.Element, visibility::SCode.Visibility) ::Bool
               local b::Bool
 
               b = begin
@@ -3431,7 +3432,7 @@
                   (SCode.CLASS(restriction = SCode.R_PACKAGE(__), encapsulatedPrefix = SCode.ENCAPSULATED(__), classDef = SCode.PARTS(elementLst = elts)), _)  => begin
                     ListUtil.exist1(elts, containsImport2, visibility)
                   end
-                  
+
                   _  => begin
                         name = SCodeUtil.elementName(elt)
                         name = "CevalScript.containsPublicInterface failed: " + name
@@ -3444,7 +3445,7 @@
         end
 
          #= If the package contains a public type or constant, we depend on this package also through other modules =#
-        function containsImport2(elt::SCode.Element, visibility::SCode.Visibility) ::Bool 
+        function containsImport2(elt::SCode.Element, visibility::SCode.Visibility) ::Bool
               local b::Bool
 
               b = begin
@@ -3453,11 +3454,11 @@
                   (SCode.IMPORT(visibility = SCode.PUBLIC(__)), SCode.PUBLIC(__))  => begin
                     true
                   end
-                  
+
                   (SCode.IMPORT(visibility = SCode.PROTECTED(__)), SCode.PROTECTED(__))  => begin
                     true
                   end
-                  
+
                   _  => begin
                       false
                   end
@@ -3466,14 +3467,14 @@
           b
         end
 
-        function printInterfaceString(elt::SCode.Element)  
+        function printInterfaceString(elt::SCode.Element)
               local str::String
 
               @match SCode.CLASS(name = str) = elt
               print(str + ": " + boolString(containsPublicInterface(elt)) + "\\n")
         end
 
-        function writeModuleDepends(cl::SCode.Element, prefix::String, suffix::String, deps::List{<:Tuple{<:String, List{<:String}}}) ::String 
+        function writeModuleDepends(cl::SCode.Element, prefix::String, suffix::String, deps::List{<:Tuple{<:String, List{<:String}}}) ::String
               local str::String
 
               str = begin
@@ -3495,7 +3496,7 @@
                       str = prefix + name + suffix + ": (RELPATH_" + name + ") " + stringDelimitList(allDepends, " ")
                     str
                   end
-                  
+
                   (SCode.CLASS(name = name, classDef = SCode.PARTS(elementLst = elts), info = info), _, _, _)  => begin
                       protectedDepends = ListUtil.map(ListUtil.select(elts, SCodeUtil.elementIsProtectedImport), importDepenency)
                       protectedDepends = ListUtil.select(protectedDepends, isNotBuiltinImport)
@@ -3517,7 +3518,7 @@
                       end
                     fail()
                   end
-                  
+
                   (SCode.CLASS(name = name, info = info), _, _, _)  => begin
                       Error.addSourceMessage(Error.GENERATE_SEPARATE_CODE_DEPENDENCIES_FAILED, list(name), info)
                     fail()
@@ -3527,19 +3528,19 @@
           str
         end
 
-        function isNotBuiltinImport(module::String) ::Bool 
+        function isNotBuiltinImport(module::String) ::Bool
               local b::Bool = module != "MetaModelica"
           b
         end
 
-        function getTypeNameIdent(val::Values.Value) ::String 
+        function getTypeNameIdent(val::Values.Value) ::String
               local str::String
 
               @match Values.CODE(Absyn.C_TYPENAME(Absyn.IDENT(str))) = val
           str
         end
 
-        function getChangedClass(elt::SCode.Element, suffix::String) ::String 
+        function getChangedClass(elt::SCode.Element, suffix::String) ::String
               local name::String
 
               name = begin
@@ -3549,7 +3550,7 @@
                       @match false = System.regularFileExists(name + suffix)
                     name
                   end
-                  
+
                   (SCode.CLASS(name = name, info = SOURCEINFO(fileName = fileName)), _)  => begin
                       @match true = System.fileIsNewerThan(fileName, name + suffix)
                     name
@@ -3559,7 +3560,7 @@
           name
         end
 
-        function isChanged(node::Tuple{<:String, List{<:String}}, hs::HashSetString.HashSet) ::Bool 
+        function isChanged(node::Tuple{<:String, List{<:String}}, hs::HashSetString.HashSet) ::Bool
               local b::Bool
 
               local str::String
@@ -3572,7 +3573,7 @@
           b
         end
 
-        function reloadClass(filename::String, encoding::String)  
+        function reloadClass(filename::String, encoding::String)
               local p::Absyn.Program
               local newp::Absyn.Program
 
@@ -3582,7 +3583,7 @@
               SymbolTable.setAbsyn(newp)
         end
 
-        function getFullPathFromUri(program::Absyn.Program, uri::String, printError::Bool) ::String 
+        function getFullPathFromUri(program::Absyn.Program, uri::String, printError::Bool) ::String
               local path::String
 
               local str1::String
@@ -3595,7 +3596,7 @@
         end
 
          #= Handle modelica: URIs =#
-        function getBasePathFromUri(scheme::String, iname::String, program::Absyn.Program, modelicaPath::String, printError::Bool) ::String 
+        function getBasePathFromUri(scheme::String, iname::String, program::Absyn.Program, modelicaPath::String, printError::Bool) ::String
               local basePath::String
 
               basePath = begin
@@ -3617,7 +3618,7 @@
                       bp = findModelicaPath2(mp, names, "", true)
                     bp
                   end
-                  
+
                   ("modelica://", name, _, mp, _)  => begin
                       @match _cons(name, names) = System.strtok(name, ".")
                       @shouldFail _ = Interactive.getPathedClassInProgram(Absyn.IDENT(name), program)
@@ -3632,11 +3633,11 @@
                       bp = findModelicaPath2(mp, names, "", true)
                     bp
                   end
-                  
+
                   ("file://", _, _, _, _)  => begin
                     ""
                   end
-                  
+
                   ("modelica://", name, _, mp, true)  => begin
                       @match _cons(name, _) = System.strtok(name, ".")
                       str = "Could not resolve modelica://" + name + " with MODELICAPATH: " + mp
@@ -3649,7 +3650,7 @@
         end
 
          #= Handle modelica: URIs =#
-        function findModelicaPath(imps::List{<:String}, names::List{<:String}, version::String) ::String 
+        function findModelicaPath(imps::List{<:String}, names::List{<:String}, version::String) ::String
               local basePath::String
 
               basePath = begin
@@ -3659,7 +3660,7 @@
                   (mp <| _, _, _)  => begin
                     findModelicaPath2(mp, names, version, false)
                   end
-                  
+
                   (_ <| mps, _, _)  => begin
                     findModelicaPath(mps, names, version)
                   end
@@ -3669,7 +3670,7 @@
         end
 
          #= Handle modelica: URIs =#
-        function findModelicaPath2(mp::String, inames::List{<:String}, version::String, b::Bool) ::String 
+        function findModelicaPath2(mp::String, inames::List{<:String}, version::String, b::Bool) ::String
               local basePath::String
 
               basePath = begin
@@ -3683,26 +3684,26 @@
                       @match true = System.directoryExists(file)
                     findModelicaPath2(file, names, "", true)
                   end
-                  
+
                   (_, name <| _, _, _)  => begin
                       @match false = stringEq(version, "")
                       file = mp + "/" + name + " " + version + ".mo"
                       @match true = System.regularFileExists(file)
                     mp
                   end
-                  
+
                   (_, name <| names, _, _)  => begin
                       file = mp + "/" + name
                       @match true = System.directoryExists(file)
                     findModelicaPath2(file, names, "", true)
                   end
-                  
+
                   (_, name <| _, _, _)  => begin
                       file = mp + "/" + name + ".mo"
                       @match true = System.regularFileExists(file)
                     mp
                   end
-                  
+
                   (_, _, _, true)  => begin
                     mp
                   end

@@ -60,47 +60,36 @@ import Flags
 import AbsynToSCode
 import SCode
 import Absyn
+import AbsynUtil
 import FCoreUtil
 import Inst
 import InstHashTable
 import InnerOuterTypes
 
-module AbsynPrograms
-  using Absyn
-  using MetaModelica
-  import OpenModelicaParser
+using Absyn
+using MetaModelica
+import OpenModelicaParser
 
-path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+function run(modelName::String, fileName::String)
 
-path = joinpath(path, "lib", "omc", "HelloWorld.mo")
-const HelloWorld = OpenModelicaParser.parseFile(path)
-@show HelloWorld
+  path = realpath(realpath(Base.find_package("OMCompiler") * "./../.."))
+  fullPath = joinpath(path, "lib", "omc", fileName)
+  println("File to parse: " + fullPath)
+  println("Model to flatten: " + modelName)
 
-end
+  AST = OpenModelicaParser.parseFile(fullPath)
 
-function run()
+  println("Size of Absyn AST: " + StringFunction(Base.summarysize(AST)))
+  # @show AST
 
   # initialize globals
   Global.initialize()
   # make sure we have all the flags loaded!
   Flags.new(Flags.emptyFlags)
 
-  @time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.HelloWorld)
-  @show scode
-
-  #= Try the bouncing ball =#
-  #@time scode = AbsynToSCode.translateAbsyn2SCode(AbsynPrograms.BouncingBall)
-  #@show scode
-  #using Modelica_Standard_Library_AST
-  #using BenchmarkTools
-  #using Profile
-  # P = Modelica_Standard_Library_AST.Program
-  #@time AbsynToSCode.translateAbsyn2SCode(P)
-  #@time AbsynToSCode.translateAbsyn2SCode(P)
-
-  println("*******************************")
-  println("SCode done")
-  println("*******************************")
+  @time scode = AbsynToSCode.translateAbsyn2SCode(AST)
+  println("Size of SCode AST: " + StringFunction(Base.summarysize(scode)))
+  # @show scode
 
   InstHashTable.init()
   #= Creating a cache. At this point the SCode is the bouncing ball... =#
@@ -110,7 +99,7 @@ function run()
   # Flags.set(Flags.EXEC_STAT, true) # not yet working!
   cache = FCoreUtil.emptyCache()
   println("after empty cache")
-  className = Absyn.IDENT("HelloWorld")
+  className = AbsynUtil.stringPath(modelName)
   println("dive in inst")
   (cache,_,_,dae) = Inst.instantiateClass(cache, InnerOuterTypes.emptyInstHierarchy, scode, className)
   println("after inst")
@@ -122,3 +111,15 @@ function run()
 end
 
 end
+
+# using Juno
+
+#function runJuno(modelName::String, fileName::String)
+#  Juno.@run OMCompiler.run(modelName, fileName)
+#end
+
+#  Main.runJuno("HelloWorld", "HelloWorld.mo")
+#  Main.runJuno("VanDerPol", "VanDerPol.mo")
+#  Main.runJuno("Influenza", "Influenza.mo")
+#  Main.runJuno("RLCircuit", "RLCircuit.mo")
+#  Main.runJuno("Modelica.Blocks.Examples.PID_Controller", "msl.mo")

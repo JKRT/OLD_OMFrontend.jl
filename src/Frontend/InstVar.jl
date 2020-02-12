@@ -5,6 +5,8 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
 
+    import Setfield
+
          #= /*
          * This file is part of OpenModelica.
          *
@@ -520,7 +522,7 @@
               outSubMod = begin
                 @match outSubMod begin
                   DAE.NAMEMOD(__)  => begin
-                      outSubMod.mod = liftUserTypeMod(outSubMod.mod, inDims)
+                      Setfield.@set outSubMod.mod = liftUserTypeMod(outSubMod.mod, inDims)
                     outSubMod
                   end
                 end
@@ -542,10 +544,10 @@
               eq = begin
                 @match eq begin
                   DAE.TYPED(__)  => begin
-                      eq.modifierAsExp = Expression.liftExpList(eq.modifierAsExp, inDims)
-                      eq.modifierAsValue = Util.applyOption1(eq.modifierAsValue, ValuesUtil.liftValueList, inDims)
+                      Setfield.@set eq.modifierAsExp = Expression.liftExpList(eq.modifierAsExp, inDims)
+                      Setfield.@set eq.modifierAsValue = Util.applyOption1(eq.modifierAsValue, ValuesUtil.liftValueList, inDims)
                       ty = Types.getPropType(eq.properties)
-                      eq.properties = Types.setPropType(eq.properties, Types.liftArrayListDims(ty, inDims))
+                      Setfield.@set eq.properties = Types.setPropType(eq.properties, Types.liftArrayListDims(ty, inDims))
                     eq
                   end
 
@@ -788,7 +790,7 @@
                   end
 
                   (_, _, _, _, _, DAE.NOMOD(__), _, n, _, _, _, DAE.DIM_UNKNOWN(__) <| _, _, _, _, _, info, _, _)  => begin
-                      Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_NO_MOD, list(String(listLength(inSubscripts) + 1), n), info)
+                      Error.addSourceMessage(Error.FAILURE_TO_DEDUCE_DIMS_NO_MOD, list(StringFunction(listLength(inSubscripts) + 1), n), info)
                     fail()
                   end
 

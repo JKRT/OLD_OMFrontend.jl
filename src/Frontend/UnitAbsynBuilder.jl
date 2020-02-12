@@ -272,14 +272,14 @@
                   end
 
                   du && Absyn.DEFINEUNIT(__) <| rest  => begin
-                      @match list(SCode.DEFINEUNIT(name, _, SOME(exp), _)) = AbsynToSCode.translateElement(du, SCode.PUBLIC())
+                      @match SCode.DEFINEUNIT(name, _, SOME(exp), _) <| nil = AbsynToSCode.translateElement(du, SCode.PUBLIC())
                       UnitParserExt.addDerived(name, exp)
                       registerDefineunits2(rest)
                     ()
                   end
 
                   du && Absyn.DEFINEUNIT(__) <| rest  => begin
-                      @match list(SCode.DEFINEUNIT(name, _, NONE(), _)) = AbsynToSCode.translateElement(du, SCode.PUBLIC())
+                      @match SCode.DEFINEUNIT(name, _, NONE(), _) <| nil = AbsynToSCode.translateElement(du, SCode.PUBLIC())
                       UnitParserExt.addBase(name)
                       registerDefineunits2(rest)
                     ()
@@ -1358,7 +1358,7 @@
                       (store, formalParamIndxs) = buildFuncTypeStores(functp, funcInstId, store)
                       (actTermLst, extraTerms, store) = buildTermExpList(env, expl, ht, store)
                       terms = buildFormal2ActualParamTerms(formalParamIndxs, actTermLst)
-                      @match (list(ut), extraTerms2, store) = buildResultTerms(functp, funcInstId, funcCallExp, store)
+                      @match (ut <| nil, extraTerms2, store) = buildResultTerms(functp, funcInstId, funcCallExp, store)
                       extraTerms = ListUtil.flatten(list(extraTerms, extraTerms2, terms))
                     (ut, extraTerms, store)
                   end

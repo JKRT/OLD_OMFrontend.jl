@@ -169,9 +169,9 @@ end
                       classRef = FNode.copyRefNoUpdate(classRef)
                       @match FCore.CL(e = c) = FNode.refData(classRef)
                       c = SCodeUtil.setClassName(newTargetClassName, c)
-                      classRef = updateClassElement(classRef, c, crefPrefix, inMod, FCore.CLS_INSTANCE(targetClassName), empty())
+                      classRef = FGraphUtil.updateClassElement(classRef, c, crefPrefix, inMod, FCore.CLS_INSTANCE(targetClassName), FCore.emptyGraph)
                       FNode.addChildRef(targetClassParentRef, newTargetClassName, classRef)
-                      sourceRef = updateSourceTargetScope(sourceRef, _cons(classRef, currentScope(gclass)))
+                      sourceRef = FGraphUtil.updateSourceTargetScope(sourceRef, _cons(classRef, currentScope(gclass)))
                       ih = inIH
                     (gclass, c, ih)
                   end
@@ -266,12 +266,12 @@ end
                   end
 
                   (_, _, _, _, _, _, _)  => begin
-                      @match true = Config.acceptMetaModelicaGrammar() || isTargetClassBuiltin(inTargetClassEnv, inTargetClass) || inFunctionScope(inSourceEnv) || SCodeUtil.isOperatorRecord(inTargetClass)
+                      @match true = Config.acceptMetaModelicaGrammar() || isTargetClassBuiltin(inTargetClassEnv, inTargetClass) || FGraphUtil.inFunctionScope(inSourceEnv) || SCodeUtil.isOperatorRecord(inTargetClass)
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
 
                   (_, _, _, _, _, _, _)  => begin
-                      @match true = stringEq(AbsynUtil.pathFirstIdent(getGraphName(inTargetClassEnv)), "OpenModelica")
+                      @match true = stringEq(AbsynUtil.pathFirstIdent(FGraphUtil.getGraphName(inTargetClassEnv)), "OpenModelica")
                     (inTargetClassEnv, inTargetClass, inIH)
                   end
 
@@ -376,7 +376,7 @@ end
                =#
                #=  name = inTargetClassName + \"$\" + ComponentReference.printComponentRefStr(prefixToCref(crefPrefix));
                =#
-               #=  + \"$\" + AbsynUtil.pathString2NoLeadingDot(getGraphName(inSourceEnv), \"$\");
+               #=  + \"$\" + AbsynUtil.pathString2NoLeadingDot(FGraphUtil.getGraphName(inSourceEnv), \"$\");
                =#
                #=  name = \"'$\" + inTargetClassName + \"@\" + AbsynUtil.pathString(AbsynUtil.stringListPath(listReverse(AbsynUtil.pathToStringList(prefixToPath(crefPrefix))))) + \"'\";
                =#

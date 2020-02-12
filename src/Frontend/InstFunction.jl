@@ -49,7 +49,7 @@
         import DAE
 
         import FCore
-        
+
         import FCoreUtil
 
         import InnerOuterTypes
@@ -291,7 +291,7 @@
                 @match (inCache, inEnv, inIH, inMod, inPrefix, inClass, inInstDims) begin
                   (cache, env, ih, mod, pre, c && SCode.CLASS(name = n, restriction = SCode.R_RECORD(_), partialPrefix = pPrefix), inst_dims)  => begin
                       (cache, c, cenv) = Lookup.lookupRecordConstructorClass(cache, env, Absyn.IDENT(n))
-                      @match (cache, env, ih, list(DAE.FUNCTION(fpath, _, ty1, _, _, _, _, source, _))) = implicitFunctionInstantiation2(cache, cenv, ih, mod, pre, c, inst_dims, true)
+                      @match (cache, env, ih, DAE.FUNCTION(fpath, _, ty1, _, _, _, _, source, _) <| nil) = implicitFunctionInstantiation2(cache, cenv, ih, mod, pre, c, inst_dims, true)
                       fun = DAE.RECORD_CONSTRUCTOR(fpath, ty1, source)
                       cache = InstUtil.addFunctionsToDAE(cache, list(fun), pPrefix)
                     (cache, env, ih)
@@ -585,7 +585,8 @@
                   end
 
                   (cache, env, ih, SCode.CLASS(name = id, classDef = SCode.DERIVED(typeSpec = Absyn.TPATH(path = cn), modifications = mod1), info = info))  => begin
-                      @match (cache, (@match SCode.CLASS() = c), cenv) = Lookup.lookupClass(cache, env, cn)
+                      @match (cache, c, cenv) = Lookup.lookupClass(cache, env, cn)
+                      @match SCode.CLASS() = c
                       (cache, mod2) = Mod.elabMod(cache, env, ih, Prefix.NOPRE(), mod1, false, Mod.DERIVED(cn), info)
                       (cache, _, ih, _, _, _, ty, _, _, _) = Inst.instClass(cache, cenv, ih, UnitAbsynBuilder.emptyInstStore(), mod2, Prefix.NOPRE(), c, nil, true, InstTypes.INNER_CALL(), ConnectionGraph.EMPTY, DAE.emptySet)
                       env_1 = env
@@ -661,7 +662,8 @@
                   end
 
                   (cache, env, ih, _, fn <| fns)  => begin
-                      @match (cache, (@match SCode.CLASS(restriction = rest) = c), cenv) = Lookup.lookupClass(cache, env, fn, SOME(inInfo))
+                      @match (cache, c, cenv) = Lookup.lookupClass(cache, env, fn, SOME(inInfo))
+                      @match SCode.CLASS(restriction = rest) = c
                       @match true = SCodeUtil.isFunctionRestriction(rest)
                       (cache, env, ih, resfns1) = implicitFunctionInstantiation2(inCache, cenv, inIH, DAE.NOMOD(), pre, c, nil, false)
                       (cache, env, ih, resfns2) = instOverloadedFunctions(cache, env, ih, pre, fns, inInfo)

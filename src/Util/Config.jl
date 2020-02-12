@@ -42,14 +42,16 @@ import Error
 import System
 
 #TODO. Fill me in
-struct LanguageStandard
-  S1_x::Int64
-  S2_x::Int64
-  S3_0::Int64
-  S3_1::Int64
-  S3_2::Int64
-  S3_3::Int64
-  Slatest::Int64
+module LanguageStandard
+  Ty = Int64
+  Size = 7
+  const S1_x = 1
+  const S2_x = 2
+  const S3_0 = 3
+  const S3_1 = 4
+  const S3_2 = 5
+  const S3_3 = 6
+  const Slatest = 7
 end
 
 
@@ -446,48 +448,46 @@ function setsimCodeTarget(inString::String)
   Flags.setConfigString(Flags.SIMCODE_TARGET, inString)
 end
 
-function getLanguageStandard() ::LanguageStandard
-  local outStandard::LanguageStandard
+function getLanguageStandard() ::LanguageStandard.Ty
+  local outStandard::LanguageStandard.Ty
 
   outStandard = intLanguageStandard(Flags.getConfigEnum(Flags.LANGUAGE_STANDARD))
   outStandard
 end
 
-function setLanguageStandard(inStandard::LanguageStandard)
+function setLanguageStandard(inStandard::LanguageStandard.Ty)
   Flags.setConfigEnum(Flags.LANGUAGE_STANDARD, languageStandardInt(inStandard))
 end
 
-function languageStandardAtLeast(inStandard::LanguageStandard) ::Bool
+function languageStandardAtLeast(inStandard::LanguageStandard.Ty) ::Bool
   local outRes::Bool
 
-  local std::LanguageStandard
+  local std::LanguageStandard.Ty
 
   std = getLanguageStandard()
   outRes = intGe(languageStandardInt(std), languageStandardInt(inStandard))
   outRes
 end
 
-function languageStandardAtMost(inStandard::LanguageStandard) ::Bool
+function languageStandardAtMost(inStandard::LanguageStandard.Ty) ::Bool
   local outRes::Bool
 
-  local std::LanguageStandard
+  local std::LanguageStandard.Ty
 
   std = getLanguageStandard()
   outRes = intLe(languageStandardInt(std), languageStandardInt(inStandard))
   outRes
 end
 
-function languageStandardInt(inStandard::LanguageStandard) ::ModelicaInteger
+function languageStandardInt(inStandard::LanguageStandard.Ty) ::ModelicaInteger
   local outValue::ModelicaInteger
-
-  local lookup::ModelicaInteger[LanguageStandard] = array(10, 20, 30, 31, 32, 33, 1000)
-
+  local lookup::Array{ModelicaInteger, 1} = [10, 20, 30, 31, 32, 33, 1000]
   outValue = lookup[inStandard]
   outValue
 end
 
-function intLanguageStandard(inValue::ModelicaInteger) ::LanguageStandard
-  local outStandard::LanguageStandard
+function intLanguageStandard(inValue::ModelicaInteger) ::LanguageStandard.Ty
+  local outStandard::LanguageStandard.Ty
 
   outStandard = begin
     @match inValue begin
@@ -523,18 +523,16 @@ function intLanguageStandard(inValue::ModelicaInteger) ::LanguageStandard
   outStandard
 end
 
-function languageStandardString(inStandard::LanguageStandard) ::String
+function languageStandardString(inStandard::LanguageStandard.Ty) ::String
   local outString::String
 
-  local lookup::String[LanguageStandard] = array("1.x", "2.x", "3.0", "3.1", "3.2", "3.3", "3.3")
-  #= /*Change this to latest version if you add more versions!*/ =#
-
+  local lookup::Array{String, 1} = ["1.x", "2.x", "3.0", "3.1", "3.2", "3.3", "3.3"]
   outString = lookup[inStandard]
   outString
 end
 
 function setLanguageStandardFromMSL(inLibraryName::String)
-  local current_std::LanguageStandard
+  local current_std::LanguageStandard.Ty
 
   current_std = getLanguageStandard()
   if current_std != LanguageStandard.latest
@@ -545,7 +543,7 @@ function setLanguageStandardFromMSL(inLibraryName::String)
   _ = begin
     local version::String
     local new_std_str::String
-    local new_std::LanguageStandard
+    local new_std::LanguageStandard.Ty
     local show_warning::Bool
     @matchcontinue inLibraryName begin
       _  => begin
@@ -570,7 +568,7 @@ function setLanguageStandardFromMSL(inLibraryName::String)
   end
 end
 
-function hasLanguageStandardChanged(inOldStandard::LanguageStandard) ::Bool
+function hasLanguageStandardChanged(inOldStandard::LanguageStandard.Ty) ::Bool
   local outHasChanged::Bool
 
   #=  If the old standard wasn't set by the user, then we consider it to have
@@ -583,8 +581,8 @@ function hasLanguageStandardChanged(inOldStandard::LanguageStandard) ::Bool
   outHasChanged
 end
 
-function versionStringToStd(inVersion::String) ::LanguageStandard
-  local outStandard::LanguageStandard
+function versionStringToStd(inVersion::String) ::LanguageStandard.Ty
+  local outStandard::LanguageStandard.Ty
 
   local version::List{String}
 
@@ -593,8 +591,8 @@ function versionStringToStd(inVersion::String) ::LanguageStandard
   outStandard
 end
 
-function versionStringToStd2(inVersion::List{<:String}) ::LanguageStandard
-  local outStandard::LanguageStandard
+function versionStringToStd2(inVersion::List{<:String}) ::LanguageStandard.Ty
+  local outStandard::LanguageStandard.Ty
 
   outStandard = begin
     @match inVersion begin
@@ -754,7 +752,7 @@ end
 checks returns true if language standard is above or equal to Modelica 3.3 =#
 function synchronousFeaturesAllowed() ::Bool
   local outRes::Bool
-  local std::LanguageStandard = getLanguageStandard()
+  local std::LanguageStandard.Ty = getLanguageStandard()
   outRes = intGe(languageStandardInt(std), 33)
   outRes
 end

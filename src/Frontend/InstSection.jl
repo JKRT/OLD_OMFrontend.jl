@@ -506,7 +506,7 @@
                       (outCache, exp, prop) = Ceval.cevalIfConstant(outCache, inEnv, exp, prop, inImpl, info)
                        #=  Check that the cref and the expression have matching types.
                        =#
-                      exp = Types.matchProp(exp, prop, cr_prop, true)
+                      (exp, _) = Types.matchProp(exp, prop, cr_prop, true)
                       (outCache, cr_exp, exp, cr_prop) = condenseArrayEquation(outCache, inEnv, inEEquation.cref, inEEquation.expReinit, cr_exp, exp, cr_prop, prop, inImpl, inPrefix, info)
                       (outCache, cr_exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, cr_exp, inPrefix)
                       (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
@@ -521,7 +521,7 @@
                       if isConnectionsOperator(inEEquation.exp)
                         (outCache, outEnv, outIH, outDae, outSets, outState, outGraph) = handleConnectionsOperators(inCache, inEnv, inIH, inPrefix, inSets, inState, inEEquation, inInitial, inImpl, inGraph, inFlattenOp)
                       else
-                        (outCache, exp) = Static.elabExp(inCache, inEnv, inEEquation.exp, inImpl, false, inPrefix, info)
+                        (outCache, exp, _) = Static.elabExp(inCache, inEnv, inEEquation.exp, inImpl, false, inPrefix, info)
                         (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
                         source = makeEqSource(info, inEnv, inPrefix, inFlattenOp)
                         outDae = instEquationNoRetCallVectorization(exp, inInitial, source)
@@ -2182,7 +2182,7 @@
                     end
 
                     SCode.ALG_NORETCALL(info = info)  => begin
-                        (outCache, exp) = Static.elabExp(outCache, inEnv, inStatement.exp, inImpl, true, inPrefix, info)
+                        (outCache, exp, _) = Static.elabExp(outCache, inEnv, inStatement.exp, inImpl, true, inPrefix, info)
                         checkValidNoRetcall(exp, info)
                         (outCache, exp) = PrefixUtil.prefixExp(outCache, inEnv, inIH, exp, inPrefix)
                         source = ElementSource.addElementSourceFileInfo(inSource, info)
@@ -2693,7 +2693,7 @@
                 else
                   tyEl = ty
                 end
-                exp = Types.matchType(exp, tyEl, DAE.T_BOOL_DEFAULT)
+                (exp, _) = Types.matchType(exp, tyEl, DAE.T_BOOL_DEFAULT)
               catch
                 Error.addSourceMessage(Error.IF_CONDITION_TYPE_ERROR, list(Dump.printExpStr(aexp), Types.unparseType(ty)), info)
                 fail()
@@ -2870,7 +2870,7 @@
 
               outCref = ComponentReference.toExpCref(connectorCref)
               @match (DAE.ATTR(connectorType = connectorType, variability = variability, innerOuter = innerOuter), ty, status, is_expandable) = Lookup.lookupConnectorVar(env, outCref)
-              deleted = FCore.isDeletedComp(status)
+              deleted = FCoreUtil.isDeletedComp(status)
               if deleted || is_expandable
                 face = DAE.NO_FACE()
                 outAttr = DAE.dummyAttrVar
@@ -4730,7 +4730,7 @@
                 @matchcontinue (inCache, var, value, props) begin
                   (cache, Absyn.CREF(cr), e_1, _)  => begin
                       @match (cache, (@match DAE.CREF(_, t) = lhs), _, attr) = Static.elabCrefNoEval(cache, inEnv, cr, inImpl, false, inPre, info)
-                      @match DAE.T_ARRAY(dims = list(_)) = t
+                      @match DAE.T_ARRAY(dims = _ <| nil) = t
                       rhs = e_1
                       Static.checkAssignmentToInput(var, attr, inEnv, false, info)
                       @match DAE.T_ARRAY(dims = _cons(lhs_dim, _)) = Expression.typeOf(lhs)

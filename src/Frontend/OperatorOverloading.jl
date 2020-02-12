@@ -600,7 +600,7 @@ function binaryUserdef(inCache::FCore.Cache, inEnv::FCore.Graph, inOper::Absyn.O
         exps = deoverloadBinaryUserdefNoConstructor(types, exp1, exp2, type1, type2, nil)
         (cache, exps) = binaryCastConstructor(cache, env, inExp1, inExp2, inType1, inType2, exps, types, info)
         (cache, exps) = binaryUserdefArray(cache, env, exps, bool1 || bool2, inOper, inExp1, inExp2, inType1, inType2, impl, pre, info)
-        @match list((daeExp, foldType)) = exps
+        @match (daeExp, foldType) <| nil = exps
         (cache, daeExp, foldType, Expression.typeOf(daeExp))
       end
     end
@@ -943,9 +943,14 @@ const divRealScalarArray = list(@do_threaded_for (DAE.DIV_SCALAR_ARRAY(real_vect
 const divArrs = list((DAE.DIV_ARR(real_vector), list(at, at), at) for at in realarrtypes)::List
 const divEwTypes = _listAppend(divTypes, _listAppend(divRealScalarArray, divArrs))::List
 const powTypes = list((real_pow, list(real_scalar, real_scalar), real_scalar), (DAE.POW_ARR(real_scalar), list(real_matrix, int_scalar), real_matrix))::List
-#TODO fix andTypes and orTypes
-const andTypes = #_cons((DAE.AND(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for (DAE.AND(bool_scalar), list(at, at), at), at, boolarrtypes))::List
-const orTypes = #_cons((DAE.OR(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar), list(@do_threaded_for(DAE.OR(bool_scalar), list(at, at), at), at, (boolarrtypes)))::List
+const andTypesArr = list((DAE.AND(bool_scalar), list(at, at), at) for at in boolarrtypes)::List
+const orTypesArr = list((DAE.OR(bool_scalar), list(at, at), at) for at in boolarrtypes)::List
+const andTypes = _cons(
+                   (DAE.AND(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar),
+                   andTypesArr)::List
+const orTypes = _cons(
+                   (DAE.OR(bool_scalar), list(bool_scalar, bool_scalar), bool_scalar),
+                   orTypesArr)::List
 #= So that we can use wildcard imports and named imports when they do occur. Not good Julia practice =#
 @exportAll()
 end
@@ -1130,7 +1135,7 @@ function operatorsBinary(inOperator::Absyn.Operator, t1::DAE.Type, e1::DAE.Exp, 
         end
 end
 end
-catch
+catch ex
 @match true = Flags.isSet(Flags.FAILTRACE)
 Debug.traceln("OperatorOverloading.operatorsBinary failed, op: " + Dump.opSymbol(op))
 fail()

@@ -5,7 +5,7 @@ module Ceval
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-
+    import Setfield
 
     ReductionOperator = Function
 
@@ -963,7 +963,7 @@ module Ceval
                       (_, v) = ceval(inCache, inEnv, e, true, Absyn.MSG(inInfo), numIter + 1)
                       ty = Types.typeOfValue(v)
                       cevalType = Types.simplifyType(ty)
-                      attr.ty = cevalType
+                      Setfield.@set attr.ty = cevalType
                     (DAE.CALL(p, el, attr), DAE.PROP(ty, DAE.C_PARAM()))
                   end
                 end
@@ -1949,7 +1949,7 @@ module Ceval
                           end
                         end
                       end
-                      @match list((_, iv_1)) = ListUtil.select(list((b1, 1), (b2, -1), (b3, 0)), Util.tuple21)
+                      @match (_, iv_1)  <| nil = ListUtil.select(list((b1, 1), (b2, -1), (b3, 0)), Util.tuple21)
                     (cache, Values.INTEGER(iv_1))
                   end
                 end
@@ -2137,8 +2137,8 @@ module Ceval
 
          #=
           author: PA
-          Evaluates the String operator String(r), String(i), String(b), String(e).
-          TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
+          Evaluates the String operator StringFunction(r), StringFunction(i), StringFunction(b), StringFunction(e).
+          TODO: Also evaluate StringFunction(r, significantDigits=d), and StringFunction(r, format=s). =#
         function cevalBuiltinSubstring(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
@@ -2169,8 +2169,8 @@ module Ceval
 
          #=
           author: PA
-          Evaluates the String operator String(r), String(i), String(b), String(e).
-          TODO: Also evaluate String(r, significantDigits=d), and String(r, format=s). =#
+          Evaluates the String operator StringFunction(r), StringFunction(i), StringFunction(b), StringFunction(e).
+          TODO: Also evaluate StringFunction(r, significantDigits=d), and StringFunction(r, format=s). =#
         function cevalBuiltinString(inCache::FCore.Cache, inEnv::FCore.Graph, inExpExpLst::List{<:DAE.Exp}, inBoolean::Bool, inMsg::Absyn.Msg, numIter::ModelicaInteger) ::Tuple{FCore.Cache, Values.Value}
               local outValue::Values.Value
               local outCache::FCore.Cache
@@ -3500,7 +3500,7 @@ module Ceval
               local exp1::DAE.Exp
               local exp2::DAE.Exp
 
-              @match list(exp1, exp2) = inExpExpLst
+              @match exp1 <| exp2  <| nil = inExpExpLst
               (cache, v1) = ceval(cache, inEnv, exp1, impl, msg, numIter + 1)
               (cache, v2) = ceval(cache, inEnv, exp2, impl, msg, numIter + 1)
               outValue = begin
@@ -3992,7 +3992,7 @@ module Ceval
                 @matchcontinue (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, exp <|  nil(), impl, msg, _)  => begin
                       @match DAE.T_ARRAY(ty = ty) = Expression.typeOf(exp)
-                      @match (cache, Values.ARRAY(vals, list(dimension))) = ceval(cache, env, exp, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(vals, dimension <| nil)) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       zero = ValuesUtil.makeZero(ty)
                       res = Values.ARRAY(list(Values.ARRAY(list(if i == j
                             listGet(vals, i)
@@ -4031,8 +4031,8 @@ module Ceval
                   local info::SourceInfo
                 @matchcontinue (inCache, inEnv, inExpExpLst, inBoolean, inMsg, numIter) begin
                   (cache, env, xe <| ye <|  nil(), impl, msg, _)  => begin
-                      @match (cache, Values.ARRAY(xv, list(3))) = ceval(cache, env, xe, impl, msg, numIter + 1)
-                      @match (cache, Values.ARRAY(yv, list(3))) = ceval(cache, env, ye, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(xv, 3 <| nil)) = ceval(cache, env, xe, impl, msg, numIter + 1)
+                      @match (cache, Values.ARRAY(yv, 3 <| nil)) = ceval(cache, env, ye, impl, msg, numIter + 1)
                       res = ValuesUtil.crossProduct(xv, yv)
                     (cache, res)
                   end
@@ -4605,7 +4605,7 @@ module Ceval
                       @match true = SCodeUtil.isParameterOrConst(variability) || inImpl || FGraphUtil.inForLoopScope(inEnv)
                       @match false = crefEqualValue(inCref, inBinding)
                       (cache, v) = cevalCrefBinding(inCache, inEnv, inCref, inBinding, inImpl, inMsg, numIter)
-                      cache = FCore.addEvaluatedCref(cache, variability, CrefForHashTable.crefStripLastSubs(inCref))
+                      cache = FCoreUtil.addEvaluatedCref(cache, variability, CrefForHashTable.crefStripLastSubs(inCref))
                     (cache, v)
                   end
                 end
@@ -4699,7 +4699,7 @@ module Ceval
                   end
 
                   (cache, env, cr, DAE.EQBOUND(exp = exp, constant_ = DAE.C_CONST(__)), impl, msg, _)  => begin
-                      @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = list(DAE.REDUCTIONITER())) = exp
+                      @match DAE.REDUCTION(reductionInfo = DAE.REDUCTIONINFO(path = Absyn.IDENT()), iterators = DAE.REDUCTIONITER() <| nil) = exp
                       (cache, v) = ceval(cache, env, exp, impl, msg, numIter + 1)
                       subsc = CrefForHashTable.crefLastSubs(cr)
                       (cache, res) = cevalSubscriptValue(cache, env, subsc, v, impl, msg, numIter + 1)

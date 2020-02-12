@@ -5,7 +5,7 @@ module ConnectUtil
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
-    using Setfield
+    import Setfield
 
 
     UpdateFunc = Function
@@ -92,7 +92,7 @@ module ConnectUtil
          =#
         import DAE.Face
         import DAE.ConnectorElement
-        import DAE.ConnectorType
+        import DAE.CConnectorType
         import DAE.SetTrieNode
         import DAE.SetTrie
         import DAE.SetConnection
@@ -101,6 +101,8 @@ module ConnectUtil
         import DAE.CSet
          #=  CSet graph represented as an adjacency list.
          =#
+
+        ConnectorType = DAE.CConnectorType
 
         DaeEdges = List # ConnectionGraph.DaeEdges # this doesn't seem to work, it says DaeEdges is undefined!
 
@@ -175,7 +177,7 @@ module ConnectUtil
                        =#
                       c1 = listAppend(c2, c1)
                       o1 = listAppend(o2, o1)
-                      node.nodes = _cons(childSets.sets, node.nodes)
+                      Setfield.@set node.nodes = _cons(childSets.sets, node.nodes)
                     DAE.SETS(node, sc, c1, o1)
                   end
                 end
@@ -464,8 +466,8 @@ module ConnectUtil
               end
                #=  Stream variables and exactly one flow => add associations.
                =#
-              @match list(flow_var) = flowVars
-              @match list(flow_cr) = daeVarToCrefs(flow_var)
+              @match flow_var <| nil = flowVars
+              @match flow_cr <| nil = daeVarToCrefs(flow_var)
               flow_cr = PrefixUtil.prefixCrefNoContext(prefix, flow_cr)
               for stream_var in streamVars
                 stream_crs = daeVarToCrefs(stream_var)
@@ -563,7 +565,7 @@ module ConnectUtil
               _ = begin
                 @match dim begin
                   DAE.DIM_ENUM(__)  => begin
-                      dim.literals = listReverse(dim.literals)
+                      Setfield.@set dim.literals = listReverse(dim.literals)
                     ()
                   end
 
@@ -623,9 +625,9 @@ module ConnectUtil
               try
                 setTrieGetElement(cref, DAE.INSIDE(), sets.sets)
               catch
-                @set sets.setCount = sets.setCount + 1
-                e = newElement(cref, DAE.INSIDE(), DAE.FLOW(), source, sets.setCount)
-                @set sets.sets = setTrieAdd(e, sets.sets)
+                Setfield.@set sets.setCount = sets.setCount + 1
+                e = newElement(cref, DAE.INSIDE(), DAE.CFLOW(), source, sets.setCount)
+                Setfield.@set sets.sets = setTrieAdd(e, sets.sets)
               end
                #=  Check if it exists in the sets already.
                =#
@@ -650,7 +652,7 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      node.flowAssociation = SOME(flowCref)
+                      Setfield.@set node.flowAssociation = SOME(flowCref)
                     ()
                   end
                 end
@@ -678,7 +680,7 @@ module ConnectUtil
                =#
               if ! ListUtil.exist2(sets.outerConnects, outerConnectionMatches, cr1, cr2)
                 new_oc = DAE.OUTERCONNECT(scope, cr1, io1, f1, cr2, io2, f2, source)
-                @set sets.outerConnects = _cons(new_oc, sets.outerConnects)
+                Setfield.@set sets.outerConnects = _cons(new_oc, sets.outerConnects)
               end
           sets
         end
@@ -901,7 +903,7 @@ module ConnectUtil
         function setElementSetIndex(element::ConnectorElement, index::ModelicaInteger) ::ConnectorElement
 
 
-              element.set = index
+              Setfield.@set element.set = index
           element
         end
 
@@ -917,7 +919,7 @@ module ConnectUtil
         function setElementName(element::ConnectorElement, name::DAE.ComponentRef) ::ConnectorElement
 
 
-              element.name = name
+              Setfield.@set element.name = name
           element
         end
 
@@ -1060,8 +1062,8 @@ module ConnectUtil
               e2 = setElementSetIndex(element2, sc)
               node = sets.sets
               node = setTrieAdd(e1, node)
-              @set sets.sets = setTrieAdd(e2, node)
-              @set sets.setCount = sc
+              Setfield.@set sets.sets = setTrieAdd(e2, node)
+              Setfield.@set sets.setCount = sc
           sets
         end
 
@@ -1074,7 +1076,7 @@ module ConnectUtil
 
               index = getElementSetIndex(set)
               e = setElementSetIndex(element, index)
-              sets.sets = setTrieAdd(e, sets.sets)
+              Setfield.@set sets.sets = setTrieAdd(e, sets.sets)
           sets
         end
 
@@ -1090,7 +1092,7 @@ module ConnectUtil
                #=  Add a new connection if the elements don't belong to the same set already.
                =#
               if set1 != set2
-                @set sets.connections = _cons((set1, set2), sets.connections)
+                Setfield.@set sets.connections = _cons((set1, set2), sets.connections)
               end
           sets
         end
@@ -1116,12 +1118,12 @@ module ConnectUtil
                       _ = begin
                         @match element.face begin
                           DAE.INSIDE(__)  => begin
-                              node.insideElement = SOME(element)
+                              Setfield.@set node.insideElement = SOME(element)
                             ()
                           end
 
                           DAE.OUTSIDE(__)  => begin
-                              node.outsideElement = SOME(element)
+                              Setfield.@set node.outsideElement = SOME(element)
                             ()
                           end
                         end
@@ -1169,7 +1171,7 @@ module ConnectUtil
 
          #= Updates a trie leaf in the sets with the given update function. =#
         function updateSetLeaf(sets::Sets, cref::DAE.ComponentRef, arg::Arg, updateFunc::UpdateFunc)  where {Arg}
-          @set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
+          Setfield.@set sets.sets = setTrieUpdate(cref, arg, sets.sets, updateFunc)
           sets
         end
 
@@ -1182,13 +1184,13 @@ module ConnectUtil
                 @match (cref, trie) begin
                   (DAE.CREF_QUAL(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
+                      Setfield.@set trie.nodes = setTrieUpdateNode(id, cref, cref.componentRef, arg, updateFunc, trie.nodes)
                     ()
                   end
 
                   (DAE.CREF_IDENT(__), DAE.SET_TRIE_NODE(__))  => begin
                       id = ComponentReference.printComponentRef2Str(cref.ident, cref.subscriptLst)
-                      trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
+                      Setfield.@set trie.nodes = setTrieUpdateLeaf(id, arg, trie.nodes, updateFunc)
                     ()
                   end
                 end
@@ -1278,7 +1280,7 @@ module ConnectUtil
               local node::SetTrieNode
 
               (node, arg) = setTrieTraverseLeaves(sets.sets, updateFunc, arg)
-              @set sets.sets = node
+              Setfield.@set sets.sets = node
           (sets, arg)
         end
 
@@ -1292,7 +1294,7 @@ module ConnectUtil
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
                       (nodes, arg) = ListUtil.map1Fold(node.nodes, setTrieTraverseLeaves, updateFunc, arg)
-                      node.nodes = nodes
+                      Setfield.@set node.nodes = nodes
                     ()
                   end
 
@@ -1761,7 +1763,7 @@ module ConnectUtil
                 element = begin
                   @match el begin
                     DAE.CONNECTOR_ELEMENT(ty = DAE.CSTREAM(NONE()))  => begin
-                        el.ty = DAE.CSTREAM(flowCref)
+                        Setfield.@set el.ty = DAE.CSTREAM(flowCref)
                       SOME(el)
                     end
 
@@ -1799,7 +1801,7 @@ module ConnectUtil
                        =#
                        #=  it to the array.
                        =#
-                      el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
+                      Setfield.@set el.name = ComponentReference.joinCrefs(prefix_cr, el.name)
                     setArrayUpdate(sets, el.set, el)
                   end
                 end
@@ -1909,7 +1911,7 @@ module ConnectUtil
                       outDAE
                     end
 
-                    DAE.SET(ty = DAE.EQU(__))  => begin
+                    DAE.SET(ty = DAE.CEQU(__))  => begin
                          #=  A set pointer left from generateSetList, ignore it.
                          =#
                          #=  Here we do some overconstrained connection breaking.
@@ -2049,9 +2051,9 @@ module ConnectUtil
 
               if System.getUsesCardinality()
                 crefs = ComponentReference.expandCref(lhsCref, false)
-                sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                Setfield.@set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
                 crefs = ComponentReference.expandCref(rhsCref, false)
-                sets.sets = increaseConnectRefCount2(crefs, sets.sets)
+                Setfield.@set sets.sets = increaseConnectRefCount2(crefs, sets.sets)
               end
           sets
         end
@@ -2071,12 +2073,12 @@ module ConnectUtil
               _ = begin
                 @match node begin
                   DAE.SET_TRIE_NODE(__)  => begin
-                      node.connectCount = node.connectCount + amount
+                      Setfield.@set node.connectCount = node.connectCount + amount
                     ()
                   end
 
                   DAE.SET_TRIE_LEAF(__)  => begin
-                      node.connectCount = node.connectCount + amount
+                      Setfield.@set node.connectCount = node.connectCount + amount
                     ()
                   end
                 end
@@ -2557,7 +2559,7 @@ module ConnectUtil
                        =#
                        #=  inStream(c2) = c1;
                        =#
-                      @match list(DAE.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match DAE.CONNECTOR_ELEMENT(name = c) <| nil = removeStreamSetElement(streamCref, reducedStreams)
                       e = Expression.crefExp(c)
                     e
                   end
@@ -2567,7 +2569,7 @@ module ConnectUtil
                        =#
                        #=  inStream(c1) = inStream(c2);
                        =#
-                      @match list(DAE.CONNECTOR_ELEMENT(name = c)) = removeStreamSetElement(streamCref, reducedStreams)
+                      @match DAE.CONNECTOR_ELEMENT(name = c) <| nil = removeStreamSetElement(streamCref, reducedStreams)
                       e = evaluateInStream(c, sets, setArray, flowThreshold)
                     e
                   end
@@ -2885,11 +2887,11 @@ module ConnectUtil
               @match true = checkConnectorBalance2(potentials, flows, streams, path, info)
                #= print(AbsynUtil.pathString(path) + \" has:\\n\\t\" +
                =#
-               #=   String(potentials) + \" potential variables\\n\\t\" +
+               #=   StringFunction(potentials) + \" potential variables\\n\\t\" +
                =#
-               #=   String(flows) + \" flow variables\\n\\t\" +
+               #=   StringFunction(flows) + \" flow variables\\n\\t\" +
                =#
-               #=   String(streams) + \" stream variables\\n\\n\");
+               #=   StringFunction(streams) + \" stream variables\\n\\n\");
                =#
         end
 
@@ -2915,8 +2917,8 @@ module ConnectUtil
                #=  input, output, stream nor flow.
                =#
               if potentialVars != flowVars
-                flow_str = String(flowVars)
-                potential_str = String(potentialVars)
+                flow_str = StringFunction(flowVars)
+                potential_str = StringFunction(potentialVars)
                 class_str = AbsynUtil.pathString(path)
                 error_str = stringAppendList(list("The number of potential variables (", potential_str, ") is not equal to the number of flow variables (", flow_str, ")."))
                 Error.addSourceMessage(Error.UNBALANCED_CONNECTOR, list(class_str, error_str), info)
@@ -2930,7 +2932,7 @@ module ConnectUtil
                #=  A stream connector must have exactly one scalar variable with the flow prefix.
                =#
               if streamVars > 0 && flowVars != 1
-                flow_str = String(flowVars)
+                flow_str = StringFunction(flowVars)
                 class_str = AbsynUtil.pathString(path)
                 error_str = stringAppendList(list("A stream connector must have exactly one flow variable, this connector has ", flow_str, " flow variables."))
                 Error.addSourceMessage(Error.INVALID_STREAM_CONNECTOR, list(class_str, error_str), info)
@@ -3176,7 +3178,7 @@ module ConnectUtil
         function printSetsStr(sets::Sets) ::String
               local string::String
 
-              string = String(sets.setCount) + " sets:\\n"
+              string = StringFunction(sets.setCount) + " sets:\\n"
               string = string + printSetTrieStr(sets.sets, "\\t")
               string = string + "Connected sets:\\n"
               string = string + printSetConnections(sets.connections) + "\\n"
@@ -3223,7 +3225,7 @@ module ConnectUtil
                 @match element begin
                   SOME(e && DAE.CONNECTOR_ELEMENT(__))  => begin
                       res = " " + printFaceStr(e.face) + " "
-                      res = res + printConnectorTypeStr(e.ty) + " [" + String(e.set) + "]"
+                      res = res + printConnectorTypeStr(e.ty) + " [" + StringFunction(e.set) + "]"
                     res
                   end
 
@@ -3241,7 +3243,7 @@ module ConnectUtil
 
               string = ComponentReference.printComponentRefStr(element.name) + " "
               string = string + printFaceStr(element.face) + " "
-              string = string + printConnectorTypeStr(element.ty) + " [" + String(element.set) + "]"
+              string = string + printConnectorTypeStr(element.ty) + " [" + StringFunction(element.set) + "]"
           string
         end
 
@@ -3324,7 +3326,7 @@ module ConnectUtil
               local set2::ModelicaInteger
 
               (set1, set2) = connection
-              string = "\\t" + String(set1) + " connected to " + intString(set2) + "\\n"
+              string = "\\t" + StringFunction(set1) + " connected to " + intString(set2) + "\\n"
           string
         end
 

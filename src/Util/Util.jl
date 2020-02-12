@@ -5,6 +5,7 @@
     #= ExportAll is not good practice but it makes it so that we do not have to write export after each function :( =#
     using ExportAll
     #= Necessary to write declarations for your uniontypes until Julia adds support for mutually recursive types =#
+    import Setfield
 
     @UniontypeDecl ReplacePattern
     @UniontypeDecl Status
@@ -587,6 +588,10 @@
                 strings = _cons(stringAppendList(listReverse(cur)), strings)
               end
               strings = listReverse(strings)
+              # adrpo, if no split possible retunr the string
+              if listEmpty(strings)
+                strings = list(string)
+              end
           strings
         end
 
