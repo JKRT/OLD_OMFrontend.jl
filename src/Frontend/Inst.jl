@@ -2972,7 +2972,7 @@
                       crefs1 = InstUtil.getCrefFromMod(m)
                       crefs2 = InstUtil.getCrefFromDim(ad)
                       crefs3 = InstUtil.getCrefFromCond(cond)
-                      crefs = ListUtil.unionList(listAppend(listAppend(crefs1, crefs2), crefs3))
+                      crefs = ListUtil.union(listAppend(crefs1, crefs2), crefs3)
                       (cache, env, ih, store, crefs) = removeSelfReferenceAndUpdate(cache, env, ih, store, crefs, own_cref, t, ci_state, attr, prefixes, impl, inst_dims, pre, mods, m, info)
                       (cache, env2, ih) = updateComponentsInEnv(cache, env, ih, pre, mods, crefs, ci_state, impl)
                       (cache, class_mod) = Mod.updateMod(cache, env2, ih, pre, class_mod, impl, info)
